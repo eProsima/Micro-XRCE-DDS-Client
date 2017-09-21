@@ -1,5 +1,5 @@
 #include "micrortps/client/mini_cdr.h"
-#include "microcdr/microCdr.h"
+#include <microcdr/microCdr.h>
 
 #include <stdio.h>
 #include <time.h>
@@ -17,6 +17,7 @@
 #define BUFFER_SIZE 40000
 
 void test(int endian);
+
 int main(int args, char** argv)
 {
     test(LITTLE_ENDIAN_MODE);

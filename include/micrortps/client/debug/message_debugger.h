@@ -1,5 +1,5 @@
-#ifndef _DDS_XRCE_MESSAGE_DEBUGGER_H_
-#define _DDS_XRCE_MESSAGE_DEBUGGER_H_
+#ifndef _DDS_XRCE_DEBUG_MESSAGE_DEBUGGER_H_
+#define _DDS_XRCE_DEBUG_MESSAGE_DEBUGGER_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -34,4 +34,4 @@ const char* data_to_string(const uint8_t* data, uint32_t size);
 }
 #endif
 
-#endif //_DDS_XRCE_MESSAGE_DEBUGGER_H_
+#endif //_DDS_XRCE_DEBUG_MESSAGE_DEBUGGER_H_

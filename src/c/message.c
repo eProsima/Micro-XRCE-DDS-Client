@@ -1,7 +1,7 @@
 #include "micrortps/client/message.h"
 #include "micrortps/client/serialization.h"
 
-#ifdef _DEBUG_
+#ifndef NDEBUG
 #include <string.h>
 #endif
 
@@ -200,7 +200,7 @@ int parse_message(MessageManager* message_manager, uint32_t message_length)
         reset_memory_cache(cache, message_length);
 
         PayloadSpec payload;
-        #ifdef _DEBUG_
+        #ifndef NDEBUG
         memset(&payload, 0xFF, sizeof(PayloadSpec));
         #endif
         switch(submessage_header.id)

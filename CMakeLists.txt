@@ -1,18 +1,31 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(micrortps_client C)
-set(CMAKE_BUILD_TYPE Debug)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-include_directories(include)
-file(GLOB CLIENT_LIB_SOURCES "src/c/*.c" "src/c/*/*.c")
-add_library(micrortps-client SHARED ${CLIENT_LIB_SOURCES})
-set_target_properties(micrortps-client PROPERTIES COMPILE_FLAGS "-D _DEBUG_ -D _VERBOSE_ -m32" LINK_FLAGS "-m32")
+project(micrortps-client C)
+
+
+file(GLOB CLIENT_LIB_SOURCES
+    src/c/*.c
+    src/c/*/*.c
+)
+
+add_library(${PROJECT_NAME} SHARED ${CLIENT_LIB_SOURCES})
+
+target_include_directories(
+    ${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
 
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 if(EPROSIMA_BUILD_TESTS)
     # Required libs for testing
-    set(CMAKE_BUILD_TYPE Release)
     add_subdirectory(thirdparty/micro-CDR)
+    add_subdirectory(thirdparty/transport)
 
     # Tests
     add_subdirectory(test/message)

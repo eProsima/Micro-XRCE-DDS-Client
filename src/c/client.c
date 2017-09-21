@@ -4,13 +4,18 @@
 #include "micrortps/client/message.h"
 #include "micrortps/client/memory_cache.h"
 
-#ifdef _VERBOSE_
-#include "micrortps/client/debug/message_debugger.h"
-#include <stdio.h>
-#endif
-
 #include <stdlib.h>
 #include <string.h>
+
+#ifndef NDEBUG
+
+#define PURPLE "\e[1;35m"
+#define RESTORE_COLOR "\e[0m"
+
+#include "micrortps/client/debug/message_debugger.h"
+#include <stdio.h>
+
+#endif
 
 
 // ---------------------------------------------------------------------
@@ -28,8 +33,9 @@ void remove_xrce_object(XRCEObject* object);
 
 void create_message_header();
 
-// For the prototype
+// For the prototype (will be mutate)
 Participant* create_participant();
+
 // ---------------------------------------------------------------------
 //                          CLIENT INTERNAL STATE
 // ---------------------------------------------------------------------
@@ -147,7 +153,7 @@ Participant* create_participant()
 
     add_create_submessage(&message_manager, &payload);
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("==> ");
     printl_create_submessage(&payload, NULL);
     #endif
@@ -176,7 +182,7 @@ Publisher* create_publisher(Topic* topic)
 
     add_create_submessage(&message_manager, &payload);
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("==> ");
     printl_create_submessage(&payload, NULL);
     #endif
@@ -207,7 +213,7 @@ Subscriber* create_subscriber(Topic* topic)
 
     add_create_submessage(&message_manager, &payload);
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("==> ");
     printl_create_submessage(&payload, NULL);
     #endif
@@ -236,7 +242,7 @@ int send_topic(Publisher* publisher, void* topic_data)
 
     add_write_data_submessage(&message_manager, &payload);
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("==> ");
     printl_write_data_submessage(&payload, NULL);
     #endif
@@ -259,7 +265,7 @@ int read_data(Subscriber* subscriber, uint16_t max_messages)
 
     add_read_data_submessage(&message_manager, &payload);
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("==> ");
     printl_read_data_submessage(&payload, NULL);
     #endif
@@ -285,7 +291,7 @@ void delete_publisher(Publisher* publisher)
 
     add_delete_submessage(&message_manager, &payload);
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("==> ");
     printl_delete_submessage(&payload, NULL);
     #endif
@@ -304,7 +310,7 @@ void delete_subscriber(Subscriber* subscriber)
 
     add_delete_submessage(&message_manager, &payload);
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("==> ");
     printl_delete_submessage(&payload, NULL);
     #endif
@@ -322,7 +328,7 @@ void update_communication()
         parse_message(&message_manager, in_length);
     }
 
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("<-- [Received %u bytes]\n", in_length);
     #endif
 
@@ -334,7 +340,7 @@ void update_communication()
         send_data_io(out_buffer, out_length, data_io);
         reset_buffer_iterator(&message_manager.writer);
 
-        #ifdef _VERBOSE_
+        #ifndef NDEBUG
         printf("--> [Send %u bytes]\n", out_length);
         #endif
     }
@@ -343,10 +349,10 @@ void update_communication()
 
 int on_message_header_received(const MessageHeaderSpec* header, void* data)
 {
-    #ifdef _VERBOSE_
-        printf("    <<Sequence number | expected: %u | received: %u>>\n",
-            expected_sequence_number_recieved, header->sequence_number);
-     #endif
+    #ifndef NDEBUG
+    printf("    %s<<Sequence number received | expected: %u | received: %u>>%s\n", PURPLE,
+        expected_sequence_number_recieved, header->sequence_number, RESTORE_COLOR);
+    #endif
 
     if(expected_sequence_number_recieved == header->sequence_number)
     {
@@ -358,7 +364,7 @@ int on_message_header_received(const MessageHeaderSpec* header, void* data)
 
 void on_status_received(const StatusPayloadSpec* payload, void* data)
 {
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("<== ");
     printl_status_submessage(payload, NULL);
     #endif
@@ -387,7 +393,7 @@ void on_status_received(const StatusPayloadSpec* payload, void* data)
 
 void on_data_received(const DataPayloadSpec* payload, void* data)
 {
-    #ifdef _VERBOSE_
+    #ifndef NDEBUG
     printf("<== ");
     printl_data_submessage(payload, NULL);
     #endif

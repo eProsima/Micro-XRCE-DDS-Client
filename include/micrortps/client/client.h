@@ -18,13 +18,6 @@ extern "C"
 #define OBJECT_SUBSCRIBER    0x08
 #define OBJECT_PUBLISHER     0x09
 
-typedef void (*DataOutEvent)(uint8_t* buffer, uint32_t size, void* callback_object);
-typedef uint32_t (*DataInEvent)(uint8_t* buffer, uint32_t length, void* callback_object);
-
-typedef struct Topic Topic;
-typedef void (*OnListenerTopic)(const void* topic_data, void* callback_object);
-
-
 typedef struct XRCEObject
 {
     uint32_t id;
@@ -34,7 +27,7 @@ typedef struct XRCEObject
 } XRCEObject;
 
 typedef struct Participant Participant;
-
+typedef struct Topic Topic;
 typedef struct Publisher
 {
     XRCEObject object;
@@ -43,6 +36,7 @@ typedef struct Publisher
 
 } Publisher;
 
+typedef void (*OnListenerTopic)(const void* topic_data, void* callback_object);
 typedef struct Subscriber
 {
     XRCEObject object;
@@ -55,7 +49,7 @@ typedef struct Subscriber
 
 } Subscriber;
 
-struct Participant
+typedef struct Participant
 {
     XRCEObject object;
     Publisher* publisher_list[10]; //make dynamically
@@ -63,10 +57,13 @@ struct Participant
 
     Subscriber* subscriber_list[10]; //make dynamically
     uint32_t subscriber_list_size;
-};
+} Participant;
+
+typedef void (*DataOutEvent)(uint8_t* buffer, uint32_t size, void* callback_object);
+typedef uint32_t (*DataInEvent)(uint8_t* buffer, uint32_t length, void* callback_object);
 
 
-//DDS XRCE API
+
 void init_client(uint32_t buffer_size, DataOutEvent send_data_io, DataInEvent receive_data_io,
         void* data_io, void* callback_object);
 void destroy_client();
@@ -84,6 +81,7 @@ void delete_publisher(Publisher* publisher);
 void delete_subscriber(Subscriber* subscriber);
 
 void update_communication();
+
 
 //UTIL
 uint32_t get_xrce_object(uint32_t id, void** object);

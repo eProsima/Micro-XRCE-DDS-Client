@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _DEBUG_
+#ifndef NDEBUG
     #include <stdio.h>
 #endif
 
@@ -52,7 +52,7 @@ void init_memory_cache(MemoryCache* cache, uint32_t memory_size)
 
 void* request_memory_cache(MemoryCache* cache, uint32_t size)
 {
-    #ifdef _DEBUG_
+    #ifndef NDEBUG
     if(cache->size + size > cache->memory_alloc)
     {
         printf("ERROR: Memory cache oveflow.");

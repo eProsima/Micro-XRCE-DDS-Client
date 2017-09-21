@@ -1,6 +1,8 @@
 #include <micrortps/client/client.h>
 
-#include "../shape_topic.h"
+#include "../common/file_io.h"
+#include "../common/serial_port_io.h"
+#include "../common/shape_topic.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -8,43 +10,56 @@
 #include <time.h>
 #include <string.h>
 
+
+#define BUFFER_SIZE 1024
+
 typedef struct UserData
 {
     uint32_t recieved_topics;
+    char command_file_name[256];
 
 } UserData;
 
-typedef struct SharedFile
-{
-    char out_file_name[256];
-    char in_file_name[256];
 
-} SharedFile;
-
-
-void compute_command(char* file_name, UserData* user, Topic* topic);
-
-//callbacks for send and recieved from io.
-void send_data_file(uint8_t* buffer, uint32_t length, void* data);
-uint32_t recieved_data_file(uint8_t* buffer, uint32_t size, void* data);
+void compute_command(UserData* user, Topic* topic);
 
 //callbacks for listening topics
 void on_listener_shape_topic(const void* topic_data, void* callback_object);
 
-char command_file[] = "command.io";
-
-
 int main(int args, char** argv)
 {
-    // For internal test only
-    SharedFile shared_file = {"client_to_agent.bin", "agent_to_client.bin"};
-    fclose(fopen(shared_file.in_file_name, "wb"));
-    fclose(fopen(command_file, "w"));
+    UserData user = {0, "command.io"};
 
-    // User data
-    UserData user = {0};
+    if(args == 2)
+    {
+        if(strcmp(argv[1], "file") == 0)
+        {
+            SharedFile* shared_file = malloc(sizeof(SharedFile));
+            init_file_io(shared_file, "client_to_agent.bin", "agent_to_client.bin");
+            fclose(fopen(user.command_file_name, "w"));
 
-    init_client(1024, send_data_file, recieved_data_file, &shared_file, &user);
+            init_client(BUFFER_SIZE, send_file_io, received_file_io, shared_file, &user);
+        }
+        else if(strcmp(argv[1], "serial_port") == 0)
+        {
+            SerialPort* serial_port = malloc(sizeof(SerialPort));
+            init_serial_port_io(serial_port, "/dev/ttyACM0");
+
+            init_client(BUFFER_SIZE, send_serial_port_io, received_serial_port_io, serial_port, &user);
+        }
+        else
+        {
+            printf(">> Write option: [file | serial_port]\n");
+            return 0;
+        }
+    }
+    else
+    {
+        printf(">> Write option: [file | serial_port]\n");
+        return 0;
+    }
+
+    //init_client(1024, send_data_file, received_data_file, &shared_file, &user);
 
     Topic topic =
     {
@@ -64,7 +79,7 @@ int main(int args, char** argv)
         printf("============================ CLIENT ========================> %s\n", time_string);
 
         // user code here
-        compute_command(command_file, &user, &topic);
+        compute_command(&user, &topic);
 
         // this function does all comunnications
         update_communication();
@@ -85,39 +100,6 @@ void on_listener_shape_topic(const void* topic_data, void* callback_object)
     user->recieved_topics++;
 }
 
-
-// -------------------------------------------------------------------------------
-//                               IN OUT FROM FILE
-// -------------------------------------------------------------------------------
-void send_data_file(uint8_t* buffer, uint32_t length, void* callback_object)
-{
-    SharedFile* shared_file = (SharedFile*)callback_object;
-
-    FILE* out_file = fopen(shared_file->out_file_name, "wb");
-    fwrite(buffer, 1, length, out_file);
-    fclose(out_file);
-}
-
-uint32_t recieved_data_file(uint8_t* buffer, uint32_t size, void* callback_object)
-{
-    SharedFile* shared_file = (SharedFile*)callback_object;
-
-    FILE* in_file = fopen(shared_file->in_file_name, "rb");
-    fseek(in_file, 0L, SEEK_END);
-    uint32_t in_file_size = ftell(in_file);
-    fseek(in_file, 0L, SEEK_SET);
-
-    if(in_file_size > size)
-        in_file_size = size;
-
-    fread(buffer, 1, in_file_size, in_file);
-    fclose(in_file);
-    fclose(fopen(shared_file->in_file_name,"wb"));
-
-    return in_file_size;
-}
-
-
 /*
 COMMANDS:
     > create_pub
@@ -128,9 +110,9 @@ COMMANDS:
     > delete_sub sub_id
 */
 
-void compute_command(char* file_name, UserData* user, Topic* topic)
+void compute_command(UserData* user, Topic* topic)
 {
-    FILE* commands_file = fopen(file_name, "r");
+    FILE* commands_file = fopen(user->command_file_name, "r");
     char command[256];
     uint32_t id;
     char color[256];
@@ -207,5 +189,5 @@ void compute_command(char* file_name, UserData* user, Topic* topic)
         printf("Unknown command or incorrect input \n");
 
     fclose(commands_file);
-    fclose(fopen(file_name, "w"));
+    fclose(fopen(user->command_file_name, "w"));
 }
