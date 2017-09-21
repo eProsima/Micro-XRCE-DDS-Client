@@ -10,8 +10,14 @@ set_target_properties(micrortps-client PROPERTIES COMPILE_FLAGS "-D _DEBUG_ -D _
 
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 if(EPROSIMA_BUILD_TESTS)
+    # Required libs for testing
+    set(CMAKE_BUILD_TYPE Release)
+    add_subdirectory(thirdparty/micro-CDR)
+
+    # Tests
     add_subdirectory(test/message)
     add_subdirectory(test/mini_cdr)
+    add_subdirectory(test/mini_vs_micro_cdr_performance)
     add_subdirectory(test/prototype/client)
     add_subdirectory(test/prototype/agent)
 endif()
