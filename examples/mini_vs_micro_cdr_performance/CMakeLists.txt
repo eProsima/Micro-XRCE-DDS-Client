@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(mini_vs_micro_cdr_performance_test C)
+project(mini_vs_micro_cdr_performance C)
 
 include_directories(../../include)
 

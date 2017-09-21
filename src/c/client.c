@@ -257,7 +257,7 @@ int read_data(Subscriber* subscriber, uint16_t max_messages)
 
     subscriber->remaning_messages = max_messages;
 
-    ReadDataPayloadSpec payload = {}; //compleate
+    ReadDataPayloadSpec payload = {};
     payload.request_id = ++request_counter;
     payload.object_id = subscriber->object.id;
     payload.max_messages = max_messages;
@@ -370,6 +370,7 @@ void on_status_received(const StatusPayloadSpec* payload, void* data)
     #endif
 
     for(uint32_t i = 0; i < xrce_object_list_size; i++) //to hash table
+    {
         if(xrce_object_list[i]->id == payload->object_id)
         {
             switch(payload->result.last_operation)
@@ -389,6 +390,7 @@ void on_status_received(const StatusPayloadSpec* payload, void* data)
             }
             return;
         }
+    }
 }
 
 void on_data_received(const DataPayloadSpec* payload, void* data)

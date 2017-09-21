@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(message_test C)
+project(message_example C)
 
 file(GLOB TEST_SOURCES
     ${PROJECT_NAME}.c

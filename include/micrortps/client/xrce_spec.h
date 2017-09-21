@@ -58,6 +58,22 @@ typedef uint32_t uint_least24_t;
 // --------------------------------------------------------------------
 //                            OBJECT VARIANT
 // --------------------------------------------------------------------
+typedef struct TimeSpec
+{
+    int32_t seconds;
+    uint32_t nanoseconds;
+
+} TimeSpec;
+
+typedef struct ClientSpec
+{
+    uint32_t xrce_cookie;
+    uint16_t xrce_version;
+    uint16_t xrce_vendor_id;
+    TimeSpec timestamp;
+    uint8_t session_id;
+
+} ClientSpec;
 
 typedef struct DataWriterSpec
 {
@@ -191,8 +207,8 @@ typedef struct ReadDataPayloadSpec
     uint_least24_t object_id;
     uint16_t max_messages;
     uint8_t read_mode;
-    uint32_t max_elapsed_time;
-    uint32_t max_rate;
+    int32_t max_elapsed_time;
+    int32_t max_rate;
     uint32_t expression_size;
     char* content_filter_expression;
     uint16_t max_samples;

@@ -18,6 +18,3 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}>
 )
-
-#ver si hace falta de verdad
-set_target_properties(transport PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

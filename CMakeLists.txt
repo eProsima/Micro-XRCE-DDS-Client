@@ -4,8 +4,11 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-project(micrortps-client C)
+option(COMPILE_EXAMPLES "Compile examples" OFF)
+option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 
+
+project(micrortps-client C)
 
 file(GLOB CLIENT_LIB_SOURCES
     src/c/*.c
@@ -19,18 +22,34 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
 
-option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
-if(EPROSIMA_BUILD_TESTS)
-    # Required libs for testing
+if(COMPILE_EXAMPLES)
+    # Required libs for examples
     add_subdirectory(thirdparty/micro-CDR)
     add_subdirectory(thirdparty/transport)
 
-    # Tests
-    add_subdirectory(test/message)
-    add_subdirectory(test/mini_cdr)
-    add_subdirectory(test/mini_vs_micro_cdr_performance)
-    add_subdirectory(test/prototype/client)
-    add_subdirectory(test/prototype/agent)
+    # Examples
+    add_subdirectory(examples/mini_cdr)
+    add_subdirectory(examples/mini_vs_micro_cdr_performance)
+    add_subdirectory(examples/message)
+
+    # prototype
+    add_subdirectory(examples/prototype/client)
+    add_subdirectory(examples/prototype/agent)
+
+    # For working in 32 bits
+
+endif()
+
+
+if(EPROSIMA_BUILD_TESTS)
+    #TODO
+endif()
+
+# For working in 32 bits
+set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+if(COMPILE_EXAMPLES)
+    set_target_properties(transport mini_cdr_example message_example
+                          prototype_client prototype_agent
+                          PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
 endif()
