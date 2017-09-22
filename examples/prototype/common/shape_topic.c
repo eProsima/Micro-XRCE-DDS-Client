@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define CYAN "\e[1;36m"
+#define RESTORE_COLOR "\e[0m"
+
 // -------------------------------------------------------------------------------
 //                               TOPIC SERIALIZATION
 // -------------------------------------------------------------------------------
@@ -47,10 +50,12 @@ uint32_t size_of_shape_topic(const void* topic_struct)
 // -------------------------------------------------------------------------------
 void print_shape_topic(const ShapeTopic* topic)
 {
-    printf("\e[1;36m");
-    printf("      - color: %s (%u characters)\n", topic->color, topic->color_length);
-    printf("      - x: %u\n", topic->x);
-    printf("      - y: %u\n", topic->y);
-    printf("      - size: %u\n", topic->size);
-    printf("\e[0m");
+    printf("      %s[TOPIC | color: %s (%u) | x: %u | y: %u | size: %u]%s\n",
+            CYAN,
+            topic->color,
+            topic->color_length,
+            topic->x,
+            topic->y,
+            topic->size,
+            RESTORE_COLOR);
 }

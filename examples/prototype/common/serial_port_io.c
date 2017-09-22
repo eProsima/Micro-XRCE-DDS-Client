@@ -18,7 +18,7 @@ void send_serial_port_io(uint8_t* buffer, uint32_t length, void* data)
 {
     SerialPort* serial_port = (SerialPort*)data;
     int bytes = send(buffer, length, serial_port->locator.kind, serial_port->channel_id);
-    if(bytes <= 0)
+    if(bytes < 0)
         printf("    %s[SEND ERROR]%s\n", RED, RESTORE_COLOR);
 }
 
@@ -26,7 +26,7 @@ uint32_t received_serial_port_io(uint8_t* buffer, uint32_t size, void* data)
 {
     SerialPort* serial_port = (SerialPort*)data;
     int bytes = receive(buffer, size, serial_port->locator.kind, serial_port->channel_id);
-    if(bytes <= 0)
+    if(bytes < 0)
     {
         printf("    %s[RECV ERROR]%s\n", RED, RESTORE_COLOR);
         return 0;

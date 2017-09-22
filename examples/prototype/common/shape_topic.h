@@ -6,7 +6,7 @@ extern "C"
 {
 #endif
 
-#include "micrortps/client/topic.h"
+#include <micrortps/client/topic.h>
 
 typedef struct ShapeTopic
 {
