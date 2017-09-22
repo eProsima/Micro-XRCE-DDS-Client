@@ -61,7 +61,7 @@ int main(int args, char** argv)
 
     if(args == 2)
     {
-        if(strcmp(argv[1], "file") == 0)
+        if(strcmp(argv[1], "-f") == 0)
         {
             SharedFile* shared_file = malloc(sizeof(SharedFile));
             init_file_io(shared_file, "agent_to_client.bin", "client_to_agent.bin");
@@ -69,7 +69,7 @@ int main(int args, char** argv)
             received_io = received_file_io;
             resource_io = shared_file;
         }
-        else if(strcmp(argv[1], "serial_port") == 0)
+        else if(strcmp(argv[1], "-s") == 0)
         {
             SerialPort* serial_port = malloc(sizeof(SerialPort));
             init_serial_port_io(serial_port, "/dev/ttyACM0");
@@ -79,13 +79,13 @@ int main(int args, char** argv)
         }
         else
         {
-            printf(">> Write option: [file | serial_port]\n");
+            printf(">> Write option: [ -f (file) | -s (serial_port)]\n");
             return 0;
         }
     }
     else
     {
-        printf(">> Write option: [file | serial_port]\n");
+        printf(">> Write option: [ -f (file) | -s (serial_port)]\n");
         return 0;
     }
 
@@ -174,8 +174,8 @@ void on_create_submessage_received(const CreatePayloadSpec* recv_payload, void* 
 
     StatusPayloadSpec payload;
     payload.result.request_id = recv_payload->request_id;
-    payload.result.status = STATUS_OK;
-    payload.result.last_operation = STATUS_LAST_OP_CREATE;
+    payload.result.kind = STATUS_LAST_OP_CREATE;
+    payload.result.implementation = STATUS_OK;
     payload.object_id = recv_payload->object_id;
 
     add_status_submessage(&agent->message_manager, &payload);
@@ -193,8 +193,8 @@ void on_delete_submessage_received(const DeletePayloadSpec* recv_payload, void* 
 
     StatusPayloadSpec payload;
     payload.result.request_id = recv_payload->request_id;
-    payload.result.status = STATUS_OK;
-    payload.result.last_operation = STATUS_LAST_OP_DELETE;
+    payload.result.kind = STATUS_LAST_OP_DELETE;
+    payload.result.implementation = STATUS_OK;
     payload.object_id = recv_payload->object_id;
 
     add_status_submessage(&agent->message_manager, &payload);
@@ -213,6 +213,7 @@ void on_write_data_submessage_received(const WriteDataPayloadSpec* recv_payload,
     uint32_t topic_size = recv_payload->data_writer.sample_kind.data.serialized_data_size;
     uint8_t* topic_data = recv_payload->data_writer.sample_kind.data.serialized_data;
 
+    printf("%u\n", topic_size);
     SerializedBufferHandle reader;
     init_serialized_buffer(&reader, topic_data, topic_size);
 

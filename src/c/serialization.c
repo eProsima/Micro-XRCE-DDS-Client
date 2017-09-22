@@ -171,8 +171,8 @@ void deserialize_read_data_payload(SerializedBufferHandle* buffer, MemoryCache* 
 
     deserialize_byte_2(buffer, &payload->max_messages);
     deserialize_byte(buffer, &payload->read_mode);
-    deserialize_byte_4(buffer, &payload->max_elapsed_time);
-    deserialize_byte_4(buffer, &payload->max_rate);
+    deserialize_byte_4(buffer, (int32_t*)&payload->max_elapsed_time);
+    deserialize_byte_4(buffer, (int32_t*)&payload->max_rate);
 
     deserialize_byte_4(buffer, &payload->expression_size);
     payload->content_filter_expression = request_memory_cache(cache, payload->expression_size);
@@ -430,22 +430,22 @@ int size_of_object_variant_subscriber(const SubscriberSpec* subscriber)
 void serialize_result_status(SerializedBufferHandle* buffer, const ResultStatusSpec* result)
 {
     serialize_byte_4(buffer, result->request_id);
-    serialize_byte(buffer, result->status);
-    serialize_byte(buffer, result->last_operation);
+    serialize_byte(buffer, result->kind);
+    serialize_byte(buffer, result->implementation);
 }
 
 void deserialize_result_status(SerializedBufferHandle* buffer, MemoryCache* cache, ResultStatusSpec* result)
 {
     deserialize_byte_4(buffer, &result->request_id);
-    deserialize_byte(buffer, &result->status);
-    deserialize_byte(buffer, &result->last_operation);
+    deserialize_byte(buffer, &result->kind);
+    deserialize_byte(buffer, &result->implementation);
 }
 
 int size_of_result_status(const ResultStatusSpec* result)
 {
     return sizeof(result->request_id)
-         + sizeof(result->status)
-         + sizeof(result->last_operation);
+         + sizeof(result->kind)
+         + sizeof(result->implementation);
 }
 
 // --------------------------------------------------------------------------

@@ -32,7 +32,7 @@ int main(int args, char** argv)
 
     if(args == 2)
     {
-        if(strcmp(argv[1], "file") == 0)
+        if(strcmp(argv[1], "-f") == 0)
         {
             SharedFile* shared_file = malloc(sizeof(SharedFile));
             init_file_io(shared_file, "client_to_agent.bin", "agent_to_client.bin");
@@ -40,7 +40,7 @@ int main(int args, char** argv)
 
             init_client(BUFFER_SIZE, send_file_io, received_file_io, shared_file, &user);
         }
-        else if(strcmp(argv[1], "serial_port") == 0)
+        else if(strcmp(argv[1], "-s") == 0)
         {
             SerialPort* serial_port = malloc(sizeof(SerialPort));
             init_serial_port_io(serial_port, "/dev/ttyACM0");
@@ -49,13 +49,13 @@ int main(int args, char** argv)
         }
         else
         {
-            printf(">> Write option: [file | serial_port]\n");
+            printf(">> Write option: [ -f (file) | -s (serial_port)]\n");
             return 0;
         }
     }
     else
     {
-        printf(">> Write option: [file | serial_port]\n");
+        printf(">> Write option: [ -f (file) | -s (serial_port)]\n");
         return 0;
     }
 
@@ -69,7 +69,10 @@ int main(int args, char** argv)
         size_of_shape_topic
     };
 
+    uint32_t count = 0;
     uint32_t dt = 2;
+    Publisher* pub = NULL;
+    Subscriber* sub = NULL;
     char time_string[80];
     while(user.recieved_topics < 10)
     {
@@ -77,14 +80,44 @@ int main(int args, char** argv)
         struct tm* timeinfo = localtime(&t);
         strftime(time_string, 80, "%T", timeinfo);
         printf("============================ CLIENT ========================> %s\n", time_string);
+        // ========================== HARDCODED INSTRUCTIONS ===========================
 
+
+        if(count == 1)
+        {
+            pub = create_publisher(&topic);
+        }
+        if(count == 3)
+        {
+            char color[64] = "PURPLE";
+            ShapeTopic shape_topic = {strlen(color), color, 100, 100, 50};
+            if(send_topic(pub, &shape_topic))
+                print_shape_topic(&shape_topic);
+        }
+        if(count == 5)
+        {
+            delete_publisher(pub);
+        }
+        if(count == 7)
+        {
+            sub = create_subscriber(&topic);
+            add_listener_topic(sub, on_listener_shape_topic);
+        }
+        if(count == 9)
+        {
+            read_data(sub, 20);
+        }
+
+        // =============================================================================
         // user code here
-        compute_command(&user, &topic);
+        //compute_command(&user, &topic);
 
         // this function does all comunnications
         update_communication();
 
         usleep(1000000 * dt);
+
+        count++;
     }
 
     return 0;
@@ -113,6 +146,7 @@ COMMANDS:
 void compute_command(UserData* user, Topic* topic)
 {
     FILE* commands_file = fopen(user->command_file_name, "r");
+    char line [512];
     char command[256];
     uint32_t id;
     char color[256];
@@ -120,7 +154,12 @@ void compute_command(UserData* user, Topic* topic)
     uint32_t y;
     uint32_t size;
     int valid_command = 0;
-    int command_size = fscanf(commands_file, "%s %u %s %u %u %u", command, &id, color, &x, &y, &size);
+
+    int command_size = -1;
+    if(commands_file != NULL && fgets(line, 512, commands_file) != NULL)
+        sscanf(line, "%s %u %s %u %u %u", command, &id, color, &x, &y, &size);
+    else
+        printf("ERROR: command file not found\n");
 
     if(command_size == -1)
     {

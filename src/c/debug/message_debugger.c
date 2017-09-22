@@ -111,8 +111,8 @@ void print_status_submessage(const StatusPayloadSpec* payload, void* data)
 {
     printf("  <Payload>\n");
     printf("  - request_id: 0x%08X\n", payload->result.request_id);
-    printf("  - status: 0x%02X\n", payload->result.status);
-    printf("  - last_operation: 0x%02X\n", payload->result.last_operation);
+    printf("  - kind: 0x%02X\n", payload->result.kind);
+    printf("  - implementation: 0x%02X\n", payload->result.implementation);
     printf("  - object_id: 0x%06X\n", payload->object_id);
 
     printf("\n\n");
@@ -231,76 +231,78 @@ void printl_delete_submessage(const DeletePayloadSpec* payload, void* data)
 
 void printl_status_submessage(const StatusPayloadSpec* payload, void* data)
 {
-    char status[64];
-    switch(payload->result.status)
-    {
-        case STATUS_OK:
-            sprintf(status, "OK");
-        break;
-        case STATUS_OK_MATCHED:
-            sprintf(status, "OK_MATCHED");
-        break;
-        case STATUS_ERR_DDS_ERROR:
-            sprintf(status, "ERR_DDS_ERROR");
-        break;
-        case STATUS_ERR_MISMATCH:
-            sprintf(status, "ERR_MISMATCH");
-        break;
-        case STATUS_ERR_ALREADY_EXISTS:
-            sprintf(status, "ERR_ALREADY_EXISTS");
-        break;
-        case STATUS_ERR_DENIED:
-            sprintf(status, "ERR_DENIED");
-        break;
-        case STATUS_ERR_UNKNOWN_REFERENCE:
-            sprintf(status, "ERR_UNKNOWN_REFERENCE");
-        break;
-        case STATUS_ERR_INVALID_DATA:
-            sprintf(status, "ERR_INVALID_DATA");
-        break;
-        case STATUS_ERR_INCOMPATIBLE:
-            sprintf(status, "ERR_INCOMPATIBLE");
-        break;
-        case STATUS_ERR_RESOURCES:
-            sprintf(status, "ERR_RESOURCES");
-        break;
-        default:
-            sprintf(status, "UNKNOWN");
-    }
-
-    char operation[64];
-    switch(payload->result.last_operation)
+    char kind[64];
+    switch(payload->result.kind)
     {
         case STATUS_LAST_OP_NONE:
-            sprintf(operation, "NONE");
+            sprintf(kind, "NONE");
         break;
         case STATUS_LAST_OP_CREATE:
-            sprintf(operation, "CREATE");
+            sprintf(kind, "CREATE");
         break;
         case STATUS_LAST_OP_UPDATE:
-            sprintf(operation, "UPDATE");
+            sprintf(kind, "UPDATE");
         break;
         case STATUS_LAST_OP_DELETE:
-            sprintf(operation, "DELETE");
+            sprintf(kind, "DELETE");
         break;
         case STATUS_LAST_OP_LOOKUP:
-            sprintf(operation, "LOOKUP");
+            sprintf(kind, "LOOKUP");
         break;
         case STATUS_LAST_OP_READ:
-            sprintf(operation, "READ");
+            sprintf(kind, "READ");
         break;
         case STATUS_LAST_OP_WRITE:
-            sprintf(operation, "WRITE");
+            sprintf(kind, "WRITE");
         break;
         default:
-            sprintf(operation, "UNKNOWN");
+            sprintf(kind, "UNKNOWN");
     }
+
+    char implementation[64];
+    switch(payload->result.implementation)
+    {
+        case STATUS_OK:
+            sprintf(implementation, "OK");
+        break;
+        case STATUS_OK_MATCHED:
+            sprintf(implementation, "OK_MATCHED");
+        break;
+        case STATUS_ERR_DDS_ERROR:
+            sprintf(implementation, "ERR_DDS_ERROR");
+        break;
+        case STATUS_ERR_MISMATCH:
+            sprintf(implementation, "ERR_MISMATCH");
+        break;
+        case STATUS_ERR_ALREADY_EXISTS:
+            sprintf(implementation, "ERR_ALREADY_EXISTS");
+        break;
+        case STATUS_ERR_DENIED:
+            sprintf(implementation, "ERR_DENIED");
+        break;
+        case STATUS_ERR_UNKNOWN_REFERENCE:
+            sprintf(implementation, "ERR_UNKNOWN_REFERENCE");
+        break;
+        case STATUS_ERR_INVALID_DATA:
+            sprintf(implementation, "ERR_INVALID_DATA");
+        break;
+        case STATUS_ERR_INCOMPATIBLE:
+            sprintf(implementation, "ERR_INCOMPATIBLE");
+        break;
+        case STATUS_ERR_RESOURCES:
+            sprintf(implementation, "ERR_RESOURCES");
+        break;
+        default:
+            sprintf(implementation, "UNKNOWN");
+    }
+
+
 
     printf("%s[Status | #%08X | id: %u | %s | %s]%s\n", YELLOW,
             payload->result.request_id,
             payload->object_id,
-            status,
-            operation,
+            kind,
+            implementation,
             RESTORE_COLOR);
 }
 

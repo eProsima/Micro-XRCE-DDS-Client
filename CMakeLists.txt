@@ -7,6 +7,7 @@ endif()
 option(COMPILE_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 
+set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-Wall-all" LINK_FLAGS "-m32")
 
 project(micrortps-client C)
 

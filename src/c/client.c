@@ -239,7 +239,7 @@ int send_topic(Publisher* publisher, void* topic_data)
     payload.data_writer.read_mode = READ_MODE_DATA;
     payload.data_writer.sample_kind.data.serialized_data = topic_buffer;
     payload.data_writer.sample_kind.data.serialized_data_size = topic_size;
-
+    printf("%u\n", topic_size);
     add_write_data_submessage(&message_manager, &payload);
 
     #ifndef NDEBUG
@@ -373,18 +373,18 @@ void on_status_received(const StatusPayloadSpec* payload, void* data)
     {
         if(xrce_object_list[i]->id == payload->object_id)
         {
-            switch(payload->result.last_operation)
+            switch(payload->result.kind)
             {
                 case STATUS_LAST_OP_CREATE:
-                    if(payload->result.status == STATUS_OK ||
-                       payload->result.status == STATUS_OK_MATCHED)
+                    if(payload->result.implementation == STATUS_OK ||
+                       payload->result.implementation == STATUS_OK_MATCHED)
                         xrce_object_list[i]->status = OBJECT_STATUS_AVALIABLE;
                     else
                         xrce_object_list[i]->status = OBJECT_STATUS_UNAVALIABLE;
                 break;
 
                 case STATUS_LAST_OP_DELETE:
-                    if(payload->result.status == STATUS_OK)
+                    if(payload->result.implementation == STATUS_OK)
                         xrce_object_list[i]->status = OBJECT_STATUS_UNAVALIABLE;
                 break;
             }

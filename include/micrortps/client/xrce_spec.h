@@ -125,8 +125,8 @@ typedef struct ObjectKindSpec
 typedef struct ResultStatusSpec
 {
     uint32_t request_id;
-    uint8_t status;
-    uint8_t last_operation;
+    uint8_t kind;
+    uint8_t implementation;
 
 } ResultStatusSpec;
 
