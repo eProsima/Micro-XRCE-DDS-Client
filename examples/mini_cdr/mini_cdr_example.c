@@ -1,4 +1,4 @@
-#include "micrortps/client/mini_cdr.h"
+#include <micrortps/client/mini_cdr.h>
 
 #include <stdio.h>
 
@@ -77,11 +77,11 @@ int main(int args, char** argv)
 
     buffer_handle.endian_mode = BIG_ENDIAN_MODE;
     deserialize_byte_8(&buffer_handle, &output_byte_8);
-    printf("   %016llX ", output_byte_8);
+    printf("   %016llX ", (long long)output_byte_8);
 
     buffer_handle.endian_mode = LITTLE_ENDIAN_MODE;
     deserialize_byte_8(&buffer_handle, &output_byte_8);
-    printf("   %016llX ", output_byte_8);
+    printf("   %016llX ", (long long)output_byte_8);
 
 
     deserialize_array(&buffer_handle, output_array, 4);

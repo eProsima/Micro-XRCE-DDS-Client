@@ -37,19 +37,22 @@ if(COMPILE_EXAMPLES)
     add_subdirectory(examples/prototype/client)
     add_subdirectory(examples/prototype/agent)
 
-    # For working in 32 bits
-
 endif()
 
 
 if(EPROSIMA_BUILD_TESTS)
-    #TODO
+    add_subdirectory(test)
 endif()
 
+
 # For working in 32 bits
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-if(COMPILE_EXAMPLES)
-    set_target_properties(transport mini_cdr_example message_example
-                          prototype_client prototype_agent
-                          PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-endif()
+#set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+#if(COMPILE_EXAMPLES)
+#    set_target_properties(transport mini_cdr_example message_example
+#                          prototype_client prototype_agent
+#                          PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+#endif()
+#if(EPROSIMA_BUILD_TESTS)
+#    set_target_properties(mini_cdr_test
+#                          PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+#endif()
