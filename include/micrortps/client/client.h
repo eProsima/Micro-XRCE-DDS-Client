@@ -66,7 +66,7 @@ typedef uint32_t (*DataInEvent)(uint8_t* buffer, uint32_t length, void* callback
 
 void init_client(uint32_t buffer_size, DataOutEvent send_data_io, DataInEvent receive_data_io,
         void* data_io, void* callback_object);
-void destroy_client();
+void destroy_client(void);
 
 Publisher* create_publisher(Topic* topic);
 Subscriber* create_subscriber(Topic* topic);
@@ -80,7 +80,7 @@ void add_listener_topic(Subscriber* subscriber, OnListenerTopic on_listener_topi
 void delete_publisher(Publisher* publisher);
 void delete_subscriber(Subscriber* subscriber);
 
-void update_communication();
+void update_communication(void);
 
 
 //UTIL

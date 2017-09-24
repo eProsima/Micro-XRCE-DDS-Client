@@ -31,10 +31,10 @@ void on_data_received(const DataPayloadSpec* payload, void* data);
 void add_xrce_object(XRCEObject* object);
 void remove_xrce_object(XRCEObject* object);
 
-void create_message_header();
+void create_message_header(void);
 
 // For the prototype (will be mutate)
-Participant* create_participant();
+Participant* create_participant(void);
 
 // ---------------------------------------------------------------------
 //                          CLIENT INTERNAL STATE
@@ -100,7 +100,7 @@ void init_client(uint32_t buffer_size, DataOutEvent send_data_io_, DataInEvent r
     callback_object = callback_object_;
 
     // Message manegement.
-    MessageCallback callback = {};
+    MessageCallback callback = {0};
     callback.on_initialize_message = on_initialize_message;
     callback.on_message_header = on_message_header_received;
     callback.on_status = on_status_received;
@@ -121,7 +121,7 @@ void init_client(uint32_t buffer_size, DataOutEvent send_data_io_, DataInEvent r
     xrce_object_list_size = 0;
 }
 
-void destroy_client()
+void destroy_client(void)
 {
     //TODO
 }
@@ -136,7 +136,7 @@ int on_initialize_message(MessageHeaderSpec* header, void* data)
     return 1;
 }
 
-Participant* create_participant()
+Participant* create_participant(void)
 {
     Participant* participant = malloc(sizeof(Participant));
     participant->publisher_list_size = 0;
@@ -239,7 +239,7 @@ int send_topic(Publisher* publisher, void* topic_data)
     payload.data_writer.read_mode = READ_MODE_DATA;
     payload.data_writer.sample_kind.data.serialized_data = topic_buffer;
     payload.data_writer.sample_kind.data.serialized_data_size = topic_size;
-    printf("%u\n", topic_size);
+
     add_write_data_submessage(&message_manager, &payload);
 
     #ifndef NDEBUG
@@ -257,7 +257,7 @@ int read_data(Subscriber* subscriber, uint16_t max_messages)
 
     subscriber->remaning_messages = max_messages;
 
-    ReadDataPayloadSpec payload = {};
+    ReadDataPayloadSpec payload = {0};
     payload.request_id = ++request_counter;
     payload.object_id = subscriber->object.id;
     payload.max_messages = max_messages;

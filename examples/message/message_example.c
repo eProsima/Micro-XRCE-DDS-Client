@@ -135,7 +135,7 @@ void create_message(MessageManager* message)
         WriteDataPayloadSpec payload;
         payload.request_id = 0xAABBCCDD;
         payload.object_id = 0x778899;
-        payload.data_writer.read_mode = READ_MODE_SAMPLE;
+        payload.data_writer.read_mode = READ_MODE_DATA;
 
         SampleKindSpec* kind = &payload.data_writer.sample_kind;
         switch(payload.data_writer.read_mode)

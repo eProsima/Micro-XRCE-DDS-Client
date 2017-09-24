@@ -213,7 +213,7 @@ void on_write_data_submessage_received(const WriteDataPayloadSpec* recv_payload,
     uint32_t topic_size = recv_payload->data_writer.sample_kind.data.serialized_data_size;
     uint8_t* topic_data = recv_payload->data_writer.sample_kind.data.serialized_data;
 
-    printf("%u\n", topic_size);
+
     SerializedBufferHandle reader;
     init_serialized_buffer(&reader, topic_data, topic_size);
 

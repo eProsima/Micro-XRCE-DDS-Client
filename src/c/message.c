@@ -203,6 +203,7 @@ int parse_message(MessageManager* message_manager, uint32_t message_length)
         #ifndef NDEBUG
         memset(&payload, 0xFF, sizeof(PayloadSpec));
         #endif
+
         switch(submessage_header.id)
         {
             case SUBMESSAGE_CREATE:

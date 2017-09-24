@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 2.8.12)
 
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 option(COMPILE_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-Wall-all" LINK_FLAGS "-m32")
-
 project(micrortps-client C)
+
+#enable to check warnings
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
 
 file(GLOB CLIENT_LIB_SOURCES
     src/c/*.c
@@ -44,6 +45,7 @@ endif()
 if(EPROSIMA_BUILD_TESTS)
     add_subdirectory(test)
 endif()
+
 
 
 # For working in 32 bits

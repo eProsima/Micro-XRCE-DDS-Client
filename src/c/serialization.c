@@ -142,7 +142,7 @@ void deserialize_write_data_payload(SerializedBufferHandle* buffer, MemoryCache*
 
 int size_of_write_data_payload(const WriteDataPayloadSpec* payload)
 {
-    return sizeof(&payload->request_id)
+    return sizeof(payload->request_id)
          + size_of_object_id(payload->object_id)
          + size_of_data_mode(&payload->data_writer);
 }
@@ -171,8 +171,8 @@ void deserialize_read_data_payload(SerializedBufferHandle* buffer, MemoryCache* 
 
     deserialize_byte_2(buffer, &payload->max_messages);
     deserialize_byte(buffer, &payload->read_mode);
-    deserialize_byte_4(buffer, (int32_t*)&payload->max_elapsed_time);
-    deserialize_byte_4(buffer, (int32_t*)&payload->max_rate);
+    deserialize_byte_4(buffer, (uint32_t*)&payload->max_elapsed_time);
+    deserialize_byte_4(buffer, (uint32_t*)&payload->max_rate);
 
     deserialize_byte_4(buffer, &payload->expression_size);
     payload->content_filter_expression = request_memory_cache(cache, payload->expression_size);
@@ -518,6 +518,7 @@ void serialize_object_id(SerializedBufferHandle* buffer, uint_least24_t object_i
     if(buffer->endian_machine == BIG_ENDIAN_MODE)
         object_id = object_id << 8;
     serialize_array(buffer, (uint8_t*)&object_id, 3);
+    //serialize_byte_4(buffer, object_id);
 }
 
 void deserialize_object_id(SerializedBufferHandle* buffer, uint_least24_t* object_id)
@@ -526,9 +527,11 @@ void deserialize_object_id(SerializedBufferHandle* buffer, uint_least24_t* objec
     if(buffer->endian_machine == BIG_ENDIAN_MODE)
         object_id++;
     deserialize_array(buffer, (uint8_t*)object_id, 3);
+    //deserialize_byte_4(buffer, object_id);
 }
 
 int size_of_object_id(uint_least24_t object_id)
 {
     return 3;
+    //return sizeof(object_id);
 }

@@ -22,15 +22,18 @@ typedef struct UserData
 
 
 void compute_command(UserData* user, Topic* topic);
+//int protoclient_main(int argc, char *argv[]);
+
 
 //callbacks for listening topics
 void on_listener_shape_topic(const void* topic_data, void* callback_object);
 
-int main(int args, char** argv)
+int protoclient_main(int args, char** argv)
 {
     UserData user = {0, "command.io"};
+    fclose(fopen(user.command_file_name, "w"));
 
-    if(args == 2)
+    if(args ==  2)
     {
         if(strcmp(argv[1], "-f") == 0)
         {
@@ -58,8 +61,6 @@ int main(int args, char** argv)
         printf(">> Write option: [ -f (file) | -s (serial_port)]\n");
         return 0;
     }
-
-    //init_client(1024, send_data_file, received_data_file, &shared_file, &user);
 
     Topic topic =
     {
@@ -89,8 +90,8 @@ int main(int args, char** argv)
         }
         if(count == 3)
         {
-            char color[64] = "PURPLE";
-            ShapeTopic shape_topic = {strlen(color), color, 100, 100, 50};
+            char color[64] = "GREEN";
+            ShapeTopic shape_topic = {strlen(color) + 1, color, 100, 100, 50};
             if(send_topic(pub, &shape_topic))
                 print_shape_topic(&shape_topic);
         }
@@ -105,12 +106,12 @@ int main(int args, char** argv)
         }
         if(count == 9)
         {
-            read_data(sub, 20);
+            read_data(sub, 5);
         }
 
         // =============================================================================
         // user code here
-        //compute_command(&user, &topic);
+        compute_command(&user, &topic);
 
         // this function does all comunnications
         update_communication();
@@ -154,12 +155,12 @@ void compute_command(UserData* user, Topic* topic)
     uint32_t y;
     uint32_t size;
     int valid_command = 0;
-
     int command_size = -1;
+
     if(commands_file != NULL && fgets(line, 512, commands_file) != NULL)
-        sscanf(line, "%s %u %s %u %u %u", command, &id, color, &x, &y, &size);
+        command_size = sscanf(line, "%s %u %s %u %u %u", command, &id, color, &x, &y, &size);
     else
-        printf("ERROR: command file not found\n");
+        ; //printf("ERROR: command file not found\n");
 
     if(command_size == -1)
     {
@@ -229,4 +230,9 @@ void compute_command(UserData* user, Topic* topic)
 
     fclose(commands_file);
     fclose(fopen(user->command_file_name, "w"));
+}
+
+int main(int argc, char *argv[])
+{
+    return protoclient_main(argc, argv);
 }
