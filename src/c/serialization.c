@@ -157,8 +157,8 @@ void serialize_read_data_payload(SerializedBufferHandle* buffer, const ReadDataP
     serialize_byte_4(buffer, payload->max_elapsed_time);
     serialize_byte_4(buffer, payload->max_rate);
 
-    serialize_byte_4(buffer, payload->expression_size);
-    serialize_array(buffer, (uint8_t*)payload->content_filter_expression, payload->expression_size);
+    //serialize_byte_4(buffer, payload->expression_size);
+    //serialize_array(buffer, (uint8_t*)payload->content_filter_expression, payload->expression_size);
 
     serialize_byte_2(buffer, payload->max_samples);
     serialize_byte(buffer, payload->include_sample_info);
@@ -174,9 +174,9 @@ void deserialize_read_data_payload(SerializedBufferHandle* buffer, MemoryCache* 
     deserialize_byte_4(buffer, (uint32_t*)&payload->max_elapsed_time);
     deserialize_byte_4(buffer, (uint32_t*)&payload->max_rate);
 
-    deserialize_byte_4(buffer, &payload->expression_size);
-    payload->content_filter_expression = request_memory_cache(cache, payload->expression_size);
-    deserialize_array(buffer, (uint8_t*)payload->content_filter_expression, payload->expression_size);
+    //deserialize_byte_4(buffer, &payload->expression_size);
+    //payload->content_filter_expression = request_memory_cache(cache, payload->expression_size);
+    //deserialize_array(buffer, (uint8_t*)payload->content_filter_expression, payload->expression_size);
 
     deserialize_byte_2(buffer, &payload->max_samples);
     deserialize_byte(buffer, &payload->include_sample_info);
@@ -190,8 +190,8 @@ int size_of_read_data_payload(const ReadDataPayloadSpec* payload)
          + sizeof(payload->read_mode)
          + sizeof(payload->max_elapsed_time)
          + sizeof(payload->max_rate)
-         + sizeof(payload->expression_size)
-         + sizeof(uint8_t) * payload->expression_size
+        // + sizeof(payload->expression_size)
+        // + sizeof(uint8_t) * payload->expression_size
          + sizeof(payload->max_samples)
          + sizeof(payload->include_sample_info);
 }

@@ -159,7 +159,7 @@ void create_message(MessageManager* message)
 
     // [READ_DATA] SUBMESSAGE
     {
-        char expresion[] = "EXPRESION";
+        //char expresion[] = "EXPRESION";
 
         ReadDataPayloadSpec payload;
         payload.request_id = 0x11223344;
@@ -168,8 +168,8 @@ void create_message(MessageManager* message)
         payload.read_mode = 0x02;
         payload.max_elapsed_time = 987654321;
         payload.max_rate = 123123123;
-        payload.content_filter_expression = expresion;
-        payload.expression_size = strlen(expresion) + 1;
+        //payload.content_filter_expression = expresion;
+        //payload.expression_size = strlen(expresion) + 1;
         payload.max_samples = 55555;
         payload.include_sample_info = 1;
 

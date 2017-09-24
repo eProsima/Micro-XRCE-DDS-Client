@@ -155,8 +155,8 @@ void print_read_data_submessage(const ReadDataPayloadSpec* payload, void* data)
     printf("  - read_mode: 0x%02X\n", payload->read_mode);
     printf("  - max_elapsed_time: %u\n", payload->max_elapsed_time);
     printf("  - max_rate: %u\n", payload->max_rate);
-    printf("  - expression_size: %u\n", payload->expression_size);
-    printf("  - content_filter_expression: %s\n", payload->content_filter_expression);
+    //printf("  - expression_size: %u\n", payload->expression_size);
+    //printf("  - content_filter_expression: %s\n", payload->content_filter_expression);
     printf("  - max_samples: %hu\n", payload->max_samples);
     printf("  - include_sample_info: 0x%02X\n", payload->include_sample_info);
     printf("\n\n");

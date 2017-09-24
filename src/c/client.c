@@ -223,7 +223,7 @@ Subscriber* create_subscriber(Topic* topic)
 
 int send_topic(Publisher* publisher, void* topic_data)
 {
-    if(publisher->object.status != OBJECT_STATUS_AVALIABLE)
+    if(publisher->object.status != OBJECT_STATUS_AVAILABLE)
         return 0;
 
     uint32_t topic_size = publisher->topic->size_of(topic_data);
@@ -252,7 +252,7 @@ int send_topic(Publisher* publisher, void* topic_data)
 
 int read_data(Subscriber* subscriber, uint16_t max_messages)
 {
-    if(subscriber->object.status != OBJECT_STATUS_AVALIABLE)
+    if(subscriber->object.status != OBJECT_STATUS_AVAILABLE)
         return 0;
 
     subscriber->remaning_messages = max_messages;
@@ -261,7 +261,7 @@ int read_data(Subscriber* subscriber, uint16_t max_messages)
     payload.request_id = ++request_counter;
     payload.object_id = subscriber->object.id;
     payload.max_messages = max_messages;
-    payload.expression_size = 0;
+    //payload.expression_size = 0;
 
     add_read_data_submessage(&message_manager, &payload);
 
@@ -280,7 +280,7 @@ void add_listener_topic(Subscriber* subscriber, OnListenerTopic on_listener_topi
 
 void delete_publisher(Publisher* publisher)
 {
-    if(publisher->object.status != OBJECT_STATUS_AVALIABLE)
+    if(publisher->object.status != OBJECT_STATUS_AVAILABLE)
         return;
 
     publisher->object.last_operation = STATUS_LAST_OP_DELETE;
@@ -299,7 +299,7 @@ void delete_publisher(Publisher* publisher)
 
 void delete_subscriber(Subscriber* subscriber)
 {
-    if(subscriber->object.status != OBJECT_STATUS_AVALIABLE)
+    if(subscriber->object.status != OBJECT_STATUS_AVAILABLE)
         return;
 
     subscriber->object.last_operation = STATUS_LAST_OP_DELETE;
@@ -329,7 +329,7 @@ void update_communication()
     }
 
     #ifndef NDEBUG
-    printf("<-- [Received %u bytes]\n", in_length);
+    //printf("<-- [Received %u bytes]\n", in_length);
     #endif
 
     // SEND
@@ -341,7 +341,7 @@ void update_communication()
         reset_buffer_iterator(&message_manager.writer);
 
         #ifndef NDEBUG
-        printf("--> [Send %u bytes]\n", out_length);
+        //printf("--> [Send %u bytes]\n", out_length);
         #endif
     }
 
@@ -378,14 +378,14 @@ void on_status_received(const StatusPayloadSpec* payload, void* data)
                 case STATUS_LAST_OP_CREATE:
                     if(payload->result.implementation == STATUS_OK ||
                        payload->result.implementation == STATUS_OK_MATCHED)
-                        xrce_object_list[i]->status = OBJECT_STATUS_AVALIABLE;
+                        xrce_object_list[i]->status = OBJECT_STATUS_AVAILABLE;
                     else
-                        xrce_object_list[i]->status = OBJECT_STATUS_UNAVALIABLE;
+                        xrce_object_list[i]->status = OBJECT_STATUS_UNAVAILABLE;
                 break;
 
                 case STATUS_LAST_OP_DELETE:
                     if(payload->result.implementation == STATUS_OK)
-                        xrce_object_list[i]->status = OBJECT_STATUS_UNAVALIABLE;
+                        xrce_object_list[i]->status = OBJECT_STATUS_UNAVAILABLE;
                 break;
             }
             return;
@@ -405,7 +405,7 @@ void on_data_received(const DataPayloadSpec* payload, void* data)
     {
         Subscriber* subscriber = (Subscriber*)object;
 
-        if(subscriber->object.status != OBJECT_STATUS_AVALIABLE)
+        if(subscriber->object.status != OBJECT_STATUS_AVAILABLE)
             return;
 
         if(subscriber->remaning_messages > 0)

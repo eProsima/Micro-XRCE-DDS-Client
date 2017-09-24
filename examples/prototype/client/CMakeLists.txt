@@ -8,4 +8,4 @@ file(GLOB TEST_SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${TEST_SOURCES})
-target_link_libraries(${PROJECT_NAME} micrortps-client transport)
+target_link_libraries(${PROJECT_NAME} micrortps-client transport pthread)

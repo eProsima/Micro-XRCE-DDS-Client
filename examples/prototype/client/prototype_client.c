@@ -9,7 +9,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <pthread.h>
 
+#define RED "\e[1;31m"
+#define RESTORE_COLOR "\e[0m"
 
 #define BUFFER_SIZE 1024
 
@@ -20,15 +23,16 @@ typedef struct UserData
 
 } UserData;
 
+static char command_line[256];
 
+int app(int args, char** argv);
+void* read_from_stdin(void* args);
 void compute_command(UserData* user, Topic* topic);
-//int protoclient_main(int argc, char *argv[]);
-
 
 //callbacks for listening topics
 void on_listener_shape_topic(const void* topic_data, void* callback_object);
 
-int protoclient_main(int args, char** argv)
+int app(int args, char** argv)
 {
     UserData user = {0, "command.io"};
     fclose(fopen(user.command_file_name, "w"));
@@ -80,36 +84,7 @@ int protoclient_main(int args, char** argv)
         time_t t = time(NULL);
         struct tm* timeinfo = localtime(&t);
         strftime(time_string, 80, "%T", timeinfo);
-        printf("============================ CLIENT ========================> %s\n", time_string);
-        // ========================== HARDCODED INSTRUCTIONS ===========================
 
-
-        if(count == 1)
-        {
-            pub = create_publisher(&topic);
-        }
-        if(count == 3)
-        {
-            char color[64] = "GREEN";
-            ShapeTopic shape_topic = {strlen(color) + 1, color, 100, 100, 50};
-            if(send_topic(pub, &shape_topic))
-                print_shape_topic(&shape_topic);
-        }
-        if(count == 5)
-        {
-            delete_publisher(pub);
-        }
-        if(count == 7)
-        {
-            sub = create_subscriber(&topic);
-            add_listener_topic(sub, on_listener_shape_topic);
-        }
-        if(count == 9)
-        {
-            read_data(sub, 5);
-        }
-
-        // =============================================================================
         // user code here
         compute_command(&user, &topic);
 
@@ -146,8 +121,6 @@ COMMANDS:
 
 void compute_command(UserData* user, Topic* topic)
 {
-    FILE* commands_file = fopen(user->command_file_name, "r");
-    char line [512];
     char command[256];
     uint32_t id;
     char color[256];
@@ -157,10 +130,8 @@ void compute_command(UserData* user, Topic* topic)
     int valid_command = 0;
     int command_size = -1;
 
-    if(commands_file != NULL && fgets(line, 512, commands_file) != NULL)
-        command_size = sscanf(line, "%s %u %s %u %u %u", command, &id, color, &x, &y, &size);
-    else
-        ; //printf("ERROR: command file not found\n");
+    command_size = sscanf(command_line, "%s %u %s %u %u %u", command, &id, color, &x, &y, &size);
+    command_line[0] = '\0';
 
     if(command_size == -1)
     {
@@ -189,11 +160,15 @@ void compute_command(UserData* user, Topic* topic)
             if(kind == OBJECT_PUBLISHER)
             {
                 delete_publisher(object);
+                if(((Publisher*)object)->object.status != OBJECT_STATUS_AVAILABLE)
+                    printf("        %sError%s\n", RED, RESTORE_COLOR);
                 valid_command = 1;
             }
             else if(kind == OBJECT_SUBSCRIBER)
             {
                 delete_subscriber(object);
+                if(((Subscriber*)object)->object.status != OBJECT_STATUS_AVAILABLE)
+                    printf("        %sError%s\n", RED, RESTORE_COLOR);
                 valid_command = 1;
             }
         }
@@ -206,6 +181,8 @@ void compute_command(UserData* user, Topic* topic)
             if(get_xrce_object(id, &object) == OBJECT_SUBSCRIBER)
             {
                 read_data(object, atoi(color));
+                if(((Subscriber*)object)->object.status != OBJECT_STATUS_AVAILABLE)
+                    printf("        %sError%s\n", RED, RESTORE_COLOR);
                 valid_command = 1;
             }
         }
@@ -220,6 +197,8 @@ void compute_command(UserData* user, Topic* topic)
                 ShapeTopic shape_topic = {strlen(color) + 1, color, x, y, size};
                 if(send_topic(object, &shape_topic))
                     print_shape_topic(&shape_topic);
+                else
+                    printf("        %sError%s\n", RED, RESTORE_COLOR);
                 valid_command = 1;
             }
         }
@@ -227,9 +206,24 @@ void compute_command(UserData* user, Topic* topic)
 
     if(!valid_command)
         printf("Unknown command or incorrect input \n");
+}
 
-    fclose(commands_file);
-    fclose(fopen(user->command_file_name, "w"));
+void* read_from_stdin(void* args)
+{
+    while(fgets(command_line, 256, stdin)){}
+    return NULL;
+}
+
+int protoclient_main(int argc, char *argv[])
+{
+    pthread_t th;
+    if(pthread_create(&th, NULL, read_from_stdin, NULL))
+    {
+        printf("ERROR: Error creating thread\n");
+        return 1;
+    }
+
+    return app(argc, argv);
 }
 
 int main(int argc, char *argv[])

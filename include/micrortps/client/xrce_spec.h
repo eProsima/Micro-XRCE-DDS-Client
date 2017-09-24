@@ -209,8 +209,8 @@ typedef struct ReadDataPayloadSpec
     uint8_t read_mode;
     int32_t max_elapsed_time;
     int32_t max_rate;
-    uint32_t expression_size;
-    char* content_filter_expression;
+    //uint32_t expression_size;
+    //char* content_filter_expression;
     uint16_t max_samples;
     uint8_t include_sample_info;
 
