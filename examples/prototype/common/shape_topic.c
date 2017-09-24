@@ -16,6 +16,7 @@ void serialize_shape_topic(SerializedBufferHandle* writer, const void* topic_str
 
     serialize_byte_4(writer, topic->color_length);
     serialize_array(writer, (uint8_t*)topic->color, topic->color_length);
+    align_to(writer, 4);
     serialize_byte_4(writer, topic->x);
     serialize_byte_4(writer, topic->y);
     serialize_byte_4(writer, topic->size);
@@ -28,6 +29,7 @@ void* deserialize_shape_topic(SerializedBufferHandle* reader, void* callback_obj
     deserialize_byte_4(reader, &topic->color_length);
     topic->color = malloc(topic->color_length);
     deserialize_array(reader, (uint8_t*)topic->color, topic->color_length);
+    align_to(reader, 4);
     deserialize_byte_4(reader, &topic->x);
     deserialize_byte_4(reader, &topic->y);
     deserialize_byte_4(reader, &topic->size);
@@ -38,8 +40,12 @@ void* deserialize_shape_topic(SerializedBufferHandle* reader, void* callback_obj
 uint32_t size_of_shape_topic(const void* topic_struct)
 {
     ShapeTopic* topic = (ShapeTopic*)topic_struct;
-    return sizeof(topic->color_length)
+
+    int alignment = (topic->color_length % 4) ? (4 - (topic->color_length % 4)) : 0;
+    return
+         + sizeof(topic->color_length)
          + strlen(topic->color) + 1
+         + sizeof(alignment)
          + sizeof(topic->x)
          + sizeof(topic->y)
          + sizeof(topic->size);

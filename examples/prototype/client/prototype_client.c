@@ -161,14 +161,18 @@ void compute_command(UserData* user, Topic* topic)
             {
                 delete_publisher(object);
                 if(((Publisher*)object)->object.status != OBJECT_STATUS_AVAILABLE)
+                {
                     printf("        %sError%s\n", RED, RESTORE_COLOR);
+                }
                 valid_command = 1;
             }
             else if(kind == OBJECT_SUBSCRIBER)
             {
                 delete_subscriber(object);
                 if(((Subscriber*)object)->object.status != OBJECT_STATUS_AVAILABLE)
+                {
                     printf("        %sError%s\n", RED, RESTORE_COLOR);
+                }
                 valid_command = 1;
             }
         }
@@ -182,7 +186,9 @@ void compute_command(UserData* user, Topic* topic)
             {
                 read_data(object, atoi(color));
                 if(((Subscriber*)object)->object.status != OBJECT_STATUS_AVAILABLE)
+                {
                     printf("        %sError%s\n", RED, RESTORE_COLOR);
+                }
                 valid_command = 1;
             }
         }
