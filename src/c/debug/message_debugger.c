@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#define GREEN "\e[1;32m"
 #define YELLOW "\e[1;33m"
 #define RESTORE_COLOR "\e[0m"
 
@@ -298,7 +299,7 @@ void printl_status_submessage(const StatusPayloadSpec* payload, void* data)
 
 
 
-    printf("%s[Status | #%08X | id: %u | %s | %s]%s\n", YELLOW,
+    printf("%s[Status | #%08X | id: %u | %s | %s]%s\n", GREEN,
             payload->result.request_id,
             payload->object_id,
             kind,
@@ -360,7 +361,7 @@ void printl_data_submessage(const DataPayloadSpec* payload, void* data)
         break;
     }
 
-    printf("%s[Data | #%08X | id: %u | %s]%s\n", YELLOW,
+    printf("%s[Data | #%08X | id: %u | %s]%s\n", GREEN,
             payload->request_id,
             payload->object_id,
             content,

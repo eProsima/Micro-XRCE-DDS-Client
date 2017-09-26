@@ -89,6 +89,8 @@ int main(int args, char** argv)
         return 0;
     }
 
+    printf("Agent initialization...\n");
+    printf("Running DDS-XRCE Agent...\n");
 
     MessageCallback callback = {};
     callback.on_initialize_message = initialize_message;
@@ -108,7 +110,7 @@ int main(int args, char** argv)
         time_t t = time(NULL);
         struct tm* timeinfo = localtime(&t);
         strftime(time_string, 80, "%T", timeinfo);
-        printf("============================= AGENT ========================> %s\n", time_string);
+        //printf("============================= AGENT ========================> %s\n", time_string);
 
         // Receive file
         uint32_t in_file_size = received_io(in_buffer, BUFFER_SIZE, resource_io);
@@ -118,7 +120,7 @@ int main(int args, char** argv)
         if(agent.messages_to_send)
             send_topic(&agent, timeinfo->tm_sec);
 
-        printf("<-- [Received %u bytes]\n", in_file_size);
+        //printf("<-- [Received %u bytes]\n", in_file_size);
 
         // Send file
         uint32_t out_file_size = agent.message_manager.writer.iterator - agent.message_manager.writer.data;
@@ -127,7 +129,7 @@ int main(int args, char** argv)
             send_io(out_buffer, out_file_size, resource_io);
             reset_buffer_iterator(&agent.message_manager.writer);
 
-            printf("--> [Send %u bytes]\n", out_file_size);
+            //printf("--> [Send %u bytes]\n", out_file_size);
         }
 
         // waiting...

@@ -151,9 +151,10 @@ void serialize_read_data_payload(SerializedBufferHandle* buffer, const ReadDataP
 {
     serialize_byte_4(buffer, payload->request_id);
     serialize_object_id(buffer, payload->object_id);
-
+//    serialize_byte(buffer, 0); // FIXME
     serialize_byte_2(buffer, payload->max_messages);
     serialize_byte(buffer, payload->read_mode);
+//    serialize_byte(buffer, 0); // FIXME
     serialize_byte_4(buffer, payload->max_elapsed_time);
     serialize_byte_4(buffer, payload->max_rate);
 
@@ -168,9 +169,11 @@ void deserialize_read_data_payload(SerializedBufferHandle* buffer, MemoryCache* 
 {
     deserialize_byte_4(buffer, &payload->request_id);
     deserialize_object_id(buffer, &payload->object_id);
-
+//    uint8_t a = 0;
+//    deserialize_byte(buffer, &a); // FIXME
     deserialize_byte_2(buffer, &payload->max_messages);
     deserialize_byte(buffer, &payload->read_mode);
+//    deserialize_byte(buffer, &a); // FIXME
     deserialize_byte_4(buffer, (uint32_t*)&payload->max_elapsed_time);
     deserialize_byte_4(buffer, (uint32_t*)&payload->max_rate);
 
@@ -194,6 +197,7 @@ int size_of_read_data_payload(const ReadDataPayloadSpec* payload)
         // + sizeof(uint8_t) * payload->expression_size
          + sizeof(payload->max_samples)
          + sizeof(payload->include_sample_info);
+//         + 2; //FIXME
 }
 
 void serialize_data_payload(SerializedBufferHandle* buffer, const DataPayloadSpec* payload)
@@ -518,7 +522,6 @@ void serialize_object_id(SerializedBufferHandle* buffer, uint_least24_t object_i
     if(buffer->endian_machine == BIG_ENDIAN_MODE)
         object_id = object_id << 8;
     serialize_array(buffer, (uint8_t*)&object_id, 3);
-    //serialize_byte_4(buffer, object_id);
 }
 
 void deserialize_object_id(SerializedBufferHandle* buffer, uint_least24_t* object_id)
@@ -527,11 +530,9 @@ void deserialize_object_id(SerializedBufferHandle* buffer, uint_least24_t* objec
     if(buffer->endian_machine == BIG_ENDIAN_MODE)
         object_id++;
     deserialize_array(buffer, (uint8_t*)object_id, 3);
-    //deserialize_byte_4(buffer, object_id);
 }
 
 int size_of_object_id(uint_least24_t object_id)
 {
     return 3;
-    //return sizeof(object_id);
 }

@@ -325,23 +325,26 @@ void update_communication()
     uint32_t in_length = receive_data_io(in_buffer, in_size, data_io);
     if(in_length > 0)
     {
+        //printf("%s\n", data_to_string(in_buffer, in_length));
         parse_message(&message_manager, in_length);
+
+        #ifndef NDEBUG
+        printf("<-- [Received %u bytes]\n", in_length);
+        #endif
     }
 
-    #ifndef NDEBUG
-    //printf("<-- [Received %u bytes]\n", in_length);
-    #endif
 
     // SEND
     uint8_t* out_buffer = message_manager.writer.data;
     uint32_t out_length = message_manager.writer.iterator - out_buffer;
     if(out_length > 0)
     {
+        //printf("%s\n", data_to_string(out_buffer, out_length));
         send_data_io(out_buffer, out_length, data_io);
         reset_buffer_iterator(&message_manager.writer);
 
         #ifndef NDEBUG
-        //printf("--> [Send %u bytes]\n", out_length);
+        printf("--> [Send %u bytes]\n", out_length);
         #endif
     }
 
@@ -405,7 +408,7 @@ void on_data_received(const DataPayloadSpec* payload, void* data)
     {
         Subscriber* subscriber = (Subscriber*)object;
 
-        if(subscriber->object.status != OBJECT_STATUS_AVAILABLE)
+        if(subscriber->object.status != OBJECT_STATUS_AVAILABLE || subscriber->remaning_messages == 0)
             return;
 
         if(subscriber->remaning_messages > 0)
