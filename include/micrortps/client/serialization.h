@@ -33,6 +33,7 @@ void serialize_object_variant_data_writer(SerializedBufferHandle* buffer, const 
 void serialize_object_variant_data_reader(SerializedBufferHandle* buffer, const DataReaderSpec* data_reader);
 void serialize_object_variant_publisher(SerializedBufferHandle* buffer, const PublisherSpec* publisher);
 void serialize_object_variant_subscriber(SerializedBufferHandle* buffer, const SubscriberSpec* subscriber);
+void serialize_object_variant_client(SerializedBufferHandle* buffer, const ClientSpec* client);
 
 //status
 void serialize_result_status(SerializedBufferHandle* buffer, const ResultStatusSpec* result);
@@ -102,6 +103,7 @@ int size_of_object_variant_data_writer(const DataWriterSpec* data_writer);
 int size_of_object_variant_data_reader(const DataReaderSpec* data_reader);
 int size_of_object_variant_publisher(const PublisherSpec* publisher);
 int size_of_object_variant_subscriber(const SubscriberSpec* subscriber);
+int size_of_object_variant_client(const ClientSpec* client);
 
 //status
 int size_of_result_status(const ResultStatusSpec* result);

@@ -211,6 +211,9 @@ void printl_create_submessage(const CreatePayloadSpec* payload, void* data)
                     payload->object.variant.subscriber.participant_id,
                     payload->object.string);
         break;
+        case OBJECT_KIND_CLIENT:
+            sprintf(content, "CLIENT | id: %u",
+                    payload->object_id);
         default:
             sprintf(content, "UNKNOWN");
     }
