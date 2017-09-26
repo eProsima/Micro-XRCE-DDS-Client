@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE MinSizeRel)
 endif()
 
 option(COMPILE_EXAMPLES "Compile examples" OFF)

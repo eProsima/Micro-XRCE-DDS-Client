@@ -228,8 +228,11 @@ int size_of_data_payload(const DataPayloadSpec* payload)
 void serialize_object_kind(SerializedBufferHandle* buffer, const ObjectKindSpec* object)
 {
     serialize_byte(buffer, object->kind);
-    serialize_byte_4(buffer, object->string_size);
-    serialize_array(buffer, (uint8_t*)object->string, object->string_size);
+    if(object->kind != OBJECT_KIND_CLIENT)
+    {
+        serialize_byte_4(buffer, object->string_size);
+        serialize_array(buffer, (uint8_t*)object->string, object->string_size);
+    }
 
     switch(object->kind)
     {
@@ -248,6 +251,10 @@ void serialize_object_kind(SerializedBufferHandle* buffer, const ObjectKindSpec*
         case OBJECT_KIND_SUBSCRIBER:
             serialize_object_variant_subscriber(buffer, &object->variant.subscriber);
         break;
+
+        case OBJECT_KIND_CLIENT:
+            serialize_object_variant_client(buffer, &object->variant.client);
+            break;
     }
 }
 
@@ -281,9 +288,8 @@ void deserialize_object_kind(SerializedBufferHandle* buffer, MemoryCache* cache,
 
 int size_of_object_kind(const ObjectKindSpec* object)
 {
-    uint32_t size = sizeof(object->kind)
-                + sizeof(object->string_size)
-                + sizeof(uint8_t) * object->string_size;
+    uint32_t size = sizeof(object->kind) + object->kind != OBJECT_KIND_CLIENT ?
+                sizeof(object->string_size) + sizeof(uint8_t) * object->string_size : 0;
 
     switch(object->kind)
     {
@@ -301,6 +307,10 @@ int size_of_object_kind(const ObjectKindSpec* object)
 
         case OBJECT_KIND_SUBSCRIBER:
             size += size_of_object_variant_subscriber(&object->variant.subscriber);
+        break;
+
+        case OBJECT_KIND_CLIENT:
+            size += size_of_object_variant_client(&object->variant.client);
         break;
     }
 
@@ -424,6 +434,23 @@ void deserialize_object_variant_subscriber(SerializedBufferHandle* buffer, Memor
 int size_of_object_variant_subscriber(const SubscriberSpec* subscriber)
 {
     return size_of_object_id(subscriber->participant_id);
+}
+
+void serialize_object_variant_client(SerializedBufferHandle* buffer, const ClientSpec* client)
+{
+    serialize_byte_4(buffer, client->xrce_cookie);
+    serialize_byte_2(buffer, client->xrce_version);
+    serialize_byte_2(buffer, client->xrce_vendor_id);
+    serialize_byte_4(buffer, client->timestamp.seconds);
+    serialize_byte_4(buffer, client->timestamp.nanoseconds);
+    serialize_byte(buffer, client->session_id);
+}
+
+int size_of_object_variant_client(const ClientSpec* client)
+{
+    return sizeof(client->xrce_cookie) + sizeof(client->xrce_version) +
+        sizeof(client->xrce_vendor_id) + sizeof(client->timestamp.seconds) +
+        sizeof(client->timestamp.nanoseconds) + sizeof(client->session_id);
 }
 
 

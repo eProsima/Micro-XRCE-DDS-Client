@@ -125,9 +125,22 @@ void init_client(uint32_t buffer_size, DataOutEvent send_data_io_, DataInEvent r
     participant_list_size = 0;
     xrce_object_list_size = 0;
 
+    // Send client message
+    CreatePayloadSpec payload;
+    payload.request_id = ++request_counter;
+    payload.object_id = 0x102030;
+    payload.object.kind = OBJECT_KIND_CLIENT;
+    payload.object.variant.client.xrce_cookie = 0x58524345;
+    payload.object.variant.client.xrce_version = 0x0100;
+    payload.object.variant.client.xrce_vendor_id = 0x0015;
+    payload.object.variant.client.xrce_vendor_id = 0x0015;
+    payload.object.variant.client.session_id = 0x01;
+
+    add_create_submessage(&message_manager, &payload);
+
     #ifndef NDEBUG
     printf("==> ");
-    printf("[Create client message]\n");
+    printl_create_submessage(&payload, NULL);
     #endif
 }
 
