@@ -68,8 +68,11 @@ void init_client(uint32_t buffer_size, DataOutEvent send_data_io, DataInEvent re
         void* data_io, void* callback_object);
 void destroy_client(void);
 
-Publisher* create_publisher(Topic* topic);
-Subscriber* create_subscriber(Topic* topic);
+Participant* create_participant(void);
+Publisher* create_publisher(Participant* participant, Topic* topic);
+Subscriber* create_subscriber(Participant* participant, Topic* topic);
+void create_data_writer(Publisher* publisher);
+void create_data_reader(Subscriber* subscriber);
 
 int send_topic(Publisher* publisher, void* topic_data);
 

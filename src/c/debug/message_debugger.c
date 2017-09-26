@@ -202,13 +202,22 @@ void printl_create_submessage(const CreatePayloadSpec* payload, void* data)
             sprintf(content, "PARTICIPANT");
         break;
         case OBJECT_KIND_PUBLISHER:
-            sprintf(content, "PUBLISHER | id: %u | topic: %s",
-                    payload->object.variant.publisher.participant_id,
-                    payload->object.string);
+            sprintf(content, "PUBLISHER | id: %u",
+                    payload->object.variant.publisher.participant_id);
         break;
         case OBJECT_KIND_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | id: %u | topic: %s",
-                    payload->object.variant.subscriber.participant_id,
+            sprintf(content, "SUBSCRIBER | id: %u",
+                    payload->object.variant.subscriber.participant_id);
+        break;
+        case OBJECT_KIND_DATA_WRITER:
+            sprintf(content, "DATA_WRITER | id: %u | id: %u | topic: %s",
+                    payload->object.variant.data_writer.participant_id,
+                    payload->object.variant.data_writer.publisher_id,
+                    payload->object.string);
+        case OBJECT_KIND_DATA_READER:
+            sprintf(content, "DATA_READER | id: %u | id: %u | topic: %s",
+                    payload->object.variant.data_reader.participant_id,
+                    payload->object.variant.data_reader.subscriber_id,
                     payload->object.string);
         break;
         default:

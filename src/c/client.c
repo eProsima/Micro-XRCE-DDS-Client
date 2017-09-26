@@ -39,6 +39,9 @@ Participant* create_participant(void);
 // ---------------------------------------------------------------------
 //                          CLIENT INTERNAL STATE
 // ---------------------------------------------------------------------
+// Client status
+int initialized = 0;
+
 // Client message header
 uint32_t client_key;
 uint8_t session_id;
@@ -88,6 +91,8 @@ void remove_xrce_object(XRCEObject* object)
 void init_client(uint32_t buffer_size, DataOutEvent send_data_io_, DataInEvent receive_data_io_,
     void* data_io_, void* callback_object_)
 {
+    initialized = 1;
+
     // Client message header
     current_sequence_number_sent = 0;
     expected_sequence_number_recieved = 0;
@@ -119,6 +124,11 @@ void init_client(uint32_t buffer_size, DataOutEvent send_data_io_, DataInEvent r
     // Element lists
     participant_list_size = 0;
     xrce_object_list_size = 0;
+
+    #ifndef NDEBUG
+    printf("==> ");
+    printf("[Create client message]\n");
+    #endif
 }
 
 void destroy_client(void)
@@ -161,10 +171,8 @@ Participant* create_participant(void)
     return participant;
 }
 
-Publisher* create_publisher(Topic* topic)
+Publisher* create_publisher(Participant* participant, Topic* topic)
 {
-    Participant* participant = (participant_list[0]) ? participant_list[0] : create_participant();
-
     Publisher* publisher = malloc(sizeof(Publisher));
     publisher->participant = participant;
     publisher->topic = topic;
@@ -176,8 +184,8 @@ Publisher* create_publisher(Topic* topic)
     payload.request_id = ++request_counter;
     payload.object_id = publisher->object.id;
     payload.object.kind = OBJECT_KIND_PUBLISHER;
-    payload.object.string = topic->name;
-    payload.object.string_size = strlen(topic->name) + 1;
+    payload.object.string = NULL;
+    payload.object.string_size = 0;
     payload.object.variant.publisher.participant_id = participant->object.id;
 
     add_create_submessage(&message_manager, &payload);
@@ -190,10 +198,8 @@ Publisher* create_publisher(Topic* topic)
     return publisher;
 }
 
-Subscriber* create_subscriber(Topic* topic)
+Subscriber* create_subscriber(Participant* participant, Topic* topic)
 {
-    Participant* participant = (participant_list[0]) ? participant_list[0] : create_participant();
-
     Subscriber* subscriber = malloc(sizeof(Subscriber));
     subscriber->participant = participant;
     subscriber->listener_list_size = 0;
@@ -207,8 +213,8 @@ Subscriber* create_subscriber(Topic* topic)
     payload.request_id = ++request_counter;
     payload.object_id = subscriber->object.id;
     payload.object.kind = OBJECT_KIND_SUBSCRIBER;
-    payload.object.string = topic->name;
-    payload.object.string_size = strlen(topic->name) + 1;
+    payload.object.string = NULL;
+    payload.object.string_size = 0;
     payload.object.variant.subscriber.participant_id = participant->object.id;
 
     add_create_submessage(&message_manager, &payload);
@@ -219,6 +225,44 @@ Subscriber* create_subscriber(Topic* topic)
     #endif
 
     return subscriber;
+}
+
+void create_data_writer(Publisher* publisher)
+{
+    CreatePayloadSpec payload;
+    payload.request_id = ++request_counter;
+    payload.object_id = ++object_id_counter;
+    payload.object.kind = OBJECT_KIND_DATA_WRITER;
+    payload.object.string = publisher->topic->name;
+    payload.object.string_size = strlen(publisher->topic->name) + 1;
+    payload.object.variant.data_writer.participant_id = publisher->participant->object.id;
+    payload.object.variant.data_writer.publisher_id = publisher->object.id;
+
+    add_create_submessage(&message_manager, &payload);
+
+    #ifndef NDEBUG
+    printf("==> ");
+    printl_create_submessage(&payload, NULL);
+    #endif
+}
+
+void create_data_reader(Subscriber* subscriber)
+{
+    CreatePayloadSpec payload;
+    payload.request_id = ++request_counter;
+    payload.object_id = ++object_id_counter;
+    payload.object.kind = OBJECT_KIND_DATA_READER;
+    payload.object.string = subscriber->topic->name;
+    payload.object.string_size = strlen(subscriber->topic->name) + 1;
+    payload.object.variant.data_reader.participant_id = subscriber->participant->object.id;
+    payload.object.variant.data_reader.subscriber_id = subscriber->object.id;
+
+    add_create_submessage(&message_manager, &payload);
+
+    #ifndef NDEBUG
+    printf("==> ");
+    printl_create_submessage(&payload, NULL);
+    #endif
 }
 
 int send_topic(Publisher* publisher, void* topic_data)
@@ -318,6 +362,10 @@ void delete_subscriber(Subscriber* subscriber)
 
 void update_communication()
 {
+    //check if client is initialized
+    if(!initialized)
+        return;
+
     // RECEIVE
     uint8_t* in_buffer = message_manager.reader.data;
     uint32_t in_size = message_manager.reader.final - in_buffer;

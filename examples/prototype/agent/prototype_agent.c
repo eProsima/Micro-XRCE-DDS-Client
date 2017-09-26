@@ -89,7 +89,6 @@ int main(int args, char** argv)
         return 0;
     }
 
-    printf("Agent initialization...\n");
     printf("Running DDS-XRCE Agent...\n");
 
     MessageCallback callback = {};
@@ -221,7 +220,7 @@ void on_write_data_submessage_received(const WriteDataPayloadSpec* recv_payload,
 
     Topic topic =
     {
-        "SQUARE",
+        "Square",
         serialize_shape_topic,
         deserialize_shape_topic,
         size_of_shape_topic
@@ -249,7 +248,7 @@ void send_topic(Agent* agent, uint32_t key)
     agent->messages_to_send--;
     Topic topic =
     {
-        "SQUARE",
+        "Square",
         serialize_shape_topic,
         deserialize_shape_topic,
         size_of_shape_topic

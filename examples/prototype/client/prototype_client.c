@@ -34,6 +34,12 @@ void compute_command(UserData* user, Topic* topic);
 //callbacks for listening topics
 void on_listener_shape_topic(const void* topic_data, void* callback_object);
 
+//pointer to callbacks for io
+void (*send_io)(uint8_t* buffer, uint32_t length, void* data);
+uint32_t (*received_io)(uint8_t* buffer, uint32_t size, void* data);
+void* resource_io = NULL;
+
+
 void print_help();
 void print_help()
 {
@@ -47,25 +53,23 @@ int app_example(int args, char** argv)
     user.recieved_topics = 0;
     user.command_file_name = NULL;
 
-    int initilized_client = 0;
-
     if(args >=  2)
     {
         if(strcmp(argv[1], "-f") == 0)
         {
             SharedFile* shared_file = malloc(sizeof(SharedFile));
             init_file_io(shared_file, "client_to_agent.bin", "agent_to_client.bin");
-
-            init_client(BUFFER_SIZE, send_file_io, received_file_io, shared_file, &user);
-            initilized_client = 1;
+            send_io = send_file_io;
+            received_io = received_file_io;
+            resource_io = shared_file;
         }
         else if(strcmp(argv[1], "-s") == 0)
         {
             SerialPort* serial_port = malloc(sizeof(SerialPort));
             init_serial_port_io(serial_port, "/dev/ttyACM0");
-
-            init_client(BUFFER_SIZE, send_serial_port_io, received_serial_port_io, serial_port, &user);
-            initilized_client = 1;
+            send_io = send_serial_port_io;
+            received_io = received_serial_port_io;
+            resource_io = serial_port;
         }
     }
     if(args == 4)
@@ -77,13 +81,12 @@ int app_example(int args, char** argv)
         }
     }
 
-    if(!initilized_client)
+    if(!resource_io)
     {
         print_help();
         return 0;
     }
 
-    printf("Client initialization...\n");
     printf("Running DDS-XRCE Client...\n");
 
     Topic topic =
@@ -168,7 +171,6 @@ void compute_command(UserData* user, Topic* topic)
         fclose(fopen(user->command_file_name, "w"));
     }
 
-
     if(command_size == -1)
     {
         //no commands is a valid commnad;
@@ -176,20 +178,40 @@ void compute_command(UserData* user, Topic* topic)
     }
     else if(command_size == 1)
     {
-        if(strcmp(command, "create_publisher") == 0)
+        if(strcmp(command, "create_client") == 0)
         {
-            create_publisher(topic);
+            init_client(BUFFER_SIZE, send_io, received_io, resource_io, user);
             valid_command = 1;
         }
-        else if(strcmp(command, "create_subscriber") == 0)
+        else if(strcmp(command, "create_participant") == 0)
         {
-            Subscriber* subscriber = create_subscriber(topic);
-            add_listener_topic(subscriber, on_listener_shape_topic);
+            create_participant();
             valid_command = 1;
         }
     }
     else if(command_size == 2)
     {
+        if(strcmp(command, "create_publisher") == 0)
+        {
+            void* participant;
+            if(get_xrce_object(id, &participant) == OBJECT_PARTICIPANT)
+            {
+                Publisher* publisher = create_publisher(participant, topic);
+                create_data_writer(publisher);
+                valid_command = 1;
+            }
+        }
+        else if(strcmp(command, "create_subscriber") == 0)
+        {
+            void* participant;
+            if(get_xrce_object(id, &participant) == OBJECT_PARTICIPANT)
+            {
+                Subscriber* subscriber = create_subscriber(participant, topic);
+                create_data_reader(subscriber);
+                add_listener_topic(subscriber, on_listener_shape_topic);
+                valid_command = 1;
+            }
+        }
         if(strcmp(command, "delete") == 0)
         {
             void* object;
@@ -255,20 +277,20 @@ void* read_from_stdin(void* args)
 {
     while(fgets(command_stdin_line, 256, stdin))
     {
-        #ifdef PX4
+        #ifdef STM32F427
         getc(stdin);
-        #endif //PX4
+        #endif //STM32F427
         shared__compute_stdin_command = 1;
     }
     return NULL;
 }
 
 
-#ifdef PX4
+#ifdef STM32F427
 int protoclient_main(int argc, char** argv)
 #else
 int main(int argc, char** argv)
-#endif //PX4
+#endif //STM32F427
 {
     // Read for reading from stdin
     pthread_t th;
