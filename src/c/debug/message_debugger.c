@@ -214,6 +214,7 @@ void printl_create_submessage(const CreatePayloadSpec* payload, void* data)
                     payload->object.variant.data_writer.participant_id,
                     payload->object.variant.data_writer.publisher_id,
                     payload->object.string);
+        break;
         case OBJECT_KIND_DATA_READER:
             sprintf(content, "DATA_READER | id: %u | id: %u | topic: %s",
                     payload->object.variant.data_reader.participant_id,
@@ -223,6 +224,7 @@ void printl_create_submessage(const CreatePayloadSpec* payload, void* data)
         case OBJECT_KIND_CLIENT:
             sprintf(content, "CLIENT | id: %u",
                     payload->object_id);
+        break;
         default:
             sprintf(content, "UNKNOWN");
     }
