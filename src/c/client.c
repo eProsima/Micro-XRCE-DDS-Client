@@ -128,12 +128,13 @@ void init_client(uint32_t buffer_size, DataOutEvent send_data_io_, DataInEvent r
     // Send client message
     CreatePayloadSpec payload;
     payload.request_id = ++request_counter;
-    payload.object_id = 0x102030;
+    payload.object_id = 0x0000FF;
     payload.object.kind = OBJECT_KIND_CLIENT;
-    payload.object.variant.client.xrce_cookie = 0x58524345;
-    payload.object.variant.client.xrce_version = 0x0100;
-    payload.object.variant.client.xrce_vendor_id = 0x0015;
-    payload.object.variant.client.xrce_vendor_id = 0x0015;
+    payload.object.variant.client.xrce_cookie = 0x45435258;
+    payload.object.variant.client.xrce_version = 0x0001;
+    payload.object.variant.client.xrce_vendor_id = 0x001;
+    payload.object.variant.client.timestamp.seconds = 1;
+    payload.object.variant.client.timestamp.nanoseconds = 2;
     payload.object.variant.client.session_id = 0x01;
 
     add_create_submessage(&message_manager, &payload);
@@ -386,7 +387,7 @@ void update_communication()
     uint32_t in_length = receive_data_io(in_buffer, in_size, data_io);
     if(in_length > 0)
     {
-        //printf("%s\n", data_to_string(in_buffer, in_length));
+        printf("%s\n", data_to_string(in_buffer, in_length));
         parse_message(&message_manager, in_length);
 
         #ifndef NDEBUG
@@ -400,7 +401,7 @@ void update_communication()
     uint32_t out_length = message_manager.writer.iterator - out_buffer;
     if(out_length > 0)
     {
-        //printf("%s\n", data_to_string(out_buffer, out_length));
+        printf("%s\n", data_to_string(out_buffer, out_length));
         send_data_io(out_buffer, out_length, data_io);
         reset_buffer_iterator(&message_manager.writer);
 

@@ -19,7 +19,7 @@ void serialize_message_header(SerializedBufferHandle* buffer, const MessageHeade
     serialize_byte_4(buffer, message_header->client_key);
     serialize_byte(buffer, message_header->session_id);
     serialize_byte(buffer, message_header->stream_id);
-    serialize_byte_2_endian(buffer, message_header->sequence_number, BIG_ENDIAN_MODE);
+    serialize_byte_2(buffer, message_header->sequence_number);
 }
 
 void deserialize_message_header(SerializedBufferHandle* buffer, MemoryCache* cache,  MessageHeaderSpec* message_header)
@@ -27,7 +27,7 @@ void deserialize_message_header(SerializedBufferHandle* buffer, MemoryCache* cac
     deserialize_byte_4(buffer, &message_header->client_key);
     deserialize_byte(buffer, &message_header->session_id);
     deserialize_byte(buffer, &message_header->stream_id);
-    deserialize_byte_2_endian(buffer, &message_header->sequence_number, BIG_ENDIAN_MODE);
+    deserialize_byte_2(buffer, &message_header->sequence_number);
 }
 
 int size_of_message_header(const MessageHeaderSpec* message_header)
@@ -48,14 +48,14 @@ void serialize_submessage_header(SerializedBufferHandle* buffer, const Submessag
 {
     serialize_byte(buffer, submessage_header->id);
     serialize_byte(buffer, submessage_header->flags);
-    serialize_byte_2_endian(buffer, submessage_header->length, BIG_ENDIAN_MODE);
+    serialize_byte_2(buffer, submessage_header->length);
 }
 
 void deserialize_submessage_header(SerializedBufferHandle* buffer, MemoryCache* cache, SubmessageHeaderSpec* submessage_header)
 {
     deserialize_byte(buffer, &submessage_header->id);
     deserialize_byte(buffer, &submessage_header->flags);
-    deserialize_byte_2_endian(buffer, &submessage_header->length, BIG_ENDIAN_MODE);
+    deserialize_byte_2(buffer, &submessage_header->length);
 }
 
 int size_of_submessage_header(const SubmessageHeaderSpec* submessage_header)
@@ -288,7 +288,8 @@ void deserialize_object_kind(SerializedBufferHandle* buffer, MemoryCache* cache,
 
 int size_of_object_kind(const ObjectKindSpec* object)
 {
-    uint32_t size = sizeof(object->kind) + object->kind != OBJECT_KIND_CLIENT ?
+    uint32_t size = sizeof(object->kind);
+    size = (object->kind != OBJECT_KIND_CLIENT) ?
                 sizeof(object->string_size) + sizeof(uint8_t) * object->string_size : 0;
 
     switch(object->kind)

@@ -9,7 +9,7 @@
 void init_serial_port_io(SerialPort* serial_port, const char* device)
 {
     serial_port->locator.kind = LOC_SERIAL;
-    strcpy(serial_port->locator.data, device);
+    strcpy((char*)serial_port->locator.data, device);
 
     serial_port->channel_id = add_locator(&serial_port->locator);
 }

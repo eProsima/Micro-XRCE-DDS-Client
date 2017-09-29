@@ -3,6 +3,7 @@
 
 #ifndef NDEBUG
 #include <string.h>
+#include <stdio.h>
 #endif
 
 // PRIVATE DEFINITIONS
@@ -51,11 +52,16 @@ int check_and_set_headers(MessageManager* message_manager, const SubmessageHeade
     }
     else //because the message header is already alignment.
     {
-        align_to(writer, 4);
+        //align_to(writer, 4);
     }
 
     if(writer->iterator + sizeof(SubmessageHeaderSpec) + header->length > writer->final)
+    {
+        #ifndef NDEBUG
+        printf("******* Serialization problem *******\n");
+        #endif
         return 0;
+    }
 
     serialize_submessage_header(writer, header);
     return 1;
@@ -202,6 +208,7 @@ int parse_message(MessageManager* message_manager, uint32_t message_length)
         PayloadSpec payload;
         #ifndef NDEBUG
         memset(&payload, 0xFF, sizeof(PayloadSpec));
+
         #endif
 
         switch(submessage_header.id)
@@ -246,7 +253,7 @@ int parse_message(MessageManager* message_manager, uint32_t message_length)
                 return 0;
         }
 
-        align_to(reader, 4);
+        //align_to(reader, 4);
     }
     while(reader->iterator + sizeof(SubmessageHeaderSpec) <= reader->data + message_length);
 

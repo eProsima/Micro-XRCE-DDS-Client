@@ -24,29 +24,34 @@ typedef struct UserData
 
 } UserData;
 
+// Global resources
 int shared__compute_stdin_command = 0;
 char command_stdin_line[256];
 
-
-void* read_from_stdin(void* args);
-void compute_command(UserData* user, Topic* topic);
-
-//callbacks for listening topics
-void on_listener_shape_topic(const void* topic_data, void* callback_object);
-
-//pointer to callbacks for io
+// Pointer to callbacks for io
 void (*send_io)(uint8_t* buffer, uint32_t length, void* data);
 uint32_t (*received_io)(uint8_t* buffer, uint32_t size, void* data);
 void* resource_io = NULL;
 
+// Functions prototypes
+void print_help(void);
+int app_example(int args, char** argv);
+void* read_from_stdin(void* args);
+void compute_command(UserData* user, Topic* topic);
+#ifdef STM32F427
+int protoclient_main(int argc, char** argv);
+#endif
 
-void print_help();
-void print_help()
+//callbacks for listening topics
+void on_listener_shape_topic(const void* topic_data, void* callback_object);
+
+
+
+void print_help(void)
 {
     printf("HELP: Write option: [ -f (file) | -s (serial_port)] [-c command_file]\n");
 }
 
-int app_example(int args, char** argv);
 int app_example(int args, char** argv)
 {
     UserData user;
@@ -170,6 +175,10 @@ void compute_command(UserData* user, Topic* topic)
         }
         fclose(fopen(user->command_file_name, "w"));
     }
+
+    // because some scanf implementations interpret no string as an empty string.
+    if(command_size == 3 && color[0] == '\0')
+        command_size = 2;
 
     if(command_size == -1)
     {

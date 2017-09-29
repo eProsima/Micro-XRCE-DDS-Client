@@ -27,7 +27,7 @@ extern "C"
 #define OBJECT_KIND_DATA_READER   0x07
 #define OBJECT_KIND_SUBSCRIBER    0x08
 #define OBJECT_KIND_PUBLISHER     0x09
-#define OBJECT_KIND_CLIENT        0x021
+#define OBJECT_KIND_CLIENT        0x21
 
 #define READ_MODE_DATA              0x00
 #define READ_MODE_DATA_SEQ          0x01

@@ -222,8 +222,11 @@ void printl_create_submessage(const CreatePayloadSpec* payload, void* data)
                     payload->object.string);
         break;
         case OBJECT_KIND_CLIENT:
-            sprintf(content, "CLIENT | id: %u",
-                    payload->object_id);
+            sprintf(content, "CLIENT | cookie: 0x%08X | v%u | vendor: %u | session: %u",
+                    payload->object.variant.client.xrce_cookie,
+                    payload->object.variant.client.xrce_version,
+                    payload->object.variant.client.xrce_vendor_id,
+                    payload->object.variant.client.session_id);
         break;
         default:
             sprintf(content, "UNKNOWN");
