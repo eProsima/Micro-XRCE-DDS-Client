@@ -197,6 +197,11 @@ void compute_command(UserData* user, Topic* topic)
             create_participant();
             valid_command = 1;
         }
+        else if(strcmp(command, "delete_client") == 0)
+        {
+            destroy_client(); //make as another delete xrce object.
+            valid_command = 1;
+        }
     }
     else if(command_size == 2)
     {
@@ -221,11 +226,20 @@ void compute_command(UserData* user, Topic* topic)
                 valid_command = 1;
             }
         }
-        if(strcmp(command, "delete") == 0)
+        else if(strcmp(command, "delete") == 0)
         {
             void* object;
             int kind = get_xrce_object(id, &object);
-            if(kind == OBJECT_PUBLISHER)
+            if(kind == OBJECT_PARTICIPANT)
+            {
+                delete_participant(object);
+                if(((Participant*)object)->object.status != OBJECT_STATUS_AVAILABLE)
+                {
+                    printf("        %sError%s\n", RED, RESTORE_COLOR);
+                }
+                valid_command = 1;
+            }
+            else if(kind == OBJECT_PUBLISHER)
             {
                 delete_publisher(object);
                 if(((Publisher*)object)->object.status != OBJECT_STATUS_AVAILABLE)

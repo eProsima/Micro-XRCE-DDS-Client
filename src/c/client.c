@@ -147,7 +147,19 @@ void init_client(uint32_t buffer_size, DataOutEvent send_data_io_, DataInEvent r
 
 void destroy_client(void)
 {
-    //TODO
+    if(!initialized)
+        return;
+
+    DeletePayloadSpec payload;
+    payload.request_id = ++request_counter;
+    payload.object_id = 0x0000FF;
+
+    add_delete_submessage(&message_manager, &payload);
+
+    #ifndef NDEBUG
+    printf("==> ");
+    printl_delete_submessage(&payload, NULL);
+    #endif
 }
 
 int on_initialize_message(MessageHeaderSpec* header, void* data)
@@ -241,6 +253,7 @@ Subscriber* create_subscriber(Participant* participant, Topic* topic)
     return subscriber;
 }
 
+//TODO: Generalize create functions.
 void create_data_writer(Publisher* publisher)
 {
     CreatePayloadSpec payload;
@@ -336,6 +349,26 @@ void add_listener_topic(Subscriber* subscriber, OnListenerTopic on_listener_topi
     subscriber->listener_list[subscriber->listener_list_size++] = on_listener_topic;
 }
 
+//TODO: Generalize delete functions.
+void delete_participant(Participant* participant)
+{
+    if(participant->object.status != OBJECT_STATUS_AVAILABLE)
+        return;
+
+    participant->object.last_operation = STATUS_LAST_OP_DELETE;
+
+    DeletePayloadSpec payload;
+    payload.request_id = ++request_counter;
+    payload.object_id = participant->object.id;
+
+    add_delete_submessage(&message_manager, &payload);
+
+    #ifndef NDEBUG
+    printf("==> ");
+    printl_delete_submessage(&payload, NULL);
+    #endif
+}
+
 void delete_publisher(Publisher* publisher)
 {
     if(publisher->object.status != OBJECT_STATUS_AVAILABLE)
@@ -352,6 +385,18 @@ void delete_publisher(Publisher* publisher)
     #ifndef NDEBUG
     printf("==> ");
     printl_delete_submessage(&payload, NULL);
+    #endif
+
+    //For the prototype.
+    DeletePayloadSpec payload_data;
+    payload_data.request_id = ++request_counter;
+    payload_data.object_id = publisher->object.id + 1;
+
+    add_delete_submessage(&message_manager, &payload_data);
+
+    #ifndef NDEBUG
+    printf("==> ");
+    printl_delete_submessage(&payload_data, NULL);
     #endif
 }
 
@@ -371,6 +416,18 @@ void delete_subscriber(Subscriber* subscriber)
     #ifndef NDEBUG
     printf("==> ");
     printl_delete_submessage(&payload, NULL);
+    #endif
+
+    //For the prototype.
+    DeletePayloadSpec payload_data;
+    payload_data.request_id = ++request_counter;
+    payload_data.object_id = subscriber->object.id + 1;
+
+    add_delete_submessage(&message_manager, &payload_data);
+
+    #ifndef NDEBUG
+    printf("==> ");
+    printl_delete_submessage(&payload_data, NULL);
     #endif
 }
 

@@ -80,6 +80,7 @@ int read_data(Subscriber* subscriber, uint16_t max_messages);
 
 void add_listener_topic(Subscriber* subscriber, OnListenerTopic on_listener_topic);
 
+void delete_participant(Participant* participant);
 void delete_publisher(Publisher* publisher);
 void delete_subscriber(Subscriber* subscriber);
 
