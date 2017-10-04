@@ -53,7 +53,7 @@ add_subdirectory(thirdparty/micrortps_transport)
 add_subdirectory(thirdparty/micro-CDR)
 
 add_library(${PROJECT_NAME} SHARED ${CLIENT_LIB_SOURCES})
-target_link_libraries(${PROJECT_NAME} transport micro-CDR)
+target_link_libraries(${PROJECT_NAME} transport microcdr)
 target_include_directories(
     ${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
