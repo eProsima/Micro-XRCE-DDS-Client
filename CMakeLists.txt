@@ -29,6 +29,7 @@ option(COMPILE_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
+option(UPDATE_SUBMODULES "Update to the latest" ON)
 
 if(EPROSIMA_BUILD)
     set(THIRDPARTY ON)
