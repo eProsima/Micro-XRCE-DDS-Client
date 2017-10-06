@@ -1,0 +1,6 @@
+[submodule "thirdparty/micrortps_transport"]
+	path = thirdparty/micrortps_transport
+	url = git@git.sambaserver.eprosima.com:nanortps/micrortps_transport.git
+[submodule "thirdparty/micro-CDR"]
+	path = thirdparty/micro-CDR
+	url = git@git.sambaserver.eprosima.com:fastcdr/nanocdr.git

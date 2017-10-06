@@ -444,9 +444,9 @@ void update_communication()
     uint32_t in_length = receive_data_io(in_buffer, in_size, data_io);
     if(in_length > 0)
     {
-	#ifndef NDEBUG
+        #ifndef NDEBUG
         printf("%s\n", data_to_string(in_buffer, in_length));
-	#endif
+        #endif
         parse_message(&message_manager, in_length);
 
         #ifndef NDEBUG
@@ -460,9 +460,9 @@ void update_communication()
     uint32_t out_length = message_manager.writer.iterator - out_buffer;
     if(out_length > 0)
     {
-	#ifndef NDEBUG
+        #ifndef NDEBUG
         printf("%s\n", data_to_string(out_buffer, out_length));
-	#endif
+        #endif
         send_data_io(out_buffer, out_length, data_io);
         reset_buffer_iterator(&message_manager.writer);
 
