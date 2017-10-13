@@ -237,6 +237,8 @@ class Enum:
                 for value in yaml_enum[name]:
                     self.values.append((value.keys()[0], value.values()[0]))
 
+        state.aliases[self.name] = self.type
+
     def writeSpec(self, file):
         file.write('\n\ntypedef enum ' + self.name + '\n{\n')
 

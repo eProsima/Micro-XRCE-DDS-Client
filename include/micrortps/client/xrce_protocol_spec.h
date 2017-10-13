@@ -261,6 +261,17 @@ typedef enum EndpointQosFlags
 } EndpointQosFlags;
 
 
+typedef struct OBJK_Endpoint_QosBinary
+{
+    uint16_t qos_flags;
+    uint16_t history_depth;
+    uint32_t deadline_msec;
+    uint32_t lifespan_msec;
+    BinarySequence_t user_data;
+
+} OBJK_Endpoint_QosBinary;
+
+
 #ifdef __cplusplus
 }
 #endif

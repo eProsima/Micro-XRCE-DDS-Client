@@ -157,12 +157,12 @@ DATA:
 
 - struct:
     OBJK_PUBLISHER_Binary:
-    - partitions:    StringSequence_t
+    - partitions:     StringSequence_t
     - group_data:     BinarySequence_t
 
 - struct:
     OBJK_SUBSCRIBER_Binary:
-    - partitions:    StringSequence_t
+    - partitions:     StringSequence_t
     - group_data:     BinarySequence_t
 
 - enum:
@@ -174,6 +174,14 @@ DATA:
     - IS_DURABILITY_TRANSIENT:       '0x01 << 4'
     - IS_DURABILITY_PERSISTANT:      '0x01 << 5'
     __TYPE__: uint16_t
+
+- struct:
+    OBJK_Endpoint_QosBinary:
+    - qos_flags:         EndpointQosFlags
+    - history_depth:     uint16_t
+    - deadline_msec:     uint32_t
+    - lifespan_msec:     uint32_t
+    - user_data:         BinarySequence_t
 
 
 FILES:

@@ -199,4 +199,12 @@ TEST_F(XRCEProtocolSerialization, OBJK_SUBSCRIBER_Binary)
 }
 
 
+TEST_F(XRCEProtocolSerialization, OBJK_Endpoint_QosBinary)
+{
+    memset(output, 0xFF, sizeof(OBJK_Endpoint_QosBinary));
+    serialize_OBJK_Endpoint_QosBinary(&writer, (OBJK_Endpoint_QosBinary*)input);
+    deserialize_OBJK_Endpoint_QosBinary(&reader, (OBJK_Endpoint_QosBinary*)output, &aux_memory);
+}
+
+
 

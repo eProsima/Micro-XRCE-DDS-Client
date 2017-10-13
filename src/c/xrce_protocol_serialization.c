@@ -302,4 +302,22 @@ void deserialize_OBJK_SUBSCRIBER_Binary(MicroBuffer* buffer, OBJK_SUBSCRIBER_Bin
     deserialize_BinarySequence_t(buffer, &output->group_data, aux);
 }
 
+void serialize_OBJK_Endpoint_QosBinary(MicroBuffer* buffer, const OBJK_Endpoint_QosBinary* input)
+{
+    serialize_uint16_t(buffer, input->qos_flags);
+    serialize_uint16_t(buffer, input->history_depth);
+    serialize_uint32_t(buffer, input->deadline_msec);
+    serialize_uint32_t(buffer, input->lifespan_msec);
+    serialize_BinarySequence_t(buffer, &input->user_data);
+}
+
+void deserialize_OBJK_Endpoint_QosBinary(MicroBuffer* buffer, OBJK_Endpoint_QosBinary* output, AuxMemory* aux)
+{
+    deserialize_uint16_t(buffer, &output->qos_flags);
+    deserialize_uint16_t(buffer, &output->history_depth);
+    deserialize_uint32_t(buffer, &output->deadline_msec);
+    deserialize_uint32_t(buffer, &output->lifespan_msec);
+    deserialize_BinarySequence_t(buffer, &output->user_data, aux);
+}
+
 
