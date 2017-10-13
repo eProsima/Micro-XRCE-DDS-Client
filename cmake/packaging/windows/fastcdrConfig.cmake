@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+get_filename_component(FILE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../" ABSOLUTE)
 
-if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-    include(${PROJECT_SOURCE_DIR}/cmake/dev/gtest.cmake)
-
-    # If Windows, link against export dll functions
-    if(WIN32)
-        add_definitions(-DMICROCDR_DYN_LINK)
+if(MSVC12)
+    if(CMAKE_CL_64)
+        include("${FILE_PREFIX_DIR}/x64Win64VS2013/fastcdr/cmake/fastcdrConfig.cmake")
+    else()
+        include("${FILE_PREFIX_DIR}/i86Win32VS2013/fastcdr/cmake/fastcdrConfig.cmake")
     endif()
-
-    set(CMAKE_CXX_STANDARD 11)
-    set(CLIENT_UNITTESTS_SOURCE XRCEProtocolSerialization.cpp)
-    add_executable(ClientUnitTests ${CLIENT_UNITTESTS_SOURCE})
-    add_gtest(ClientUnitTests ${CLIENT_UNITTESTS_SOURCE})
-    target_include_directories(ClientUnitTests PRIVATE ${GTEST_INCLUDE_DIRS})
-    target_link_libraries(ClientUnitTests microcdr micrortps-client ${GTEST_BOTH_LIBRARIES})
-
+elseif(MSVC14)
+    if(CMAKE_CL_64)
+        include("${FILE_PREFIX_DIR}/x64Win64VS2015/fastcdr/cmake/fastcdrConfig.cmake")
+    else()
+        include("${FILE_PREFIX_DIR}/i86Win32VS2015/fastcdr/cmake/fastcdrConfig.cmake")
+    endif()
+else()
+    message(FATAL_ERROR "Not supported version of Visual Studio")
 endif()

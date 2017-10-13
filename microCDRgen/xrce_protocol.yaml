@@ -1,0 +1,140 @@
+DATA:
+- typedef: {ClientKey:  'uint8_t 4'}
+- typedef: {ObjectKind: uint8_t}
+- define:  {OBJK_INVALID:      '0x00'}
+- define:  {OBJK_PARTICIPANT:  '0x01'}
+- define:  {OBJK_DATAWRITER:   '0x03'}
+- define:  {OBJK_TOPIC:        '0x04'}
+- define:  {OBJK_DATAREADER:   '0x07'}
+- define:  {OBJK_SUBSCRIBER:   '0x08'}
+- define:  {OBJK_PUBLISHER:    '0x09'}
+- define:  {OBJK_TYPE:         '0x10'}
+- define:  {OBJK_QOSPROFILE:   '0x11'}
+- define:  {OBJK_APPLICATION:  '0x20'}
+- define:  {OBJK_CLIENT:       '0x21'}
+
+- typedef: {ObjectId: 'uint8_t 2'}
+- define:  {OBJECTID_INVALID: '{0xFF, 0xFF}'}
+- define:  {OBJECTID_CLIENT:  '{0xFF, 0xFF}'}
+- define:  {OBJECTID_SESSION: '{0xFF, 0xFF}'}
+
+- typedef: {XrceCookie: 'uint8_t 4'}
+- define:  {XRCE_COOKIE: '{0x58, 0x52, 0x43, 0x45}'}
+
+- typedef: {XrceVersion: 'uint8_t 2'}
+- define:  {XRCE_VESION_MAJOR:  '0x01'}
+- define:  {XRCE_VESION_MINOR:  '0x00'}
+- define:  {XRCE_VERSION: '{XRCE_VESION_MAJOR, XRCE_VESION_MINOR}'}
+
+- typedef: {XrceVendorId: 'uint8_t 2'}
+- define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}
+
+- typedef: {SessionId: uint8_t}
+- define:  {SESSIONID_NONE_WITH_CLIENT_KEY:     '0x00'}
+- define:  {SESSIONID_NONE_WITHOUT_CLIENT_KEY:  '0x80'}
+
+- typedef: {StreamId: uint8_t}
+- define:  {STREAMID_NONE:                  '0x01'}
+- define:  {STREAMID_BUILTIN_BEST_EFFORTS:  '0x00'}
+- define:  {STREAMID_BUILTIN_RELIABLE:      '0x00'}
+
+- typedef: {RepresentationFormat: uint8_t}
+- define:  {REPRESENTATION_BY_REFERENCE:   '0x01'}
+- define:  {REPRESENTATION_AS_XML_STRING:  '0x02'}
+- define:  {REPRESENTATION_IN_BINARY:      '0x03'}
+
+
+- struct:
+    Time_t:
+    - seconds:                     int32_t
+    - nanoseconds: uint32_t
+
+- struct:
+    String_t:
+    - size:     int32_t
+    - data:     char*
+
+- struct:
+    BinarySequence_t:
+    - size:     int32_t
+    - data:     uint8_t*
+
+- struct:
+    StringSequence_t:
+    - size:     int32_t
+    - data:     String_t*
+
+- struct:
+    OBJK_CLIENT_Representation:
+    - xrce_cookie:      XrceCookie
+    - xrce_version:     XrceVersion
+    - xrce_vendor_id:   XrceVendorId
+    - client_timestamp: Time_t
+    - client_key:       ClientKey
+    - session_id:       SessionId
+
+- union:
+    OBJK_Representation3Formats:
+    - format:                    RepresentationFormat
+    - object_name:               String_t
+    - string_representation:     String_t
+    - binary_representation:     BinarySequence_t
+    __DISCRIMINATOR__:
+      - REPRESENTATION_BY_REFERENCE
+      - REPRESENTATION_AS_XML_STRING
+      - REPRESENTATION_IN_BINARY
+
+- enum:
+    EndpointQosFlags:
+    - IS_RELIABLE:          '0x01 << 0'
+    - IS_HISTORY_KEEP_LAST: '0x01 << 1'
+    __TYPE__: uint16_t
+
+
+FILES:
+  spec_file:
+    head: |
+      #ifndef _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
+      #define _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
+
+      #ifdef __cplusplus
+      extern "C"
+      {
+      #endif
+
+      #include <stdint.h>
+
+    tail: |
+
+      #ifdef __cplusplus
+      }
+      #endif
+
+      #endif //_MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
+  h_file:
+    head: |
+      #ifndef _MICRORTPS_CLIENT_XRCE_PROTOCOL_SERIALIZATION_H_
+      #define _MICRORTPS_CLIENT_XRCE_PROTOCOL_SERIALIZATION_H_
+
+      #ifdef __cplusplus
+      extern "C"
+      {
+      #endif
+
+      #include "xrce_protocol_spec.h"
+      #include "aux_memory.h"
+
+      #include <microcdr/microcdr.h>
+
+    tail: |
+
+      #ifdef __cplusplus
+      }
+      #endif
+
+      #endif //_MICRORTPS_CLIENT_XRCE_PROTOCOL_SERIALIZATION_H_
+  c_file:
+    head: |
+      #include "xrce_protocol_serialization.h"
+
+    tail: ""
