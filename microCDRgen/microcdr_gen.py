@@ -263,10 +263,12 @@ class MicroCDRGenerator:
         self.spec_file_head = yaml['FILES']['spec_file']['head']
         self.h_file_head = yaml['FILES']['h_file']['head']
         self.c_file_head = yaml['FILES']['c_file']['head']
+        self.test_head = yaml['FILES']['test']['head']
 
         self.spec_file_tail = yaml['FILES']['spec_file']['tail']
         self.h_file_tail = yaml['FILES']['h_file']['tail']
         self.c_file_tail = yaml['FILES']['c_file']['tail']
+        self.test_tail = yaml['FILES']['test']['tail']
 
         self.entries = []
         for node in yaml['DATA']:
@@ -318,6 +320,22 @@ class MicroCDRGenerator:
         file.write('\n' + self.c_file_tail)
         file.close()
 
+    def writeTest(self, filePath):
+        file = open(filePath, 'w')
+        file.write(self.test_head +'\n')
+
+        for entry in self.entries:
+            if isinstance(entry, Struct):
+                file.write('TEST_F(XRCEProtocolSerialization, ' + entry.name +')\n')
+                file.write('{\n')
+                file.write('    memset(output, 0xFF, sizeof(' + entry.name + '));\n')
+                file.write('    serialize_' + entry.name + '(&writer, (' + entry.name + '*)input);\n')
+                file.write('    deserialize_' + entry.name + '(&reader, (' + entry.name + '*)output, &aux_memory);\n')
+                file.write('}\n\n\n')
+
+        file.write('\n' + self.test_tail)
+        file.close()
+
 
 import yaml
 with open('xrce_protocol.yaml', 'r') as f:
@@ -327,7 +345,21 @@ microCDRGen = MicroCDRGenerator(src)
 
 headers = '../include/micrortps/client/'
 sources = '../src/c/'
+tests = '../test/'
 
-microCDRGen.writeSpec(headers +'xrce_protocol_spec.h')
+microCDRGen.writeSpec(headers + 'xrce_protocol_spec.h')
 microCDRGen.writeSerializationHeader(headers + 'xrce_protocol_serialization.h')
 microCDRGen.writeSerializationImplementation(sources + 'xrce_protocol_serialization.c')
+microCDRGen.writeTest(tests + 'XRCEProtocolSerialization.cpp')
+
+"""
+TEST_F(XRCEProtocolSerialization, Time_t)
+{
+    memset(output, 0xFF, sizeof(Time_t));
+
+    serialize_Time_t(&writer, (Time_t*)input);
+    deserialize_Time_t(&reader, (Time_t*)output, &aux_memory);
+
+
+}
+"""

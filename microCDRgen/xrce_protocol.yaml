@@ -46,7 +46,7 @@ DATA:
 
 - struct:
     Time_t:
-    - seconds:                     int32_t
+    - seconds:     int32_t
     - nanoseconds: uint32_t
 
 - struct:
@@ -136,5 +136,50 @@ FILES:
   c_file:
     head: |
       #include "xrce_protocol_serialization.h"
+
+    tail: ""
+
+  test:
+    head: |
+      #include <gtest/gtest.h>
+      #include <string>
+
+      #include <micrortps/client/xrce_protocol_serialization.h>
+
+      #define BUFFER_LENGTH 1024
+
+      class XRCEProtocolSerialization : public testing::Test
+      {
+          protected:
+              XRCEProtocolSerialization()
+              {
+                  init_aux_memory(&aux_memory, BUFFER_LENGTH);
+
+                  init_external_buffer(&writer, buffer, BUFFER_LENGTH);
+                  init_external_buffer(&reader, buffer, BUFFER_LENGTH);
+
+                  memset(input, '\0', BUFFER_LENGTH);
+                  memset(output, '\0', BUFFER_LENGTH);
+              }
+
+              ~XRCEProtocolSerialization()
+              {
+                  EXPECT_STREQ((char*)input, (char*)output);
+                  free_aux_memory(&aux_memory);
+              }
+
+              AuxMemory aux_memory;
+
+              MicroBuffer writer;
+              MicroBuffer reader;
+
+              uint8_t input[BUFFER_LENGTH];
+              uint8_t output[BUFFER_LENGTH];
+              uint8_t buffer[BUFFER_LENGTH];
+      };
+
+      // ====================================================================================
+      //                                   GTEST FUNCTIONS
+      // ====================================================================================
 
     tail: ""
