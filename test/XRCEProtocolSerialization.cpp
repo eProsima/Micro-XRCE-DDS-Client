@@ -79,4 +79,124 @@ TEST_F(XRCEProtocolSerialization, OBJK_CLIENT_Representation)
 }
 
 
+TEST_F(XRCEProtocolSerialization, OBJK_Representation3_Base)
+{
+    memset(output, 0xFF, sizeof(OBJK_Representation3_Base));
+    serialize_OBJK_Representation3_Base(&writer, (OBJK_Representation3_Base*)input);
+    deserialize_OBJK_Representation3_Base(&reader, (OBJK_Representation3_Base*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_Representation2_Base)
+{
+    memset(output, 0xFF, sizeof(OBJK_Representation2_Base));
+    serialize_OBJK_Representation2_Base(&writer, (OBJK_Representation2_Base*)input);
+    deserialize_OBJK_Representation2_Base(&reader, (OBJK_Representation2_Base*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_QOSPROFILE_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_QOSPROFILE_Representation));
+    serialize_OBJK_QOSPROFILE_Representation(&writer, (OBJK_QOSPROFILE_Representation*)input);
+    deserialize_OBJK_QOSPROFILE_Representation(&reader, (OBJK_QOSPROFILE_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_APPLICATION_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_APPLICATION_Representation));
+    serialize_OBJK_APPLICATION_Representation(&writer, (OBJK_APPLICATION_Representation*)input);
+    deserialize_OBJK_APPLICATION_Representation(&reader, (OBJK_APPLICATION_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_PARTICIPANT_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_PARTICIPANT_Representation));
+    serialize_OBJK_PARTICIPANT_Representation(&writer, (OBJK_PARTICIPANT_Representation*)input);
+    deserialize_OBJK_PARTICIPANT_Representation(&reader, (OBJK_PARTICIPANT_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_TYPE_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_TYPE_Representation));
+    serialize_OBJK_TYPE_Representation(&writer, (OBJK_TYPE_Representation*)input);
+    deserialize_OBJK_TYPE_Representation(&reader, (OBJK_TYPE_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_TOPIC_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_TOPIC_Representation));
+    serialize_OBJK_TOPIC_Representation(&writer, (OBJK_TOPIC_Representation*)input);
+    deserialize_OBJK_TOPIC_Representation(&reader, (OBJK_TOPIC_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_PUBLISHER_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_PUBLISHER_Representation));
+    serialize_OBJK_PUBLISHER_Representation(&writer, (OBJK_PUBLISHER_Representation*)input);
+    deserialize_OBJK_PUBLISHER_Representation(&reader, (OBJK_PUBLISHER_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_SUBSCRIBER_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_SUBSCRIBER_Representation));
+    serialize_OBJK_SUBSCRIBER_Representation(&writer, (OBJK_SUBSCRIBER_Representation*)input);
+    deserialize_OBJK_SUBSCRIBER_Representation(&reader, (OBJK_SUBSCRIBER_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_DATA_WRITER_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_DATA_WRITER_Representation));
+    serialize_OBJK_DATA_WRITER_Representation(&writer, (OBJK_DATA_WRITER_Representation*)input);
+    deserialize_OBJK_DATA_WRITER_Representation(&reader, (OBJK_DATA_WRITER_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_DATA_READER_Representation)
+{
+    memset(output, 0xFF, sizeof(OBJK_DATA_READER_Representation));
+    serialize_OBJK_DATA_READER_Representation(&writer, (OBJK_DATA_READER_Representation*)input);
+    deserialize_OBJK_DATA_READER_Representation(&reader, (OBJK_DATA_READER_Representation*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_TYPE_Binary)
+{
+    memset(output, 0xFF, sizeof(OBJK_TYPE_Binary));
+    serialize_OBJK_TYPE_Binary(&writer, (OBJK_TYPE_Binary*)input);
+    deserialize_OBJK_TYPE_Binary(&reader, (OBJK_TYPE_Binary*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_TOPIC_Binary)
+{
+    memset(output, 0xFF, sizeof(OBJK_TOPIC_Binary));
+    serialize_OBJK_TOPIC_Binary(&writer, (OBJK_TOPIC_Binary*)input);
+    deserialize_OBJK_TOPIC_Binary(&reader, (OBJK_TOPIC_Binary*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_PUBLISHER_Binary)
+{
+    memset(output, 0xFF, sizeof(OBJK_PUBLISHER_Binary));
+    serialize_OBJK_PUBLISHER_Binary(&writer, (OBJK_PUBLISHER_Binary*)input);
+    deserialize_OBJK_PUBLISHER_Binary(&reader, (OBJK_PUBLISHER_Binary*)output, &aux_memory);
+}
+
+
+TEST_F(XRCEProtocolSerialization, OBJK_SUBSCRIBER_Binary)
+{
+    memset(output, 0xFF, sizeof(OBJK_SUBSCRIBER_Binary));
+    serialize_OBJK_SUBSCRIBER_Binary(&writer, (OBJK_SUBSCRIBER_Binary*)input);
+    deserialize_OBJK_SUBSCRIBER_Binary(&reader, (OBJK_SUBSCRIBER_Binary*)output, &aux_memory);
+}
+
+
 

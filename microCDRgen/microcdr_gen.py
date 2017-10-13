@@ -118,13 +118,13 @@ class Struct:
 
 
     def writeSerializationHeader(self, file):
-        file.write('\nvoid serialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
+        file.write('\nvoid serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
                  '* input);\n')
         file.write('void deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
                      '* output, AuxMemory* aux);\n')
 
     def writeSerializationImplementation(self, file):
-        file.write('void serialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
+        file.write('void serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
                  '* input)\n{\n')
 
         if len(self.attributes) == 2 and self.attributes[0].name == 'size' and self.attributes[1].name == 'data':
@@ -194,7 +194,7 @@ class Union:
         self.struct.writeSerializationHeader(file)
 
     def writeSerializationImplementation(self, file):
-        file.write('void serialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
+        file.write('void serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
                  '* input)\n{\n')
 
         self.discriminator.writeSerialization(file, 4)
