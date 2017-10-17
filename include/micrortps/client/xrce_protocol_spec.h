@@ -440,7 +440,7 @@ typedef struct BaseObjectReply
 
 typedef struct InfoReply
 {
-    BaseObjectReply base_object_reply;
+    BaseObjectReply reply;
     ObjectVariant info;
 
 } InfoReply;
@@ -604,98 +604,58 @@ typedef struct SubmessageHeader
 } SubmessageHeader;
 
 
-typedef struct CREATE_Payload
+typedef struct CreateResourcePayload
 {
     BaseObjectRequest request;
     ObjectVariant object_representation;
 
-} CREATE_Payload;
+} CreateResourcePayload;
 
 
-typedef struct DELETE_RESOURCE_Payload
+typedef struct DeleteResourcePayload
 {
     BaseObjectRequest request;
 
-} DELETE_RESOURCE_Payload;
+} DeleteResourcePayload;
 
 
-typedef struct RESOURCE_STATUS_Payload
+typedef struct ResourceStatusPayload
 {
     BaseObjectReply reply;
 
-} RESOURCE_STATUS_Payload;
+} ResourceStatusPayload;
 
 
-typedef struct GET_INFO_Payload
+typedef struct GetInfoPayload
 {
     BaseObjectRequest request;
     uint32_t info_mask;
 
-} GET_INFO_Payload;
+} GetInfoPayload;
 
 
-typedef struct INFO_Payload
+typedef struct InfoPayload
 {
     BaseObjectReply reply;
     Info info;
 
-} INFO_Payload;
+} InfoPayload;
 
 
-typedef struct READ_DATA_Payload
+typedef struct ReadDataPayload
 {
     BaseObjectRequest request;
     ReadSpecification read_specification;
 
-} READ_DATA_Payload;
+} ReadDataPayload;
 
 
-typedef struct DATA_Payload_Data
-{
-    BaseObjectReply reply;
-    SampleData data;
-
-} DATA_Payload_Data;
-
-
-typedef struct DATA_Payload_Sample
-{
-    BaseObjectReply reply;
-    Sample sample;
-
-} DATA_Payload_Sample;
-
-
-typedef struct DATA_Payload_DataSequence
-{
-    BaseObjectReply reply;
-    SampleDataSequence data_seq;
-
-} DATA_Payload_DataSequence;
-
-
-typedef struct DATA_Payload_SampleSequence
-{
-    BaseObjectReply reply;
-    SampleSequence sample_seq;
-
-} DATA_Payload_SampleSequence;
-
-
-typedef struct DATA_Payload_PackageSamples
-{
-    BaseObjectReply reply;
-    PackedSamples packed_samples;
-
-} DATA_Payload_PackageSamples;
-
-
-typedef struct WRITE_DATA_Payload
+typedef struct WriteDataPayload
 {
     BaseObjectRequest request;
     DataRepresentation data_to_write;
 
-} WRITE_DATA_Payload;
+} WriteDataPayload;
 
 
 #ifdef __cplusplus

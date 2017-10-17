@@ -66,7 +66,7 @@ class Attribute:
             for i in xrange(1, len(self.optional_values)):
                 file.write('\n    || input->optional_' + self.name + ' == ' + self.optional_values[i])
             file.write(')\n')
-            file.write(' ' * (spaces + 4))
+            file.write(' ' * spaces)
 
         file.write(' ' * spaces)
         file.write('serialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'input->' + name + array_size + ');\n')
@@ -91,13 +91,31 @@ class Attribute:
             for i in xrange(1, len(self.optional_values)):
                 file.write('\n    || output->optional_' + self.name + ' == ' + self.optional_values[i])
             file.write(')\n')
-            file.write(' ' * (spaces + 4))
+            file.write(' ' * spaces)
 
         file.write(' ' * spaces)
         file.write('deserialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + aux + ');\n')
 
         if self.optional_values:
             file.write('\n')
+
+    def writeSize(self, file, spaces, var_prefix = ''):
+        name = var_prefix + self.name
+
+        if self.optional_values:
+            file.write('((data->optional_' + self.name + ' == ' + self.optional_values[0])
+            for i in xrange(1, len(self.optional_values)):
+                file.write(' || data->optional_' + self.name + ' == ' + self.optional_values[i])
+            file.write(') ? ')
+
+        file.write(' ' * spaces)
+        if State.is_basic_type(self.type):
+            file.write('sizeof(data->' + name + ')')
+        else:
+            file.write('size_of_' + self.type + '(&data->' + name + ')')
+
+        if self.optional_values:
+            file.write(' : 0 )')
 
 class Define:
     def __init__(self, yaml_define, state):
@@ -152,8 +170,12 @@ class Struct:
     def writeSerializationHeader(self, file):
         file.write('\nvoid serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
                  '* input);\n')
+
         file.write('void deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
                      '* output, AuxMemory* aux);\n')
+
+        file.write('uint32_t size_of_' + self.name + '(const ' + self.name +
+                     '* data);\n')
 
     def writeSerializationImplementation(self, file):
         file.write('void serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
@@ -175,6 +197,7 @@ class Struct:
 
         file.write('}\n\n')
 
+
         file.write('void deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
                  '* output, AuxMemory* aux)\n{\n')
 
@@ -191,6 +214,26 @@ class Struct:
         else:
             for attribute in self.attributes:
                 attribute.writeDeserialization(file, 4)
+
+        file.write('}\n\n')
+
+
+        file.write('uint32_t size_of_' + self.name + '(const ' + self.name +
+                     '* data)\n{\n')
+
+        file.write('    return ')
+
+        if len(self.attributes) == 2 and self.attributes[0].name == 'size' and self.attributes[1].name == 'data':
+            file.write('sizeof(data->size) + data->size;\n')
+
+        else:
+            self.attributes[0].writeSize(file, 0)
+            for i in xrange(1, len(self.attributes)):
+
+                file.write('\n         + ')
+                self.attributes[i].writeSize(file, 0)
+
+            file.write(';\n')
 
         file.write('}\n\n')
 
@@ -241,6 +284,7 @@ class Union:
         file.write('    }\n')
         file.write('}\n\n')
 
+
         file.write('void deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
                  '* output, AuxMemory* aux)\n{\n')
 
@@ -254,6 +298,24 @@ class Union:
             file.write('        break;\n')
 
         file.write('    }\n')
+        file.write('}\n\n')
+
+
+        file.write('uint32_t size_of_' + self.name + '(const ' + self.name +
+                     '* data)\n{\n')
+
+        file.write('    uint32_t size = sizeof(data->' + self.discriminator.name + ');\n')
+
+        file.write('    switch(data->' + self.discriminator.name + ')\n')
+        file.write('    {\n')
+        for case, attribute in zip(self.discriminator_values, self.union.attributes):
+            file.write('        case ' + case + ':\n')
+            file.write('            size += ')
+            attribute.writeSize(file, 0, '_.')
+            file.write(';\n        break;\n')
+
+        file.write('    }\n\n')
+        file.write('    return size;\n')
         file.write('}\n\n')
 
 class Enum:

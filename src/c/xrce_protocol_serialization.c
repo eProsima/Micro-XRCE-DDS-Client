@@ -12,6 +12,12 @@ void deserialize_Time_t(MicroBuffer* buffer, Time_t* output, AuxMemory* aux)
     deserialize_uint32_t(buffer, &output->nanoseconds);
 }
 
+uint32_t size_of_Time_t(const Time_t* data)
+{
+    return sizeof(data->seconds)
+         + sizeof(data->nanoseconds);
+}
+
 void serialize_String_t(MicroBuffer* buffer, const String_t* input)
 {
     serialize_sequence_char(buffer, input->data, input->size);
@@ -22,6 +28,11 @@ void deserialize_String_t(MicroBuffer* buffer, String_t* output, AuxMemory* aux)
     deserialize_sequence_char(buffer, output->data, &output->size);
 }
 
+uint32_t size_of_String_t(const String_t* data)
+{
+    return sizeof(data->size) + data->size;
+}
+
 void serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* input)
 {
     serialize_sequence_uint8_t(buffer, input->data, input->size);
@@ -30,6 +41,11 @@ void serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* inp
 void deserialize_BinarySequence_t(MicroBuffer* buffer, BinarySequence_t* output, AuxMemory* aux)
 {
     deserialize_sequence_uint8_t(buffer, output->data, &output->size);
+}
+
+uint32_t size_of_BinarySequence_t(const BinarySequence_t* data)
+{
+    return sizeof(data->size) + data->size;
 }
 
 void serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* input)
@@ -44,6 +60,11 @@ void deserialize_StringSequence_t(MicroBuffer* buffer, StringSequence_t* output,
     deserialize_uint32_t(buffer, &output->size);
     for(uint32_t i = 0; i < output->size; i++)
         deserialize_String_t(buffer, &output->data[i], aux);
+}
+
+uint32_t size_of_StringSequence_t(const StringSequence_t* data)
+{
+    return sizeof(data->size) + data->size;
 }
 
 void serialize_OBJK_CLIENT_Representation(MicroBuffer* buffer, const OBJK_CLIENT_Representation* input)
@@ -64,6 +85,16 @@ void deserialize_OBJK_CLIENT_Representation(MicroBuffer* buffer, OBJK_CLIENT_Rep
     deserialize_Time_t(buffer, &output->client_timestamp, aux);
     deserialize_array_uint8_t(buffer, output->client_key, 4);
     deserialize_uint8_t(buffer, &output->session_id);
+}
+
+uint32_t size_of_OBJK_CLIENT_Representation(const OBJK_CLIENT_Representation* data)
+{
+    return sizeof(data->xrce_cookie)
+         + sizeof(data->xrce_version)
+         + sizeof(data->xrce_vendor_id)
+         + size_of_Time_t(&data->client_timestamp)
+         + sizeof(data->client_key)
+         + sizeof(data->session_id);
 }
 
 void serialize_OBJK_Representation3Formats(MicroBuffer* buffer, const OBJK_Representation3Formats* input)
@@ -100,6 +131,25 @@ void deserialize_OBJK_Representation3Formats(MicroBuffer* buffer, OBJK_Represent
     }
 }
 
+uint32_t size_of_OBJK_Representation3Formats(const OBJK_Representation3Formats* data)
+{
+    uint32_t size = sizeof(data->format);
+    switch(data->format)
+    {
+        case REPRESENTATION_BY_REFERENCE:
+            size += size_of_String_t(&data->_.object_name);
+        break;
+        case REPRESENTATION_AS_XML_STRING:
+            size += size_of_String_t(&data->_.string_representation);
+        break;
+        case REPRESENTATION_IN_BINARY:
+            size += size_of_BinarySequence_t(&data->_.binary_representation);
+        break;
+    }
+
+    return size;
+}
+
 void serialize_OBJK_Representation2Formats(MicroBuffer* buffer, const OBJK_Representation2Formats* input)
 {
     serialize_uint8_t(buffer, input->format);
@@ -128,6 +178,22 @@ void deserialize_OBJK_Representation2Formats(MicroBuffer* buffer, OBJK_Represent
     }
 }
 
+uint32_t size_of_OBJK_Representation2Formats(const OBJK_Representation2Formats* data)
+{
+    uint32_t size = sizeof(data->format);
+    switch(data->format)
+    {
+        case REPRESENTATION_BY_REFERENCE:
+            size += size_of_String_t(&data->_.object_name);
+        break;
+        case REPRESENTATION_AS_XML_STRING:
+            size += size_of_String_t(&data->_.string_representation);
+        break;
+    }
+
+    return size;
+}
+
 void serialize_OBJK_Representation3_Base(MicroBuffer* buffer, const OBJK_Representation3_Base* input)
 {
     serialize_OBJK_Representation3Formats(buffer, &input->representation);
@@ -136,6 +202,11 @@ void serialize_OBJK_Representation3_Base(MicroBuffer* buffer, const OBJK_Represe
 void deserialize_OBJK_Representation3_Base(MicroBuffer* buffer, OBJK_Representation3_Base* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3Formats(buffer, &output->representation, aux);
+}
+
+uint32_t size_of_OBJK_Representation3_Base(const OBJK_Representation3_Base* data)
+{
+    return size_of_OBJK_Representation3Formats(&data->representation);
 }
 
 void serialize_OBJK_Representation2_Base(MicroBuffer* buffer, const OBJK_Representation2_Base* input)
@@ -148,6 +219,11 @@ void deserialize_OBJK_Representation2_Base(MicroBuffer* buffer, OBJK_Representat
     deserialize_OBJK_Representation2Formats(buffer, &output->representation, aux);
 }
 
+uint32_t size_of_OBJK_Representation2_Base(const OBJK_Representation2_Base* data)
+{
+    return size_of_OBJK_Representation2Formats(&data->representation);
+}
+
 void serialize_OBJK_QOSPROFILE_Representation(MicroBuffer* buffer, const OBJK_QOSPROFILE_Representation* input)
 {
     serialize_OBJK_Representation2_Base(buffer, &input->base2);
@@ -156,6 +232,11 @@ void serialize_OBJK_QOSPROFILE_Representation(MicroBuffer* buffer, const OBJK_QO
 void deserialize_OBJK_QOSPROFILE_Representation(MicroBuffer* buffer, OBJK_QOSPROFILE_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation2_Base(buffer, &output->base2, aux);
+}
+
+uint32_t size_of_OBJK_QOSPROFILE_Representation(const OBJK_QOSPROFILE_Representation* data)
+{
+    return size_of_OBJK_Representation2_Base(&data->base2);
 }
 
 void serialize_OBJK_APPLICATION_Representation(MicroBuffer* buffer, const OBJK_APPLICATION_Representation* input)
@@ -168,6 +249,11 @@ void deserialize_OBJK_APPLICATION_Representation(MicroBuffer* buffer, OBJK_APPLI
     deserialize_OBJK_Representation2_Base(buffer, &output->base2, aux);
 }
 
+uint32_t size_of_OBJK_APPLICATION_Representation(const OBJK_APPLICATION_Representation* data)
+{
+    return size_of_OBJK_Representation2_Base(&data->base2);
+}
+
 void serialize_OBJK_PARTICIPANT_Representation(MicroBuffer* buffer, const OBJK_PARTICIPANT_Representation* input)
 {
     serialize_OBJK_Representation2_Base(buffer, &input->base2);
@@ -176,6 +262,11 @@ void serialize_OBJK_PARTICIPANT_Representation(MicroBuffer* buffer, const OBJK_P
 void deserialize_OBJK_PARTICIPANT_Representation(MicroBuffer* buffer, OBJK_PARTICIPANT_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation2_Base(buffer, &output->base2, aux);
+}
+
+uint32_t size_of_OBJK_PARTICIPANT_Representation(const OBJK_PARTICIPANT_Representation* data)
+{
+    return size_of_OBJK_Representation2_Base(&data->base2);
 }
 
 void serialize_OBJK_TYPE_Representation(MicroBuffer* buffer, const OBJK_TYPE_Representation* input)
@@ -192,6 +283,13 @@ void deserialize_OBJK_TYPE_Representation(MicroBuffer* buffer, OBJK_TYPE_Represe
     deserialize_String_t(buffer, &output->registered_type_name, aux);
 }
 
+uint32_t size_of_OBJK_TYPE_Representation(const OBJK_TYPE_Representation* data)
+{
+    return size_of_OBJK_Representation3_Base(&data->base3)
+         + sizeof(data->participant_id)
+         + size_of_String_t(&data->registered_type_name);
+}
+
 void serialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, const OBJK_TOPIC_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
@@ -202,6 +300,12 @@ void deserialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, OBJK_TOPIC_Repre
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
     deserialize_array_uint8_t(buffer, output->participant_id, 2);
+}
+
+uint32_t size_of_OBJK_TOPIC_Representation(const OBJK_TOPIC_Representation* data)
+{
+    return size_of_OBJK_Representation3_Base(&data->base3)
+         + sizeof(data->participant_id);
 }
 
 void serialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, const OBJK_PUBLISHER_Representation* input)
@@ -216,6 +320,12 @@ void deserialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, OBJK_PUBLISH
     deserialize_array_uint8_t(buffer, output->participant_id, 2);
 }
 
+uint32_t size_of_OBJK_PUBLISHER_Representation(const OBJK_PUBLISHER_Representation* data)
+{
+    return size_of_OBJK_Representation3_Base(&data->base3)
+         + sizeof(data->participant_id);
+}
+
 void serialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
@@ -226,6 +336,12 @@ void deserialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, OBJK_SUBSCR
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
     deserialize_array_uint8_t(buffer, output->participant_id, 2);
+}
+
+uint32_t size_of_OBJK_SUBSCRIBER_Representation(const OBJK_SUBSCRIBER_Representation* data)
+{
+    return size_of_OBJK_Representation3_Base(&data->base3)
+         + sizeof(data->participant_id);
 }
 
 void serialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, const OBJK_DATAWRITER_Representation* input)
@@ -242,6 +358,13 @@ void deserialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, OBJK_DATAWR
     deserialize_array_uint8_t(buffer, output->publisher_id, 2);
 }
 
+uint32_t size_of_OBJK_DATAWRITER_Representation(const OBJK_DATAWRITER_Representation* data)
+{
+    return size_of_OBJK_Representation3_Base(&data->base3)
+         + sizeof(data->participant_id)
+         + sizeof(data->publisher_id);
+}
+
 void serialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, const OBJK_DATAREADER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
@@ -256,6 +379,13 @@ void deserialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, OBJK_DATARE
     deserialize_array_uint8_t(buffer, output->subscriber_id, 2);
 }
 
+uint32_t size_of_OBJK_DATAREADER_Representation(const OBJK_DATAREADER_Representation* data)
+{
+    return size_of_OBJK_Representation3_Base(&data->base3)
+         + sizeof(data->participant_id)
+         + sizeof(data->subscriber_id);
+}
+
 void serialize_OBJK_TYPE_Binary(MicroBuffer* buffer, const OBJK_TYPE_Binary* input)
 {
     serialize_String_t(buffer, &input->type_name);
@@ -264,6 +394,11 @@ void serialize_OBJK_TYPE_Binary(MicroBuffer* buffer, const OBJK_TYPE_Binary* inp
 void deserialize_OBJK_TYPE_Binary(MicroBuffer* buffer, OBJK_TYPE_Binary* output, AuxMemory* aux)
 {
     deserialize_String_t(buffer, &output->type_name, aux);
+}
+
+uint32_t size_of_OBJK_TYPE_Binary(const OBJK_TYPE_Binary* data)
+{
+    return size_of_String_t(&data->type_name);
 }
 
 void serialize_OBJK_TOPIC_Binary(MicroBuffer* buffer, const OBJK_TOPIC_Binary* input)
@@ -278,6 +413,12 @@ void deserialize_OBJK_TOPIC_Binary(MicroBuffer* buffer, OBJK_TOPIC_Binary* outpu
     deserialize_String_t(buffer, &output->type_name, aux);
 }
 
+uint32_t size_of_OBJK_TOPIC_Binary(const OBJK_TOPIC_Binary* data)
+{
+    return size_of_String_t(&data->topic_name)
+         + size_of_String_t(&data->type_name);
+}
+
 void serialize_OBJK_PUBLISHER_Binary(MicroBuffer* buffer, const OBJK_PUBLISHER_Binary* input)
 {
     serialize_StringSequence_t(buffer, &input->partitions);
@@ -290,6 +431,12 @@ void deserialize_OBJK_PUBLISHER_Binary(MicroBuffer* buffer, OBJK_PUBLISHER_Binar
     deserialize_BinarySequence_t(buffer, &output->group_data, aux);
 }
 
+uint32_t size_of_OBJK_PUBLISHER_Binary(const OBJK_PUBLISHER_Binary* data)
+{
+    return size_of_StringSequence_t(&data->partitions)
+         + size_of_BinarySequence_t(&data->group_data);
+}
+
 void serialize_OBJK_SUBSCRIBER_Binary(MicroBuffer* buffer, const OBJK_SUBSCRIBER_Binary* input)
 {
     serialize_StringSequence_t(buffer, &input->partitions);
@@ -300,6 +447,12 @@ void deserialize_OBJK_SUBSCRIBER_Binary(MicroBuffer* buffer, OBJK_SUBSCRIBER_Bin
 {
     deserialize_StringSequence_t(buffer, &output->partitions, aux);
     deserialize_BinarySequence_t(buffer, &output->group_data, aux);
+}
+
+uint32_t size_of_OBJK_SUBSCRIBER_Binary(const OBJK_SUBSCRIBER_Binary* data)
+{
+    return size_of_StringSequence_t(&data->partitions)
+         + size_of_BinarySequence_t(&data->group_data);
 }
 
 void serialize_OBJK_Endpoint_QosBinary(MicroBuffer* buffer, const OBJK_Endpoint_QosBinary* input)
@@ -320,6 +473,15 @@ void deserialize_OBJK_Endpoint_QosBinary(MicroBuffer* buffer, OBJK_Endpoint_QosB
     deserialize_BinarySequence_t(buffer, &output->user_data, aux);
 }
 
+uint32_t size_of_OBJK_Endpoint_QosBinary(const OBJK_Endpoint_QosBinary* data)
+{
+    return sizeof(data->qos_flags)
+         + sizeof(data->history_depth)
+         + sizeof(data->deadline_msec)
+         + sizeof(data->lifespan_msec)
+         + size_of_BinarySequence_t(&data->user_data);
+}
+
 void serialize_OBJK_DataReader_Binary(MicroBuffer* buffer, const OBJK_DataReader_Binary* input)
 {
     serialize_String_t(buffer, &input->topic_name);
@@ -336,6 +498,14 @@ void deserialize_OBJK_DataReader_Binary(MicroBuffer* buffer, OBJK_DataReader_Bin
     deserialize_String_t(buffer, &output->contentbased_filter, aux);
 }
 
+uint32_t size_of_OBJK_DataReader_Binary(const OBJK_DataReader_Binary* data)
+{
+    return size_of_String_t(&data->topic_name)
+         + size_of_OBJK_Endpoint_QosBinary(&data->endpoint_qos)
+         + sizeof(data->timebasedfilter_msec)
+         + size_of_String_t(&data->contentbased_filter);
+}
+
 void serialize_OBJK_DataWriter_Binary(MicroBuffer* buffer, const OBJK_DataWriter_Binary* input)
 {
     serialize_String_t(buffer, &input->topic_name);
@@ -348,6 +518,13 @@ void deserialize_OBJK_DataWriter_Binary(MicroBuffer* buffer, OBJK_DataWriter_Bin
     deserialize_String_t(buffer, &output->topic_name, aux);
     deserialize_OBJK_Endpoint_QosBinary(buffer, &output->endpoint_qos, aux);
     deserialize_uint32_t(buffer, &output->ownership_strength);
+}
+
+uint32_t size_of_OBJK_DataWriter_Binary(const OBJK_DataWriter_Binary* data)
+{
+    return size_of_String_t(&data->topic_name)
+         + size_of_OBJK_Endpoint_QosBinary(&data->endpoint_qos)
+         + sizeof(data->ownership_strength);
 }
 
 void serialize_ObjectVariant(MicroBuffer* buffer, const ObjectVariant* input)
@@ -426,6 +603,46 @@ void deserialize_ObjectVariant(MicroBuffer* buffer, ObjectVariant* output, AuxMe
     }
 }
 
+uint32_t size_of_ObjectVariant(const ObjectVariant* data)
+{
+    uint32_t size = sizeof(data->kind);
+    switch(data->kind)
+    {
+        case OBJK_CLIENT:
+            size += size_of_OBJK_CLIENT_Representation(&data->_.client);
+        break;
+        case OBJK_APPLICATION:
+            size += size_of_OBJK_APPLICATION_Representation(&data->_.application);
+        break;
+        case OBJK_PARTICIPANT:
+            size += size_of_OBJK_PARTICIPANT_Representation(&data->_.participant);
+        break;
+        case OBJK_QOSPROFILE:
+            size += size_of_OBJK_QOSPROFILE_Representation(&data->_.qos_profile);
+        break;
+        case OBJK_TYPE:
+            size += size_of_OBJK_TYPE_Representation(&data->_.type);
+        break;
+        case OBJK_TOPIC:
+            size += size_of_OBJK_TOPIC_Representation(&data->_.topic);
+        break;
+        case OBJK_PUBLISHER:
+            size += size_of_OBJK_PUBLISHER_Representation(&data->_.publisher);
+        break;
+        case OBJK_SUBSCRIBER:
+            size += size_of_OBJK_SUBSCRIBER_Representation(&data->_.subscriber);
+        break;
+        case OBJK_DATAWRITER:
+            size += size_of_OBJK_DATAWRITER_Representation(&data->_.data_writer);
+        break;
+        case OBJK_DATAREADER:
+            size += size_of_OBJK_DATAREADER_Representation(&data->_.data_reader);
+        break;
+    }
+
+    return size;
+}
+
 void serialize_CreationMode(MicroBuffer* buffer, const CreationMode* input)
 {
     serialize_bool(buffer, input->reuse);
@@ -436,6 +653,12 @@ void deserialize_CreationMode(MicroBuffer* buffer, CreationMode* output, AuxMemo
 {
     deserialize_bool(buffer, &output->reuse);
     deserialize_bool(buffer, &output->replace);
+}
+
+uint32_t size_of_CreationMode(const CreationMode* data)
+{
+    return sizeof(data->reuse)
+         + sizeof(data->replace);
 }
 
 void serialize_ResultStatus(MicroBuffer* buffer, const ResultStatus* input)
@@ -452,6 +675,13 @@ void deserialize_ResultStatus(MicroBuffer* buffer, ResultStatus* output, AuxMemo
     deserialize_uint8_t(buffer, &output->implementation_status);
 }
 
+uint32_t size_of_ResultStatus(const ResultStatus* data)
+{
+    return sizeof(data->request_id)
+         + sizeof(data->status)
+         + sizeof(data->implementation_status);
+}
+
 void serialize_OBJK_DATAREADER_ActivityInfo(MicroBuffer* buffer, const OBJK_DATAREADER_ActivityInfo* input)
 {
     serialize_int16_t(buffer, input->highest_acked_num);
@@ -460,6 +690,11 @@ void serialize_OBJK_DATAREADER_ActivityInfo(MicroBuffer* buffer, const OBJK_DATA
 void deserialize_OBJK_DATAREADER_ActivityInfo(MicroBuffer* buffer, OBJK_DATAREADER_ActivityInfo* output, AuxMemory* aux)
 {
     deserialize_int16_t(buffer, &output->highest_acked_num);
+}
+
+uint32_t size_of_OBJK_DATAREADER_ActivityInfo(const OBJK_DATAREADER_ActivityInfo* data)
+{
+    return sizeof(data->highest_acked_num);
 }
 
 void serialize_OBJK_DATAWRITER_ActivityInfo(MicroBuffer* buffer, const OBJK_DATAWRITER_ActivityInfo* input)
@@ -472,6 +707,12 @@ void deserialize_OBJK_DATAWRITER_ActivityInfo(MicroBuffer* buffer, OBJK_DATAWRIT
 {
     deserialize_int16_t(buffer, &output->streaseq_num);
     deserialize_uint64_t(buffer, &output->sample_seq_num);
+}
+
+uint32_t size_of_OBJK_DATAWRITER_ActivityInfo(const OBJK_DATAWRITER_ActivityInfo* data)
+{
+    return sizeof(data->streaseq_num)
+         + sizeof(data->sample_seq_num);
 }
 
 void serialize_ActivityInfoVariant(MicroBuffer* buffer, const ActivityInfoVariant* input)
@@ -502,6 +743,22 @@ void deserialize_ActivityInfoVariant(MicroBuffer* buffer, ActivityInfoVariant* o
     }
 }
 
+uint32_t size_of_ActivityInfoVariant(const ActivityInfoVariant* data)
+{
+    uint32_t size = sizeof(data->kind);
+    switch(data->kind)
+    {
+        case OBJK_DATAWRITER:
+            size += size_of_OBJK_DATAWRITER_ActivityInfo(&data->_.data_writer);
+        break;
+        case OBJK_DATAREADER:
+            size += size_of_OBJK_DATAREADER_ActivityInfo(&data->_.data_reader);
+        break;
+    }
+
+    return size;
+}
+
 void serialize_Info(MicroBuffer* buffer, const Info* input)
 {
     serialize_ObjectVariant(buffer, &input->config);
@@ -512,6 +769,12 @@ void deserialize_Info(MicroBuffer* buffer, Info* output, AuxMemory* aux)
 {
     deserialize_ObjectVariant(buffer, &output->config, aux);
     deserialize_ActivityInfoVariant(buffer, &output->activity, aux);
+}
+
+uint32_t size_of_Info(const Info* data)
+{
+    return size_of_ObjectVariant(&data->config)
+         + size_of_ActivityInfoVariant(&data->activity);
 }
 
 void serialize_BaseRequest(MicroBuffer* buffer, const BaseRequest* input)
@@ -526,6 +789,12 @@ void deserialize_BaseRequest(MicroBuffer* buffer, BaseRequest* output, AuxMemory
     deserialize_array_uint8_t(buffer, output->object_id, 2);
 }
 
+uint32_t size_of_BaseRequest(const BaseRequest* data)
+{
+    return sizeof(data->request_id)
+         + sizeof(data->object_id);
+}
+
 void serialize_BaseObjectRequest(MicroBuffer* buffer, const BaseObjectRequest* input)
 {
     serialize_array_uint8_t(buffer, input->base_request, 2);
@@ -536,6 +805,12 @@ void deserialize_BaseObjectRequest(MicroBuffer* buffer, BaseObjectRequest* outpu
 {
     deserialize_array_uint8_t(buffer, output->base_request, 2);
     deserialize_array_uint8_t(buffer, output->object_id, 2);
+}
+
+uint32_t size_of_BaseObjectRequest(const BaseObjectRequest* data)
+{
+    return sizeof(data->base_request)
+         + sizeof(data->object_id);
 }
 
 void serialize_BaseReply(MicroBuffer* buffer, const BaseReply* input)
@@ -550,6 +825,12 @@ void deserialize_BaseReply(MicroBuffer* buffer, BaseReply* output, AuxMemory* au
     deserialize_array_uint8_t(buffer, output->request_id, 2);
 }
 
+uint32_t size_of_BaseReply(const BaseReply* data)
+{
+    return size_of_ResultStatus(&data->result)
+         + sizeof(data->request_id);
+}
+
 void serialize_BaseObjectReply(MicroBuffer* buffer, const BaseObjectReply* input)
 {
     serialize_BaseReply(buffer, &input->base_reply);
@@ -562,16 +843,28 @@ void deserialize_BaseObjectReply(MicroBuffer* buffer, BaseObjectReply* output, A
     deserialize_array_uint8_t(buffer, output->object_id, 2);
 }
 
+uint32_t size_of_BaseObjectReply(const BaseObjectReply* data)
+{
+    return size_of_BaseReply(&data->base_reply)
+         + sizeof(data->object_id);
+}
+
 void serialize_InfoReply(MicroBuffer* buffer, const InfoReply* input)
 {
-    serialize_BaseObjectReply(buffer, &input->base_object_reply);
+    serialize_BaseObjectReply(buffer, &input->reply);
     serialize_ObjectVariant(buffer, &input->info);
 }
 
 void deserialize_InfoReply(MicroBuffer* buffer, InfoReply* output, AuxMemory* aux)
 {
-    deserialize_BaseObjectReply(buffer, &output->base_object_reply, aux);
+    deserialize_BaseObjectReply(buffer, &output->reply, aux);
     deserialize_ObjectVariant(buffer, &output->info, aux);
+}
+
+uint32_t size_of_InfoReply(const InfoReply* data)
+{
+    return size_of_BaseObjectReply(&data->reply)
+         + size_of_ObjectVariant(&data->info);
 }
 
 void serialize_DataDeliveryControl(MicroBuffer* buffer, const DataDeliveryControl* input)
@@ -588,17 +881,24 @@ void deserialize_DataDeliveryControl(MicroBuffer* buffer, DataDeliveryControl* o
     deserialize_uint32_t(buffer, &output->max_rate);
 }
 
+uint32_t size_of_DataDeliveryControl(const DataDeliveryControl* data)
+{
+    return sizeof(data->max_samples)
+         + sizeof(data->max_elapsed_time)
+         + sizeof(data->max_rate);
+}
+
 void serialize_ReadSpecification(MicroBuffer* buffer, const ReadSpecification* input)
 {
     serialize_uint8_t(buffer, input->optional_content_filter_expression);
     if(input->optional_content_filter_expression == true)
-            serialize_String_t(buffer, &input->content_filter_expression);
+        serialize_String_t(buffer, &input->content_filter_expression);
 
     serialize_uint8_t(buffer, input->optional_delivery_config);
     if(input->optional_delivery_config == FORMAT_DATA_SEQ
     || input->optional_delivery_config == FORMAT_SAMPLE_SEQ
     || input->optional_delivery_config == FORMAT_PACKED_SAMPLES)
-            serialize_DataDeliveryControl(buffer, &input->delivery_config);
+        serialize_DataDeliveryControl(buffer, &input->delivery_config);
 
 }
 
@@ -606,14 +906,20 @@ void deserialize_ReadSpecification(MicroBuffer* buffer, ReadSpecification* outpu
 {
     deserialize_uint8_t(buffer, &output->optional_content_filter_expression);
     if(output->optional_content_filter_expression == true)
-            deserialize_String_t(buffer, &output->content_filter_expression, aux);
+        deserialize_String_t(buffer, &output->content_filter_expression, aux);
 
     deserialize_uint8_t(buffer, &output->optional_delivery_config);
     if(output->optional_delivery_config == FORMAT_DATA_SEQ
     || output->optional_delivery_config == FORMAT_SAMPLE_SEQ
     || output->optional_delivery_config == FORMAT_PACKED_SAMPLES)
-            deserialize_DataDeliveryControl(buffer, &output->delivery_config, aux);
+        deserialize_DataDeliveryControl(buffer, &output->delivery_config, aux);
 
+}
+
+uint32_t size_of_ReadSpecification(const ReadSpecification* data)
+{
+    return ((data->optional_content_filter_expression == true) ? size_of_String_t(&data->content_filter_expression) : 0 )
+         + ((data->optional_delivery_config == FORMAT_DATA_SEQ || data->optional_delivery_config == FORMAT_SAMPLE_SEQ || data->optional_delivery_config == FORMAT_PACKED_SAMPLES) ? size_of_DataDeliveryControl(&data->delivery_config) : 0 );
 }
 
 void serialize_SampleInfo(MicroBuffer* buffer, const SampleInfo* input)
@@ -630,6 +936,13 @@ void deserialize_SampleInfo(MicroBuffer* buffer, SampleInfo* output, AuxMemory* 
     deserialize_uint32_t(buffer, &output->session_time_offset);
 }
 
+uint32_t size_of_SampleInfo(const SampleInfo* data)
+{
+    return sizeof(data->state)
+         + sizeof(data->sequence_number)
+         + sizeof(data->session_time_offset);
+}
+
 void serialize_SampleInfoDelta(MicroBuffer* buffer, const SampleInfoDelta* input)
 {
     serialize_uint8_t(buffer, input->state);
@@ -644,6 +957,13 @@ void deserialize_SampleInfoDelta(MicroBuffer* buffer, SampleInfoDelta* output, A
     deserialize_uint16_t(buffer, &output->timestamp_delta);
 }
 
+uint32_t size_of_SampleInfoDelta(const SampleInfoDelta* data)
+{
+    return sizeof(data->state)
+         + sizeof(data->seq_number_delta)
+         + sizeof(data->timestamp_delta);
+}
+
 void serialize_SampleData(MicroBuffer* buffer, const SampleData* input)
 {
     serialize_sequence_uint8_t(buffer, input->data, input->size);
@@ -652,6 +972,11 @@ void serialize_SampleData(MicroBuffer* buffer, const SampleData* input)
 void deserialize_SampleData(MicroBuffer* buffer, SampleData* output, AuxMemory* aux)
 {
     deserialize_sequence_uint8_t(buffer, output->data, &output->size);
+}
+
+uint32_t size_of_SampleData(const SampleData* data)
+{
+    return sizeof(data->size) + data->size;
 }
 
 void serialize_SampleDataSequence(MicroBuffer* buffer, const SampleDataSequence* input)
@@ -668,6 +993,11 @@ void deserialize_SampleDataSequence(MicroBuffer* buffer, SampleDataSequence* out
         deserialize_SampleData(buffer, &output->data[i], aux);
 }
 
+uint32_t size_of_SampleDataSequence(const SampleDataSequence* data)
+{
+    return sizeof(data->size) + data->size;
+}
+
 void serialize_Sample(MicroBuffer* buffer, const Sample* input)
 {
     serialize_SampleInfo(buffer, &input->info);
@@ -678,6 +1008,12 @@ void deserialize_Sample(MicroBuffer* buffer, Sample* output, AuxMemory* aux)
 {
     deserialize_SampleInfo(buffer, &output->info, aux);
     deserialize_SampleData(buffer, &output->data, aux);
+}
+
+uint32_t size_of_Sample(const Sample* data)
+{
+    return size_of_SampleInfo(&data->info)
+         + size_of_SampleData(&data->data);
 }
 
 void serialize_SampleSequence(MicroBuffer* buffer, const SampleSequence* input)
@@ -694,6 +1030,11 @@ void deserialize_SampleSequence(MicroBuffer* buffer, SampleSequence* output, Aux
         deserialize_Sample(buffer, &output->data[i], aux);
 }
 
+uint32_t size_of_SampleSequence(const SampleSequence* data)
+{
+    return sizeof(data->size) + data->size;
+}
+
 void serialize_SampleDelta(MicroBuffer* buffer, const SampleDelta* input)
 {
     serialize_SampleInfoDelta(buffer, &input->info_delta);
@@ -704,6 +1045,12 @@ void deserialize_SampleDelta(MicroBuffer* buffer, SampleDelta* output, AuxMemory
 {
     deserialize_SampleInfoDelta(buffer, &output->info_delta, aux);
     deserialize_SampleData(buffer, &output->data, aux);
+}
+
+uint32_t size_of_SampleDelta(const SampleDelta* data)
+{
+    return size_of_SampleInfoDelta(&data->info_delta)
+         + size_of_SampleData(&data->data);
 }
 
 void serialize_SampleDeltaSequence(MicroBuffer* buffer, const SampleDeltaSequence* input)
@@ -720,6 +1067,11 @@ void deserialize_SampleDeltaSequence(MicroBuffer* buffer, SampleDeltaSequence* o
         deserialize_SampleDelta(buffer, &output->data[i], aux);
 }
 
+uint32_t size_of_SampleDeltaSequence(const SampleDeltaSequence* data)
+{
+    return sizeof(data->size) + data->size;
+}
+
 void serialize_PackedSamples(MicroBuffer* buffer, const PackedSamples* input)
 {
     serialize_SampleInfo(buffer, &input->info_base);
@@ -730,6 +1082,12 @@ void deserialize_PackedSamples(MicroBuffer* buffer, PackedSamples* output, AuxMe
 {
     deserialize_SampleInfo(buffer, &output->info_base, aux);
     deserialize_SampleDeltaSequence(buffer, &output->sample_delta_seq, aux);
+}
+
+uint32_t size_of_PackedSamples(const PackedSamples* data)
+{
+    return size_of_SampleInfo(&data->info_base)
+         + size_of_SampleDeltaSequence(&data->sample_delta_seq);
 }
 
 void serialize_PackedSamplesSequence(MicroBuffer* buffer, const PackedSamplesSequence* input)
@@ -744,6 +1102,11 @@ void deserialize_PackedSamplesSequence(MicroBuffer* buffer, PackedSamplesSequenc
     deserialize_uint32_t(buffer, &output->size);
     for(uint32_t i = 0; i < output->size; i++)
         deserialize_PackedSamples(buffer, &output->data[i], aux);
+}
+
+uint32_t size_of_PackedSamplesSequence(const PackedSamplesSequence* data)
+{
+    return sizeof(data->size) + data->size;
 }
 
 void serialize_DataRepresentation(MicroBuffer* buffer, const DataRepresentation* input)
@@ -792,6 +1155,31 @@ void deserialize_DataRepresentation(MicroBuffer* buffer, DataRepresentation* out
     }
 }
 
+uint32_t size_of_DataRepresentation(const DataRepresentation* data)
+{
+    uint32_t size = sizeof(data->format);
+    switch(data->format)
+    {
+        case FORMAT_DATA:
+            size += size_of_SampleData(&data->_.data);
+        break;
+        case FORMAT_DATA_SEQ:
+            size += size_of_SampleDataSequence(&data->_.data_seq);
+        break;
+        case FORMAT_SAMPLE:
+            size += size_of_Sample(&data->_.sample);
+        break;
+        case FORMAT_SAMPLE_SEQ:
+            size += size_of_SampleSequence(&data->_.sample_seq);
+        break;
+        case FORMAT_PACKED_SAMPLES:
+            size += size_of_PackedSamples(&data->_.packed_samples);
+        break;
+    }
+
+    return size;
+}
+
 void serialize_MessageHeader(MicroBuffer* buffer, const MessageHeader* input)
 {
     serialize_uint8_t(buffer, input->session_id);
@@ -808,6 +1196,14 @@ void deserialize_MessageHeader(MicroBuffer* buffer, MessageHeader* output, AuxMe
     deserialize_array_uint8_t(buffer, output->client_key, 4);
 }
 
+uint32_t size_of_MessageHeader(const MessageHeader* data)
+{
+    return sizeof(data->session_id)
+         + sizeof(data->stream_id)
+         + sizeof(data->sequence_nr)
+         + sizeof(data->client_key);
+}
+
 void serialize_SubmessageHeader(MicroBuffer* buffer, const SubmessageHeader* input)
 {
     serialize_uint8_t(buffer, input->submessage_id);
@@ -822,144 +1218,131 @@ void deserialize_SubmessageHeader(MicroBuffer* buffer, SubmessageHeader* output,
     deserialize_uint16_t(buffer, &output->submessage_length);
 }
 
-void serialize_CREATE_Payload(MicroBuffer* buffer, const CREATE_Payload* input)
+uint32_t size_of_SubmessageHeader(const SubmessageHeader* data)
+{
+    return sizeof(data->submessage_id)
+         + sizeof(data->flags)
+         + sizeof(data->submessage_length);
+}
+
+void serialize_CreateResourcePayload(MicroBuffer* buffer, const CreateResourcePayload* input)
 {
     serialize_BaseObjectRequest(buffer, &input->request);
     serialize_ObjectVariant(buffer, &input->object_representation);
 }
 
-void deserialize_CREATE_Payload(MicroBuffer* buffer, CREATE_Payload* output, AuxMemory* aux)
+void deserialize_CreateResourcePayload(MicroBuffer* buffer, CreateResourcePayload* output, AuxMemory* aux)
 {
     deserialize_BaseObjectRequest(buffer, &output->request, aux);
     deserialize_ObjectVariant(buffer, &output->object_representation, aux);
 }
 
-void serialize_DELETE_RESOURCE_Payload(MicroBuffer* buffer, const DELETE_RESOURCE_Payload* input)
+uint32_t size_of_CreateResourcePayload(const CreateResourcePayload* data)
+{
+    return size_of_BaseObjectRequest(&data->request)
+         + size_of_ObjectVariant(&data->object_representation);
+}
+
+void serialize_DeleteResourcePayload(MicroBuffer* buffer, const DeleteResourcePayload* input)
 {
     serialize_BaseObjectRequest(buffer, &input->request);
 }
 
-void deserialize_DELETE_RESOURCE_Payload(MicroBuffer* buffer, DELETE_RESOURCE_Payload* output, AuxMemory* aux)
+void deserialize_DeleteResourcePayload(MicroBuffer* buffer, DeleteResourcePayload* output, AuxMemory* aux)
 {
     deserialize_BaseObjectRequest(buffer, &output->request, aux);
 }
 
-void serialize_RESOURCE_STATUS_Payload(MicroBuffer* buffer, const RESOURCE_STATUS_Payload* input)
+uint32_t size_of_DeleteResourcePayload(const DeleteResourcePayload* data)
+{
+    return size_of_BaseObjectRequest(&data->request);
+}
+
+void serialize_ResourceStatusPayload(MicroBuffer* buffer, const ResourceStatusPayload* input)
 {
     serialize_BaseObjectReply(buffer, &input->reply);
 }
 
-void deserialize_RESOURCE_STATUS_Payload(MicroBuffer* buffer, RESOURCE_STATUS_Payload* output, AuxMemory* aux)
+void deserialize_ResourceStatusPayload(MicroBuffer* buffer, ResourceStatusPayload* output, AuxMemory* aux)
 {
     deserialize_BaseObjectReply(buffer, &output->reply, aux);
 }
 
-void serialize_GET_INFO_Payload(MicroBuffer* buffer, const GET_INFO_Payload* input)
+uint32_t size_of_ResourceStatusPayload(const ResourceStatusPayload* data)
+{
+    return size_of_BaseObjectReply(&data->reply);
+}
+
+void serialize_GetInfoPayload(MicroBuffer* buffer, const GetInfoPayload* input)
 {
     serialize_BaseObjectRequest(buffer, &input->request);
     serialize_uint32_t(buffer, input->info_mask);
 }
 
-void deserialize_GET_INFO_Payload(MicroBuffer* buffer, GET_INFO_Payload* output, AuxMemory* aux)
+void deserialize_GetInfoPayload(MicroBuffer* buffer, GetInfoPayload* output, AuxMemory* aux)
 {
     deserialize_BaseObjectRequest(buffer, &output->request, aux);
     deserialize_uint32_t(buffer, &output->info_mask);
 }
 
-void serialize_INFO_Payload(MicroBuffer* buffer, const INFO_Payload* input)
+uint32_t size_of_GetInfoPayload(const GetInfoPayload* data)
+{
+    return size_of_BaseObjectRequest(&data->request)
+         + sizeof(data->info_mask);
+}
+
+void serialize_InfoPayload(MicroBuffer* buffer, const InfoPayload* input)
 {
     serialize_BaseObjectReply(buffer, &input->reply);
     serialize_Info(buffer, &input->info);
 }
 
-void deserialize_INFO_Payload(MicroBuffer* buffer, INFO_Payload* output, AuxMemory* aux)
+void deserialize_InfoPayload(MicroBuffer* buffer, InfoPayload* output, AuxMemory* aux)
 {
     deserialize_BaseObjectReply(buffer, &output->reply, aux);
     deserialize_Info(buffer, &output->info, aux);
 }
 
-void serialize_READ_DATA_Payload(MicroBuffer* buffer, const READ_DATA_Payload* input)
+uint32_t size_of_InfoPayload(const InfoPayload* data)
+{
+    return size_of_BaseObjectReply(&data->reply)
+         + size_of_Info(&data->info);
+}
+
+void serialize_ReadDataPayload(MicroBuffer* buffer, const ReadDataPayload* input)
 {
     serialize_BaseObjectRequest(buffer, &input->request);
     serialize_ReadSpecification(buffer, &input->read_specification);
 }
 
-void deserialize_READ_DATA_Payload(MicroBuffer* buffer, READ_DATA_Payload* output, AuxMemory* aux)
+void deserialize_ReadDataPayload(MicroBuffer* buffer, ReadDataPayload* output, AuxMemory* aux)
 {
     deserialize_BaseObjectRequest(buffer, &output->request, aux);
     deserialize_ReadSpecification(buffer, &output->read_specification, aux);
 }
 
-void serialize_DATA_Payload_Data(MicroBuffer* buffer, const DATA_Payload_Data* input)
+uint32_t size_of_ReadDataPayload(const ReadDataPayload* data)
 {
-    serialize_BaseObjectReply(buffer, &input->reply);
-    serialize_SampleData(buffer, &input->data);
+    return size_of_BaseObjectRequest(&data->request)
+         + size_of_ReadSpecification(&data->read_specification);
 }
 
-void deserialize_DATA_Payload_Data(MicroBuffer* buffer, DATA_Payload_Data* output, AuxMemory* aux)
-{
-    deserialize_BaseObjectReply(buffer, &output->reply, aux);
-    deserialize_SampleData(buffer, &output->data, aux);
-}
-
-void serialize_DATA_Payload_Sample(MicroBuffer* buffer, const DATA_Payload_Sample* input)
-{
-    serialize_BaseObjectReply(buffer, &input->reply);
-    serialize_Sample(buffer, &input->sample);
-}
-
-void deserialize_DATA_Payload_Sample(MicroBuffer* buffer, DATA_Payload_Sample* output, AuxMemory* aux)
-{
-    deserialize_BaseObjectReply(buffer, &output->reply, aux);
-    deserialize_Sample(buffer, &output->sample, aux);
-}
-
-void serialize_DATA_Payload_DataSequence(MicroBuffer* buffer, const DATA_Payload_DataSequence* input)
-{
-    serialize_BaseObjectReply(buffer, &input->reply);
-    serialize_SampleDataSequence(buffer, &input->data_seq);
-}
-
-void deserialize_DATA_Payload_DataSequence(MicroBuffer* buffer, DATA_Payload_DataSequence* output, AuxMemory* aux)
-{
-    deserialize_BaseObjectReply(buffer, &output->reply, aux);
-    deserialize_SampleDataSequence(buffer, &output->data_seq, aux);
-}
-
-void serialize_DATA_Payload_SampleSequence(MicroBuffer* buffer, const DATA_Payload_SampleSequence* input)
-{
-    serialize_BaseObjectReply(buffer, &input->reply);
-    serialize_SampleSequence(buffer, &input->sample_seq);
-}
-
-void deserialize_DATA_Payload_SampleSequence(MicroBuffer* buffer, DATA_Payload_SampleSequence* output, AuxMemory* aux)
-{
-    deserialize_BaseObjectReply(buffer, &output->reply, aux);
-    deserialize_SampleSequence(buffer, &output->sample_seq, aux);
-}
-
-void serialize_DATA_Payload_PackageSamples(MicroBuffer* buffer, const DATA_Payload_PackageSamples* input)
-{
-    serialize_BaseObjectReply(buffer, &input->reply);
-    serialize_PackedSamples(buffer, &input->packed_samples);
-}
-
-void deserialize_DATA_Payload_PackageSamples(MicroBuffer* buffer, DATA_Payload_PackageSamples* output, AuxMemory* aux)
-{
-    deserialize_BaseObjectReply(buffer, &output->reply, aux);
-    deserialize_PackedSamples(buffer, &output->packed_samples, aux);
-}
-
-void serialize_WRITE_DATA_Payload(MicroBuffer* buffer, const WRITE_DATA_Payload* input)
+void serialize_WriteDataPayload(MicroBuffer* buffer, const WriteDataPayload* input)
 {
     serialize_BaseObjectRequest(buffer, &input->request);
     serialize_DataRepresentation(buffer, &input->data_to_write);
 }
 
-void deserialize_WRITE_DATA_Payload(MicroBuffer* buffer, WRITE_DATA_Payload* output, AuxMemory* aux)
+void deserialize_WriteDataPayload(MicroBuffer* buffer, WriteDataPayload* output, AuxMemory* aux)
 {
     deserialize_BaseObjectRequest(buffer, &output->request, aux);
     deserialize_DataRepresentation(buffer, &output->data_to_write, aux);
+}
+
+uint32_t size_of_WriteDataPayload(const WriteDataPayload* data)
+{
+    return size_of_BaseObjectRequest(&data->request)
+         + size_of_DataRepresentation(&data->data_to_write);
 }
 
 

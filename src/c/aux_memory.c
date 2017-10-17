@@ -9,15 +9,15 @@
 
 void init_aux_memory(AuxMemory* memory, uint32_t memory_size)
 {
-    memory->memory = malloc(memory_size);
-    memory->memory_alloc = memory_size;
+    memory->buffer = malloc(memory_size);
+    memory->buffer_alloc = memory_size;
     memory->size = 0;
 }
 
 void* request_aux_memory(AuxMemory* memory, uint32_t size)
 {
     #ifndef NDEBUG
-    if(memory->size + size > memory->memory_alloc)
+    if(memory->size + size > memory->buffer_alloc)
     {
         printf("ERROR: AuxMemory oveflow.\n");
         return NULL;
@@ -26,10 +26,10 @@ void* request_aux_memory(AuxMemory* memory, uint32_t size)
 
     uint32_t init = memory->size;
     memory->size += size;
-    return ((uint8_t*)memory->memory) + init;
+    return ((uint8_t*)memory->buffer) + init;
 }
 
 void free_aux_memory(AuxMemory* memory)
 {
-    free(memory->memory);
+    free(memory->buffer);
 }

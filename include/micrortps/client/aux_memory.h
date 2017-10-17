@@ -11,9 +11,9 @@ extern "C"
 
 typedef struct AuxMemory
 {
-    void* memory;
+    void* buffer;
     uint32_t size;
-    uint32_t memory_alloc;
+    uint32_t buffer_alloc;
 
 } AuxMemory;
 

@@ -1,5 +1,5 @@
 DATA:
-- typedef: {ClientKey:  'uint8_t 4'}
+- typedef: {ClientKey:  uint8_t 4}
 - typedef: {ObjectKind: uint8_t}
 - define:  {OBJK_INVALID:      '0x00'}
 - define:  {OBJK_PARTICIPANT:  '0x01'}
@@ -13,20 +13,20 @@ DATA:
 - define:  {OBJK_APPLICATION:  '0x20'}
 - define:  {OBJK_CLIENT:       '0x21'}
 
-- typedef: {ObjectId: 'uint8_t 2'}
+- typedef: {ObjectId: uint8_t 2}
 - define:  {OBJECTID_INVALID: '{0xFF, 0xFF}'}
 - define:  {OBJECTID_CLIENT:  '{0xFF, 0xFF}'}
 - define:  {OBJECTID_SESSION: '{0xFF, 0xFF}'}
 
-- typedef: {XrceCookie: 'uint8_t 4'}
+- typedef: {XrceCookie: uint8_t 4}
 - define:  {XRCE_COOKIE: '{0x58, 0x52, 0x43, 0x45}'}
 
-- typedef: {XrceVersion: 'uint8_t 2'}
+- typedef: {XrceVersion: uint8_t 2}
 - define:  {XRCE_VESION_MAJOR:  '0x01'}
 - define:  {XRCE_VESION_MINOR:  '0x00'}
 - define:  {XRCE_VERSION: '{XRCE_VESION_MAJOR, XRCE_VESION_MINOR}'}
 
-- typedef: {XrceVendorId: 'uint8_t 2'}
+- typedef: {XrceVendorId: uint8_t 2}
 - define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}
 
 - typedef: {SessionId: uint8_t}
@@ -310,7 +310,7 @@ DATA:
 
 - struct:
     InfoReply:
-      - base_object_reply: BaseObjectReply
+      - reply: BaseObjectReply
       - info: ObjectVariant
 
 - struct:
@@ -428,60 +428,35 @@ DATA:
       - submessage_length: uint16_t
 
 - struct:
-    CREATE_Payload:
+    CreateResourcePayload:
       - request: BaseObjectRequest
       - object_representation: ObjectVariant
 
 - struct:
-    DELETE_RESOURCE_Payload:
+    DeleteResourcePayload:
       - request: BaseObjectRequest
 
 - struct:
-    RESOURCE_STATUS_Payload:
+    ResourceStatusPayload:
       - reply: BaseObjectReply
 
 - struct:
-    GET_INFO_Payload:
+    GetInfoPayload:
       - request: BaseObjectRequest
       - info_mask: InfoMask
 
 - struct:
-    INFO_Payload:
+    InfoPayload:
       - reply: BaseObjectReply
       - info: Info
 
 - struct:
-    READ_DATA_Payload:
+    ReadDataPayload:
       - request: BaseObjectRequest
       - read_specification: ReadSpecification
 
 - struct:
-    DATA_Payload_Data:
-      - reply: BaseObjectReply
-      - data: SampleData
-
-- struct:
-    DATA_Payload_Sample:
-      - reply: BaseObjectReply
-      - sample: Sample
-
-- struct:
-    DATA_Payload_DataSequence:
-      - reply: BaseObjectReply
-      - data_seq: SampleDataSequence
-
-- struct:
-    DATA_Payload_SampleSequence:
-      - reply: BaseObjectReply
-      - sample_seq: SampleSequence
-
-- struct:
-    DATA_Payload_PackageSamples:
-      - reply: BaseObjectReply
-      - packed_samples: PackedSamples
-
-- struct:
-    WRITE_DATA_Payload:
+    WriteDataPayload:
       - request: BaseObjectRequest
       - data_to_write: DataRepresentation
 
