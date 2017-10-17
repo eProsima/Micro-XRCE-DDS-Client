@@ -1,7 +1,6 @@
 class State:
     def __init__(self):
         self.aliases = {}
-        self.optional_sequence = 0
 
     def process_var_type(self, var_type_raw):
         if self.aliases.has_key(var_type_raw):
@@ -33,24 +32,19 @@ class State:
 class Attribute:
     def __init__(self, yaml_attribute, state):
         self.endianness = ''
-        self.optional_values = []
 
         for name in yaml_attribute.keys():
             if name == '__ENDIANNESS__':
                 self.endianness = yaml_attribute[name] + '_ENDIANNESS'
-            elif name == '__OPTIONAL_CONDITION__':
-                self.optional_values = yaml_attribute[name]
             else:
                 self.name = name
                 self.type, self.array_value = state.process_var_type(yaml_attribute[name])
 
     def writeSpec(self, file):
         array_string = '[' + self.array_value + ']' if self.array_value else ''
-        if self.optional_values:
-            file.write('    uint8_t optional_' + self.name + ';\n')
         file.write('    ' + self.type + ' ' + self.name + array_string + ';\n')
 
-    def writeSerialization(self, file, spaces, var_prefix = '', optional_prefix = False):
+    def writeSerialization(self, file, spaces, var_prefix = ''):
         name = var_prefix + self.name
         endianness = self.endianness + ', ' if self.endianness else ''
         endian = 'endian_' if self.endianness else ''
@@ -58,23 +52,10 @@ class Attribute:
         array_size = ', ' + self.array_value if self.array_value else ''
         direction = '&' if not State.is_basic_type(self.type) else ''
 
-        if self.optional_values:
-            file.write(' ' * spaces)
-            file.write('serialize_uint8_t(buffer, input->optional_' + self.name + ');\n')
-            file.write(' ' * spaces)
-            file.write('if(input->optional_' + self.name + ' == ' + self.optional_values[0])
-            for i in xrange(1, len(self.optional_values)):
-                file.write('\n    || input->optional_' + self.name + ' == ' + self.optional_values[i])
-            file.write(')\n')
-            file.write(' ' * (spaces + 4))
-
         file.write(' ' * spaces)
         file.write('serialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'input->' + name + array_size + ');\n')
 
-        if self.optional_values:
-            file.write('\n')
-
-    def writeDeserialization(self, file, spaces, var_prefix = '', optional_prefix = False):
+    def writeDeserialization(self, file, spaces, var_prefix = ''):
         name = var_prefix + self.name
         endianness = self.endianness + ', ' if self.endianness else ''
         endian = 'endian_' if self.endianness else ''
@@ -83,21 +64,8 @@ class Attribute:
         direction = '&' if not self.array_value else ''
         aux = ', aux' if not State.is_basic_type(self.type) else ''
 
-        if self.optional_values:
-            file.write(' ' * spaces)
-            file.write('deserialize_uint8_t(buffer, &output->optional_' + self.name + ');\n')
-            file.write(' ' * spaces)
-            file.write('if(output->optional_' + self.name + ' == ' + self.optional_values[0])
-            for i in xrange(1, len(self.optional_values)):
-                file.write('\n    || output->optional_' + self.name + ' == ' + self.optional_values[i])
-            file.write(')\n')
-            file.write(' ' * (spaces + 4))
-
         file.write(' ' * spaces)
         file.write('deserialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + aux + ');\n')
-
-        if self.optional_values:
-            file.write('\n')
 
 class Define:
     def __init__(self, yaml_define, state):
@@ -297,10 +265,12 @@ class MicroCDRGenerator:
         self.spec_file_head = yaml['FILES']['spec_file']['head']
         self.h_file_head = yaml['FILES']['h_file']['head']
         self.c_file_head = yaml['FILES']['c_file']['head']
+        self.test_head = yaml['FILES']['test']['head']
 
         self.spec_file_tail = yaml['FILES']['spec_file']['tail']
         self.h_file_tail = yaml['FILES']['h_file']['tail']
         self.c_file_tail = yaml['FILES']['c_file']['tail']
+        self.test_tail = yaml['FILES']['test']['tail']
 
         self.entries = []
         for node in yaml['DATA']:
@@ -352,6 +322,23 @@ class MicroCDRGenerator:
         file.write('\n' + self.c_file_tail)
         file.close()
 
+    def writeTest(self, filePath):
+        file = open(filePath, 'w')
+        file.write(self.test_head +'\n')
+
+        for entry in self.entries:
+            if isinstance(entry, Struct):
+                file.write('TEST_F(XRCEProtocolSerialization, ' + entry.name +')\n')
+                file.write('{\n')
+                file.write('    memset(output, 0xFF, sizeof(' + entry.name + '));\n')
+                file.write('    serialize_' + entry.name + '(&writer, (' + entry.name + '*)input);\n')
+                file.write('    deserialize_' + entry.name + '(&reader, (' + entry.name + '*)output, &aux_memory);\n')
+                file.write('}\n\n\n')
+
+        file.write('\n' + self.test_tail)
+        file.close()
+
+
 import yaml
 with open('xrce_protocol.yaml', 'r') as f:
     src = yaml.load(f)
@@ -360,7 +347,21 @@ microCDRGen = MicroCDRGenerator(src)
 
 headers = '../include/micrortps/client/'
 sources = '../src/c/'
+tests = '../test/'
 
 microCDRGen.writeSpec(headers + 'xrce_protocol_spec.h')
 microCDRGen.writeSerializationHeader(headers + 'xrce_protocol_serialization.h')
 microCDRGen.writeSerializationImplementation(sources + 'xrce_protocol_serialization.c')
+microCDRGen.writeTest(tests + 'XRCEProtocolSerialization.cpp')
+
+"""
+TEST_F(XRCEProtocolSerialization, Time_t)
+{
+    memset(output, 0xFF, sizeof(Time_t));
+
+    serialize_Time_t(&writer, (Time_t*)input);
+    deserialize_Time_t(&reader, (Time_t*)output, &aux_memory);
+
+
+}
+"""

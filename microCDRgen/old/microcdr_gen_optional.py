@@ -44,38 +44,31 @@ class Attribute:
                 self.name = name
                 self.type, self.array_value = state.process_var_type(yaml_attribute[name])
 
-    def writeSpec(self, file):
-        array_string = '[' + self.array_value + ']' if self.array_value else ''
         if self.optional_values:
-            file.write('    uint8_t optional_' + self.name + ';\n')
-        file.write('    ' + self.type + ' ' + self.name + array_string + ';\n')
+            self.optional_type = 'Optional_' + self.type + str(state.optional_sequence)
+            state.optional_sequence += 1
+
+    def writeSpec(self, file, optional_prefix = False):
+        optional = 'Optional_' if optional_prefix and self.optional_values else ''
+
+        array_string = '[' + self.array_value + ']' if self.array_value else ''
+        file.write('    ' + optional + self.type + ' ' + self.name + array_string + ';\n')
 
     def writeSerialization(self, file, spaces, var_prefix = '', optional_prefix = False):
         name = var_prefix + self.name
+        var_type = 'Optional_' + self.type if optional_prefix and self.optional_values else self.type
         endianness = self.endianness + ', ' if self.endianness else ''
         endian = 'endian_' if self.endianness else ''
         array = 'array_' if self.array_value else ''
         array_size = ', ' + self.array_value if self.array_value else ''
         direction = '&' if not State.is_basic_type(self.type) else ''
 
-        if self.optional_values:
-            file.write(' ' * spaces)
-            file.write('serialize_uint8_t(buffer, input->optional_' + self.name + ');\n')
-            file.write(' ' * spaces)
-            file.write('if(input->optional_' + self.name + ' == ' + self.optional_values[0])
-            for i in xrange(1, len(self.optional_values)):
-                file.write('\n    || input->optional_' + self.name + ' == ' + self.optional_values[i])
-            file.write(')\n')
-            file.write(' ' * (spaces + 4))
-
         file.write(' ' * spaces)
-        file.write('serialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'input->' + name + array_size + ');\n')
-
-        if self.optional_values:
-            file.write('\n')
+        file.write('serialize_' + endian + array + var_type + '(buffer, ' + endianness + direction + 'input->' + name + array_size + ');\n')
 
     def writeDeserialization(self, file, spaces, var_prefix = '', optional_prefix = False):
         name = var_prefix + self.name
+        var_type = 'Optional_' + self.type if optional_prefix and self.optional_values else self.type
         endianness = self.endianness + ', ' if self.endianness else ''
         endian = 'endian_' if self.endianness else ''
         array = 'array_' if self.array_value else ''
@@ -83,21 +76,8 @@ class Attribute:
         direction = '&' if not self.array_value else ''
         aux = ', aux' if not State.is_basic_type(self.type) else ''
 
-        if self.optional_values:
-            file.write(' ' * spaces)
-            file.write('deserialize_uint8_t(buffer, &output->optional_' + self.name + ');\n')
-            file.write(' ' * spaces)
-            file.write('if(output->optional_' + self.name + ' == ' + self.optional_values[0])
-            for i in xrange(1, len(self.optional_values)):
-                file.write('\n    || output->optional_' + self.name + ' == ' + self.optional_values[i])
-            file.write(')\n')
-            file.write(' ' * (spaces + 4))
-
         file.write(' ' * spaces)
-        file.write('deserialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + aux + ');\n')
-
-        if self.optional_values:
-            file.write('\n')
+        file.write('deserialize_' + endian + array + var_type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + aux + ');\n')
 
 class Define:
     def __init__(self, yaml_define, state):
@@ -141,21 +121,65 @@ class Struct:
             self.attributes.append(Attribute(attribute, state))
 
     def writeSpec(self, file):
+        for attribute in self.attributes:
+            if attribute.optional_values:
+                file.write('\n\ntypedef struct ' + attribute.optional_type + '\n{\n')
+                file.write('    uint8_t optional;\n')
+                attribute.writeSpec(file);
+                file.write('\n}' + attribute.optional_type + ';\n')
+
         file.write('\n\ntypedef ' + self.struct + ' ' + self.name + '\n{\n')
 
         for attribute in self.attributes:
-            attribute.writeSpec(file);
+            attribute.writeSpec(file, True);
 
         file.write('\n} ' + self.name + ';\n')
 
 
     def writeSerializationHeader(self, file):
+        for attribute in self.attributes:
+            if attribute.optional_values:
+                file.write('\nvoid serialize_' + attribute.optional_type + '(MicroBuffer* buffer, const ' + attribute.optional_type +
+                    '* input);\n')
+                file.write('void deserialize_' + attribute.optional_type + '(MicroBuffer* buffer, ' + attribute.optional_type +
+                     '* output, AuxMemory* aux);\n')
+
         file.write('\nvoid serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
                  '* input);\n')
         file.write('void deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
                      '* output, AuxMemory* aux);\n')
 
     def writeSerializationImplementation(self, file):
+        for attribute in self.attributes:
+            if attribute.optional_values:
+                file.write('\nvoid serialize_' + attribute.optional_type + '(MicroBuffer* buffer, const ' + attribute.optional_type +
+                    '* input)\n{\n')
+                file.write('    serialize_uint8_t(buffer, input->optional);\n')
+                file.write('    switch(input->optional)\n')
+                file.write('    {\n')
+
+                for value in attribute.optional_values:
+                    file.write('        case ' + value + ':\n')
+
+                attribute.writeSerialization(file, 12)
+                file.write('    }\n')
+                file.write('}\n\n')
+
+
+                file.write('void deserialize_' + attribute.optional_type + '(MicroBuffer* buffer, ' + attribute.optional_type +
+                     '* output, AuxMemory* aux){\n')
+                file.write('    deserialize_uint8_t(buffer, &output->optional);\n')
+                file.write('    switch(output->optional)\n')
+                file.write('    {\n')
+
+                for value in attribute.optional_values:
+                    file.write('        case ' + value + ':\n')
+
+                attribute.writeDeserialization(file, 12)
+                file.write('    }\n')
+                file.write('}\n\n')
+
+
         file.write('void serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
                  '* input)\n{\n')
 
@@ -171,7 +195,7 @@ class Struct:
 
         else:
             for attribute in self.attributes:
-                attribute.writeSerialization(file, 4)
+                attribute.writeSerialization(file, 4, '', True)
 
         file.write('}\n\n')
 
@@ -190,7 +214,7 @@ class Struct:
 
         else:
             for attribute in self.attributes:
-                attribute.writeDeserialization(file, 4)
+                attribute.writeDeserialization(file, 4, '', True)
 
         file.write('}\n\n')
 

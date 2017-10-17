@@ -22,7 +22,7 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
     endif()
 
     set(CMAKE_CXX_STANDARD 11)
-    set(CLIENT_UNITTESTS_SOURCE XRCEProtocolSerialization.cpp)
+    set(CLIENT_UNITTESTS_SOURCE Message.cpp)
     add_executable(ClientUnitTests ${CLIENT_UNITTESTS_SOURCE})
     add_gtest(ClientUnitTests ${CLIENT_UNITTESTS_SOURCE})
     target_include_directories(ClientUnitTests PRIVATE ${GTEST_INCLUDE_DIRS})
