@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BUFFER_SIZE 2000
+#define BUFFER_SIZE 1024
 
 int init_message_header(MessageHeaderSpec* header, void* data);
 void create_message(MessageManager* message);

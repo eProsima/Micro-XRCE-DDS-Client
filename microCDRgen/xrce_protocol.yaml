@@ -11,7 +11,6 @@ DATA:
 - define:  {OBJK_TYPE:         '0x10'}
 - define:  {OBJK_QOSPROFILE:   '0x11'}
 - define:  {OBJK_APPLICATION:  '0x20'}
-- define:  {OBJK_CLIENT:       '0x21'}
 
 - typedef: {ObjectId: uint8_t 2}
 - define:  {OBJECTID_INVALID: '{0xFF, 0xFF}'}
@@ -122,11 +121,11 @@ DATA:
 
 - struct:
     OBJK_Representation3_Base:
-      - representation:     OBJK_Representation3Formats
+      - format3:     OBJK_Representation3Formats
 
 - struct:
     OBJK_Representation2_Base:
-      - representation:     OBJK_Representation2Formats
+      - format2:     OBJK_Representation2Formats
 
 - struct:
     OBJK_QOSPROFILE_Representation:
@@ -226,7 +225,6 @@ DATA:
 - union:
     ObjectVariant:
       - kind: ObjectKind
-      - client: OBJK_CLIENT_Representation
       - application: OBJK_APPLICATION_Representation
       - participant: OBJK_PARTICIPANT_Representation
       - qos_profile: OBJK_QOSPROFILE_Representation
@@ -237,7 +235,6 @@ DATA:
       - data_writer: OBJK_DATAWRITER_Representation
       - data_reader: OBJK_DATAREADER_Representation
     __DISCRIMINATOR__:
-      - OBJK_CLIENT
       - OBJK_APPLICATION
       - OBJK_PARTICIPANT
       - OBJK_QOSPROFILE
@@ -247,11 +244,6 @@ DATA:
       - OBJK_SUBSCRIBER
       - OBJK_DATAWRITER
       - OBJK_DATAREADER
-
-- struct:
-    CreationMode:
-      - reuse: bool
-      - replace: bool
 
 - struct:
     ResultStatus:
@@ -295,7 +287,7 @@ DATA:
 
 - struct:
     BaseObjectRequest:
-      - base_request: RequestId
+      - base: BaseRequest
       - object_id: ObjectId
 
 - struct:
@@ -305,7 +297,7 @@ DATA:
 
 - struct:
     BaseObjectReply:
-      - base_reply: BaseReply
+      - base: BaseReply
       - object_id: ObjectId
 
 - struct:
@@ -399,19 +391,19 @@ DATA:
 
 - enum:
     SubmessageId:
-      - CREATE_CLIENT: '0'
-      - CREATE:        '1'
-      - GET_INFO:      '2'
-      - DELETE:        '3'
-      - STATUS:        '4'
-      - INFO:          '5'
-      - WRITE_DATA:    '6'
-      - READ_DATA:     '7'
-      - DATA:          '8'
-      - ACKNACK:       '9'
-      - HEARTBEAT:     '10'
-      - FRAGMENT:      '12'
-      - FRAGMENT_END:  '13'
+      - SUBMESSAGE_ID_CREATE_CLIENT: '0'
+      - SUBMESSAGE_ID_CREATE:        '1'
+      - SUBMESSAGE_ID_GET_INFO:      '2'
+      - SUBMESSAGE_ID_DELETE:        '3'
+      - SUBMESSAGE_ID_STATUS:        '4'
+      - SUBMESSAGE_ID_INFO:          '5'
+      - SUBMESSAGE_ID_WRITE_DATA:    '6'
+      - SUBMESSAGE_ID_READ_DATA:     '7'
+      - SUBMESSAGE_ID_DATA:          '8'
+      - SUBMESSAGE_ID_ACKNACK:       '9'
+      - SUBMESSAGE_ID_HEARTBEAT:     '10'
+      - SUBMESSAGE_ID_FRAGMENT:      '12'
+      - SUBMESSAGE_ID_FRAGMENT_END:  '13'
     __TYPE__: uint8_t
 
 - struct:
@@ -421,23 +413,36 @@ DATA:
       - sequence_nr: uint16_t
       - client_key: ClientKey
 
+- enum:
+    SubmessageHeaderFlags:
+      - FLAG_BIG_ENDIAN:    '0x00'
+      - FLAG_LITTLE_ENDIAN: '0x01 << 0'
+      - FLAG_REPLACE:       '0x01 << 1'
+      - FLAG_LAST_FRAGMENT: '0x01 << 1'
+      - FLAG_REUSE:         '0x01 << 2'
+    __TYPE__: uint8_t
+
 - struct:
     SubmessageHeader:
-      - submessage_id: uint8_t
-      - flags: uint8_t
-      - submessage_length: uint16_t
+      - id: uint8_t
+      - flags: SubmessageHeaderFlags
+      - length: uint16_t
+
+- struct:
+    CreateClientPayload:
+      - representation: OBJK_CLIENT_Representation
 
 - struct:
     CreateResourcePayload:
       - request: BaseObjectRequest
-      - object_representation: ObjectVariant
+      - representation: ObjectVariant
 
 - struct:
     DeleteResourcePayload:
       - request: BaseObjectRequest
 
 - struct:
-    ResourceStatusPayload:
+    StatusPayload:
       - reply: BaseObjectReply
 
 - struct:
@@ -459,6 +464,31 @@ DATA:
     WriteDataPayload:
       - request: BaseObjectRequest
       - data_to_write: DataRepresentation
+
+- struct:
+    SampleDataPayloadData:
+      - reply: BaseObjectReply
+      - data: SampleData
+
+- struct:
+    SamplePayloadData:
+      - reply: BaseObjectReply
+      - sample: Sample
+
+- struct:
+    SampleDataSequencePayloadData:
+      - reply: BaseObjectReply
+      - data_sequence: SampleDataSequence
+
+- struct:
+    SampleSequencePayloadData:
+      - reply: BaseObjectReply
+      - sample_sequence: SampleSequence
+
+- struct:
+    PackedSamplesPayloadData:
+      - reply: BaseObjectReply
+      - packed_samples: PackedSamples
 
 FILES:
   spec_file:

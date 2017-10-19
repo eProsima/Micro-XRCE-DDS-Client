@@ -7,10 +7,19 @@
     #include <stdio.h>
 #endif
 
-void init_aux_memory(AuxMemory* memory, uint32_t memory_size)
+void init_aux_memory(AuxMemory* memory)
 {
-    memory->buffer = malloc(memory_size);
-    memory->buffer_alloc = memory_size;
+    memory->buffer = NULL;
+    memory->buffer_alloc = 0;
+}
+
+void reset_aux_memory(AuxMemory* memory, uint32_t memory_size)
+{
+    if(memory->buffer_alloc < memory_size)
+    {
+        memory->buffer = realloc(memory->buffer, memory_size);
+        memory->buffer_alloc = memory_size;
+    }
     memory->size = 0;
 }
 
@@ -31,5 +40,5 @@ void* request_aux_memory(AuxMemory* memory, uint32_t size)
 
 void free_aux_memory(AuxMemory* memory)
 {
-    free(memory->buffer);
+    memory->buffer = realloc(memory->buffer, 0);
 }

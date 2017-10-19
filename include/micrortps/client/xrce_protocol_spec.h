@@ -23,7 +23,6 @@ typedef uint8_t ObjectKind;
 #define OBJK_TYPE 0x10
 #define OBJK_QOSPROFILE 0x11
 #define OBJK_APPLICATION 0x20
-#define OBJK_CLIENT 0x21
 
 typedef uint8_t ObjectId[2];
 #define OBJECTID_INVALID {0xFF, 0xFF}
@@ -161,14 +160,14 @@ typedef struct OBJK_Representation2Formats
 
 typedef struct OBJK_Representation3_Base
 {
-    OBJK_Representation3Formats representation;
+    OBJK_Representation3Formats format3;
 
 } OBJK_Representation3_Base;
 
 
 typedef struct OBJK_Representation2_Base
 {
-    OBJK_Representation2Formats representation;
+    OBJK_Representation2Formats format2;
 
 } OBJK_Representation2_Base;
 
@@ -320,7 +319,6 @@ typedef struct OBJK_DataWriter_Binary
 
 typedef union ObjectVariantU
 {
-    OBJK_CLIENT_Representation client;
     OBJK_APPLICATION_Representation application;
     OBJK_PARTICIPANT_Representation participant;
     OBJK_QOSPROFILE_Representation qos_profile;
@@ -340,14 +338,6 @@ typedef struct ObjectVariant
     ObjectVariantU _;
 
 } ObjectVariant;
-
-
-typedef struct CreationMode
-{
-    bool reuse;
-    bool replace;
-
-} CreationMode;
 
 
 typedef struct ResultStatus
@@ -416,7 +406,7 @@ typedef struct BaseRequest
 
 typedef struct BaseObjectRequest
 {
-    uint8_t base_request[2];
+    BaseRequest base;
     uint8_t object_id[2];
 
 } BaseObjectRequest;
@@ -432,7 +422,7 @@ typedef struct BaseReply
 
 typedef struct BaseObjectReply
 {
-    BaseReply base_reply;
+    BaseReply base;
     uint8_t object_id[2];
 
 } BaseObjectReply;
@@ -568,19 +558,19 @@ typedef struct DataRepresentation
 
 typedef enum SubmessageId
 {
-    CREATE_CLIENT = 0,
-    CREATE = 1,
-    GET_INFO = 2,
-    DELETE = 3,
-    STATUS = 4,
-    INFO = 5,
-    WRITE_DATA = 6,
-    READ_DATA = 7,
-    DATA = 8,
-    ACKNACK = 9,
-    HEARTBEAT = 10,
-    FRAGMENT = 12,
-    FRAGMENT_END = 13
+    SUBMESSAGE_ID_CREATE_CLIENT = 0,
+    SUBMESSAGE_ID_CREATE = 1,
+    SUBMESSAGE_ID_GET_INFO = 2,
+    SUBMESSAGE_ID_DELETE = 3,
+    SUBMESSAGE_ID_STATUS = 4,
+    SUBMESSAGE_ID_INFO = 5,
+    SUBMESSAGE_ID_WRITE_DATA = 6,
+    SUBMESSAGE_ID_READ_DATA = 7,
+    SUBMESSAGE_ID_DATA = 8,
+    SUBMESSAGE_ID_ACKNACK = 9,
+    SUBMESSAGE_ID_HEARTBEAT = 10,
+    SUBMESSAGE_ID_FRAGMENT = 12,
+    SUBMESSAGE_ID_FRAGMENT_END = 13
 
 } SubmessageId;
 
@@ -595,19 +585,37 @@ typedef struct MessageHeader
 } MessageHeader;
 
 
+typedef enum SubmessageHeaderFlags
+{
+    FLAG_BIG_ENDIAN = 0x00,
+    FLAG_LITTLE_ENDIAN = 0x01 << 0,
+    FLAG_REPLACE = 0x01 << 1,
+    FLAG_LAST_FRAGMENT = 0x01 << 1,
+    FLAG_REUSE = 0x01 << 2
+
+} SubmessageHeaderFlags;
+
+
 typedef struct SubmessageHeader
 {
-    uint8_t submessage_id;
+    uint8_t id;
     uint8_t flags;
-    uint16_t submessage_length;
+    uint16_t length;
 
 } SubmessageHeader;
+
+
+typedef struct CreateClientPayload
+{
+    OBJK_CLIENT_Representation representation;
+
+} CreateClientPayload;
 
 
 typedef struct CreateResourcePayload
 {
     BaseObjectRequest request;
-    ObjectVariant object_representation;
+    ObjectVariant representation;
 
 } CreateResourcePayload;
 
@@ -619,11 +627,11 @@ typedef struct DeleteResourcePayload
 } DeleteResourcePayload;
 
 
-typedef struct ResourceStatusPayload
+typedef struct StatusPayload
 {
     BaseObjectReply reply;
 
-} ResourceStatusPayload;
+} StatusPayload;
 
 
 typedef struct GetInfoPayload
@@ -656,6 +664,46 @@ typedef struct WriteDataPayload
     DataRepresentation data_to_write;
 
 } WriteDataPayload;
+
+
+typedef struct SampleDataPayloadData
+{
+    BaseObjectReply reply;
+    SampleData data;
+
+} SampleDataPayloadData;
+
+
+typedef struct SamplePayloadData
+{
+    BaseObjectReply reply;
+    Sample sample;
+
+} SamplePayloadData;
+
+
+typedef struct SampleDataSequencePayloadData
+{
+    BaseObjectReply reply;
+    SampleDataSequence data_sequence;
+
+} SampleDataSequencePayloadData;
+
+
+typedef struct SampleSequencePayloadData
+{
+    BaseObjectReply reply;
+    SampleSequence sample_sequence;
+
+} SampleSequencePayloadData;
+
+
+typedef struct PackedSamplesPayloadData
+{
+    BaseObjectReply reply;
+    PackedSamples packed_samples;
+
+} PackedSamplesPayloadData;
 
 
 #ifdef __cplusplus

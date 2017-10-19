@@ -99,24 +99,6 @@ class Attribute:
         if self.optional_values:
             file.write('\n')
 
-    def writeSize(self, file, spaces, var_prefix = ''):
-        name = var_prefix + self.name
-
-        if self.optional_values:
-            file.write('((data->optional_' + self.name + ' == ' + self.optional_values[0])
-            for i in xrange(1, len(self.optional_values)):
-                file.write(' || data->optional_' + self.name + ' == ' + self.optional_values[i])
-            file.write(') ? ')
-
-        file.write(' ' * spaces)
-        if State.is_basic_type(self.type):
-            file.write('sizeof(data->' + name + ')')
-        else:
-            file.write('size_of_' + self.type + '(&data->' + name + ')')
-
-        if self.optional_values:
-            file.write(' : 0 )')
-
 class Define:
     def __init__(self, yaml_define, state):
         self.id = yaml_define.keys()[0]
@@ -174,9 +156,6 @@ class Struct:
         file.write('void deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
                      '* output, AuxMemory* aux);\n')
 
-        file.write('uint32_t size_of_' + self.name + '(const ' + self.name +
-                     '* data);\n')
-
     def writeSerializationImplementation(self, file):
         file.write('void serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
                  '* input)\n{\n')
@@ -203,37 +182,19 @@ class Struct:
 
         if len(self.attributes) == 2 and self.attributes[0].name == 'size' and self.attributes[1].name == 'data':
             data_type = self.attributes[1].type[:-1]
+
+            file.write('    deserialize_uint32_t(buffer, &output->size);\n')
+            file.write('    output->data = request_aux_memory(aux, output->size * sizeof(' + data_type + '));\n')
             if State.is_basic_type(data_type):
-                file.write('    deserialize_sequence_' + data_type + '(buffer, output->data, &output->size);\n')
+                file.write('    deserialize_array_' + data_type + '(buffer, output->data, output->size);\n')
 
             else:
-                file.write('    deserialize_uint32_t(buffer, &output->size);\n')
                 file.write('    for(uint32_t i = 0; i < output->size; i++)\n')
                 file.write('        deserialize_' + data_type + '(buffer, &output->data[i], aux);\n')
 
         else:
             for attribute in self.attributes:
                 attribute.writeDeserialization(file, 4)
-
-        file.write('}\n\n')
-
-
-        file.write('uint32_t size_of_' + self.name + '(const ' + self.name +
-                     '* data)\n{\n')
-
-        file.write('    return ')
-
-        if len(self.attributes) == 2 and self.attributes[0].name == 'size' and self.attributes[1].name == 'data':
-            file.write('sizeof(data->size) + data->size;\n')
-
-        else:
-            self.attributes[0].writeSize(file, 0)
-            for i in xrange(1, len(self.attributes)):
-
-                file.write('\n         + ')
-                self.attributes[i].writeSize(file, 0)
-
-            file.write(';\n')
 
         file.write('}\n\n')
 
@@ -300,23 +261,6 @@ class Union:
         file.write('    }\n')
         file.write('}\n\n')
 
-
-        file.write('uint32_t size_of_' + self.name + '(const ' + self.name +
-                     '* data)\n{\n')
-
-        file.write('    uint32_t size = sizeof(data->' + self.discriminator.name + ');\n')
-
-        file.write('    switch(data->' + self.discriminator.name + ')\n')
-        file.write('    {\n')
-        for case, attribute in zip(self.discriminator_values, self.union.attributes):
-            file.write('        case ' + case + ':\n')
-            file.write('            size += ')
-            attribute.writeSize(file, 0, '_.')
-            file.write(';\n        break;\n')
-
-        file.write('    }\n\n')
-        file.write('    return size;\n')
-        file.write('}\n\n')
 
 class Enum:
     def __init__(self, yaml_enum, state):
