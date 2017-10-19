@@ -2,13 +2,64 @@
 #include "micrortps/client/xrce_protocol_serialization.h"
 
 #ifndef NDEBUG
+
 #include <string.h>
 #include <stdio.h>
 #define ERROR_PRINT(fmt, args...) fprintf(stderr, fmt, ## args)
+
 #else
+
 #define DEBUG_PRINT(fmt, args...)
+
 #endif
 
+void parse_data_payload(MicroBuffer* reader, AuxMemory* aux_memory,
+    MessageInputCallback* callback, DataFormat format)
+{
+    switch(format)
+    {
+        case FORMAT_DATA:
+        {
+            SampleData data;
+            deserialize_SampleData(reader, &data, aux_memory);
+            if(callback->on_data_payload)
+                callback->on_data_payload(&data, callback->object);
+        }
+        break;
+        case FORMAT_SAMPLE:
+        {
+            Sample sample;
+            deserialize_Sample(reader, &sample, aux_memory);
+            if(callback->on_sample_payload)
+                callback->on_sample_payload(&sample, callback->object);
+        }
+        break;
+        case FORMAT_DATA_SEQ:
+        {
+            SampleDataSequence data_sequence;
+            deserialize_SampleDataSequence(reader, &data_sequence, aux_memory);
+            if(callback->on_data_sequence_payload)
+                callback->on_data_sequence_payload(&data_sequence, callback->object);
+        }
+        break;
+        case FORMAT_SAMPLE_SEQ:
+        {
+            SampleSequence sample_sequence;
+            deserialize_SampleSequence(reader, &sample_sequence, aux_memory);
+            if(callback->on_sample_sequence_payload)
+                callback->on_sample_sequence_payload(&sample_sequence, callback->object);
+        }
+        break;
+        case FORMAT_PACKED_SAMPLES:
+        {
+            PackedSamples packed_samples;
+            deserialize_PackedSamples(reader, &packed_samples, aux_memory);
+            if(callback->on_packed_samples_payload)
+                callback->on_packed_samples_payload(&packed_samples, callback->object);
+        }
+        break;
+    }
+}
 
 int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCallback* callback)
 {
@@ -18,8 +69,11 @@ int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCal
     if(callback->on_submessage_header)
         callback->on_submessage_header(&submessage_header, callback->object);
 
+    // Configure the reader for the specific endianess
+    reader->endianness = submessage_header.flags & FLAG_ENDIANNESS;
+
     // We will need as much a quantity of aux memory equivalent to the payload length.
-    reset_aux_memory(aux_memory, submessage_header.length);
+    increase_aux_memory(aux_memory, submessage_header.length);
 
     // Parse payload and call the corresponding callback.
     switch(submessage_header.id)
@@ -44,10 +98,19 @@ int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCal
 
         case SUBMESSAGE_ID_DATA:
         {
-            DataPayload data_payload;
-            deserialize_BaseObjectReply(reader, &data_payload.reply, aux_memory);
+            BaseObjectReply data_reply;
+            deserialize_BaseObjectReply(reader, &data_reply, aux_memory);
             if(callback->on_data_submessage)
-                callback->on_data_submessage(&data_payload, callback->object);
+            {
+                DataFormat format = callback->on_data_submessage(&data_reply, callback->object);
+                parse_data_payload(reader, aux_memory, callback, format);
+            }
+            else
+            {
+                // skip submessage.
+                reader->iterator += submessage_header.length;
+                reader->last_data_size = 0;
+            }
         }
         break;
 
@@ -59,7 +122,7 @@ int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCal
     return 1;
 }
 
-int parse_message(uint8_t* message_data, uint32_t length, MessageInputCallback* callback)
+int parse_message(uint8_t* message_data, uint32_t length, AuxMemory* aux_memory, MessageInputCallback* callback)
 {
     // All messages need at least 12 bytes (MessageHeader and SubmessageHeader)
     if(length < 12)
@@ -83,21 +146,13 @@ int parse_message(uint8_t* message_data, uint32_t length, MessageInputCallback* 
             return 0;
         }
 
-    // Prepare the auxiliar memory for deserialization process.
-    AuxMemory aux_memory;
-    init_aux_memory(&aux_memory);
-
     // Parse all submessages of the message
     do
     {
-        if(!parse_submessage(&reader, &aux_memory, callback))
-        {
-            free_aux_memory(&aux_memory);
+        if(!parse_submessage(&reader, aux_memory, callback))
             return 0;
-        }
     }
     while(reader.iterator + align_to(&reader, 4) + 4 > reader.final); // while another submessage fix...
 
-    free_aux_memory(&aux_memory);
     return 1;
 }

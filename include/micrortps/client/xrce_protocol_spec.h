@@ -73,12 +73,16 @@ typedef uint8_t RequestId[2];
 #define STATUS_LAST_OP_READ 0x05
 #define STATUS_LAST_OP_WRITE 0x06
 
-typedef uint8_t DataFormat;
-#define FORMAT_DATA 0x00
-#define FORMAT_DATA_SEQ 0x01
-#define FORMAT_SAMPLE 0x02
-#define FORMAT_SAMPLE_SEQ 0x03
-#define FORMAT_PACKED_SAMPLES 0x04
+
+typedef enum DataFormat
+{
+    FORMAT_DATA = 0x00,
+    FORMAT_DATA_SEQ = 0x01,
+    FORMAT_SAMPLE = 0x02,
+    FORMAT_SAMPLE_SEQ = 0x03,
+    FORMAT_PACKED_SAMPLES = 0x04
+
+} DataFormat;
 
 
 typedef struct Time_t
@@ -587,8 +591,7 @@ typedef struct MessageHeader
 
 typedef enum SubmessageHeaderFlags
 {
-    FLAG_BIG_ENDIAN = 0x00,
-    FLAG_LITTLE_ENDIAN = 0x01 << 0,
+    FLAG_ENDIANNESS = 0x01 << 0,
     FLAG_REPLACE = 0x01 << 1,
     FLAG_LAST_FRAGMENT = 0x01 << 1,
     FLAG_REUSE = 0x01 << 2

@@ -18,7 +18,7 @@ typedef struct AuxMemory
 } AuxMemory;
 
 void init_aux_memory(AuxMemory* cache);
-void reset_aux_memory(AuxMemory* cache, uint32_t size);
+void increase_aux_memory(AuxMemory* cache, uint32_t memory_size);
 void* request_aux_memory(AuxMemory* cache, uint32_t size);
 void free_aux_memory(AuxMemory* cache);
 

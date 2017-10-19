@@ -13,7 +13,7 @@ void init_aux_memory(AuxMemory* memory)
     memory->buffer_alloc = 0;
 }
 
-void reset_aux_memory(AuxMemory* memory, uint32_t memory_size)
+void increase_aux_memory(AuxMemory* memory, uint32_t memory_size)
 {
     if(memory->buffer_alloc < memory_size)
     {

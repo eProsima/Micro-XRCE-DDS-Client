@@ -65,7 +65,7 @@ bool end_submessage(MessageOutput* message, MicroState submessage_beginning,
 void init_message_output(MessageOutput* message, MessageOutputCallback callback,
                           uint8_t* out_buffer, uint32_t out_buffer_size)
 {
-    init_external_buffer(&message->writer, message->out_buffer, out_buffer_size);
+    init_external_buffer(&message->writer, out_buffer, out_buffer_size);
 
     message->callback = callback;
 }

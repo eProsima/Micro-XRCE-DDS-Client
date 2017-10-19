@@ -63,12 +63,14 @@ DATA:
 - define:  {STATUS_LAST_OP_READ:   '0x05'}
 - define:  {STATUS_LAST_OP_WRITE:  '0x06'}
 
-- typedef: {DataFormat: uint8_t}
-- define:  {FORMAT_DATA:           '0x00'}
-- define:  {FORMAT_DATA_SEQ:       '0x01'}
-- define:  {FORMAT_SAMPLE:         '0x02'}
-- define:  {FORMAT_SAMPLE_SEQ:     '0x03'}
-- define:  {FORMAT_PACKED_SAMPLES: '0x04'}
+- enum:
+    DataFormat:
+      - FORMAT_DATA:           '0x00'
+      - FORMAT_DATA_SEQ:       '0x01'
+      - FORMAT_SAMPLE:         '0x02'
+      - FORMAT_SAMPLE_SEQ:     '0x03'
+      - FORMAT_PACKED_SAMPLES: '0x04'
+    __TYPE__: uint8_t
 
 - struct:
     Time_t:
@@ -410,13 +412,12 @@ DATA:
     MessageHeader:
       - session_id: uint8_t
       - stream_id: uint8_t
-      - sequence_nr: uint16_t
+      - {sequence_nr: uint16_t, __ENDIANNESS__: LITTLE}
       - client_key: ClientKey
 
 - enum:
     SubmessageHeaderFlags:
-      - FLAG_BIG_ENDIAN:    '0x00'
-      - FLAG_LITTLE_ENDIAN: '0x01 << 0'
+      - FLAG_ENDIANNESS:    '0x01 << 0'
       - FLAG_REPLACE:       '0x01 << 1'
       - FLAG_LAST_FRAGMENT: '0x01 << 1'
       - FLAG_REUSE:         '0x01 << 2'
@@ -426,7 +427,7 @@ DATA:
     SubmessageHeader:
       - id: uint8_t
       - flags: SubmessageHeaderFlags
-      - length: uint16_t
+      - {length: uint16_t, __ENDIANNESS__: LITTLE}
 
 - struct:
     CreateClientPayload:

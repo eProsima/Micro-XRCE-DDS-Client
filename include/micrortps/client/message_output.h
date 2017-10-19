@@ -12,8 +12,7 @@ extern "C"
 
 typedef struct MessageOutputCallback
 {
-    //serialize callbacks
-    int (*on_initialize_message)(MessageHeader* header, void* callback_object);
+    void (*on_initialize_message)(MessageHeader* header, void* callback_object);
 
     void* object;
 
@@ -21,8 +20,6 @@ typedef struct MessageOutputCallback
 
 typedef struct MessageOutput
 {
-    uint8_t* out_buffer; //64 bytes minimun
-
     MicroBuffer writer;
 
     MessageOutputCallback callback;

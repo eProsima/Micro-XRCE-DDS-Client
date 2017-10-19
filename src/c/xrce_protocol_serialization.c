@@ -789,7 +789,7 @@ void serialize_MessageHeader(MicroBuffer* buffer, const MessageHeader* input)
 {
     serialize_uint8_t(buffer, input->session_id);
     serialize_uint8_t(buffer, input->stream_id);
-    serialize_uint16_t(buffer, input->sequence_nr);
+    serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->sequence_nr);
     serialize_array_uint8_t(buffer, input->client_key, 4);
 }
 
@@ -797,7 +797,7 @@ void deserialize_MessageHeader(MicroBuffer* buffer, MessageHeader* output, AuxMe
 {
     deserialize_uint8_t(buffer, &output->session_id);
     deserialize_uint8_t(buffer, &output->stream_id);
-    deserialize_uint16_t(buffer, &output->sequence_nr);
+    deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->sequence_nr);
     deserialize_array_uint8_t(buffer, output->client_key, 4);
 }
 
@@ -805,14 +805,14 @@ void serialize_SubmessageHeader(MicroBuffer* buffer, const SubmessageHeader* inp
 {
     serialize_uint8_t(buffer, input->id);
     serialize_uint8_t(buffer, input->flags);
-    serialize_uint16_t(buffer, input->length);
+    serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->length);
 }
 
 void deserialize_SubmessageHeader(MicroBuffer* buffer, SubmessageHeader* output, AuxMemory* aux)
 {
     deserialize_uint8_t(buffer, &output->id);
     deserialize_uint8_t(buffer, &output->flags);
-    deserialize_uint16_t(buffer, &output->length);
+    deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->length);
 }
 
 void serialize_CreateClientPayload(MicroBuffer* buffer, const CreateClientPayload* input)
