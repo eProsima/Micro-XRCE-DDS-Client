@@ -1,5 +1,7 @@
 DATA:
-- typedef: {ClientKey:  uint8_t 4}
+#- typedef: {ClientKey:  uint8_t 4}
+- struct:  {ClientKey: [data: uint8_t 4]}
+
 - typedef: {ObjectKind: uint8_t}
 - define:  {OBJK_INVALID:      '0x00'}
 - define:  {OBJK_PARTICIPANT:  '0x01'}
@@ -12,20 +14,24 @@ DATA:
 - define:  {OBJK_QOSPROFILE:   '0x11'}
 - define:  {OBJK_APPLICATION:  '0x20'}
 
-- typedef: {ObjectId: uint8_t 2}
+#- typedef: {ObjectId: uint8_t 2}
+- struct:  {ObjectId: [data: uint8_t 2]}
 - define:  {OBJECTID_INVALID: '{0xFF, 0xFF}'}
 - define:  {OBJECTID_CLIENT:  '{0xFF, 0xFF}'}
 - define:  {OBJECTID_SESSION: '{0xFF, 0xFF}'}
 
-- typedef: {XrceCookie: uint8_t 4}
-- define:  {XRCE_COOKIE: '{0x58, 0x52, 0x43, 0x45}'}
+#- typedef: {XrceCookie: uint8_t 4}
+- struct:  {XrceCookie: [data: uint8_t 4]}
+- define:  {XRCE_COOKIE: '(XrceCookie){0x58, 0x52, 0x43, 0x45}'}
 
-- typedef: {XrceVersion: uint8_t 2}
+#- typedef: {XrceVersion: uint8_t 2}
+- struct:  {XrceVersion: [data: uint8_t 2]}
 - define:  {XRCE_VESION_MAJOR:  '0x01'}
 - define:  {XRCE_VESION_MINOR:  '0x00'}
-- define:  {XRCE_VERSION: '{XRCE_VESION_MAJOR, XRCE_VESION_MINOR}'}
+- define:  {XRCE_VERSION: '(XrceVersion){XRCE_VESION_MAJOR, XRCE_VESION_MINOR}'}
 
-- typedef: {XrceVendorId: uint8_t 2}
+#- typedef: {XrceVendorId: uint8_t 2}
+- struct:  {XrceVendorId: [data: uint8_t 2]}
 - define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}
 
 - typedef: {SessionId: uint8_t}
@@ -33,16 +39,17 @@ DATA:
 - define:  {SESSIONID_NONE_WITHOUT_CLIENT_KEY:  '0x80'}
 
 - typedef: {StreamId: uint8_t}
-- define:  {STREAMID_NONE:                  '0x01'}
-- define:  {STREAMID_BUILTIN_BEST_EFFORTS:  '0x00'}
-- define:  {STREAMID_BUILTIN_RELIABLE:      '0x00'}
+- define:  {STREAMID_NONE:                  '0x00'}
+- define:  {STREAMID_BUILTIN_BEST_EFFORTS:  '0x01'}
+- define:  {STREAMID_BUILTIN_RELIABLE:      '0x8F'}
 
 - typedef: {RepresentationFormat: uint8_t}
 - define:  {REPRESENTATION_BY_REFERENCE:   '0x01'}
 - define:  {REPRESENTATION_AS_XML_STRING:  '0x02'}
 - define:  {REPRESENTATION_IN_BINARY:      '0x03'}
 
-- typedef: {RequestId: uint8_t 2}
+#- typedef: {RequestId: uint8_t 2}
+- struct:  {RequestId: [data: uint8_t 2]}
 
 - define:  {STATUS_OK:                    '0x00'}
 - define:  {STATUS_OK_MATCHED:            '0x01'}
@@ -413,7 +420,7 @@ DATA:
       - session_id: uint8_t
       - stream_id: uint8_t
       - {sequence_nr: uint16_t, __ENDIANNESS__: LITTLE}
-      - client_key: ClientKey
+      # - client_key: ClientKey //manage at message level.
 
 - enum:
     SubmessageHeaderFlags:

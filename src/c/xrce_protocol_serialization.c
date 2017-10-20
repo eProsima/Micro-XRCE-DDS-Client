@@ -1,5 +1,65 @@
 #include "xrce_protocol_serialization.h"
 
+void serialize_ClientKey(MicroBuffer* buffer, const ClientKey* input)
+{
+    serialize_array_uint8_t(buffer, input->data, 4);
+}
+
+void deserialize_ClientKey(MicroBuffer* buffer, ClientKey* output, AuxMemory* aux)
+{
+    deserialize_array_uint8_t(buffer, output->data, 4);
+}
+
+void serialize_ObjectId(MicroBuffer* buffer, const ObjectId* input)
+{
+    serialize_array_uint8_t(buffer, input->data, 2);
+}
+
+void deserialize_ObjectId(MicroBuffer* buffer, ObjectId* output, AuxMemory* aux)
+{
+    deserialize_array_uint8_t(buffer, output->data, 2);
+}
+
+void serialize_XrceCookie(MicroBuffer* buffer, const XrceCookie* input)
+{
+    serialize_array_uint8_t(buffer, input->data, 4);
+}
+
+void deserialize_XrceCookie(MicroBuffer* buffer, XrceCookie* output, AuxMemory* aux)
+{
+    deserialize_array_uint8_t(buffer, output->data, 4);
+}
+
+void serialize_XrceVersion(MicroBuffer* buffer, const XrceVersion* input)
+{
+    serialize_array_uint8_t(buffer, input->data, 2);
+}
+
+void deserialize_XrceVersion(MicroBuffer* buffer, XrceVersion* output, AuxMemory* aux)
+{
+    deserialize_array_uint8_t(buffer, output->data, 2);
+}
+
+void serialize_XrceVendorId(MicroBuffer* buffer, const XrceVendorId* input)
+{
+    serialize_array_uint8_t(buffer, input->data, 2);
+}
+
+void deserialize_XrceVendorId(MicroBuffer* buffer, XrceVendorId* output, AuxMemory* aux)
+{
+    deserialize_array_uint8_t(buffer, output->data, 2);
+}
+
+void serialize_RequestId(MicroBuffer* buffer, const RequestId* input)
+{
+    serialize_array_uint8_t(buffer, input->data, 2);
+}
+
+void deserialize_RequestId(MicroBuffer* buffer, RequestId* output, AuxMemory* aux)
+{
+    deserialize_array_uint8_t(buffer, output->data, 2);
+}
+
 void serialize_Time_t(MicroBuffer* buffer, const Time_t* input)
 {
     serialize_int32_t(buffer, input->seconds);
@@ -53,21 +113,21 @@ void deserialize_StringSequence_t(MicroBuffer* buffer, StringSequence_t* output,
 
 void serialize_OBJK_CLIENT_Representation(MicroBuffer* buffer, const OBJK_CLIENT_Representation* input)
 {
-    serialize_array_uint8_t(buffer, input->xrce_cookie, 4);
-    serialize_array_uint8_t(buffer, input->xrce_version, 2);
-    serialize_array_uint8_t(buffer, input->xrce_vendor_id, 2);
+    serialize_XrceCookie(buffer, &input->xrce_cookie);
+    serialize_XrceVersion(buffer, &input->xrce_version);
+    serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
     serialize_Time_t(buffer, &input->client_timestamp);
-    serialize_array_uint8_t(buffer, input->client_key, 4);
+    serialize_ClientKey(buffer, &input->client_key);
     serialize_uint8_t(buffer, input->session_id);
 }
 
 void deserialize_OBJK_CLIENT_Representation(MicroBuffer* buffer, OBJK_CLIENT_Representation* output, AuxMemory* aux)
 {
-    deserialize_array_uint8_t(buffer, output->xrce_cookie, 4);
-    deserialize_array_uint8_t(buffer, output->xrce_version, 2);
-    deserialize_array_uint8_t(buffer, output->xrce_vendor_id, 2);
+    deserialize_XrceCookie(buffer, &output->xrce_cookie, aux);
+    deserialize_XrceVersion(buffer, &output->xrce_version, aux);
+    deserialize_XrceVendorId(buffer, &output->xrce_vendor_id, aux);
     deserialize_Time_t(buffer, &output->client_timestamp, aux);
-    deserialize_array_uint8_t(buffer, output->client_key, 4);
+    deserialize_ClientKey(buffer, &output->client_key, aux);
     deserialize_uint8_t(buffer, &output->session_id);
 }
 
@@ -186,79 +246,79 @@ void deserialize_OBJK_PARTICIPANT_Representation(MicroBuffer* buffer, OBJK_PARTI
 void serialize_OBJK_TYPE_Representation(MicroBuffer* buffer, const OBJK_TYPE_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_array_uint8_t(buffer, input->participant_id, 2);
+    serialize_ObjectId(buffer, &input->participant_id);
     serialize_String_t(buffer, &input->registered_type_name);
 }
 
 void deserialize_OBJK_TYPE_Representation(MicroBuffer* buffer, OBJK_TYPE_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_array_uint8_t(buffer, output->participant_id, 2);
+    deserialize_ObjectId(buffer, &output->participant_id, aux);
     deserialize_String_t(buffer, &output->registered_type_name, aux);
 }
 
 void serialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, const OBJK_TOPIC_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_array_uint8_t(buffer, input->participant_id, 2);
+    serialize_ObjectId(buffer, &input->participant_id);
 }
 
 void deserialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, OBJK_TOPIC_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_array_uint8_t(buffer, output->participant_id, 2);
+    deserialize_ObjectId(buffer, &output->participant_id, aux);
 }
 
 void serialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, const OBJK_PUBLISHER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_array_uint8_t(buffer, input->participant_id, 2);
+    serialize_ObjectId(buffer, &input->participant_id);
 }
 
 void deserialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, OBJK_PUBLISHER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_array_uint8_t(buffer, output->participant_id, 2);
+    deserialize_ObjectId(buffer, &output->participant_id, aux);
 }
 
 void serialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_array_uint8_t(buffer, input->participant_id, 2);
+    serialize_ObjectId(buffer, &input->participant_id);
 }
 
 void deserialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, OBJK_SUBSCRIBER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_array_uint8_t(buffer, output->participant_id, 2);
+    deserialize_ObjectId(buffer, &output->participant_id, aux);
 }
 
 void serialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, const OBJK_DATAWRITER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_array_uint8_t(buffer, input->participant_id, 2);
-    serialize_array_uint8_t(buffer, input->publisher_id, 2);
+    serialize_ObjectId(buffer, &input->participant_id);
+    serialize_ObjectId(buffer, &input->publisher_id);
 }
 
 void deserialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, OBJK_DATAWRITER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_array_uint8_t(buffer, output->participant_id, 2);
-    deserialize_array_uint8_t(buffer, output->publisher_id, 2);
+    deserialize_ObjectId(buffer, &output->participant_id, aux);
+    deserialize_ObjectId(buffer, &output->publisher_id, aux);
 }
 
 void serialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, const OBJK_DATAREADER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_array_uint8_t(buffer, input->participant_id, 2);
-    serialize_array_uint8_t(buffer, input->subscriber_id, 2);
+    serialize_ObjectId(buffer, &input->participant_id);
+    serialize_ObjectId(buffer, &input->subscriber_id);
 }
 
 void deserialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, OBJK_DATAREADER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_array_uint8_t(buffer, output->participant_id, 2);
-    deserialize_array_uint8_t(buffer, output->subscriber_id, 2);
+    deserialize_ObjectId(buffer, &output->participant_id, aux);
+    deserialize_ObjectId(buffer, &output->subscriber_id, aux);
 }
 
 void serialize_OBJK_TYPE_Binary(MicroBuffer* buffer, const OBJK_TYPE_Binary* input)
@@ -427,14 +487,14 @@ void deserialize_ObjectVariant(MicroBuffer* buffer, ObjectVariant* output, AuxMe
 
 void serialize_ResultStatus(MicroBuffer* buffer, const ResultStatus* input)
 {
-    serialize_array_uint8_t(buffer, input->request_id, 2);
+    serialize_RequestId(buffer, &input->request_id);
     serialize_uint8_t(buffer, input->status);
     serialize_uint8_t(buffer, input->implementation_status);
 }
 
 void deserialize_ResultStatus(MicroBuffer* buffer, ResultStatus* output, AuxMemory* aux)
 {
-    deserialize_array_uint8_t(buffer, output->request_id, 2);
+    deserialize_RequestId(buffer, &output->request_id, aux);
     deserialize_uint8_t(buffer, &output->status);
     deserialize_uint8_t(buffer, &output->implementation_status);
 }
@@ -503,50 +563,50 @@ void deserialize_Info(MicroBuffer* buffer, Info* output, AuxMemory* aux)
 
 void serialize_BaseRequest(MicroBuffer* buffer, const BaseRequest* input)
 {
-    serialize_array_uint8_t(buffer, input->request_id, 2);
-    serialize_array_uint8_t(buffer, input->object_id, 2);
+    serialize_RequestId(buffer, &input->request_id);
+    serialize_ObjectId(buffer, &input->object_id);
 }
 
 void deserialize_BaseRequest(MicroBuffer* buffer, BaseRequest* output, AuxMemory* aux)
 {
-    deserialize_array_uint8_t(buffer, output->request_id, 2);
-    deserialize_array_uint8_t(buffer, output->object_id, 2);
+    deserialize_RequestId(buffer, &output->request_id, aux);
+    deserialize_ObjectId(buffer, &output->object_id, aux);
 }
 
 void serialize_BaseObjectRequest(MicroBuffer* buffer, const BaseObjectRequest* input)
 {
     serialize_BaseRequest(buffer, &input->base);
-    serialize_array_uint8_t(buffer, input->object_id, 2);
+    serialize_ObjectId(buffer, &input->object_id);
 }
 
 void deserialize_BaseObjectRequest(MicroBuffer* buffer, BaseObjectRequest* output, AuxMemory* aux)
 {
     deserialize_BaseRequest(buffer, &output->base, aux);
-    deserialize_array_uint8_t(buffer, output->object_id, 2);
+    deserialize_ObjectId(buffer, &output->object_id, aux);
 }
 
 void serialize_BaseReply(MicroBuffer* buffer, const BaseReply* input)
 {
     serialize_ResultStatus(buffer, &input->result);
-    serialize_array_uint8_t(buffer, input->request_id, 2);
+    serialize_RequestId(buffer, &input->request_id);
 }
 
 void deserialize_BaseReply(MicroBuffer* buffer, BaseReply* output, AuxMemory* aux)
 {
     deserialize_ResultStatus(buffer, &output->result, aux);
-    deserialize_array_uint8_t(buffer, output->request_id, 2);
+    deserialize_RequestId(buffer, &output->request_id, aux);
 }
 
 void serialize_BaseObjectReply(MicroBuffer* buffer, const BaseObjectReply* input)
 {
     serialize_BaseReply(buffer, &input->base);
-    serialize_array_uint8_t(buffer, input->object_id, 2);
+    serialize_ObjectId(buffer, &input->object_id);
 }
 
 void deserialize_BaseObjectReply(MicroBuffer* buffer, BaseObjectReply* output, AuxMemory* aux)
 {
     deserialize_BaseReply(buffer, &output->base, aux);
-    deserialize_array_uint8_t(buffer, output->object_id, 2);
+    deserialize_ObjectId(buffer, &output->object_id, aux);
 }
 
 void serialize_InfoReply(MicroBuffer* buffer, const InfoReply* input)
@@ -790,7 +850,6 @@ void serialize_MessageHeader(MicroBuffer* buffer, const MessageHeader* input)
     serialize_uint8_t(buffer, input->session_id);
     serialize_uint8_t(buffer, input->stream_id);
     serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->sequence_nr);
-    serialize_array_uint8_t(buffer, input->client_key, 4);
 }
 
 void deserialize_MessageHeader(MicroBuffer* buffer, MessageHeader* output, AuxMemory* aux)
@@ -798,7 +857,6 @@ void deserialize_MessageHeader(MicroBuffer* buffer, MessageHeader* output, AuxMe
     deserialize_uint8_t(buffer, &output->session_id);
     deserialize_uint8_t(buffer, &output->stream_id);
     deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->sequence_nr);
-    deserialize_array_uint8_t(buffer, output->client_key, 4);
 }
 
 void serialize_SubmessageHeader(MicroBuffer* buffer, const SubmessageHeader* input)

@@ -1,5 +1,7 @@
-#include "micrortps/client/message_input.h"
+#include "micrortps/client/input_message.h"
 #include "micrortps/client/xrce_protocol_serialization.h"
+
+#include <stdlib.h>
 
 #ifndef NDEBUG
 
@@ -13,9 +15,25 @@
 
 #endif
 
-void parse_data_payload(MicroBuffer* reader, AuxMemory* aux_memory,
-    MessageInputCallback* callback, DataFormat format)
+void init_input_message(InputMessage* message, InputMessageCallback callback, uint8_t* in_buffer, uint32_t in_buffer_size)
 {
+    init_external_buffer(&message->reader, in_buffer, in_buffer_size);
+    init_aux_memory(&message->aux_memory);
+
+    message->callback = callback;
+}
+
+void free_input_message(InputMessage* message)
+{
+    free_aux_memory(&message->aux_memory);
+}
+
+void parse_data_payload(InputMessage* message, DataFormat format)
+{
+    MicroBuffer* reader = &message->reader;
+    AuxMemory* aux_memory = &message->aux_memory;
+    InputMessageCallback* callback = &message->callback;
+
     switch(format)
     {
         case FORMAT_DATA:
@@ -61,8 +79,12 @@ void parse_data_payload(MicroBuffer* reader, AuxMemory* aux_memory,
     }
 }
 
-int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCallback* callback)
+int parse_submessage(InputMessage* message)
 {
+    MicroBuffer* reader = &message->reader;
+    AuxMemory* aux_memory = &message->aux_memory;
+    InputMessageCallback* callback = &message->callback;
+
     // Submessage message header.
     SubmessageHeader submessage_header;
     deserialize_SubmessageHeader(reader, &submessage_header, NULL);
@@ -73,7 +95,11 @@ int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCal
     reader->endianness = submessage_header.flags & FLAG_ENDIANNESS;
 
     // We will need as much a quantity of aux memory equivalent to the payload length.
-    increase_aux_memory(aux_memory, submessage_header.length);
+    increase_aux_memory(&message->aux_memory, submessage_header.length);
+
+    // Submessage is not complete.
+    if(reader->iterator + submessage_header.length >= reader->final)
+        return 0;
 
     // Parse payload and call the corresponding callback.
     switch(submessage_header.id)
@@ -103,7 +129,7 @@ int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCal
             if(callback->on_data_submessage)
             {
                 DataFormat format = callback->on_data_submessage(&data_reply, callback->object);
-                parse_data_payload(reader, aux_memory, callback, format);
+                parse_data_payload(message, format);
             }
             else
             {
@@ -122,37 +148,34 @@ int parse_submessage(MicroBuffer* reader, AuxMemory* aux_memory, MessageInputCal
     return 1;
 }
 
-int parse_message(uint8_t* message_data, uint32_t length, AuxMemory* aux_memory, MessageInputCallback* callback)
+int parse_message(InputMessage* message, uint32_t length)
 {
-    // All messages need at least 12 bytes (MessageHeader and SubmessageHeader)
-    if(length < 12)
-    {
-        ERROR_PRINT("Parse message error: Message length is %u (less than 12).", length);
-        return 0;
-    }
-
-    // Init the reader for the message.
-    MicroBuffer reader;
-    init_external_buffer(&reader, message_data, length);
+    // Reader for the message.
+    MicroBuffer* reader = &message->reader;
+    InputMessageCallback* callback = &message->callback;
 
     // Parse message header.
-    // If the callback implementation fails, the message will not be parse
     MessageHeader message_header;
-    deserialize_MessageHeader(&reader, &message_header, NULL);
-    if(callback->on_message_header)
-        if(!callback->on_message_header(&message_header, callback->object))
-        {
-            ERROR_PRINT("Parse message error: Message header not undestood.");
-            return 0;
-        }
+    ClientKey key;
+    deserialize_MessageHeader(reader, &message_header, NULL);
+    if(message_header.session_id >= 128)
+        deserialize_ClientKey(reader, &key, NULL);
+
+    // If the callback implementation fails, the message will not be parse
+    if(callback->on_message_header &&
+        !callback->on_message_header(&message_header, &key, callback->object))
+    {
+        ERROR_PRINT("Parse message error: Message header not undestood.");
+        return 0;
+    }
 
     // Parse all submessages of the message
     do
     {
-        if(!parse_submessage(&reader, aux_memory, callback))
+        if(!parse_submessage(message))
             return 0;
     }
-    while(reader.iterator + align_to(&reader, 4) + 4 > reader.final); // while another submessage fix...
+    while(reader->iterator + align_to(reader, 4) + 4 >= reader->final); // while another submessage fix...
 
     return 1;
 }

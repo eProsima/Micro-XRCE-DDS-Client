@@ -12,6 +12,24 @@ extern "C"
 #include <microcdr/microcdr.h>
 
 
+void serialize_ClientKey(MicroBuffer* buffer, const ClientKey* input);
+void deserialize_ClientKey(MicroBuffer* buffer, ClientKey* output, AuxMemory* aux);
+
+void serialize_ObjectId(MicroBuffer* buffer, const ObjectId* input);
+void deserialize_ObjectId(MicroBuffer* buffer, ObjectId* output, AuxMemory* aux);
+
+void serialize_XrceCookie(MicroBuffer* buffer, const XrceCookie* input);
+void deserialize_XrceCookie(MicroBuffer* buffer, XrceCookie* output, AuxMemory* aux);
+
+void serialize_XrceVersion(MicroBuffer* buffer, const XrceVersion* input);
+void deserialize_XrceVersion(MicroBuffer* buffer, XrceVersion* output, AuxMemory* aux);
+
+void serialize_XrceVendorId(MicroBuffer* buffer, const XrceVendorId* input);
+void deserialize_XrceVendorId(MicroBuffer* buffer, XrceVendorId* output, AuxMemory* aux);
+
+void serialize_RequestId(MicroBuffer* buffer, const RequestId* input);
+void deserialize_RequestId(MicroBuffer* buffer, RequestId* output, AuxMemory* aux);
+
 void serialize_Time_t(MicroBuffer* buffer, const Time_t* input);
 void deserialize_Time_t(MicroBuffer* buffer, Time_t* output, AuxMemory* aux);
 

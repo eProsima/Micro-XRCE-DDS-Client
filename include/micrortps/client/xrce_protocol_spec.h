@@ -10,7 +10,12 @@ extern "C"
 #include <stdbool.h>
 
 
-typedef uint8_t ClientKey[4];
+
+typedef struct ClientKey
+{
+    uint8_t data[4];
+
+} ClientKey;
 
 typedef uint8_t ObjectKind;
 #define OBJK_INVALID 0x00
@@ -24,20 +29,40 @@ typedef uint8_t ObjectKind;
 #define OBJK_QOSPROFILE 0x11
 #define OBJK_APPLICATION 0x20
 
-typedef uint8_t ObjectId[2];
+
+typedef struct ObjectId
+{
+    uint8_t data[2];
+
+} ObjectId;
 #define OBJECTID_INVALID {0xFF, 0xFF}
 #define OBJECTID_CLIENT {0xFF, 0xFF}
 #define OBJECTID_SESSION {0xFF, 0xFF}
 
-typedef uint8_t XrceCookie[4];
-#define XRCE_COOKIE {0x58, 0x52, 0x43, 0x45}
 
-typedef uint8_t XrceVersion[2];
+typedef struct XrceCookie
+{
+    uint8_t data[4];
+
+} XrceCookie;
+#define XRCE_COOKIE (XrceCookie){0x58, 0x52, 0x43, 0x45}
+
+
+typedef struct XrceVersion
+{
+    uint8_t data[2];
+
+} XrceVersion;
 #define XRCE_VESION_MAJOR 0x01
 #define XRCE_VESION_MINOR 0x00
-#define XRCE_VERSION {XRCE_VESION_MAJOR, XRCE_VESION_MINOR}
+#define XRCE_VERSION (XrceVersion){XRCE_VESION_MAJOR, XRCE_VESION_MINOR}
 
-typedef uint8_t XrceVendorId[2];
+
+typedef struct XrceVendorId
+{
+    uint8_t data[2];
+
+} XrceVendorId;
 #define XRCE_VENDOR_INVALID {0x00, 0x00}
 
 typedef uint8_t SessionId;
@@ -45,16 +70,21 @@ typedef uint8_t SessionId;
 #define SESSIONID_NONE_WITHOUT_CLIENT_KEY 0x80
 
 typedef uint8_t StreamId;
-#define STREAMID_NONE 0x01
-#define STREAMID_BUILTIN_BEST_EFFORTS 0x00
-#define STREAMID_BUILTIN_RELIABLE 0x00
+#define STREAMID_NONE 0x00
+#define STREAMID_BUILTIN_BEST_EFFORTS 0x01
+#define STREAMID_BUILTIN_RELIABLE 0x8F
 
 typedef uint8_t RepresentationFormat;
 #define REPRESENTATION_BY_REFERENCE 0x01
 #define REPRESENTATION_AS_XML_STRING 0x02
 #define REPRESENTATION_IN_BINARY 0x03
 
-typedef uint8_t RequestId[2];
+
+typedef struct RequestId
+{
+    uint8_t data[2];
+
+} RequestId;
 #define STATUS_OK 0x00
 #define STATUS_OK_MATCHED 0x01
 #define STATUS_ERR_DDS_ERROR 0x80
@@ -119,11 +149,11 @@ typedef struct StringSequence_t
 
 typedef struct OBJK_CLIENT_Representation
 {
-    uint8_t xrce_cookie[4];
-    uint8_t xrce_version[2];
-    uint8_t xrce_vendor_id[2];
+    XrceCookie xrce_cookie;
+    XrceVersion xrce_version;
+    XrceVendorId xrce_vendor_id;
     Time_t client_timestamp;
-    uint8_t client_key[4];
+    ClientKey client_key;
     uint8_t session_id;
 
 } OBJK_CLIENT_Representation;
@@ -200,7 +230,7 @@ typedef struct OBJK_PARTICIPANT_Representation
 typedef struct OBJK_TYPE_Representation
 {
     OBJK_Representation3_Base base3;
-    uint8_t participant_id[2];
+    ObjectId participant_id;
     String_t registered_type_name;
 
 } OBJK_TYPE_Representation;
@@ -209,7 +239,7 @@ typedef struct OBJK_TYPE_Representation
 typedef struct OBJK_TOPIC_Representation
 {
     OBJK_Representation3_Base base3;
-    uint8_t participant_id[2];
+    ObjectId participant_id;
 
 } OBJK_TOPIC_Representation;
 
@@ -217,7 +247,7 @@ typedef struct OBJK_TOPIC_Representation
 typedef struct OBJK_PUBLISHER_Representation
 {
     OBJK_Representation3_Base base3;
-    uint8_t participant_id[2];
+    ObjectId participant_id;
 
 } OBJK_PUBLISHER_Representation;
 
@@ -225,7 +255,7 @@ typedef struct OBJK_PUBLISHER_Representation
 typedef struct OBJK_SUBSCRIBER_Representation
 {
     OBJK_Representation3_Base base3;
-    uint8_t participant_id[2];
+    ObjectId participant_id;
 
 } OBJK_SUBSCRIBER_Representation;
 
@@ -233,8 +263,8 @@ typedef struct OBJK_SUBSCRIBER_Representation
 typedef struct OBJK_DATAWRITER_Representation
 {
     OBJK_Representation3_Base base3;
-    uint8_t participant_id[2];
-    uint8_t publisher_id[2];
+    ObjectId participant_id;
+    ObjectId publisher_id;
 
 } OBJK_DATAWRITER_Representation;
 
@@ -242,8 +272,8 @@ typedef struct OBJK_DATAWRITER_Representation
 typedef struct OBJK_DATAREADER_Representation
 {
     OBJK_Representation3_Base base3;
-    uint8_t participant_id[2];
-    uint8_t subscriber_id[2];
+    ObjectId participant_id;
+    ObjectId subscriber_id;
 
 } OBJK_DATAREADER_Representation;
 
@@ -346,7 +376,7 @@ typedef struct ObjectVariant
 
 typedef struct ResultStatus
 {
-    uint8_t request_id[2];
+    RequestId request_id;
     uint8_t status;
     uint8_t implementation_status;
 
@@ -402,8 +432,8 @@ typedef struct Info
 
 typedef struct BaseRequest
 {
-    uint8_t request_id[2];
-    uint8_t object_id[2];
+    RequestId request_id;
+    ObjectId object_id;
 
 } BaseRequest;
 
@@ -411,7 +441,7 @@ typedef struct BaseRequest
 typedef struct BaseObjectRequest
 {
     BaseRequest base;
-    uint8_t object_id[2];
+    ObjectId object_id;
 
 } BaseObjectRequest;
 
@@ -419,7 +449,7 @@ typedef struct BaseObjectRequest
 typedef struct BaseReply
 {
     ResultStatus result;
-    uint8_t request_id[2];
+    RequestId request_id;
 
 } BaseReply;
 
@@ -427,7 +457,7 @@ typedef struct BaseReply
 typedef struct BaseObjectReply
 {
     BaseReply base;
-    uint8_t object_id[2];
+    ObjectId object_id;
 
 } BaseObjectReply;
 
@@ -584,7 +614,6 @@ typedef struct MessageHeader
     uint8_t session_id;
     uint8_t stream_id;
     uint16_t sequence_nr;
-    uint8_t client_key[4];
 
 } MessageHeader;
 

@@ -1,4 +1,4 @@
-#include "micrortps/client/message_output.h"
+#include "micrortps/client/output_message.h"
 #include "micrortps/client/xrce_protocol_serialization.h"
 
 #ifndef NDEBUG
@@ -7,37 +7,37 @@
 #endif
 
 // PRIVATE DEFINITIONS
-void begin_submessage(MessageOutput* message, MicroState* submessage_beginning,
+void begin_submessage(OutputMessage* message, MicroState* submessage_beginning,
                       MicroState* header_beginning, MicroState* payload_beginning);
 
-bool end_submessage(MessageOutput* message, MicroState submessage_beginning,
+bool end_submessage(OutputMessage* message, MicroState submessage_beginning,
                     MicroState header_beginning, MicroState payload_beginning,
                     SubmessageId id, uint8_t flags);
 
 
-void begin_submessage(MessageOutput* message, MicroState* submessage_beginning,
+void begin_submessage(OutputMessage* message, MicroState* submessage_beginning,
                       MicroState* header_beginning, MicroState* payload_beginning)
 {
     if(message->writer.iterator == message->writer.init)
     {
         MessageHeader message_header;
-        message->callback.on_initialize_message(&message_header, message->callback.object);
+        ClientKey key;
+        message->callback.on_initialize_message(&message_header, &key, message->callback.object);
 
         serialize_MessageHeader(&message->writer, &message_header);
+        if(message_header.session_id >= 128)
+            serialize_ClientKey(&message->writer, &key);
     }
-
     *submessage_beginning = get_micro_state(&message->writer);
 
     align_to(&message->writer, 4);
-
     *header_beginning = get_micro_state(&message->writer);
 
     message->writer.iterator += 4; //Space for MessageHeader.
-
     *payload_beginning = get_micro_state(&message->writer);
 }
 
-bool end_submessage(MessageOutput* message, MicroState submessage_beginning,
+bool end_submessage(OutputMessage* message, MicroState submessage_beginning,
                     MicroState header_beginning, MicroState payload_beginning,
                     SubmessageId id, uint8_t flags)
 {
@@ -62,7 +62,7 @@ bool end_submessage(MessageOutput* message, MicroState submessage_beginning,
     return true;
 }
 
-void init_message_output(MessageOutput* message, MessageOutputCallback callback,
+void init_output_message(OutputMessage* message, OutputMessageCallback callback,
                           uint8_t* out_buffer, uint32_t out_buffer_size)
 {
     init_external_buffer(&message->writer, out_buffer, out_buffer_size);
@@ -70,7 +70,7 @@ void init_message_output(MessageOutput* message, MessageOutputCallback callback,
     message->callback = callback;
 }
 
-bool add_create_client_submessage(MessageOutput* message, const CreateClientPayload* payload)
+bool add_create_client_submessage(OutputMessage* message, const CreateClientPayload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
@@ -81,7 +81,7 @@ bool add_create_client_submessage(MessageOutput* message, const CreateClientPayl
         SUBMESSAGE_ID_CREATE_CLIENT, message->writer.endianness);
 }
 
-bool add_create_resource_submessage(MessageOutput* message, const CreateResourcePayload* payload, uint8_t creation_mode)
+bool add_create_resource_submessage(OutputMessage* message, const CreateResourcePayload* payload, uint8_t creation_mode)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
@@ -92,7 +92,7 @@ bool add_create_resource_submessage(MessageOutput* message, const CreateResource
         SUBMESSAGE_ID_CREATE, creation_mode | message->writer.endianness);
 }
 
-bool add_delete_resource_submessage(MessageOutput* message, const DeleteResourcePayload* payload)
+bool add_delete_resource_submessage(OutputMessage* message, const DeleteResourcePayload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
@@ -103,7 +103,7 @@ bool add_delete_resource_submessage(MessageOutput* message, const DeleteResource
         SUBMESSAGE_ID_DELETE, message->writer.endianness);
 }
 
-bool add_get_info_submessage(MessageOutput* message, const GetInfoPayload* payload)
+bool add_get_info_submessage(OutputMessage* message, const GetInfoPayload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
@@ -114,7 +114,7 @@ bool add_get_info_submessage(MessageOutput* message, const GetInfoPayload* paylo
         SUBMESSAGE_ID_GET_INFO, message->writer.endianness);
 }
 
-bool add_read_data_submessage(MessageOutput* message, const ReadDataPayload* payload)
+bool add_read_data_submessage(OutputMessage* message, const ReadDataPayload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
@@ -125,7 +125,7 @@ bool add_read_data_submessage(MessageOutput* message, const ReadDataPayload* pay
         SUBMESSAGE_ID_READ_DATA, message->writer.endianness);
 }
 
-bool add_write_data_submessage(MessageOutput* message, const WriteDataPayload* payload)
+bool add_write_data_submessage(OutputMessage* message, const WriteDataPayload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 

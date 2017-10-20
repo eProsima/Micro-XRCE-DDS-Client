@@ -70,3 +70,10 @@ if(EPROSIMA_BUILD_TESTS AND NOT EPROSIMA_INSTALLER)
         add_subdirectory(test)
     endif()
 endif()
+
+###############################################################################
+# Examples
+###############################################################################
+if(EPROSIMA_BUILD_EXAMPLES)
+    add_subdirectory(examples/prototype)
+endif()
