@@ -40,6 +40,7 @@ typedef struct InputMessage
     InputMessageCallback callback;
     MicroBuffer reader;
 
+    uint32_t buffer;
     uint32_t buffer_size;
 
 } InputMessage;

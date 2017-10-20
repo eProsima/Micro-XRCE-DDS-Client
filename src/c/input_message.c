@@ -21,6 +21,7 @@ void init_input_message(InputMessage* message, InputMessageCallback callback, ui
     init_external_buffer(&message->reader, in_buffer, 0);
 
     message->callback = callback;
+    message->buffer = in_buffer;
     message->buffer_size = in_buffer_size;
 }
 
@@ -156,7 +157,7 @@ int parse_message(InputMessage* message, uint32_t length)
     // Init the reader
     MicroBuffer* reader = &message->reader;
     if(length <= message->buffer_size)
-        init_external_buffer(reader, reader->init, length);
+        init_external_buffer(reader, message->buffer, length);
     else
     {
         ERROR_PRINT("Parse message error: Message length greater than input buffer.");

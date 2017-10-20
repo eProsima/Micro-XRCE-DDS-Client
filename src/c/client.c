@@ -9,10 +9,11 @@
 // aux includes
 #include <stdio.h>
 
-#define BUFFER_LENGTH 1024
-
 typedef struct ClientState
 {
+    locator_id_t transport_id;
+    uint32_t buffer_size;
+
     uint8_t* input_buffer;
     uint8_t* output_buffer;
 
@@ -36,12 +37,15 @@ int on_message_header(const MessageHeader* header, const ClientKey* key, void* v
 // ----------------------------------------------------------------------------------
 //                                 PUBLIC API
 // ----------------------------------------------------------------------------------
-ClientState* new_client_state()
+ClientState* new_client_state(locator_id_t transport_id, uint32_t buffer_size)
 {
     ClientState* state = malloc(sizeof(ClientState));
 
-    state->input_buffer = malloc(BUFFER_LENGTH);
-    state->output_buffer = malloc(BUFFER_LENGTH);
+    state->transport_id = transport_id;
+    state->buffer_size = buffer_size;
+
+    state->input_buffer = malloc(buffer_size);
+    state->output_buffer = malloc(buffer_size);
 
     state->session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
     state->stream_id = STREAMID_NONE;
@@ -57,8 +61,8 @@ ClientState* new_client_state()
     input_callback.object = state;
     input_callback.on_message_header = on_message_header;
 
-    init_output_message(&state->output_message, output_callback, state->output_buffer, BUFFER_LENGTH);
-    init_input_message(&state->input_message, input_callback, state->input_buffer, BUFFER_LENGTH);
+    init_output_message(&state->output_message, output_callback, state->output_buffer, buffer_size);
+    init_input_message(&state->input_message, input_callback, state->input_buffer, buffer_size);
 
     return state;
 }
@@ -90,12 +94,22 @@ void create_xrce_client(ClientState* state)
 
 void create_participant(ClientState* state)
 {
-
+    //TODO
 }
 
-void received_data(ClientState* state)
+void send_to_agent(ClientState* state)
 {
-    parse_message(&state->input_message, BUFFER_LENGTH);
+    uint32_t length = get_message_length(&state->output_message);
+    send_data(state->output_buffer, length, state->transport_id);
+}
+
+void received_from_agent(ClientState* state)
+{
+    uint32_t length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
+    if(length > 0)
+    {
+        parse_message(&state->input_message, length);
+    }
 }
 
 // ----------------------------------------------------------------------------------

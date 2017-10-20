@@ -7,6 +7,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include <transport/ddsxrce_transport.h>
 
 typedef enum CreateModeFlags
 {
@@ -16,13 +17,14 @@ typedef enum CreateModeFlags
 
 typedef struct ClientState ClientState;
 
-ClientState* new_client_state();
+ClientState* new_client_state(locator_id_t locator_id, uint32_t buffer_size);
 void free_client_state(ClientState* state);
 
 void create_xrce_client(ClientState* state);
 void create_participant(ClientState* state);
 
-void received_data(ClientState* state);
+void send_to_agent(ClientState* state);
+void received_from_agent(ClientState* state);
 
 /*void create_xrce_participant(ClientState* state);
 void create_xrce_topic(ClientState* state);

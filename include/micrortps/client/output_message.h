@@ -27,6 +27,8 @@ typedef struct OutputMessage
 void init_output_message(OutputMessage* message, OutputMessageCallback callback,
                           uint8_t* out_buffer, uint32_t out_buffer_size);
 
+uint32_t get_message_length(OutputMessage* message);
+
 bool add_create_client_submessage  (OutputMessage* message, const CreateClientPayload* payload);
 bool add_create_resource_submessage(OutputMessage* message, const CreateResourcePayload* payload, uint8_t creation_mode);
 bool add_delete_resource_submessage(OutputMessage* message, const DeleteResourcePayload* payload);
