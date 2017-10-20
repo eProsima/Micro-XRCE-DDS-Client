@@ -88,14 +88,9 @@ void create_xrce_client(ClientState* state)
     add_create_client_submessage(&state->output_message, &payload);
 }
 
-void delete_xrce_client(ClientState* state)
+void create_participant(ClientState* state)
 {
-    DeleteResourcePayload payload;
-    payload.request.base.request_id = (RequestId){0x01, 0x02};
-    payload.request.base.object_id = (ObjectId){0x01, 0x02};
-    payload.request.object_id = (ObjectId){0x01, 0x02};
 
-    add_delete_resource_submessage(&state->output_message, &payload);
 }
 
 void received_data(ClientState* state)

@@ -20,7 +20,7 @@ ClientState* new_client_state();
 void free_client_state(ClientState* state);
 
 void create_xrce_client(ClientState* state);
-void delete_xrce_client(ClientState* state);
+void create_participant(ClientState* state);
 
 void received_data(ClientState* state);
 
