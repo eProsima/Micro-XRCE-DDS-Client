@@ -17,10 +17,11 @@
 
 void init_input_message(InputMessage* message, InputMessageCallback callback, uint8_t* in_buffer, uint32_t in_buffer_size)
 {
-    init_external_buffer(&message->reader, in_buffer, in_buffer_size);
     init_aux_memory(&message->aux_memory);
+    init_external_buffer(&message->reader, in_buffer, 0);
 
     message->callback = callback;
+    message->buffer_size = in_buffer_size;
 }
 
 void free_input_message(InputMessage* message)
@@ -150,9 +151,17 @@ int parse_submessage(InputMessage* message)
 
 int parse_message(InputMessage* message, uint32_t length)
 {
-    // Reader for the message.
-    MicroBuffer* reader = &message->reader;
     InputMessageCallback* callback = &message->callback;
+
+    // Init the reader
+    MicroBuffer* reader = &message->reader;
+    if(length <= message->buffer_size)
+        init_external_buffer(reader, reader->init, length);
+    else
+    {
+        ERROR_PRINT("Parse message error: Message length greater than input buffer.");
+        return 0;
+    }
 
     // Parse message header.
     MessageHeader message_header;
