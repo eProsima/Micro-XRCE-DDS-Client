@@ -1,5 +1,6 @@
 #include <micrortps/client/client.h>
 #include <stdio.h>
+#include <string.h>
 
 #define BUFFER_SIZE 1024
 
@@ -7,34 +8,26 @@ int main(int args, char** argv)
 {
     printf("--- XRCE CLIENT ---\n");
 
-    // Choosing transport
-    locator_id_t transport_id;
-
-    bool request_help = true;
+    ClientState* state = NULL;
     if(args > 2)
     {
         if(strcmp(argv[1], "serial") == 0)
         {
-            transport_id = add_serial_locator("/dev/ttyACM0");
-            request_help = false;
+            state = new_serial_client_state(BUFFER_SIZE, "/dev/ttyACM0");
         }
         else if(strcmp(argv[1], "udp") == 0 && args == 4)
         {
-            transport_id = add_udp_locator(atoi(argv[2]), atoi(argv[3]));
-            request_help = false;
+            state = new_udp_client_state(BUFFER_SIZE, 2000, 2001);
         }
     }
-
-    if(request_help)
+    if(!state)
         printf("Help: program [serial | udp recv_port send_port]");
-
-
-    ClientState* state = new_client_state(transport_id, BUFFER_SIZE);
 
     create_xrce_client(state);
 
+    send_to_agent(state);
+
     free_client_state(state);
-    rm_locator(transport_id);
 
     return 0;
 }

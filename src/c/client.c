@@ -5,15 +5,13 @@
 
 #include <time.h>
 #include <stdlib.h>
-
-// aux includes
-#include <stdio.h>
+#include <transport/ddsxrce_transport.h>
 
 typedef struct ClientState
 {
     locator_id_t transport_id;
-    uint32_t buffer_size;
 
+    uint32_t buffer_size;
     uint8_t* input_buffer;
     uint8_t* output_buffer;
 
@@ -30,20 +28,31 @@ typedef struct ClientState
 
 } ClientState;
 
+ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id);
+
 void on_initialize_message(MessageHeader* header, ClientKey* key, void* vstate);
 int on_message_header(const MessageHeader* header, const ClientKey* key, void* vstate);
 
+// ----------------------------------------------------------------------------------
+//                                  CLIENT STATE
+// ----------------------------------------------------------------------------------
+ClientState* new_serial_client_state(uint32_t buffer_size, const char* device)
+{
+    return new_client_state(buffer_size, add_serial_locator(device));
+}
 
-// ----------------------------------------------------------------------------------
-//                                 PUBLIC API
-// ----------------------------------------------------------------------------------
-ClientState* new_client_state(locator_id_t transport_id, uint32_t buffer_size)
+ClientState* new_udp_client_state(uint32_t buffer_size, uint16_t recv_port, uint16_t send_port)
+{
+    return new_client_state(buffer_size, add_udp_locator(recv_port, send_port));
+}
+
+ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
 {
     ClientState* state = malloc(sizeof(ClientState));
 
     state->transport_id = transport_id;
-    state->buffer_size = buffer_size;
 
+    state->buffer_size = buffer_size;
     state->input_buffer = malloc(buffer_size);
     state->output_buffer = malloc(buffer_size);
 
@@ -69,11 +78,16 @@ ClientState* new_client_state(locator_id_t transport_id, uint32_t buffer_size)
 
 void free_client_state(ClientState* state)
 {
+    rm_locator(state->transport_id);
     free_input_message(&state->input_message);
     free(state->output_buffer);
     free(state->input_buffer);
     free(state);
 }
+
+// ----------------------------------------------------------------------------------
+//                                    XRCE API
+// ----------------------------------------------------------------------------------
 
 void create_xrce_client(ClientState* state)
 {
@@ -97,6 +111,9 @@ void create_participant(ClientState* state)
     //TODO
 }
 
+// ----------------------------------------------------------------------------------
+//                                 COMUNICATION
+// ----------------------------------------------------------------------------------
 void send_to_agent(ClientState* state)
 {
     uint32_t length = get_message_length(&state->output_message);
