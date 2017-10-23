@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define BUFFER_SIZE 1024
 
@@ -16,10 +17,12 @@ typedef struct ShapeTopic
 
 } ShapeTopic;
 
-void serialize_shape_topic(const MicroBuffer* buffer, const void* topic_structure);
-void deserialize_shape_topic(MicroBuffer* buffer, uint8_t* topic);
+void serialize_shape_topic(MicroBuffer* buffer, const void* topic_structure);
+void deserialize_shape_topic(MicroBuffer* buffer, uint8_t* topic_serialization);
 
 void on_shape_topic(const void* topic, void* callback_object);
+
+void printl_shape_topic(const ShapeTopic* shape_topic);
 
 int main(int args, char** argv)
 {
@@ -65,6 +68,7 @@ int main(int args, char** argv)
 
     ShapeTopic shape_topic = {strlen("PURPLE") + 1, "PURPLE", 100 , 100, 50};
     write_data(state, data_writer_id, &shape_topic);
+    printl_shape_topic(&shape_topic);
     send_to_agent(state);
 
     read_data(state, data_reader_id, on_shape_topic, NULL, 5);
@@ -90,17 +94,43 @@ int main(int args, char** argv)
     return 0;
 }
 
-void serialize_shape_topic(const MicroBuffer* buffer, const void* topic_structure)
+void serialize_shape_topic(MicroBuffer* buffer, const void* topic_structure)
 {
-    //TODO
+    ShapeTopic* topic = (ShapeTopic*) topic_structure;
+    serialize_uint32_t(buffer, topic->color_length);
+    serialize_array_char(buffer, topic->color, topic->color_length);
+    serialize_uint32_t(buffer, topic->x);
+    serialize_uint32_t(buffer, topic->y);
+    serialize_uint32_t(buffer, topic->size);
 }
 
-void deserialize_shape_topic(MicroBuffer* buffer, uint8_t* topic)
+void deserialize_shape_topic(MicroBuffer* buffer, uint8_t* topic_serialization)
 {
-    //TODO
+    ShapeTopic* topic = malloc(sizeof(ShapeTopic));
+    deserialize_uint32_t(buffer, &topic->color_length);
+    topic->color = malloc(sizeof(topic->color_length));
+    deserialize_array_char(buffer, topic->color, topic->color_length);
+    deserialize_uint32_t(buffer, &topic->x);
+    deserialize_uint32_t(buffer, &topic->y);
+    deserialize_uint32_t(buffer, &topic->size);
 }
 
-void on_shape_topic(const void* topic, void* callback_object)
+void on_shape_topic(const void* vtopic, void* callback_object)
 {
-    //TODO
+    ShapeTopic* topic = (ShapeTopic*) vtopic;
+    printl_shape_topic(topic);
+
+    free(topic->color);
+    free(topic);
+}
+
+void printl_shape_topic(const ShapeTopic* shape_topic)
+{
+    printf("        %s[%s | x: %u | y: %u | size: %u]%s\n",
+            "\e[1;34m",
+            shape_topic->color,
+            shape_topic->x,
+            shape_topic->y,
+            shape_topic->size,
+            "\e[0m");
 }

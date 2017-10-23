@@ -456,9 +456,9 @@ typedef struct DataDeliveryControl
 
 typedef struct ReadSpecification
 {
-    uint8_t optional_content_filter_expression;
+    bool optional_content_filter_expression;
     String_t content_filter_expression;
-    uint8_t optional_delivery_config;
+    bool optional_delivery_config;
     DataDeliveryControl delivery_config;
 
 } ReadSpecification;

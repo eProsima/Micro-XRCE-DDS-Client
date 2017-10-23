@@ -141,6 +141,9 @@ bool end_submessage(OutputMessage* message, MicroState submessage_beginning,
     header.flags = flags;
     header.length = current_state.position - payload_beginning.position;
 
+    if(message->callback.on_initialize_submessage)
+        message->callback.on_initialize_submessage(&header, NULL);
+
     serialize_SubmessageHeader(&message->writer, &header);
 
     restore_micro_state(&message->writer, current_state);

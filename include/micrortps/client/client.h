@@ -17,8 +17,11 @@ typedef enum CreateModeFlags
 typedef struct ClientState ClientState;
 typedef struct MicroBuffer MicroBuffer;
 
-typedef void (*SerializeTopic)(const MicroBuffer* buffer, const void* topic_structure);
-typedef void (*DeserializeTopic)(MicroBuffer* buffer, uint8_t* topic);
+typedef void (*SerializeTopic)(MicroBuffer* buffer, const void* topic_structure);
+typedef void (*DeserializeTopic)(MicroBuffer* buffer, uint8_t* topic_serialization);
+
+typedef uint32_t (*SizeOfTopic)();
+
 typedef void (*OnTopic)(const void* topic, void* callback_object);
 
 // ----------------------------------------------------------------------------------------------
@@ -36,15 +39,15 @@ uint16_t create_participant(ClientState* state);
 uint16_t create_publisher(ClientState* state, uint16_t participant_id);
 uint16_t create_subscriber(ClientState* state, uint16_t participant_id);
 uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id,
-        char* topic, uint32_t topic_length, SerializeTopic serialization);
+        char* topic_name, uint32_t topic_name_length, SerializeTopic serialization);
 uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id,
-        char* topic, uint32_t topic_length, DeserializeTopic deserialization);
+        char* topic_name, uint32_t topic_name_length, DeserializeTopic deserialization);
 
 void delete_resource(ClientState* state, uint16_t resource_id);
 
 void write_data(ClientState* state, uint16_t data_writer_id, void* topic);
 void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* callback_object,
-        uint16_t max_messages);
+        uint16_t max_samples);
 
 // ----------------------------------------------------------------------------------------------
 //    Comunication functions

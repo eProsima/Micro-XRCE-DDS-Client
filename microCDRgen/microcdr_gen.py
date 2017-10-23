@@ -47,7 +47,7 @@ class Attribute:
     def writeSpec(self, file):
         array_string = '[' + self.array_value + ']' if self.array_value else ''
         if self.optional_values:
-            file.write('    uint8_t optional_' + self.name + ';\n')
+            file.write('    bool optional_' + self.name + ';\n')
         file.write('    ' + self.type + ' ' + self.name + array_string + ';\n')
 
     def writeSerialization(self, file, spaces, var_prefix = '', optional_prefix = False):
@@ -60,7 +60,7 @@ class Attribute:
 
         if self.optional_values:
             file.write(' ' * spaces)
-            file.write('serialize_uint8_t(buffer, input->optional_' + self.name + ');\n')
+            file.write('serialize_bool(buffer, input->optional_' + self.name + ');\n')
             file.write(' ' * spaces)
             file.write('if(input->optional_' + self.name + ' == ' + self.optional_values[0])
             for i in xrange(1, len(self.optional_values)):
@@ -85,7 +85,7 @@ class Attribute:
 
         if self.optional_values:
             file.write(' ' * spaces)
-            file.write('deserialize_uint8_t(buffer, &output->optional_' + self.name + ');\n')
+            file.write('deserialize_bool(buffer, &output->optional_' + self.name + ');\n')
             file.write(' ' * spaces)
             file.write('if(output->optional_' + self.name + ' == ' + self.optional_values[0])
             for i in xrange(1, len(self.optional_values)):
