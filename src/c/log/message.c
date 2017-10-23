@@ -20,7 +20,6 @@ const char* data_to_string(const uint8_t* data, uint32_t size)
     static char buffer[1024];
     for(uint32_t i = 0; i < size; i++)
         sprintf(buffer + 3 * i, "%02X ", data[i]);
-    sprintf(buffer + 5 * size, "\n");
     return buffer;
 }
 #endif
@@ -56,26 +55,26 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayl
             break;
 
         case OBJK_PUBLISHER:
-            sprintf(content, "PUBLISHER | id: %s",
-                    data_to_string(payload->representation._.publisher.participant_id.data, sizeof(ObjectId)));
+            sprintf(content, "PUBLISHER | id: %04X",
+                    payload->representation._.publisher.participant_id);
             break;
 
         case OBJK_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | id: %s",
-                    data_to_string(payload->representation._.subscriber.participant_id.data, sizeof(ObjectId)));
+            sprintf(content, "SUBSCRIBER | id: %04X",
+                    payload->representation._.subscriber.participant_id);
             break;
 
         case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | id: %s | id: %s | topic: %s",
-                    data_to_string(payload->representation._.data_writer.participant_id.data, sizeof(ObjectId)),
-                    data_to_string(payload->representation._.data_writer.publisher_id.data, sizeof(ObjectId)),
+            sprintf(content, "DATA_WRITER | id: %04X | id: %04X | topic: %s",
+                    payload->representation._.data_writer.participant_id,
+                    payload->representation._.data_writer.publisher_id,
                     payload->representation._.data_writer.base3._.object_name.data);
             break;
 
         case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | id: %s | id: %s | topic: %s",
-                    data_to_string(payload->representation._.data_reader.participant_id.data, sizeof(ObjectId)),
-                    data_to_string(payload->representation._.data_reader.subscriber_id.data, sizeof(ObjectId)),
+            sprintf(content, "DATA_READER | id: %04X | id: %04X | topic: %s",
+                    payload->representation._.data_reader.participant_id,
+                    payload->representation._.data_reader.subscriber_id,
                     payload->representation._.data_reader.base3._.object_name.data);
             break;
 
@@ -83,11 +82,11 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayl
             sprintf(content, "UNKNOWN");
     }
 
-    printf("%s%s[Create | #%s | id: %s | %s]%s\n",
+    printf("%s%s[Create | #%04X | id: %04X | %s]%s\n",
             pre,
             YELLOW,
-            data_to_string(payload->request.base.request_id.data, sizeof(RequestId)),
-            data_to_string(payload->request.object_id.data, sizeof(ObjectId)),
+            payload->request.base.request_id,
+            payload->request.object_id,
             content,
             RESTORE_COLOR);
 }
@@ -164,12 +163,12 @@ void PRINTL_STATUS_SUBMESSAGE(const char* pre, const StatusPayload* payload)
             sprintf(implementation, "UNKNOWN");
     }
 
-    printf("%s%s[Status | #%s | id: %s | from #%s | %s | %s]%s\n",
+    printf("%s%s[Status | #%04X | id: %04X | from #%04X | %s | %s]%s\n",
             pre,
             YELLOW,
-            data_to_string(payload->reply.base.request_id.data, sizeof(RequestId)),
-            data_to_string(payload->reply.object_id.data, sizeof(ObjectId)),
-            data_to_string(payload->reply.base.result.request_id.data, sizeof(RequestId)),
+            payload->reply.base.request_id,
+            payload->reply.object_id,
+            payload->reply.base.result.request_id,
             kind, implementation,
             RESTORE_COLOR);
 }

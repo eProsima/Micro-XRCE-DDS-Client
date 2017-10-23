@@ -29,12 +29,7 @@ typedef uint8_t ObjectKind;
 #define OBJK_QOSPROFILE 0x11
 #define OBJK_APPLICATION 0x20
 
-
-typedef struct ObjectId
-{
-    uint8_t data[2];
-
-} ObjectId;
+typedef uint16_t ObjectId;
 #define OBJECTID_INVALID {0xFF, 0xFF}
 #define OBJECTID_CLIENT {0xFF, 0xFF}
 #define OBJECTID_SESSION {0xFF, 0xFF}
@@ -79,12 +74,7 @@ typedef uint8_t RepresentationFormat;
 #define REPRESENTATION_AS_XML_STRING 0x02
 #define REPRESENTATION_IN_BINARY 0x03
 
-
-typedef struct RequestId
-{
-    uint8_t data[2];
-
-} RequestId;
+typedef uint16_t RequestId;
 #define STATUS_OK 0x00
 #define STATUS_OK_MATCHED 0x01
 #define STATUS_ERR_DDS_ERROR 0x80
@@ -216,7 +206,7 @@ typedef struct OBJK_PARTICIPANT_Representation
 typedef struct OBJK_TYPE_Representation
 {
     OBJK_Representation3_Base base3;
-    ObjectId participant_id;
+    uint16_t participant_id;
     String_t registered_type_name;
 
 } OBJK_TYPE_Representation;
@@ -225,7 +215,7 @@ typedef struct OBJK_TYPE_Representation
 typedef struct OBJK_TOPIC_Representation
 {
     OBJK_Representation3_Base base3;
-    ObjectId participant_id;
+    uint16_t participant_id;
 
 } OBJK_TOPIC_Representation;
 
@@ -233,7 +223,7 @@ typedef struct OBJK_TOPIC_Representation
 typedef struct OBJK_PUBLISHER_Representation
 {
     OBJK_Representation3_Base base3;
-    ObjectId participant_id;
+    uint16_t participant_id;
 
 } OBJK_PUBLISHER_Representation;
 
@@ -241,7 +231,7 @@ typedef struct OBJK_PUBLISHER_Representation
 typedef struct OBJK_SUBSCRIBER_Representation
 {
     OBJK_Representation3_Base base3;
-    ObjectId participant_id;
+    uint16_t participant_id;
 
 } OBJK_SUBSCRIBER_Representation;
 
@@ -249,8 +239,8 @@ typedef struct OBJK_SUBSCRIBER_Representation
 typedef struct OBJK_DATAWRITER_Representation
 {
     OBJK_Representation3_Base base3;
-    ObjectId participant_id;
-    ObjectId publisher_id;
+    uint16_t participant_id;
+    uint16_t publisher_id;
 
 } OBJK_DATAWRITER_Representation;
 
@@ -258,8 +248,8 @@ typedef struct OBJK_DATAWRITER_Representation
 typedef struct OBJK_DATAREADER_Representation
 {
     OBJK_Representation3_Base base3;
-    ObjectId participant_id;
-    ObjectId subscriber_id;
+    uint16_t participant_id;
+    uint16_t subscriber_id;
 
 } OBJK_DATAREADER_Representation;
 
@@ -362,7 +352,7 @@ typedef struct ObjectVariant
 
 typedef struct ResultStatus
 {
-    RequestId request_id;
+    uint16_t request_id;
     uint8_t status;
     uint8_t implementation_status;
 
@@ -418,7 +408,7 @@ typedef struct Info
 
 typedef struct BaseRequest
 {
-    RequestId request_id;
+    uint16_t request_id;
 
 } BaseRequest;
 
@@ -426,7 +416,7 @@ typedef struct BaseRequest
 typedef struct BaseObjectRequest
 {
     BaseRequest base;
-    ObjectId object_id;
+    uint16_t object_id;
 
 } BaseObjectRequest;
 
@@ -434,7 +424,7 @@ typedef struct BaseObjectRequest
 typedef struct BaseReply
 {
     ResultStatus result;
-    RequestId request_id;
+    uint16_t request_id;
 
 } BaseReply;
 
@@ -442,7 +432,7 @@ typedef struct BaseReply
 typedef struct BaseObjectReply
 {
     BaseReply base;
-    ObjectId object_id;
+    uint16_t object_id;
 
 } BaseObjectReply;
 

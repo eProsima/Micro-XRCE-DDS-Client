@@ -28,6 +28,9 @@ typedef struct ClientState
 
     InputMessageCallback input_callback;
 
+    uint16_t next_request_id;
+    uint16_t next_object_id;
+
 } ClientState;
 
 ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id);
@@ -75,6 +78,12 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     init_output_message(&state->output_message, output_callback, state->output_buffer, buffer_size);
     init_input_message(&state->input_message, input_callback, state->input_buffer, buffer_size);
 
+    state->next_request_id = 0;
+    state->next_object_id = 0;
+
+    //Default message encoding
+    state->output_message.writer.endianness = LITTLE_ENDIANNESS;
+
     return state;
 }
 
@@ -112,12 +121,40 @@ void create_client(ClientState* state)
 uint16_t create_participant(ClientState* state)
 {
     CreateResourcePayload payload;
-    payload.request.base.request_id;
-    payload.request.object_id;
-    payload.representation.kind;
-    payload.representation._.participant.base2.format;
-    payload.representation._.participant.base2._.object_name;
-    printf("%u\n", sizeof(ObjectId));
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
+    payload.representation.kind = OBJK_PARTICIPANT;
+    payload.representation._.participant.base2.format = REPRESENTATION_BY_REFERENCE;
+    payload.representation._.participant.base2._.object_name.size = 0;
+
+    add_create_resource_submessage(&state->output_message, &payload, 0);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+}
+
+uint16_t create_publisher(ClientState* state, uint16_t participant_id)
+{
+    CreateResourcePayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
+    payload.representation.kind = OBJK_PUBLISHER;
+    payload.representation._.publisher.participant_id = participant_id;
+    payload.representation._.publisher.base3.format = REPRESENTATION_BY_REFERENCE;
+    payload.representation._.publisher.base3._.object_name.size = 0;
+
+    add_create_resource_submessage(&state->output_message, &payload, 0);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+}
+
+uint16_t create_subscriber(ClientState* state, uint16_t participant_id)
+{
+    CreateResourcePayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
+    payload.representation.kind = OBJK_SUBSCRIBER;
+    payload.representation._.subscriber.participant_id = participant_id;
+    payload.representation._.subscriber.base3.format = REPRESENTATION_BY_REFERENCE;
+    payload.representation._.subscriber.base3._.object_name.size = 0;
+
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
 }

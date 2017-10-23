@@ -29,6 +29,12 @@ int main(int args, char** argv)
     create_participant(state);
     send_to_agent(state);
 
+    uint16_t participant_id = create_publisher(state, participant_id);
+    send_to_agent(state);
+
+    create_subscriber(state, participant_id);
+    send_to_agent(state);
+
     free_client_state(state);
 
     return 0;

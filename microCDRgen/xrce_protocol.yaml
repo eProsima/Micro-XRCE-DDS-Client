@@ -15,7 +15,8 @@ DATA:
 - define:  {OBJK_APPLICATION:  '0x20'}
 
 #- typedef: {ObjectId: uint8_t 2}
-- struct:  {ObjectId: [data: uint8_t 2]}
+#- struct:  {ObjectId: [data: uint8_t 2]}
+- typedef: {ObjectId: uint16_t}
 - define:  {OBJECTID_INVALID: '{0xFF, 0xFF}'}
 - define:  {OBJECTID_CLIENT:  '{0xFF, 0xFF}'}
 - define:  {OBJECTID_SESSION: '{0xFF, 0xFF}'}
@@ -49,7 +50,8 @@ DATA:
 - define:  {REPRESENTATION_IN_BINARY:      '0x03'}
 
 #- typedef: {RequestId: uint8_t 2}
-- struct:  {RequestId: [data: uint8_t 2]}
+#- struct:  {RequestId: [data: uint8_t 2]}
+- typedef: {RequestId: uint16_t}
 
 - define:  {STATUS_OK:                    '0x00'}
 - define:  {STATUS_OK_MATCHED:            '0x01'}

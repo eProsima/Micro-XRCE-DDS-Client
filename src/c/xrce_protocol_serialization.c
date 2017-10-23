@@ -10,16 +10,6 @@ void deserialize_ClientKey(MicroBuffer* buffer, ClientKey* output, AuxMemory* au
     deserialize_array_uint8_t(buffer, output->data, 4);
 }
 
-void serialize_ObjectId(MicroBuffer* buffer, const ObjectId* input)
-{
-    serialize_array_uint8_t(buffer, input->data, 2);
-}
-
-void deserialize_ObjectId(MicroBuffer* buffer, ObjectId* output, AuxMemory* aux)
-{
-    deserialize_array_uint8_t(buffer, output->data, 2);
-}
-
 void serialize_XrceCookie(MicroBuffer* buffer, const XrceCookie* input)
 {
     serialize_array_uint8_t(buffer, input->data, 4);
@@ -46,16 +36,6 @@ void serialize_XrceVendorId(MicroBuffer* buffer, const XrceVendorId* input)
 }
 
 void deserialize_XrceVendorId(MicroBuffer* buffer, XrceVendorId* output, AuxMemory* aux)
-{
-    deserialize_array_uint8_t(buffer, output->data, 2);
-}
-
-void serialize_RequestId(MicroBuffer* buffer, const RequestId* input)
-{
-    serialize_array_uint8_t(buffer, input->data, 2);
-}
-
-void deserialize_RequestId(MicroBuffer* buffer, RequestId* output, AuxMemory* aux)
 {
     deserialize_array_uint8_t(buffer, output->data, 2);
 }
@@ -226,79 +206,79 @@ void deserialize_OBJK_PARTICIPANT_Representation(MicroBuffer* buffer, OBJK_PARTI
 void serialize_OBJK_TYPE_Representation(MicroBuffer* buffer, const OBJK_TYPE_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_ObjectId(buffer, &input->participant_id);
+    serialize_uint16_t(buffer, input->participant_id);
     serialize_String_t(buffer, &input->registered_type_name);
 }
 
 void deserialize_OBJK_TYPE_Representation(MicroBuffer* buffer, OBJK_TYPE_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_ObjectId(buffer, &output->participant_id, aux);
+    deserialize_uint16_t(buffer, &output->participant_id);
     deserialize_String_t(buffer, &output->registered_type_name, aux);
 }
 
 void serialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, const OBJK_TOPIC_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_ObjectId(buffer, &input->participant_id);
+    serialize_uint16_t(buffer, input->participant_id);
 }
 
 void deserialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, OBJK_TOPIC_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_ObjectId(buffer, &output->participant_id, aux);
+    deserialize_uint16_t(buffer, &output->participant_id);
 }
 
 void serialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, const OBJK_PUBLISHER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_ObjectId(buffer, &input->participant_id);
+    serialize_uint16_t(buffer, input->participant_id);
 }
 
 void deserialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, OBJK_PUBLISHER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_ObjectId(buffer, &output->participant_id, aux);
+    deserialize_uint16_t(buffer, &output->participant_id);
 }
 
 void serialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_ObjectId(buffer, &input->participant_id);
+    serialize_uint16_t(buffer, input->participant_id);
 }
 
 void deserialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, OBJK_SUBSCRIBER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_ObjectId(buffer, &output->participant_id, aux);
+    deserialize_uint16_t(buffer, &output->participant_id);
 }
 
 void serialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, const OBJK_DATAWRITER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_ObjectId(buffer, &input->participant_id);
-    serialize_ObjectId(buffer, &input->publisher_id);
+    serialize_uint16_t(buffer, input->participant_id);
+    serialize_uint16_t(buffer, input->publisher_id);
 }
 
 void deserialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, OBJK_DATAWRITER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_ObjectId(buffer, &output->participant_id, aux);
-    deserialize_ObjectId(buffer, &output->publisher_id, aux);
+    deserialize_uint16_t(buffer, &output->participant_id);
+    deserialize_uint16_t(buffer, &output->publisher_id);
 }
 
 void serialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, const OBJK_DATAREADER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_ObjectId(buffer, &input->participant_id);
-    serialize_ObjectId(buffer, &input->subscriber_id);
+    serialize_uint16_t(buffer, input->participant_id);
+    serialize_uint16_t(buffer, input->subscriber_id);
 }
 
 void deserialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, OBJK_DATAREADER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_ObjectId(buffer, &output->participant_id, aux);
-    deserialize_ObjectId(buffer, &output->subscriber_id, aux);
+    deserialize_uint16_t(buffer, &output->participant_id);
+    deserialize_uint16_t(buffer, &output->subscriber_id);
 }
 
 void serialize_OBJK_TYPE_Binary(MicroBuffer* buffer, const OBJK_TYPE_Binary* input)
@@ -467,14 +447,14 @@ void deserialize_ObjectVariant(MicroBuffer* buffer, ObjectVariant* output, AuxMe
 
 void serialize_ResultStatus(MicroBuffer* buffer, const ResultStatus* input)
 {
-    serialize_RequestId(buffer, &input->request_id);
+    serialize_uint16_t(buffer, input->request_id);
     serialize_uint8_t(buffer, input->status);
     serialize_uint8_t(buffer, input->implementation_status);
 }
 
 void deserialize_ResultStatus(MicroBuffer* buffer, ResultStatus* output, AuxMemory* aux)
 {
-    deserialize_RequestId(buffer, &output->request_id, aux);
+    deserialize_uint16_t(buffer, &output->request_id);
     deserialize_uint8_t(buffer, &output->status);
     deserialize_uint8_t(buffer, &output->implementation_status);
 }
@@ -543,48 +523,48 @@ void deserialize_Info(MicroBuffer* buffer, Info* output, AuxMemory* aux)
 
 void serialize_BaseRequest(MicroBuffer* buffer, const BaseRequest* input)
 {
-    serialize_RequestId(buffer, &input->request_id);
+    serialize_uint16_t(buffer, input->request_id);
 }
 
 void deserialize_BaseRequest(MicroBuffer* buffer, BaseRequest* output, AuxMemory* aux)
 {
-    deserialize_RequestId(buffer, &output->request_id, aux);
+    deserialize_uint16_t(buffer, &output->request_id);
 }
 
 void serialize_BaseObjectRequest(MicroBuffer* buffer, const BaseObjectRequest* input)
 {
     serialize_BaseRequest(buffer, &input->base);
-    serialize_ObjectId(buffer, &input->object_id);
+    serialize_uint16_t(buffer, input->object_id);
 }
 
 void deserialize_BaseObjectRequest(MicroBuffer* buffer, BaseObjectRequest* output, AuxMemory* aux)
 {
     deserialize_BaseRequest(buffer, &output->base, aux);
-    deserialize_ObjectId(buffer, &output->object_id, aux);
+    deserialize_uint16_t(buffer, &output->object_id);
 }
 
 void serialize_BaseReply(MicroBuffer* buffer, const BaseReply* input)
 {
     serialize_ResultStatus(buffer, &input->result);
-    serialize_RequestId(buffer, &input->request_id);
+    serialize_uint16_t(buffer, input->request_id);
 }
 
 void deserialize_BaseReply(MicroBuffer* buffer, BaseReply* output, AuxMemory* aux)
 {
     deserialize_ResultStatus(buffer, &output->result, aux);
-    deserialize_RequestId(buffer, &output->request_id, aux);
+    deserialize_uint16_t(buffer, &output->request_id);
 }
 
 void serialize_BaseObjectReply(MicroBuffer* buffer, const BaseObjectReply* input)
 {
     serialize_BaseReply(buffer, &input->base);
-    serialize_ObjectId(buffer, &input->object_id);
+    serialize_uint16_t(buffer, input->object_id);
 }
 
 void deserialize_BaseObjectReply(MicroBuffer* buffer, BaseObjectReply* output, AuxMemory* aux)
 {
     deserialize_BaseReply(buffer, &output->base, aux);
-    deserialize_ObjectId(buffer, &output->object_id, aux);
+    deserialize_uint16_t(buffer, &output->object_id);
 }
 
 void serialize_InfoReply(MicroBuffer* buffer, const InfoReply* input)

@@ -24,6 +24,8 @@ void free_client_state(ClientState* state);
 // XRCE Client API funcions
 void create_client(ClientState* state);
 uint16_t create_participant(ClientState* state);
+uint16_t create_publisher(ClientState* state, uint16_t participant_id);
+uint16_t create_subscriber(ClientState* state, uint16_t participant_id);
 
 // Comunication functions
 void send_to_agent(ClientState* state);
