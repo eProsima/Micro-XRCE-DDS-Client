@@ -25,7 +25,7 @@ const char* data_to_string(const uint8_t* data, uint32_t size)
 #endif
 
 #ifdef SERIALIZATION_LOGS
-void PRINT_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
+void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 {
     printf("%s%s<< %s>>%s\n",
             pre,
@@ -55,24 +55,24 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayl
             break;
 
         case OBJK_PUBLISHER:
-            sprintf(content, "PUBLISHER | id: %04X",
+            sprintf(content, "PUBLISHER | id: 0x%04X",
                     payload->representation._.publisher.participant_id);
             break;
 
         case OBJK_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | id: %04X",
+            sprintf(content, "SUBSCRIBER | id: 0x%04X",
                     payload->representation._.subscriber.participant_id);
             break;
 
         case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | id: %04X | id: %04X | topic: %s",
+            sprintf(content, "DATA_WRITER | id: 0x%04X | id: 0x%04X | topic: %s",
                     payload->representation._.data_writer.participant_id,
                     payload->representation._.data_writer.publisher_id,
                     payload->representation._.data_writer.base3._.object_name.data);
             break;
 
         case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | id: %04X | id: %04X | topic: %s",
+            sprintf(content, "DATA_READER | id: 0x%04X | id: 0x%04X | topic: %s",
                     payload->representation._.data_reader.participant_id,
                     payload->representation._.data_reader.subscriber_id,
                     payload->representation._.data_reader.base3._.object_name.data);
@@ -82,7 +82,7 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayl
             sprintf(content, "UNKNOWN");
     }
 
-    printf("%s%s[Create | #%04X | id: %04X | %s]%s\n",
+    printf("%s%s[Create | #0x%04X | id: 0x%04X | %s]%s\n",
             pre,
             YELLOW,
             payload->request.base.request_id,
@@ -93,7 +93,12 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayl
 
 void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const char* pre, const DeleteResourcePayload* payload)
 {
-
+    printf("%s%s[Delete | #0x%04X | id: 0x%04X]%s\n",
+            pre,
+            YELLOW,
+            payload->request.base.request_id,
+            payload->request.object_id,
+            RESTORE_COLOR);
 }
 
 void PRINTL_STATUS_SUBMESSAGE(const char* pre, const StatusPayload* payload)
@@ -163,7 +168,7 @@ void PRINTL_STATUS_SUBMESSAGE(const char* pre, const StatusPayload* payload)
             sprintf(implementation, "UNKNOWN");
     }
 
-    printf("%s%s[Status | #%04X | id: %04X | from #%04X | %s | %s]%s\n",
+    printf("%s%s[Status | #0x%04X | id: 0x%04X | from #0x%04X | %s | %s]%s\n",
             pre,
             YELLOW,
             payload->reply.base.request_id,

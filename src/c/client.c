@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <transport/ddsxrce_transport.h>
 
+#ifndef NDEBUG
+#include <string.h>
+#endif
+
 typedef struct ClientState
 {
     locator_id_t transport_id;
@@ -84,6 +88,11 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     //Default message encoding
     state->output_message.writer.endianness = LITTLE_ENDIANNESS;
 
+    #ifndef NDEBUG
+    memset(state->output_buffer, 0, state->buffer_size);
+    memset(state->input_buffer, 0, state->buffer_size);
+    #endif
+
     return state;
 }
 
@@ -129,6 +138,8 @@ uint16_t create_participant(ClientState* state)
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+
+    return payload.request.object_id;
 }
 
 uint16_t create_publisher(ClientState* state, uint16_t participant_id)
@@ -137,12 +148,14 @@ uint16_t create_publisher(ClientState* state, uint16_t participant_id)
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_PUBLISHER;
-    payload.representation._.publisher.participant_id = participant_id;
     payload.representation._.publisher.base3.format = REPRESENTATION_BY_REFERENCE;
     payload.representation._.publisher.base3._.object_name.size = 0;
+    payload.representation._.publisher.participant_id = participant_id;
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+
+    return payload.request.object_id;
 }
 
 uint16_t create_subscriber(ClientState* state, uint16_t participant_id)
@@ -151,12 +164,73 @@ uint16_t create_subscriber(ClientState* state, uint16_t participant_id)
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_SUBSCRIBER;
-    payload.representation._.subscriber.participant_id = participant_id;
     payload.representation._.subscriber.base3.format = REPRESENTATION_BY_REFERENCE;
     payload.representation._.subscriber.base3._.object_name.size = 0;
+    payload.representation._.subscriber.participant_id = participant_id;
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+
+    return payload.request.object_id;
+}
+
+uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id,
+        char* topic, uint32_t topic_length, SerializeTopic serialization)
+{
+    CreateResourcePayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
+    payload.representation.kind = OBJK_DATAWRITER;
+    payload.representation._.data_writer.base3.format = REPRESENTATION_BY_REFERENCE;
+    payload.representation._.data_writer.base3._.object_name.size = topic_length;
+    payload.representation._.data_writer.base3._.object_name.data = topic;
+    payload.representation._.data_writer.participant_id = participant_id;
+    payload.representation._.data_writer.publisher_id = publisher_id;
+
+    add_create_resource_submessage(&state->output_message, &payload, 0);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+
+    return payload.request.object_id;
+}
+
+uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id,
+        char* topic, uint32_t topic_length, DeserializeTopic deserialization)
+{
+    CreateResourcePayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
+    payload.representation.kind = OBJK_DATAREADER;
+    payload.representation._.data_reader.base3.format = REPRESENTATION_BY_REFERENCE;
+    payload.representation._.data_reader.base3._.object_name.size = topic_length;
+    payload.representation._.data_reader.base3._.object_name.data = topic;
+    payload.representation._.data_reader.participant_id = participant_id;
+    payload.representation._.data_reader.subscriber_id = subscriber_id;
+
+    add_create_resource_submessage(&state->output_message, &payload, 0);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+
+    return payload.request.object_id;
+}
+
+void delete_resource(ClientState* state, uint16_t resource_id)
+{
+    DeleteResourcePayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = resource_id;
+
+    add_delete_resource_submessage(&state->output_message, &payload);
+    PRINTL_DELETE_RESOURCE_SUBMESSAGE(SEND, &payload);
+}
+
+void write_data(ClientState* state, uint16_t data_writer_id, void* topic)
+{
+    //TODO
+}
+
+void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* callback_object,
+        uint16_t max_messages)
+{
+    //TODO
 }
 
 // ----------------------------------------------------------------------------------
@@ -170,7 +244,10 @@ void send_to_agent(ClientState* state)
 
     if(output_length > 0)
     {
-        PRINT_SERIALIZATION(SEND, state->output_message.writer.init, output_length);
+        PRINTL_SERIALIZATION(SEND, state->output_buffer, output_length);
+        #ifndef NDEBUG
+        memset(state->output_buffer, 0, state->buffer_size);
+        #endif
     }
 
     reset_buffer(&state->output_message.writer);
@@ -181,9 +258,13 @@ void received_from_agent(ClientState* state)
     uint32_t length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
     if(length > 0)
     {
+        #ifndef NDEBUG
+        memset(state->input_buffer, 0, state->buffer_size);
+        #endif
+
         parse_message(&state->input_message, length);
 
-        PRINT_SERIALIZATION(RECV, state->input_message.reader.init, length);
+        PRINTL_SERIALIZATION(RECV, state->input_buffer, length);
     }
 }
 
