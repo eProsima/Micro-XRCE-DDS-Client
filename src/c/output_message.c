@@ -1,5 +1,5 @@
-#include "micrortps/client/output_message.h"
-#include "micrortps/client/xrce_protocol_serialization.h"
+#include "output_message.h"
+#include "xrce_protocol_serialization.h"
 
 #ifndef NDEBUG
 #include <string.h>
@@ -42,7 +42,7 @@ bool add_create_client_submessage(OutputMessage* message, const CreateClientPayl
         SUBMESSAGE_ID_CREATE_CLIENT, message->writer.endianness);
 }
 
-bool add_create_resource_submessage(OutputMessage* message, const CreateResourcePayload* payload, uint8_t creation_mode)
+bool add_create_resource_submessage(OutputMessage* message, const CreateResourcePayload* payload, CreationMode creation_mode)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 

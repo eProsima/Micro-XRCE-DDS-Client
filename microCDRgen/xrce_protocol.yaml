@@ -109,7 +109,7 @@ DATA:
       - session_id:       SessionId
 
 - union:
-    OBJK_Representation3Formats:
+    OBJK_Representation3_Base:
       - format:                    RepresentationFormat
       - object_name:               String_t
       - string_representation:     String_t
@@ -120,21 +120,13 @@ DATA:
       - REPRESENTATION_IN_BINARY
 
 - union:
-    OBJK_Representation2Formats:
+    OBJK_Representation2_Base:
       - format:                    RepresentationFormat
       - object_name:               String_t
       - string_representation:     String_t
     __DISCRIMINATOR__:
       - REPRESENTATION_BY_REFERENCE
       - REPRESENTATION_AS_XML_STRING
-
-- struct:
-    OBJK_Representation3_Base:
-      - format3:     OBJK_Representation3Formats
-
-- struct:
-    OBJK_Representation2_Base:
-      - format2:     OBJK_Representation2Formats
 
 - struct:
     OBJK_QOSPROFILE_Representation:
@@ -292,7 +284,7 @@ DATA:
 - struct:
     BaseRequest:
       - request_id: RequestId
-      - object_id: ObjectId
+      #- object_id: ObjectId
 
 - struct:
     BaseObjectRequest:

@@ -22,8 +22,8 @@ ClientState* new_udp_client_state(uint32_t buffer_size, uint16_t recv_port, uint
 void free_client_state(ClientState* state);
 
 // XRCE Client API funcions
-void create_xrce_client(ClientState* state);
-void create_participant(ClientState* state);
+void create_client(ClientState* state);
+uint16_t create_participant(ClientState* state);
 
 // Comunication functions
 void send_to_agent(ClientState* state);

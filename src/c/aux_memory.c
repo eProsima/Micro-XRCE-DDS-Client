@@ -1,10 +1,10 @@
-#include "micrortps/client/aux_memory.h"
+#include "aux_memory.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 #ifndef NDEBUG
-    #include <stdio.h>
+#include <stdio.h>
 #endif
 
 void init_aux_memory(AuxMemory* memory)
@@ -28,7 +28,7 @@ void* request_aux_memory(AuxMemory* memory, uint32_t size)
     #ifndef NDEBUG
     if(memory->size + size > memory->buffer_alloc)
     {
-        printf("ERROR: AuxMemory oveflow.\n");
+        fprintf(stderr, "ERROR: AuxMemory oveflow.\n");
         return NULL;
     }
     #endif

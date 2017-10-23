@@ -131,7 +131,7 @@ void deserialize_OBJK_CLIENT_Representation(MicroBuffer* buffer, OBJK_CLIENT_Rep
     deserialize_uint8_t(buffer, &output->session_id);
 }
 
-void serialize_OBJK_Representation3Formats(MicroBuffer* buffer, const OBJK_Representation3Formats* input)
+void serialize_OBJK_Representation3_Base(MicroBuffer* buffer, const OBJK_Representation3_Base* input)
 {
     serialize_uint8_t(buffer, input->format);
     switch(input->format)
@@ -148,7 +148,7 @@ void serialize_OBJK_Representation3Formats(MicroBuffer* buffer, const OBJK_Repre
     }
 }
 
-void deserialize_OBJK_Representation3Formats(MicroBuffer* buffer, OBJK_Representation3Formats* output, AuxMemory* aux)
+void deserialize_OBJK_Representation3_Base(MicroBuffer* buffer, OBJK_Representation3_Base* output, AuxMemory* aux)
 {
     deserialize_uint8_t(buffer, &output->format);
     switch(output->format)
@@ -165,7 +165,7 @@ void deserialize_OBJK_Representation3Formats(MicroBuffer* buffer, OBJK_Represent
     }
 }
 
-void serialize_OBJK_Representation2Formats(MicroBuffer* buffer, const OBJK_Representation2Formats* input)
+void serialize_OBJK_Representation2_Base(MicroBuffer* buffer, const OBJK_Representation2_Base* input)
 {
     serialize_uint8_t(buffer, input->format);
     switch(input->format)
@@ -179,7 +179,7 @@ void serialize_OBJK_Representation2Formats(MicroBuffer* buffer, const OBJK_Repre
     }
 }
 
-void deserialize_OBJK_Representation2Formats(MicroBuffer* buffer, OBJK_Representation2Formats* output, AuxMemory* aux)
+void deserialize_OBJK_Representation2_Base(MicroBuffer* buffer, OBJK_Representation2_Base* output, AuxMemory* aux)
 {
     deserialize_uint8_t(buffer, &output->format);
     switch(output->format)
@@ -191,26 +191,6 @@ void deserialize_OBJK_Representation2Formats(MicroBuffer* buffer, OBJK_Represent
             deserialize_String_t(buffer, &output->_.string_representation, aux);
         break;
     }
-}
-
-void serialize_OBJK_Representation3_Base(MicroBuffer* buffer, const OBJK_Representation3_Base* input)
-{
-    serialize_OBJK_Representation3Formats(buffer, &input->format3);
-}
-
-void deserialize_OBJK_Representation3_Base(MicroBuffer* buffer, OBJK_Representation3_Base* output, AuxMemory* aux)
-{
-    deserialize_OBJK_Representation3Formats(buffer, &output->format3, aux);
-}
-
-void serialize_OBJK_Representation2_Base(MicroBuffer* buffer, const OBJK_Representation2_Base* input)
-{
-    serialize_OBJK_Representation2Formats(buffer, &input->format2);
-}
-
-void deserialize_OBJK_Representation2_Base(MicroBuffer* buffer, OBJK_Representation2_Base* output, AuxMemory* aux)
-{
-    deserialize_OBJK_Representation2Formats(buffer, &output->format2, aux);
 }
 
 void serialize_OBJK_QOSPROFILE_Representation(MicroBuffer* buffer, const OBJK_QOSPROFILE_Representation* input)
@@ -564,13 +544,11 @@ void deserialize_Info(MicroBuffer* buffer, Info* output, AuxMemory* aux)
 void serialize_BaseRequest(MicroBuffer* buffer, const BaseRequest* input)
 {
     serialize_RequestId(buffer, &input->request_id);
-    serialize_ObjectId(buffer, &input->object_id);
 }
 
 void deserialize_BaseRequest(MicroBuffer* buffer, BaseRequest* output, AuxMemory* aux)
 {
     deserialize_RequestId(buffer, &output->request_id, aux);
-    deserialize_ObjectId(buffer, &output->object_id, aux);
 }
 
 void serialize_BaseObjectRequest(MicroBuffer* buffer, const BaseObjectRequest* input)

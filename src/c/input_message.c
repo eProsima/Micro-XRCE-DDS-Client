@@ -1,5 +1,5 @@
-#include "micrortps/client/input_message.h"
-#include "micrortps/client/xrce_protocol_serialization.h"
+#include "input_message.h"
+#include "xrce_protocol_serialization.h"
 
 #include <stdlib.h>
 
@@ -30,7 +30,7 @@ void free_input_message(InputMessage* message)
     free_aux_memory(&message->aux_memory);
 }
 
-void parse_data_payload(InputMessage* message, DataFormat format)
+void parse_data_payload(InputMessage* message, DataFormat format, const BaseObjectReply* reply)
 {
     MicroBuffer* reader = &message->reader;
     AuxMemory* aux_memory = &message->aux_memory;
@@ -43,7 +43,7 @@ void parse_data_payload(InputMessage* message, DataFormat format)
             SampleData data;
             deserialize_SampleData(reader, &data, aux_memory);
             if(callback->on_data_payload)
-                callback->on_data_payload(&data, callback->object);
+                callback->on_data_payload(reply, &data, callback->object);
         }
         break;
         case FORMAT_SAMPLE:
@@ -51,7 +51,7 @@ void parse_data_payload(InputMessage* message, DataFormat format)
             Sample sample;
             deserialize_Sample(reader, &sample, aux_memory);
             if(callback->on_sample_payload)
-                callback->on_sample_payload(&sample, callback->object);
+                callback->on_sample_payload(reply, &sample, callback->object);
         }
         break;
         case FORMAT_DATA_SEQ:
@@ -59,7 +59,7 @@ void parse_data_payload(InputMessage* message, DataFormat format)
             SampleDataSequence data_sequence;
             deserialize_SampleDataSequence(reader, &data_sequence, aux_memory);
             if(callback->on_data_sequence_payload)
-                callback->on_data_sequence_payload(&data_sequence, callback->object);
+                callback->on_data_sequence_payload(reply, &data_sequence, callback->object);
         }
         break;
         case FORMAT_SAMPLE_SEQ:
@@ -67,7 +67,7 @@ void parse_data_payload(InputMessage* message, DataFormat format)
             SampleSequence sample_sequence;
             deserialize_SampleSequence(reader, &sample_sequence, aux_memory);
             if(callback->on_sample_sequence_payload)
-                callback->on_sample_sequence_payload(&sample_sequence, callback->object);
+                callback->on_sample_sequence_payload(reply, &sample_sequence, callback->object);
         }
         break;
         case FORMAT_PACKED_SAMPLES:
@@ -75,7 +75,7 @@ void parse_data_payload(InputMessage* message, DataFormat format)
             PackedSamples packed_samples;
             deserialize_PackedSamples(reader, &packed_samples, aux_memory);
             if(callback->on_packed_samples_payload)
-                callback->on_packed_samples_payload(&packed_samples, callback->object);
+                callback->on_packed_samples_payload(reply, &packed_samples, callback->object);
         }
         break;
     }
@@ -131,7 +131,7 @@ int parse_submessage(InputMessage* message)
             if(callback->on_data_submessage)
             {
                 DataFormat format = callback->on_data_submessage(&data_reply, callback->object);
-                parse_data_payload(message, format);
+                parse_data_payload(message, format, &data_reply);
             }
             else
             {

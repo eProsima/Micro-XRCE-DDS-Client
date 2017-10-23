@@ -44,8 +44,11 @@ find_eprosima_package(micro-CDR)
 
 file(GLOB CLIENT_LIB_SOURCES
     src/c/*.c
-    #src/c/*/*.c
+    src/c/log/*.c
 )
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSERIALIZATION_LOGS")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMESSAGE_LOGS")
 
 add_subdirectory(thirdparty/micrortps_transport)
 add_subdirectory(thirdparty/micro-CDR)

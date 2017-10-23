@@ -23,8 +23,10 @@ int main(int args, char** argv)
     if(!state)
         printf("Help: program [serial | udp recv_port send_port]");
 
-    create_xrce_client(state);
+    create_client(state);
+    send_to_agent(state);
 
+    create_participant(state);
     send_to_agent(state);
 
     free_client_state(state);

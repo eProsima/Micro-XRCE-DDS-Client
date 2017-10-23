@@ -159,49 +159,35 @@ typedef struct OBJK_CLIENT_Representation
 } OBJK_CLIENT_Representation;
 
 
-typedef union OBJK_Representation3FormatsU
+typedef union OBJK_Representation3_BaseU
 {
     String_t object_name;
     String_t string_representation;
     BinarySequence_t binary_representation;
 
-} OBJK_Representation3FormatsU;
-
-
-typedef struct OBJK_Representation3Formats
-{
-    uint8_t format;
-    OBJK_Representation3FormatsU _;
-
-} OBJK_Representation3Formats;
-
-
-typedef union OBJK_Representation2FormatsU
-{
-    String_t object_name;
-    String_t string_representation;
-
-} OBJK_Representation2FormatsU;
-
-
-typedef struct OBJK_Representation2Formats
-{
-    uint8_t format;
-    OBJK_Representation2FormatsU _;
-
-} OBJK_Representation2Formats;
+} OBJK_Representation3_BaseU;
 
 
 typedef struct OBJK_Representation3_Base
 {
-    OBJK_Representation3Formats format3;
+    uint8_t format;
+    OBJK_Representation3_BaseU _;
 
 } OBJK_Representation3_Base;
 
 
+typedef union OBJK_Representation2_BaseU
+{
+    String_t object_name;
+    String_t string_representation;
+
+} OBJK_Representation2_BaseU;
+
+
 typedef struct OBJK_Representation2_Base
 {
-    OBJK_Representation2Formats format2;
+    uint8_t format;
+    OBJK_Representation2_BaseU _;
 
 } OBJK_Representation2_Base;
 
@@ -433,7 +419,6 @@ typedef struct Info
 typedef struct BaseRequest
 {
     RequestId request_id;
-    ObjectId object_id;
 
 } BaseRequest;
 

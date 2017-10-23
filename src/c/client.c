@@ -1,7 +1,9 @@
-#include "micrortps/client/client.h"
+#include "client.h"
 
-#include "micrortps/client/input_message.h"
-#include "micrortps/client/output_message.h"
+#include "input_message.h"
+#include "output_message.h"
+
+#include "log/message.h"
 
 #include <time.h>
 #include <stdlib.h>
@@ -89,7 +91,7 @@ void free_client_state(ClientState* state)
 //                                    XRCE API
 // ----------------------------------------------------------------------------------
 
-void create_xrce_client(ClientState* state)
+void create_client(ClientState* state)
 {
     struct timespec ts;
     timespec_get(&ts, TIME_UTC);
@@ -104,20 +106,37 @@ void create_xrce_client(ClientState* state)
     payload.representation.session_id = 0x01;
 
     add_create_client_submessage(&state->output_message, &payload);
+    PRINTL_CREATE_CLIENT_SUBMESSAGE(SEND, &payload);
 }
 
-void create_participant(ClientState* state)
+uint16_t create_participant(ClientState* state)
 {
-    //TODO
+    CreateResourcePayload payload;
+    payload.request.base.request_id;
+    payload.request.object_id;
+    payload.representation.kind;
+    payload.representation._.participant.base2.format;
+    payload.representation._.participant.base2._.object_name;
+    printf("%u\n", sizeof(ObjectId));
+    add_create_resource_submessage(&state->output_message, &payload, 0);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
 }
 
 // ----------------------------------------------------------------------------------
 //                                 COMUNICATION
 // ----------------------------------------------------------------------------------
+
 void send_to_agent(ClientState* state)
 {
     uint32_t length = get_message_length(&state->output_message);
-    send_data(state->output_buffer, length, state->transport_id);
+    int output_length = send_data(state->output_buffer, length, state->transport_id);
+
+    if(output_length > 0)
+    {
+        PRINT_SERIALIZATION(SEND, state->output_message.writer.init, output_length);
+    }
+
+    reset_buffer(&state->output_message.writer);
 }
 
 void received_from_agent(ClientState* state)
@@ -126,11 +145,13 @@ void received_from_agent(ClientState* state)
     if(length > 0)
     {
         parse_message(&state->input_message, length);
+
+        PRINT_SERIALIZATION(RECV, state->input_message.reader.init, length);
     }
 }
 
 // ----------------------------------------------------------------------------------
-//                                 CALLBACKS
+//                                   CALLBACKS
 // ----------------------------------------------------------------------------------
 
 void on_initialize_message(MessageHeader* header, ClientKey* key, void* vstate)
