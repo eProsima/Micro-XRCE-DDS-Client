@@ -7,6 +7,8 @@
 #endif
 
 // PRIVATE DEFINITIONS
+void begin_message(OutputMessage* message);
+
 void begin_submessage(OutputMessage* message, MicroState* submessage_beginning,
                       MicroState* header_beginning, MicroState* payload_beginning);
 
@@ -100,19 +102,23 @@ bool add_write_data_submessage(OutputMessage* message, const WriteDataPayload* p
 // ----------------------------------------------------------------------------------
 //                                  PRIVATE UTILS
 // ----------------------------------------------------------------------------------
+void begin_message(OutputMessage* message)
+{
+    MessageHeader message_header;
+    ClientKey key;
+    message->callback.on_initialize_message(&message_header, &key, message->callback.object);
+
+    serialize_MessageHeader(&message->writer, &message_header);
+    if(message_header.session_id >= 128)
+        serialize_ClientKey(&message->writer, &key);
+}
+
 void begin_submessage(OutputMessage* message, MicroState* submessage_beginning,
                       MicroState* header_beginning, MicroState* payload_beginning)
 {
     if(message->writer.iterator == message->writer.init)
-    {
-        MessageHeader message_header;
-        ClientKey key;
-        message->callback.on_initialize_message(&message_header, &key, message->callback.object);
+        begin_message(message);
 
-        serialize_MessageHeader(&message->writer, &message_header);
-        if(message_header.session_id >= 128)
-            serialize_ClientKey(&message->writer, &key);
-    }
     *submessage_beginning = get_micro_state(&message->writer);
 
     align_to(&message->writer, 4);
@@ -141,8 +147,8 @@ bool end_submessage(OutputMessage* message, MicroState submessage_beginning,
     header.flags = flags;
     header.length = current_state.position - payload_beginning.position;
 
-    if(message->callback.on_initialize_submessage)
-        message->callback.on_initialize_submessage(&header, NULL);
+    if(message->callback.on_submessage_header)
+        message->callback.on_submessage_header(&header, NULL);
 
     serialize_SubmessageHeader(&message->writer, &header);
 

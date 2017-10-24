@@ -21,14 +21,19 @@ typedef struct InputMessageCallback
     // Submessages
     void (*on_status_submessage)(const StatusPayload* payload, void* callback_object);
     void (*on_info_submessage)  (const InfoPayload* payload, void* callback_object);
-    DataFormat (*on_data_submessage)  (const BaseObjectReply* data_reply, void* callback_object);
+    DataFormat (*on_data_submessage)  (const BaseObjectReply* reply, void* callback_object);
 
     // Data payloads
-    int (*on_data_payload)           (const BaseObjectReply* reply, const SampleData* data, void* callback_object);
-    int (*on_sample_payload)         (const BaseObjectReply* reply, const Sample* sample, void* callback_object);
-    int (*on_data_sequence_payload)  (const BaseObjectReply* reply, const SampleDataSequence* data_sequence, void* callback_object);
-    int (*on_sample_sequence_payload)(const BaseObjectReply* reply, const SampleSequence* sample_sequence, void* callback_object);
-    int (*on_packed_samples_payload) (const BaseObjectReply* reply, const PackedSamples* packed_samples, void* callback_object);
+    void (*on_data_payload)           (const BaseObjectReply* reply, const SampleData* data,
+            void* callback_object, Endianness endianness);
+    void (*on_sample_payload)         (const BaseObjectReply* reply, const Sample* sample,
+            void* callback_object, Endianness endianness);
+    void (*on_data_sequence_payload)  (const BaseObjectReply* reply, const SampleDataSequence* data_sequence,
+            void* callback_object, Endianness endianness);
+    void (*on_sample_sequence_payload)(const BaseObjectReply* reply, const SampleSequence* sample_sequence,
+            void* callback_object, Endianness endianness);
+    void (*on_packed_samples_payload) (const BaseObjectReply* reply, const PackedSamples* packed_samples,
+            void* callback_object, Endianness endianness);
 
     void* object;
 

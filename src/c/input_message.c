@@ -43,7 +43,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             SampleData data;
             deserialize_SampleData(reader, &data, aux_memory);
             if(callback->on_data_payload)
-                callback->on_data_payload(reply, &data, callback->object);
+                callback->on_data_payload(reply, &data, callback->object, reader->endianness);
         }
         break;
         case FORMAT_SAMPLE:
@@ -51,7 +51,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             Sample sample;
             deserialize_Sample(reader, &sample, aux_memory);
             if(callback->on_sample_payload)
-                callback->on_sample_payload(reply, &sample, callback->object);
+                callback->on_sample_payload(reply, &sample, callback->object, reader->endianness);
         }
         break;
         case FORMAT_DATA_SEQ:
@@ -59,7 +59,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             SampleDataSequence data_sequence;
             deserialize_SampleDataSequence(reader, &data_sequence, aux_memory);
             if(callback->on_data_sequence_payload)
-                callback->on_data_sequence_payload(reply, &data_sequence, callback->object);
+                callback->on_data_sequence_payload(reply, &data_sequence, callback->object, reader->endianness);
         }
         break;
         case FORMAT_SAMPLE_SEQ:
@@ -67,7 +67,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             SampleSequence sample_sequence;
             deserialize_SampleSequence(reader, &sample_sequence, aux_memory);
             if(callback->on_sample_sequence_payload)
-                callback->on_sample_sequence_payload(reply, &sample_sequence, callback->object);
+                callback->on_sample_sequence_payload(reply, &sample_sequence, callback->object, reader->endianness);
         }
         break;
         case FORMAT_PACKED_SAMPLES:
@@ -75,7 +75,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             PackedSamples packed_samples;
             deserialize_PackedSamples(reader, &packed_samples, aux_memory);
             if(callback->on_packed_samples_payload)
-                callback->on_packed_samples_payload(reply, &packed_samples, callback->object);
+                callback->on_packed_samples_payload(reply, &packed_samples, callback->object, reader->endianness);
         }
         break;
     }
@@ -93,7 +93,7 @@ int parse_submessage(InputMessage* message)
     if(callback->on_submessage_header)
         callback->on_submessage_header(&submessage_header, callback->object);
 
-    // Configure the reader for the specific endianess
+    // Configure the reader for the specific endianness
     reader->endianness = submessage_header.flags & FLAG_ENDIANNESS;
 
     // We will need as much a quantity of aux memory equivalent to the payload length.

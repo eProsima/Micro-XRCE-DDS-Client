@@ -27,63 +27,70 @@ const char* data_to_string(const uint8_t* data, uint32_t size)
 #ifdef SERIALIZATION_LOGS
 void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 {
-    printf("%s%s<< %s>>%s\n",
+    printf("%s%s<< [%u]: %s>>%s\n",
             pre,
             BROWN,
+            size,
             data_to_string(buffer, size),
             RESTORE_COLOR);
 }
 #endif
 
 #ifdef MESSAGE_LOGS
-void PRINTL_CREATE_CLIENT_SUBMESSAGE(const char* pre, const CreateClientPayload* payload)
+void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
 {
     printf("%s%s[Create | session: 0x%02X]%s\n",
-            pre,
+            SEND,
             YELLOW,
             payload->representation.session_id,
             RESTORE_COLOR);
 }
 
-void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayload* payload)
+void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
 {
     char content[128];
     switch(payload->representation.kind)
     {
         case OBJK_PARTICIPANT:
             sprintf(content, "PARTICIPANT");
-            break;
+        break;
 
         case OBJK_PUBLISHER:
             sprintf(content, "PUBLISHER | id: 0x%04X",
                     payload->representation._.publisher.participant_id);
-            break;
+        break;
 
         case OBJK_SUBSCRIBER:
             sprintf(content, "SUBSCRIBER | id: 0x%04X",
                     payload->representation._.subscriber.participant_id);
-            break;
+        break;
 
         case OBJK_DATAWRITER:
             sprintf(content, "DATA_WRITER | id: 0x%04X | id: 0x%04X | topic: %s",
                     payload->representation._.data_writer.participant_id,
                     payload->representation._.data_writer.publisher_id,
                     payload->representation._.data_writer.base3._.object_name.data);
-            break;
+        break;
 
         case OBJK_DATAREADER:
             sprintf(content, "DATA_READER | id: 0x%04X | id: 0x%04X | topic: %s",
                     payload->representation._.data_reader.participant_id,
                     payload->representation._.data_reader.subscriber_id,
                     payload->representation._.data_reader.base3._.object_name.data);
-            break;
+        break;
+
+        case OBJK_TOPIC:
+            sprintf(content, "TOPIC | id: 0x%04X | topic: %s",
+                    payload->representation._.data_reader.participant_id,
+                    payload->representation._.data_reader.base3._.object_name.data);
+        break;
 
         default:
             sprintf(content, "UNKNOWN");
     }
 
     printf("%s%s[Create | #0x%04X | id: 0x%04X | %s]%s\n",
-            pre,
+            SEND,
             YELLOW,
             payload->request.base.request_id,
             payload->request.object_id,
@@ -91,42 +98,42 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayl
             RESTORE_COLOR);
 }
 
-void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const char* pre, const DeleteResourcePayload* payload)
+void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DeleteResourcePayload* payload)
 {
     printf("%s%s[Delete | #0x%04X | id: 0x%04X]%s\n",
-            pre,
+            SEND,
             YELLOW,
             payload->request.base.request_id,
             payload->request.object_id,
             RESTORE_COLOR);
 }
 
-void PRINTL_STATUS_SUBMESSAGE(const char* pre, const StatusPayload* payload)
+void PRINTL_STATUS_SUBMESSAGE(const StatusPayload* payload)
 {
     char kind[64];
     switch(payload->reply.base.result.status)
     {
         case STATUS_LAST_OP_NONE:
             sprintf(kind, "NONE");
-            break;
+        break;
         case STATUS_LAST_OP_CREATE:
             sprintf(kind, "CREATE");
-            break;
+        break;
         case STATUS_LAST_OP_UPDATE:
             sprintf(kind, "UPDATE");
-            break;
+        break;
         case STATUS_LAST_OP_DELETE:
             sprintf(kind, "DELETE");
-            break;
+        break;
         case STATUS_LAST_OP_LOOKUP:
             sprintf(kind, "LOOKUP");
-            break;
+        break;
         case STATUS_LAST_OP_READ:
             sprintf(kind, "READ");
-            break;
+        break;
         case STATUS_LAST_OP_WRITE:
             sprintf(kind, "WRITE");
-            break;
+        break;
         default:
             sprintf(kind, "UNKNOWN");
     }
@@ -136,41 +143,41 @@ void PRINTL_STATUS_SUBMESSAGE(const char* pre, const StatusPayload* payload)
     {
         case STATUS_OK:
             sprintf(implementation, "OK");
-            break;
+        break;
         case STATUS_OK_MATCHED:
             sprintf(implementation, "OK_MATCHED");
-            break;
+        break;
         case STATUS_ERR_DDS_ERROR:
             sprintf(implementation, "ERR_DDS_ERROR");
-            break;
+        break;
         case STATUS_ERR_MISMATCH:
             sprintf(implementation, "ERR_MISMATCH");
-            break;
+        break;
         case STATUS_ERR_ALREADY_EXISTS:
             sprintf(implementation, "ERR_ALREADY_EXISTS");
-            break;
+        break;
         case STATUS_ERR_DENIED:
             sprintf(implementation, "ERR_DENIED");
-            break;
+        break;
         case STATUS_ERR_UNKNOWN_REFERENCE:
             sprintf(implementation, "ERR_UNKNOWN_REFERENCE");
-            break;
+        break;
         case STATUS_ERR_INVALID_DATA:
             sprintf(implementation, "ERR_INVALID_DATA");
-            break;
+        break;
         case STATUS_ERR_INCOMPATIBLE:
             sprintf(implementation, "ERR_INCOMPATIBLE");
-            break;
+        break;
         case STATUS_ERR_RESOURCES:
             sprintf(implementation, "ERR_RESOURCES");
-            break;
+        break;
         default:
             sprintf(implementation, "UNKNOWN");
     }
 
     printf("%s%s[Status | #0x%04X | id: 0x%04X | from #0x%04X | %s | %s]%s\n",
-            pre,
-            YELLOW,
+            RECV,
+            GREEN,
             payload->reply.base.request_id,
             payload->reply.object_id,
             payload->reply.base.result.request_id,
@@ -178,38 +185,74 @@ void PRINTL_STATUS_SUBMESSAGE(const char* pre, const StatusPayload* payload)
             RESTORE_COLOR);
 }
 
-void PRINTL_WRITE_DATA_SUBMESSAGE(const char* pre, const WriteDataPayload* payload)
+void PRINTL_WRITE_DATA_SUBMESSAGE(const WriteDataPayload* payload)
 {
+    char content[1024];
+    switch(payload->data_to_write.format)
+    {
+        case FORMAT_DATA:
+            sprintf(content, "DATA | size: %u", payload->data_to_write._.data.size);
+        break;
+        case FORMAT_DATA_SEQ:
+        break;
+        case FORMAT_SAMPLE:
+        break;
+        case FORMAT_SAMPLE_SEQ:
+        break;
+        case FORMAT_PACKED_SAMPLES:
+        break;
+    }
 
+    printf("%s%s[Write data | #0x%04X | id: 0x%04X | %s]%s\n",
+            SEND,
+            YELLOW,
+            payload->request.base.request_id,
+            payload->request.object_id,
+            content,
+            RESTORE_COLOR);
 }
 
-void PRINTL_READ_DATA_SUBMESSAGE(const char* pre, const ReadDataPayload* payload)
+void PRINTL_READ_DATA_SUBMESSAGE(const ReadDataPayload* payload)
 {
-
+    printf("%s%s[Read data | #0x%04X | id: 0x%04X | max samples: %u]%s\n",
+            SEND,
+            YELLOW,
+            payload->request.base.request_id,
+            payload->request.object_id,
+            payload->read_specification.delivery_config.max_samples,
+            RESTORE_COLOR);
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const char* pre, const BaseObjectReply* reply, const SampleData* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const BaseObjectReply* reply, const SampleData* payload)
 {
-
+    char content[64];
+    printf("%s[Data | #0x%04X | id: 0x%04X | from #0x%04X | DATA | size: %u]%s\n",
+            RECV
+            GREEN,
+            reply->base.request_id,
+            reply->object_id,
+            reply->base.result.request_id,
+            payload->size,
+            RESTORE_COLOR);
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE(const char* pre, const BaseObjectReply* reply, const Sample* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE(const BaseObjectReply* reply, const Sample* payload)
 {
-
+    //TODO
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const char* pre, const BaseObjectReply* reply, const SampleDataSequence* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSequence* payload)
 {
-
+    //TODO
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const char* pre, const BaseObjectReply* reply, const SampleSequence* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSequence* payload)
 {
-
+    //TODO
 }
 
-void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const char* pre, const BaseObjectReply* reply, const PackedSamples* payload)
+void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const BaseObjectReply* reply, const PackedSamples* payload)
 {
-
+    //TODO
 }
 #endif

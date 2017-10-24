@@ -7,20 +7,35 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
+
+typedef struct ClientState ClientState;
+typedef struct MicroBuffer MicroBuffer;
+
 
 typedef enum CreateModeFlags
 {
     REUSE_MODE =   0x01 << 0,
     REPLACE_MODE = 0x01 << 1
+
 } CreateModeFlags;
 
-typedef struct ClientState ClientState;
-typedef struct MicroBuffer MicroBuffer;
+typedef struct String
+{
+    char* data;
+    uint32_t length;
 
-typedef void (*SerializeTopic)(MicroBuffer* buffer, const void* topic_structure);
-typedef void (*DeserializeTopic)(MicroBuffer* buffer, uint8_t* topic_serialization);
+} String;
 
-typedef uint32_t (*SizeOfTopic)();
+typedef struct AbstractTopic
+{
+    void* topic;
+
+} AbstractTopic;
+
+
+typedef bool (*SerializeTopic)(MicroBuffer* writer, const AbstractTopic* topic_structure);
+typedef bool (*DeserializeTopic)(MicroBuffer* reader, AbstractTopic* topic_structure);
 
 typedef void (*OnTopic)(const void* topic, void* callback_object);
 
@@ -38,10 +53,10 @@ void create_client(ClientState* state);
 uint16_t create_participant(ClientState* state);
 uint16_t create_publisher(ClientState* state, uint16_t participant_id);
 uint16_t create_subscriber(ClientState* state, uint16_t participant_id);
-uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id,
-        char* topic_name, uint32_t topic_name_length, SerializeTopic serialization);
-uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id,
-        char* topic_name, uint32_t topic_name_length, DeserializeTopic deserialization);
+uint16_t create_topic(ClientState* state, uint16_t participant_id, String name,
+        SerializeTopic serialization, DeserializeTopic deserialization);
+uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String topic_name);
+uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String topic_name);
 
 void delete_resource(ClientState* state, uint16_t resource_id);
 

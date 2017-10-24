@@ -7,30 +7,37 @@
 
 #include <time.h>
 #include <stdlib.h>
+#include <microcdr/microcdr.h>
 #include <transport/ddsxrce_transport.h>
 
 #ifndef NDEBUG
 #include <string.h>
 #endif
 
-typedef struct TopicWriter
+#define MAX_TOPIC_LENGTH 256
+
+typedef struct Topic
 {
-    uint16_t data_writer_id;
+    String name;
     SerializeTopic serialize_topic;
-
-} TopicWriter;
-
-typedef struct TopicReader
-{
-    uint16_t data_reader_id;
     DeserializeTopic deserialize_topic;
 
-} TopicReader;
+} Topic;
+
+typedef struct DataReader
+{
+    uint16_t id;
+    Topic* topic;
+
+} DataReader;
 
 typedef struct ReadRequest
 {
     uint16_t data_reader_request_id;
+    DataReader* data_reader;
+    DataFormat data_format;
     OnTopic on_topic;
+    void* callback_object;
 
 } ReadRequest;
 
@@ -54,15 +61,15 @@ typedef struct ClientState
     uint16_t next_request_id;
     uint16_t next_object_id;
 
-    //TODO: Do it as a Hash Table
-    TopicWriter topic_writer_vector[10];
-    uint32_t topic_writer_vector_size;
+    //TODO: Do it as a key-value map
+    Topic topic_vector[10];
+    uint32_t topic_vector_size;
 
-    //TODO: Do it as a Hash Table
-    TopicReader topic_reader_vector[10];
-    uint32_t topic_reader_vector_size;
+    //TODO: Do it as a key-value map
+    DataReader data_reader_vector[10];
+    uint32_t data_reader_vector_size;
 
-    //TODO: Do it as a Hash Table
+    //TODO: Do it as a key-value map
     ReadRequest read_request_vector[10];
     uint32_t read_request_vector_size;
 
@@ -70,8 +77,14 @@ typedef struct ClientState
 
 ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id);
 
-void on_initialize_message(MessageHeader* header, ClientKey* key, void* vstate);
-int on_message_header(const MessageHeader* header, const ClientKey* key, void* vstate);
+void on_initialize_message(MessageHeader* header, ClientKey* key, void* callback_object);
+
+int on_message_header(const MessageHeader* header, const ClientKey* key, void* callback_object);
+
+void on_status_submessage(const StatusPayload* payload, void* callback_object);
+DataFormat on_data_submessage(const BaseObjectReply* data_reply, void* callback_object);
+
+void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* callback_object, Endianness endianness);
 
 // ----------------------------------------------------------------------------------
 //                                  CLIENT STATE
@@ -109,12 +122,18 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     InputMessageCallback input_callback = {0};
     input_callback.object = state;
     input_callback.on_message_header = on_message_header;
+    input_callback.on_status_submessage = on_status_submessage;
+    input_callback.on_data_submessage = on_data_submessage;
+    input_callback.on_data_payload = on_data_payload;
 
     init_output_message(&state->output_message, output_callback, state->output_buffer, buffer_size);
     init_input_message(&state->input_message, input_callback, state->input_buffer, buffer_size);
 
     state->next_request_id = 0;
     state->next_object_id = 0;
+
+    state->topic_vector_size = 0;
+    state->read_request_vector_size = 0;
 
     //Default message encoding
     state->output_message.writer.endianness = LITTLE_ENDIANNESS;
@@ -155,7 +174,7 @@ void create_client(ClientState* state)
     payload.representation.session_id = 0x01;
 
     add_create_client_submessage(&state->output_message, &payload);
-    PRINTL_CREATE_CLIENT_SUBMESSAGE(SEND, &payload);
+    PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
 }
 
 uint16_t create_participant(ClientState* state)
@@ -168,7 +187,7 @@ uint16_t create_participant(ClientState* state)
     payload.representation._.participant.base2._.object_name.size = 0;
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
     return payload.request.object_id;
 }
@@ -184,7 +203,7 @@ uint16_t create_publisher(ClientState* state, uint16_t participant_id)
     payload.representation._.publisher.participant_id = participant_id;
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
     return payload.request.object_id;
 }
@@ -200,51 +219,74 @@ uint16_t create_subscriber(ClientState* state, uint16_t participant_id)
     payload.representation._.subscriber.participant_id = participant_id;
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
     return payload.request.object_id;
 }
 
-uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id,
-        char* topic_name, uint32_t topic_name_length, SerializeTopic serialization)
+uint16_t create_topic(ClientState* state, uint16_t participant_id, String name,
+        SerializeTopic serialization, DeserializeTopic deserialization)
+{
+    CreateResourcePayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
+    payload.representation.kind = OBJK_TOPIC;
+    payload.representation._.topic.base3.format = REPRESENTATION_BY_REFERENCE;
+    payload.representation._.topic.base3._.object_name.size = name.length;
+    payload.representation._.topic.base3._.object_name.data = name.data;
+    payload.representation._.topic.participant_id = participant_id;
+
+    //TODO as key-value map
+    state->topic_vector[state->topic_vector_size++] =
+            (Topic){name, serialization, deserialization};
+
+    add_create_resource_submessage(&state->output_message, &payload, 0);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+
+    return payload.request.object_id;
+}
+
+uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String topic_name)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_DATAWRITER;
     payload.representation._.data_writer.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.data_writer.base3._.object_name.size = topic_name_length;
-    payload.representation._.data_writer.base3._.object_name.data = topic_name;
+    payload.representation._.data_writer.base3._.object_name.size = topic_name.length;
+    payload.representation._.data_writer.base3._.object_name.data = topic_name.data;
     payload.representation._.data_writer.participant_id = participant_id;
     payload.representation._.data_writer.publisher_id = publisher_id;
 
-    state->topic_writer_vector[state->topic_writer_vector_size++] =
-    (TopicWriter){payload.request.object_id, serialization};
-
     add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
     return payload.request.object_id;
 }
 
-uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id,
-        char* topic_name, uint32_t topic_name_length, DeserializeTopic deserialization)
+uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String topic_name)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_DATAREADER;
     payload.representation._.data_reader.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.data_reader.base3._.object_name.size = topic_name_length;
-    payload.representation._.data_reader.base3._.object_name.data = topic_name;
+    payload.representation._.data_reader.base3._.object_name.size = topic_name.length;
+    payload.representation._.data_reader.base3._.object_name.data = topic_name.data;
     payload.representation._.data_reader.participant_id = participant_id;
     payload.representation._.data_reader.subscriber_id = subscriber_id;
 
-    state->topic_reader_vector[state->topic_reader_vector_size++] =
-    (TopicReader){payload.request.object_id, deserialization};
+    //TODO as key-value map
+    Topic* topic = NULL;
+    for(uint32_t i = 0; i < state->topic_vector_size && !topic; i++)
+        if(strcmp(state->topic_vector[i].name.data, topic_name.data) == 0)
+            topic = &state->topic_vector[i];
+
+    state->data_reader_vector[state->data_reader_vector_size++] =
+            (DataReader){state->next_object_id, topic};
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(SEND, &payload);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
     return payload.request.object_id;
 }
@@ -256,35 +298,135 @@ void delete_resource(ClientState* state, uint16_t resource_id)
     payload.request.object_id = resource_id;
 
     add_delete_resource_submessage(&state->output_message, &payload);
-    PRINTL_DELETE_RESOURCE_SUBMESSAGE(SEND, &payload);
+    PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
 }
 
 void write_data(ClientState* state, uint16_t data_writer_id, void* topic)
 {
-    WriteDataPayload payload;
-    payload.request.base.request_id = ++state->next_request_id;
-    payload.request.object_id = ++state->next_object_id;
-    payload.data_to_write.format = FORMAT_DATA;
-    //payload.data_to_write._.data.size =
-    //payload.data_to_write._.data.data =
+    //TODO: change this, serialize directly in the message
+    char buffer[MAX_TOPIC_LENGTH];
+    SerializeTopic serialize_topic = NULL;
+    for(uint32_t i = 0; i < state->topic_vector_size && !serialize_topic; i++)
+        serialize_topic = state->topic_vector[i].serialize_topic;
+
+    MicroBuffer writer;
+    init_external_buffer(&writer, buffer, MAX_TOPIC_LENGTH);
+    writer.endianness = state->output_message.writer.endianness;
+
+    if(serialize_topic(&writer, &(AbstractTopic){topic}))
+    {
+        WriteDataPayload payload;
+        payload.request.base.request_id = ++state->next_request_id;
+        payload.request.object_id = data_writer_id;
+        payload.data_to_write.format = FORMAT_DATA;
+        payload.data_to_write._.data.size = writer.iterator - writer.init;
+        payload.data_to_write._.data.data = writer.init;
+
+        add_write_data_submessage(&state->output_message, &payload);
+        PRINTL_WRITE_DATA_SUBMESSAGE(&payload);
+    }
 }
 
-void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* callback_object, uint16_t max_samples)
+void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* callback_object,
+        uint16_t max_samples)
 {
     ReadDataPayload payload;
     payload.request.base.request_id = ++state->next_request_id;
-    payload.request.object_id = ++state->next_object_id;
+    payload.request.object_id = data_reader_id;
     payload.read_specification.optional_content_filter_expression = false;
-    payload.read_specification.optional_delivery_config = true;
+    payload.read_specification.optional_delivery_config = FORMAT_DATA;
     payload.read_specification.delivery_config.max_samples = max_samples;
-    payload.read_specification.delivery_config.max_samples = 0;
-    payload.read_specification.delivery_config.max_samples = 0;
+    payload.read_specification.delivery_config.max_elapsed_time = 0;
+    payload.read_specification.delivery_config.max_rate = 0;
+
+    //TODO as key-value map
+    DataReader* data_reader = NULL;
+    for(uint32_t i = 0; i < state->data_reader_vector_size && !data_reader; i++)
+        if(state->data_reader_vector[i].id == data_reader_id)
+            data_reader = &state->data_reader_vector[i];
 
     state->read_request_vector[state->read_request_vector_size++] =
-    (ReadRequest){payload.request.base.request_id, on_topic};
+            (ReadRequest){payload.request.base.request_id, data_reader,
+            payload.read_specification.optional_delivery_config, on_topic, callback_object};
 
     add_read_data_submessage(&state->output_message, &payload);
-    PRINTL_READ_DATA_SUBMESSAGE(SEND, &payload);
+    PRINTL_READ_DATA_SUBMESSAGE(&payload);
+}
+
+// ----------------------------------------------------------------------------------
+//                                   CALLBACKS
+// ----------------------------------------------------------------------------------
+
+void on_initialize_message(MessageHeader* header, ClientKey* key, void* vstate)
+{
+    ClientState* state = (ClientState*) vstate;
+
+    header->session_id = state->session_id;
+    header->stream_id = state->stream_id;
+    header->sequence_nr = state->output_sequence_number;
+    *key = state->key;
+
+    state->output_sequence_number++;
+}
+
+int on_message_header(const MessageHeader* header, const ClientKey* key, void* vstate)
+{
+    ClientState* state = (ClientState*) vstate;
+
+    if(header->stream_id != STREAMID_NONE)
+        if(header->sequence_nr != state->input_sequence_number)
+            return 0;
+
+    state->input_sequence_number++;
+
+    return 1;
+}
+
+void on_status_submessage(const StatusPayload* payload, void* callback_object)
+{
+    ClientState* state = (ClientState*) callback_object;
+    PRINTL_STATUS_SUBMESSAGE(payload);
+}
+
+DataFormat on_data_submessage(const BaseObjectReply* reply, void* callback_object)
+{
+    ClientState* state = (ClientState*) callback_object;
+
+    //TODO as key-value map
+    for(uint32_t i = 0; i < state->read_request_vector_size; i++)
+        if(state->read_request_vector[i].data_reader_request_id == reply->base.result.request_id)
+            return state->read_request_vector[i].data_format;
+}
+
+void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* callback_object, Endianness endianness)
+{
+    ClientState* state = (ClientState*) callback_object;
+
+    PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(reply, data);
+
+    OnTopic on_topic = NULL;
+    void* topic_object = NULL;
+    DeserializeTopic deserialize_topic = NULL;
+
+    //TODO as key-value map
+    for(uint32_t i = 0; i < state->read_request_vector_size; i++)
+        if(state->read_request_vector[i].data_reader_request_id == reply->base.request_id)
+        {
+            DataReader* data_reader = state->read_request_vector[i].data_reader;
+            on_topic = state->read_request_vector[i].on_topic;
+            topic_object = state->read_request_vector[i].callback_object;
+
+            if(data_reader && data_reader->topic)
+                deserialize_topic = data_reader->topic->deserialize_topic;
+        }
+
+    MicroBuffer reader;
+    init_external_buffer(&reader, data->data, data->size);
+    reader.endianness = endianness;
+
+    AbstractTopic abstract_topic;
+    if(deserialize_topic(&reader, &abstract_topic))
+        on_topic(abstract_topic.topic, topic_object);
 }
 
 // ----------------------------------------------------------------------------------
@@ -320,33 +462,4 @@ void received_from_agent(ClientState* state)
 
         PRINTL_SERIALIZATION(RECV, state->input_buffer, length);
     }
-}
-
-// ----------------------------------------------------------------------------------
-//                                   CALLBACKS
-// ----------------------------------------------------------------------------------
-
-void on_initialize_message(MessageHeader* header, ClientKey* key, void* vstate)
-{
-    ClientState* state = (ClientState*) vstate;
-
-    header->session_id = state->session_id;
-    header->stream_id = state->stream_id;
-    header->sequence_nr = state->output_sequence_number;
-    *key = state->key;
-
-    state->output_sequence_number++;
-}
-
-int on_message_header(const MessageHeader* header, const ClientKey* key, void* vstate)
-{
-    ClientState* state = (ClientState*) vstate;
-
-    if(header->stream_id != STREAMID_NONE)
-        if(header->sequence_nr != state->input_sequence_number)
-            return 0;
-
-    state->input_sequence_number++;
-
-    return 1;
 }

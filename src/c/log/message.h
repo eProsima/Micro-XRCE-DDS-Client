@@ -11,13 +11,13 @@ extern "C"
 
 #if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)
 #include <stdio.h>
+
+#define SEND "==> "
+#define RECV "<== "
+
 const char* data_to_string(const uint8_t* data, uint32_t size);
 #endif
 
-#ifdef MESSAGE_LOGS
-#define SEND "==> "
-#define RECV "<== "
-#endif
 
 void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 #ifndef SERIALIZATION_LOGS
@@ -26,77 +26,77 @@ void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 ;
 #endif
 
-void PRINTL_CREATE_CLIENT_SUBMESSAGE(const char* pre, const CreateClientPayload* payload)
+void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const char* pre, const CreateResourcePayload* payload)
+void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const char* pre, const DeleteResourcePayload* payload)
+void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DeleteResourcePayload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_STATUS_SUBMESSAGE(const char* pre, const StatusPayload* payload)
+void PRINTL_STATUS_SUBMESSAGE(const StatusPayload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_WRITE_DATA_SUBMESSAGE(const char* pre, const WriteDataPayload* payload)
+void PRINTL_WRITE_DATA_SUBMESSAGE(const WriteDataPayload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_READ_DATA_SUBMESSAGE(const char* pre, const ReadDataPayload* payload)
+void PRINTL_READ_DATA_SUBMESSAGE(const ReadDataPayload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const char* pre, const BaseObjectReply* reply, const SampleData* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const BaseObjectReply* reply, const SampleData* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE(const char* pre, const BaseObjectReply* reply, const Sample* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE(const BaseObjectReply* reply, const Sample* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const char* pre, const BaseObjectReply* reply, const SampleDataSequence* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSequence* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const char* pre, const BaseObjectReply* reply, const SampleSequence* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSequence* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const char* pre, const BaseObjectReply* reply, const PackedSamples* payload)
+void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const BaseObjectReply* reply, const PackedSamples* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else

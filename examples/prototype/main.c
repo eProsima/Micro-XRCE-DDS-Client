@@ -17,8 +17,8 @@ typedef struct ShapeTopic
 
 } ShapeTopic;
 
-void serialize_shape_topic(MicroBuffer* buffer, const void* topic_structure);
-void deserialize_shape_topic(MicroBuffer* buffer, uint8_t* topic_serialization);
+bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure);
+bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_serialization);
 
 void on_shape_topic(const void* topic, void* callback_object);
 
@@ -43,13 +43,15 @@ int main(int args, char** argv)
     if(!state)
         printf("Help: program [serial | udp recv_port send_port]");
 
-    char topic[] = "SQUARE";
-    uint32_t topic_length = strlen(topic) + 1;
 
     create_client(state);
     send_to_agent(state);
 
     uint16_t participant_id = create_participant(state);
+    send_to_agent(state);
+
+    String topic_name = {"SQUARE", strlen("SQUARE") + 1};
+    uint16_t topic_id = create_topic(state, participant_id, topic_name, serialize_shape_topic, deserialize_shape_topic);
     send_to_agent(state);
 
     uint16_t publisher_id = create_publisher(state, participant_id);
@@ -59,11 +61,11 @@ int main(int args, char** argv)
     send_to_agent(state);
 
     uint16_t data_writer_id =
-    create_data_writer(state, participant_id, publisher_id, topic, topic_length, serialize_shape_topic);
+    create_data_writer(state, participant_id, publisher_id, topic_name);
     send_to_agent(state);
 
     uint16_t data_reader_id =
-    create_data_reader(state, participant_id, subscriber_id, topic, topic_length, deserialize_shape_topic);
+    create_data_reader(state, participant_id, subscriber_id, topic_name);
     send_to_agent(state);
 
     ShapeTopic shape_topic = {strlen("PURPLE") + 1, "PURPLE", 100 , 100, 50};
@@ -94,25 +96,33 @@ int main(int args, char** argv)
     return 0;
 }
 
-void serialize_shape_topic(MicroBuffer* buffer, const void* topic_structure)
+bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
-    ShapeTopic* topic = (ShapeTopic*) topic_structure;
-    serialize_uint32_t(buffer, topic->color_length);
-    serialize_array_char(buffer, topic->color, topic->color_length);
-    serialize_uint32_t(buffer, topic->x);
-    serialize_uint32_t(buffer, topic->y);
-    serialize_uint32_t(buffer, topic->size);
+    ShapeTopic* topic = (ShapeTopic*) topic_structure->topic;
+
+    serialize_uint32_t(writer, topic->color_length);
+    serialize_array_char(writer, topic->color, topic->color_length);
+    serialize_uint32_t(writer, topic->x);
+    serialize_uint32_t(writer, topic->y);
+    serialize_uint32_t(writer, topic->size);
+
+    return true;
 }
 
-void deserialize_shape_topic(MicroBuffer* buffer, uint8_t* topic_serialization)
+bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
 {
     ShapeTopic* topic = malloc(sizeof(ShapeTopic));
-    deserialize_uint32_t(buffer, &topic->color_length);
+
+    deserialize_uint32_t(reader, &topic->color_length);
     topic->color = malloc(sizeof(topic->color_length));
-    deserialize_array_char(buffer, topic->color, topic->color_length);
-    deserialize_uint32_t(buffer, &topic->x);
-    deserialize_uint32_t(buffer, &topic->y);
-    deserialize_uint32_t(buffer, &topic->size);
+    deserialize_array_char(reader, topic->color, topic->color_length);
+    deserialize_uint32_t(reader, &topic->x);
+    deserialize_uint32_t(reader, &topic->y);
+    deserialize_uint32_t(reader, &topic->size);
+
+    topic_structure->topic = topic;
+
+    return true;
 }
 
 void on_shape_topic(const void* vtopic, void* callback_object)
