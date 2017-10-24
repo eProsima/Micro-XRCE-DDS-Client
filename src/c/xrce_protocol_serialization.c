@@ -54,7 +54,8 @@ void deserialize_Time_t(MicroBuffer* buffer, Time_t* output, AuxMemory* aux)
 
 void serialize_String_t(MicroBuffer* buffer, const String_t* input)
 {
-    serialize_sequence_char(buffer, input->data, input->size);
+    serialize_uint32_t(buffer, input->size);
+    serialize_array_char(buffer, input->data, input->size);
 }
 
 void deserialize_String_t(MicroBuffer* buffer, String_t* output, AuxMemory* aux)
@@ -66,7 +67,8 @@ void deserialize_String_t(MicroBuffer* buffer, String_t* output, AuxMemory* aux)
 
 void serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* input)
 {
-    serialize_sequence_uint8_t(buffer, input->data, input->size);
+    serialize_uint32_t(buffer, input->size);
+    serialize_array_uint8_t(buffer, input->data, input->size);
 }
 
 void deserialize_BinarySequence_t(MicroBuffer* buffer, BinarySequence_t* output, AuxMemory* aux)
@@ -651,7 +653,8 @@ void deserialize_SampleInfoDelta(MicroBuffer* buffer, SampleInfoDelta* output, A
 
 void serialize_SampleData(MicroBuffer* buffer, const SampleData* input)
 {
-    serialize_sequence_uint8_t(buffer, input->data, input->size);
+    serialize_uint32_t(buffer, input->size);
+    serialize_array_uint8_t(buffer, input->data, input->size);
 }
 
 void deserialize_SampleData(MicroBuffer* buffer, SampleData* output, AuxMemory* aux)

@@ -163,8 +163,8 @@ class Struct:
         if len(self.attributes) == 2 and self.attributes[0].name == 'size' and self.attributes[1].name == 'data':
             data_type = self.attributes[1].type[:-1]
             if State.is_basic_type(data_type):
-                file.write('    serialize_sequence_' + data_type + '(buffer, input->data, input->size);\n')
-
+                file.write('    serialize_uint32_t(buffer, input->size);\n')
+                file.write('    serialize_array_' + data_type + '(buffer, input->data, input->size);\n')
             else:
                 file.write('    serialize_uint32_t(buffer, input->size);\n')
                 file.write('    for(uint32_t i = 0; i < input->size; i++)\n')
