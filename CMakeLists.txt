@@ -69,8 +69,12 @@ file(GLOB CLIENT_LIB_SOURCES
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSERIALIZATION_LOGS")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMESSAGE_LOGS")
 
-add_subdirectory(thirdparty/micrortps_transport)
-add_subdirectory(thirdparty/micro-CDR)
+if(THIRDPARTY)
+    if(NOT TARGET transport)
+         add_subdirectory(thirdparty/micrortps_transport)
+    endif()
+    add_subdirectory(thirdparty/micro-CDR)
+endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/include/micrortps/client)
 add_library(${PROJECT_NAME} ${CLIENT_LIB_SOURCES})
