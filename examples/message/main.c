@@ -50,15 +50,15 @@ int main(int args, char** argv)
     return 0;
 }
 
-void on_initialize_message(MessageHeader* header, ClientKey* key, void* callback_object)
+void on_initialize_message(MessageHeader* header, ClientKey* key, void* args)
 {
-    UserData* data = (UserData*) callback_object;
+    UserData* data = (UserData*) args;
 
 }
 
-int on_message_header(const MessageHeader* header, const ClientKey* key, void* callback_object)
+int on_message_header(const MessageHeader* header, const ClientKey* key, void* args)
 {
-    UserData* data = (UserData*) callback_object;
+    UserData* data = (UserData*) args;
 
 
 

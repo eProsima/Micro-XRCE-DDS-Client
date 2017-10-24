@@ -12,8 +12,8 @@ extern "C"
 
 typedef struct OutputMessageCallback
 {
-    void (*on_initialize_message)(MessageHeader* header, ClientKey* key, void* callback_object);
-    void (*on_submessage_header)(const SubmessageHeader* header, void* callback_object);
+    void (*on_initialize_message)(MessageHeader* header, ClientKey* key, void* args);
+    void (*on_submessage_header)(const SubmessageHeader* header, void* args);
     void* object;
 
 } OutputMessageCallback;

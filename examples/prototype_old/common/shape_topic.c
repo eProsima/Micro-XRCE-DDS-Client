@@ -10,7 +10,7 @@
 // -------------------------------------------------------------------------------
 //                               TOPIC SERIALIZATION
 // -------------------------------------------------------------------------------
-void serialize_shape_topic(SerializedBufferHandle* writer, const void* topic_struct, void* callback_object)
+void serialize_shape_topic(SerializedBufferHandle* writer, const void* topic_struct, void* args)
 {
     ShapeTopic* topic = (ShapeTopic*)topic_struct;
 
@@ -22,7 +22,7 @@ void serialize_shape_topic(SerializedBufferHandle* writer, const void* topic_str
     serialize_byte_4(writer, topic->size);
 }
 
-void* deserialize_shape_topic(SerializedBufferHandle* reader, void* callback_object)
+void* deserialize_shape_topic(SerializedBufferHandle* reader, void* args)
 {
     ShapeTopic* topic = malloc(sizeof(ShapeTopic));
 

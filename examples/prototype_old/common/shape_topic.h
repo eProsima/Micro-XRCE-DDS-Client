@@ -19,8 +19,8 @@ typedef struct ShapeTopic
 } ShapeTopic;
 
 //callbacks for serialization
-void serialize_shape_topic(SerializedBufferHandle*  writer, const void* topic, void* callback_object);
-void* deserialize_shape_topic(SerializedBufferHandle*  reader, void* callback_object);
+void serialize_shape_topic(SerializedBufferHandle*  writer, const void* topic, void* args);
+void* deserialize_shape_topic(SerializedBufferHandle*  reader, void* args);
 uint32_t size_of_shape_topic(const void* topic);
 
 void print_shape_topic(const ShapeTopic* topic);

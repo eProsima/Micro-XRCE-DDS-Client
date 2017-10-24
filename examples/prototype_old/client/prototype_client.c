@@ -43,7 +43,7 @@ int protoclient_main(int argc, char** argv);
 #endif
 
 //callbacks for listening topics
-void on_listener_shape_topic(const void* topic_data, void* callback_object);
+void on_listener_shape_topic(const void* topic_data, void* args);
 
 
 
@@ -120,12 +120,12 @@ int app_example(int args, char** argv)
     return 0;
 }
 
-void on_listener_shape_topic(const void* topic_data, void* callback_object)
+void on_listener_shape_topic(const void* topic_data, void* args)
 {
     const ShapeTopic* shape_topic = (const ShapeTopic*)topic_data;
     print_shape_topic(shape_topic);
 
-    UserData* user = (UserData*)callback_object;
+    UserData* user = (UserData*)args;
     user->recieved_topics++;
 }
 

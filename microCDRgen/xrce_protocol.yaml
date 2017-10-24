@@ -88,17 +88,17 @@ DATA:
 
 - struct:
     String_t:
-      - size: int32_t
+      - size: uint32_t
       - data: char*
 
 - struct:
     BinarySequence_t:
-      - size: int32_t
+      - size: uint32_t
       - data: uint8_t*
 
 - struct:
     StringSequence_t:
-      - size: int32_t
+      - size: uint32_t
       - data: String_t*
 
 - struct:

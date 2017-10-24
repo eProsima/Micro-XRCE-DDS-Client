@@ -115,7 +115,7 @@ typedef struct Time_t
 
 typedef struct String_t
 {
-    int32_t size;
+    uint32_t size;
     char* data;
 
 } String_t;
@@ -123,7 +123,7 @@ typedef struct String_t
 
 typedef struct BinarySequence_t
 {
-    int32_t size;
+    uint32_t size;
     uint8_t* data;
 
 } BinarySequence_t;
@@ -131,7 +131,7 @@ typedef struct BinarySequence_t
 
 typedef struct StringSequence_t
 {
-    int32_t size;
+    uint32_t size;
     String_t* data;
 
 } StringSequence_t;
@@ -458,7 +458,7 @@ typedef struct ReadSpecification
 {
     bool optional_content_filter_expression;
     String_t content_filter_expression;
-    bool optional_delivery_config;
+    uint8_t optional_delivery_config;
     DataDeliveryControl delivery_config;
 
 } ReadSpecification;

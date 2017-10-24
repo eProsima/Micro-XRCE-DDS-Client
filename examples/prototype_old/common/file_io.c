@@ -14,9 +14,9 @@ void init_file_io(SharedFile* shared_file, const char* out_file_name, const char
     fclose(fopen(shared_file->in_file_name, "wb"));
 }
 
-void send_file_io(uint8_t* buffer, uint32_t length, void* callback_object)
+void send_file_io(uint8_t* buffer, uint32_t length, void* args)
 {
-    SharedFile* shared_file = (SharedFile*)callback_object;
+    SharedFile* shared_file = (SharedFile*)args;
 
     FILE* out_file = fopen(shared_file->out_file_name, "wb");
     if(out_file == NULL)
@@ -27,9 +27,9 @@ void send_file_io(uint8_t* buffer, uint32_t length, void* callback_object)
     fclose(out_file);
 }
 
-uint32_t received_file_io(uint8_t* buffer, uint32_t size, void* callback_object)
+uint32_t received_file_io(uint8_t* buffer, uint32_t size, void* args)
 {
-    SharedFile* shared_file = (SharedFile*)callback_object;
+    SharedFile* shared_file = (SharedFile*)args;
 
     FILE* in_file = fopen(shared_file->in_file_name, "rb");
      if(in_file == NULL)

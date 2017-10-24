@@ -601,7 +601,7 @@ void serialize_ReadSpecification(MicroBuffer* buffer, const ReadSpecification* i
     if(input->optional_content_filter_expression == true)
         serialize_String_t(buffer, &input->content_filter_expression);
 
-    serialize_bool(buffer, input->optional_delivery_config);
+    serialize_uint8_t(buffer, input->optional_delivery_config);
     if(input->optional_delivery_config == FORMAT_DATA_SEQ
     || input->optional_delivery_config == FORMAT_SAMPLE_SEQ
     || input->optional_delivery_config == FORMAT_PACKED_SAMPLES)
@@ -615,7 +615,7 @@ void deserialize_ReadSpecification(MicroBuffer* buffer, ReadSpecification* outpu
     if(output->optional_content_filter_expression == true)
         deserialize_String_t(buffer, &output->content_filter_expression, aux);
 
-    deserialize_bool(buffer, &output->optional_delivery_config);
+    deserialize_uint8_t(buffer, &output->optional_delivery_config);
     if(output->optional_delivery_config == FORMAT_DATA_SEQ
     || output->optional_delivery_config == FORMAT_SAMPLE_SEQ
     || output->optional_delivery_config == FORMAT_PACKED_SAMPLES)

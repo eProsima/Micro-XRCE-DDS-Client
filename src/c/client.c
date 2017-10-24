@@ -37,7 +37,7 @@ typedef struct ReadRequest
     DataReader* data_reader;
     DataFormat data_format;
     OnTopic on_topic;
-    void* callback_object;
+    void* args;
 
 } ReadRequest;
 
@@ -77,14 +77,14 @@ typedef struct ClientState
 
 ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id);
 
-void on_initialize_message(MessageHeader* header, ClientKey* key, void* callback_object);
+void on_initialize_message(MessageHeader* header, ClientKey* key, void* args);
 
-int on_message_header(const MessageHeader* header, const ClientKey* key, void* callback_object);
+int on_message_header(const MessageHeader* header, const ClientKey* key, void* args);
 
-void on_status_submessage(const StatusPayload* payload, void* callback_object);
-DataFormat on_data_submessage(const BaseObjectReply* data_reply, void* callback_object);
+void on_status_submessage(const StatusPayload* payload, void* args);
+DataFormat on_data_submessage(const BaseObjectReply* data_reply, void* args);
 
-void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* callback_object, Endianness endianness);
+void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* args, Endianness endianness);
 
 // ----------------------------------------------------------------------------------
 //                                  CLIENT STATE
@@ -327,7 +327,7 @@ void write_data(ClientState* state, uint16_t data_writer_id, void* topic)
     }
 }
 
-void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* callback_object,
+void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* args,
         uint16_t max_samples)
 {
     ReadDataPayload payload;
@@ -347,7 +347,7 @@ void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, vo
 
     state->read_request_vector[state->read_request_vector_size++] =
             (ReadRequest){payload.request.base.request_id, data_reader,
-            payload.read_specification.optional_delivery_config, on_topic, callback_object};
+            payload.read_specification.optional_delivery_config, on_topic, args};
 
     add_read_data_submessage(&state->output_message, &payload);
     PRINTL_READ_DATA_SUBMESSAGE(&payload);
@@ -382,15 +382,15 @@ int on_message_header(const MessageHeader* header, const ClientKey* key, void* v
     return 1;
 }
 
-void on_status_submessage(const StatusPayload* payload, void* callback_object)
+void on_status_submessage(const StatusPayload* payload, void* args)
 {
-    ClientState* state = (ClientState*) callback_object;
+    ClientState* state = (ClientState*) args;
     PRINTL_STATUS_SUBMESSAGE(payload);
 }
 
-DataFormat on_data_submessage(const BaseObjectReply* reply, void* callback_object)
+DataFormat on_data_submessage(const BaseObjectReply* reply, void* args)
 {
-    ClientState* state = (ClientState*) callback_object;
+    ClientState* state = (ClientState*) args;
 
     //TODO as key-value map
     for(uint32_t i = 0; i < state->read_request_vector_size; i++)
@@ -398,9 +398,9 @@ DataFormat on_data_submessage(const BaseObjectReply* reply, void* callback_objec
             return state->read_request_vector[i].data_format;
 }
 
-void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* callback_object, Endianness endianness)
+void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* args, Endianness endianness)
 {
-    ClientState* state = (ClientState*) callback_object;
+    ClientState* state = (ClientState*) args;
 
     PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(reply, data);
 
@@ -414,7 +414,7 @@ void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void*
         {
             DataReader* data_reader = state->read_request_vector[i].data_reader;
             on_topic = state->read_request_vector[i].on_topic;
-            topic_object = state->read_request_vector[i].callback_object;
+            topic_object = state->read_request_vector[i].args;
 
             if(data_reader && data_reader->topic)
                 deserialize_topic = data_reader->topic->deserialize_topic;
@@ -436,20 +436,22 @@ void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void*
 void send_to_agent(ClientState* state)
 {
     uint32_t length = get_message_length(&state->output_message);
-    int output_length = send_data(state->output_buffer, length, state->transport_id);
-
-    if(output_length > 0)
+    if(length > 0)
     {
-        PRINTL_SERIALIZATION(SEND, state->output_buffer, output_length);
-        #ifndef NDEBUG
-        memset(state->output_buffer, 0, state->buffer_size);
-        #endif
-    }
+        int output_length = send_data(state->output_buffer, length, state->transport_id);
+        if(output_length > 0)
+        {
+            PRINTL_SERIALIZATION(SEND, state->output_buffer, output_length);
+            #ifndef NDEBUG
+            memset(state->output_buffer, 0, state->buffer_size);
+            #endif
+        }
 
-    reset_buffer(&state->output_message.writer);
+        reset_buffer(&state->output_message.writer);
+    }
 }
 
-void received_from_agent(ClientState* state)
+void receive_from_agent(ClientState* state)
 {
     uint32_t length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
     if(length > 0)

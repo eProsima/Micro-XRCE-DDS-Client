@@ -37,7 +37,7 @@ typedef struct AbstractTopic
 typedef bool (*SerializeTopic)(MicroBuffer* writer, const AbstractTopic* topic_structure);
 typedef bool (*DeserializeTopic)(MicroBuffer* reader, AbstractTopic* topic_structure);
 
-typedef void (*OnTopic)(const void* topic, void* callback_object);
+typedef void (*OnTopic)(const void* topic, void* args);
 
 // ----------------------------------------------------------------------------------------------
 //    State funcions
@@ -61,14 +61,14 @@ uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_
 void delete_resource(ClientState* state, uint16_t resource_id);
 
 void write_data(ClientState* state, uint16_t data_writer_id, void* topic);
-void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* callback_object,
+void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* args,
         uint16_t max_samples);
 
 // ----------------------------------------------------------------------------------------------
 //    Comunication functions
 // ----------------------------------------------------------------------------------------------
 void send_to_agent(ClientState* state);
-void received_from_agent(ClientState* state);
+void receive_from_agent(ClientState* state);
 
 #ifdef __cplusplus
 }
