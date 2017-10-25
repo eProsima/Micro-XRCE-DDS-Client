@@ -8,33 +8,26 @@ extern "C"
 
 #include "input_message.h"
 #include "output_message.h"
+
 #include <transport/ddsxrce_transport.h>
 
-
-typedef struct Topic
+typedef struct CallbackData
 {
-    String name;
-    SerializeTopic serialize_topic;
+    DataFormat format;
     DeserializeTopic deserialize_topic;
-
-} Topic;
-
-typedef struct DataReader
-{
-    uint16_t id;
-    Topic* topic;
-
-} DataReader;
-
-typedef struct ReadRequest
-{
-    uint16_t data_reader_request_id;
-    DataReader* data_reader;
-    DataFormat data_format;
     OnTopic on_topic;
-    void* args;
+    void* on_topic_args;
 
-} ReadRequest;
+} CallbackData;
+
+typedef struct CallbackDataStorage
+{
+    uint32_t size;
+    uint16_t initial_id;
+    bool* existence;
+    CallbackData* callbacks;
+
+} CallbackDataStorage;
 
 typedef struct ClientState
 {
@@ -56,23 +49,30 @@ typedef struct ClientState
     uint16_t next_request_id;
     uint16_t next_object_id;
 
-    //TODO: Do it as a key-value map
-    Topic topic_vector[10];
-    uint32_t topic_vector_size;
-
-    //TODO: Do it as a key-value map
-    DataReader data_reader_vector[10];
-    uint32_t data_reader_vector_size;
-
-    //TODO: Do it as a key-value map
-    ReadRequest read_request_vector[10];
-    uint32_t read_request_vector_size;
+    CallbackDataStorage callback_data_storage;
 
 } ClientState;
 
 
+// ----------------------------------------------------------------------------------------------
+//    Data callback map funcions
+// ----------------------------------------------------------------------------------------------
+void init_callback_data_storage(CallbackDataStorage* store, int16_t initial_id);
+void free_callback_data_storage(CallbackDataStorage* store);
+
+uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, DeserializeTopic deserialize_topic,
+        OnTopic on_topic, void* on_topic_args);
+void remove_callback_data(CallbackDataStorage* store, uint16_t id);
+CallbackData* get_callback_data(const CallbackDataStorage* store, uint16_t id);
+
+// ----------------------------------------------------------------------------------------------
+//    Internal state functions
+// ----------------------------------------------------------------------------------------------
 ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id);
 
+// ----------------------------------------------------------------------------------------------
+//    Callbacks
+// ----------------------------------------------------------------------------------------------
 void on_initialize_message(MessageHeader* header, ClientKey* key, void* args);
 
 bool on_message_header(const MessageHeader* header, const ClientKey* key, void* args);

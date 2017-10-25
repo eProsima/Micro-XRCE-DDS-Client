@@ -101,7 +101,7 @@ void compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "create_topic") == 0 && length == 1)
     {
-        create_topic(state, id, topic_name, serialize_shape_topic, deserialize_shape_topic);
+        create_topic(state, id, topic_name);
     }
     else if(strcmp(name, "create_publisher") == 0 && length == 2)
     {
@@ -121,11 +121,11 @@ void compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "write_data") == 0 && length == 2)
     {
-        write_data(state, id, &shape_topic);
+        write_data(state, id, serialize_shape_topic, &shape_topic);
     }
-    else if(strcmp(name, "read_data") == 0 && length == 3)
+    else if(strcmp(name, "read_data") == 0 && length == 2)
     {
-        read_data(state, id, on_shape_topic, NULL, extra);
+        read_data(state, id, deserialize_shape_topic, on_shape_topic, NULL);
     }
     else if(strcmp(name, "delete") == 0 && length == 2)
     {

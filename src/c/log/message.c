@@ -1,11 +1,17 @@
 #include "message.h"
 
-#define BROWN          "\e[0;33m"
-#define PURPLE         "\e[0;35m"
+#define YELLOW_DARK    "\e[0;33m"
+#define PURPLE_DARK    "\e[0;35m"
+#define GREY_LIGHT     "\e[0;37m"
 
+#define GREY_DARK      "\e[1;30m"
+#define RED            "\e[1;31m"
 #define GREEN          "\e[1;32m"
 #define YELLOW         "\e[1;33m"
-#define LIGHT_PURPLE   "\e[1;35m"
+#define BLUE           "\e[1;34m"
+#define PURPLE         "\e[1;35m"
+#define CYAN           "\e[1;36m"
+#define WHITE          "\e[1;37m"
 
 #define RESTORE_COLOR  "\e[0m"
 
@@ -15,6 +21,7 @@
 #endif
 
 #if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)
+const char* data_to_string(const uint8_t* data, uint32_t size);
 const char* data_to_string(const uint8_t* data, uint32_t size)
 {
     static char buffer[1024];
@@ -29,7 +36,7 @@ void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 {
     printf("%s%s<< [%u]: %s>>%s\n",
             pre,
-            BROWN,
+            YELLOW_DARK,
             size,
             data_to_string(buffer, size),
             RESTORE_COLOR);
@@ -177,7 +184,7 @@ void PRINTL_STATUS_SUBMESSAGE(const StatusPayload* payload)
 
     printf("%s%s[Status | #0x%04X | id: 0x%04X | from #0x%04X | %s | %s]%s\n",
             RECV,
-            GREEN,
+            PURPLE,
             payload->reply.base.request_id,
             payload->reply.object_id,
             payload->reply.base.result.request_id,
@@ -214,12 +221,11 @@ void PRINTL_WRITE_DATA_SUBMESSAGE(const WriteDataPayload* payload)
 
 void PRINTL_READ_DATA_SUBMESSAGE(const ReadDataPayload* payload)
 {
-    printf("%s%s[Read data | #0x%04X | id: 0x%04X | max samples: %u]%s\n",
+    printf("%s%s[Read data | #0x%04X | id: 0x%04X]%s\n",
             SEND,
             YELLOW,
             payload->request.base.request_id,
             payload->request.object_id,
-            payload->read_specification.delivery_config.max_samples,
             RESTORE_COLOR);
 }
 
@@ -228,7 +234,7 @@ void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const BaseObjectReply* reply, const Samp
     char content[64];
     printf("%s[Data | #0x%04X | id: 0x%04X | from #0x%04X | DATA | size: %u]%s\n",
             RECV
-            GREEN,
+            PURPLE,
             reply->base.request_id,
             reply->object_id,
             reply->base.result.request_id,

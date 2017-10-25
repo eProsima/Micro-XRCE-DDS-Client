@@ -1,5 +1,4 @@
 DATA:
-#- typedef: {ClientKey:  uint8_t 4}
 - struct:  {ClientKey: [data: uint8_t 4]}
 
 - typedef: {ObjectKind: uint8_t}
@@ -14,24 +13,19 @@ DATA:
 - define:  {OBJK_QOSPROFILE:   '0x11'}
 - define:  {OBJK_APPLICATION:  '0x20'}
 
-#- typedef: {ObjectId: uint8_t 2}
-#- struct:  {ObjectId: [data: uint8_t 2]}
 - typedef: {ObjectId: uint16_t}
 - define:  {OBJECTID_INVALID: '{0xFF, 0xFF}'}
 - define:  {OBJECTID_CLIENT:  '{0xFF, 0xFF}'}
 - define:  {OBJECTID_SESSION: '{0xFF, 0xFF}'}
 
-#- typedef: {XrceCookie: uint8_t 4}
 - struct:  {XrceCookie: [data: uint8_t 4]}
 - define:  {XRCE_COOKIE: '(XrceCookie){0x58, 0x52, 0x43, 0x45}'}
 
-#- typedef: {XrceVersion: uint8_t 2}
 - struct:  {XrceVersion: [data: uint8_t 2]}
 - define:  {XRCE_VESION_MAJOR:  '0x01'}
 - define:  {XRCE_VESION_MINOR:  '0x00'}
 - define:  {XRCE_VERSION: '(XrceVersion){XRCE_VESION_MAJOR, XRCE_VESION_MINOR}'}
 
-#- typedef: {XrceVendorId: uint8_t 2}
 - struct:  {XrceVendorId: [data: uint8_t 2]}
 - define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}
 
@@ -49,8 +43,6 @@ DATA:
 - define:  {REPRESENTATION_AS_XML_STRING:  '0x02'}
 - define:  {REPRESENTATION_IN_BINARY:      '0x03'}
 
-#- typedef: {RequestId: uint8_t 2}
-#- struct:  {RequestId: [data: uint8_t 2]}
 - typedef: {RequestId: uint16_t}
 
 - define:  {STATUS_OK:                    '0x00'}
@@ -79,6 +71,7 @@ DATA:
       - FORMAT_SAMPLE:         '0x02'
       - FORMAT_SAMPLE_SEQ:     '0x03'
       - FORMAT_PACKED_SAMPLES: '0x04'
+      - FORMAT_BAD:            '0xFF'
     __TYPE__: uint8_t
 
 - struct:
@@ -250,7 +243,7 @@ DATA:
 
 - struct:
     ResultStatus:
-      - request_id: RequestId
+      - {request_id: RequestId, __ENDIANNESS__: LITTLE}
       - status: uint8_t
       - implementation_status: uint8_t
 
@@ -285,23 +278,22 @@ DATA:
 
 - struct:
     BaseRequest:
-      - request_id: RequestId
-      #- object_id: ObjectId
+      - {request_id: RequestId, __ENDIANNESS__: LITTLE}
 
 - struct:
     BaseObjectRequest:
       - base: BaseRequest
-      - object_id: ObjectId
+      - {object_id: ObjectId, __ENDIANNESS__: LITTLE}
 
 - struct:
     BaseReply:
       - result: ResultStatus
-      - request_id: RequestId
+      - {request_id: RequestId, __ENDIANNESS__: LITTLE}
 
 - struct:
     BaseObjectReply:
       - base: BaseReply
-      - object_id: ObjectId
+      - {object_id: ObjectId, __ENDIANNESS__: LITTLE}
 
 - struct:
     InfoReply:

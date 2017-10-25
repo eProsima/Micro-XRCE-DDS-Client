@@ -100,7 +100,8 @@ typedef enum DataFormat
     FORMAT_DATA_SEQ = 0x01,
     FORMAT_SAMPLE = 0x02,
     FORMAT_SAMPLE_SEQ = 0x03,
-    FORMAT_PACKED_SAMPLES = 0x04
+    FORMAT_PACKED_SAMPLES = 0x04,
+    FORMAT_BAD = 0xFF
 
 } DataFormat;
 

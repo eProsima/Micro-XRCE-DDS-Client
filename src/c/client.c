@@ -54,8 +54,7 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     state->next_request_id = 0;
     state->next_object_id = 0;
 
-    state->topic_vector_size = 0;
-    state->read_request_vector_size = 0;
+    init_callback_data_storage(&state->callback_data_storage, 0xFF00);
 
     //Default message encoding
     state->output_message.writer.endianness = LITTLE_ENDIANNESS;
@@ -71,6 +70,8 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
 void free_client_state(ClientState* state)
 {
     rm_locator(state->transport_id);
+
+    free_callback_data_storage(&state->callback_data_storage);
     free_input_message(&state->input_message);
     free(state->output_buffer);
     free(state->input_buffer);
@@ -146,8 +147,7 @@ uint16_t create_subscriber(ClientState* state, uint16_t participant_id)
     return payload.request.object_id;
 }
 
-uint16_t create_topic(ClientState* state, uint16_t participant_id, String name,
-        SerializeTopic serialization, DeserializeTopic deserialization)
+uint16_t create_topic(ClientState* state, uint16_t participant_id, String name)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -157,10 +157,6 @@ uint16_t create_topic(ClientState* state, uint16_t participant_id, String name,
     payload.representation._.topic.base3._.object_name.size = name.length;
     payload.representation._.topic.base3._.object_name.data = name.data;
     payload.representation._.topic.participant_id = participant_id;
-
-    //TODO as key-value map
-    state->topic_vector[state->topic_vector_size++] =
-            (Topic){name, serialization, deserialization};
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
@@ -198,15 +194,6 @@ uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_
     payload.representation._.data_reader.participant_id = participant_id;
     payload.representation._.data_reader.subscriber_id = subscriber_id;
 
-    //TODO as key-value map
-    Topic* topic = NULL;
-    for(uint32_t i = 0; i < state->topic_vector_size && !topic; i++)
-        if(strcmp(state->topic_vector[i].name.data, topic_name.data) == 0)
-            topic = &state->topic_vector[i];
-
-    state->data_reader_vector[state->data_reader_vector_size++] =
-            (DataReader){state->next_object_id, topic};
-
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
@@ -223,13 +210,10 @@ void delete_resource(ClientState* state, uint16_t resource_id)
     PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
 }
 
-void write_data(ClientState* state, uint16_t data_writer_id, void* topic)
+void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialize_topic, void* topic)
 {
-    //TODO: change this, serialize directly in the message
+    //Change this to serialize directly in the message (?)
     char buffer[MAX_TOPIC_LENGTH];
-    SerializeTopic serialize_topic = NULL;
-    for(uint32_t i = 0; i < state->topic_vector_size && !serialize_topic; i++)
-        serialize_topic = state->topic_vector[i].serialize_topic;
 
     MicroBuffer writer;
     init_external_buffer(&writer, buffer, MAX_TOPIC_LENGTH);
@@ -249,27 +233,17 @@ void write_data(ClientState* state, uint16_t data_writer_id, void* topic)
     }
 }
 
-void read_data(ClientState* state, uint16_t data_reader_id, OnTopic on_topic, void* args,
-        uint16_t max_samples)
+void read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialize_topic,
+        OnTopic on_topic, void* on_topic_args)
 {
+    int16_t callback_request_id = register_callback_data(&state->callback_data_storage,
+            FORMAT_DATA, deserialize_topic, on_topic, on_topic_args);
+
     ReadDataPayload payload;
-    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.base.request_id = callback_request_id;
     payload.request.object_id = data_reader_id;
     payload.read_specification.optional_content_filter_expression = false;
     payload.read_specification.optional_delivery_config = FORMAT_DATA;
-    payload.read_specification.delivery_config.max_samples = max_samples;
-    payload.read_specification.delivery_config.max_elapsed_time = 0;
-    payload.read_specification.delivery_config.max_rate = 0;
-
-    //TODO as key-value map
-    DataReader* data_reader = NULL;
-    for(uint32_t i = 0; i < state->data_reader_vector_size && !data_reader; i++)
-        if(state->data_reader_vector[i].id == data_reader_id)
-            data_reader = &state->data_reader_vector[i];
-
-    state->read_request_vector[state->read_request_vector_size++] =
-            (ReadRequest){payload.request.base.request_id, data_reader,
-            payload.read_specification.optional_delivery_config, on_topic, args};
 
     add_read_data_submessage(&state->output_message, &payload);
     PRINTL_READ_DATA_SUBMESSAGE(&payload);
@@ -300,7 +274,6 @@ bool on_message_header(const MessageHeader* header, const ClientKey* key, void* 
             return 0;
 
     state->input_sequence_number++;
-
     return 1;
 }
 
@@ -314,41 +287,31 @@ DataFormat on_data_submessage(const BaseObjectReply* reply, void* args)
 {
     ClientState* state = (ClientState*) args;
 
-    //TODO as key-value map
-    for(uint32_t i = 0; i < state->read_request_vector_size; i++)
-        if(state->read_request_vector[i].data_reader_request_id == reply->base.result.request_id)
-            return state->read_request_vector[i].data_format;
+    CallbackData* callback_data = get_callback_data(&state->callback_data_storage, reply->base.result.request_id);
+    if(callback_data)
+        return callback_data->format;
+
+    return FORMAT_BAD;
 }
 
 void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* args, Endianness endianness)
 {
     ClientState* state = (ClientState*) args;
-
     PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(reply, data);
 
-    OnTopic on_topic = NULL;
-    void* topic_object = NULL;
-    DeserializeTopic deserialize_topic = NULL;
+    CallbackData* callback_data = get_callback_data(&state->callback_data_storage, reply->base.result.request_id);
+    if(callback_data)
+    {
+        MicroBuffer reader;
+        init_external_buffer(&reader, data->data, data->size);
+        reader.endianness = endianness;
 
-    //TODO as key-value map
-    for(uint32_t i = 0; i < state->read_request_vector_size; i++)
-        if(state->read_request_vector[i].data_reader_request_id == reply->base.request_id)
-        {
-            DataReader* data_reader = state->read_request_vector[i].data_reader;
-            on_topic = state->read_request_vector[i].on_topic;
-            topic_object = state->read_request_vector[i].args;
+        AbstractTopic abstract_topic;
+        if(callback_data->deserialize_topic(&reader, &abstract_topic))
+            callback_data->on_topic(abstract_topic.topic, callback_data->on_topic_args);
 
-            if(data_reader && data_reader->topic)
-                deserialize_topic = data_reader->topic->deserialize_topic;
-        }
-
-    MicroBuffer reader;
-    init_external_buffer(&reader, data->data, data->size);
-    reader.endianness = endianness;
-
-    AbstractTopic abstract_topic;
-    if(deserialize_topic(&reader, &abstract_topic))
-        on_topic(abstract_topic.topic, topic_object);
+        remove_callback_data(&state->callback_data_storage, reply->base.result.request_id);
+    }
 }
 
 // ----------------------------------------------------------------------------------
@@ -386,4 +349,61 @@ void receive_from_agent(ClientState* state)
 
         PRINTL_SERIALIZATION(RECV, state->input_buffer, length);
     }
+}
+
+// ----------------------------------------------------------------------------------------------
+//    Data callback funcions
+// ----------------------------------------------------------------------------------------------
+
+void init_callback_data_storage(CallbackDataStorage* store, int16_t initial_id)
+{
+    store->size = 1;
+    store->initial_id = initial_id;
+    store->existence = calloc(store->size, sizeof(bool));
+    store->callbacks = malloc(sizeof(CallbackData) * store->size);
+}
+
+void free_callback_data_storage(CallbackDataStorage* store)
+{
+    free(store->callbacks);
+    free(store->existence);
+}
+
+uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, DeserializeTopic deserialize_topic,
+        OnTopic on_topic, void* on_topic_args)
+{
+    uint16_t id = store->size;
+    for(uint32_t i = 0; i < store->size; i++)
+        if(!store->existence[i])
+            id = i;
+
+    if(id == store->size)
+    {
+        uint32_t new_size = store->size * 2;
+        store->existence = realloc(store->existence, sizeof(bool) *new_size);
+        store->callbacks = realloc(store->callbacks, sizeof(CallbackData) * new_size);
+
+        for(uint32_t i = store->size; i < new_size; i++)
+            store->existence[i] = false;
+
+        store->size = new_size;
+    }
+
+    store->existence[id] = true;
+    store->callbacks[id] = (CallbackData){format, deserialize_topic, on_topic, on_topic_args};
+
+    return store->initial_id + id;
+}
+
+void remove_callback_data(CallbackDataStorage* store, uint16_t id)
+{
+    if(store->size + store->initial_id > id)
+        store->existence[id - store->initial_id] = false;
+}
+
+CallbackData* get_callback_data(const CallbackDataStorage* store, uint16_t id)
+{
+    if(store->size + store->initial_id > id)
+        return &store->callbacks[id - store->initial_id];
+    return NULL;
 }
