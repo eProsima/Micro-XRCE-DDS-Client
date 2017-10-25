@@ -15,7 +15,7 @@ extern "C"
 typedef struct InputMessageCallback
 {
     // Headers
-    int  (*on_message_header)   (const MessageHeader* header, const ClientKey* key, void* args);
+    bool  (*on_message_header)   (const MessageHeader* header, const ClientKey* key, void* args);
     void (*on_submessage_header)(const SubmessageHeader* header, void* args);
 
     // Submessages

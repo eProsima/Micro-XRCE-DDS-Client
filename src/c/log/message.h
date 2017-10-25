@@ -1,5 +1,5 @@
-#ifndef _C_LOG_MESSAGE_PRIVATE_H_
-#define _C_LOG_MESSAGE_PRIVATE_H_
+#ifndef _MICRORTPS_C_LOG_MESSAGE_PRIVATE_H_
+#define _MICRORTPS_C_LOG_MESSAGE_PRIVATE_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -108,4 +108,4 @@ void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const BaseObjectReply* reply, const P
 }
 #endif
 
-#endif //_C_LOG_MESSAGE_PRIVATE_H_
+#endif //_MICRORTPS_C_LOG_MESSAGE_PRIVATE_H_

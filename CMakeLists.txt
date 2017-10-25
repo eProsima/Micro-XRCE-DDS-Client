@@ -78,7 +78,7 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/include/micrortps/client)
 add_library(${PROJECT_NAME} ${CLIENT_LIB_SOURCES})
-target_link_libraries(${PROJECT_NAME} microcdr transport pthread)
+target_link_libraries(${PROJECT_NAME} microcdr transport)
 target_include_directories(
     ${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -101,5 +101,6 @@ endif()
 # Examples
 ###############################################################################
 if(EPROSIMA_BUILD_EXAMPLES)
+    add_subdirectory(examples/message)
     add_subdirectory(examples/prototype)
 endif()

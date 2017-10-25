@@ -119,7 +119,7 @@ void compute_command(const char* command, ClientState* state)
     {
         create_data_reader(state, id, extra, topic_name);
     }
-    else if(strcmp(name, "write_data") == 0 &&length == 2)
+    else if(strcmp(name, "write_data") == 0 && length == 2)
     {
         write_data(state, id, &shape_topic);
     }
@@ -183,52 +183,3 @@ void printl_shape_topic(const ShapeTopic* shape_topic)
             shape_topic->size,
             "\e[0m");
 }
-
-/*
-create_client(state);
-send_to_agent(state);
-
-uint16_t participant_id = create_participant(state);
-send_to_agent(state);
-
-String topic_name = {"SQUARE", strlen("SQUARE") + 1};
-uint16_t topic_id = create_topic(state, participant_id, topic_name, serialize_shape_topic, deserialize_shape_topic);
-send_to_agent(state);
-
-uint16_t publisher_id = create_publisher(state, participant_id);
-send_to_agent(state);
-
-uint16_t subscriber_id = create_subscriber(state, participant_id);
-send_to_agent(state);
-
-uint16_t data_writer_id =
-create_data_writer(state, participant_id, publisher_id, topic_name);
-send_to_agent(state);
-
-uint16_t data_reader_id =
-create_data_reader(state, participant_id, subscriber_id, topic_name);
-send_to_agent(state);
-
-ShapeTopic shape_topic = {strlen("PURPLE") + 1, "PURPLE", 100 , 100, 50};
-write_data(state, data_writer_id, &shape_topic);
-printl_shape_topic(&shape_topic);
-send_to_agent(state);
-
-read_data(state, data_reader_id, on_shape_topic, NULL, 5);
-send_to_agent(state);
-
-delete_resource(state, data_reader_id);
-send_to_agent(state);
-
-delete_resource(state, data_writer_id);
-send_to_agent(state);
-
-delete_resource(state, subscriber_id);
-send_to_agent(state);
-
-delete_resource(state, publisher_id);
-send_to_agent(state);
-
-delete_resource(state, participant_id);
-send_to_agent(state);
-*/
