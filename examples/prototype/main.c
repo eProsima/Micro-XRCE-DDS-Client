@@ -31,7 +31,9 @@ bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_serializa
 void on_shape_topic(const void* topic, void* args);
 void printl_shape_topic(const ShapeTopic* shape_topic);
 void* listen_agent(void* args);
-void compute_command(const char* command, ClientState* state);
+bool compute_command(const char* command, ClientState* state);
+
+static bool stop_listening = false;
 
 int main(int args, char** argv)
 {
@@ -54,8 +56,8 @@ int main(int args, char** argv)
 
 
     // Listening agent
-    pthread_t th;
-    if(pthread_create(&th, NULL, listen_agent, state))
+    pthread_t listening_thread;
+    if(pthread_create(&listening_thread, NULL, listen_agent, state))
     {
         printf("ERROR: Error creating thread\n");
         return 1;
@@ -65,8 +67,14 @@ int main(int args, char** argv)
     char command_stdin_line[256];
     while(fgets(command_stdin_line, 256, stdin))
     {
-        compute_command(command_stdin_line, state);
+        if(!compute_command(command_stdin_line, state))
+        {
+            stop_listening = true;
+            break;
+        }
     }
+
+    //pthread_join(listening_thread, NULL);
 
     free_client_state(state);
 
@@ -75,14 +83,16 @@ int main(int args, char** argv)
 
 void* listen_agent(void* args)
 {
-    while(true)
+    while(!stop_listening)
     {
         receive_from_agent((ClientState*) args);
-        usleep(1000000);
+        //usleep(1000000);
     }
+
+    return NULL;
 }
 
-void compute_command(const char* command, ClientState* state)
+bool compute_command(const char* command, ClientState* state)
 {
     char name[128];
     int id = 0;
@@ -99,7 +109,7 @@ void compute_command(const char* command, ClientState* state)
     {
         create_participant(state);
     }
-    else if(strcmp(name, "create_topic") == 0 && length == 1)
+    else if(strcmp(name, "create_topic") == 0 && length == 2)
     {
         create_topic(state, id, topic_name);
     }
@@ -132,7 +142,14 @@ void compute_command(const char* command, ClientState* state)
         delete_resource(state, id);
     }
 
+    // only send data if there is.
     send_to_agent(state);
+
+    // close client
+    if(strcmp(name, "exit") == 0)
+        return false;
+
+    return true;
 }
 
 bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)

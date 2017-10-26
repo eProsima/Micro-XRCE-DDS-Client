@@ -40,5 +40,6 @@ void* request_aux_memory(AuxMemory* memory, uint32_t size)
 
 void free_aux_memory(AuxMemory* memory)
 {
-    memory->buffer = realloc(memory->buffer, 0);
+    memory->buffer = NULL;
+    free(memory->buffer);
 }

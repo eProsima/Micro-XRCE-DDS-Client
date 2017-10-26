@@ -212,7 +212,7 @@ void delete_resource(ClientState* state, uint16_t resource_id)
 
 void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialize_topic, void* topic)
 {
-    //Change this to serialize directly in the message (?)
+    //Knows previously the topic length. Is it feasible?
     char buffer[MAX_TOPIC_LENGTH];
 
     MicroBuffer writer;
