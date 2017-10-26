@@ -87,8 +87,10 @@ int parse_submessage(InputMessage* message)
     AuxMemory* aux_memory = &message->aux_memory;
     InputMessageCallback* callback = &message->callback;
 
-    // Submessage message header.
+    // All subsessages begin with a 4 bytes alignment.
     align_to(reader, 4);
+
+    // Submessage message header.
     SubmessageHeader submessage_header;
     deserialize_SubmessageHeader(reader, &submessage_header, NULL);
     if(callback->on_submessage_header)
