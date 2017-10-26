@@ -338,11 +338,12 @@ void send_to_agent(ClientState* state)
 
 void receive_from_agent(ClientState* state)
 {
-    uint32_t length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
+    int length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
+    printf("received: %i \n", length);
     if(length > 0)
     {
         #ifndef NDEBUG
-        memset(state->input_buffer, 0, state->buffer_size);
+        memset(state->input_buffer, 0xFF, state->buffer_size);
         #endif
 
         parse_message(&state->input_message, length);

@@ -11,7 +11,7 @@
 
 #else
 
-#define DEBUG_PRINT(fmt, args...)
+#define DEBUG_PRINT(fmt, args...) ;
 
 #endif
 
@@ -88,20 +88,24 @@ int parse_submessage(InputMessage* message)
     InputMessageCallback* callback = &message->callback;
 
     // Submessage message header.
+    align_to(reader, 4);
     SubmessageHeader submessage_header;
     deserialize_SubmessageHeader(reader, &submessage_header, NULL);
     if(callback->on_submessage_header)
         callback->on_submessage_header(&submessage_header, callback->object);
 
-    // Configure the reader for the specific endianness
+    // Configure the reader for the specific message endianness
     reader->endianness = submessage_header.flags & FLAG_ENDIANNESS;
 
     // We will need as much a quantity of aux memory equivalent to the payload length.
     increase_aux_memory(&message->aux_memory, submessage_header.length);
 
     // Submessage is not complete.
-    if(reader->iterator + submessage_header.length >= reader->final)
+    if(reader->iterator + submessage_header.length > reader->final)
+    {
+        ERROR_PRINT("Parse message error: Subessage not complete.\n");
         return 0;
+    }
 
     // Parse payload and call the corresponding callback.
     switch(submessage_header.id)
@@ -143,7 +147,7 @@ int parse_submessage(InputMessage* message)
         break;
 
         default:
-            ERROR_PRINT("Parse message error: Unknown submessage id 0x%02X", submessage_header.id);
+            ERROR_PRINT("Parse message error: Unknown submessage id 0x%02X\n", submessage_header.id);
             return 0;
     }
 
@@ -160,7 +164,7 @@ int parse_message(InputMessage* message, uint32_t length)
         init_external_buffer(reader, message->buffer, length);
     else
     {
-        ERROR_PRINT("Parse message error: Message length greater than input buffer.");
+        ERROR_PRINT("Parse message error: Message length greater than input buffer.\n");
         return 0;
     }
 
@@ -175,7 +179,7 @@ int parse_message(InputMessage* message, uint32_t length)
     if(callback->on_message_header &&
         !callback->on_message_header(&message_header, &key, callback->object))
     {
-        ERROR_PRINT("Parse message error: Message header not undestood.");
+        ERROR_PRINT("Parse message error: Message header not undestood.\n");
         return 0;
     }
 
@@ -185,7 +189,7 @@ int parse_message(InputMessage* message, uint32_t length)
         if(!parse_submessage(message))
             return 0;
     }
-    while(reader->iterator + align_to(reader, 4) + 4 >= reader->final); // while another submessage fix...
+    while(reader->iterator < reader->final); // while another submessage fix...
 
     return 1;
 }

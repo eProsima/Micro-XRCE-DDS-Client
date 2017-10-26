@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 class State:
     def __init__(self):
         self.aliases = {}
@@ -361,14 +362,23 @@ class MicroCDRGenerator:
         file.close()
 
 import yaml
-with open('xrce_protocol.yaml', 'r') as f:
-    src = yaml.load(f)
+import sys
 
-microCDRGen = MicroCDRGenerator(src)
+if len(sys.argv) == 4:
+    with open(sys.argv[1], 'r') as f:
+        src = yaml.load(f)
 
-headers = '../include/micrortps/client/'
-sources = '../src/c/'
+    microCDRGen = MicroCDRGenerator(src)
 
-microCDRGen.writeSpec(headers + 'xrce_protocol_spec.h')
-microCDRGen.writeSerializationHeader(headers + 'xrce_protocol_serialization.h')
-microCDRGen.writeSerializationImplementation(sources + 'xrce_protocol_serialization.c')
+    file_path_points = sys.argv[1].split('.')
+    file_path_slash = file_path_points[len(file_path_points) - 2].split('/')
+    name = file_path_slash[len(file_path_slash) - 1]
+    headers = sys.argv[2] + '/'
+    sources = sys.argv[3] + '/'
+
+    microCDRGen.writeSpec(headers + name + '_spec.h')
+    microCDRGen.writeSerializationHeader(headers + name + '_serialization.h')
+    microCDRGen.writeSerializationImplementation(sources + name + '_serialization.c')
+
+else:
+    print('program yaml_source headers_dir sources_dir')

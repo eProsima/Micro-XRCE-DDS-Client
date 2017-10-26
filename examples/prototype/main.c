@@ -33,7 +33,7 @@ void printl_shape_topic(const ShapeTopic* shape_topic);
 void* listen_agent(void* args);
 bool compute_command(const char* command, ClientState* state);
 
-static bool stop_listening = false;
+bool stop_listening = false;
 
 int main(int args, char** argv)
 {
@@ -85,6 +85,7 @@ void* listen_agent(void* args)
 {
     while(!stop_listening)
     {
+        // only read data if there is. (NOT WORKS AT THIS POINT)
         receive_from_agent((ClientState*) args);
         //usleep(1000000);
     }
