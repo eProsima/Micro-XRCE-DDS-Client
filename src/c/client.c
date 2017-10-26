@@ -271,7 +271,10 @@ bool on_message_header(const MessageHeader* header, const ClientKey* key, void* 
 
     if(header->stream_id != STREAMID_NONE)
         if(header->sequence_nr != state->input_sequence_number)
+        {
+            PRINT_SEQUENCE_NUMBER(header->sequence_nr, state->input_sequence_number);
             return 0;
+        }
 
     state->input_sequence_number++;
     return 1;
@@ -338,14 +341,14 @@ void send_to_agent(ClientState* state)
 
 void receive_from_agent(ClientState* state)
 {
+    #ifndef NDEBUG
+    memset(state->input_buffer, 0x00, state->buffer_size);
+    #endif
+
     int length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
     printf("received: %i \n", length);
     if(length > 0)
     {
-        #ifndef NDEBUG
-        memset(state->input_buffer, 0xFF, state->buffer_size);
-        #endif
-
         parse_message(&state->input_message, length);
 
         PRINTL_SERIALIZATION(RECV, state->input_buffer, length);

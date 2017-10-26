@@ -44,6 +44,18 @@ void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 #endif
 
 #ifdef MESSAGE_LOGS
+void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t local_sequence_number)
+{
+    printf("%s%sSequence number error => received: %u, expected: %u.%s\n",
+            RECV,
+            RED,
+            message_sequence_number,
+            local_sequence_number,
+            RESTORE_COLOR);
+}
+#endif
+
+#ifdef MESSAGE_LOGS
 void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
 {
     printf("%s%s[Create | session: 0x%02X]%s\n",

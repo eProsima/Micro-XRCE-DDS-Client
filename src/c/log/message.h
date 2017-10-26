@@ -34,6 +34,13 @@ INLINE_SER void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uin
 ;
 #endif
 
+INLINE_MES void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t local_sequence_number)
+#ifndef MESSAGE_LOGS
+{}
+#else
+;
+#endif
+
 INLINE_MES void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
 #ifndef MESSAGE_LOGS
 {}
