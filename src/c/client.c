@@ -164,15 +164,15 @@ uint16_t create_topic(ClientState* state, uint16_t participant_id, String name)
     return payload.request.object_id;
 }
 
-uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String topic_name)
+uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String xml)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_DATAWRITER;
     payload.representation._.data_writer.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.data_writer.base3._.object_name.size = topic_name.length;
-    payload.representation._.data_writer.base3._.object_name.data = topic_name.data;
+    payload.representation._.data_writer.base3._.object_name.size = xml.length;
+    payload.representation._.data_writer.base3._.object_name.data = xml.data;
     payload.representation._.data_writer.participant_id = participant_id;
     payload.representation._.data_writer.publisher_id = publisher_id;
 
@@ -182,15 +182,15 @@ uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_
     return payload.request.object_id;
 }
 
-uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String topic_name)
+uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String xml)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_DATAREADER;
     payload.representation._.data_reader.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.data_reader.base3._.object_name.size = topic_name.length;
-    payload.representation._.data_reader.base3._.object_name.data = topic_name.data;
+    payload.representation._.data_reader.base3._.object_name.size = xml.length;
+    payload.representation._.data_reader.base3._.object_name.data = xml.data;
     payload.representation._.data_reader.participant_id = participant_id;
     payload.representation._.data_reader.subscriber_id = subscriber_id;
 
@@ -212,7 +212,7 @@ void delete_resource(ClientState* state, uint16_t resource_id)
 
 void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialize_topic, void* topic)
 {
-    //Knows previously the topic length. Is it feasible?
+    //Knows previously the topic serialized length. Is it feasible?
     char buffer[MAX_TOPIC_LENGTH];
 
     MicroBuffer writer;
