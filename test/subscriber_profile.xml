@@ -1,0 +1,16 @@
+<profiles>
+  <subscriber profile_name="default_xrce_subscriber_profile">
+    <topic>
+      <kind>WITH_KEY</kind>
+      <name>Square</name>
+      <dataType>ShapeType</dataType>
+      <historyQos>
+        <kind>KEEP_LAST</kind>
+        <depth>5</depth>
+      </historyQos>
+      <durability>
+        <kind>TRANSIENT_LOCAL</kind>
+      </durability>
+    </topic>
+  </subscriber>
+</profiles>

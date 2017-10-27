@@ -30,7 +30,7 @@ int main(int args, char** argv)
     uint8_t out_buffer[BUFFER_SIZE];
 
     OutputMessageCallback output_callback = {0};
-    output_callback.object = &user_data;
+    output_callback.args = &user_data;
     output_callback.on_initialize_message = on_initialize_message;
 
     OutputMessage output_message;
@@ -53,7 +53,7 @@ int main(int args, char** argv)
     uint8_t in_buffer[BUFFER_SIZE];
 
     InputMessageCallback input_callback = {0};
-    input_callback.object = &user_data;
+    input_callback.args = &user_data;
     input_callback.on_message_header = on_message_header;
 
     InputMessage input_message;

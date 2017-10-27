@@ -35,7 +35,7 @@ typedef struct InputMessageCallback
     void (*on_packed_samples_payload) (const BaseObjectReply* reply, const PackedSamples* packed_samples,
             void* args, Endianness endianness);
 
-    void* object;
+    void* args;
 
 } InputMessageCallback;
 

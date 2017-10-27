@@ -31,18 +31,15 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     state->input_buffer = malloc(buffer_size);
     state->output_buffer = malloc(buffer_size);
 
-    state->session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
-    state->stream_id = STREAMID_NONE;
     state->output_sequence_number = 0;
     state->input_sequence_number = 0;
-    state->key = (ClientKey){0xFF, 0xFF, 0xFF, 0xFF};
 
     OutputMessageCallback output_callback = {0};
-    output_callback.object = state;
+    output_callback.args = state;
     output_callback.on_initialize_message = on_initialize_message;
 
     InputMessageCallback input_callback = {0};
-    input_callback.object = state;
+    input_callback.args = state;
     input_callback.on_message_header = on_message_header;
     input_callback.on_status_submessage = on_status_submessage;
     input_callback.on_data_submessage = on_data_submessage;
@@ -60,8 +57,8 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     state->output_message.writer.endianness = LITTLE_ENDIANNESS;
 
     #ifndef NDEBUG
-    memset(state->output_buffer, 0, state->buffer_size);
-    memset(state->input_buffer, 0, state->buffer_size);
+    memset(state->output_buffer, 0x00, state->buffer_size);
+    memset(state->input_buffer, 0x00, state->buffer_size);
     #endif
 
     return state;
@@ -82,22 +79,33 @@ void free_client_state(ClientState* state)
 //                              XRCE API - CLIENT TO AGENT
 // ----------------------------------------------------------------------------------
 
-void create_client(ClientState* state)
+uint16_t create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args)
 {
+    state->on_status_received = on_status;
+    state->on_status_received_args = on_status_args;
+
     struct timespec ts;
     timespec_get(&ts, TIME_UTC);
 
     CreateClientPayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
     payload.representation.xrce_cookie = XRCE_COOKIE;
     payload.representation.xrce_version = XRCE_VERSION;
     payload.representation.xrce_vendor_id = (XrceVendorId){0x01, 0x0F};
     payload.representation.client_timestamp.seconds = ts.tv_sec;
     payload.representation.client_timestamp.nanoseconds = ts.tv_nsec;
-    payload.representation.client_key = (ClientKey){0xFF, 0xFF, 0xFF, 0xFF};
-    payload.representation.session_id = 0x01;
+    payload.representation.client_key = (ClientKey){0xAA, 0xBB, 0xCC, 0xDD};
+    payload.representation.session_id = 0xEE;
+
+    state->session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
+    state->stream_id = STREAMID_NONE;
+    state->key = payload.representation.client_key;
 
     add_create_client_submessage(&state->output_message, &payload);
     PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
+
+    return payload.request.object_id;
 }
 
 uint16_t create_participant(ClientState* state)
@@ -234,7 +242,7 @@ void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic seri
 }
 
 void read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialize_topic,
-        OnTopic on_topic, void* on_topic_args)
+        OnTopicReceived on_topic, void* on_topic_args)
 {
     int16_t callback_request_id = register_callback_data(&state->callback_data_storage,
             FORMAT_DATA, deserialize_topic, on_topic, on_topic_args);
@@ -284,6 +292,14 @@ void on_status_submessage(const StatusPayload* payload, void* args)
 {
     ClientState* state = (ClientState*) args;
     PRINTL_STATUS_SUBMESSAGE(payload);
+
+    if(state->on_status_received)
+    {
+        state->on_status_received(payload->reply.object_id,
+                payload->reply.base.result.status,
+                payload->reply.base.result.implementation_status,
+                state->on_status_received_args);
+    }
 }
 
 DataFormat on_data_submessage(const BaseObjectReply* reply, void* args)
@@ -346,7 +362,6 @@ void receive_from_agent(ClientState* state)
     #endif
 
     int length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
-    printf("received: %i \n", length);
     if(length > 0)
     {
         parse_message(&state->input_message, length);
@@ -374,7 +389,7 @@ void free_callback_data_storage(CallbackDataStorage* store)
 }
 
 uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, DeserializeTopic deserialize_topic,
-        OnTopic on_topic, void* on_topic_args)
+        OnTopicReceived on_topic, void* on_topic_args)
 {
     uint16_t id = store->size;
     for(uint32_t i = 0; i < store->size; i++)

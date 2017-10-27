@@ -15,7 +15,7 @@ typedef struct CallbackData
 {
     DataFormat format;
     DeserializeTopic deserialize_topic;
-    OnTopic on_topic;
+    OnTopicReceived on_topic;
     void* on_topic_args;
 
 } CallbackData;
@@ -37,10 +37,11 @@ typedef struct ClientState
     uint8_t* input_buffer;
     uint8_t* output_buffer;
 
-    uint8_t session_id;
-    uint8_t stream_id;
     uint16_t output_sequence_number;
     uint16_t input_sequence_number;
+
+    uint8_t session_id;
+    uint8_t stream_id;
     ClientKey key;
 
     OutputMessage output_message;
@@ -50,6 +51,9 @@ typedef struct ClientState
     uint16_t next_object_id;
 
     CallbackDataStorage callback_data_storage;
+
+    OnStatusReceived on_status_received;
+    void* on_status_received_args;
 
 } ClientState;
 
@@ -61,7 +65,7 @@ void init_callback_data_storage(CallbackDataStorage* store, int16_t initial_id);
 void free_callback_data_storage(CallbackDataStorage* store);
 
 uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, DeserializeTopic deserialize_topic,
-        OnTopic on_topic, void* on_topic_args);
+        OnTopicReceived on_topic, void* on_topic_args);
 void remove_callback_data(CallbackDataStorage* store, uint16_t id);
 CallbackData* get_callback_data(const CallbackDataStorage* store, uint16_t id);
 

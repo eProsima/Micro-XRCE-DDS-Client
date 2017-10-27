@@ -58,9 +58,11 @@ void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t local_sequ
 #ifdef MESSAGE_LOGS
 void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
 {
-    printf("%s%s[Create | session: 0x%02X]%s\n",
+    printf("%s%s[Create client | #0x%04X | id: 0x%04X | session: 0x%02X]%s\n",
             SEND,
             YELLOW,
+            payload->request.base.request_id,
+            payload->request.object_id,
             payload->representation.session_id,
             RESTORE_COLOR);
 }

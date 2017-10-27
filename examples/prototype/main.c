@@ -102,13 +102,12 @@ bool compute_command(const char* command, ClientState* state)
     char name[128];
     int id = 0;
     int extra = 0;
-    String topic_name = {"SQUARE", strlen("SQUARE") + 1};
-    ShapeTopic shape_topic = {strlen("PURPLE") + 1, "PURPLE", 100 , 100, 50};
-
     int length = sscanf(command, "%s %u %u", name, &id, &extra);
+
+
     if(strcmp(name, "create_client") == 0)
     {
-        create_client(state);
+        create_client(state, NULL, NULL);
     }
     else if(strcmp(name, "create_participant") == 0)
     {
@@ -116,6 +115,7 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "create_topic") == 0 && length == 2)
     {
+        String topic_name = {"SQUARE", strlen("SQUARE") + 1};
         create_topic(state, id, topic_name);
     }
     else if(strcmp(name, "create_publisher") == 0 && length == 2)
@@ -128,14 +128,17 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "create_data_writer") == 0 && length == 3)
     {
-        create_data_writer(state, id, extra, topic_name);
+        String xml = {"SQUARE", strlen("SQUARE") + 1};
+        create_data_writer(state, id, extra, xml);
     }
     else if(strcmp(name, "create_data_reader") == 0 && length == 3)
     {
-        create_data_reader(state, id, extra, topic_name);
+        String xml = {"SQUARE", strlen("SQUARE") + 1};
+        create_data_reader(state, id, extra, xml);
     }
     else if(strcmp(name, "write_data") == 0 && length == 2)
     {
+        ShapeTopic shape_topic = {strlen("PURPLE") + 1, "PURPLE", 100 , 100, 50};
         write_data(state, id, serialize_shape_topic, &shape_topic);
     }
     else if(strcmp(name, "read_data") == 0 && length == 2)

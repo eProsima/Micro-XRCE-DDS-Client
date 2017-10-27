@@ -37,7 +37,8 @@ typedef struct AbstractTopic
 typedef bool (*SerializeTopic)(MicroBuffer* writer, const AbstractTopic* topic_structure);
 typedef bool (*DeserializeTopic)(MicroBuffer* reader, AbstractTopic* topic_structure);
 
-typedef void (*OnTopic)(const void* topic, void* args);
+typedef void (*OnTopicReceived)(const void* topic, void* args);
+typedef void (*OnStatusReceived)(uint16_t id, uint8_t operation, uint8_t status, void* args);
 
 // ----------------------------------------------------------------------------------------------
 //    State funcions
@@ -49,7 +50,7 @@ void free_client_state(ClientState* state);
 // ----------------------------------------------------------------------------------------------
 //    XRCE Client API funcions
 // ----------------------------------------------------------------------------------------------
-void create_client(ClientState* state);
+uint16_t create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args);
 uint16_t create_participant(ClientState* state);
 uint16_t create_publisher(ClientState* state, uint16_t participant_id);
 uint16_t create_subscriber(ClientState* state, uint16_t participant_id);
@@ -61,7 +62,7 @@ void delete_resource(ClientState* state, uint16_t resource_id);
 
 void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialization, void* topic);
 void read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialization,
-        OnTopic on_topic, void* on_topic_args);
+        OnTopicReceived on_topic, void* on_topic_args);
 
 // ----------------------------------------------------------------------------------------------
 //    Comunication functions

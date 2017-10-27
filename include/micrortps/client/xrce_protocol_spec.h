@@ -61,8 +61,8 @@ typedef struct XrceVendorId
 #define XRCE_VENDOR_INVALID {0x00, 0x00}
 
 typedef uint8_t SessionId;
-#define SESSIONID_NONE_WITH_CLIENT_KEY 0x00
-#define SESSIONID_NONE_WITHOUT_CLIENT_KEY 0x80
+#define SESSIONID_NONE_WITHOUT_CLIENT_KEY 0x00
+#define SESSIONID_NONE_WITH_CLIENT_KEY 0x80
 
 typedef uint8_t StreamId;
 #define STREAMID_NONE 0x00
@@ -615,6 +615,7 @@ typedef struct SubmessageHeader
 
 typedef struct CreateClientPayload
 {
+    BaseObjectRequest request;
     OBJK_CLIENT_Representation representation;
 
 } CreateClientPayload;

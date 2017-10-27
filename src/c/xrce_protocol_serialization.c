@@ -836,11 +836,13 @@ void deserialize_SubmessageHeader(MicroBuffer* buffer, SubmessageHeader* output,
 
 void serialize_CreateClientPayload(MicroBuffer* buffer, const CreateClientPayload* input)
 {
+    serialize_BaseObjectRequest(buffer, &input->request);
     serialize_OBJK_CLIENT_Representation(buffer, &input->representation);
 }
 
 void deserialize_CreateClientPayload(MicroBuffer* buffer, CreateClientPayload* output, AuxMemory* aux)
 {
+    deserialize_BaseObjectRequest(buffer, &output->request, aux);
     deserialize_OBJK_CLIENT_Representation(buffer, &output->representation, aux);
 }
 

@@ -43,7 +43,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             SampleData data;
             deserialize_SampleData(reader, &data, aux_memory);
             if(callback->on_data_payload)
-                callback->on_data_payload(reply, &data, callback->object, reader->endianness);
+                callback->on_data_payload(reply, &data, callback->args, reader->endianness);
         }
         break;
         case FORMAT_SAMPLE:
@@ -51,7 +51,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             Sample sample;
             deserialize_Sample(reader, &sample, aux_memory);
             if(callback->on_sample_payload)
-                callback->on_sample_payload(reply, &sample, callback->object, reader->endianness);
+                callback->on_sample_payload(reply, &sample, callback->args, reader->endianness);
         }
         break;
         case FORMAT_DATA_SEQ:
@@ -59,7 +59,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             SampleDataSequence data_sequence;
             deserialize_SampleDataSequence(reader, &data_sequence, aux_memory);
             if(callback->on_data_sequence_payload)
-                callback->on_data_sequence_payload(reply, &data_sequence, callback->object, reader->endianness);
+                callback->on_data_sequence_payload(reply, &data_sequence, callback->args, reader->endianness);
         }
         break;
         case FORMAT_SAMPLE_SEQ:
@@ -67,7 +67,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             SampleSequence sample_sequence;
             deserialize_SampleSequence(reader, &sample_sequence, aux_memory);
             if(callback->on_sample_sequence_payload)
-                callback->on_sample_sequence_payload(reply, &sample_sequence, callback->object, reader->endianness);
+                callback->on_sample_sequence_payload(reply, &sample_sequence, callback->args, reader->endianness);
         }
         break;
         case FORMAT_PACKED_SAMPLES:
@@ -75,7 +75,7 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             PackedSamples packed_samples;
             deserialize_PackedSamples(reader, &packed_samples, aux_memory);
             if(callback->on_packed_samples_payload)
-                callback->on_packed_samples_payload(reply, &packed_samples, callback->object, reader->endianness);
+                callback->on_packed_samples_payload(reply, &packed_samples, callback->args, reader->endianness);
         }
         break;
     }
@@ -94,7 +94,7 @@ int parse_submessage(InputMessage* message)
     SubmessageHeader submessage_header;
     deserialize_SubmessageHeader(reader, &submessage_header, NULL);
     if(callback->on_submessage_header)
-        callback->on_submessage_header(&submessage_header, callback->object);
+        callback->on_submessage_header(&submessage_header, callback->args);
 
     // Configure the reader for the specific message endianness
     reader->endianness = submessage_header.flags & FLAG_ENDIANNESS;
@@ -117,7 +117,7 @@ int parse_submessage(InputMessage* message)
             StatusPayload payload;
             deserialize_StatusPayload(reader, &payload, aux_memory);
             if(callback->on_status_submessage)
-                callback->on_status_submessage(&payload, callback->object);
+                callback->on_status_submessage(&payload, callback->args);
         }
         break;
 
@@ -126,7 +126,7 @@ int parse_submessage(InputMessage* message)
             InfoPayload payload;
             deserialize_InfoPayload(reader, &payload, aux_memory);
             if(callback->on_info_submessage)
-                callback->on_info_submessage(&payload, callback->object);
+                callback->on_info_submessage(&payload, callback->args);
         }
         break;
 
@@ -136,7 +136,7 @@ int parse_submessage(InputMessage* message)
             deserialize_BaseObjectReply(reader, &data_reply, aux_memory);
             if(callback->on_data_submessage)
             {
-                DataFormat format = callback->on_data_submessage(&data_reply, callback->object);
+                DataFormat format = callback->on_data_submessage(&data_reply, callback->args);
                 parse_data_payload(message, format, &data_reply);
             }
             else
@@ -179,7 +179,7 @@ int parse_message(InputMessage* message, uint32_t length)
 
     // If the callback implementation fails, the message will not be parse
     if(callback->on_message_header &&
-        !callback->on_message_header(&message_header, &key, callback->object))
+        !callback->on_message_header(&message_header, &key, callback->args))
     {
         ERROR_PRINT("Parse message error: Message header not undestood.\n");
         return 0;

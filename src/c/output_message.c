@@ -106,7 +106,7 @@ void begin_message(OutputMessage* message)
 {
     MessageHeader message_header;
     ClientKey key;
-    message->callback.on_initialize_message(&message_header, &key, message->callback.object);
+    message->callback.on_initialize_message(&message_header, &key, message->callback.args);
 
     serialize_MessageHeader(&message->writer, &message_header);
     if(message_header.session_id >= 128)
