@@ -132,7 +132,7 @@ bool end_submessage(OutputMessage* message, MicroState submessage_beginning,
                     MicroState header_beginning, MicroState payload_beginning,
                     SubmessageId id, uint8_t flags)
 {
-    if(message->writer.iterator == message->writer.final)
+    if(message->writer.iterator > message->writer.final)
     {
         restore_micro_state(&message->writer, submessage_beginning);
         return false;
