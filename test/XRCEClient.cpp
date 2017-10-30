@@ -53,19 +53,14 @@ class ClientTests : public ::testing::Test
 
         void waitStatus()
         {
-            /*int statusWaitCounter = 0;
+            int statusWaitCounter = 0;
             while(!receive_from_agent(state) && statusWaitCounter < STATUS_TRIES_WAIT)
             {
                 usleep(1000);
                 statusWaitCounter++;
-            }*/
+            }
 
-            bool expectedTimeout = false;
-            bool timeout = false;
-            if(!receive_from_agent(state))
-                timeout = true;
-
-            ASSERT_EQ(timeout, expectedTimeout);
+            ASSERT_LT(statusWaitCounter, STATUS_TRIES_WAIT);
         }
 
         void checkStatus(uint8_t operation)

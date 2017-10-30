@@ -36,7 +36,7 @@ void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 {
     printf("%s%s<< [%u]: %s>>%s\n",
             pre,
-            YELLOW_DARK,
+            GREY_DARK,
             size,
             data_to_string(buffer, size),
             RESTORE_COLOR);
@@ -69,7 +69,7 @@ void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
 
 void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
 {
-    char content[128];
+    char content[2048];
     switch(payload->representation.kind)
     {
         case OBJK_PARTICIPANT:
