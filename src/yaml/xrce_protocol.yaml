@@ -243,7 +243,7 @@ DATA:
 
 - struct:
     ResultStatus:
-      - {request_id: RequestId, __ENDIANNESS__: MACHINE}
+      - {request_id: RequestId, __ENDIANNESS__: BIG}
       - status: uint8_t
       - implementation_status: uint8_t
 
@@ -278,22 +278,22 @@ DATA:
 
 - struct:
     BaseRequest:
-      - {request_id: RequestId, __ENDIANNESS__: MACHINE}
+      - {request_id: RequestId, __ENDIANNESS__: BIG}
 
 - struct:
     BaseObjectRequest:
       - base: BaseRequest
-      - {object_id: ObjectId, __ENDIANNESS__: MACHINE}
+      - {object_id: ObjectId, __ENDIANNESS__: BIG}
 
 - struct:
     BaseReply:
       - result: ResultStatus
-      - {request_id: RequestId, __ENDIANNESS__: MACHINE}
+      - {request_id: RequestId, __ENDIANNESS__: BIG}
 
 - struct:
     BaseObjectReply:
       - base: BaseReply
-      - {object_id: ObjectId, __ENDIANNESS__: MACHINE}
+      - {object_id: ObjectId, __ENDIANNESS__: BIG}
 
 - struct:
     InfoReply:

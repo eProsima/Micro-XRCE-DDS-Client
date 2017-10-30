@@ -161,7 +161,7 @@ void on_status(uint16_t id, uint8_t operation, uint8_t status, void* args)
     test->statusReceived = true;
 }
 
-TEST_F(ClientLogicTest, CreateDeleteClient)
+/*TEST_F(ClientLogicTest, CreateDeleteClient)
 {
     uint16_t client_id = createClient();
 
@@ -170,10 +170,10 @@ TEST_F(ClientLogicTest, CreateDeleteClient)
     deleteXRCEObject(client_id);
 
     waitAndcheckStatus(STATUS_LAST_OP_DELETE);
-}
+}*/
 
 
-/*TEST_F(ClientLogicTest, CreateDeleteParticipant)
+TEST_F(ClientLogicTest, CreateDeleteParticipant)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
@@ -183,7 +183,7 @@ TEST_F(ClientLogicTest, CreateDeleteClient)
     //deleteXRCEObject(participant_id);
 
     //waitAndcheckStatus(STATUS_LAST_OP_DELETE);
-}/*
+}
 
 /*TEST_F(ClientLogicTest, CreateDeletePublisher)
 {
