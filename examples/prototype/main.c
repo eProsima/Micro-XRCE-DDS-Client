@@ -29,6 +29,8 @@ bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_serializa
 //    App client
 // ----------------------------------------------------
 void on_shape_topic(const void* topic, void* args);
+void on_status_received(uint16_t id, uint8_t operation, uint8_t status, void* args);
+
 void printl_shape_topic(const ShapeTopic* shape_topic);
 void* listen_agent(void* args);
 bool compute_command(const char* command, ClientState* state);
@@ -78,7 +80,7 @@ int main(int args, char** argv)
         }
     }
 
-    //pthread_join(listening_thread, NULL);
+    pthread_join(listening_thread, NULL);
 
     free_client_state(state);
 
@@ -89,9 +91,7 @@ void* listen_agent(void* args)
 {
     while(!stop_listening)
     {
-        // only read data if there is. (NOT WORKS AT THIS POINT)
         receive_from_agent((ClientState*) args);
-        //usleep(1000000);
     }
 
     return NULL;
@@ -107,7 +107,7 @@ bool compute_command(const char* command, ClientState* state)
 
     if(strcmp(name, "create_client") == 0)
     {
-        create_client(state, NULL, NULL);
+        create_client(state, on_status_received, NULL);
     }
     else if(strcmp(name, "create_participant") == 0)
     {
@@ -196,6 +196,11 @@ void on_shape_topic(const void* vtopic, void* args)
 
     free(topic->color);
     free(topic);
+}
+
+void on_status_received(uint16_t id, uint8_t operation, uint8_t status, void* args)
+{
+    printf("User status callback\n");
 }
 
 void printl_shape_topic(const ShapeTopic* shape_topic)
