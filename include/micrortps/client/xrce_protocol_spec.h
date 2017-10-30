@@ -30,9 +30,9 @@ typedef uint8_t ObjectKind;
 #define OBJK_APPLICATION 0x20
 
 typedef uint16_t ObjectId;
-#define OBJECTID_INVALID {0xFF, 0xFF}
-#define OBJECTID_CLIENT {0xFF, 0xFF}
-#define OBJECTID_SESSION {0xFF, 0xFF}
+#define OBJECTID_INVALID 0xFFFF
+#define OBJECTID_CLIENT 0xFFF0
+#define OBJECTID_SESSION 0xFFF1
 
 
 typedef struct XrceCookie

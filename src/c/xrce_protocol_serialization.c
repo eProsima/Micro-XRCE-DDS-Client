@@ -449,14 +449,14 @@ void deserialize_ObjectVariant(MicroBuffer* buffer, ObjectVariant* output, AuxMe
 
 void serialize_ResultStatus(MicroBuffer* buffer, const ResultStatus* input)
 {
-    serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->request_id);
+    serialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, input->request_id);
     serialize_uint8_t(buffer, input->status);
     serialize_uint8_t(buffer, input->implementation_status);
 }
 
 void deserialize_ResultStatus(MicroBuffer* buffer, ResultStatus* output, AuxMemory* aux)
 {
-    deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->request_id);
+    deserialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, &output->request_id);
     deserialize_uint8_t(buffer, &output->status);
     deserialize_uint8_t(buffer, &output->implementation_status);
 }
@@ -525,48 +525,48 @@ void deserialize_Info(MicroBuffer* buffer, Info* output, AuxMemory* aux)
 
 void serialize_BaseRequest(MicroBuffer* buffer, const BaseRequest* input)
 {
-    serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->request_id);
+    serialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, input->request_id);
 }
 
 void deserialize_BaseRequest(MicroBuffer* buffer, BaseRequest* output, AuxMemory* aux)
 {
-    deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->request_id);
+    deserialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, &output->request_id);
 }
 
 void serialize_BaseObjectRequest(MicroBuffer* buffer, const BaseObjectRequest* input)
 {
     serialize_BaseRequest(buffer, &input->base);
-    serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->object_id);
+    serialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, input->object_id);
 }
 
 void deserialize_BaseObjectRequest(MicroBuffer* buffer, BaseObjectRequest* output, AuxMemory* aux)
 {
     deserialize_BaseRequest(buffer, &output->base, aux);
-    deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->object_id);
+    deserialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, &output->object_id);
 }
 
 void serialize_BaseReply(MicroBuffer* buffer, const BaseReply* input)
 {
     serialize_ResultStatus(buffer, &input->result);
-    serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->request_id);
+    serialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, input->request_id);
 }
 
 void deserialize_BaseReply(MicroBuffer* buffer, BaseReply* output, AuxMemory* aux)
 {
     deserialize_ResultStatus(buffer, &output->result, aux);
-    deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->request_id);
+    deserialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, &output->request_id);
 }
 
 void serialize_BaseObjectReply(MicroBuffer* buffer, const BaseObjectReply* input)
 {
     serialize_BaseReply(buffer, &input->base);
-    serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->object_id);
+    serialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, input->object_id);
 }
 
 void deserialize_BaseObjectReply(MicroBuffer* buffer, BaseObjectReply* output, AuxMemory* aux)
 {
     deserialize_BaseReply(buffer, &output->base, aux);
-    deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->object_id);
+    deserialize_endian_uint16_t(buffer, MACHINE_ENDIANNESS, &output->object_id);
 }
 
 void serialize_InfoReply(MicroBuffer* buffer, const InfoReply* input)

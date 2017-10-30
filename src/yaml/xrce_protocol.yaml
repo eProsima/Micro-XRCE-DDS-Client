@@ -14,9 +14,9 @@ DATA:
 - define:  {OBJK_APPLICATION:  '0x20'}
 
 - typedef: {ObjectId: uint16_t}
-- define:  {OBJECTID_INVALID: '{0xFF, 0xFF}'}
-- define:  {OBJECTID_CLIENT:  '{0xFF, 0xFF}'}
-- define:  {OBJECTID_SESSION: '{0xFF, 0xFF}'}
+- define:  {OBJECTID_INVALID: '0xFFFF'}
+- define:  {OBJECTID_CLIENT:  '0xFFF0'}
+- define:  {OBJECTID_SESSION: '0xFFF1'}
 
 - struct:  {XrceCookie: [data: uint8_t 4]}
 - define:  {XRCE_COOKIE: '(XrceCookie){0x58, 0x52, 0x43, 0x45}'}
@@ -243,7 +243,7 @@ DATA:
 
 - struct:
     ResultStatus:
-      - {request_id: RequestId, __ENDIANNESS__: LITTLE}
+      - {request_id: RequestId, __ENDIANNESS__: MACHINE}
       - status: uint8_t
       - implementation_status: uint8_t
 
@@ -278,22 +278,22 @@ DATA:
 
 - struct:
     BaseRequest:
-      - {request_id: RequestId, __ENDIANNESS__: LITTLE}
+      - {request_id: RequestId, __ENDIANNESS__: MACHINE}
 
 - struct:
     BaseObjectRequest:
       - base: BaseRequest
-      - {object_id: ObjectId, __ENDIANNESS__: LITTLE}
+      - {object_id: ObjectId, __ENDIANNESS__: MACHINE}
 
 - struct:
     BaseReply:
       - result: ResultStatus
-      - {request_id: RequestId, __ENDIANNESS__: LITTLE}
+      - {request_id: RequestId, __ENDIANNESS__: MACHINE}
 
 - struct:
     BaseObjectReply:
       - base: BaseReply
-      - {object_id: ObjectId, __ENDIANNESS__: LITTLE}
+      - {object_id: ObjectId, __ENDIANNESS__: MACHINE}
 
 - struct:
     InfoReply:

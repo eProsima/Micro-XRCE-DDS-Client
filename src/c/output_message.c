@@ -6,6 +6,8 @@
 #include <stdio.h>
 #endif
 
+#include <stdlib.h>
+
 // PRIVATE DEFINITIONS
 void begin_message(OutputMessage* message);
 

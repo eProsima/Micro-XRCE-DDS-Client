@@ -89,7 +89,7 @@ uint16_t create_client(ClientState* state, OnStatusReceived on_status, void* on_
 
     CreateClientPayload payload;
     payload.request.base.request_id = ++state->next_request_id;
-    payload.request.object_id = ++state->next_object_id;
+    payload.request.object_id = OBJECTID_CLIENT;
     payload.representation.xrce_cookie = XRCE_COOKIE;
     payload.representation.xrce_version = XRCE_VERSION;
     payload.representation.xrce_vendor_id = (XrceVendorId){0x01, 0x0F};

@@ -8,6 +8,7 @@
 #include <fstream>
 
 #define BUFFER_SIZE 1024
+#define STATUS_WAIT_MICROSECONDS 3000
 
 void on_status(uint16_t id, uint8_t operation, uint8_t status, void* args);
 void* listen_agent(void* args);
@@ -23,6 +24,7 @@ class ClientLogicTest : public ::testing::Test
             statusId = 0x0000;
             statusOperation = 0xFF;
             statusImplementation = 0xFF;
+            statusReceived = false;
 
             if(pthread_create(&listening_thread, NULL, listen_agent, this))
             {
@@ -37,10 +39,19 @@ class ClientLogicTest : public ::testing::Test
             free_client_state(state);
         }
 
-        void checkStatus(uint8_t operation)
+        void waitAndcheckStatus(uint8_t operation)
         {
+            int statusWaitCounter = 0;
+            while(!statusReceived && statusWaitCounter < STATUS_WAIT_MICROSECONDS)
+            {
+                usleep(1000);
+                statusWaitCounter++;
+            }
+
+            ASSERT_LT(statusWaitCounter, STATUS_WAIT_MICROSECONDS);
             ASSERT_EQ(statusOperation, operation);
             ASSERT_EQ(statusImplementation, STATUS_OK);
+            statusReceived = false;
         }
 
         uint16_t createClient()
@@ -122,13 +133,14 @@ class ClientLogicTest : public ::testing::Test
         uint16_t statusId;
         uint8_t statusOperation;
         uint8_t statusImplementation;
+        bool statusReceived;
 };
 
 void* listen_agent(void* args)
 {
     ClientLogicTest* test = static_cast<ClientLogicTest*>(args);
 
-    usleep(10000);
+    usleep(100000);
     while(!test->stop_listening)
     {
         receive_from_agent(test->state);
@@ -144,42 +156,44 @@ void on_status(uint16_t id, uint8_t operation, uint8_t status, void* args)
     test->statusId = id;
     test->statusOperation = operation;
     test->statusImplementation = status;
+    test->statusReceived = true;
 }
 
 TEST_F(ClientLogicTest, CreateDeleteClient)
 {
     uint16_t client_id = createClient();
 
-    usleep(3000000);
+    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
 
-    checkStatus(STATUS_LAST_OP_CREATE);
+    deleteXRCEObject(client_id);
 
-    //deleteXRCEObject(client_id);
-    //checkStatus(STATUS_LAST_OP_DELETE);
+    waitAndcheckStatus(STATUS_LAST_OP_DELETE);
 }
 
-/*
-TEST_F(ClientLogicTest, CreateDeleteParticipant)
+
+/*TEST_F(ClientLogicTest, CreateDeleteParticipant)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
 
-    checkStatus(STATUS_LAST_OP_CREATE);
+    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
 
-    deleteXRCEObject(participant_id);
-    checkStatus(STATUS_LAST_OP_DELETE);
-}
+    //deleteXRCEObject(participant_id);
 
-TEST_F(ClientLogicTest, CreateDeletePublisher)
+    //waitAndcheckStatus(STATUS_LAST_OP_DELETE);
+}/*
+
+/*TEST_F(ClientLogicTest, CreateDeletePublisher)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t publisher_id = createPublisher(participant_id);
 
-    checkStatus(STATUS_LAST_OP_CREATE);
+    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(publisher_id);
-    checkStatus(STATUS_LAST_OP_DELETE);
+
+    waitAndcheckStatus(STATUS_LAST_OP_DELETE);
 }
 
 TEST_F(ClientLogicTest, CreateDeleteSubscriber)
@@ -188,9 +202,10 @@ TEST_F(ClientLogicTest, CreateDeleteSubscriber)
     uint16_t participant_id = createParticipant();
     uint16_t subscriber_id = createSubscriber(participant_id);
 
-    checkStatus(STATUS_LAST_OP_CREATE);
+    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(subscriber_id);
-    checkStatus(STATUS_LAST_OP_DELETE);
+
+    waitAndcheckStatus(STATUS_LAST_OP_DELETE);
 }
 */
