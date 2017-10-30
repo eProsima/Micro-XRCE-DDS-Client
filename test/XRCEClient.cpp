@@ -56,8 +56,10 @@ class ClientLogicTest : public ::testing::Test
 
         uint16_t createClient()
         {
-            create_client(state, on_status, this);
+            uint16_t client_id = create_client(state, on_status, this);
             send_to_agent(state);
+
+            return client_id;
         }
 
         uint16_t createParticipant()
