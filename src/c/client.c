@@ -348,7 +348,7 @@ void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void*
 //                                 COMUNICATION
 // ----------------------------------------------------------------------------------
 
-void send_to_agent(ClientState* state)
+bool send_to_agent(ClientState* state)
 {
     uint32_t length = get_message_length(&state->output_message);
     if(length > 0)
@@ -360,13 +360,16 @@ void send_to_agent(ClientState* state)
             #ifndef NDEBUG
             memset(state->output_buffer, 0, state->buffer_size);
             #endif
-        }
 
-        reset_buffer(&state->output_message.writer);
+            reset_buffer(&state->output_message.writer);
+            return true;
+        }
     }
+
+    return false;
 }
 
-void receive_from_agent(ClientState* state)
+bool receive_from_agent(ClientState* state)
 {
     #ifndef NDEBUG
     memset(state->input_buffer, 0x00, state->buffer_size);
@@ -378,7 +381,11 @@ void receive_from_agent(ClientState* state)
         parse_message(&state->input_message, length);
 
         PRINTL_SERIALIZATION(RECV, state->input_buffer, length);
+
+        return true;
     }
+
+    return false;
 }
 
 // ----------------------------------------------------------------------------------------------

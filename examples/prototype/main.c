@@ -128,12 +128,12 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "create_data_writer") == 0 && length == 3)
     {
-        String xml = {"SQUARE", strlen("SQUARE") + 1};
+        String xml = {"", 1};
         create_data_writer(state, id, extra, xml);
     }
     else if(strcmp(name, "create_data_reader") == 0 && length == 3)
     {
-        String xml = {"SQUARE", strlen("SQUARE") + 1};
+        String xml = {"", 1};
         create_data_reader(state, id, extra, xml);
     }
     else if(strcmp(name, "write_data") == 0 && length == 2)

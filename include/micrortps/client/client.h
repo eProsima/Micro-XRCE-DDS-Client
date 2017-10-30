@@ -74,8 +74,8 @@ XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic
 // ----------------------------------------------------------------------------------------------
 //    Comunication functions
 // ----------------------------------------------------------------------------------------------
-void send_to_agent(ClientState* state);
-void receive_from_agent(ClientState* state);
+bool send_to_agent(ClientState* state);
+bool receive_from_agent(ClientState* state);
 
 #ifdef __cplusplus
 }

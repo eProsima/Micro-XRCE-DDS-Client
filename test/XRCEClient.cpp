@@ -1,6 +1,8 @@
 #include <micrortps/client/client.h>
 #include <micrortps/client/xrce_protocol_spec.h>
 
+#include <microcdr/microcdr.h>
+
 #include <gtest/gtest.h>
 #include <cstdint>
 #include <unistd.h>
@@ -8,55 +10,70 @@
 #include <fstream>
 
 #define BUFFER_SIZE 1024
-#define STATUS_WAIT_MICROSECONDS 3000
+#define STATUS_TRIES_WAIT 100
 
+typedef struct ShapeTopic
+{
+    uint32_t color_length;
+    char*    color;
+    uint32_t x;
+    uint32_t y;
+    uint32_t size;
+
+} ShapeTopic;
+
+bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure);
+bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_serialization);
+
+void on_shape_topic(XRCEInfo info, const void* topic, void* args);
 void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
-void* listen_agent(void* args);
 
-class ClientLogicTest : public ::testing::Test
+void printl_shape_topic(const ShapeTopic* shape_topic);
+
+class ClientTests : public ::testing::Test
 {
     public:
-        ClientLogicTest()
+        ClientTests()
         {
-            stop_listening = false;
             state = new_udp_client_state(BUFFER_SIZE, 2020, 2019);
 
-            statusObjectId = 0xFFFF;
+            statusObjectId = 0x0000;
             statusRequestId = 0x0000;
             statusOperation = 0xFF;
-            statusReceived = false;
-            last_object = 0xFFFF;
-            last_request = 0x0000;
+            statusImplementation = 0xFF;
 
-            if(pthread_create(&listening_thread, NULL, listen_agent, this))
-            {
-                printf("ERROR: Error creating thread\n");
-            }
+            last_object = 0x0000;
+            last_request = 0x0000;
         }
 
-        ~ClientLogicTest()
+        ~ClientTests()
         {
-            stop_listening = true;
-            pthread_join(listening_thread, NULL);
             free_client_state(state);
         }
 
-        void waitAndcheckStatus(uint8_t operation)
+        void waitStatus()
         {
-            int statusWaitCounter = 0;
-            while(!statusReceived && statusWaitCounter < STATUS_WAIT_MICROSECONDS)
+            /*int statusWaitCounter = 0;
+            while(!receive_from_agent(state) && statusWaitCounter < STATUS_TRIES_WAIT)
             {
                 usleep(1000);
                 statusWaitCounter++;
-            }
+            }*/
 
-            ASSERT_LT(statusWaitCounter, STATUS_WAIT_MICROSECONDS);
+            bool expectedTimeout = false;
+            bool timeout = false;
+            if(!receive_from_agent(state))
+                timeout = true;
+
+            ASSERT_EQ(timeout, expectedTimeout);
+        }
+
+        void checkStatus(uint8_t operation)
+        {
             ASSERT_EQ(statusObjectId, last_object);
             ASSERT_EQ(statusRequestId, last_request);
             ASSERT_EQ(statusOperation, operation);
             ASSERT_EQ(statusImplementation, STATUS_OK);
-
-            statusReceived = false;
         }
 
         uint16_t createClient()
@@ -65,6 +82,8 @@ class ClientLogicTest : public ::testing::Test
             last_object = info.object_id;
             last_request = info.request_id;
             send_to_agent(state);
+
+            waitStatus();
 
             return info.object_id;
         }
@@ -76,6 +95,8 @@ class ClientLogicTest : public ::testing::Test
             last_request = info.request_id;
             send_to_agent(state);
 
+            waitStatus();
+
             return info.object_id;
         }
 
@@ -85,6 +106,8 @@ class ClientLogicTest : public ::testing::Test
             last_object = info.object_id;
             last_request = info.request_id;
             send_to_agent(state);
+
+            waitStatus();
 
             return info.object_id;
         }
@@ -96,13 +119,15 @@ class ClientLogicTest : public ::testing::Test
             last_request = info.request_id;
             send_to_agent(state);
 
+            waitStatus();
+
             return info.object_id;
         }
 
         uint16_t createDataWriter(uint16_t participant_id, uint16_t publisher_id)
         {
             String xml;
-            std::ifstream in("data_writer_profile");
+            std::ifstream in("data_writer_profile.xml", std::ifstream::in);
             in.seekg (0, in.end);
             xml.length = in.tellg();
             in.seekg (0, in.beg);
@@ -115,13 +140,16 @@ class ClientLogicTest : public ::testing::Test
             send_to_agent(state);
 
             delete xml.data;
+
+            waitStatus();
+
             return info.object_id;
         }
 
         uint16_t createDataReader(uint16_t participant_id, uint16_t subscriber_id)
         {
             String xml;
-            std::ifstream in("data_reader_profile");
+            std::ifstream in("data_reader_profile.xml", std::ifstream::in);
             in.seekg (0, in.end);
             xml.length = in.tellg();
             in.seekg (0, in.beg);
@@ -134,7 +162,23 @@ class ClientLogicTest : public ::testing::Test
             send_to_agent(state);
 
             delete xml.data;
+
+            waitStatus();
+
             return info.object_id;
+        }
+
+        void writeData(uint16_t data_writer_id)
+        {
+            char topicColor[64] = "PURPLE";
+            uint32_t length = strlen(topicColor) + 1;
+            ShapeTopic shape_topic = {length, topicColor, 100, 100, 50};
+            XRCEInfo info = write_data(state, data_writer_id, serialize_shape_topic, &shape_topic);
+            last_object = info.object_id;
+            last_request = info.request_id;
+            send_to_agent(state);
+
+            waitStatus();
         }
 
         void deleteXRCEObject(uint16_t id)
@@ -143,12 +187,11 @@ class ClientLogicTest : public ::testing::Test
             last_object = info.object_id;
             last_request = info.request_id;
             send_to_agent(state);
+
+            waitStatus();
         }
 
         ClientState* state;
-
-        bool stop_listening;
-        pthread_t listening_thread;
 
         uint16_t statusObjectId;
         uint16_t statusRequestId;
@@ -157,80 +200,154 @@ class ClientLogicTest : public ::testing::Test
 
         uint16_t last_request;
         uint16_t last_object;
-        bool statusReceived;
 };
 
-void* listen_agent(void* args)
+bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
-    ClientLogicTest* test = static_cast<ClientLogicTest*>(args);
+    ShapeTopic* topic = (ShapeTopic*) topic_structure->topic;
 
-    usleep(100000);
-    while(!test->stop_listening)
-    {
-        receive_from_agent(test->state);
-    }
+    serialize_uint32_t(writer, topic->color_length);
+    serialize_array_char(writer, topic->color, topic->color_length);
+    serialize_uint32_t(writer, topic->x);
+    serialize_uint32_t(writer, topic->y);
+    serialize_uint32_t(writer, topic->size);
 
-    return NULL;
+    return true;
+}
+
+bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
+{
+    ShapeTopic* topic = (ShapeTopic*)malloc(sizeof(ShapeTopic));
+
+    deserialize_uint32_t(reader, &topic->color_length);
+    topic->color = (char*)malloc(sizeof(topic->color_length));
+    deserialize_array_char(reader, topic->color, topic->color_length);
+    deserialize_uint32_t(reader, &topic->x);
+    deserialize_uint32_t(reader, &topic->y);
+    deserialize_uint32_t(reader, &topic->size);
+
+    topic_structure->topic = topic;
+
+    return true;
+}
+
+void on_shape_topic(XRCEInfo info, const void* vtopic, void* args)
+{
+    ShapeTopic* topic = (ShapeTopic*) vtopic;
+    printl_shape_topic(topic);
+
+    free(topic->color);
+    free(topic);
 }
 
 void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
 {
-    ClientLogicTest* test = static_cast<ClientLogicTest*>(args);
+    ClientTests* test = static_cast<ClientTests*>(args);
 
     test->statusObjectId = info.object_id;
     test->statusRequestId = info.request_id;
     test->statusOperation = operation;
     test->statusImplementation = status;
-    test->statusReceived = true;
 }
 
-TEST_F(ClientLogicTest, CreateDeleteClient)
+void printl_shape_topic(const ShapeTopic* shape_topic)
+{
+    printf("        %s[%s | x: %u | y: %u | size: %u]%s\n",
+            "\e[1;34m",
+            shape_topic->color,
+            shape_topic->x,
+            shape_topic->y,
+            shape_topic->size,
+            "\e[0m");
+}
+
+TEST_F(ClientTests, CreateDeleteClient)
 {
     uint16_t client_id = createClient();
-
-    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
+    checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(client_id);
-
-    waitAndcheckStatus(STATUS_LAST_OP_DELETE);
+    checkStatus(STATUS_LAST_OP_DELETE);
 }
 
-
-TEST_F(ClientLogicTest, CreateDeleteParticipant)
+TEST_F(ClientTests, CreateDeleteParticipant)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
+    checkStatus(STATUS_LAST_OP_CREATE);
 
-    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
-
-    //deleteXRCEObject(participant_id);
-
-    //waitAndcheckStatus(STATUS_LAST_OP_DELETE);
+    deleteXRCEObject(participant_id);
+    checkStatus(STATUS_LAST_OP_DELETE);
+    deleteXRCEObject(client_id);
 }
 
-/*TEST_F(ClientLogicTest, CreateDeletePublisher)
+TEST_F(ClientTests, CreateDeletePublisher)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t publisher_id = createPublisher(participant_id);
-
-    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
+    checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(publisher_id);
-
-    waitAndcheckStatus(STATUS_LAST_OP_DELETE);
+    checkStatus(STATUS_LAST_OP_DELETE);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
 }
 
-TEST_F(ClientLogicTest, CreateDeleteSubscriber)
+TEST_F(ClientTests, CreateDeleteSubscriber)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t subscriber_id = createSubscriber(participant_id);
-
-    waitAndcheckStatus(STATUS_LAST_OP_CREATE);
+    checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(subscriber_id);
-
-    waitAndcheckStatus(STATUS_LAST_OP_DELETE);
+    checkStatus(STATUS_LAST_OP_DELETE);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
 }
-*/
+
+TEST_F(ClientTests, CreateDeleteDataWriter)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t publisher_id = createPublisher(participant_id);
+    uint16_t data_writer_id = createDataWriter(participant_id, publisher_id);
+    checkStatus(STATUS_LAST_OP_CREATE);
+
+    deleteXRCEObject(data_writer_id);
+    checkStatus(STATUS_LAST_OP_DELETE);
+    deleteXRCEObject(publisher_id);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
+
+TEST_F(ClientTests, CreateDeleteDataReader)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t subscriber_id = createSubscriber(participant_id);
+    uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
+    checkStatus(STATUS_LAST_OP_CREATE);
+
+    deleteXRCEObject(data_reader_id);
+    checkStatus(STATUS_LAST_OP_DELETE);
+    deleteXRCEObject(subscriber_id);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
+
+TEST_F(ClientTests, WriteData)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t publisher_id = createPublisher(participant_id);
+    uint16_t data_writer_id = createDataWriter(participant_id, publisher_id);
+    writeData(data_writer_id);
+    checkStatus(STATUS_LAST_OP_CREATE);
+
+    deleteXRCEObject(data_writer_id);
+    deleteXRCEObject(publisher_id);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
