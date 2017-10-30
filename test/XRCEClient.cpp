@@ -9,7 +9,7 @@
 
 #include <fstream>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 4096
 #define STATUS_TRIES_WAIT 100
 
 typedef struct ShapeTopic
