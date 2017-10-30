@@ -79,7 +79,7 @@ void free_client_state(ClientState* state)
 //                              XRCE API - CLIENT TO AGENT
 // ----------------------------------------------------------------------------------
 
-uint16_t create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args)
+XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args)
 {
     state->on_status_received = on_status;
     state->on_status_received_args = on_status_args;
@@ -105,10 +105,10 @@ uint16_t create_client(ClientState* state, OnStatusReceived on_status, void* on_
     add_create_client_submessage(&state->output_message, &payload);
     PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
 
-    return payload.request.object_id;
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-uint16_t create_participant(ClientState* state)
+XRCEInfo create_participant(ClientState* state)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -120,10 +120,10 @@ uint16_t create_participant(ClientState* state)
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
-    return payload.request.object_id;
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-uint16_t create_publisher(ClientState* state, uint16_t participant_id)
+XRCEInfo create_publisher(ClientState* state, uint16_t participant_id)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -136,10 +136,10 @@ uint16_t create_publisher(ClientState* state, uint16_t participant_id)
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
-    return payload.request.object_id;
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-uint16_t create_subscriber(ClientState* state, uint16_t participant_id)
+XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -152,10 +152,10 @@ uint16_t create_subscriber(ClientState* state, uint16_t participant_id)
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
-    return payload.request.object_id;
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-uint16_t create_topic(ClientState* state, uint16_t participant_id, String name)
+XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String name)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -169,10 +169,10 @@ uint16_t create_topic(ClientState* state, uint16_t participant_id, String name)
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
-    return payload.request.object_id;
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String xml)
+XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String xml)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -187,10 +187,10 @@ uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
-    return payload.request.object_id;
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String xml)
+XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String xml)
 {
     CreateResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -205,10 +205,10 @@ uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
 
-    return payload.request.object_id;
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-void delete_resource(ClientState* state, uint16_t resource_id)
+XRCEInfo delete_resource(ClientState* state, uint16_t resource_id)
 {
     DeleteResourcePayload payload;
     payload.request.base.request_id = ++state->next_request_id;
@@ -216,9 +216,11 @@ void delete_resource(ClientState* state, uint16_t resource_id)
 
     add_delete_resource_submessage(&state->output_message, &payload);
     PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
+
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
-void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialize_topic, void* topic)
+XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialize_topic, void* topic)
 {
     //Knows previously the topic serialized length. Is it feasible?
     char buffer[MAX_TOPIC_LENGTH];
@@ -238,10 +240,14 @@ void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic seri
 
         add_write_data_submessage(&state->output_message, &payload);
         PRINTL_WRITE_DATA_SUBMESSAGE(&payload);
+
+        return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
     }
+
+    return (XRCEInfo){0xFFFF, 0x0000};
 }
 
-void read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialize_topic,
+XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialize_topic,
         OnTopicReceived on_topic, void* on_topic_args)
 {
     int16_t callback_request_id = register_callback_data(&state->callback_data_storage,
@@ -255,6 +261,8 @@ void read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic des
 
     add_read_data_submessage(&state->output_message, &payload);
     PRINTL_READ_DATA_SUBMESSAGE(&payload);
+
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
 // ----------------------------------------------------------------------------------
@@ -295,7 +303,7 @@ void on_status_submessage(const StatusPayload* payload, void* args)
 
     if(state->on_status_received)
     {
-        state->on_status_received(payload->reply.object_id,
+        state->on_status_received((XRCEInfo){payload->reply.object_id, payload->reply.base.result.request_id},
                 payload->reply.base.result.status,
                 payload->reply.base.result.implementation_status,
                 state->on_status_received_args);
@@ -327,7 +335,10 @@ void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void*
 
         AbstractTopic abstract_topic;
         if(callback_data->deserialize_topic(&reader, &abstract_topic))
-            callback_data->on_topic(abstract_topic.topic, callback_data->on_topic_args);
+        {
+            XRCEInfo info = (XRCEInfo){reply->object_id, reply->base.result.request_id};
+            callback_data->on_topic(info, abstract_topic.topic, callback_data->on_topic_args);
+        }
 
         remove_callback_data(&state->callback_data_storage, reply->base.result.request_id);
     }

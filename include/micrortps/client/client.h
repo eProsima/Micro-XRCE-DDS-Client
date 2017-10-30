@@ -33,12 +33,19 @@ typedef struct AbstractTopic
 
 } AbstractTopic;
 
+typedef struct XRCEInfo
+{
+    uint16_t object_id;
+    uint16_t request_id;
+
+} XRCEInfo;
+
 
 typedef bool (*SerializeTopic)(MicroBuffer* writer, const AbstractTopic* topic_structure);
 typedef bool (*DeserializeTopic)(MicroBuffer* reader, AbstractTopic* topic_structure);
 
-typedef void (*OnTopicReceived)(const void* topic, void* args);
-typedef void (*OnStatusReceived)(uint16_t id, uint8_t operation, uint8_t status, void* args);
+typedef void (*OnTopicReceived)(XRCEInfo info, const void* topic, void* args);
+typedef void (*OnStatusReceived)(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
 
 // ----------------------------------------------------------------------------------------------
 //    State funcions
@@ -50,18 +57,18 @@ void free_client_state(ClientState* state);
 // ----------------------------------------------------------------------------------------------
 //    XRCE Client API funcions
 // ----------------------------------------------------------------------------------------------
-uint16_t create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args);
-uint16_t create_participant(ClientState* state);
-uint16_t create_publisher(ClientState* state, uint16_t participant_id);
-uint16_t create_subscriber(ClientState* state, uint16_t participant_id);
-uint16_t create_topic(ClientState* state, uint16_t participant_id, String name);
-uint16_t create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String xml);
-uint16_t create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String xml);
+XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args);
+XRCEInfo create_participant(ClientState* state);
+XRCEInfo create_publisher(ClientState* state, uint16_t participant_id);
+XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id);
+XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String name);
+XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String xml);
+XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String xml);
 
-void delete_resource(ClientState* state, uint16_t resource_id);
+XRCEInfo delete_resource(ClientState* state, uint16_t resource_id);
 
-void write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialization, void* topic);
-void read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialization,
+XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialization, void* topic);
+XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialization,
         OnTopicReceived on_topic, void* on_topic_args);
 
 // ----------------------------------------------------------------------------------------------

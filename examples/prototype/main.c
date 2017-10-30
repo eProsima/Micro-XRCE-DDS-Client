@@ -28,8 +28,8 @@ bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_serializa
 // ----------------------------------------------------
 //    App client
 // ----------------------------------------------------
-void on_shape_topic(const void* topic, void* args);
-void on_status_received(uint16_t id, uint8_t operation, uint8_t status, void* args);
+void on_shape_topic(XRCEInfo info, const void* topic, void* args);
+void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
 
 void printl_shape_topic(const ShapeTopic* shape_topic);
 void* listen_agent(void* args);
@@ -189,7 +189,7 @@ bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure
     return true;
 }
 
-void on_shape_topic(const void* vtopic, void* args)
+void on_shape_topic(XRCEInfo info, const void* vtopic, void* args)
 {
     ShapeTopic* topic = (ShapeTopic*) vtopic;
     printl_shape_topic(topic);
@@ -198,7 +198,7 @@ void on_shape_topic(const void* vtopic, void* args)
     free(topic);
 }
 
-void on_status_received(uint16_t id, uint8_t operation, uint8_t status, void* args)
+void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
 {
     printf("User status callback\n");
 }
