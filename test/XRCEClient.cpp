@@ -95,6 +95,29 @@ class ClientTests : public ::testing::Test
             return info.object_id;
         }
 
+        uint16_t createTopic(uint16_t participant_id)
+        {
+            char data[4096];
+            String xml = {data, 0};
+            /*std::ifstream in("topic_profile.xml", std::ifstream::in);
+            if(in.is_open())
+            {
+                in.seekg (0, in.end);
+                xml.length = in.tellg();
+                in.seekg (0, in.beg);
+                in.read(data, xml.length);
+            }*/
+
+            XRCEInfo info = create_topic(state, participant_id, xml);
+            lastObject = info.object_id;
+            lastRequest = info.request_id;
+            send_to_agent(state);
+
+            waitStatus();
+
+            return info.object_id;
+        }
+
         uint16_t createPublisher(uint16_t participant_id)
         {
             XRCEInfo info = create_publisher(state, participant_id);
@@ -121,20 +144,21 @@ class ClientTests : public ::testing::Test
 
         uint16_t createDataWriter(uint16_t participant_id, uint16_t publisher_id)
         {
-            String xml;
+            char data[4096];
+            String xml = {data, 0};
             std::ifstream in("data_writer_profile.xml", std::ifstream::in);
-            in.seekg (0, in.end);
-            xml.length = in.tellg();
-            in.seekg (0, in.beg);
-            xml.data = new char[xml.length];
-            in.read(xml.data, xml.length);
+            if(in.is_open())
+            {
+                in.seekg (0, in.end);
+                xml.length = in.tellg();
+                in.seekg (0, in.beg);
+                in.read(data, xml.length);
+            }
 
             XRCEInfo info = create_data_writer(state, participant_id, publisher_id, xml);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
-
-            delete[] xml.data;
 
             waitStatus();
 
@@ -143,20 +167,21 @@ class ClientTests : public ::testing::Test
 
         uint16_t createDataReader(uint16_t participant_id, uint16_t subscriber_id)
         {
-            String xml;
+            char data[4096];
+            String xml = {data, 0};
             std::ifstream in("data_reader_profile.xml", std::ifstream::in);
-            in.seekg (0, in.end);
-            xml.length = in.tellg();
-            in.seekg (0, in.beg);
-            xml.data = new char[xml.length];
-            in.read(xml.data, xml.length);
+            if(in.is_open())
+            {
+                in.seekg (0, in.end);
+                xml.length = in.tellg();
+                in.seekg (0, in.beg);
+                in.read(data, xml.length);
+            }
 
             XRCEInfo info = create_data_reader(state, participant_id, subscriber_id, xml);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
-
-            delete[] xml.data;
 
             waitStatus();
 
@@ -169,6 +194,17 @@ class ClientTests : public ::testing::Test
             uint32_t length = strlen(topicColor) + 1;
             ShapeTopic shape_topic = {length, topicColor, 100, 100, 50};
             XRCEInfo info = write_data(state, data_writer_id, serialize_shape_topic, &shape_topic);
+            printl_shape_topic(&shape_topic);
+            lastObject = info.object_id;
+            lastRequest = info.request_id;
+            send_to_agent(state);
+
+            waitStatus();
+        }
+
+        void readData(uint16_t data_reader_id)
+        {
+            XRCEInfo info = read_data(state, data_reader_id, deserialize_shape_topic, on_shape_topic, NULL);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
@@ -276,6 +312,19 @@ TEST_F(ClientTests, CreateDeleteParticipant)
     deleteXRCEObject(client_id);
 }
 
+TEST_F(ClientTests, CreateDeleteTopic)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t topic_id = createTopic(participant_id);
+    checkStatus(STATUS_LAST_OP_CREATE);
+
+    deleteXRCEObject(topic_id);
+    checkStatus(STATUS_LAST_OP_DELETE);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
+
 TEST_F(ClientTests, CreateDeletePublisher)
 {
     uint16_t client_id = createClient();
@@ -343,6 +392,21 @@ TEST_F(ClientTests, WriteData)
 
     deleteXRCEObject(data_writer_id);
     deleteXRCEObject(publisher_id);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
+
+TEST_F(ClientTests, ReadData)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t subscriber_id = createSubscriber(participant_id);
+    uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
+    readData(data_reader_id);
+    checkStatus(STATUS_LAST_OP_CREATE);
+
+    deleteXRCEObject(data_reader_id);
+    deleteXRCEObject(subscriber_id);
     deleteXRCEObject(participant_id);
     deleteXRCEObject(client_id);
 }

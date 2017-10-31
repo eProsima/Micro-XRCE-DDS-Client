@@ -59,9 +59,9 @@ void free_client_state(ClientState* state);
 // ----------------------------------------------------------------------------------------------
 XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args);
 XRCEInfo create_participant(ClientState* state);
+XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml);
 XRCEInfo create_publisher(ClientState* state, uint16_t participant_id);
 XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id);
-XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String name);
 XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String xml);
 XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String xml);
 

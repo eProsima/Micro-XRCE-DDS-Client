@@ -76,6 +76,12 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
             sprintf(content, "PARTICIPANT");
         break;
 
+        case OBJK_TOPIC:
+            sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
+                    payload->representation._.data_reader.participant_id,
+                    payload->representation._.data_reader.base3._.object_name.size);
+        break;
+
         case OBJK_PUBLISHER:
             sprintf(content, "PUBLISHER | id: 0x%04X",
                     payload->representation._.publisher.participant_id);
@@ -97,12 +103,6 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
             sprintf(content, "DATA_READER | id: 0x%04X | id: 0x%04X | xml: %u",
                     payload->representation._.data_reader.participant_id,
                     payload->representation._.data_reader.subscriber_id,
-                    payload->representation._.data_reader.base3._.object_name.size);
-        break;
-
-        case OBJK_TOPIC:
-            sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
-                    payload->representation._.data_reader.participant_id,
                     payload->representation._.data_reader.base3._.object_name.size);
         break;
 

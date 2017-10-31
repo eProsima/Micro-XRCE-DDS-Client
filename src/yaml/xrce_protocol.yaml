@@ -138,35 +138,35 @@ DATA:
 - struct:
     OBJK_TYPE_Representation:
       - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
+      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
       - registered_type_name: String_t
 
 - struct:
     OBJK_TOPIC_Representation:
       - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
+      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
 
 - struct:
     OBJK_PUBLISHER_Representation:
       - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
+      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
 
 - struct:
     OBJK_SUBSCRIBER_Representation:
       - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
+      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
 
 - struct:
     OBJK_DATAWRITER_Representation:
       - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-      - publisher_id: ObjectId
+      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
+      - {publisher_id: ObjectId, __ENDIANNESS__: BIG}
 
 - struct:
     OBJK_DATAREADER_Representation:
       - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-      - subscriber_id: ObjectId
+      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
+      - {subscriber_id: ObjectId, __ENDIANNESS__: BIG}
 
 - struct:
     OBJK_TYPE_Binary:

@@ -123,6 +123,23 @@ XRCEInfo create_participant(ClientState* state)
     return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
 }
 
+XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml)
+{
+    CreateResourcePayload payload;
+    payload.request.base.request_id = ++state->next_request_id;
+    payload.request.object_id = ++state->next_object_id;
+    payload.representation.kind = OBJK_TOPIC;
+    payload.representation._.topic.base3.format = REPRESENTATION_BY_REFERENCE;
+    payload.representation._.topic.base3._.object_name.size = xml.length;
+    payload.representation._.topic.base3._.object_name.data = xml.data;
+    payload.representation._.topic.participant_id = participant_id;
+
+    add_create_resource_submessage(&state->output_message, &payload, 0);
+    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+
+    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
+}
+
 XRCEInfo create_publisher(ClientState* state, uint16_t participant_id)
 {
     CreateResourcePayload payload;
@@ -148,23 +165,6 @@ XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id)
     payload.representation._.subscriber.base3.format = REPRESENTATION_BY_REFERENCE;
     payload.representation._.subscriber.base3._.object_name.size = 0;
     payload.representation._.subscriber.participant_id = participant_id;
-
-    add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
-
-    return (XRCEInfo){payload.request.object_id, payload.request.base.request_id};
-}
-
-XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String name)
-{
-    CreateResourcePayload payload;
-    payload.request.base.request_id = ++state->next_request_id;
-    payload.request.object_id = ++state->next_object_id;
-    payload.representation.kind = OBJK_TOPIC;
-    payload.representation._.topic.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.topic.base3._.object_name.size = name.length;
-    payload.representation._.topic.base3._.object_name.data = name.data;
-    payload.representation._.topic.participant_id = participant_id;
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);

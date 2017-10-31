@@ -115,8 +115,8 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "create_topic") == 0 && length == 2)
     {
-        String topic_name = {"SQUARE", strlen("SQUARE") + 1};
-        create_topic(state, id, topic_name);
+        String xml = {"<xml>", 6};
+        create_topic(state, id, xml);
     }
     else if(strcmp(name, "create_publisher") == 0 && length == 2)
     {
@@ -128,12 +128,12 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "create_data_writer") == 0 && length == 3)
     {
-        String xml = {"", 1};
+        String xml = {"<xml>", 6};
         create_data_writer(state, id, extra, xml);
     }
     else if(strcmp(name, "create_data_reader") == 0 && length == 3)
     {
-        String xml = {"", 1};
+        String xml = {"<xml>", 6};
         create_data_reader(state, id, extra, xml);
     }
     else if(strcmp(name, "write_data") == 0 && length == 2)

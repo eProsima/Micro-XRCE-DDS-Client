@@ -208,79 +208,79 @@ void deserialize_OBJK_PARTICIPANT_Representation(MicroBuffer* buffer, OBJK_PARTI
 void serialize_OBJK_TYPE_Representation(MicroBuffer* buffer, const OBJK_TYPE_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_uint16_t(buffer, input->participant_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->participant_id);
     serialize_String_t(buffer, &input->registered_type_name);
 }
 
 void deserialize_OBJK_TYPE_Representation(MicroBuffer* buffer, OBJK_TYPE_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_uint16_t(buffer, &output->participant_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->participant_id);
     deserialize_String_t(buffer, &output->registered_type_name, aux);
 }
 
 void serialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, const OBJK_TOPIC_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_uint16_t(buffer, input->participant_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->participant_id);
 }
 
 void deserialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, OBJK_TOPIC_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_uint16_t(buffer, &output->participant_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->participant_id);
 }
 
 void serialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, const OBJK_PUBLISHER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_uint16_t(buffer, input->participant_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->participant_id);
 }
 
 void deserialize_OBJK_PUBLISHER_Representation(MicroBuffer* buffer, OBJK_PUBLISHER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_uint16_t(buffer, &output->participant_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->participant_id);
 }
 
 void serialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_uint16_t(buffer, input->participant_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->participant_id);
 }
 
 void deserialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, OBJK_SUBSCRIBER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_uint16_t(buffer, &output->participant_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->participant_id);
 }
 
 void serialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, const OBJK_DATAWRITER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_uint16_t(buffer, input->participant_id);
-    serialize_uint16_t(buffer, input->publisher_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->participant_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->publisher_id);
 }
 
 void deserialize_OBJK_DATAWRITER_Representation(MicroBuffer* buffer, OBJK_DATAWRITER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_uint16_t(buffer, &output->participant_id);
-    deserialize_uint16_t(buffer, &output->publisher_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->participant_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->publisher_id);
 }
 
 void serialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, const OBJK_DATAREADER_Representation* input)
 {
     serialize_OBJK_Representation3_Base(buffer, &input->base3);
-    serialize_uint16_t(buffer, input->participant_id);
-    serialize_uint16_t(buffer, input->subscriber_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->participant_id);
+    serialize_endian_uint16_t(buffer, BIG_ENDIANNESS, input->subscriber_id);
 }
 
 void deserialize_OBJK_DATAREADER_Representation(MicroBuffer* buffer, OBJK_DATAREADER_Representation* output, AuxMemory* aux)
 {
     deserialize_OBJK_Representation3_Base(buffer, &output->base3, aux);
-    deserialize_uint16_t(buffer, &output->participant_id);
-    deserialize_uint16_t(buffer, &output->subscriber_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->participant_id);
+    deserialize_endian_uint16_t(buffer, BIG_ENDIANNESS, &output->subscriber_id);
 }
 
 void serialize_OBJK_TYPE_Binary(MicroBuffer* buffer, const OBJK_TYPE_Binary* input)
