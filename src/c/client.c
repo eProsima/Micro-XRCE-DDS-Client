@@ -226,7 +226,7 @@ XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic 
     char buffer[MAX_TOPIC_LENGTH];
 
     MicroBuffer writer;
-    init_external_buffer(&writer, buffer, MAX_TOPIC_LENGTH);
+    init_external_buffer(&writer, (uint8_t*)buffer, MAX_TOPIC_LENGTH);
     writer.endianness = state->output_message.writer.endianness;
 
     if(serialize_topic(&writer, &(AbstractTopic){topic}))
@@ -314,9 +314,20 @@ DataFormat on_data_submessage(const BaseObjectReply* reply, void* args)
 {
     ClientState* state = (ClientState*) args;
 
-    CallbackData* callback_data = get_callback_data(&state->callback_data_storage, reply->base.result.request_id);
-    if(callback_data)
-        return callback_data->format;
+    if(state->on_status_received)
+    {
+        state->on_status_received((XRCEInfo){reply->object_id, reply->base.result.request_id},
+                reply->base.result.status,
+                reply->base.result.implementation_status,
+                state->on_status_received_args);
+    }
+
+    if(reply->base.result.implementation_status == STATUS_OK)
+    {
+        CallbackData* callback_data = get_callback_data(&state->callback_data_storage, reply->base.result.request_id);
+        if(callback_data)
+            return callback_data->format;
+    }
 
     return FORMAT_BAD;
 }

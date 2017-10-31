@@ -6,6 +6,7 @@ extern "C"
 {
 #endif
 
+#include "client.h"
 #include "input_message.h"
 #include "output_message.h"
 

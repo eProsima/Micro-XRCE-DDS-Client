@@ -26,6 +26,6 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
     add_executable(ClientUnitTests ${CLIENT_UNITTESTS_SOURCE})
     add_gtest(ClientUnitTests ${CLIENT_UNITTESTS_SOURCE})
     target_include_directories(ClientUnitTests PRIVATE ${GTEST_INCLUDE_DIRS})
-    target_link_libraries(ClientUnitTests microcdr micrortps-client ${GTEST_BOTH_LIBRARIES})
+    target_link_libraries(ClientUnitTests micrortps-client ${GTEST_BOTH_LIBRARIES})
 
 endif()

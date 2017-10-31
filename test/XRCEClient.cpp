@@ -42,11 +42,10 @@ class ClientTests : public ::testing::Test
             statusOperation = 0xFF;
             statusImplementation = 0xFF;
 
-            dataObjectId = 0x0000;
-            dataRequestId = 0x0000;
-
             lastObject = 0x0000;
             lastRequest = 0x0000;
+
+            topicCount = 0;
         }
 
         ~ClientTests()
@@ -74,9 +73,9 @@ class ClientTests : public ::testing::Test
             ASSERT_EQ(statusImplementation, STATUS_OK);
         }
 
-        void checkDataTopic()
+        void checkDataTopic(int expectedNumTopic)
         {
-            //TODO
+            ASSERT_EQ(statusImplementation, topicCount);
         }
 
         uint16_t createClient()
@@ -107,14 +106,14 @@ class ClientTests : public ::testing::Test
         {
             char data[4096];
             String xml = {data, 0};
-            /*std::ifstream in("topic_profile.xml", std::ifstream::in);
+            std::ifstream in("data_writer_profile.xml", std::ifstream::in);
             if(in.is_open())
             {
                 in.seekg (0, in.end);
                 xml.length = in.tellg();
                 in.seekg (0, in.beg);
                 in.read(data, xml.length);
-            }*/
+            }
 
             XRCEInfo info = create_topic(state, participant_id, xml);
             lastObject = info.object_id;
@@ -237,12 +236,10 @@ class ClientTests : public ::testing::Test
         uint8_t statusOperation;
         uint8_t statusImplementation;
 
-        uint16_t dataObjectId;
-        uint16_t dataRequestId;
-        ShapeTopic dataTopic;
-
         uint16_t lastRequest;
         uint16_t lastObject;
+
+        int topicCount;
 };
 
 bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
@@ -281,12 +278,7 @@ void on_shape_topic(XRCEInfo info, const void* vtopic, void* args)
     ShapeTopic* topic = (ShapeTopic*) vtopic;
     printl_shape_topic(topic);
 
-    test->dataObjectId = info.object_id;
-    test->dataRequestId = info.request_id;
-    test->dataTopic.color = topic->color;
-    test->dataTopic.x = topic->x;
-    test->dataTopic.y = topic->y;
-    test->dataTopic.size = topic->size;
+    test->topicCount++;
 
     free(topic->color);
     free(topic);
@@ -409,7 +401,7 @@ TEST_F(ClientTests, WriteData)
     uint16_t publisher_id = createPublisher(participant_id);
     uint16_t data_writer_id = createDataWriter(participant_id, publisher_id);
     writeData(data_writer_id);
-    checkStatus(STATUS_LAST_OP_CREATE);
+    checkStatus(STATUS_LAST_OP_WRITE);
 
     deleteXRCEObject(data_writer_id);
     deleteXRCEObject(publisher_id);
@@ -424,7 +416,8 @@ TEST_F(ClientTests, ReadData)
     uint16_t subscriber_id = createSubscriber(participant_id);
     uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
     readData(data_reader_id);
-    checkDataTopic();
+    checkStatus(STATUS_LAST_OP_READ);
+    checkDataTopic(1);
 
     deleteXRCEObject(data_reader_id);
     deleteXRCEObject(subscriber_id);

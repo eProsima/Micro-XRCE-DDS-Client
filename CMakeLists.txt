@@ -77,6 +77,8 @@ endif()
 add_subdirectory(thirdparty/micro-CDR)
 
 include_directories(${PROJECT_SOURCE_DIR}/include/micrortps/client)
+include_directories(${PROJECT_SOURCE_DIR}/src/c/logs)
+include_directories(${PROJECT_SOURCE_DIR}/src/c)
 add_library(${PROJECT_NAME} ${CLIENT_LIB_SOURCES})
 target_link_libraries(${PROJECT_NAME} microcdr transport)
 target_include_directories(
