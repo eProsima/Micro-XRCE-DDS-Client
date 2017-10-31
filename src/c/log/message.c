@@ -24,7 +24,7 @@
 const char* data_to_string(const uint8_t* data, uint32_t size);
 const char* data_to_string(const uint8_t* data, uint32_t size)
 {
-    static char buffer[1024];
+    static char buffer[4096];
     for(uint32_t i = 0; i < size; i++)
         sprintf(buffer + 3 * i, "%02X ", data[i]);
     return buffer;
@@ -69,7 +69,7 @@ void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
 
 void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
 {
-    char content[2048];
+    char content[4096];
     switch(payload->representation.kind)
     {
         case OBJK_PARTICIPANT:
@@ -87,23 +87,23 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
         break;
 
         case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | id: 0x%04X | id: 0x%04X | xml: %s",
+            sprintf(content, "DATA_WRITER | id: 0x%04X | id: 0x%04X | xml: %u",
                     payload->representation._.data_writer.participant_id,
                     payload->representation._.data_writer.publisher_id,
-                    payload->representation._.data_writer.base3._.object_name.data);
+                    payload->representation._.data_writer.base3._.object_name.size);
         break;
 
         case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | id: 0x%04X | id: 0x%04X | xml: %s",
+            sprintf(content, "DATA_READER | id: 0x%04X | id: 0x%04X | xml: %u",
                     payload->representation._.data_reader.participant_id,
                     payload->representation._.data_reader.subscriber_id,
-                    payload->representation._.data_reader.base3._.object_name.data);
+                    payload->representation._.data_reader.base3._.object_name.size);
         break;
 
         case OBJK_TOPIC:
-            sprintf(content, "TOPIC | id: 0x%04X | topic: %s",
+            sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
                     payload->representation._.data_reader.participant_id,
-                    payload->representation._.data_reader.base3._.object_name.data);
+                    payload->representation._.data_reader.base3._.object_name.size);
         break;
 
         default:
