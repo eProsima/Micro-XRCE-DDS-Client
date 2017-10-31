@@ -122,7 +122,7 @@ void serialize_OBJK_Representation3_Base(MicroBuffer* buffer, const OBJK_Represe
             serialize_String_t(buffer, &input->_.object_name);
         break;
         case REPRESENTATION_AS_XML_STRING:
-            serialize_String_t(buffer, &input->_.string_representation);
+            serialize_String_t(buffer, &input->_.xml);
         break;
         case REPRESENTATION_IN_BINARY:
             serialize_BinarySequence_t(buffer, &input->_.binary_representation);
@@ -139,7 +139,7 @@ void deserialize_OBJK_Representation3_Base(MicroBuffer* buffer, OBJK_Representat
             deserialize_String_t(buffer, &output->_.object_name, aux);
         break;
         case REPRESENTATION_AS_XML_STRING:
-            deserialize_String_t(buffer, &output->_.string_representation, aux);
+            deserialize_String_t(buffer, &output->_.xml, aux);
         break;
         case REPRESENTATION_IN_BINARY:
             deserialize_BinarySequence_t(buffer, &output->_.binary_representation, aux);
@@ -156,7 +156,7 @@ void serialize_OBJK_Representation2_Base(MicroBuffer* buffer, const OBJK_Represe
             serialize_String_t(buffer, &input->_.object_name);
         break;
         case REPRESENTATION_AS_XML_STRING:
-            serialize_String_t(buffer, &input->_.string_representation);
+            serialize_String_t(buffer, &input->_.xml);
         break;
     }
 }
@@ -170,7 +170,7 @@ void deserialize_OBJK_Representation2_Base(MicroBuffer* buffer, OBJK_Representat
             deserialize_String_t(buffer, &output->_.object_name, aux);
         break;
         case REPRESENTATION_AS_XML_STRING:
-            deserialize_String_t(buffer, &output->_.string_representation, aux);
+            deserialize_String_t(buffer, &output->_.xml, aux);
         break;
     }
 }

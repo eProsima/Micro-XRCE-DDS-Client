@@ -129,9 +129,9 @@ XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml)
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_TOPIC;
-    payload.representation._.topic.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.topic.base3._.object_name.size = xml.length;
-    payload.representation._.topic.base3._.object_name.data = xml.data;
+    payload.representation._.topic.base3.format = REPRESENTATION_AS_XML_STRING;
+    payload.representation._.topic.base3._.xml.size = xml.length;
+    payload.representation._.topic.base3._.xml.data = xml.data;
     payload.representation._.topic.participant_id = participant_id;
 
     add_create_resource_submessage(&state->output_message, &payload, 0);
@@ -178,9 +178,9 @@ XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_DATAWRITER;
-    payload.representation._.data_writer.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.data_writer.base3._.object_name.size = xml.length;
-    payload.representation._.data_writer.base3._.object_name.data = xml.data;
+    payload.representation._.data_writer.base3.format = REPRESENTATION_AS_XML_STRING;
+    payload.representation._.data_writer.base3._.xml.size = xml.length;
+    payload.representation._.data_writer.base3._.xml.data = xml.data;
     payload.representation._.data_writer.participant_id = participant_id;
     payload.representation._.data_writer.publisher_id = publisher_id;
 
@@ -196,9 +196,9 @@ XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_
     payload.request.base.request_id = ++state->next_request_id;
     payload.request.object_id = ++state->next_object_id;
     payload.representation.kind = OBJK_DATAREADER;
-    payload.representation._.data_reader.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.data_reader.base3._.object_name.size = xml.length;
-    payload.representation._.data_reader.base3._.object_name.data = xml.data;
+    payload.representation._.data_reader.base3.format = REPRESENTATION_AS_XML_STRING;
+    payload.representation._.data_reader.base3._.xml.size = xml.length;
+    payload.representation._.data_reader.base3._.xml.data = xml.data;
     payload.representation._.data_reader.participant_id = participant_id;
     payload.representation._.data_reader.subscriber_id = subscriber_id;
 

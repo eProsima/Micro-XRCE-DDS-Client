@@ -107,7 +107,7 @@ DATA:
     OBJK_Representation3_Base:
       - format:                    RepresentationFormat
       - object_name:               String_t
-      - string_representation:     String_t
+      - xml:                       String_t
       - binary_representation:     BinarySequence_t
     __DISCRIMINATOR__:
       - REPRESENTATION_BY_REFERENCE
@@ -118,7 +118,7 @@ DATA:
     OBJK_Representation2_Base:
       - format:                    RepresentationFormat
       - object_name:               String_t
-      - string_representation:     String_t
+      - xml:                       String_t
     __DISCRIMINATOR__:
       - REPRESENTATION_BY_REFERENCE
       - REPRESENTATION_AS_XML_STRING

@@ -153,7 +153,7 @@ typedef struct OBJK_CLIENT_Representation
 typedef union OBJK_Representation3_BaseU
 {
     String_t object_name;
-    String_t string_representation;
+    String_t xml;
     BinarySequence_t binary_representation;
 
 } OBJK_Representation3_BaseU;
@@ -170,7 +170,7 @@ typedef struct OBJK_Representation3_Base
 typedef union OBJK_Representation2_BaseU
 {
     String_t object_name;
-    String_t string_representation;
+    String_t xml;
 
 } OBJK_Representation2_BaseU;
 

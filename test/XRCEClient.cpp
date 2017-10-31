@@ -10,7 +10,7 @@
 #include <fstream>
 
 #define BUFFER_SIZE 4096
-#define STATUS_TRIES_WAIT 100
+#define MESSAGE_TRIES_WAIT 100
 
 typedef struct ShapeTopic
 {
@@ -42,6 +42,9 @@ class ClientTests : public ::testing::Test
             statusOperation = 0xFF;
             statusImplementation = 0xFF;
 
+            dataObjectId = 0x0000;
+            dataRequestId = 0x0000;
+
             lastObject = 0x0000;
             lastRequest = 0x0000;
         }
@@ -51,16 +54,16 @@ class ClientTests : public ::testing::Test
             free_client_state(state);
         }
 
-        void waitStatus()
+        void waitMessage()
         {
-            int statusWaitCounter = 0;
-            while(!receive_from_agent(state) && statusWaitCounter < STATUS_TRIES_WAIT)
+            int messageWaitCounter = 0;
+            while(!receive_from_agent(state) && messageWaitCounter < MESSAGE_TRIES_WAIT)
             {
                 usleep(1000);
-                statusWaitCounter++;
+                messageWaitCounter++;
             }
 
-            ASSERT_LT(statusWaitCounter, STATUS_TRIES_WAIT);
+            ASSERT_LT(messageWaitCounter, MESSAGE_TRIES_WAIT);
         }
 
         void checkStatus(uint8_t operation)
@@ -71,6 +74,11 @@ class ClientTests : public ::testing::Test
             ASSERT_EQ(statusImplementation, STATUS_OK);
         }
 
+        void checkDataTopic()
+        {
+            //TODO
+        }
+
         uint16_t createClient()
         {
             XRCEInfo info = create_client(state, on_status, this);
@@ -78,7 +86,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
 
             return info.object_id;
         }
@@ -90,7 +98,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
 
             return info.object_id;
         }
@@ -113,7 +121,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
 
             return info.object_id;
         }
@@ -125,7 +133,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
 
             return info.object_id;
         }
@@ -137,7 +145,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
 
             return info.object_id;
         }
@@ -160,7 +168,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
 
             return info.object_id;
         }
@@ -183,7 +191,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
 
             return info.object_id;
         }
@@ -199,17 +207,17 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
         }
 
         void readData(uint16_t data_reader_id)
         {
-            XRCEInfo info = read_data(state, data_reader_id, deserialize_shape_topic, on_shape_topic, NULL);
+            XRCEInfo info = read_data(state, data_reader_id, deserialize_shape_topic, on_shape_topic, this);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
         }
 
         void deleteXRCEObject(uint16_t id)
@@ -219,7 +227,7 @@ class ClientTests : public ::testing::Test
             lastRequest = info.request_id;
             send_to_agent(state);
 
-            waitStatus();
+            waitMessage();
         }
 
         ClientState* state;
@@ -228,6 +236,10 @@ class ClientTests : public ::testing::Test
         uint16_t statusRequestId;
         uint8_t statusOperation;
         uint8_t statusImplementation;
+
+        uint16_t dataObjectId;
+        uint16_t dataRequestId;
+        ShapeTopic dataTopic;
 
         uint16_t lastRequest;
         uint16_t lastObject;
@@ -264,8 +276,17 @@ bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure
 
 void on_shape_topic(XRCEInfo info, const void* vtopic, void* args)
 {
+    ClientTests* test = static_cast<ClientTests*>(args);
+
     ShapeTopic* topic = (ShapeTopic*) vtopic;
     printl_shape_topic(topic);
+
+    test->dataObjectId = info.object_id;
+    test->dataRequestId = info.request_id;
+    test->dataTopic.color = topic->color;
+    test->dataTopic.x = topic->x;
+    test->dataTopic.y = topic->y;
+    test->dataTopic.size = topic->size;
 
     free(topic->color);
     free(topic);
@@ -403,7 +424,7 @@ TEST_F(ClientTests, ReadData)
     uint16_t subscriber_id = createSubscriber(participant_id);
     uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
     readData(data_reader_id);
-    checkStatus(STATUS_LAST_OP_CREATE);
+    checkDataTopic();
 
     deleteXRCEObject(data_reader_id);
     deleteXRCEObject(subscriber_id);
