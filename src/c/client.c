@@ -56,11 +56,6 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     //Default message encoding
     state->output_message.writer.endianness = LITTLE_ENDIANNESS;
 
-    #ifndef NDEBUG
-    memset(state->output_buffer, 0x00, state->buffer_size);
-    memset(state->input_buffer, 0x00, state->buffer_size);
-    #endif
-
     return state;
 }
 
@@ -368,12 +363,8 @@ bool send_to_agent(ClientState* state)
         if(output_length > 0)
         {
             PRINTL_SERIALIZATION(SEND, state->output_buffer, output_length);
-
-            #ifndef NDEBUG
-            memset(state->output_buffer, 0x00, state->buffer_size);
-            #endif
-
             reset_buffer(&state->output_message.writer);
+
             return true;
         }
     }
@@ -383,15 +374,10 @@ bool send_to_agent(ClientState* state)
 
 bool receive_from_agent(ClientState* state)
 {
-    #ifndef NDEBUG
-    memset(state->input_buffer, 0x00, state->buffer_size);
-    #endif
-
     int length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
     if(length > 0)
     {
         parse_message(&state->input_message, length);
-
         PRINTL_SERIALIZATION(RECV, state->input_buffer, length);
 
         return true;
