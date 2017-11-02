@@ -368,8 +368,9 @@ bool send_to_agent(ClientState* state)
         if(output_length > 0)
         {
             PRINTL_SERIALIZATION(SEND, state->output_buffer, output_length);
+
             #ifndef NDEBUG
-            memset(state->output_buffer, 0, state->buffer_size);
+            memset(state->output_buffer, 0x00, state->buffer_size);
             #endif
 
             reset_buffer(&state->output_message.writer);

@@ -138,8 +138,9 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "write_data") == 0 && length == 2)
     {
-        ShapeTopic shape_topic = {strlen("PURPLE") + 1, "PURPLE", 100 , 100, 50};
+        ShapeTopic shape_topic = {strlen("GREEN") + 1, "GREEN", 100 , 100, 50};
         write_data(state, id, serialize_shape_topic, &shape_topic);
+        printl_shape_topic(&shape_topic);
     }
     else if(strcmp(name, "read_data") == 0 && length == 2)
     {
