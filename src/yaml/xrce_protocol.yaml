@@ -13,10 +13,10 @@ DATA:
 - define:  {OBJK_QOSPROFILE:   '0x11'}
 - define:  {OBJK_APPLICATION:  '0x20'}
 
-- typedef: {ObjectId: uint16_t}
-- define:  {OBJECTID_INVALID: '0xFFFF'}
-- define:  {OBJECTID_CLIENT:  '0xFFF0'}
-- define:  {OBJECTID_SESSION: '0xFFF1'}
+- struct:  {ObjectId: [data: uint8_t 2, num: uint16_t]}
+- define:  {OBJECTID_INVALID: '(ObjectId){0xFF, 0xFF}'}
+- define:  {OBJECTID_CLIENT:  '(ObjectId){0xFF, 0xF0}'}
+- define:  {OBJECTID_SESSION: '(ObjectId){0xFF, 0xF1}'}
 
 - struct:  {XrceCookie: [data: uint8_t 4]}
 - define:  {XRCE_COOKIE: '(XrceCookie){0x58, 0x52, 0x43, 0x45}'}
@@ -43,7 +43,7 @@ DATA:
 - define:  {REPRESENTATION_AS_XML_STRING:  '0x02'}
 - define:  {REPRESENTATION_IN_BINARY:      '0x03'}
 
-- typedef: {RequestId: uint16_t}
+- struct:  {RequestId: [data: uint8_t 2, num: uint16_t]}
 
 - define:  {STATUS_OK:                    '0x00'}
 - define:  {STATUS_OK_MATCHED:            '0x01'}
@@ -138,35 +138,35 @@ DATA:
 - struct:
     OBJK_TYPE_Representation:
       - base3:     OBJK_Representation3_Base
-      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
+      - participant_id: ObjectId
       - registered_type_name: String_t
 
 - struct:
     OBJK_TOPIC_Representation:
       - base3:     OBJK_Representation3_Base
-      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
+      - participant_id: ObjectId
 
 - struct:
     OBJK_PUBLISHER_Representation:
       - base3:     OBJK_Representation3_Base
-      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
+      - participant_id: ObjectId
 
 - struct:
     OBJK_SUBSCRIBER_Representation:
       - base3:     OBJK_Representation3_Base
-      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
+      - participant_id: ObjectId
 
 - struct:
     OBJK_DATAWRITER_Representation:
       - base3:     OBJK_Representation3_Base
-      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
-      - {publisher_id: ObjectId, __ENDIANNESS__: BIG}
+      - participant_id: ObjectId
+      - publisher_id: ObjectId
 
 - struct:
     OBJK_DATAREADER_Representation:
       - base3:     OBJK_Representation3_Base
-      - {participant_id: ObjectId, __ENDIANNESS__: BIG}
-      - {subscriber_id: ObjectId, __ENDIANNESS__: BIG}
+      - participant_id: ObjectId
+      - subscriber_id: ObjectId
 
 - struct:
     OBJK_TYPE_Binary:
@@ -243,7 +243,7 @@ DATA:
 
 - struct:
     ResultStatus:
-      - {request_id: RequestId, __ENDIANNESS__: BIG}
+      - request_id: RequestId
       - status: uint8_t
       - implementation_status: uint8_t
 
@@ -278,22 +278,22 @@ DATA:
 
 - struct:
     BaseRequest:
-      - {request_id: RequestId, __ENDIANNESS__: BIG}
+      - request_id: RequestId
 
 - struct:
     BaseObjectRequest:
       - base: BaseRequest
-      - {object_id: ObjectId, __ENDIANNESS__: BIG}
+      - object_id: ObjectId
 
 - struct:
     BaseReply:
       - result: ResultStatus
-      - {request_id: RequestId, __ENDIANNESS__: BIG}
+      - request_id: RequestId
 
 - struct:
     BaseObjectReply:
       - base: BaseReply
-      - {object_id: ObjectId, __ENDIANNESS__: BIG}
+      - object_id: ObjectId
 
 - struct:
     InfoReply:

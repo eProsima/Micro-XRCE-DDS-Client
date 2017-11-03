@@ -31,6 +31,30 @@ class State:
                var_type == 'float' or
                var_type == 'double')
 
+    def get_type_bytes_size(var_type):
+        if var_type == 'bool':
+            return 1
+        if var_type == 'char':
+            return 1
+        if var_type == 'uint8_t':
+            return 1
+        if var_type == 'uint16_t':
+            return 2
+        if var_type == 'uint32_t':
+            return 4
+        if var_type == 'uint64_t':
+            return 8
+        if var_type == 'int16_t':
+            return 2
+        if var_type == 'int32_t':
+            return 4
+        if var_type == 'int64_t':
+            return 8
+        if var_type == 'float':
+            return 4
+        if var_type == 'double':
+            return 8
+
 class Attribute:
     def __init__(self, yaml_attribute, state):
         self.endianness = ''
@@ -144,7 +168,11 @@ class Struct:
             self.attributes.append(Attribute(attribute, state))
 
     def writeSpec(self, file):
-        file.write('\n\ntypedef ' + self.struct + ' ' + self.name + '\n{\n')
+        struct = self.struct
+        if len(self.attributes) == 2 and self.attributes[0].name == 'data' and self.attributes[1].name == 'num':
+            struct = 'union'
+
+        file.write('\n\ntypedef ' + struct + ' ' + self.name + '\n{\n')
 
         for attribute in self.attributes:
             attribute.writeSpec(file);
@@ -173,6 +201,9 @@ class Struct:
                 file.write('    for(uint32_t i = 0; i < input->size; i++)\n')
                 file.write('        serialize_' + data_type + '(buffer, &input->data[i]);\n')
 
+        elif len(self.attributes) == 2 and self.attributes[0].name == 'data' and self.attributes[1].name == 'num':
+            self.attributes[0].writeSerialization(file, 4)
+
         else:
             for attribute in self.attributes:
                 attribute.writeSerialization(file, 4)
@@ -194,6 +225,9 @@ class Struct:
             else:
                 file.write('    for(uint32_t i = 0; i < output->size; i++)\n')
                 file.write('        deserialize_' + data_type + '(buffer, &output->data[i], aux);\n')
+
+        elif len(self.attributes) == 2 and self.attributes[0].name == 'data' and self.attributes[1].name == 'num':
+            self.attributes[0].writeDeserialization(file, 4)
 
         else:
             for attribute in self.attributes:
@@ -373,8 +407,8 @@ if len(sys.argv) == 4:
     file_path_points = sys.argv[1].split('.')
     file_path_slash = file_path_points[len(file_path_points) - 2].split('/')
     name = file_path_slash[len(file_path_slash) - 1]
-    headers = sys.argv[2] + '/'
-    sources = sys.argv[3] + '/'
+    headers = sys.argv[2] + ('/' if sys.argv[2][-1] != '/' else '')
+    sources = sys.argv[3] + ('/' if sys.argv[3][-1] != '/' else '')
 
     microCDRGen.writeSpec(headers + name + '_spec.h')
     microCDRGen.writeSerializationHeader(headers + name + '_serialization.h')

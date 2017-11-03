@@ -38,8 +38,8 @@ int main(int args, char** argv)
 
     // Message payload
     CreateResourcePayload payload;
-    payload.request.base.request_id = 0x0001;
-    payload.request.object_id = 0x0001;
+    payload.request.base.request_id = (RequestId){0x00, 0x01};
+    payload.request.object_id = (ObjectId){0x00, 0x01};
     payload.representation.kind = OBJK_PARTICIPANT;
     payload.representation._.participant.base2.format = REPRESENTATION_BY_REFERENCE;
     payload.representation._.participant.base2._.object_name.size = 0;
