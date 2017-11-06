@@ -7,6 +7,7 @@ extern "C"
 #endif
 
 #include "xrce_protocol_spec.h"
+#include "../client_private.h"
 #include <stdint.h>
 
 #if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)

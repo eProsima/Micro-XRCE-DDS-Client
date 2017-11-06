@@ -40,7 +40,9 @@ const char* reply_to_string(const BaseObjectReply* reply);
 const char* request_to_string(const BaseObjectRequest* request)
 {
     static char buffer[256];
-    sprintf(buffer, "#0x%04X | id: 0x%04X", request->base.request_id.num, request->object_id.num);
+    sprintf(buffer, "#0x%04X | id: 0x%04X",
+            get_num_request_id(request->base.request_id),
+            get_num_object_id(request->object_id));
 
     return buffer;
 }
@@ -114,9 +116,9 @@ const char* reply_to_string(const BaseObjectReply* reply)
     }
 
     sprintf(buffer, "#0x%04X | id: 0x%04X | from #0x%04X | %s | %s",
-            reply->base.request_id.num,
-            reply->object_id.num,
-            reply->base.result.request_id.num,
+            get_num_request_id(reply->base.request_id),
+            get_num_object_id(reply->object_id),
+            get_num_request_id(reply->base.result.request_id),
             kind, implementation);
 
     return buffer;
@@ -167,31 +169,31 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
 
         case OBJK_TOPIC:
             sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
-                    payload->representation._.data_reader.participant_id.num,
+                    get_num_object_id(payload->representation._.data_reader.participant_id),
                     payload->representation._.data_reader.base3._.xml.size);
         break;
 
         case OBJK_PUBLISHER:
             sprintf(content, "PUBLISHER | id: 0x%04X",
-                    payload->representation._.publisher.participant_id.num);
+                    get_num_object_id(payload->representation._.publisher.participant_id));
         break;
 
         case OBJK_SUBSCRIBER:
             sprintf(content, "SUBSCRIBER | id: 0x%04X",
-                    payload->representation._.subscriber.participant_id.num);
+                    get_num_object_id(payload->representation._.subscriber.participant_id));
         break;
 
         case OBJK_DATAWRITER:
             sprintf(content, "DATA_WRITER | id: 0x%04X | id: 0x%04X | xml: %u",
-                    payload->representation._.data_writer.participant_id.num,
-                    payload->representation._.data_writer.publisher_id.num,
+                    get_num_object_id(payload->representation._.data_writer.participant_id),
+                    get_num_object_id(payload->representation._.data_writer.publisher_id),
                     payload->representation._.data_writer.base3._.xml.size);
         break;
 
         case OBJK_DATAREADER:
             sprintf(content, "DATA_READER | id: 0x%04X | id: 0x%04X | xml: %u",
-                    payload->representation._.data_reader.participant_id.num,
-                    payload->representation._.data_reader.subscriber_id.num,
+                    get_num_object_id(payload->representation._.data_reader.participant_id),
+                    get_num_object_id(payload->representation._.data_reader.subscriber_id),
                     payload->representation._.data_reader.base3._.xml.size);
         break;
 

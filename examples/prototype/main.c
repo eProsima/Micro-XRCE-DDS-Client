@@ -58,7 +58,10 @@ int main(int args, char** argv)
         }
     }
     if(!state)
-        printf("Help: program [serial | udp recv_port send_port]");
+    {
+        printf("Help: program [serial | udp recv_port send_port]\n");
+        return 1;
+    }
 
 
     // Listening agent
@@ -66,7 +69,7 @@ int main(int args, char** argv)
     if(pthread_create(&listening_thread, NULL, listen_agent, state))
     {
         printf("ERROR: Error creating thread\n");
-        return 1;
+        return 2;
     }
 
     // Waiting user commands

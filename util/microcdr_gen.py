@@ -168,11 +168,7 @@ class Struct:
             self.attributes.append(Attribute(attribute, state))
 
     def writeSpec(self, file):
-        struct = self.struct
-        if len(self.attributes) == 2 and self.attributes[0].name == 'data' and self.attributes[1].name == 'num':
-            struct = 'union'
-
-        file.write('\n\ntypedef ' + struct + ' ' + self.name + '\n{\n')
+        file.write('\n\ntypedef ' + self.struct + ' ' + self.name + '\n{\n')
 
         for attribute in self.attributes:
             attribute.writeSpec(file);
@@ -201,9 +197,6 @@ class Struct:
                 file.write('    for(uint32_t i = 0; i < input->size; i++)\n')
                 file.write('        serialize_' + data_type + '(buffer, &input->data[i]);\n')
 
-        elif len(self.attributes) == 2 and self.attributes[0].name == 'data' and self.attributes[1].name == 'num':
-            self.attributes[0].writeSerialization(file, 4)
-
         else:
             for attribute in self.attributes:
                 attribute.writeSerialization(file, 4)
@@ -225,9 +218,6 @@ class Struct:
             else:
                 file.write('    for(uint32_t i = 0; i < output->size; i++)\n')
                 file.write('        deserialize_' + data_type + '(buffer, &output->data[i], aux);\n')
-
-        elif len(self.attributes) == 2 and self.attributes[0].name == 'data' and self.attributes[1].name == 'num':
-            self.attributes[0].writeDeserialization(file, 4)
 
         else:
             for attribute in self.attributes:

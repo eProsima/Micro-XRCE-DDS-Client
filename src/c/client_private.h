@@ -75,6 +75,14 @@ CallbackData* get_callback_data(const CallbackDataStorage* store, uint16_t id);
 // ----------------------------------------------------------------------------------------------
 ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id);
 
+uint16_t get_num_request_id(RequestId request_id);
+RequestId get_raw_request_id(uint16_t request_id);
+
+uint16_t get_num_object_id(ObjectId object_id);
+ObjectId get_raw_object_id(uint16_t object_id);
+
+XRCEInfo create_xrce_info(RequestId request_id, ObjectId object_id);
+
 // ----------------------------------------------------------------------------------------------
 //    Callbacks
 // ----------------------------------------------------------------------------------------------

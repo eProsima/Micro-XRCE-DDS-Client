@@ -55,6 +55,18 @@ else()
 endif()
 
 ###############################################################################
+# Test system configuration
+###############################################################################
+include(${PROJECT_SOURCE_DIR}/cmake/dev/check_configuration.cmake)
+
+option(CHECK_ENDIANNESS "Enable/disable endiannes checking" ON)
+if(CHECK_ENDIANNESS)
+    check_endianness()
+else()
+    message(STATUS "WARNING!! micrortps-client without check endianness")
+endif()
+
+###############################################################################
 # Load external eProsima projects.
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/dev/eprosima_libraries.cmake)

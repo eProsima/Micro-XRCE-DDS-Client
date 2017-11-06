@@ -30,10 +30,9 @@ typedef uint8_t ObjectKind;
 #define OBJK_APPLICATION 0x20
 
 
-typedef union ObjectId
+typedef struct ObjectId
 {
     uint8_t data[2];
-    uint16_t num;
 
 } ObjectId;
 #define OBJECTID_INVALID (ObjectId){0xFF, 0xFF}
@@ -81,10 +80,9 @@ typedef uint8_t RepresentationFormat;
 #define REPRESENTATION_IN_BINARY 0x03
 
 
-typedef union RequestId
+typedef struct RequestId
 {
     uint8_t data[2];
-    uint16_t num;
 
 } RequestId;
 #define STATUS_OK 0x00

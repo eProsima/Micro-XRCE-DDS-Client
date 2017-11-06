@@ -35,11 +35,10 @@ typedef struct AbstractTopic
 
 typedef struct XRCEInfo
 {
-    uint16_t object_id;
     uint16_t request_id;
+    uint16_t object_id;
 
 } XRCEInfo;
-
 
 typedef bool (*SerializeTopic)(MicroBuffer* writer, const AbstractTopic* topic_structure);
 typedef bool (*DeserializeTopic)(MicroBuffer* reader, AbstractTopic* topic_structure);
