@@ -256,7 +256,7 @@ XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_
 
 XRCEInfo delete_resource(ClientState* state, uint16_t resource_id)
 {
-    XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
+    XRCEInfo info = {++state->next_request_id, resource_id};
 
     DeleteResourcePayload payload;
     payload.request.base.request_id = get_raw_request_id(info.request_id);
