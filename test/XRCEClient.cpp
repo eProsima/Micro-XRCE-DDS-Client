@@ -417,6 +417,7 @@ TEST_F(ClientTests, ReadData)
     uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
     readData(data_reader_id);
     checkStatus(STATUS_LAST_OP_READ);
+    waitMessage();
     checkDataTopic(1);
 
     deleteXRCEObject(data_reader_id);
