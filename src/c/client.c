@@ -119,9 +119,7 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
     struct timespec ts;
     timespec_get(&ts, TIME_UTC);
 
-    uint16_t request_id = ++state->next_request_id;
-
-    XRCEInfo info = {get_num_object_id(OBJECTID_CLIENT), ++state->next_object_id};
+    XRCEInfo info = {++state->next_request_id, get_num_object_id(OBJECTID_CLIENT)};
 
     CreateClientPayload payload;
     payload.request.base.request_id = get_raw_request_id(info.request_id);
