@@ -75,7 +75,7 @@ class ClientTests : public ::testing::Test
 
         void checkDataTopic(int expectedNumTopic)
         {
-            ASSERT_EQ(statusImplementation, topicCount);
+            ASSERT_EQ(expectedNumTopic, topicCount);
         }
 
         uint16_t createClient()
