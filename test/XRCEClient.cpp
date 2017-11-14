@@ -14,6 +14,13 @@
 #define BUFFER_SIZE 4096
 #define MESSAGE_TRIES_WAIT 100
 
+typedef struct HelloWorld
+{
+    uint32_t index;
+    uint32_t message_length;
+    char* message;
+} HelloTopic;
+
 typedef struct ShapeTopic
 {
     uint32_t color_length;
@@ -21,16 +28,20 @@ typedef struct ShapeTopic
     uint32_t x;
     uint32_t y;
     uint32_t size;
-
 } ShapeTopic;
+
+bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_structure);
+bool deserialize_hello_topic(MicroBuffer* reader, AbstractTopic* topic_serialization);
 
 bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure);
 bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_serialization);
 
 void on_shape_topic(XRCEInfo info, const void* topic, void* args);
+void on_hello_topic(XRCEInfo info, const void* topic, void* args);
 void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
 
 void printl_shape_topic(const ShapeTopic* shape_topic);
+void printl_hello_topic(const HelloTopic* hellow_topic);
 
 class ClientTests : public ::testing::Test
 {
@@ -151,11 +162,11 @@ class ClientTests : public ::testing::Test
             return info.object_id;
         }
 
-        uint16_t createDataWriter(uint16_t participant_id, uint16_t publisher_id)
+        uint16_t createDataWriter(const char* file_name, uint16_t participant_id, uint16_t publisher_id)
         {
             char data[4096];
             String xml = {data, 0};
-            std::ifstream in("data_writer_profile.xml", std::ifstream::in);
+            std::ifstream in(file_name, std::ifstream::in);
             if(in.is_open())
             {
                 in.seekg (0, in.end);
@@ -174,11 +185,11 @@ class ClientTests : public ::testing::Test
             return info.object_id;
         }
 
-        uint16_t createDataReader(uint16_t participant_id, uint16_t subscriber_id)
+        uint16_t createDataReader(const char* file_name, uint16_t participant_id, uint16_t subscriber_id)
         {
             char data[4096];
             String xml = {data, 0};
-            std::ifstream in("data_reader_profile.xml", std::ifstream::in);
+            std::ifstream in(file_name, std::ifstream::in);
             if(in.is_open())
             {
                 in.seekg (0, in.end);
@@ -197,7 +208,31 @@ class ClientTests : public ::testing::Test
             return info.object_id;
         }
 
-        void writeData(uint16_t data_writer_id)
+        void writeHelloData(uint16_t data_writer_id)
+        {
+            char message[] = "Hello data sample";
+            uint32_t length = strlen(message) + 1;
+            HelloTopic hello_topic = {10, length, message};
+            XRCEInfo info = write_data(state, data_writer_id, serialize_hello_topic, &hello_topic);
+            printl_hello_topic(&hello_topic);
+            lastObject = info.object_id;
+            lastRequest = info.request_id;
+            send_to_agent(state);
+
+            waitMessage();
+        }
+
+        void readHelloData(uint16_t data_reader_id)
+        {
+            XRCEInfo info = read_data(state, data_reader_id, deserialize_hello_topic, on_hello_topic, this);
+            lastObject = info.object_id;
+            lastRequest = info.request_id;
+            send_to_agent(state);
+
+            waitMessage();
+        }
+
+        void writeShapeData(uint16_t data_writer_id)
         {
             char topicColor[64] = "PURPLE";
             uint32_t length = strlen(topicColor) + 1;
@@ -211,7 +246,7 @@ class ClientTests : public ::testing::Test
             waitMessage();
         }
 
-        void readData(uint16_t data_reader_id)
+        void readShapeData(uint16_t data_reader_id)
         {
             XRCEInfo info = read_data(state, data_reader_id, deserialize_shape_topic, on_shape_topic, this);
             lastObject = info.object_id;
@@ -244,6 +279,27 @@ class ClientTests : public ::testing::Test
         int topicCount;
 };
 
+bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
+{
+    HelloTopic* topic = (HelloTopic*) topic_structure->topic;
+    serialize_uint32_t(writer, topic->index);
+    serialize_array_char(writer, topic->message, topic->message_length);
+    return true;
+}
+
+bool deserialize_hello_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
+{
+    HelloTopic* topic = (HelloTopic*)malloc(sizeof(HelloTopic));
+    deserialize_uint32_t(reader, &topic->index);
+    deserialize_uint32_t(reader, &topic->message_length);
+    topic->message = (char*)malloc(sizeof(topic->message_length));
+    deserialize_array_char(reader, topic->message, topic->message_length);
+
+    topic_structure->topic = topic;
+
+    return true;
+}
+
 bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
     ShapeTopic* topic = (ShapeTopic*) topic_structure->topic;
@@ -271,6 +327,19 @@ bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure
     topic_structure->topic = topic;
 
     return true;
+}
+
+void on_hello_topic(XRCEInfo info, const void* vtopic, void* args)
+{
+    ClientTests* test = static_cast<ClientTests*>(args);
+
+    HelloTopic* topic = (HelloTopic*) vtopic;
+    printl_hello_topic(topic);
+
+    test->topicCount++;
+
+    free(topic->message);
+    free(topic);
 }
 
 void on_shape_topic(XRCEInfo info, const void* vtopic, void* args)
@@ -304,6 +373,15 @@ void printl_shape_topic(const ShapeTopic* shape_topic)
             shape_topic->x,
             shape_topic->y,
             shape_topic->size,
+            "\e[0m");
+}
+
+void printl_hello_topic(const HelloTopic* hello_topic)
+{
+    printf("        %s[%s | index: %u]%s\n",
+            "\e[1;34m",
+            hello_topic->message,
+            hello_topic->index,
             "\e[0m");
 }
 
@@ -371,7 +449,7 @@ TEST_F(ClientTests, CreateDeleteDataWriter)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t publisher_id = createPublisher(participant_id);
-    uint16_t data_writer_id = createDataWriter(participant_id, publisher_id);
+    uint16_t data_writer_id = createDataWriter("data_writer_profile.xml", participant_id, publisher_id);
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(data_writer_id);
@@ -386,7 +464,7 @@ TEST_F(ClientTests, CreateDeleteDataReader)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t subscriber_id = createSubscriber(participant_id);
-    uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
+    uint16_t data_reader_id = createDataReader("data_reader_profile.xml", participant_id, subscriber_id);
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(data_reader_id);
@@ -401,8 +479,23 @@ TEST_F(ClientTests, WriteData)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t publisher_id = createPublisher(participant_id);
-    uint16_t data_writer_id = createDataWriter(participant_id, publisher_id);
-    writeData(data_writer_id);
+    uint16_t data_writer_id = createDataWriter("data_writer_profile.xml", participant_id, publisher_id);
+    writeShapeData(data_writer_id);
+    checkStatus(STATUS_LAST_OP_WRITE);
+
+    deleteXRCEObject(data_writer_id);
+    deleteXRCEObject(publisher_id);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
+
+TEST_F(ClientTests, WriteHelloData)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t publisher_id = createPublisher(participant_id);
+    uint16_t data_writer_id = createDataWriter("hello_data_writer_profile.xml", participant_id, publisher_id);
+    writeHelloData(data_writer_id);
     checkStatus(STATUS_LAST_OP_WRITE);
 
     deleteXRCEObject(data_writer_id);
@@ -416,8 +509,24 @@ TEST_F(ClientTests, ReadData)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t subscriber_id = createSubscriber(participant_id);
-    uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
-    readData(data_reader_id);
+    uint16_t data_reader_id = createDataReader("data_reader_profile.xml", participant_id, subscriber_id);
+    readShapeData(data_reader_id);
+    checkStatus(STATUS_LAST_OP_READ);
+    waitMessage();
+    checkDataTopic(1);
+    deleteXRCEObject(data_reader_id);
+    deleteXRCEObject(subscriber_id);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
+
+TEST_F(ClientTests, ReadHelloData)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t subscriber_id = createSubscriber(participant_id);
+    uint16_t data_reader_id = createDataReader("hello_data_reader_profile.xml", participant_id, subscriber_id);
+    readHelloData(data_reader_id);
     checkStatus(STATUS_LAST_OP_READ);
     waitMessage();
     checkDataTopic(1);
@@ -432,16 +541,14 @@ TEST_F(ClientTests, ReadMultiData)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t subscriber_id = createSubscriber(participant_id);
-    uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
-    readData(data_reader_id);
+    uint16_t data_reader_id = createDataReader("data_reader_profile.xml", participant_id, subscriber_id);
+    readShapeData(data_reader_id);
     checkStatus(STATUS_LAST_OP_READ);
     {
         waitMessage();
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
         checkDataTopic(1);
     }
-
-
     deleteXRCEObject(data_reader_id);
     deleteXRCEObject(subscriber_id);
     deleteXRCEObject(participant_id);
