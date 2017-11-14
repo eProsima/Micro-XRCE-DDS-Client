@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <unistd.h>
 
+#include <thread>
+
 #include <fstream>
 
 #define BUFFER_SIZE 4096
@@ -419,6 +421,26 @@ TEST_F(ClientTests, ReadData)
     checkStatus(STATUS_LAST_OP_READ);
     waitMessage();
     checkDataTopic(1);
+    deleteXRCEObject(data_reader_id);
+    deleteXRCEObject(subscriber_id);
+    deleteXRCEObject(participant_id);
+    deleteXRCEObject(client_id);
+}
+
+TEST_F(ClientTests, ReadMultiData)
+{
+    uint16_t client_id = createClient();
+    uint16_t participant_id = createParticipant();
+    uint16_t subscriber_id = createSubscriber(participant_id);
+    uint16_t data_reader_id = createDataReader(participant_id, subscriber_id);
+    readData(data_reader_id);
+    checkStatus(STATUS_LAST_OP_READ);
+    {
+        waitMessage();
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        checkDataTopic(1);
+    }
+
 
     deleteXRCEObject(data_reader_id);
     deleteXRCEObject(subscriber_id);
