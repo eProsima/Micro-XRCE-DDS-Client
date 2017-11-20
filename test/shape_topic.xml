@@ -1,8 +1,6 @@
 <dds>
-<profiles>
     <topic>
         <name>Square</name>
         <dataType>ShapeType</dataType>
     </topic>
-    </profiles>
 </dds>

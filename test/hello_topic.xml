@@ -1,8 +1,6 @@
 <dds>
-<profiles>
-    <topic>
-        <name>HelloWorldTopic</name>
-        <dataType>HelloWorld</dataType>
-    </topic>
-    </profiles>
+<topic>
+    <name>HelloWorldTopic</name>
+    <dataType>HelloWorld</dataType>
+</topic>
 </dds>
