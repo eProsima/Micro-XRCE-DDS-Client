@@ -1,0 +1,8 @@
+<dds>
+<profiles>
+    <topic>
+        <name>HelloWorldTopic</name>
+        <dataType>HelloWorld</dataType>
+    </topic>
+    </profiles>
+</dds>

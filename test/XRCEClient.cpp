@@ -115,11 +115,11 @@ class ClientTests : public ::testing::Test
             return info.object_id;
         }
 
-        uint16_t createTopic(uint16_t participant_id)
+        uint16_t createTopic(const char* file_name, uint16_t participant_id)
         {
             char data[4096];
             String xml = {data, 0};
-            std::ifstream in("data_writer_profile.xml", std::ifstream::in);
+            std::ifstream in(file_name, std::ifstream::in);
             if(in.is_open())
             {
                 in.seekg (0, in.end);
@@ -409,7 +409,7 @@ TEST_F(ClientTests, CreateDeleteTopic)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
-    uint16_t topic_id = createTopic(participant_id);
+    uint16_t topic_id = createTopic("shape_topic.xml", participant_id);
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(topic_id);
