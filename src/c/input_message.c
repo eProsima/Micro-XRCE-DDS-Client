@@ -77,6 +77,8 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
             if(callback->on_packed_samples_payload)
                 callback->on_packed_samples_payload(reply, &packed_samples, callback->args, reader->endianness);
         }
+        case FORMAT_BAD:
+        default:
         break;
     }
 }

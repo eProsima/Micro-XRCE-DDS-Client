@@ -81,9 +81,9 @@ uint16_t get_num_request_id(RequestId request_id)
 RequestId get_raw_request_id(uint16_t request_id)
 {
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
-        return (RequestId){(uint8_t)(request_id >> 8), (uint8_t)request_id};
+        return (RequestId){{(uint8_t)(request_id >> 8), (uint8_t)request_id}};
     else
-        return (RequestId){(uint8_t)(request_id), (uint8_t)request_id >> 8};
+        return (RequestId){{(uint8_t)(request_id), (uint8_t)request_id >> 8}};
 }
 
 uint16_t get_num_object_id(ObjectId object_id)
@@ -97,9 +97,9 @@ uint16_t get_num_object_id(ObjectId object_id)
 ObjectId get_raw_object_id(uint16_t object_id)
 {
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
-        return (ObjectId){(uint8_t)(object_id >> 8), (uint8_t)object_id};
+        return (ObjectId){{(uint8_t)(object_id >> 8), (uint8_t)object_id}};
     else
-        return (ObjectId){(uint8_t)(object_id), (uint8_t)object_id >> 8};
+        return (ObjectId){{(uint8_t)(object_id), (uint8_t)object_id >> 8}};
 }
 
 XRCEInfo create_xrce_info(RequestId request_id, ObjectId object_id)
@@ -117,7 +117,7 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
     state->on_status_received_args = on_status_args;
 
     struct timespec ts;
-    timespec_get(&ts, TIME_UTC);
+    clock_gettime(CLOCK_REALTIME, &ts);
 
     XRCEInfo info = {++state->next_request_id, get_num_object_id(OBJECTID_CLIENT)};
 
@@ -126,10 +126,10 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
     payload.request.object_id = OBJECTID_CLIENT;
     payload.representation.xrce_cookie = XRCE_COOKIE;
     payload.representation.xrce_version = XRCE_VERSION;
-    payload.representation.xrce_vendor_id = (XrceVendorId){0x01, 0x0F};
+    payload.representation.xrce_vendor_id = (XrceVendorId){{0x01, 0x0F}};
     payload.representation.client_timestamp.seconds = ts.tv_sec;
     payload.representation.client_timestamp.nanoseconds = ts.tv_nsec;
-    payload.representation.client_key = (ClientKey){0xAA, 0xBB, 0xCC, 0xDD};
+    payload.representation.client_key = (ClientKey){{0xAA, 0xBB, 0xCC, 0xDD}};
     payload.representation.session_id = 0xEE;
 
     state->session_id = SESSIONID_NONE_WITH_CLIENT_KEY;

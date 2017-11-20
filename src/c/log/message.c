@@ -15,12 +15,7 @@
 
 #define RESTORE_COLOR  "\e[0m"
 
-#ifdef MESSAGE_LOGS
-#define SEND_STR "==>"
-#define RECV_STR "<=="
-#endif
-
-//#if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)
+#if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)
 //Only one call into a printf.
 const char* data_to_string(const uint8_t* data, uint32_t size);
 
@@ -31,7 +26,7 @@ const char* data_to_string(const uint8_t* data, uint32_t size)
         sprintf(buffer + 3 * i, "%02X ", data[i]);
     return buffer;
 }
-//#endif
+#endif
 
 #ifdef MESSAGE_LOGS
 const char* request_to_string(const BaseObjectRequest* request);
