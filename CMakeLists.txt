@@ -25,7 +25,7 @@ endif()
 ###############################################################################
 # eProsima build options
 ###############################################################################
-option(COMPILE_EXAMPLES "Compile examples" OFF)
+option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
@@ -115,6 +115,6 @@ endif()
 # Examples
 ###############################################################################
 if(EPROSIMA_BUILD_EXAMPLES)
+    add_subdirectory(examples/helloworld)
     add_subdirectory(examples/message)
-    add_subdirectory(examples/prototype)
 endif()
