@@ -16,11 +16,18 @@
 # CMake build rules for micro RTPS client
 ###############################################################################
 cmake_minimum_required(VERSION 2.8.12)
-project(micrortps-client)
-
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
+# Set CMAKE_BUILD_TYPE to Release by default.
+if(DEFINED CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+    )
+else()
+    set(CMAKE_BUILD_TYPE Release CACHE STRING
+        "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+        )
 endif()
+
+project(micrortps-client)
 
 ###############################################################################
 # eProsima build options
@@ -29,7 +36,7 @@ option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
-option(UPDATE_SUBMODULES "Update to the latest" OFF)
+option(UPDATE_SUBMODULES "Update to the latest" ON)
 
 if(EPROSIMA_BUILD)
     set(THIRDPARTY ON)
@@ -88,6 +95,7 @@ if(NOT TARGET transport)
 endif()
 add_subdirectory(thirdparty/micro-CDR)
 
+include_directories(${PROJECT_SOURCE_DIR}/thirdparty/micro-CDR/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/micrortps/client)
 include_directories(${PROJECT_SOURCE_DIR}/src/c/logs)
 include_directories(${PROJECT_SOURCE_DIR}/src/c)
@@ -118,3 +126,21 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/helloworld)
     add_subdirectory(examples/message)
 endif()
+
+
+###############################################################################
+# Packaging
+###############################################################################
+
+# Install public headers
+set_public_headers_directory(${PROJECT_SOURCE_DIR}/include micrortps
+DESTINATION ${INCLUDE_INSTALL_DIR}
+COMPONENT headers
+)
+
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+    COMPONENT libraries
+    )
