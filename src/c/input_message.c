@@ -11,7 +11,7 @@
 
 #else
 
-#define DEBUG_PRINT(fmt, args...) ;
+#define ERROR_PRINT(fmt, args...);
 
 #endif
 

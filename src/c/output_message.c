@@ -126,7 +126,7 @@ void begin_submessage(OutputMessage* message, MicroState* submessage_beginning,
     align_to(&message->writer, 4);
     *header_beginning = get_micro_state(&message->writer);
 
-    message->writer.iterator += 4; //Space for MessageHeader.
+    message->writer.iterator += 4; //Space for SubMessageHeader.
     *payload_beginning = get_micro_state(&message->writer);
 }
 

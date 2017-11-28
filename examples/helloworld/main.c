@@ -14,7 +14,6 @@
 // ----------------------------------------------------
 typedef struct HelloWorld
 {
-    uint32_t index;
     uint32_t message_length;
     char* message;
 } HelloTopic;
@@ -26,7 +25,6 @@ bool deserialize_hello_topic(MicroBuffer* reader, AbstractTopic* topic_serializa
 bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
     HelloTopic* topic = (HelloTopic*) topic_structure->topic;
-    serialize_uint32_t(writer, topic->index);
     serialize_array_char(writer, topic->message, topic->message_length);
     return true;
 }
@@ -34,7 +32,6 @@ bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_struc
 bool deserialize_hello_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
 {
     HelloTopic* topic = (HelloTopic*)malloc(sizeof(HelloTopic));
-    deserialize_uint32_t(reader, &topic->index);
     deserialize_uint32_t(reader, &topic->message_length);
     topic->message = (char*)malloc(sizeof(topic->message_length));
     deserialize_array_char(reader, topic->message, topic->message_length);
@@ -225,10 +222,9 @@ void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* 
 
 void printl_hello_topic(const HelloTopic* hello_topic)
 {
-    printf("        %s[%s | index: %u]%s\n",
+    printf("        %s[%s]%s\n",
             "\e[1;34m",
             hello_topic->message,
-            hello_topic->index,
             "\e[0m");
 }
 
@@ -253,7 +249,7 @@ String read_file(char* file_name)
         printf("Error opening %s\n", file_name);
     }
 
-    return xml;
+     return xml;
 }
 
 void help()
