@@ -133,6 +133,14 @@ endif()
 # Packaging
 ###############################################################################
 
+# Install examples
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples/
+DESTINATION examples
+COMPONENT examples
+PATTERN "examples/*/CMakeLists.txt" EXCLUDE
+)
+
+
 # Install public headers
 set_public_headers_directory(${PROJECT_SOURCE_DIR}/include micrortps
 DESTINATION ${INCLUDE_INSTALL_DIR}
