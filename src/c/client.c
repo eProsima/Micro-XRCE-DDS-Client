@@ -16,9 +16,9 @@ ClientState* new_serial_client_state(uint32_t buffer_size, const char* device)
     return new_client_state(buffer_size, add_serial_locator(device));
 }
 
-ClientState* new_udp_client_state(uint32_t buffer_size, uint16_t recv_port, uint16_t send_port)
+ClientState* new_udp_client_state(uint32_t buffer_size, const char* server_ip, uint16_t recv_port, uint16_t send_port)
 {
-    return new_client_state(buffer_size, add_udp_locator(recv_port, send_port));
+    return new_client_state(buffer_size, add_udp_locator(server_ip, recv_port, send_port));
 }
 
 ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)

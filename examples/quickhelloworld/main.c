@@ -58,7 +58,7 @@ void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
 int main(int args, char** argv)
 {
     // Creates a client state.
-    ClientState* state = new_udp_client_state(4096, 2019, 2020);
+    ClientState* state = new_udp_client_state(4096, "127.0.0.1", 2019, 2020);
 
     // Creates this client on the Agent.
     create_client(state, on_status, NULL);

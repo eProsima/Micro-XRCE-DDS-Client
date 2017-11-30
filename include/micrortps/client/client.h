@@ -50,7 +50,7 @@ typedef void (*OnStatusReceived)(XRCEInfo info, uint8_t operation, uint8_t statu
 //    State funcions
 // ----------------------------------------------------------------------------------------------
 ClientState* new_serial_client_state(uint32_t buffer_size, const char* device);
-ClientState* new_udp_client_state(uint32_t buffer_size, uint16_t recv_port, uint16_t send_port);
+ClientState* new_udp_client_state(uint32_t buffer_size, const char* server_ip, uint16_t recv_port, uint16_t send_port);
 void free_client_state(ClientState* state);
 
 // ----------------------------------------------------------------------------------------------

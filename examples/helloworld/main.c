@@ -72,17 +72,17 @@ int main(int args, char** argv)
             state = new_serial_client_state(BUFFER_SIZE, argv[2]);
             printf("<< Serial mode => dev: %s >>\n", argv[2]);
         }
-        else if(strcmp(argv[1], "udp") == 0 && args == 4)
+        else if(strcmp(argv[1], "udp") == 0 && args == 5)
         {
-            uint16_t received_port = atoi(argv[2]);
-            uint16_t send_port = atoi(argv[3]);
-            state = new_udp_client_state(BUFFER_SIZE, received_port, send_port);
+            uint16_t received_port = atoi(argv[3]);
+            uint16_t send_port = atoi(argv[4]);
+            state = new_udp_client_state(BUFFER_SIZE, argv[2], received_port, send_port);
             printf("<< UDP mode => recv port: %u, send port: %u >>\n", received_port, send_port);
         }
     }
     if(!state)
     {
-        printf("Help: program [serial | udp recv_port send_port]\n");
+        printf("Help: program [serial | udp dest_ip recv_port send_port]\n");
         return 1;
     }
 
