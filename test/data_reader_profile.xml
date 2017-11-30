@@ -1,7 +1,7 @@
 <profiles>
   <subscriber profile_name="default_xrce_subscriber_profile">
     <topic>
-      <kind>NO_KEY</kind>
+      <kind>WITH_KEY</kind>
       <name>Square</name>
       <dataType>ShapeType</dataType>
       <historyQos>
