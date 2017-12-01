@@ -51,6 +51,7 @@ String read_file(char* file_name)
 // User type declaration
 typedef struct HelloWorld
 {
+    uint32_t index;
     uint32_t message_length;
     char* message;
 } HelloTopic;
@@ -59,6 +60,8 @@ typedef struct HelloWorld
 bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
     HelloTopic* topic = (HelloTopic*) topic_structure->topic;
+    serialize_uint32_t(writer, topic->index);
+    serialize_uint32_t(writer, topic->message_length);
     serialize_array_char(writer, topic->message, topic->message_length);
     return true;
 }
@@ -96,7 +99,7 @@ int main(int args, char** argv)
     // Prepare and write the user data to be sent.
     char message[] = "Hello DDS world!";
     uint32_t length = strlen(message) + 1;
-    HelloTopic hello_topic = {length, message};
+    HelloTopic hello_topic = {1, length, message};
     // Write user type data.
     write_data(state, data_writer_info.object_id, serialize_hello_topic, &hello_topic);
 
