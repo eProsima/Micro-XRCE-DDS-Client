@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <micrortps/client/client.h>
-#include <microcdr/microcdr.h>
+#include "HelloWorld.h"
 
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <pthread.h>
-#include <unistd.h>
 
 #define BUFFER_SIZE 1024
 
@@ -45,25 +41,6 @@ String read_file(char* file_name)
     }
 
      return xml;
-}
-
-
-// User type declaration
-typedef struct HelloWorld
-{
-    uint32_t index;
-    uint32_t message_length;
-    char* message;
-} HelloTopic;
-
-// Serialization implementation provided by the user. Uses Eprosima MicroCDR.
-bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
-{
-    HelloTopic* topic = (HelloTopic*) topic_structure->topic;
-    serialize_uint32_t(writer, topic->index);
-    serialize_uint32_t(writer, topic->message_length);
-    serialize_array_char(writer, topic->message, topic->message_length);
-    return true;
 }
 
 // User callback for receiving status messages from the Agent.
@@ -98,10 +75,9 @@ int main(int args, char** argv)
 
     // Prepare and write the user data to be sent.
     char message[] = "Hello DDS world!";
-    uint32_t length = strlen(message) + 1;
-    HelloTopic hello_topic = {1, length, message};
+    HelloWorld hello_topic = {1, message};
     // Write user type data.
-    write_data(state, data_writer_info.object_id, serialize_hello_topic, &hello_topic);
+    write_data(state, data_writer_info.object_id, serialize_HelloWorld_topic, &hello_topic);
 
     // Send the data through the UDP transport.
     send_to_agent(state);

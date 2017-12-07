@@ -12,58 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <micrortps/client/client.h>
-#include <microcdr/microcdr.h>
+//#include <micrortps/client/client.h>
+//#include <microcdr/microcdr.h>
+//
+#include "Shape.h"
 
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+//#include <string.h>
+//#include <stdlib.h>
 #include <pthread.h>
-#include <unistd.h>
+//#include <unistd.h>
+
 
 #define BUFFER_SIZE 4096
 
 // ----------------------------------------------------
 //    User topic definition
 // ----------------------------------------------------
-typedef struct ShapeTopic
-{
-    uint32_t color_length;
-    char*    color;
-    uint32_t x;
-    uint32_t y;
-    uint32_t size;
-
-} ShapeTopic;
-
-bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
-{
-    ShapeTopic* topic = (ShapeTopic*) topic_structure->topic;
-
-    serialize_uint32_t(writer, topic->color_length);
-    serialize_array_char(writer, topic->color, topic->color_length);
-    serialize_uint32_t(writer, topic->x);
-    serialize_uint32_t(writer, topic->y);
-    serialize_uint32_t(writer, topic->size);
-
-    return true;
-}
-
-bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
-{
-    ShapeTopic* topic = malloc(sizeof(ShapeTopic));
-
-    deserialize_uint32_t(reader, &topic->color_length);
-    topic->color = malloc(sizeof(topic->color_length));
-    deserialize_array_char(reader, topic->color, topic->color_length);
-    deserialize_uint32_t(reader, &topic->x);
-    deserialize_uint32_t(reader, &topic->y);
-    deserialize_uint32_t(reader, &topic->size);
-
-    topic_structure->topic = topic;
-
-    return true;
-}
+//typedef struct ShapeTopic
+//{
+//    uint32_t color_length;
+//    char*    color;
+//    uint32_t x;
+//    uint32_t y;
+//    uint32_t size;
+//
+//} ShapeTopic;
+//
+//bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
+//{
+//    ShapeTopic* topic = (ShapeTopic*) topic_structure->topic;
+//
+//    serialize_uint32_t(writer, topic->color_length);
+//    serialize_array_char(writer, topic->color, topic->color_length);
+//    serialize_uint32_t(writer, topic->x);
+//    serialize_uint32_t(writer, topic->y);
+//    serialize_uint32_t(writer, topic->size);
+//
+//    return true;
+//}
+//
+//bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
+//{
+//    ShapeTopic* topic = malloc(sizeof(ShapeTopic));
+//
+//    deserialize_uint32_t(reader, &topic->color_length);
+//    topic->color = malloc(sizeof(topic->color_length));
+//    deserialize_array_char(reader, topic->color, topic->color_length);
+//    deserialize_uint32_t(reader, &topic->x);
+//    deserialize_uint32_t(reader, &topic->y);
+//    deserialize_uint32_t(reader, &topic->size);
+//
+//    topic_structure->topic = topic;
+//
+//    return true;
+//}
 
 
 // ----------------------------------------------------
@@ -72,7 +75,7 @@ bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure
 void on_shape_topic(XRCEInfo info, const void* topic, void* args);
 void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
 
-void printl_shape_topic(const ShapeTopic* shape_topic);
+void printl_shape_topic(const ShapeType* shape_topic);
 void* listen_agent(void* args);
 bool compute_command(const char* command, ClientState* state);
 void list_commands();
@@ -198,13 +201,13 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "write_data") == 0 && length == 2)
     {
-        ShapeTopic shape_topic = {strlen("GREEN") + 1, "GREEN", 100 , 100, 50};
-        write_data(state, id, serialize_shape_topic, &shape_topic);
+        ShapeType shape_topic = {"GREEN", 100 , 100, 50};
+        write_data(state, id, serialize_Shape_topic, &shape_topic);
         printl_shape_topic(&shape_topic);
     }
     else if(strcmp(name, "read_data") == 0 && length == 2)
     {
-        read_data(state, id, deserialize_shape_topic, on_shape_topic, NULL);
+        read_data(state, id, deserialize_Shape_topic, on_shape_topic, NULL);
     }
     else if(strcmp(name, "delete") == 0 && length == 2)
     {
@@ -231,10 +234,10 @@ bool compute_command(const char* command, ClientState* state)
 
 void on_shape_topic(XRCEInfo info, const void* vtopic, void* args)
 {
-    ShapeTopic* topic = (ShapeTopic*) vtopic;
+    ShapeType* topic = (ShapeType*) vtopic;
     printl_shape_topic(topic);
 
-    free(topic->color);
+    free(topic->m_color);
     free(topic);
 }
 
@@ -243,14 +246,14 @@ void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* 
     printf("User status callback\n");
 }
 
-void printl_shape_topic(const ShapeTopic* shape_topic)
+void printl_shape_topic(const ShapeType* shape_topic)
 {
     printf("        %s[%s | x: %u | y: %u | size: %u]%s\n",
             "\e[1;34m",
-            shape_topic->color,
-            shape_topic->x,
-            shape_topic->y,
-            shape_topic->size,
+            shape_topic->m_color,
+            shape_topic->m_x,
+            shape_topic->m_y,
+            shape_topic->m_shapesize,
             "\e[0m");
 }
 
