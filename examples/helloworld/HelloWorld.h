@@ -33,31 +33,36 @@
  */
 typedef struct HelloWorld
 {
-    uint32_t m_index;
-    char* m_message;
+    uint32_t index;
+    char* message;
 } HelloWorld;
 
 bool serialize_HelloWorld_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
     HelloWorld* topic = (HelloWorld*) topic_structure->topic;
-    serialize_uint32_t(writer, topic->m_index);
-    serialize_uint32_t(writer, strlen(topic->m_message) + 1);
-    serialize_array_char(writer, topic->m_message, strlen(topic->m_message) + 1);
+    serialize_uint32_t(writer, topic->index);
+    serialize_uint32_t(writer, strlen(topic->message) + 1);
+    serialize_array_char(writer, topic->message, strlen(topic->message) + 1);
 
     return true;
 }
 
-bool deserialize_HelloWorld_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
+HelloWorld *deserialize_HelloWorld_message(MicroBuffer *message)
 {
     HelloWorld* topic = malloc(sizeof(HelloWorld));
-    deserialize_uint32_t(reader, &topic->m_index);
-    uint32_t size = 0;
-    deserialize_uint32_t(reader, &size);
-    topic->m_message = malloc(size);
-    deserialize_array_char(reader, topic->m_message, size);
+    deserialize_uint32_t(message, &topic->index);
+    uint32_t size_message = 0;
+    deserialize_uint32_t(message, &size_message);
+    topic->message = malloc(size_message);
+    deserialize_array_char(message, topic->message, size_message);
 
-    topic_structure->topic = topic;
-    return true;
+    return topic;
+}
+
+void deallocate_HelloWorld_topic(HelloWorld *topic)
+{
+    free(topic->message);
+    free(topic);
 }
 
 #endif // _HelloWorld_H_

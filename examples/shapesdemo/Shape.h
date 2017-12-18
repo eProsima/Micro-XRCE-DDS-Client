@@ -33,37 +33,42 @@
  */
 typedef struct ShapeType
 {
-    char* m_color;
-    int32_t m_x;
-    int32_t m_y;
-    int32_t m_shapesize;
+    char* color;
+    int32_t x;
+    int32_t y;
+    int32_t shapesize;
 } ShapeType;
 
-bool serialize_Shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
+bool serialize_ShapeType_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
     ShapeType* topic = (ShapeType*) topic_structure->topic;
-    serialize_uint32_t(writer, strlen(topic->m_color) + 1);
-    serialize_array_char(writer, topic->m_color, strlen(topic->m_color) + 1);
-    serialize_int32_t(writer, topic->m_x);
-    serialize_int32_t(writer, topic->m_y);
-    serialize_int32_t(writer, topic->m_shapesize);
+    serialize_uint32_t(writer, strlen(topic->color) + 1);
+    serialize_array_char(writer, topic->color, strlen(topic->color) + 1);
+    serialize_int32_t(writer, topic->x);
+    serialize_int32_t(writer, topic->y);
+    serialize_int32_t(writer, topic->shapesize);
 
     return true;
 }
 
-bool deserialize_Shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
+ShapeType *deserialize_ShapeType_message(MicroBuffer *message)
 {
     ShapeType* topic = malloc(sizeof(ShapeType));
-    uint32_t size = 0;
-    deserialize_uint32_t(reader, &size);
-    topic->m_color = malloc(size);
-    deserialize_array_char(reader, topic->m_color, size);
-    deserialize_int32_t(reader, &topic->m_x);
-    deserialize_int32_t(reader, &topic->m_y);
-    deserialize_int32_t(reader, &topic->m_shapesize);
+    uint32_t size_color = 0;
+    deserialize_uint32_t(message, &size_color);
+    topic->color = malloc(size_color);
+    deserialize_array_char(message, topic->color, size_color);
+    deserialize_int32_t(message, &topic->x);
+    deserialize_int32_t(message, &topic->y);
+    deserialize_int32_t(message, &topic->shapesize);
 
-    topic_structure->topic = topic;
-    return true;
+    return topic;
+}
+
+void deallocate_ShapeType_topic(ShapeType *topic)
+{
+    free(topic->color);
+    free(topic);
 }
 
 #endif // _Shape_H_

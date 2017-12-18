@@ -22,7 +22,7 @@
 // ----------------------------------------------------
 //    App client
 // ----------------------------------------------------
-void on_hello_topic(XRCEInfo info, const void* topic, void* args);
+void on_hello_topic(XRCEInfo info, MicroBuffer *message, void* args);
 void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
 
 void printl_hello_topic(const HelloWorld* hello_topic);
@@ -158,7 +158,7 @@ bool compute_command(const char* command, ClientState* state)
     }
     else if(strcmp(name, "read_data") == 0 && length == 2)
     {
-        read_data(state, id, deserialize_HelloWorld_topic, on_hello_topic, NULL);
+        read_data(state, id, on_hello_topic, NULL);
     }
     else if(strcmp(name, "delete") == 0 && length == 2)
     {
@@ -183,13 +183,11 @@ bool compute_command(const char* command, ClientState* state)
     return true;
 }
 
-void on_hello_topic(XRCEInfo info, const void* vtopic, void* args)
+void on_hello_topic(XRCEInfo info, MicroBuffer* message, void* args)
 {
-    HelloWorld* topic = (HelloWorld*) vtopic;
+    HelloWorld* topic = deserialize_HelloWorld_message(message);
     printl_hello_topic(topic);
-
-    free(topic->m_message);
-    free(topic);
+    deallocate_HelloWorld_topic(topic);
 }
 
 void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
@@ -201,8 +199,8 @@ void printl_hello_topic(const HelloWorld* hello_topic)
 {
     printf("        %s[%s | index: %u]%s\n",
             "\e[1;34m",
-            hello_topic->m_message,
-            hello_topic->m_index,
+            hello_topic->message,
+            hello_topic->index,
             "\e[0m");
 }
 

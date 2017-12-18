@@ -1,6 +1,6 @@
 <dds>
 <topic>
-    <name>HelloWorldTopic</name>
+    <name>HelloWorldPubSubTopic</name>
     <dataType>HelloWorld</dataType>
 </topic>
 </dds>

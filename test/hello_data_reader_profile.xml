@@ -2,7 +2,7 @@
   <subscriber profile_name="default_xrce_subscriber_profile">
     <topic>
       <kind>NO_KEY</kind>
-      <name>HelloWorldTopic</name>
+      <name>HelloWorldPubSubTopic</name>
       <dataType>HelloWorld</dataType>
       <historyQos>
         <kind>KEEP_LAST</kind>
