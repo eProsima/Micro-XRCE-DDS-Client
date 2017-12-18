@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//#include <micrortps/client/client.h>
-//#include <microcdr/microcdr.h>
-//
 #include "Shape.h"
 
 #include <stdio.h>
-#include <pthread.h>
-
-#define BUFFER_SIZE 4096
+#include <unistd.h>
 
 // ----------------------------------------------------
 //    App client
@@ -36,7 +31,15 @@ void help();
 
 String read_file(char* file_name);
 
-bool stop_listening = false;
+int check_input()
+{
+    struct timeval tv = {0, 0};
+    fd_set fds = {{0, 0}};
+    FD_ZERO(&fds);
+    FD_SET(0, &fds); //STDIN 0
+    select(1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(0, &fds);
+}
 
 int main(int args, char** argv)
 {
@@ -47,14 +50,14 @@ int main(int args, char** argv)
     {
         if(strcmp(argv[1], "serial") == 0)
         {
-            state = new_serial_client_state(BUFFER_SIZE, argv[2]);
+            state = new_serial_client_state(MAX_MESSAGE_SIZE, argv[2]);
             printf("<< Serial mode => dev: %s >>\n", argv[2]);
         }
         else if(strcmp(argv[1], "udp") == 0 && args == 5)
         {
             uint16_t received_port = atoi(argv[3]);
             uint16_t send_port = atoi(argv[4]);
-            state = new_udp_client_state(BUFFER_SIZE, argv[2], received_port, send_port);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, argv[2], received_port, send_port);
             printf("<< UDP mode => recv port: %u, send port: %u >>\n", received_port, send_port);
         }
     }
@@ -64,52 +67,35 @@ int main(int args, char** argv)
         return 1;
     }
 
-
-    // Listening agent
-    pthread_t listening_thread;
-    if(pthread_create(&listening_thread, NULL, listen_agent, state))
-    {
-        printf("ERROR: Error creating thread\n");
-        return 2;
-    }
-
     // Waiting user commands
     printf(":>");
     char command_stdin_line[256];
-    while(fgets(command_stdin_line, 256, stdin))
+    bool running = true;
+    while (running)
     {
-        if(!compute_command(command_stdin_line, state))
+        if (!check_input())
         {
-            stop_listening = true;
-            break;
+            receive_from_agent(state);
         }
-        printf(":>");
+        else if (fgets(command_stdin_line, 256, stdin))
+        {
+            if (!compute_command(command_stdin_line, state))
+            {
+                running = false;
+                break;
+            }
+        }
+        usleep(1000); // usleep takes sleep time in us (1 millionth of a second)
     }
 
-    pthread_join(listening_thread, NULL);
-
-    free_client_state(state);
-
-    return 0;
-}
-
-void* listen_agent(void* args)
-{
-    while(!stop_listening)
-    {
-        receive_from_agent((ClientState*) args);
-    }
-
-    return NULL;
 }
 
 bool compute_command(const char* command, ClientState* state)
 {
     char name[128];
-    static unsigned int hello_world_id = 0;
     int id = 0;
     int extra = 0;
-    int length = sscanf(command, "%s %u %u", name, &id, &extra);
+    int length = sscanf(command, "%s %i %i", name, &id, &extra);
 
 
     if(strcmp(name, "create_client") == 0)
@@ -170,6 +156,10 @@ bool compute_command(const char* command, ClientState* state)
     {
         list_commands();
     }
+    else if(strcmp(name, "exit") == 0)
+    {
+        return false;
+    }
     else
     {
         help();
@@ -178,15 +168,14 @@ bool compute_command(const char* command, ClientState* state)
     // only send data if there is.
     send_to_agent(state);
 
-    // close client
-    if(strcmp(name, "exit") == 0)
-        return false;
 
     return true;
 }
 
 void on_shape_topic(XRCEInfo info, MicroBuffer *message, void* args)
 {
+    (void)info;
+    (void)args;
     ShapeType* topic = deserialize_ShapeType_message(message);
     printl_shape_topic(topic);
     deallocate_ShapeType_topic(topic);
@@ -194,18 +183,22 @@ void on_shape_topic(XRCEInfo info, MicroBuffer *message, void* args)
 
 void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
 {
+    (void)info;
+    (void)operation;
+    (void)status;
+    (void)args;
     printf("User status callback\n");
 }
 
 void printl_shape_topic(const ShapeType* shape_topic)
 {
     printf("        %s[%s | x: %u | y: %u | size: %u]%s\n",
-            "\e[1;34m",
+            "\x1B[1;34m",
             shape_topic->color,
             shape_topic->x,
             shape_topic->y,
             shape_topic->shapesize,
-            "\e[0m");
+            "\x1B[0m");
 }
 
 String read_file(char* file_name)
@@ -251,5 +244,6 @@ void list_commands()
     printf("    write_data <data writer id>:                         Write data using <data writer id> DataWriter\n");
     printf("    read_data <data reader id>:                          Read data using <data reader id> DataReader\n");
     printf("    delete <id>:                                         Removes object with <id> identifier\n");
+    printf("    exit:                                                Close program\n");
     printf("    h, help:                                             Shows this message\n");
 }

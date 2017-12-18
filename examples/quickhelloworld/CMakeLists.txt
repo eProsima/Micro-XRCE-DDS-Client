@@ -13,12 +13,15 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 2.8.12)
+if (${CMAKE_VERSION} VERSION_GREATER 3.0)
+    cmake_policy(SET CMP0048 OLD)
+endif()
 
 project(quick_hello_world_client)
 
 file(GLOB TEST_SOURCES main.c)
 add_executable(${PROJECT_NAME} ${TEST_SOURCES})
-target_link_libraries(${PROJECT_NAME} micrortps-client pthread)
+target_link_libraries(${PROJECT_NAME} micrortps-client)
 
 file(COPY ${PROJECT_SOURCE_DIR}/../../test/hello_topic.xml
      DESTINATION ${PROJECT_BINARY_DIR})

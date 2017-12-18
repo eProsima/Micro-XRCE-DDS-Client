@@ -15,9 +15,6 @@
 #include "HelloWorld.h"
 
 #include <stdio.h>
-#include <pthread.h>
-
-#define BUFFER_SIZE 1024
 
 String read_file(char* file_name)
 {
@@ -46,11 +43,17 @@ String read_file(char* file_name)
 // User callback for receiving status messages from the Agent.
 void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
 {
+    (void)info;
+    (void)operation;
+    (void)status;
+    (void)args;
     // Process status message.
-};
+}
 
 int main(int args, char** argv)
 {
+    (void)args;
+    (void)argv;
     // Creates a client state.
     ClientState* state = new_udp_client_state(4096, "127.0.0.1", 2019, 2020);
 

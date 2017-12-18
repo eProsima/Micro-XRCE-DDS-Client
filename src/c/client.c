@@ -42,8 +42,7 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     state->transport_id = transport_id;
 
     state->buffer_size = buffer_size;
-    state->input_buffer = malloc(buffer_size);
-    state->output_buffer = malloc(buffer_size);
+    state->buffer = malloc(buffer_size);
 
     state->output_sequence_number = 0;
     state->input_sequence_number = 0;
@@ -59,8 +58,8 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     input_callback.on_data_submessage = on_data_submessage;
     input_callback.on_data_payload = on_data_payload;
 
-    init_output_message(&state->output_message, output_callback, state->output_buffer, buffer_size);
-    init_input_message(&state->input_message, input_callback, state->input_buffer, buffer_size);
+    init_output_message(&state->output_message, output_callback, state->buffer, buffer_size);
+    init_input_message(&state->input_message, input_callback, state->buffer, buffer_size);
 
     state->next_request_id = 0;
     state->next_object_id = 0;
@@ -79,8 +78,7 @@ void free_client_state(ClientState* state)
 
     free_callback_data_storage(&state->callback_data_storage);
     free_input_message(&state->input_message);
-    free(state->output_buffer);
-    free(state->input_buffer);
+    free(state->buffer);
     free(state);
 }
 
@@ -427,10 +425,10 @@ bool send_to_agent(ClientState* state)
     uint32_t length = get_message_length(&state->output_message);
     if(length > 0)
     {
-        int output_length = send_data(state->output_buffer, length, state->transport_id);
+        int output_length = send_data(state->buffer, length, state->transport_id);
         if(output_length > 0)
         {
-            PRINTL_SERIALIZATION(SEND, state->output_buffer, output_length);
+            PRINTL_SERIALIZATION(SEND, state->buffer, output_length);
             reset_buffer(&state->output_message.writer);
 
             return true;
@@ -442,11 +440,11 @@ bool send_to_agent(ClientState* state)
 
 bool receive_from_agent(ClientState* state)
 {
-    int length = receive_data(state->input_buffer, state->buffer_size, state->transport_id);
+    int length = receive_data(state->buffer, state->buffer_size, state->transport_id);
     if(length > 0)
     {
         parse_message(&state->input_message, length);
-        PRINTL_SERIALIZATION(RECV, state->input_buffer, length);
+        PRINTL_SERIALIZATION(RECV, state->buffer, length);
 
         return true;
     }
