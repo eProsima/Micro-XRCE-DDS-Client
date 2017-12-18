@@ -56,6 +56,7 @@ bool deserialize_HelloWorld_topic(MicroBuffer* reader, AbstractTopic* topic_stru
     topic->m_message = malloc(size);
     deserialize_array_char(reader, topic->m_message, size);
 
+    topic_structure->topic = topic;
     return true;
 }
 
