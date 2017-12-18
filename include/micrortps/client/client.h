@@ -20,6 +20,8 @@ extern "C"
 {
 #endif
 
+#include "config.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 

@@ -16,6 +16,10 @@
 # CMake build rules for micro RTPS client
 ###############################################################################
 cmake_minimum_required(VERSION 2.8.12)
+if (${CMAKE_VERSION} VERSION_GREATER 3.0)
+	cmake_policy(SET CMP0048 OLD)
+endif()
+
 # Set CMAKE_BUILD_TYPE to Release by default.
 if(DEFINED CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING
@@ -27,11 +31,25 @@ else()
         )
 endif()
 
-project(micrortps-client)
+project(micrortps-client C)
+
+###############################################################################
+# Version information                                                         #
+###############################################################################
+set(PROJECT_MAJOR_VERSION 0)
+set(PROJECT_MINOR_VERSION 3)
+set(PROJECT_MICRO_VERSION 0)
+set(PROJECT_VERSION ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_MICRO_VERSION})
+message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
 ###############################################################################
 # eProsima build options
 ###############################################################################
+
+# Project specific options
+set(MAX_MESSAGE_SIZE 512 CACHE STRING "Define maximum message size to be used for messages")
+
+option(EPROSIMA_VERBOSE "Compile examples" OFF)
 option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(EPROSIMA_BUILD "Activate internal building" OFF)
@@ -77,34 +95,40 @@ endif()
 # Load external eProsima projects.
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/dev/eprosima_libraries.cmake)
-find_eprosima_package(micrortps_transport)
-find_eprosima_package(micro-CDR)
+find_eprosima_package(micrortps_transport NAME transport)
+find_eprosima_package(micro-CDR NAME microcdr)
 
 file(GLOB CLIENT_LIB_SOURCES
     src/c/*.c
     src/c/log/*.c
 )
 
+###############################################################################
+# Warning level
+###############################################################################
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra --std=c++11")
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSERIALIZATION_LOGS")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMESSAGE_LOGS")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSERIALIZATION_LOGS")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMESSAGE_LOGS")
 
-if(NOT TARGET transport)
-     add_subdirectory(thirdparty/micrortps_transport)
-endif()
-add_subdirectory(thirdparty/micro-CDR)
-
-include_directories(${PROJECT_SOURCE_DIR}/thirdparty/micro-CDR/include)
-include_directories(${PROJECT_SOURCE_DIR}/include/micrortps/client)
-include_directories(${PROJECT_SOURCE_DIR}/src/c/logs)
-include_directories(${PROJECT_SOURCE_DIR}/src/c)
+include_directories(${PROJECT_SOURCE_DIR}/include/micrortps/client
+                    ${PROJECT_SOURCE_DIR}/src/c/logs
+                    ${PROJECT_SOURCE_DIR}/src/c)
 add_library(${PROJECT_NAME} ${CLIENT_LIB_SOURCES})
 target_link_libraries(${PROJECT_NAME} microcdr transport)
 target_include_directories(
     ${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
+
+###############################################################################
+# Config
+###############################################################################
+configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/config.h.in
+${PROJECT_BINARY_DIR}/include/micrortps/config.h)
 
 ###############################################################################
 # Testing
@@ -123,6 +147,9 @@ endif()
 # Examples
 ###############################################################################
 if(EPROSIMA_BUILD_EXAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/thirdparty/micro-CDR/include
+                        ${PROJECT_BINARY_DIR}/include/micrortps/
+    )
     add_subdirectory(examples/helloworld)
     add_subdirectory(examples/quickhelloworld)
     add_subdirectory(examples/message)
@@ -143,10 +170,7 @@ PATTERN "examples/*/CMakeLists.txt" EXCLUDE
 
 
 # Install public headers
-set_public_headers_directory(${PROJECT_SOURCE_DIR}/include micrortps
-DESTINATION ${INCLUDE_INSTALL_DIR}
-COMPONENT headers
-)
+
 
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${BIN_INSTALL_DIR}

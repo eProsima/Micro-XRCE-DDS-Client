@@ -15,109 +15,97 @@
 #include "HelloWorld.h"
 
 #include <stdio.h>
-#include <pthread.h>
-
-#define BUFFER_SIZE 1024
+#include <unistd.h>
 
 // ----------------------------------------------------
 //    App client
 // ----------------------------------------------------
-void on_hello_topic(XRCEInfo info, const void* topic, void* args);
-void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
+void on_hello_topic(XRCEInfo info, const void *topic, void *args);
+void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void *args);
 
-void printl_hello_topic(const HelloWorld* hello_topic);
-void* listen_agent(void* args);
-bool compute_command(const char* command, ClientState* state);
+void printl_hello_topic(const HelloWorld *hello_topic);
+void *listen_agent(void *args);
+bool compute_command(const char *command, ClientState *state);
 void list_commands();
 void help();
 
-String read_file(char* file_name);
+String read_file(char *file_name);
 
-bool stop_listening = false;
+int check_input()
+{
+    struct timeval tv;
+    fd_set fds = {{0, 0}};
+    FD_ZERO(&fds);
+    FD_SET(0, &fds); //STDIN 0
+    select(1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(0, &fds);
+}
 
-int main(int args, char** argv)
+int main(int args, char **argv)
 {
     printf("<< HELLO WORLD XRCE CLIENT >>\n");
 
-    ClientState* state = NULL;
-    if(args > 2)
+    ClientState *state = NULL;
+    if (args > 3)
     {
-        if(strcmp(argv[1], "serial") == 0)
+        if (strcmp(argv[1], "serial") == 0)
         {
-            state = new_serial_client_state(BUFFER_SIZE, argv[2]);
+            state = new_serial_client_state(MAX_MESSAGE_SIZE, argv[2]);
             printf("<< Serial mode => dev: %s >>\n", argv[2]);
         }
-        else if(strcmp(argv[1], "udp") == 0 && args == 5)
+        else if (strcmp(argv[1], "udp") == 0 && args == 5)
         {
             uint16_t received_port = atoi(argv[3]);
             uint16_t send_port = atoi(argv[4]);
-            state = new_udp_client_state(BUFFER_SIZE, argv[2], received_port, send_port);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, argv[2], received_port, send_port);
             printf("<< UDP mode => recv port: %u, send port: %u >>\n", received_port, send_port);
         }
     }
-    if(!state)
+    if (!state)
     {
         printf("Help: program [serial | udp dest_ip recv_port send_port]\n");
         return 1;
     }
 
-
-    // Listening agent
-    pthread_t listening_thread;
-    if(pthread_create(&listening_thread, NULL, listen_agent, state))
-    {
-        printf("ERROR: Error creating thread\n");
-        return 2;
-    }
-
     // Waiting user commands
     printf(":>");
     char command_stdin_line[256];
-    while(fgets(command_stdin_line, 256, stdin))
+    bool running = true;
+    while (running)
     {
-        if(!compute_command(command_stdin_line, state))
+        if (!check_input())
         {
-            stop_listening = true;
-            break;
+            receive_from_agent(state);
         }
-        printf(":>");
+        else if (fgets(command_stdin_line, 256, stdin))
+        {
+            if (!compute_command(command_stdin_line, state))
+            {
+                running = false;
+                break;
+            }
+        }
+        usleep(1000); // usleep takes sleep time in us (1 millionth of a second)
     }
-
-    pthread_join(listening_thread, NULL);
-
-    free_client_state(state);
-
-    return 0;
 }
 
-void* listen_agent(void* args)
-{
-    while(!stop_listening)
-    {
-        receive_from_agent((ClientState*) args);
-    }
-
-    return NULL;
-}
-
-bool compute_command(const char* command, ClientState* state)
+bool compute_command(const char *command, ClientState *state)
 {
     char name[128];
     static unsigned int hello_world_id = 0;
     int id = 0;
     int extra = 0;
-    int length = sscanf(command, "%s %u %u", name, &id, &extra);
+    int length = sscanf(command, "%s %i %i", name, &id, &extra);
 
-
-    if(strcmp(name, "create_client") == 0)
+    if (strcmp(name, "create_client") == 0)
     {
         create_client(state, on_status_received, NULL);
     }
-    else if(strcmp(name, "create_participant") == 0)
+    else if (strcmp(name, "create_participant") == 0)
     {
         create_participant(state);
     }
-    else if(strcmp(name, "create_topic") == 0 && length == 2)
+    else if (strcmp(name, "create_topic") == 0 && length == 2)
     {
         String xml = read_file("hello_topic.xml");
         if (xml.length > 0)
@@ -125,15 +113,15 @@ bool compute_command(const char* command, ClientState* state)
             create_topic(state, id, xml);
         }
     }
-    else if(strcmp(name, "create_publisher") == 0 && length == 2)
+    else if (strcmp(name, "create_publisher") == 0 && length == 2)
     {
         create_publisher(state, id);
     }
-    else if(strcmp(name, "create_subscriber") == 0 && length == 2)
+    else if (strcmp(name, "create_subscriber") == 0 && length == 2)
     {
         create_subscriber(state, id);
     }
-    else if(strcmp(name, "create_data_writer") == 0 && length == 3)
+    else if (strcmp(name, "create_data_writer") == 0 && length == 3)
     {
         String xml = read_file("hello_data_writer_profile.xml");
         if (xml.length > 0)
@@ -141,7 +129,7 @@ bool compute_command(const char* command, ClientState* state)
             create_data_writer(state, id, extra, xml);
         }
     }
-    else if(strcmp(name, "create_data_reader") == 0 && length == 3)
+    else if (strcmp(name, "create_data_reader") == 0 && length == 3)
     {
         String xml = read_file("hello_data_reader_profile.xml");
         if (xml.length > 0)
@@ -149,24 +137,28 @@ bool compute_command(const char* command, ClientState* state)
             create_data_reader(state, id, extra, xml);
         }
     }
-    else if(strcmp(name, "write_data") == 0 && length == 2)
+    else if (strcmp(name, "write_data") == 0 && length == 2)
     {
         char message[] = "Hello from client";
         HelloWorld hello_topic = (HelloWorld){hello_world_id++, message};
         write_data(state, id, serialize_HelloWorld_topic, &hello_topic);
         printl_hello_topic(&hello_topic);
     }
-    else if(strcmp(name, "read_data") == 0 && length == 2)
+    else if (strcmp(name, "read_data") == 0 && length == 2)
     {
         read_data(state, id, deserialize_HelloWorld_topic, on_hello_topic, NULL);
     }
-    else if(strcmp(name, "delete") == 0 && length == 2)
+    else if (strcmp(name, "delete") == 0 && length == 2)
     {
         delete_resource(state, id);
     }
-    else if(strcmp(name, "h") == 0 || strcmp(name, "help") == 0)
+    else if (strcmp(name, "h") == 0 || strcmp(name, "help") == 0)
     {
         list_commands();
+    }
+    else if (strcmp(name, "exit") == 0)
+    {
+        return false;
     }
     else
     {
@@ -176,37 +168,39 @@ bool compute_command(const char* command, ClientState* state)
     // only send data if there is.
     send_to_agent(state);
 
-    // close client
-    if(strcmp(name, "exit") == 0)
-        return false;
-
     return true;
 }
 
-void on_hello_topic(XRCEInfo info, const void* vtopic, void* args)
+void on_hello_topic(XRCEInfo info, const void *vtopic, void *args)
 {
-    HelloWorld* topic = (HelloWorld*) vtopic;
+    (void)info;
+    (void)args;
+    HelloWorld *topic = (HelloWorld *)vtopic;
     printl_hello_topic(topic);
 
     free(topic->m_message);
     free(topic);
 }
 
-void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
+void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void *args)
 {
+    (void)info;
+    (void)operation;
+    (void)status;
+    (void)args;
     printf("User status callback\n");
 }
 
-void printl_hello_topic(const HelloWorld* hello_topic)
+void printl_hello_topic(const HelloWorld *hello_topic)
 {
     printf("        %s[%s | index: %u]%s\n",
-            "\e[1;34m",
-            hello_topic->m_message,
-            hello_topic->m_index,
-            "\e[0m");
+           "\x1B[1;34m",
+           hello_topic->m_message,
+           hello_topic->m_index,
+           "\x1B[0m");
 }
 
-String read_file(char* file_name)
+String read_file(char *file_name)
 {
     printf("READ FILE\n");
     const size_t MAXBUFLEN = 4096;
@@ -227,7 +221,7 @@ String read_file(char* file_name)
         printf("Error opening %s\n", file_name);
     }
 
-     return xml;
+    return xml;
 }
 
 void help()
@@ -249,5 +243,6 @@ void list_commands()
     printf("    write_data <data writer id>:                         Write data using <data writer id> DataWriter\n");
     printf("    read_data <data reader id>:                          Read data using <data reader id> DataReader\n");
     printf("    delete <id>:                                         Removes object with <id> identifier\n");
+    printf("    exit:                                                Close program\n");
     printf("    h, help:                                             Shows this message\n");
 }

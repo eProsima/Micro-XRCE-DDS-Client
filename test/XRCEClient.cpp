@@ -25,7 +25,6 @@
 
 #include <fstream>
 
-#define BUFFER_SIZE 4096
 #define MESSAGE_TRIES_WAIT 100
 
 typedef struct HelloWorld
@@ -62,7 +61,7 @@ class ClientTests : public ::testing::Test
     public:
         ClientTests()
         {
-            state = new_udp_client_state(BUFFER_SIZE, 2020, 2019);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, 2020, 2019);
 
             statusObjectId = 0x0000;
             statusRequestId = 0x0000;

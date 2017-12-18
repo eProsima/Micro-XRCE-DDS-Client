@@ -49,8 +49,7 @@ typedef struct ClientState
     locator_id_t transport_id;
 
     uint32_t buffer_size;
-    uint8_t* input_buffer;
-    uint8_t* output_buffer;
+    uint8_t* buffer;
 
     uint16_t output_sequence_number;
     uint16_t input_sequence_number;

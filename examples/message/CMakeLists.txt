@@ -13,6 +13,9 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 2.8.12)
+if (${CMAKE_VERSION} VERSION_GREATER 3.0)
+    cmake_policy(SET CMP0048 OLD)
+endif()
 
 project(message_example C)
 
