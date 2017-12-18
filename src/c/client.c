@@ -311,11 +311,9 @@ XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic 
     return (XRCEInfo){0x0000, 0xFFFF};
 }
 
-XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialize_topic,
-        OnTopicReceived on_topic, void* on_topic_args)
+XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args)
 {
-    int16_t callback_request_id = register_callback_data(&state->callback_data_storage,
-            FORMAT_DATA, deserialize_topic, on_topic, on_topic_args);
+    int16_t callback_request_id = register_callback_data(&state->callback_data_storage, FORMAT_DATA, on_message, callback_args);
 
     XRCEInfo info = {callback_request_id, data_reader_id};
 
@@ -414,9 +412,7 @@ void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void*
         init_external_buffer(&reader, data->data, data->size);
         reader.endianness = endianness;
 
-        AbstractTopic abstract_topic;
-        if(callback_data->deserialize_topic(&reader, &abstract_topic))
-            callback_data->on_topic(info, abstract_topic.topic, callback_data->on_topic_args);
+        callback_data->on_message(info, &reader, callback_data->callback_args);
 
         remove_callback_data(&state->callback_data_storage, info.request_id);
     }
@@ -476,8 +472,7 @@ void free_callback_data_storage(CallbackDataStorage* store)
     free(store->existence);
 }
 
-uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, DeserializeTopic deserialize_topic,
-        OnTopicReceived on_topic, void* on_topic_args)
+uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, OnMessageReceived on_message, void *callback_args)
 {
     uint16_t id = store->size;
     for(uint32_t i = 0; i < store->size; i++)
@@ -488,7 +483,7 @@ uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, Dese
     {
         uint32_t new_size = store->size * 2;
         store->existence = realloc(store->existence, sizeof(bool) *new_size);
-        store->callbacks = realloc(store->callbacks, sizeof(CallbackData) * new_size);
+        store->callbacks = realloc(store->callbacks, sizeof(CallbackData) *new_size);
 
         for(uint32_t i = store->size; i < new_size; i++)
             store->existence[i] = false;
@@ -497,7 +492,7 @@ uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, Dese
     }
 
     store->existence[id] = true;
-    store->callbacks[id] = (CallbackData){format, deserialize_topic, on_topic, on_topic_args};
+    store->callbacks[id] = (CallbackData){format, on_message, callback_args};
 
     return store->initial_id + id;
 }

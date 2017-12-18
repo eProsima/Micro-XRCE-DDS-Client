@@ -57,7 +57,7 @@ typedef struct XRCEInfo
 typedef bool (*SerializeTopic)(MicroBuffer* writer, const AbstractTopic* topic_structure);
 typedef bool (*DeserializeTopic)(MicroBuffer* reader, AbstractTopic* topic_structure);
 
-typedef void (*OnTopicReceived)(XRCEInfo info, const void* topic, void* args);
+typedef void (*OnMessageReceived)(XRCEInfo info, MicroBuffer *message, void *args);
 typedef void (*OnStatusReceived)(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
 
 // ----------------------------------------------------------------------------------------------
@@ -81,8 +81,7 @@ XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_
 XRCEInfo delete_resource(ClientState* state, uint16_t resource_id);
 
 XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialization, void* topic);
-XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, DeserializeTopic deserialization,
-        OnTopicReceived on_topic, void* on_topic_args);
+XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args);
 
 // ----------------------------------------------------------------------------------------------
 //    Comunication functions

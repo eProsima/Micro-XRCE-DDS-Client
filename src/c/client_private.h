@@ -29,9 +29,8 @@ extern "C"
 typedef struct CallbackData
 {
     DataFormat format;
-    DeserializeTopic deserialize_topic;
-    OnTopicReceived on_topic;
-    void* on_topic_args;
+    OnMessageReceived on_message;
+    void *callback_args;
 
 } CallbackData;
 
@@ -79,8 +78,7 @@ typedef struct ClientState
 void init_callback_data_storage(CallbackDataStorage* store, int16_t initial_id);
 void free_callback_data_storage(CallbackDataStorage* store);
 
-uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, DeserializeTopic deserialize_topic,
-        OnTopicReceived on_topic, void* on_topic_args);
+uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, OnMessageReceived on_message, void *callback_args);
 void remove_callback_data(CallbackDataStorage* store, uint16_t id);
 CallbackData* get_callback_data(const CallbackDataStorage* store, uint16_t id);
 
