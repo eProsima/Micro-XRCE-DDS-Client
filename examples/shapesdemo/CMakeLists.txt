@@ -32,11 +32,11 @@ file(COPY ${PROJECT_SOURCE_DIR}/../../test/data_writer_profile.xml
 DESTINATION ${PROJECT_BINARY_DIR})
 
 install(TARGETS ${PROJECT_NAME}
-RUNTIME DESTINATION examples/shapesdemo/${BIN_INSTALL_DIR}
+RUNTIME DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
 )
 
 install(FILES ${PROJECT_SOURCE_DIR}/../../test/shape_topic.xml
-${PROJECT_SOURCE_DIR}/../../test/data_reader_profile.xml
-${PROJECT_SOURCE_DIR}/../../test/data_writer_profile.xml
-DESTINATION examples/shapesdemo/${BIN_INSTALL_DIR}
+                ${PROJECT_SOURCE_DIR}/../../test/data_reader_profile.xml
+                ${PROJECT_SOURCE_DIR}/../../test/data_writer_profile.xml
+        DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
 )

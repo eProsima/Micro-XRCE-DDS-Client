@@ -31,7 +31,17 @@ else()
         )
 endif()
 
+###############################################################################
+# Product information                                                         #
+###############################################################################
 project(micrortps-client C)
+
+# Set product name
+if(DEFINED PRODUCT_NAME)
+    set(PRODUCT_NAME ${PRODUCT_NAME} CACHE STRING "Choose the product name in which this project is included")
+else()
+    set(PRODUCT_NAME micrortps CACHE STRING "Choose the product name in which this project is included")
+endif()
 
 ###############################################################################
 # Version information                                                         #
@@ -45,11 +55,10 @@ message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 ###############################################################################
 # eProsima build options
 ###############################################################################
-
 # Project specific options
 set(MAX_MESSAGE_SIZE 512 CACHE STRING "Define maximum message size to be used for messages")
 
-option(EPROSIMA_VERBOSE "Compile examples" OFF)
+#option(EPROSIMA_VERBOSE "Compile examples" OFF)
 option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(EPROSIMA_BUILD "Activate internal building" OFF)
@@ -114,22 +123,21 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMESSAGE_LOGS")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSERIALIZATION_LOGS")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMESSAGE_LOGS")
 
-include_directories(${PROJECT_SOURCE_DIR}/include/micrortps/client
-                    ${PROJECT_SOURCE_DIR}/src/c/logs
-                    ${PROJECT_SOURCE_DIR}/src/c)
+###############################################################################
+# Config
+###############################################################################
+configure_file(${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/config.h.in
+               ${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/config.h)
+
 add_library(${PROJECT_NAME} ${CLIENT_LIB_SOURCES})
 target_link_libraries(${PROJECT_NAME} microcdr transport)
 target_include_directories(
     ${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/client>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
+    $<INSTALL_INTERFACE:include>
 )
-
-###############################################################################
-# Config
-###############################################################################
-configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/config.h.in
-${PROJECT_BINARY_DIR}/include/micrortps/config.h)
-
 ###############################################################################
 # Testing
 ###############################################################################
@@ -147,34 +155,48 @@ endif()
 # Examples
 ###############################################################################
 if(EPROSIMA_BUILD_EXAMPLES)
-    include_directories(${PROJECT_SOURCE_DIR}/thirdparty/micro-CDR/include
-                        ${PROJECT_BINARY_DIR}/include/micrortps/
-    )
     add_subdirectory(examples/helloworld)
     add_subdirectory(examples/quickhelloworld)
     add_subdirectory(examples/message)
     add_subdirectory(examples/shapesdemo)
 endif()
 
-
 ###############################################################################
 # Packaging
 ###############################################################################
+# Install public headers
+include(${PROJECT_SOURCE_DIR}/cmake/dev/set_sources.cmake)
+set_public_headers_directory(${PROJECT_SOURCE_DIR}/include ${PRODUCT_NAME}
+    DESTINATION ${INCLUDE_INSTALL_DIR}
+    COMPONENT headers
+    )
+
+# Install config.h header
+set_public_header(${PROJECT_BINARY_DIR}/include ${PRODUCT_NAME} config.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/${PRODUCT_NAME}/client
+    COMPONENT headers
+    )
 
 # Install examples
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples/
-DESTINATION examples
+DESTINATION examples/${PRODUCT_NAME}/client
 COMPONENT examples
 PATTERN "examples/*/CMakeLists.txt" EXCLUDE
 )
 
-
-# Install public headers
-
-
 install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
-    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
-    COMPONENT libraries
-    )
+        EXPORT ${PROJECT_NAME}Targets
+        RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+        LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+        COMPONENT libraries
+)
+
+export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Targets.cmake)
+
+install(EXPORT ${PROJECT_NAME}Targets
+DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/cmake
+COMPONENT cmake
+)
+
+include(${PROJECT_SOURCE_DIR}/cmake/packaging/eProsimaPackaging.cmake)

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <micrortps/client/input_message.h>
+#include <micrortps/client/client.h>
 #include <micrortps/client/output_message.h>
 #include <microcdr/microcdr.h>
 

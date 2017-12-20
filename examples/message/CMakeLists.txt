@@ -25,5 +25,5 @@ add_executable(${PROJECT_NAME} ${TEST_SOURCES})
 target_link_libraries(${PROJECT_NAME} micrortps-client)
 
 install(TARGETS ${PROJECT_NAME}
-RUNTIME DESTINATION examples/message/${BIN_INSTALL_DIR}
+RUNTIME DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
 )
