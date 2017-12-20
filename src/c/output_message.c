@@ -28,10 +28,16 @@ bool begin_message(OutputMessage *message);
 bool begin_submessage(OutputMessage *message, MicroState *submessage_beginning,
                       MicroState *header_beginning, MicroState *payload_beginning);
 
-bool end_submessage(OutputMessage *message, MicroState submessage_beginning,
+bool end_submessage(OutputMessage *message,
                     MicroState header_beginning, MicroState payload_beginning,
                     SubmessageId id, uint8_t flags);
 
+bool try_add_create_client_submessage(OutputMessage *message, const CreateClientPayload *payload);
+bool try_add_create_resource_submessage(OutputMessage *message, const CreateResourcePayload *payload, CreationMode creation_mode);
+bool try_add_delete_resource_submessage(OutputMessage *message, const DeleteResourcePayload *payload);
+bool try_add_get_info_submessage(OutputMessage *message, const GetInfoPayload *payload);
+bool try_add_read_data_submessage(OutputMessage *message, const ReadDataPayload *payload);
+bool try_add_write_data_submessage(OutputMessage *message, const WriteDataPayload *payload);
 
 // ----------------------------------------------------------------------------------
 //                                 PUBLIC API
@@ -51,62 +57,160 @@ uint32_t get_message_length(OutputMessage *message)
 
 bool add_create_client_submessage(OutputMessage *message, const CreateClientPayload *payload)
 {
+    bool added = try_add_create_client_submessage(message, payload);
+    if (!added)
+    {
+        message->callback.on_out_of_bounds(message->callback.args);
+        added = try_add_create_client_submessage(message, payload);
+    }
+    return added;
+}
+
+bool try_add_create_client_submessage(OutputMessage *message, const CreateClientPayload *payload)
+{
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
-    return begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-           serialize_CreateClientPayload(&message->writer, payload) &&
-           end_submessage(message, submessage_beginning, header_beginning, payload_beginning,
-                          SUBMESSAGE_ID_CREATE_CLIENT, message->writer.endianness);
+    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
+               serialize_CreateClientPayload(&message->writer, payload) &&
+               end_submessage(message, header_beginning, payload_beginning,
+                              SUBMESSAGE_ID_CREATE_CLIENT, message->writer.endianness);
+    if (!ret)
+    {
+        restore_micro_state(&message->writer, submessage_beginning);
+    }
+    return ret;
 }
 
 bool add_create_resource_submessage(OutputMessage *message, const CreateResourcePayload *payload, CreationMode creation_mode)
 {
+    bool added = try_add_create_resource_submessage(message, payload, creation_mode);
+    if (!added)
+    {
+        message->callback.on_out_of_bounds(message->callback.args);
+        added = try_add_create_resource_submessage(message, payload, creation_mode);
+    }
+    return added;
+}
+
+bool try_add_create_resource_submessage(OutputMessage *message, const CreateResourcePayload *payload, CreationMode creation_mode)
+{
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
-    return begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-           serialize_CreateResourcePayload(&message->writer, payload) &&
-           end_submessage(message, submessage_beginning, header_beginning, payload_beginning,
-                          SUBMESSAGE_ID_CREATE, creation_mode | message->writer.endianness);
+    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
+               serialize_CreateResourcePayload(&message->writer, payload) &&
+               end_submessage(message, header_beginning, payload_beginning,
+                              SUBMESSAGE_ID_CREATE, creation_mode | message->writer.endianness);
+    if (!ret)
+    {
+        restore_micro_state(&message->writer, submessage_beginning);
+    }
+    return ret;
 }
 
 bool add_delete_resource_submessage(OutputMessage *message, const DeleteResourcePayload *payload)
 {
+    bool added = try_add_delete_resource_submessage(message, payload);
+    if (!added)
+    {
+        message->callback.on_out_of_bounds(message->callback.args);
+        added = try_add_delete_resource_submessage(message, payload);
+    }
+    return added;
+}
+
+bool try_add_delete_resource_submessage(OutputMessage *message, const DeleteResourcePayload *payload)
+{
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
-    return begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-           serialize_DeleteResourcePayload(&message->writer, payload) &&
-           end_submessage(message, submessage_beginning, header_beginning, payload_beginning,
-                          SUBMESSAGE_ID_DELETE, message->writer.endianness);
+    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
+               serialize_DeleteResourcePayload(&message->writer, payload) &&
+               end_submessage(message, header_beginning, payload_beginning,
+                              SUBMESSAGE_ID_DELETE, message->writer.endianness);
+    if (!ret)
+    {
+        restore_micro_state(&message->writer, submessage_beginning);
+    }
+    return ret;
 }
 
 bool add_get_info_submessage(OutputMessage *message, const GetInfoPayload *payload)
 {
+    bool added = try_add_get_info_submessage(message, payload);
+    if (!added)
+    {
+        message->callback.on_out_of_bounds(message->callback.args);
+        added = try_add_get_info_submessage(message, payload);
+    }
+    return added;
+}
+
+bool try_add_get_info_submessage(OutputMessage *message, const GetInfoPayload *payload)
+{
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
-    return begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-           serialize_GetInfoPayload(&message->writer, payload) &&
-           end_submessage(message, submessage_beginning, header_beginning, payload_beginning,
-                          SUBMESSAGE_ID_GET_INFO, message->writer.endianness);
+    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
+               serialize_GetInfoPayload(&message->writer, payload) &&
+               end_submessage(message, header_beginning, payload_beginning,
+                              SUBMESSAGE_ID_GET_INFO, message->writer.endianness);
+
+    if (!ret)
+    {
+        restore_micro_state(&message->writer, submessage_beginning);
+    }
+    return ret;
 }
 
 bool add_read_data_submessage(OutputMessage *message, const ReadDataPayload *payload)
 {
+    bool added = try_add_read_data_submessage(message, payload);
+    if (!added)
+    {
+        message->callback.on_out_of_bounds(message->callback.args);
+        added = try_add_read_data_submessage(message, payload);
+    }
+    return added;
+}
+
+bool try_add_read_data_submessage(OutputMessage *message, const ReadDataPayload *payload)
+{
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
-    return begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-           serialize_ReadDataPayload(&message->writer, payload) && end_submessage(message, submessage_beginning, header_beginning, payload_beginning, SUBMESSAGE_ID_READ_DATA, message->writer.endianness);
+    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
+               serialize_ReadDataPayload(&message->writer, payload) &&
+               end_submessage(message, header_beginning, payload_beginning, SUBMESSAGE_ID_READ_DATA, message->writer.endianness);
+
+    if (!ret)
+    {
+        restore_micro_state(&message->writer, submessage_beginning);
+    }
+    return ret;
 }
 
 bool add_write_data_submessage(OutputMessage *message, const WriteDataPayload *payload)
 {
-    MicroState submessage_beginning, header_beginning, payload_beginning;
-
-    return begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-           serialize_WriteDataPayload(&message->writer, payload) &&
-           end_submessage(message, submessage_beginning, header_beginning, payload_beginning,
-                          SUBMESSAGE_ID_WRITE_DATA, message->writer.endianness);
+    bool added = try_add_write_data_submessage(message, payload);
+    if (!added)
+    {
+        message->callback.on_out_of_bounds(message->callback.args);
+        added = try_add_write_data_submessage(message, payload);
+    }
+    return added;
 }
 
+bool try_add_write_data_submessage(OutputMessage *message, const WriteDataPayload *payload)
+{
+    MicroState submessage_beginning, header_beginning, payload_beginning;
+
+    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
+               serialize_WriteDataPayload(&message->writer, payload) &&
+               end_submessage(message, header_beginning, payload_beginning,
+                              SUBMESSAGE_ID_WRITE_DATA, message->writer.endianness);
+    if (!ret)
+    {
+        restore_micro_state(&message->writer, submessage_beginning);
+    }
+    return ret;
+}
 // ----------------------------------------------------------------------------------
 //                                  PRIVATE UTILS
 // ----------------------------------------------------------------------------------
@@ -139,7 +243,7 @@ bool begin_submessage(OutputMessage *message, MicroState *submessage_beginning,
     return ret;
 }
 
-bool end_submessage(OutputMessage *message, MicroState submessage_beginning,
+bool end_submessage(OutputMessage *message,
                     MicroState header_beginning, MicroState payload_beginning,
                     SubmessageId id, uint8_t flags)
 {

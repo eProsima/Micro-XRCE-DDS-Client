@@ -50,6 +50,7 @@ ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
     OutputMessageCallback output_callback = {0};
     output_callback.args = state;
     output_callback.on_initialize_message = on_initialize_message;
+    output_callback.on_out_of_bounds = on_out_of_bounds;
 
     InputMessageCallback input_callback = {0};
     input_callback.args = state;
@@ -148,8 +149,10 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
     state->stream_id = STREAMID_NONE;
     state->key = payload.representation.client_key;
 
-    add_create_client_submessage(&state->output_message, &payload);
-    PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
+    if (add_create_client_submessage(&state->output_message, &payload))
+    {
+        PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -165,8 +168,10 @@ XRCEInfo create_participant(ClientState* state)
     payload.representation._.participant.base2.format = REPRESENTATION_BY_REFERENCE;
     payload.representation._.participant.base2._.object_name.size = 0;
 
-    add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    {
+        PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -184,8 +189,10 @@ XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml)
     payload.representation._.topic.base3._.xml.data = xml.data;
     payload.representation._.topic.participant_id = get_raw_object_id(participant_id);
 
-    add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    {
+        PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -202,8 +209,10 @@ XRCEInfo create_publisher(ClientState* state, uint16_t participant_id)
     payload.representation._.publisher.base3._.object_name.size = 0;
     payload.representation._.publisher.participant_id = get_raw_object_id(participant_id);
 
-    add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    {
+        PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -220,8 +229,10 @@ XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id)
     payload.representation._.subscriber.base3._.object_name.size = 0;
     payload.representation._.subscriber.participant_id = get_raw_object_id(participant_id);
 
-    add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    {
+        PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -240,8 +251,10 @@ XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_
     payload.representation._.data_writer.participant_id = get_raw_object_id(participant_id);
     payload.representation._.data_writer.publisher_id = get_raw_object_id(publisher_id);
 
-    add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    {
+        PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -260,8 +273,10 @@ XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_
     payload.representation._.data_reader.participant_id = get_raw_object_id(participant_id);
     payload.representation._.data_reader.subscriber_id = get_raw_object_id(subscriber_id);
 
-    add_create_resource_submessage(&state->output_message, &payload, 0);
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    {
+        PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -274,8 +289,10 @@ XRCEInfo delete_resource(ClientState* state, uint16_t resource_id)
     payload.request.base.request_id = get_raw_request_id(info.request_id);
     payload.request.object_id = get_raw_object_id(info.object_id);
 
-    add_delete_resource_submessage(&state->output_message, &payload);
-    PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
+    if (add_delete_resource_submessage(&state->output_message, &payload))
+    {
+        PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
     return info;
 }
@@ -300,9 +317,10 @@ XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic 
         payload.data_to_write._.data.size = writer.iterator - writer.init;
         payload.data_to_write._.data.data = writer.init;
 
-        add_write_data_submessage(&state->output_message, &payload);
-        PRINTL_WRITE_DATA_SUBMESSAGE(&payload);
-
+        if (add_write_data_submessage(&state->output_message, &payload))
+        {
+            PRINTL_WRITE_DATA_SUBMESSAGE(&payload);
+        }
         return info;
     }
 
@@ -321,9 +339,10 @@ XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, OnMessageReceive
     payload.read_specification.optional_content_filter_expression = false;
     payload.read_specification.optional_delivery_config = FORMAT_DATA;
 
-    add_read_data_submessage(&state->output_message, &payload);
-    PRINTL_READ_DATA_SUBMESSAGE(&payload);
-
+    if (add_read_data_submessage(&state->output_message, &payload))
+    {
+        PRINTL_READ_DATA_SUBMESSAGE(&payload);
+    }
     return info;
 }
 
@@ -341,6 +360,11 @@ void on_initialize_message(MessageHeader* header, ClientKey* key, void* vstate)
     *key = state->key;
 
     state->output_sequence_number++;
+}
+
+void on_out_of_bounds(void* vstate)
+{
+    send_to_agent((ClientState*) vstate);
 }
 
 bool on_message_header(const MessageHeader* header, const ClientKey* key, void* vstate)

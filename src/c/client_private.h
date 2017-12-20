@@ -99,6 +99,8 @@ XRCEInfo create_xrce_info(RequestId request_id, ObjectId object_id);
 // ----------------------------------------------------------------------------------------------
 void on_initialize_message(MessageHeader* header, ClientKey* key, void* args);
 
+void on_out_of_bounds(void* args);
+
 bool on_message_header(const MessageHeader* header, const ClientKey* key, void* args);
 
 void on_status_submessage(const StatusPayload* payload, void* args);

@@ -28,6 +28,7 @@ typedef struct OutputMessageCallback
 {
     void (*on_initialize_message)(MessageHeader* header, ClientKey* key, void* args);
     void (*on_submessage_header)(const SubmessageHeader* header, void* args);
+    void (*on_out_of_bounds)(void* args);
     void* args;
 
 } OutputMessageCallback;
