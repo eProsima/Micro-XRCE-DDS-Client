@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "output_message.h"
-#include "xrce_protocol_serialization.h"
+#include <micrortps/client/output_message.h>
+#include <micrortps/client/xrce_protocol_serialization.h>
 
 #ifndef NDEBUG
 #include <string.h>

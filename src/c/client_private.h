@@ -20,9 +20,9 @@ extern "C"
 {
 #endif
 
-#include "client.h"
-#include "input_message.h"
-#include "output_message.h"
+#include <micrortps/client/client.h>
+#include <micrortps/client/input_message.h>
+#include <micrortps/client/output_message.h>
 
 #include <transport/ddsxrce_transport.h>
 

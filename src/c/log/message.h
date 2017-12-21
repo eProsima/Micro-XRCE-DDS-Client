@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include "xrce_protocol_spec.h"
+#include <micrortps/client/xrce_protocol_spec.h>
 #include "../client_private.h"
 #include <stdint.h>
 

@@ -61,7 +61,7 @@ class ClientTests : public ::testing::Test
     public:
         ClientTests()
         {
-            state = new_udp_client_state(MAX_MESSAGE_SIZE, 2020, 2019);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, "127.0.0.1", 2020, 2019);
 
             statusObjectId = 0x0000;
             statusRequestId = 0x0000;
@@ -237,7 +237,7 @@ class ClientTests : public ::testing::Test
 
         void readHelloData(uint16_t data_reader_id)
         {
-            XRCEInfo info = read_data(state, data_reader_id, deserialize_hello_topic, on_hello_topic, this);
+            XRCEInfo info; // TODO = read_data(state, data_reader_id, deserialize_hello_topic, on_hello_topic, this);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
@@ -261,7 +261,7 @@ class ClientTests : public ::testing::Test
 
         void readShapeData(uint16_t data_reader_id)
         {
-            XRCEInfo info = read_data(state, data_reader_id, deserialize_shape_topic, on_shape_topic, this);
+            XRCEInfo info; // TODO = read_data(state, data_reader_id, deserialize_shape_topic, on_shape_topic, this);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
