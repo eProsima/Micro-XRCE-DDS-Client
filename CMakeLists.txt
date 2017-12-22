@@ -104,8 +104,8 @@ endif()
 # Load external eProsima projects.
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/dev/eprosima_libraries.cmake)
-find_eprosima_package(micrortps_transport NAME transport)
-find_eprosima_package(micro-CDR NAME microcdr)
+add_subdirectory(thirdparty/micrortps_transport)
+add_subdirectory(thirdparty/micro-CDR)
 
 file(GLOB CLIENT_LIB_SOURCES
     src/c/*.c
