@@ -30,27 +30,28 @@
 typedef struct HelloWorld
 {
     uint32_t index;
-    uint32_t message_length;
     char* message;
 } HelloTopic;
 
 typedef struct ShapeTopic
 {
-    uint32_t color_length;
     char*    color;
     uint32_t x;
     uint32_t y;
-    uint32_t size;
+    uint32_t shapesize;
 } ShapeTopic;
 
 bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_structure);
-bool deserialize_hello_topic(MicroBuffer* reader, AbstractTopic* topic_serialization);
+HelloTopic* deserialize_hello_message(MicroBuffer *message);
+void deallocate_hello_topic(HelloTopic* topic);
+
 
 bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure);
-bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_serialization);
+ShapeTopic* deserialize_shape_message(MicroBuffer* message);
+void deallocate_shape_topic(ShapeTopic* topic);
 
-void on_shape_topic(XRCEInfo info, const void* topic, void* args);
-void on_hello_topic(XRCEInfo info, const void* topic, void* args);
+void on_shape_topic(XRCEInfo info, MicroBuffer *message, void* args);
+void on_hello_topic(XRCEInfo info, MicroBuffer *message, void* args);
 void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
 
 void printl_shape_topic(const ShapeTopic* shape_topic);
@@ -61,7 +62,7 @@ class ClientTests : public ::testing::Test
     public:
         ClientTests()
         {
-            state = new_udp_client_state(MAX_MESSAGE_SIZE, 2020, 2019);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, "127.0.0.1", 2020, 2019);
 
             statusObjectId = 0x0000;
             statusRequestId = 0x0000;
@@ -224,8 +225,7 @@ class ClientTests : public ::testing::Test
         void writeHelloData(uint16_t data_writer_id)
         {
             char message[] = "Hello data sample";
-            uint32_t length = strlen(message) + 1;
-            HelloTopic hello_topic = {10, length, message};
+            HelloTopic hello_topic = {10, message};
             XRCEInfo info = write_data(state, data_writer_id, serialize_hello_topic, &hello_topic);
             printl_hello_topic(&hello_topic);
             lastObject = info.object_id;
@@ -237,7 +237,7 @@ class ClientTests : public ::testing::Test
 
         void readHelloData(uint16_t data_reader_id)
         {
-            XRCEInfo info = read_data(state, data_reader_id, deserialize_hello_topic, on_hello_topic, this);
+            XRCEInfo info = read_data(state, data_reader_id, on_hello_topic, this);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
@@ -248,8 +248,7 @@ class ClientTests : public ::testing::Test
         void writeShapeData(uint16_t data_writer_id)
         {
             char topicColor[64] = "PURPLE";
-            uint32_t length = strlen(topicColor) + 1;
-            ShapeTopic shape_topic = {length, topicColor, 100, 100, 50};
+            ShapeTopic shape_topic = {topicColor, 100, 100, 50};
             XRCEInfo info = write_data(state, data_writer_id, serialize_shape_topic, &shape_topic);
             printl_shape_topic(&shape_topic);
             lastObject = info.object_id;
@@ -261,7 +260,7 @@ class ClientTests : public ::testing::Test
 
         void readShapeData(uint16_t data_reader_id)
         {
-            XRCEInfo info = read_data(state, data_reader_id, deserialize_shape_topic, on_shape_topic, this);
+            XRCEInfo info = read_data(state, data_reader_id, on_shape_topic, this);
             lastObject = info.object_id;
             lastRequest = info.request_id;
             send_to_agent(state);
@@ -296,76 +295,86 @@ bool serialize_hello_topic(MicroBuffer* writer, const AbstractTopic* topic_struc
 {
     HelloTopic* topic = (HelloTopic*) topic_structure->topic;
     serialize_uint32_t(writer, topic->index);
-    serialize_array_char(writer, topic->message, topic->message_length);
+    serialize_uint32_t(writer, strlen(topic->message) + 1);
+    serialize_array_char(writer, topic->message, strlen(topic->message) + 1);
+
     return true;
 }
 
-bool deserialize_hello_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
+HelloTopic* deserialize_hello_message(MicroBuffer* message)
 {
-    HelloTopic* topic = (HelloTopic*)malloc(sizeof(HelloTopic));
-    deserialize_uint32_t(reader, &topic->index);
-    deserialize_uint32_t(reader, &topic->message_length);
-    topic->message = (char*)malloc(sizeof(topic->message_length));
-    deserialize_array_char(reader, topic->message, topic->message_length);
+    HelloTopic* topic = (HelloTopic*) malloc(sizeof(HelloTopic));
+    deserialize_uint32_t(message, &topic->index);
+    uint32_t size_message = 0;
+    deserialize_uint32_t(message, &size_message);
+    topic->message = (char*) malloc(size_message);
+    deserialize_array_char(message, topic->message, size_message);
 
-    topic_structure->topic = topic;
+    return topic;
+}
 
-    return true;
+void deallocate_hello_topic(HelloTopic* topic)
+{
+    free(topic->message);
+    free(topic);
 }
 
 bool serialize_shape_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
 {
     ShapeTopic* topic = (ShapeTopic*) topic_structure->topic;
-
-    serialize_uint32_t(writer, topic->color_length);
-    serialize_array_char(writer, topic->color, topic->color_length);
+    serialize_uint32_t(writer, strlen(topic->color) + 1);
+    serialize_array_char(writer, topic->color, strlen(topic->color) + 1);
     serialize_uint32_t(writer, topic->x);
     serialize_uint32_t(writer, topic->y);
-    serialize_uint32_t(writer, topic->size);
+    serialize_uint32_t(writer, topic->shapesize);
 
     return true;
 }
 
-bool deserialize_shape_topic(MicroBuffer* reader, AbstractTopic* topic_structure)
+ShapeTopic* deserialize_shape_message(MicroBuffer* message)
 {
-    ShapeTopic* topic = (ShapeTopic*)malloc(sizeof(ShapeTopic));
+    ShapeTopic* topic = (ShapeTopic*) malloc(sizeof(ShapeTopic)); 
+    uint32_t size_color = 0;
+    deserialize_uint32_t(message, &size_color);
+    topic->color = (char*) malloc(size_color);
+    deserialize_array_char(message, topic->color, size_color);
+    deserialize_uint32_t(message, &topic->x);
+    deserialize_uint32_t(message, &topic->y);
+    deserialize_uint32_t(message, &topic->shapesize);
 
-    deserialize_uint32_t(reader, &topic->color_length);
-    topic->color = (char*)malloc(sizeof(topic->color_length));
-    deserialize_array_char(reader, topic->color, topic->color_length);
-    deserialize_uint32_t(reader, &topic->x);
-    deserialize_uint32_t(reader, &topic->y);
-    deserialize_uint32_t(reader, &topic->size);
-
-    topic_structure->topic = topic;
-
-    return true;
+    return topic;
 }
 
-void on_hello_topic(XRCEInfo info, const void* vtopic, void* args)
+void deallocate_shape_topic(ShapeTopic* topic)
 {
-    ClientTests* test = static_cast<ClientTests*>(args);
-
-    HelloTopic* topic = (HelloTopic*) vtopic;
-    printl_hello_topic(topic);
-
-    test->topicCount++;
-
-    free(topic->message);
+    free(topic->color);
     free(topic);
 }
 
-void on_shape_topic(XRCEInfo info, const void* vtopic, void* args)
+void on_hello_topic(XRCEInfo info, MicroBuffer *message, void* args)
 {
+    (void) info;
+    ClientTests* test = static_cast<ClientTests*>(args);
+    
+    HelloTopic* topic = deserialize_hello_message(message);
+    printl_hello_topic(topic);
+    
+    test->topicCount++;
+
+    deallocate_hello_topic(topic);
+}
+
+void on_shape_topic(XRCEInfo info, MicroBuffer* message, void* args)
+{
+    (void) info;
     ClientTests* test = static_cast<ClientTests*>(args);
 
-    ShapeTopic* topic = (ShapeTopic*) vtopic;
+    ShapeTopic* topic = deserialize_shape_message(message);
     printl_shape_topic(topic);
 
     test->topicCount++;
 
-    free(topic->color);
-    free(topic);
+    deallocate_shape_topic(topic);
 }
 
 void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
@@ -380,22 +389,22 @@ void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
 
 void printl_shape_topic(const ShapeTopic* shape_topic)
 {
-    printf("        %s[%s | x: %u | y: %u | size: %u]%s\n",
-            "\e[1;34m",
+    printf("        %s[%s | x: %u | y: %u | shapesize: %u]%s\n",
+            "\x1B[1;34m",
             shape_topic->color,
             shape_topic->x,
             shape_topic->y,
-            shape_topic->size,
-            "\e[0m");
+            shape_topic->shapesize,
+            "\x1B[0m");
 }
 
 void printl_hello_topic(const HelloTopic* hello_topic)
 {
     printf("        %s[%s | index: %u]%s\n",
-            "\e[1;34m",
+            "\x1B[1;34m",
             hello_topic->message,
             hello_topic->index,
-            "\e[0m");
+            "\x1B[0m");
 }
 
 TEST_F(ClientTests, CreateDeleteClient)
