@@ -55,7 +55,7 @@ int main(int args, char** argv)
     (void)args;
     (void)argv;
     // Creates a client state.
-    ClientState* state = new_udp_client_state(4096, "127.0.0.1", 2019, 2020);
+    ClientState* state = new_udp_client_state(4096, 4000, 2020, 2019, "127.0.0.1");
 
     // Creates this client on the Agent.
     create_client(state, on_status, NULL);

@@ -61,7 +61,7 @@ class ClientTests : public ::testing::Test
     public:
         ClientTests()
         {
-            state = new_udp_client_state(MAX_MESSAGE_SIZE, "127.0.0.1", 2020, 2019);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, 4000, 2020, 2019, "127.0.0.1");
 
             statusObjectId = 0x0000;
             statusRequestId = 0x0000;

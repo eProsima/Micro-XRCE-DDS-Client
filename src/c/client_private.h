@@ -24,7 +24,7 @@ extern "C"
 #include <micrortps/client/input_message.h>
 #include <micrortps/client/output_message.h>
 
-#include <transport/ddsxrce_transport.h>
+#include <transport/micrortps_transport.h>
 
 typedef struct CallbackData
 {
