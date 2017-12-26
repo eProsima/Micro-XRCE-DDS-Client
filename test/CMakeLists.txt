@@ -28,4 +28,18 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
     target_include_directories(ClientUnitTests PRIVATE ${GTEST_INCLUDE_DIRS})
     target_link_libraries(ClientUnitTests micrortps-client ${GTEST_BOTH_LIBRARIES})
 
+    # Copy .xml files.
+    file(COPY ${PROJECT_SOURCE_DIR}/test DESTINATION ${PROJECT_BINARY_DIR}
+         FILES_MATCHING PATTERN "*.xml")
+
+    install(TARGETS ClientUnitTests
+            EXPORT ${PROJECT_NAME}Targets
+            RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+            LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+            ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+            COMPONENT libraries
+    )
+
+export(TARGETS ClientUnitTests FILE ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Targets.cmake)
+
 endif()

@@ -56,8 +56,8 @@ int main(int args, char** argv)
         else if(strcmp(argv[1], "udp") == 0 && args == 5)
         {
             uint16_t received_port = atoi(argv[3]);
-            uint16_t send_port = atoi(argv[4]);
-            state = new_udp_client_state(MAX_MESSAGE_SIZE, argv[2], received_port, send_port);
+            uint16_t remote_port = atoi(argv[4]);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, 4000, received_port, remote_port, argv[2]);
             printf("<< UDP mode => recv port: %u, send port: %u >>\n", received_port, send_port);
         }
     }

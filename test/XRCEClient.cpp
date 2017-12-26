@@ -62,7 +62,7 @@ class ClientTests : public ::testing::Test
     public:
         ClientTests()
         {
-            state = new_udp_client_state(MAX_MESSAGE_SIZE, "127.0.0.1", 2020, 2019);
+            state = new_udp_client_state(MAX_MESSAGE_SIZE, 4000, 2020, 2019, "127.0.0.1");
 
             statusObjectId = 0x0000;
             statusRequestId = 0x0000;
@@ -90,6 +90,9 @@ class ClientTests : public ::testing::Test
             }
 
             ASSERT_LT(messageWaitCounter, MESSAGE_TRIES_WAIT);
+            
+            // Wait until agent realizes.
+            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
 
         void checkStatus(uint8_t operation)
@@ -422,6 +425,7 @@ TEST_F(ClientTests, CreateDeleteParticipant)
     uint16_t participant_id = createParticipant();
     checkStatus(STATUS_LAST_OP_CREATE);
 
+
     deleteXRCEObject(participant_id);
     checkStatus(STATUS_LAST_OP_DELETE);
     deleteXRCEObject(client_id);
@@ -432,6 +436,7 @@ TEST_F(ClientTests, CreateDeleteTopic)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t topic_id = createTopic("shape_topic.xml", participant_id);
+
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(topic_id);
@@ -445,6 +450,7 @@ TEST_F(ClientTests, CreateDeletePublisher)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t publisher_id = createPublisher(participant_id);
+
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(publisher_id);
@@ -458,6 +464,7 @@ TEST_F(ClientTests, CreateDeleteSubscriber)
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
     uint16_t subscriber_id = createSubscriber(participant_id);
+
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(subscriber_id);
@@ -470,13 +477,16 @@ TEST_F(ClientTests, CreateDeleteDataWriter)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
+    uint16_t topic_id = createTopic("shape_topic.xml", participant_id);
     uint16_t publisher_id = createPublisher(participant_id);
     uint16_t data_writer_id = createDataWriter("data_writer_profile.xml", participant_id, publisher_id);
+    
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(data_writer_id);
     checkStatus(STATUS_LAST_OP_DELETE);
     deleteXRCEObject(publisher_id);
+    deleteXRCEObject(topic_id);
     deleteXRCEObject(participant_id);
     deleteXRCEObject(client_id);
 }
@@ -485,13 +495,16 @@ TEST_F(ClientTests, CreateDeleteDataReader)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
+    uint16_t topic_id = createTopic("shape_topic.xml", participant_id);
     uint16_t subscriber_id = createSubscriber(participant_id);
     uint16_t data_reader_id = createDataReader("data_reader_profile.xml", participant_id, subscriber_id);
+
     checkStatus(STATUS_LAST_OP_CREATE);
 
     deleteXRCEObject(data_reader_id);
     checkStatus(STATUS_LAST_OP_DELETE);
     deleteXRCEObject(subscriber_id);
+    deleteXRCEObject(topic_id);
     deleteXRCEObject(participant_id);
     deleteXRCEObject(client_id);
 }
@@ -500,13 +513,17 @@ TEST_F(ClientTests, WriteData)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
+    uint16_t topic_id = createTopic("shape_topic.xml", participant_id);
     uint16_t publisher_id = createPublisher(participant_id);
     uint16_t data_writer_id = createDataWriter("data_writer_profile.xml", participant_id, publisher_id);
+    
     writeShapeData(data_writer_id);
+
     checkStatus(STATUS_LAST_OP_WRITE);
 
     deleteXRCEObject(data_writer_id);
     deleteXRCEObject(publisher_id);
+    deleteXRCEObject(topic_id);
     deleteXRCEObject(participant_id);
     deleteXRCEObject(client_id);
 }
@@ -515,13 +532,17 @@ TEST_F(ClientTests, WriteHelloData)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
+    uint16_t topic_id = createTopic("shape_topic.xml", participant_id);
     uint16_t publisher_id = createPublisher(participant_id);
     uint16_t data_writer_id = createDataWriter("hello_data_writer_profile.xml", participant_id, publisher_id);
+
     writeHelloData(data_writer_id);
+
     checkStatus(STATUS_LAST_OP_WRITE);
 
     deleteXRCEObject(data_writer_id);
     deleteXRCEObject(publisher_id);
+    deleteXRCEObject(topic_id);
     deleteXRCEObject(participant_id);
     deleteXRCEObject(client_id);
 }
@@ -530,14 +551,20 @@ TEST_F(ClientTests, ReadData)
 {
     uint16_t client_id = createClient();
     uint16_t participant_id = createParticipant();
+    uint16_t topic_id = createTopic("shape_topic.xml", participant_id);
     uint16_t subscriber_id = createSubscriber(participant_id);
     uint16_t data_reader_id = createDataReader("data_reader_profile.xml", participant_id, subscriber_id);
+
     readShapeData(data_reader_id);
+    
     checkStatus(STATUS_LAST_OP_READ);
+    
     waitMessage();
     checkDataTopic(1);
+
     deleteXRCEObject(data_reader_id);
     deleteXRCEObject(subscriber_id);
+    deleteXRCEObject(topic_id);
     deleteXRCEObject(participant_id);
     deleteXRCEObject(client_id);
 }

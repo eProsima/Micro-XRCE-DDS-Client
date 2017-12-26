@@ -34,7 +34,7 @@ endif()
 ###############################################################################
 # Product information                                                         #
 ###############################################################################
-project(micrortps-client C)
+project(micrortps-client C CXX)
 
 # Set product name
 if(DEFINED PRODUCT_NAME)
@@ -104,8 +104,10 @@ endif()
 # Load external eProsima projects.
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/dev/eprosima_libraries.cmake)
-find_eprosima_package(micrortps_transport NAME transport)
-find_eprosima_package(micro-CDR NAME microcdr)
+if(NOT TARGET transport)
+  add_subdirectory(thirdparty/micrortps_transport)
+endif()
+add_subdirectory(thirdparty/micro-CDR)
 
 file(GLOB CLIENT_LIB_SOURCES
     src/c/*.c
@@ -126,15 +128,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMESSAGE_LOGS")
 ###############################################################################
 # Config
 ###############################################################################
-configure_file(${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/config.h.in
-               ${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/config.h)
+configure_file(${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/client/config.h.in
+               ${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/client/config.h)
 
 add_library(${PROJECT_NAME} ${CLIENT_LIB_SOURCES})
-target_link_libraries(${PROJECT_NAME} microcdr transport)
+target_link_libraries(${PROJECT_NAME} PUBLIC microcdr transport)
 target_include_directories(
     ${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/client>
-    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/client>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     $<INSTALL_INTERFACE:include>
 )
@@ -164,6 +166,8 @@ endif()
 ###############################################################################
 # Packaging
 ###############################################################################
+install_eprosima_libraries()
+
 # Install public headers
 include(${PROJECT_SOURCE_DIR}/cmake/dev/set_sources.cmake)
 set_public_headers_directory(${PROJECT_SOURCE_DIR}/include ${PRODUCT_NAME}
@@ -172,9 +176,10 @@ set_public_headers_directory(${PROJECT_SOURCE_DIR}/include ${PRODUCT_NAME}
     )
 
 # Install config.h header
-set_public_header(${PROJECT_BINARY_DIR}/include ${PRODUCT_NAME} config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/${PRODUCT_NAME}/client
+set_public_header(${PROJECT_BINARY_DIR}/include ${PRODUCT_NAME}/client/ config.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}
     COMPONENT headers
+    INSTALL
     )
 
 # Install examples

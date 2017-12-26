@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "xrce_protocol_serialization.h"
+#include <micrortps/client/xrce_protocol_serialization.h>
 
 bool serialize_ClientKey(MicroBuffer *buffer, const ClientKey *input)
 {
