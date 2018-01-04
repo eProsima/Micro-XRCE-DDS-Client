@@ -72,9 +72,11 @@ endif()
 ###############################################################################
 # Check MSVC architecture
 ###############################################################################
+include(${PROJECT_SOURCE_DIR}/cmake/dev/check_configuration.cmake)
 if(MSVC OR MSVC_IDE)
     check_msvc_arch()
 endif()
+
 ###############################################################################
 # Installation paths
 ###############################################################################
@@ -117,7 +119,7 @@ file(GLOB CLIENT_LIB_SOURCES
 ###############################################################################
 # Warning level
 ###############################################################################
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra --std=c++11")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSERIALIZATION_LOGS")
@@ -140,6 +142,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     $<INSTALL_INTERFACE:include>
 )
+
 ###############################################################################
 # Testing
 ###############################################################################

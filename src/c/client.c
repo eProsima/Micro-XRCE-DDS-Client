@@ -139,8 +139,26 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
     state->on_status_received = on_status;
     state->on_status_received_args = on_status_args;
 
+
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+
+    #ifdef WIN32
+        SYSTEMTIME epoch_tm = {1970, 1, 4, 1, 0, 0, 0, 0};
+        FILETIME epoch_ft;
+        SystemTimeToFileTime(&epoch_tm, &epoch_ft);
+        uint64_t epoch_time = (((uint64_t) epoch_ft.dwHighDateTime) << 32) + epoch_ft.dwLowDateTime;
+	
+        SYSTEMTIME tm;
+	FILETIME ft;
+	GetSystemTime(&tm);
+	SystemTimeToFileTime(&tm, &ft);
+	uint64_t current_time = (((uint64_t) ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
+
+	ts.tv_sec = (time_t) ((current_time - epoch_time) / 10000000);
+	ts.tv_nsec = (time_t) ((current_time - epoch_time) % 10000000);
+    #else
+        clock_gettime(CLOCK_REALTIME, &ts);
+    #endif
 
     XRCEInfo info = {++state->next_request_id, get_num_object_id(OBJECTID_CLIENT)};
 

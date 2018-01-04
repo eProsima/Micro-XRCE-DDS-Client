@@ -21,11 +21,11 @@
 
 #include <string.h>
 #include <stdio.h>
-#define ERROR_PRINT(fmt, args...) fprintf(stderr, fmt, ## args)
+#define ERROR_PRINT(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
 
 #else
 
-#define ERROR_PRINT(fmt, args...);
+#define ERROR_PRINT(fmt, ...);
 
 #endif
 
