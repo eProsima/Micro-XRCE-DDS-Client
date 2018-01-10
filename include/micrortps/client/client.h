@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include "config.h"
+#include <micrortps/client/config.h>
 
 #include <stdint.h>
 #include <stdbool.h>

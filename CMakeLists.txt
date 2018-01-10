@@ -22,13 +22,13 @@ endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
 if(DEFINED CMAKE_BUILD_TYPE)
-set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING
+        "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
     )
 else()
     set(CMAKE_BUILD_TYPE Release CACHE STRING
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-        )
+    )
 endif()
 
 ###############################################################################
@@ -120,10 +120,9 @@ file(GLOB CLIENT_LIB_SOURCES
 # Warning level
 ###############################################################################
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra --std=c++11")
-
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSERIALIZATION_LOGS")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMESSAGE_LOGS")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic --std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSERIALIZATION_LOGS")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMESSAGE_LOGS")
 
@@ -131,14 +130,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMESSAGE_LOGS")
 # Config
 ###############################################################################
 configure_file(${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/client/config.h.in
-               ${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/client/config.h)
+    ${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/client/config.h
+)
 
-add_library(${PROJECT_NAME} ${CLIENT_LIB_SOURCES})
+add_library(${PROJECT_NAME} STATIC ${CLIENT_LIB_SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC microcdr transport)
 target_include_directories(
     ${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/client>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     $<INSTALL_INTERFACE:include>
 )
@@ -176,35 +176,33 @@ include(${PROJECT_SOURCE_DIR}/cmake/dev/set_sources.cmake)
 set_public_headers_directory(${PROJECT_SOURCE_DIR}/include ${PRODUCT_NAME}
     DESTINATION ${INCLUDE_INSTALL_DIR}
     COMPONENT headers
-    )
+)
 
 # Install config.h header
 set_public_header(${PROJECT_BINARY_DIR}/include ${PRODUCT_NAME}/client/ config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}
+    DESTINATION ${INCLUDE_INSTALL_DIR}/${PRODUCT_NAME}/client
     COMPONENT headers
     INSTALL
-    )
+)
 
 # Install examples
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples/
-DESTINATION examples/${PRODUCT_NAME}/client
-COMPONENT examples
-PATTERN "examples/*/CMakeLists.txt" EXCLUDE
+    DESTINATION examples/${PRODUCT_NAME}/client
+    COMPONENT examples
+    PATTERN "examples/*/CMakeLists.txt" EXCLUDE
 )
 
 install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
-        RUNTIME DESTINATION ${BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
-        COMPONENT libraries
+    EXPORT ${PROJECT_NAME}Targets
+    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+    COMPONENT libraries
 )
 
-export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Targets.cmake)
-
 install(EXPORT ${PROJECT_NAME}Targets
-DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/cmake
-COMPONENT cmake
+    DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/cmake
+    COMPONENT cmake
 )
 
 include(${PROJECT_SOURCE_DIR}/cmake/packaging/eProsimaPackaging.cmake)

@@ -19,7 +19,12 @@
 
 #include <gtest/gtest.h>
 #include <cstdint>
-#include <unistd.h>
+
+#ifdef WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
 
 #include <thread>
 
@@ -84,7 +89,11 @@ class ClientTests : public ::testing::Test
             int messageWaitCounter = 0;
             while(!receive_from_agent(state) && messageWaitCounter < MESSAGE_TRIES_WAIT)
             {
-                usleep(1000);
+                #ifdef WIN32
+		    Sleep(1000);
+		#else 
+                    usleep(1000);
+		#endif
                 messageWaitCounter++;
             }
 
