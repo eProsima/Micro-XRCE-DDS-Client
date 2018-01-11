@@ -18,15 +18,11 @@
 #include <stdlib.h>
 
 #ifndef NDEBUG
-
-#include <string.h>
-#include <stdio.h>
-#define ERROR_PRINT(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
-
+    #include <string.h>
+    #include <stdio.h>
+    #define ERROR_PRINT(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
 #else
-
-#define ERROR_PRINT(fmt, ...);
-
+    #define ERROR_PRINT(fmt, ...);
 #endif
 
 void init_input_message(InputMessage* message, InputMessageCallback callback, uint8_t* in_buffer, uint32_t in_buffer_size)
@@ -121,7 +117,7 @@ int parse_submessage(InputMessage* message)
     // Submessage is not complete.
     if(reader->iterator + submessage_header.length > reader->final)
     {
-        ERROR_PRINT("Parse message error: Subessage not complete.\n");
+        ERROR_PRINT("Parse message error: Subessage not complete.\n", 0);
         return 0;
     }
 
@@ -182,7 +178,7 @@ int parse_message(InputMessage* message, uint32_t length)
         init_external_buffer(reader, message->buffer, length);
     else
     {
-        ERROR_PRINT("Parse message error: Message length greater than input buffer.\n");
+        ERROR_PRINT("Parse message error: Message length greater than input buffer.\n", 0);
         return 0;
     }
 
@@ -197,7 +193,7 @@ int parse_message(InputMessage* message, uint32_t length)
     if(callback->on_message_header &&
         !callback->on_message_header(&message_header, &key, callback->args))
     {
-        ERROR_PRINT("Parse message error: Message header not undestood.\n");
+        ERROR_PRINT("Parse message error: Message header not undestood.\n", 0);
         return 0;
     }
 

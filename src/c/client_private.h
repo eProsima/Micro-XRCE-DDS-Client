@@ -74,7 +74,7 @@ typedef struct ClientState
 // ----------------------------------------------------------------------------------------------
 //    Data callback map funcions
 // ----------------------------------------------------------------------------------------------
-void init_callback_data_storage(CallbackDataStorage* store, int16_t initial_id);
+void init_callback_data_storage(CallbackDataStorage* store, uint16_t initial_id);
 void free_callback_data_storage(CallbackDataStorage* store);
 
 uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, OnMessageReceived on_message, void *callback_args);

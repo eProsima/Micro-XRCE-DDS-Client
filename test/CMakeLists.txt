@@ -37,6 +37,10 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
 
     target_link_libraries(ClientUnitTests ${GTEST_BOTH_LIBRARIES} micrortps-client)
 
+    # Copy .xml files.
+    file(COPY ${PROJECT_SOURCE_DIR}/test DESTINATION ${PROJECT_BINARY_DIR}
+         FILES_MATCHING PATTERN "*.xml")
+
     install(TARGETS ClientUnitTests
         EXPORT ${PROJECT_NAME}Targets
         RUNTIME DESTINATION ${BIN_INSTALL_DIR}

@@ -14,20 +14,20 @@
 
 #include "message.h"
 
-#define YELLOW_DARK    "\e[0;33m"
-#define PURPLE_DARK    "\e[0;35m"
-#define GREY_LIGHT     "\e[0;37m"
+#define YELLOW_DARK    "\x1B[0;33m"
+#define PURPLE_DARK    "\x1B[0;35m"
+#define GREY_LIGHT     "\x1B[0;37m"
 
-#define GREY_DARK      "\e[1;30m"
-#define RED            "\e[1;31m"
-#define GREEN          "\e[1;32m"
-#define YELLOW         "\e[1;33m"
-#define BLUE           "\e[1;34m"
-#define PURPLE         "\e[1;35m"
-#define CYAN           "\e[1;36m"
-#define WHITE          "\e[1;37m"
+#define GREY_DARK      "\x1B[1;30m"
+#define RED            "\x1B[1;31m"
+#define GREEN          "\x1B[1;32m"
+#define YELLOW         "\x1B[1;33m"
+#define BLUE           "\x1B[1;34m"
+#define PURPLE         "\x1B[1;35m"
+#define CYAN           "\x1B[1;36m"
+#define WHITE          "\x1B[1;37m"
 
-#define RESTORE_COLOR  "\e[0m"
+#define RESTORE_COLOR  "\x1B[0m"
 
 #if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)
 //Only one call into a printf.
@@ -296,7 +296,6 @@ void PRINTL_READ_DATA_SUBMESSAGE(const ReadDataPayload* payload)
 
 void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const BaseObjectReply* reply, const SampleData* payload)
 {
-    char content[64];
     printf("%s%s[Data | %s | FORMAT_DATA | size: %u]%s\n",
             RECV,
             PURPLE,
@@ -308,20 +307,28 @@ void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const BaseObjectReply* reply, const Samp
 void PRINTL_DATA_SUBMESSAGE_SAMPLE(const BaseObjectReply* reply, const Sample* payload)
 {
     //TODO
+    (void) reply;
+    (void) payload;
 }
 
 void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSequence* payload)
 {
     //TODO
+    (void) reply;
+    (void) payload;
 }
 
 void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSequence* payload)
 {
     //TODO
+    (void) reply;
+    (void) payload;
 }
 
 void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const BaseObjectReply* reply, const PackedSamples* payload)
 {
     //TODO
+    (void) reply;
+    (void) payload;
 }
 #endif

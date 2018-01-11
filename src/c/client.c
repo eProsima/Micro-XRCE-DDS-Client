@@ -397,6 +397,9 @@ void on_out_of_bounds(void* vstate)
 
 bool on_message_header(const MessageHeader* header, const ClientKey* key, void* vstate)
 {
+    // TODO.
+    (void) key;
+
     ClientState* state = (ClientState*) vstate;
 
     if(header->stream_id != STREAMID_NONE)
@@ -508,7 +511,7 @@ bool receive_from_agent(ClientState* state)
 //    Data callback funcions
 // ----------------------------------------------------------------------------------------------
 
-void init_callback_data_storage(CallbackDataStorage* store, int16_t initial_id)
+void init_callback_data_storage(CallbackDataStorage* store, uint16_t initial_id)
 {
     store->size = 1;
     store->initial_id = initial_id;
