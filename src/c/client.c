@@ -1,96 +1,87 @@
+/*
+ * Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <micrortps/client/client.h>
 #include "client_private.h"
-
 #include "log/message.h"
-
 #include <time.h>
-// Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 #include <stdlib.h>
 
 #define MAX_TOPIC_LENGTH 256
 
-// ----------------------------------------------------------------------------------
-//                                  CLIENT STATE
-// ----------------------------------------------------------------------------------
-ClientState* new_serial_client_state(uint32_t buffer_size, const char* device)
+/* ----------------------------------------------------------------------------------------------
+                                    CLIENT SESSION
+ ---------------------------------------------------------------------------------------------- */
+uint8_t new_udp_session(Session* session,
+                     uint8_t* buf,
+                     uint32_t buf_size,
+                     uint16_t send_port,
+                     uint16_t recv_port,
+                     uint16_t remote_port,
+                     const char* server_ip)
 {
-    locator_id_t lid = add_serial_locator(device);
-    if (0 >= lid)
+    uint8_t result = 0xFF;
+    locator_id_t locator_id = add_udp_locator(send_port, recv_port, remote_port, server_ip);
+
+    if (0>= locator_id)
     {
-        return NULL;
+        result = SESSION_LOCATOR_ERR;
     }
-    return new_client_state(buffer_size, lid);
-}
-
-ClientState* new_udp_client_state(uint32_t buffer_size, uint16_t send_port, uint16_t recv_port, uint16_t remote_port, const char* server_ip)
-{
-    locator_id_t lid = add_udp_locator(send_port, recv_port, remote_port, server_ip);
-    if (0 >= lid)
+    else
     {
-        return NULL;
+        session->transport_id = locator_id;
+        session->buffer = buf;
+        session->buffer_size = buf_size;
+
+        session->output_sequence_number = 0;
+        session->input_sequence_number = 0;
+
+        OutputMessageCallback output_callback = {0};
+        output_callback.args = session;
+        output_callback.on_initialize_message = on_initialize_message;
+        output_callback.on_out_of_bounds = on_out_of_bounds;
+
+        InputMessageCallback input_callback = {0};
+        input_callback.args = session;
+        input_callback.on_message_header = on_message_header;
+        input_callback.on_status_submessage = on_status_submessage;
+        input_callback.on_data_submessage = on_data_submessage;
+        input_callback.on_data_payload = on_data_payload;
+
+        init_output_message(&session->output_message, output_callback,
+                            session->buffer, session->buffer_size);
+        init_input_message(&session->input_message, input_callback,
+                           session->buffer, session->buffer_size);
+
+        session->next_request_id = 0;
+        session->next_object_id = 0;
+
+        session->output_message.writer.endianness = LITTLE_ENDIANNESS;
+
+        result = SESSION_CREATED;
     }
-    return new_client_state(buffer_size, lid);
+
+    return result;
 }
 
-ClientState* new_client_state(uint32_t buffer_size, locator_id_t transport_id)
+void close_session(Session* session)
 {
-    ClientState* state = malloc(sizeof(ClientState));
-
-    state->transport_id = transport_id;
-
-    state->buffer_size = buffer_size;
-    state->buffer = malloc(buffer_size);
-
-    state->output_sequence_number = 0;
-    state->input_sequence_number = 0;
-
-    OutputMessageCallback output_callback = {0};
-    output_callback.args = state;
-    output_callback.on_initialize_message = on_initialize_message;
-    output_callback.on_out_of_bounds = on_out_of_bounds;
-
-    InputMessageCallback input_callback = {0};
-    input_callback.args = state;
-    input_callback.on_message_header = on_message_header;
-    input_callback.on_status_submessage = on_status_submessage;
-    input_callback.on_data_submessage = on_data_submessage;
-    input_callback.on_data_payload = on_data_payload;
-
-    init_output_message(&state->output_message, output_callback, state->buffer, buffer_size);
-    init_input_message(&state->input_message, input_callback, state->buffer, buffer_size);
-
-    state->next_request_id = 0;
-    state->next_object_id = 0;
-
-    init_callback_data_storage(&state->callback_data_storage, 0xFF00);
-
-    //Default message encoding
-    state->output_message.writer.endianness = LITTLE_ENDIANNESS;
-
-    return state;
-}
-
-void free_client_state(ClientState* state)
-{
-    rm_locator(state->transport_id);
-
-    free_callback_data_storage(&state->callback_data_storage);
-    free_input_message(&state->input_message);
-    free(state->buffer);
-    free(state);
+    rm_locator(session->transport_id);
+    free_callback_data_storage(&session->callback_data_storage);
+    free_input_message(&session->input_message);
 }
 
 uint16_t get_num_request_id(RequestId request_id)
@@ -130,18 +121,17 @@ XRCEInfo create_xrce_info(RequestId request_id, ObjectId object_id)
     return (XRCEInfo){get_num_request_id(request_id), get_num_object_id(object_id)};
 }
 
-// ----------------------------------------------------------------------------------
-//                              XRCE API - CLIENT TO AGENT
-// ----------------------------------------------------------------------------------
-
-XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_status_args)
+/* ----------------------------------------------------------------------------------------------
+                                XRCE API - CLIENT TO AGENT
+ ---------------------------------------------------------------------------------------------- */
+uint8_t init_session(Session* session, XRCEInfo* info, OnStatusReceived on_status, void *on_status_args)
 {
-    state->on_status_received = on_status;
-    state->on_status_received_args = on_status_args;
+    uint8_t result = 0xFF;
 
+    session->on_status_received = on_status;
+    session->on_status_received_args = on_status_args;
 
     struct timespec ts;
-
     #ifdef WIN32
         SYSTEMTIME epoch_tm = {1970, 1, 4, 1, 0, 0, 0, 0};
         FILETIME epoch_ft;
@@ -160,8 +150,12 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
         clock_gettime(CLOCK_REALTIME, &ts);
     #endif
 
-    state->next_request_id++;
-    XRCEInfo info = {state->next_request_id, get_num_object_id(OBJECTID_CLIENT)};
+    ++session->next_request_id;
+    if (info)
+    {
+        info->request_id = session->next_request_id;
+        info->object_id = get_num_object_id(OBJECTID_CLIENT);
+    }
 
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = get_raw_request_id(state->next_request_id);
@@ -180,17 +174,22 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
     state->stream_id = STREAMID_NONE;
     state->key = payload.client_representation.client_key;
 
-    if (add_create_client_submessage(&state->output_message, &payload))
+    if (add_create_client_submessage(&session->output_message, &payload))
     {
         PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
+        result = SESSION_INIT;
+    }
+    else
+    {
+        result = SESSION_SERIALIZATION_ERR;
     }
 
-    return info;
+    return result;
 }
 
-XRCEInfo create_participant(ClientState* state)
+XRCEInfo create_participant(Session* session)
 {
-    XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
+    XRCEInfo info = {++session->next_request_id, ++session->next_object_id};
 
     CREATE_Payload payload;
     payload.base.request_id = get_raw_request_id(info.request_id);
@@ -199,7 +198,7 @@ XRCEInfo create_participant(ClientState* state)
     payload.object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
     payload.object_representation._.participant.base.representation._.object_reference.size = 0;
 
-    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
+    if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -207,9 +206,9 @@ XRCEInfo create_participant(ClientState* state)
     return info;
 }
 
-XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml)
+XRCEInfo create_topic(Session* session, uint16_t participant_id, String xml)
 {
-    XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
+    XRCEInfo info = {++session->next_request_id, ++session->next_object_id};
 
     CREATE_Payload payload;
     payload.base.request_id = get_raw_request_id(info.request_id);
@@ -220,7 +219,7 @@ XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml)
     payload.object_representation._.topic.base.representation._.xml_string_represenatation.data = xml.data;
     payload.object_representation._.topic.participant_id = get_raw_object_id(participant_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
+    if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -228,9 +227,9 @@ XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml)
     return info;
 }
 
-XRCEInfo create_publisher(ClientState* state, uint16_t participant_id)
+XRCEInfo create_publisher(Session* session, uint16_t participant_id)
 {
-    XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
+    XRCEInfo info = {++session->next_request_id, ++session->next_object_id};
 
     CREATE_Payload payload;
     payload.base.request_id = get_raw_request_id(info.request_id);
@@ -240,7 +239,7 @@ XRCEInfo create_publisher(ClientState* state, uint16_t participant_id)
     payload.object_representation._.publisher.base.representation._.object_name.size = 0;
     payload.object_representation._.publisher.participant_id = get_raw_object_id(participant_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
+    if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -248,9 +247,9 @@ XRCEInfo create_publisher(ClientState* state, uint16_t participant_id)
     return info;
 }
 
-XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id)
+XRCEInfo create_subscriber(Session* session, uint16_t participant_id)
 {
-    XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
+    XRCEInfo info = {++session->next_request_id, ++session->next_object_id};
 
     CREATE_Payload payload;
     payload.base.request_id = get_raw_request_id(info.request_id);
@@ -260,7 +259,7 @@ XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id)
     payload.object_representation._.subscriber.base.representation._.object_name.size = 0;
     payload.object_representation._.subscriber.participant_id = get_raw_object_id(participant_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
+    if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -268,9 +267,9 @@ XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id)
     return info;
 }
 
-XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_t publisher_id, String xml)
+XRCEInfo create_data_writer(Session* session, uint16_t participant_id, uint16_t publisher_id, String xml)
 {
-    XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
+    XRCEInfo info = {++session->next_request_id, ++session->next_object_id};
 
     CREATE_Payload payload;
     payload.base.request_id = get_raw_request_id(info.request_id);
@@ -281,7 +280,7 @@ XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_
     payload.object_representation._.data_writer.base._.xml_string_represenatation.data = xml.data;
     payload.object_representation._.data_writer.publisher_id = get_raw_object_id(publisher_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
+    if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -289,9 +288,9 @@ XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_
     return info;
 }
 
-XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_t subscriber_id, String xml)
+XRCEInfo create_data_reader(Session* session, uint16_t participant_id, uint16_t subscriber_id, String xml)
 {
-    XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
+    XRCEInfo info = {++session->next_request_id, ++session->next_object_id};
 
     CREATE_Payload payload;
     payload.base.request_id = get_raw_request_id(info.request_id);
@@ -302,7 +301,7 @@ XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_
     payload.object_representation._.data_reader.base._.xml_string_represenatation.data = xml.data;
     payload.object_representation._.data_reader.subscriber_id = get_raw_object_id(subscriber_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
+    if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -310,15 +309,15 @@ XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_
     return info;
 }
 
-XRCEInfo delete_resource(ClientState* state, uint16_t resource_id)
+XRCEInfo delete_resource(Session* session, uint16_t resource_id)
 {
-    XRCEInfo info = {++state->next_request_id, resource_id};
+    XRCEInfo info = {++session->next_request_id, resource_id};
 
     DELETE_Payload payload;
     payload.base.request_id = get_raw_request_id(info.request_id);
     payload.base.object_id = get_raw_object_id(info.object_id);
 
-    if (add_delete_resource_submessage(&state->output_message, &payload))
+    if (add_delete_resource_submessage(&session->output_message, &payload))
     {
         PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -326,18 +325,18 @@ XRCEInfo delete_resource(ClientState* state, uint16_t resource_id)
     return info;
 }
 
-XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic serialize_topic, void* topic)
+XRCEInfo write_data(Session* session, uint16_t data_writer_id, SerializeTopic serialize_topic, void* topic)
 {
     //Knows previously the topic serialized length. Is it feasible?
     char buffer[MAX_TOPIC_LENGTH];
 
     MicroBuffer writer;
     init_external_buffer(&writer, (uint8_t*)buffer, MAX_TOPIC_LENGTH);
-    writer.endianness = state->output_message.writer.endianness;
+    writer.endianness = session->output_message.writer.endianness;
 
     if(serialize_topic(&writer, &(AbstractTopic){topic}))
     {
-        XRCEInfo info = {++state->next_request_id, data_writer_id};
+        XRCEInfo info = {++session->next_request_id, data_writer_id};
 
         WRITE_DATA_Payload_Data payload;
         payload.base.request_id = get_raw_request_id(info.request_id);
@@ -345,7 +344,7 @@ XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic 
         payload.data.data = writer.init;
         payload.data.size = writer.iterator - writer.init;
 
-        if (add_write_data_submessage(&state->output_message, &payload))
+        if (add_write_data_submessage(&session->output_message, &payload))
         {
             PRINTL_WRITE_DATA_SUBMESSAGE(&payload);
         }
@@ -355,9 +354,9 @@ XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic 
     return (XRCEInfo){0x0000, 0xFFFF};
 }
 
-XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args)
+XRCEInfo read_data(Session* session, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args)
 {
-    int16_t callback_request_id = register_callback_data(&state->callback_data_storage, FORMAT_DATA, on_message, callback_args);
+    int16_t callback_request_id = register_callback_data(&session->callback_data_storage, FORMAT_DATA, on_message, callback_args);
 
     XRCEInfo info = {callback_request_id, data_reader_id};
 
@@ -368,85 +367,83 @@ XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, OnMessageReceive
     payload.read_specification.optional_content_filter_expression = false;
     payload.read_specification.optional_delivery_control = false;
 
-    if (add_read_data_submessage(&state->output_message, &payload))
+    if (add_read_data_submessage(&session->output_message, &payload))
     {
         PRINTL_READ_DATA_SUBMESSAGE(&payload);
     }
     return info;
 }
 
-// ----------------------------------------------------------------------------------
-//                              CALLBACKS - AGENT TO CLIENT
-// ----------------------------------------------------------------------------------
-
-void on_initialize_message(MessageHeader* header, ClientKey* key, void* vstate)
+/* ----------------------------------------------------------------------------------------------
+                                CALLBACKS - AGENT TO CLIENT
+ ---------------------------------------------------------------------------------------------- */
+void on_initialize_message(MessageHeader* header, ClientKey* key, void* vsession)
 {
-    ClientState* state = (ClientState*) vstate;
+    Session* session = (Session*) vsession;
 
-    header->session_id = state->session_id;
-    header->stream_id = state->stream_id;
-    header->sequence_nr = state->output_sequence_number;
-    *key = state->key;
+    header->session_id = session->session_id;
+    header->stream_id = session->stream_id;
+    header->sequence_nr = session->output_sequence_number;
+    *key = session->key;
 
-    state->output_sequence_number++;
+    session->output_sequence_number++;
 }
 
-void on_out_of_bounds(void* vstate)
+void on_out_of_bounds(void* vsession)
 {
-    send_to_agent((ClientState*) vstate);
+    send_to_agent((Session*) vsession);
 }
 
-bool on_message_header(const MessageHeader* header, const ClientKey* key, void* vstate)
+bool on_message_header(const MessageHeader* header, const ClientKey* key, void* vsession)
 {
     // TODO.
     (void) key;
 
-    ClientState* state = (ClientState*) vstate;
+    Session* session = (Session*) vsession;
 
     if(header->stream_id != STREAMID_NONE)
-        if(header->sequence_nr != state->input_sequence_number)
+        if(header->sequence_nr != session->input_sequence_number)
         {
-            PRINT_SEQUENCE_NUMBER(header->sequence_nr, state->input_sequence_number);
+            PRINT_SEQUENCE_NUMBER(header->sequence_nr, session->input_sequence_number);
             return 0;
         }
 
-    state->input_sequence_number++;
+    session->input_sequence_number++;
     return 1;
 }
 
 void on_status_submessage(const STATUS_Payload* payload, void* args)
 {
-    ClientState* state = (ClientState*) args;
+    Session* session = (Session*) args;
     PRINTL_STATUS_SUBMESSAGE(payload);
 
-    if(state->on_status_received)
+    if(session->on_status_received)
     {
-
         XRCEInfo info = create_xrce_info(payload->base.related_request.request_id, payload->base.related_request.object_id);
-        state->on_status_received(info,
+        session->on_status_received(info,
                                   payload->base.result.status,
                                   payload->base.result.implementation_status,
-                                  state->on_status_received_args);
+                                  session->on_status_received_args);
     }
 }
 
 DataFormat on_data_submessage(const BaseObjectReply* reply, void* args)
 {
     DataFormat result = FORMAT_EMPTY;
-    ClientState* state = (ClientState*) args;
+    Session* session = (Session*) args;
     XRCEInfo info = create_xrce_info(reply->related_request.request_id, reply->related_request.object_id);
 
-    if(state->on_status_received)
+    if(session->on_status_received)
     {
-        state->on_status_received(info,
+        session->on_status_received(info,
                                   reply->result.status,
                                   reply->result.implementation_status,
-                                  state->on_status_received_args);
+                                  session->on_status_received_args);
     }
 
     if(reply->result.status == STATUS_OK)
     {
-        CallbackData* callback_data = get_callback_data(&state->callback_data_storage, info.request_id);
+        CallbackData* callback_data = get_callback_data(&session->callback_data_storage, info.request_id);
         if(callback_data)
         {
             result = callback_data->format;
@@ -458,35 +455,34 @@ DataFormat on_data_submessage(const BaseObjectReply* reply, void* args)
 
 void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* args, Endianness endianness)
 {
-    ClientState* state = (ClientState*) args;
+    Session* session = (Session*) args;
     PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(reply, data);
 
     XRCEInfo info = create_xrce_info(reply->related_request.request_id, reply->related_request.object_id);
-    CallbackData* callback_data = get_callback_data(&state->callback_data_storage, info.request_id);
+    CallbackData* callback_data = get_callback_data(&session->callback_data_storage, info.request_id);
     if(callback_data)
     {
         MicroBuffer reader;
         init_external_buffer(&reader, data->data, data->size);
         reader.endianness = endianness;
         callback_data->on_message(info, &reader, callback_data->callback_args);
-        remove_callback_data(&state->callback_data_storage, info.request_id);
+        remove_callback_data(&session->callback_data_storage, info.request_id);
     }
 }
 
-// ----------------------------------------------------------------------------------
-//                                 COMUNICATION
-// ----------------------------------------------------------------------------------
-
-bool send_to_agent(ClientState* state)
+/* ----------------------------------------------------------------------------------------------
+                                   COMMUNICATION
+ ---------------------------------------------------------------------------------------------- */
+bool send_to_agent(Session* session)
 {
-    uint32_t length = get_message_length(&state->output_message);
+    uint32_t length = get_message_length(&session->output_message);
     if(length > 0)
     {
-        int output_length = send_data(state->buffer, length, state->transport_id);
+        int output_length = send_data(session->buffer, length, session->transport_id);
         if(output_length > 0)
         {
-            PRINTL_SERIALIZATION(SEND, state->buffer, output_length);
-            reset_buffer(&state->output_message.writer);
+            PRINTL_SERIALIZATION(SEND, session->buffer, output_length);
+            reset_buffer(&session->output_message.writer);
 
             return true;
         }
@@ -495,13 +491,13 @@ bool send_to_agent(ClientState* state)
     return false;
 }
 
-bool receive_from_agent(ClientState* state)
+bool receive_from_agent(Session* session)
 {
-    int length = receive_data(state->buffer, state->buffer_size, state->transport_id);
+    int length = receive_data(session->buffer, session->buffer_size, session->transport_id);
     if(length > 0)
     {
-        parse_message(&state->input_message, length);
-        PRINTL_SERIALIZATION(RECV, state->buffer, length);
+        parse_message(&session->input_message, length);
+        PRINTL_SERIALIZATION(RECV, session->buffer, length);
 
         return true;
     }
@@ -509,10 +505,9 @@ bool receive_from_agent(ClientState* state)
     return false;
 }
 
-// ----------------------------------------------------------------------------------------------
-//    Data callback funcions
-// ----------------------------------------------------------------------------------------------
-
+/* ----------------------------------------------------------------------------------------------
+                                CALLBACKS - DATA
+ ---------------------------------------------------------------------------------------------- */
 void init_callback_data_storage(CallbackDataStorage* store, uint16_t initial_id)
 {
     store->size = 1;

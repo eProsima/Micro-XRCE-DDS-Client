@@ -25,7 +25,7 @@ void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* 
 
 void printl_hello_topic(const HelloWorld *hello_topic);
 void *listen_agent(void *args);
-bool compute_command(const char *command, ClientState *state);
+bool compute_command(const char *command, Session *session);
 void list_commands();
 void help();
 
@@ -45,23 +45,26 @@ int main(int args, char **argv)
 {
     printf("<< HELLO WORLD XRCE CLIENT >>\n");
 
-    ClientState *state = NULL;
+    uint8_t result = 0xFF;
+    uint8_t my_buffer[4096];
+    Session my_session;
+
     if (args > 3)
     {
         if (strcmp(argv[1], "serial") == 0)
         {
-            state = new_serial_client_state(MAX_MESSAGE_SIZE, argv[2]);
             printf("<< Serial mode => dev: %s >>\n", argv[2]);
         }
         else if (strcmp(argv[1], "udp") == 0 && args == 5)
         {
             uint16_t received_port = atoi(argv[3]);
             uint16_t remote_port = atoi(argv[4]);
-            state = new_udp_client_state(MAX_MESSAGE_SIZE, 4000, received_port, remote_port, argv[2]);
+            result = new_udp_session(&my_session, my_buffer, sizeof(my_buffer),
+                                     4000, received_port, remote_port, argv[2]);
             printf("<< UDP mode => recv port: %u, send port: %u >>\n", received_port, remote_port);
         }
     }
-    if (!state)
+    if (result != SESSION_CREATED)
     {
         printf("Help: program [serial | udp dest_ip recv_port send_port]\n");
         return 1;
@@ -75,11 +78,11 @@ int main(int args, char **argv)
     {
         if (!check_input())
         {
-            receive_from_agent(state);
+            receive_from_agent(&my_session);
         }
         else if (fgets(command_stdin_line, 256, stdin))
         {
-            if (!compute_command(command_stdin_line, state))
+            if (!compute_command(command_stdin_line, &my_session))
             {
                 running = false;
                 break;
@@ -89,7 +92,7 @@ int main(int args, char **argv)
     }
 }
 
-bool compute_command(const char *command, ClientState *state)
+bool compute_command(const char* command, Session* session)
 {
     char name[128];
     static unsigned int hello_world_id = 0;
@@ -99,34 +102,34 @@ bool compute_command(const char *command, ClientState *state)
 
     if (strcmp(name, "create_client") == 0)
     {
-        create_client(state, on_status_received, NULL);
+        init_session(session, NULL, on_status_received, NULL);
     }
     else if (strcmp(name, "create_participant") == 0)
     {
-        create_participant(state);
+        create_participant(session);
     }
     else if (strcmp(name, "create_topic") == 0 && length == 2)
     {
         String xml = read_file("hello_topic.xml");
         if (xml.length > 0)
         {
-            create_topic(state, id, xml);
+            create_topic(session, id, xml);
         }
     }
     else if (strcmp(name, "create_publisher") == 0 && length == 2)
     {
-        create_publisher(state, id);
+        create_publisher(session, id);
     }
     else if (strcmp(name, "create_subscriber") == 0 && length == 2)
     {
-        create_subscriber(state, id);
+        create_subscriber(session, id);
     }
     else if (strcmp(name, "create_data_writer") == 0 && length == 3)
     {
         String xml = read_file("hello_data_writer_profile.xml");
         if (xml.length > 0)
         {
-            create_data_writer(state, id, extra, xml);
+            create_data_writer(session, id, extra, xml);
         }
     }
     else if (strcmp(name, "create_data_reader") == 0 && length == 3)
@@ -134,23 +137,23 @@ bool compute_command(const char *command, ClientState *state)
         String xml = read_file("hello_data_reader_profile.xml");
         if (xml.length > 0)
         {
-            create_data_reader(state, id, extra, xml);
+            create_data_reader(session, id, extra, xml);
         }
     }
     else if (strcmp(name, "write_data") == 0 && length == 2)
     {
         char message[] = "Hello from client";
         HelloWorld hello_topic = (HelloWorld){hello_world_id++, message};
-        write_data(state, id, serialize_HelloWorld_topic, &hello_topic);
+        write_data(session, id, serialize_HelloWorld_topic, &hello_topic);
         printl_hello_topic(&hello_topic);
     }
     else if (strcmp(name, "read_data") == 0 && length == 2)
     {
-        read_data(state, id, on_hello_topic, NULL);
+        read_data(session, id, on_hello_topic, NULL);
     }
     else if (strcmp(name, "delete") == 0 && length == 2)
     {
-        delete_resource(state, id);
+        delete_resource(session, id);
     }
     else if (strcmp(name, "h") == 0 || strcmp(name, "help") == 0)
     {
@@ -166,7 +169,7 @@ bool compute_command(const char *command, ClientState *state)
     }
 
     // only send data if there is.
-    send_to_agent(state);
+    send_to_agent(session);
 
     return true;
 }

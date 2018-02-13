@@ -54,37 +54,39 @@ int main(int args, char** argv)
 {
     (void)args;
     (void)argv;
-    // Creates a client state.
-    ClientState* state = new_udp_client_state(4096, 4000, 2020, 2019, "127.0.0.1");
 
-    // Creates this client on the Agent.
-    create_client(state, on_status, NULL);
+    uint8_t result;
+    uint8_t my_buffer[1024];
+    Session my_session;
+
+    /* Create udp session */
+    result = new_udp_session(&my_session, my_buffer, sizeof(my_buffer),
+                             4000, 2020, 2019, "127.0.0.1");
+    result = init_session(&my_session, NULL, on_status, NULL);
+
     // Creates a participant on the Agent.
-    XRCEInfo participant_info = create_participant(state);
+    XRCEInfo participant_info = create_participant(&my_session);
 
     // Register a topic on the given participant. Uses a topic configuration read from xml file
     String topic_profile = {"<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>", 86+1};
-    create_topic(state, participant_info.object_id, topic_profile);
-
+    create_topic(&my_session, participant_info.object_id, topic_profile);
 
     // Creates a publisher on the given participant
-    XRCEInfo publisher_info = create_publisher(state, participant_info.object_id);
-
+    XRCEInfo publisher_info = create_publisher(&my_session, participant_info.object_id);
 
     String data_writer_profile = {"<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>",
     300+1};
-
-    XRCEInfo data_writer_info = create_data_writer(state, participant_info.object_id, publisher_info.object_id, data_writer_profile); //read_file("hello_data_writer_profile.xml"));
+    XRCEInfo data_writer_info = create_data_writer(&my_session, participant_info.object_id, publisher_info.object_id, data_writer_profile); //read_file("hello_data_writer_profile.xml"));
 
     // Prepare and write the user data to be sent.
     char message[] = "Hello DDS world!";
     HelloWorld hello_topic = {1, message};
+
     // Write user type data.
-    write_data(state, data_writer_info.object_id, serialize_HelloWorld_topic, &hello_topic);
+    write_data(&my_session, data_writer_info.object_id, serialize_HelloWorld_topic, &hello_topic);
 
     // Send the data through the UDP transport.
-    send_to_agent(state);
+    send_to_agent(&my_session);
 
-    // Free all the ClientState resources.
-    free_client_state(state);
+    close_session(&my_session);
 }
