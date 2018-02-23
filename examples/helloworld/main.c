@@ -149,7 +149,8 @@ bool compute_command(const char* command, Session* session)
     }
     else if (strcmp(name, "read_data") == 0 && length == 2)
     {
-        read_data(session, id, on_hello_topic, NULL);
+        XRCEInfo info;
+        read_data(session, &info, id, on_hello_topic, NULL);
     }
     else if (strcmp(name, "delete") == 0 && length == 2)
     {

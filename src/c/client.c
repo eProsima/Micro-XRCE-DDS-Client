@@ -69,6 +69,12 @@ uint8_t new_udp_session(Session* session,
         session->next_request_id = 0;
         session->next_object_id = 0;
 
+        init_callback_data_storage(&session->callback_data_storage,
+                                   session->callback_data,
+                                   session->existence,
+                                   sizeof(session->existence),
+                                   0xFF00);
+
         session->output_message.writer.endianness = LITTLE_ENDIANNESS;
 
         result = SESSION_CREATED;
@@ -80,7 +86,6 @@ uint8_t new_udp_session(Session* session,
 void close_session(Session* session)
 {
     rm_locator(session->transport_id);
-    free_callback_data_storage(&session->callback_data_storage);
     free_input_message(&session->input_message);
 }
 
@@ -354,24 +359,31 @@ XRCEInfo write_data(Session* session, uint16_t data_writer_id, SerializeTopic se
     return (XRCEInfo){0x0000, 0xFFFF};
 }
 
-XRCEInfo read_data(Session* session, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args)
+bool read_data(Session* session, XRCEInfo* info, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args)
 {
-    int16_t callback_request_id = register_callback_data(&session->callback_data_storage, FORMAT_DATA, on_message, callback_args);
+    uint16_t callback_request_id;
+    bool result = register_callback_data(&session->callback_data_storage, &callback_request_id,
+                                         FORMAT_DATA, on_message, callback_args);
 
-    XRCEInfo info = {callback_request_id, data_reader_id};
-
-    READ_DATA_Payload payload;
-    payload.base.request_id = get_raw_request_id(info.request_id);
-    payload.base.object_id = get_raw_object_id(info.object_id);
-    payload.read_specification.data_format = FORMAT_DATA;
-    payload.read_specification.optional_content_filter_expression = false;
-    payload.read_specification.optional_delivery_control = false;
-
-    if (add_read_data_submessage(&session->output_message, &payload))
+    if (result)
     {
-        PRINTL_READ_DATA_SUBMESSAGE(&payload);
+        info->request_id = callback_request_id;
+        info->object_id = data_reader_id;
+
+        READ_DATA_Payload payload;
+        payload.base.request_id = get_raw_request_id(info.request_id);
+        payload.base.object_id = get_raw_object_id(info.object_id);
+        payload.read_specification.data_format = FORMAT_DATA;
+        payload.read_specification.optional_content_filter_expression = false;
+        payload.read_specification.optional_delivery_control = false;
+
+        if (add_read_data_submessage(&session->output_message, &payload))
+        {
+            PRINTL_READ_DATA_SUBMESSAGE(&payload);
+        }
     }
-    return info;
+
+    return result;
 }
 
 /* ----------------------------------------------------------------------------------------------
@@ -396,17 +408,18 @@ void on_out_of_bounds(void* vsession)
 
 bool on_message_header(const MessageHeader* header, const ClientKey* key, void* vsession)
 {
-    // TODO.
     (void) key;
 
     Session* session = (Session*) vsession;
 
     if(header->stream_id != STREAMID_NONE)
+    {
         if(header->sequence_nr != session->input_sequence_number)
         {
             PRINT_SEQUENCE_NUMBER(header->sequence_nr, session->input_sequence_number);
             return 0;
         }
+    }
 
     session->input_sequence_number++;
     return 1;
@@ -508,43 +521,44 @@ bool receive_from_agent(Session* session)
 /* ----------------------------------------------------------------------------------------------
                                 CALLBACKS - DATA
  ---------------------------------------------------------------------------------------------- */
-void init_callback_data_storage(CallbackDataStorage* store, uint16_t initial_id)
+void init_callback_data_storage(CallbackDataStorage* store,
+                                CallbackData* callbacks,
+                                bool* existence,
+                                uint32_t size,
+                                uint16_t initial_id)
 {
-    store->size = 1;
-    store->initial_id = initial_id;
-    store->existence = calloc(store->size, sizeof(bool));
-    store->callbacks = malloc(sizeof(CallbackData) * store->size);
+    store->size 		= size;
+    store->initial_id 	= initial_id;
+    store->existence	= existence;
+    store->callbacks	= callbacks;
 }
 
-void free_callback_data_storage(CallbackDataStorage* store)
+bool register_callback_data(CallbackDataStorage* store,
+                            uint16_t* callback_id,
+                            uint8_t format,
+                            OnMessageReceived on_message,
+                            void* callback_args)
 {
-    free(store->callbacks);
-    free(store->existence);
-}
+    bool result = false;
 
-uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, OnMessageReceived on_message, void *callback_args)
-{
     uint16_t id = store->size;
     for(uint32_t i = 0; i < store->size; i++)
-        if(!store->existence[i])
-            id = i;
-
-    if(id == store->size)
     {
-        uint32_t new_size = store->size * 2;
-        store->existence = realloc(store->existence, sizeof(bool) *new_size);
-        store->callbacks = realloc(store->callbacks, sizeof(CallbackData) *new_size);
-
-        for(uint32_t i = store->size; i < new_size; i++)
-            store->existence[i] = false;
-
-        store->size = new_size;
+        if(!store->existence[i])
+        {
+            id = i;
+        }
     }
 
-    store->existence[id] = true;
-    store->callbacks[id] = (CallbackData){format, on_message, callback_args};
+    if(id != store->size)
+    {
+        store->existence[id] 	= true;
+        store->callbacks[id] 	= (CallbackData){format, on_message, callback_args};
+        *callback_id			= store->initial_id + id;
+        result = true;
+    }
 
-    return store->initial_id + id;
+    return result;
 }
 
 void remove_callback_data(CallbackDataStorage* store, uint16_t id)

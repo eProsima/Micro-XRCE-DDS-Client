@@ -57,6 +57,7 @@ message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 ###############################################################################
 # Project specific options
 set(MAX_MESSAGE_SIZE 512 CACHE STRING "Define maximum message size to be used for messages")
+set(DATA_CALLBACK_SIZE 10 CACHE STRING "Define data callback size")
 
 #option(EPROSIMA_VERBOSE "Compile examples" OFF)
 option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)

@@ -31,10 +31,18 @@ extern "C"
 /* ----------------------------------------------------------------------------------------------
       Data callback map funcions
  ---------------------------------------------------------------------------------------------- */
-void init_callback_data_storage(CallbackDataStorage* store, uint16_t initial_id);
-void free_callback_data_storage(CallbackDataStorage* store);
+void init_callback_data_storage(CallbackDataStorage* store,
+                                CallbackData* callbacks,
+                                bool* existence,
+                                uint32_t size,
+                                uint16_t initial_id);
+//void free_callback_data_storage(CallbackDataStorage* store);
 
-uint16_t register_callback_data(CallbackDataStorage* store, uint8_t format, OnMessageReceived on_message, void *callback_args);
+bool register_callback_data(CallbackDataStorage* store,
+                            uint16_t* callback_id,
+                            uint8_t format,
+                            OnMessageReceived on_message,
+                            void* callback_args);
 void remove_callback_data(CallbackDataStorage* store, uint16_t id);
 CallbackData* get_callback_data(const CallbackDataStorage* store, uint16_t id);
 

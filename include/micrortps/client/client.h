@@ -109,6 +109,8 @@ typedef struct Session
     uint16_t next_request_id;
     uint16_t next_object_id;
 
+    bool				existence[DATA_CALLBACK_SIZE];
+    CallbackData 		callback_data[DATA_CALLBACK_SIZE];
     CallbackDataStorage callback_data_storage;
 
     OnStatusReceived on_status_received;
@@ -142,7 +144,7 @@ XRCEInfo create_data_reader(Session* session, uint16_t participant_id, uint16_t 
 XRCEInfo delete_resource(Session* session, uint16_t resource_id);
 
 XRCEInfo write_data(Session* session, uint16_t data_writer_id, SerializeTopic serialization, void* topic);
-XRCEInfo read_data(Session* session, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args);
+bool read_data(Session* session, XRCEInfo* info, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args);
 
 /* ----------------------------------------------------------------------------------------------
       Comunication functions
