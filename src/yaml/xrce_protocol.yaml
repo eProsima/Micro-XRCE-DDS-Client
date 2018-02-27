@@ -1,22 +1,31 @@
 DATA:
 - struct:  {ClientKey: [data: uint8_t 4]}
 
-- typedef: {ObjectKind: uint8_t}
-- define:  {OBJK_INVALID:      '0x00'}
-- define:  {OBJK_PARTICIPANT:  '0x01'}
-- define:  {OBJK_DATAWRITER:   '0x03'}
-- define:  {OBJK_TOPIC:        '0x04'}
-- define:  {OBJK_DATAREADER:   '0x07'}
-- define:  {OBJK_SUBSCRIBER:   '0x08'}
-- define:  {OBJK_PUBLISHER:    '0x09'}
-- define:  {OBJK_TYPE:         '0x10'}
-- define:  {OBJK_QOSPROFILE:   '0x11'}
-- define:  {OBJK_APPLICATION:  '0x20'}
+- define:  {CLIENT_INVALID: '(ClientKey){0x00, 0x00, 0x00, 0x00}'}
 
-- struct:  {ObjectId: [data: uint8_t 2]}
-- define:  {OBJECTID_INVALID: '(ObjectId){0xFF, 0xFF}'}
-- define:  {OBJECTID_CLIENT:  '(ObjectId){0xFF, 0xF0}'}
-- define:  {OBJECTID_SESSION: '(ObjectId){0xFF, 0xF1}'}
+- typedef: {ObjectKind: uint8_t}
+
+- define:  {OBJK_INVALID:       '0x00'}
+- define:  {OBJK_PARTICIPANT:   '0x01'}
+- define:  {OBJK_TOPIC:         '0x02'}
+- define:  {OBJK_PUBLISHER:     '0x03'}
+- define:  {OBJK_SUBSCRIBER:    '0x04'}
+- define:  {OBJK_DATAWRITER:    '0x05'}
+- define:  {OBJK_DATAREADER:    '0x06'}
+- define:  {OBJK_TYPE:          '0x0A'}
+- define:  {OBJK_QOSPROFILE:    '0x0B'}
+- define:  {OBJK_APPLICATION:   '0x0C'}
+- define:  {OBJK_AGENT:         '0x0D'}
+- define:  {OBJK_CLIENT:        '0x0E'}
+- define:  {OBJK_OTHER:         '0x0F'}
+
+- struct:  {ObjectId:       [data: uint8_t 2]}
+- struct:  {ObjectPrefix:   [data: uint8_t 2]}
+
+- define:  {OBJECTID_INVALID:   '(ObjectId){0x00, 0x00}'}
+- define:  {OBJECTID_AGENT:     '(ObjectId){0xFF, 0xFD}'}
+- define:  {OBJECTID_CLIENT:    '(ObjectId){0xFF, 0xFE}'}
+- define:  {OBJECTID_SESSION:   '(ObjectId){0xFF, 0xFF}'}
 
 - struct:  {XrceCookie: [data: uint8_t 4]}
 - define:  {XRCE_COOKIE: '(XrceCookie){0x58, 0x52, 0x43, 0x45}'}
@@ -30,31 +39,290 @@ DATA:
 - define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}
 
 - typedef: {SessionId: uint8_t}
-- define:  {SESSIONID_NONE_WITHOUT_CLIENT_KEY: '0x00'}
-- define:  {SESSIONID_NONE_WITH_CLIENT_KEY:    '0x80'}
+- define:  {SESSIONID_NONE_WITH_CLIENT_KEY:     '0x00'}
+- define:  {SESSIONID_NONE_WITHOUT_CLIENT_KEY:  '0x80'}
 
 - typedef: {StreamId: uint8_t}
 - define:  {STREAMID_NONE:                  '0x00'}
 - define:  {STREAMID_BUILTIN_BEST_EFFORTS:  '0x01'}
-- define:  {STREAMID_BUILTIN_RELIABLE:      '0x8F'}
+- define:  {STREAMID_BUILTIN_RELIABLE:      '0x80'}
 
+- enum:
+    TransportLocatorFormat:
+        - ADDRESS_FORMAT_SMALL:     '0'
+        - ADDRESS_FORMAT_MEDIUM:    '1'
+        - ADDRESS_FORMAT_LARGE:     '2'
+        - ADDRESS_FORMAT_STRING:    '3'
+    __TYPE__: uint8_t
+
+- struct:
+    TransportLocatorSmall:
+        - address: uint8_t 2
+        - locator_port: uint8_t
+
+- struct:
+    TransportLocatorMedium:
+        - address: uint8_t 4
+        - locator_port: uint8_t
+
+- struct:
+    TransportLocatorLarge:
+        - address: uint8_t 16
+        - locator_port: uint8_t
+
+- struct:
+    TransportLocatorString:
+        - value: string
+
+- union:
+    TransportLocator:
+        - format: TransportLocatorFormat
+        - small_locator: TransportLocatorSmall 
+        - medium_locator: TransportLocatorMedium
+        - large_locator: TransportLocatorLarge
+        - string_locator: TransportLocatorString
+    __DISCRIMINATOR__: 
+        - ADDRESS_FORMAT_SMALL
+        - ADDRESS_FORMAT_MEDIUM
+        - ADDRESS_FORMAT_LARGE
+        - ADDRESS_FORMAT_STRING
+
+- struct:
+    TransportLocatorSeq:
+        - size: uint32_t
+        - locators: TransportLocator*
+
+- struct:
+    Property:
+        - string: name
+        - string: value
+
+- struct:
+    PropertySeq:
+        - size: uint32_t
+        - properties: Property*
+
+- struct:
+    CLIENT_Representation:
+        - xrce_cookie:        XrceCookie
+        - xrce_version:       XrceVersion
+        - xrce_vendor_id:     XrceVendorId
+        - client_timestamp:   Time_t
+        - client_key:         ClientKey
+        - session_id:         SessionId
+        - properties:         PropertySeq
+
+- struct:
+    AGENT_Representation:
+        - xrce_cookie:        XrceCookie
+        - xrce_version:       XrceVersion
+        - xrce_vendor_id:     XrceVendorId
+        - agent_timestamp:    Time_t
+        - properties:         PropertySeq
+        
 - typedef: {RepresentationFormat: uint8_t}
 - define:  {REPRESENTATION_BY_REFERENCE:   '0x01'}
 - define:  {REPRESENTATION_AS_XML_STRING:  '0x02'}
 - define:  {REPRESENTATION_IN_BINARY:      '0x03'}
 
+- define:  {REFERENCE_MAX_LEN:  '128'}
+
+- union:
+    OBJK_Representation3Formats:
+      - format:                     RepresentationFormat
+      - object_reference:           String_t
+      - xml_string_represenatation: String_t
+      - binary_representation:      BinarySequence_t
+    __DISCRIMINATOR__:
+      - REPRESENTATION_BY_REFERENCE
+      - REPRESENTATION_AS_XML_STRING
+      - REPRESENTATION_IN_BINARY
+
+- union:
+    OBJK_RepresentationRefAndXMLFormats:
+        - format:                       RepresentationFormat
+        - object_name:                  String_t
+        - xml_string_represenatation:   String_t
+    __DISCRIMINATOR__:
+        - REPRESENTATION_BY_REFERENCE
+        - REPRESENTATION_AS_XML_STRING
+
+- union:
+    OBJK_RepresentationBinAndXMLFormats:
+        - format:                       RepresentationFormat
+        - object_name:                  BinarySequence_t
+        - xml_string_represenatation:   String_t
+    __DISCRIMINATOR__:
+        - REPRESENTATION_IN_BINARY
+        - REPRESENTATION_AS_XML_STRING
+          
+- struct:
+    OBJK_RepresentationRefAndXML_Base:
+        - representation: OBJK_RepresentationRefAndXMLFormats
+
+- struct:
+    OBJK_RepresentationBinAndXML_Base:
+        - representation: OBJK_RepresentationBinAndXMLFormats
+        
+- struct:
+    OBJK_Representation3_Base:
+        - representation: OBJK_Representation3Formats
+
+- struct:
+    OBJK_QOSPROFILE_Representation:
+      - base:    OBJK_RepresentationRefAndXML_Base 
+
+- struct:
+    OBJK_TYPE_Representation:
+      - base:    OBJK_RepresentationRefAndXML_Base
+
+- struct:
+    OBJK_DOMAIN_Representation:
+      - base:    OBJK_RepresentationRefAndXML_Base
+
+- struct:
+    OBJK_APPLICATION_Representation:
+      - base:    OBJK_RepresentationRefAndXML_Base
+
+- struct:
+    OBJK_PUBLISHER_Representation:
+      - base:    OBJK_RepresentationBinAndXML_Base
+
+- struct:
+    OBJK_SUBSCRIBER_Representation:
+      - base:    OBJK_RepresentationBinAndXML_Base
+
+- struct:
+    DATAWRITER_Representation:
+      - base:    OBJK_RepresentationBinAndXMLFormats 
+
+- struct:
+    DATAREADER_Representation:
+      - base:    OBJK_RepresentationBinAndXMLFormats 
+
+- struct:
+    OBJK_PARTICIPANT_Representation:
+      - base:       OBJK_Representation3_Base
+      - domain_id:  int16_t
+
+- struct:
+    OBJK_TOPIC_Representation:
+      - base:           OBJK_Representation3_Base    
+      - participant_id: ObjectId
+
+- struct:
+    OBJK_DomainParticipant_Binary:
+        - domain_reference:         String_t
+        - qos_profile_reference:    String_t
+
+- struct:
+    OBJK_Topic_Binary:
+        - topic_name:       String_t
+        - type_reference:   String_t
+        - type_name:        String_t
+
+- struct:
+    OBJK_Publisher_Binary_Qos:
+        - partitions: StringSequence_t
+        - group_data: BinarySequence_t
+
+- struct:
+    OBJK_Publisher_Binary: 
+        - publisher_name: String_t
+        - qos: OBJK_Publisher_Binary_Qos
+
+- struct:
+    OBJK_Subscriber_Binary_Qos:
+        - partitions: StringSequence_t
+        - group_data: BinarySequence_t
+
+- struct:
+    OBJK_Subscriber_Binary: 
+        - subscriber_name: String_t
+        - qos: OBJK_Subscirber_Binary_Qos
+
+- enum:
+    EndpointQosFlags:
+      - is_reliabel:                   '0x01 << 0'
+      - is_history_keep_last:          '0x01 << 1'
+      - is_ownership_exclusive:        '0x01 << 2'
+      - is_durability_transient_local: '0x01 << 3'
+      - is_durability_transient:       '0x01 << 4'
+      - is_durability_persistent:      '0x01 << 5'
+    __TYPE__: uint16_t
+
+- struct:
+    OBJK_DataWriter_Binary_Qos:
+        - base: OBJK_Endpoint_QosBinary
+        - ownership_strength: uint64_t
+
+- struct:
+    OBJK_DataReader_Binary_Qos:
+        - base: OBJK_Endpoint_QosBinary
+        - timebasedfilter_msec: uint64_t
+        - contentbased_filter: String_t
+
+- struct:
+    OBJK_DataReader_Binary:
+        - String_t: topic_name
+        - qos: OBJK_DataReader_Binary_Qos
+
+- struct:
+    OBJK_DataWiter_Binary:
+        - String_t: topic_name
+        - qos: OBJK_DataWriter_Binary_Qos
+
+- union:
+    ObjectVariant:
+      - kind: ObjectKind
+      - agent:          AGENT_Representation
+      - client:         CLIENT_Representation
+      - application:    OBJK_APPLICATION_Representation
+      - participant:    OBJK_PARTICIPANT_Representation
+      - qos_profile:    OBJK_QOSPROFILE_Representation
+      - type:           OBJK_TYPE_Representation
+      - topic:          OBJK_TOPIC_Representation
+      - publisher:      OBJK_PUBLISHER_Representation
+      - subscriber:     OBJK_SUBSCRIBER_Representation
+      - data_writer:    DATAWRITER_Representation
+      - data_reader:    DATAREADER_Representation
+    __DISCRIMINATOR__:
+      - OBJK_APPLICATION
+      - OBJK_PARTICIPANT
+      - OBJK_QOSPROFILE
+      - OBJK_TYPE
+      - OBJK_TOPIC
+      - OBJK_PUBLISHER
+      - OBJK_SUBSCRIBER
+      - OBJK_DATAWRITER
+      - OBJK_DATAREADER
+
+- struct:
+    CreationMode:
+        - reuse: bool
+        - replace: bool
+
 - struct:  {RequestId: [data: uint8_t 2]}
 
-- define:  {STATUS_OK:                    '0x00'}
-- define:  {STATUS_OK_MATCHED:            '0x01'}
-- define:  {STATUS_ERR_DDS_ERROR:         '0x80'}
-- define:  {STATUS_ERR_MISMATCH:          '0x81'}
-- define:  {STATUS_ERR_ALREADY_EXISTS:    '0x82'}
-- define:  {STATUS_ERR_DENIED:            '0x83'}
-- define:  {STATUS_ERR_UNKNOWN_REFERENCE: '0x84'}
-- define:  {STATUS_ERR_INVALID_DATA:      '0x85'}
-- define:  {STATUS_ERR_INCOMPATIBLE:      '0x86'}
-- define:  {STATUS_ERR_RESOURCES:         '0x87'}
+- enum:
+    StatusValue:
+        - STATUS_OK:                    '0x00'
+        - STATUS_OK_MATCHED:            '0x01'
+        - STATUS_ERR_DDS_ERROR:         '0x80'          
+        - STATUS_ERR_MISMATCH:          '0x81'
+        - STATUS_ERR_ALREADY_EXISTS:    '0x82'
+        - STATUS_ERR_DENIED:            '0x83'
+        - STATUS_ERR_UNKNOWN_REFERENCE: '0x84'
+        - STATUS_ERR_INVALID_DATA:      '0x85'
+        - STATUS_ERR_INCOMPATIBLE:      '0x86'
+        - STATUS_ERR_RESOURCES:         '0x87'
+
+- struct:
+    ResultStatus:
+      - status: StatusValue
+      - implementation_status: uint8_t
+
+- typedef: {RelatedObjectRequest: BaseObjectRequest}
 
 - define:  {STATUS_LAST_OP_NONE:   '0x00'}
 - define:  {STATUS_LAST_OP_CREATE: '0x01'}
@@ -65,14 +333,305 @@ DATA:
 - define:  {STATUS_LAST_OP_WRITE:  '0x06'}
 
 - enum:
+    InfoMask:
+      - INFO_CONFIGURATION: 0x01 << 0
+      - INFO_ACTIVITY:      0x01 << 1
+    __TYPE__: uint32_t
+
+- struct:
+    AGENT_ActivityInfo:
+        - availibility: int8_t
+        - address_seq: TransportLocatorSeq
+
+- struct:
+    DATAREADER_ActivityInfo:
+      - highest_acked_num: int16_t
+
+- struct:
+    DATAWRITER_ActivityInfo:
+      - stream_seq_num: int16_t
+      - sample_seq_num: uint64_t
+
+- union:
+    ActivityInfoVariant:
+      - kind: ObjectKind
+      - agent:          AGENT_ActivityInfo
+      - data_writer:    DATAWRITER_ActivityInfo
+      - data_reader:    DATAREADER_ActivityInfo
+    __DISCRIMINATOR__:
+      - OBJK_AGENT
+      - OBJK_DATAWRITER
+      - OBJK_DATAREADER
+
+- struct:
+    ObjectInfo:
+        - config: ObjectVariant
+        - activity: ActivityInfoVariant
+
+- struct:
+    BaseObjectRequest:
+      - request_id: RequestId 
+      - object_id: ObjectId
+
+- struct:
+    BaseObjectReply:
+      - related_request: BaseObjectRequest
+      - result: ResultStatus
+
+- enum:
     DataFormat:
       - FORMAT_DATA:           '0x00'
-      - FORMAT_DATA_SEQ:       '0x01'
       - FORMAT_SAMPLE:         '0x02'
-      - FORMAT_SAMPLE_SEQ:     '0x03'
-      - FORMAT_PACKED_SAMPLES: '0x04'
-      - FORMAT_BAD:            '0xFF'
+      - FORMAT_DATA_SEQ:       '0x08'
+      - FORMAT_SAMPLE_SEQ:     '0x0A'
+      - FORMAT_PACKED_SAMPLES: '0x0E'
+      - FORMAT_MASK:           '0x0F'
     __TYPE__: uint8_t
+
+- struct:
+    DataDeliveryControl:
+      - max_samples:            uint16_t
+      - max_elapsed_time:       uint32_t
+      - max_bytes_per_seconds:  uint32_t
+      - min_pace_period:        uint32_t
+
+- struct:
+    ReadSpecification:
+      - data_format: DataFormat
+      - content_filter_expression: String_t
+        __OPTIONAL_CONDITION__: ['true']
+
+      - delivery_control: DataDeliveryControl
+        __OPTIONAL_CONDITION__: ['false']
+
+- enum:
+    SampleInfoFlags:
+        - INSTANCE_STATE_UNREGISTERD:   '0x01 << 0'
+        - INSTANCE_STATE_DISPOSED:      '0x01 << 1'
+        - VIEW_STATE_NEW:               '0x01 << 2'
+        - SAMPLE_STATE_READ:            '0x01 << 3'
+    __TYPE__: uint8_t
+
+- enum:
+    SampleInfoFormat:
+        - FORMAT_EMPTY:     '0x00'
+        - FORMAT_SEQNUM:    '0x01'             
+        - FORMAT_TIMESTAMP: '0x02'
+        - FORMAT_SEQN_TIMS: '0x03'
+
+- struct:
+    SeqNumberAndTimestamp:
+        - sequence_number:      uint32_t
+        - session_time_offset:  uint32_t
+
+- union:
+    SampleInfoDetail:
+        - format: SampleInfoFormat
+        - empty:                void
+        - sequence_number:      uint32_t
+        - session_time_offset:  uint32_t
+        - seqnum_n_timestamp:   SeqNumberAndTimestamp
+    __DISCRIMINATOR__:
+        - FORMAT_EMPTY
+        - FORMAT_SEQNUM
+        - FORMAT_TIMESTAMP
+        - FORMAT_SEQN_TIMS
+
+- struct:
+    SampleInfo:
+      - state: SampleInfoFlags
+      - detail: SampleInfoDetail
+
+- typedef: {DeciSecond: uint16_t}
+
+- struct:
+    SampleInfoDelta:
+      - state:              SampleInfoFlags
+      - seq_number_delta:   uint8_t
+      - timestamp_delta:    DeciSecond
+
+- struct:
+    SampleData:
+      - size: uint32_t
+      - data: uint8_t*
+
+- struct:
+    Sample:
+      - info: SampleInfo
+      - data: SampleData
+
+- struct:
+    SampleDelta:
+      - info_delta: SampleInfoDelta
+      - data: SampleData
+
+- struct:
+    PackedSamples:
+      - info_base: SampleInfo
+      - sample_delta_seq: SampleDeltaSequence
+
+- struct:
+    SamplePackedSeq:
+        - size: uint32_t
+        - data: PackedSamples
+
+- union:
+    DataRepresentation:
+      - format: DataFormat
+      - data: SampleData
+      - sample: Sample
+      - data_seq: SampleDataSequence
+      - sample_seq: SampleSequence
+      - packed_samples: PackedSamples
+    __DISCRIMINATOR__:
+      - FORMAT_DATA
+      - FORMAT_SAMPLE
+      - FORMAT_DATA_SEQ
+      - FORMAT_SAMPLE_SEQ
+      - FORMAT_PACKED_SAMPLES
+
+- struct:
+    CREATE_CLIENT_Payload:
+      - base: BaseObjectRequest
+      - client_representation: CLIENT_Representation
+
+- struct:
+    CREATE_Payload:
+      - base: BaseObjectRequest
+      - object_representation: ObjectVariant
+
+- struct:
+    GET_INFO_Payload:
+      - base: BaseObjectRequest
+      - info_mask: InfoMask
+
+- struct:
+    DELETE_Payload:
+      - base: BaseObjectRequest
+
+- struct:
+    STATUS_AGENT_Payload:
+      - base: BaseObjectReply
+      - agent_info: AGENT_Representation
+
+- struct:
+    STATUS_Payload:
+      - base: BaseObjectReply
+
+- struct:
+    INFO_Payload:
+      - base: BaseObjectReply
+      - object_info: ObjectInfo
+
+- struct:
+    READ_DATA_Payload:
+      - base: BaseObjectRequest
+      - read_specification: ReadSpecification
+
+- struct:
+    WRITE_DATA_Payload_Data:
+      - base: BaseObjectRequest
+      - data: SampleData
+
+- struct:
+    WRITE_DATA_Payload_Sample:
+      - base: BaseObjectRequest
+      - sample: Sample
+
+- struct:
+    WRITE_DATA_Payload_DataSeq:
+      - base: BaseObjectRequest
+      - data_seq: SampleDataSequence
+
+- struct:
+    WRITE_DATA_Payload_SampleSeq:
+      - base: BaseObjectRequest
+      - sample_seq: SampleSequence
+
+- struct:
+    WRITE_DATA_Payload_PackedSamples:
+      - base: BaseObjectRequest
+      - packed_samples: PackedSamples
+
+- struct:
+    DATA_Payload_Data:
+      - base: RelatedObjectRequest
+      - data: SampleData
+
+- struct:
+    DATA_Payload_Sample:
+      - base: RelatedObjectRequest
+      - sample: Sample
+
+- struct:
+    DATA_Payload_DataSeq:
+      - base: RelatedObjectRequest
+      - data_seq: SampleDataSequence
+
+- struct:
+    DATA_Payload_SampleSeq:
+      - base: RelatedObjectRequest
+      - sample_seq: SampleSequence
+
+- struct:
+    DATA_Payload_PackedSamples:
+      - base: RelatedObjectRequest
+      - packed_samples: PackedSamples
+
+- struct:
+    ACKNACK_Payload:
+        - first_unacked_seq_num: int16_t
+        - nack_bitmap: uint8_t 2
+          
+- struct:
+    HEARTBEAT_Payload:
+        - first_unacked_seq_nr: int16_t
+        - last_unacked_seq_nr: int16_t
+
+- struct:
+    MessageHeader:
+      - session_id: uint8_t
+      - stream_id: uint8_t
+      - {sequence_nr: uint16_t, __ENDIANNESS__: LITTLE}
+      # - client_key: ClientKey //manage at message level.
+          
+- enum:
+    SubmessageId:
+      - SUBMESSAGE_ID_CREATE_CLIENT: '0'
+      - SUBMESSAGE_ID_CREATE:        '1'
+      - SUBMESSAGE_ID_GET_INFO:      '2'
+      - SUBMESSAGE_ID_DELETE:        '3'
+      - SUBMESSAGE_ID_STATUS:        '4'
+      - SUBMESSAGE_ID_INFO:          '5'
+      - SUBMESSAGE_ID_WRITE_DATA:    '6'
+      - SUBMESSAGE_ID_READ_DATA:     '7'
+      - SUBMESSAGE_ID_DATA:          '8'
+      - SUBMESSAGE_ID_ACKNACK:       '9'
+      - SUBMESSAGE_ID_HEARTBEAT:     '10'
+      - SUBMESSAGE_ID_FRAGMENT:      '12'
+      - SUBMESSAGE_ID_FRAGMENT_END:  '13'
+    __TYPE__: uint8_t
+
+- enum:
+    SubmessageHeaderFlags:
+      - FLAG_ENDIANNESS:            '0x01 << 0'
+      - FLAG_REUSE:                 '0x01 << 1'
+      - FLAG_REPLACE:               '0x01 << 2'
+      - FLAG_LAST_FRAGMENT:         '0x01 << 1'
+      - FORMAT_DATA_F:              '0x00'
+      - FORMAT_SAMPLE_F:            '0x02'
+      - FORMAT_DATA_SEQ_F:          '0x08' 
+      - FORMAT_SAMPLE_SEQ_F:        '0x0A'
+      - FORMAT_PACKED_SAMPLES_F:    '0x0E'
+    __TYPE__: uint8_t
+
+- struct:
+    SubmessageHeader:
+      - id: uint8_t
+      - flags: SubmessageHeaderFlags
+      - {length: uint16_t, __ENDIANNESS__: LITTLE}
+        
+        ######################################################################################        
 
 - struct:
     Time_t:
@@ -95,254 +654,9 @@ DATA:
       - data: String_t*
 
 - struct:
-    OBJK_CLIENT_Representation:
-      - xrce_cookie:      XrceCookie
-      - xrce_version:     XrceVersion
-      - xrce_vendor_id:   XrceVendorId
-      - client_timestamp: Time_t
-      - client_key:       ClientKey
-      - session_id:       SessionId
-
-- union:
-    OBJK_Representation3_Base:
-      - format:                    RepresentationFormat
-      - object_name:               String_t
-      - xml:                       String_t
-      - binary_representation:     BinarySequence_t
-    __DISCRIMINATOR__:
-      - REPRESENTATION_BY_REFERENCE
-      - REPRESENTATION_AS_XML_STRING
-      - REPRESENTATION_IN_BINARY
-
-- union:
-    OBJK_Representation2_Base:
-      - format:                    RepresentationFormat
-      - object_name:               String_t
-      - xml:                       String_t
-    __DISCRIMINATOR__:
-      - REPRESENTATION_BY_REFERENCE
-      - REPRESENTATION_AS_XML_STRING
-
-- struct:
-    OBJK_QOSPROFILE_Representation:
-      - base2:     OBJK_Representation2_Base
-
-- struct:
-    OBJK_APPLICATION_Representation:
-      - base2:     OBJK_Representation2_Base
-
-- struct:
-    OBJK_PARTICIPANT_Representation:
-      - base2:     OBJK_Representation2_Base
-
-- struct:
-    OBJK_TYPE_Representation:
-      - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-      - registered_type_name: String_t
-
-- struct:
-    OBJK_TOPIC_Representation:
-      - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-
-- struct:
-    OBJK_PUBLISHER_Representation:
-      - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-
-- struct:
-    OBJK_SUBSCRIBER_Representation:
-      - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-
-- struct:
-    OBJK_DATAWRITER_Representation:
-      - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-      - publisher_id: ObjectId
-
-- struct:
-    OBJK_DATAREADER_Representation:
-      - base3:     OBJK_Representation3_Base
-      - participant_id: ObjectId
-      - subscriber_id: ObjectId
-
-- struct:
-    OBJK_TYPE_Binary:
-      - type_name:     String_t
-
-- struct:
-    OBJK_TOPIC_Binary:
-      - topic_name:    String_t
-      - type_name:     String_t
-
-- struct:
-    OBJK_PUBLISHER_Binary:
-      - partitions:     StringSequence_t
-      - group_data:     BinarySequence_t
-
-- struct:
-    OBJK_SUBSCRIBER_Binary:
-      - partitions:     StringSequence_t
-      - group_data:     BinarySequence_t
-
-- enum:
-    EndpointQosFlags:
-      - IS_RELIABLE:                   '0x01 << 0'
-      - IS_HISTORY_KEEP_LAST:          '0x01 << 1'
-      - IS_OWNERSHIP_EXCLUSIVE:        '0x01 << 2'
-      - IS_DURABILITY_TRANSIENT_LOCAL: '0x01 << 3'
-      - IS_DURABILITY_TRANSIENT:       '0x01 << 4'
-      - IS_DURABILITY_PERSISTANT:      '0x01 << 5'
-    __TYPE__: uint16_t
-
-- struct:
-    OBJK_Endpoint_QosBinary:
-      - qos_flags:         EndpointQosFlags
-      - history_depth:     uint16_t
-      - deadline_msec:     uint32_t
-      - lifespan_msec:     uint32_t
-      - user_data:         BinarySequence_t
-
-- struct:
-    OBJK_DataReader_Binary:
-      - topic_name:         String_t
-      - endpoint_qos:     OBJK_Endpoint_QosBinary
-      - timebasedfilter_msec:     uint32_t
-      - contentbased_filter:     String_t
-
-- struct:
-    OBJK_DataWriter_Binary:
-      - topic_name:         String_t
-      - endpoint_qos:     OBJK_Endpoint_QosBinary
-      - ownership_strength:     uint32_t
-
-- union:
-    ObjectVariant:
-      - kind: ObjectKind
-      - application: OBJK_APPLICATION_Representation
-      - participant: OBJK_PARTICIPANT_Representation
-      - qos_profile: OBJK_QOSPROFILE_Representation
-      - type: OBJK_TYPE_Representation
-      - topic: OBJK_TOPIC_Representation
-      - publisher: OBJK_PUBLISHER_Representation
-      - subscriber: OBJK_SUBSCRIBER_Representation
-      - data_writer: OBJK_DATAWRITER_Representation
-      - data_reader: OBJK_DATAREADER_Representation
-    __DISCRIMINATOR__:
-      - OBJK_APPLICATION
-      - OBJK_PARTICIPANT
-      - OBJK_QOSPROFILE
-      - OBJK_TYPE
-      - OBJK_TOPIC
-      - OBJK_PUBLISHER
-      - OBJK_SUBSCRIBER
-      - OBJK_DATAWRITER
-      - OBJK_DATAREADER
-
-- struct:
-    ResultStatus:
-      - request_id: RequestId
-      - status: uint8_t
-      - implementation_status: uint8_t
-
-- enum:
-    InfoMask:
-      - INFO_CONFIGURATION: 0x01 << 0
-      - INFO_ACTIVITY:      0x01 << 1
-    __TYPE__: uint32_t
-
-- struct:
-    OBJK_DATAREADER_ActivityInfo:
-      - highest_acked_num: int16_t
-
-- struct:
-    OBJK_DATAWRITER_ActivityInfo:
-      - streaseq_num: int16_t
-      - sample_seq_num: uint64_t
-
-- union:
-    ActivityInfoVariant:
-      - kind: ObjectKind
-      - data_writer: OBJK_DATAWRITER_ActivityInfo
-      - data_reader: OBJK_DATAREADER_ActivityInfo
-    __DISCRIMINATOR__:
-      - OBJK_DATAWRITER
-      - OBJK_DATAREADER
-
-- struct:
-    Info:
-      - config: ObjectVariant
-      - activity: ActivityInfoVariant
-
-- struct:
-    BaseRequest:
-      - request_id: RequestId
-
-- struct:
-    BaseObjectRequest:
-      - base: BaseRequest
-      - object_id: ObjectId
-
-- struct:
-    BaseReply:
-      - result: ResultStatus
-      - request_id: RequestId
-
-- struct:
-    BaseObjectReply:
-      - base: BaseReply
-      - object_id: ObjectId
-
-- struct:
-    InfoReply:
-      - reply: BaseObjectReply
-      - info: ObjectVariant
-
-- struct:
-    DataDeliveryControl:
-      - max_samples: uint16_t
-      - max_elapsed_time: uint32_t
-      - max_rate: uint32_t
-
-- struct:
-    ReadSpecification:
-      - content_filter_expression: String_t
-        __OPTIONAL_CONDITION__: ['true']
-
-      - delivery_config: DataDeliveryControl
-        __OPTIONAL_CONDITION__:
-          - FORMAT_DATA_SEQ
-          - FORMAT_SAMPLE_SEQ
-          - FORMAT_PACKED_SAMPLES
-
-- struct:
-    SampleInfo:
-      - state: uint32_t
-      - sequence_number: uint32_t
-      - session_time_offset: uint32_t
-
-- struct:
-    SampleInfoDelta:
-      - state: uint8_t
-      - seq_number_delta: uint8_t
-      - timestamp_delta: uint16_t
-
-- struct:
-    SampleData:
-      - size: uint32_t
-      - data: uint8_t*
-
-- struct:
     SampleDataSequence:
       - size: uint32_t
       - data: SampleData*
-
-- struct:
-    Sample:
-      - info: SampleInfo
-      - data: SampleData
 
 - struct:
     SampleSequence:
@@ -350,140 +664,14 @@ DATA:
       - data: Sample*
 
 - struct:
-    SampleDelta:
-      - info_delta: SampleInfoDelta
-      - data: SampleData
-
-- struct:
     SampleDeltaSequence:
       - size: uint32_t
       - data: SampleDelta*
 
 - struct:
-    PackedSamples:
-      - info_base: SampleInfo
-      - sample_delta_seq: SampleDeltaSequence
-
-- struct:
     PackedSamplesSequence:
       - size: uint32_t
       - data: PackedSamples*
-
-- union:
-    DataRepresentation:
-      - format: DataFormat
-      - data: SampleData
-      - data_seq: SampleDataSequence
-      - sample: Sample
-      - sample_seq: SampleSequence
-      - packed_samples: PackedSamples
-    __DISCRIMINATOR__:
-      - FORMAT_DATA
-      - FORMAT_DATA_SEQ
-      - FORMAT_SAMPLE
-      - FORMAT_SAMPLE_SEQ
-      - FORMAT_PACKED_SAMPLES
-
-- enum:
-    SubmessageId:
-      - SUBMESSAGE_ID_CREATE_CLIENT: '0'
-      - SUBMESSAGE_ID_CREATE:        '1'
-      - SUBMESSAGE_ID_GET_INFO:      '2'
-      - SUBMESSAGE_ID_DELETE:        '3'
-      - SUBMESSAGE_ID_STATUS:        '4'
-      - SUBMESSAGE_ID_INFO:          '5'
-      - SUBMESSAGE_ID_WRITE_DATA:    '6'
-      - SUBMESSAGE_ID_READ_DATA:     '7'
-      - SUBMESSAGE_ID_DATA:          '8'
-      - SUBMESSAGE_ID_ACKNACK:       '9'
-      - SUBMESSAGE_ID_HEARTBEAT:     '10'
-      - SUBMESSAGE_ID_FRAGMENT:      '12'
-      - SUBMESSAGE_ID_FRAGMENT_END:  '13'
-    __TYPE__: uint8_t
-
-- struct:
-    MessageHeader:
-      - session_id: uint8_t
-      - stream_id: uint8_t
-      - {sequence_nr: uint16_t, __ENDIANNESS__: LITTLE}
-      # - client_key: ClientKey //manage at message level.
-
-- enum:
-    SubmessageHeaderFlags:
-      - FLAG_ENDIANNESS:    '0x01 << 0'
-      - FLAG_REPLACE:       '0x01 << 1'
-      - FLAG_LAST_FRAGMENT: '0x01 << 1'
-      - FLAG_REUSE:         '0x01 << 2'
-    __TYPE__: uint8_t
-
-- struct:
-    SubmessageHeader:
-      - id: uint8_t
-      - flags: SubmessageHeaderFlags
-      - {length: uint16_t, __ENDIANNESS__: LITTLE}
-
-- struct:
-    CreateClientPayload:
-      - request: BaseObjectRequest
-      - representation: OBJK_CLIENT_Representation
-
-- struct:
-    CreateResourcePayload:
-      - request: BaseObjectRequest
-      - representation: ObjectVariant
-
-- struct:
-    DeleteResourcePayload:
-      - request: BaseObjectRequest
-
-- struct:
-    StatusPayload:
-      - reply: BaseObjectReply
-
-- struct:
-    GetInfoPayload:
-      - request: BaseObjectRequest
-      - info_mask: InfoMask
-
-- struct:
-    InfoPayload:
-      - reply: BaseObjectReply
-      - info: Info
-
-- struct:
-    ReadDataPayload:
-      - request: BaseObjectRequest
-      - read_specification: ReadSpecification
-
-- struct:
-    WriteDataPayload:
-      - request: BaseObjectRequest
-      - data_to_write: DataRepresentation
-
-- struct:
-    SampleDataPayloadData:
-      - reply: BaseObjectReply
-      - data: SampleData
-
-- struct:
-    SamplePayloadData:
-      - reply: BaseObjectReply
-      - sample: Sample
-
-- struct:
-    SampleDataSequencePayloadData:
-      - reply: BaseObjectReply
-      - data_sequence: SampleDataSequence
-
-- struct:
-    SampleSequencePayloadData:
-      - reply: BaseObjectReply
-      - sample_sequence: SampleSequence
-
-- struct:
-    PackedSamplesPayloadData:
-      - reply: BaseObjectReply
-      - packed_samples: PackedSamples
 
 FILES:
   spec_file:
