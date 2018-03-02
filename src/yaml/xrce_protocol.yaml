@@ -1,4 +1,34 @@
 DATA:
+
+#########################################################################################
+# Basic types
+#########################################################################################
+
+- struct:
+    Time_t:
+      - seconds: int32_t
+      - nanoseconds: uint32_t
+
+- struct:
+    String_t:
+      - size: uint32_t
+      - data: char*
+
+- struct:
+    BinarySequence_t:
+      - size: uint32_t
+      - data: uint8_t*
+
+- struct:
+    StringSequence_t:
+      - size: uint32_t
+      - data: String_t*
+
+
+#########################################################################################
+# IDL types
+#########################################################################################
+
 - struct:  {ClientKey: [data: uint8_t 4]}
 
 - define:  {CLIENT_INVALID: '(ClientKey){0x00, 0x00, 0x00, 0x00}'}
@@ -72,7 +102,7 @@ DATA:
 
 - struct:
     TransportLocatorString:
-        - value: string
+        - value: String_t
 
 - union:
     TransportLocator:
@@ -90,17 +120,17 @@ DATA:
 - struct:
     TransportLocatorSeq:
         - size: uint32_t
-        - locators: TransportLocator*
+        - data: TransportLocator*
 
 - struct:
     Property:
-        - string: name
-        - string: value
+        - name: String_t
+        - value: String_t
 
 - struct:
     PropertySeq:
         - size: uint32_t
-        - properties: Property*
+        - data: Property*
 
 - struct:
     CLIENT_Representation:
@@ -239,7 +269,7 @@ DATA:
 - struct:
     OBJK_Subscriber_Binary: 
         - subscriber_name: String_t
-        - qos: OBJK_Subscirber_Binary_Qos
+        - qos: OBJK_Subscriber_Binary_Qos
 
 - enum:
     EndpointQosFlags:
@@ -250,6 +280,18 @@ DATA:
       - is_durability_transient:       '0x01 << 4'
       - is_durability_persistent:      '0x01 << 5'
     __TYPE__: uint16_t
+
+- struct:
+    OBJK_Endpoint_QosBinary:
+        - qos_flags: EndpointQosFlags
+        - history_depth: uint16_t
+          __OPTIONAL_CONDITION__: ['true']
+        - deadline_msec: uint32_t
+          __OPTIONAL_CONDITION__: ['true']
+        - lifespan_msec: uint32_t
+          __OPTIONAL_CONDITION__: ['true']
+        - user_data: BinarySequence_t
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_DataWriter_Binary_Qos:
@@ -264,12 +306,12 @@ DATA:
 
 - struct:
     OBJK_DataReader_Binary:
-        - String_t: topic_name
+        - topic_name: String_t
         - qos: OBJK_DataReader_Binary_Qos
 
 - struct:
     OBJK_DataWiter_Binary:
-        - String_t: topic_name
+        - topic_name: String_t
         - qos: OBJK_DataWriter_Binary_Qos
 
 - union:
@@ -322,6 +364,11 @@ DATA:
       - status: StatusValue
       - implementation_status: uint8_t
 
+- struct:
+    BaseObjectRequest:
+      - request_id: RequestId
+      - object_id: ObjectId
+
 - typedef: {RelatedObjectRequest: BaseObjectRequest}
 
 - define:  {STATUS_LAST_OP_NONE:   '0x00'}
@@ -340,7 +387,7 @@ DATA:
 
 - struct:
     AGENT_ActivityInfo:
-        - availibility: int8_t
+        - availibility: int16_t
         - address_seq: TransportLocatorSeq
 
 - struct:
@@ -367,11 +414,6 @@ DATA:
     ObjectInfo:
         - config: ObjectVariant
         - activity: ActivityInfoVariant
-
-- struct:
-    BaseObjectRequest:
-      - request_id: RequestId 
-      - object_id: ObjectId
 
 - struct:
     BaseObjectReply:
@@ -402,7 +444,7 @@ DATA:
         __OPTIONAL_CONDITION__: ['true']
 
       - delivery_control: DataDeliveryControl
-        __OPTIONAL_CONDITION__: ['false']
+        __OPTIONAL_CONDITION__: ['true']
 
 - enum:
     SampleInfoFlags:
@@ -427,7 +469,6 @@ DATA:
 - union:
     SampleInfoDetail:
         - format: SampleInfoFormat
-        - empty:                void
         - sequence_number:      uint32_t
         - session_time_offset:  uint32_t
         - seqnum_n_timestamp:   SeqNumberAndTimestamp
@@ -456,14 +497,29 @@ DATA:
       - data: uint8_t*
 
 - struct:
+    SampleDataSeq:
+      - size: uint32_t
+      - data: SampleData*
+
+- struct:
     Sample:
       - info: SampleInfo
       - data: SampleData
 
 - struct:
+    SampleSeq:
+      - size: uint32_t
+      - data: Sample*
+
+- struct:
     SampleDelta:
       - info_delta: SampleInfoDelta
       - data: SampleData
+
+- struct:
+    SampleDeltaSequence:
+      - size: uint32_t
+      - data: SampleDelta*
 
 - struct:
     PackedSamples:
@@ -473,15 +529,15 @@ DATA:
 - struct:
     SamplePackedSeq:
         - size: uint32_t
-        - data: PackedSamples
+        - data: PackedSamples*
 
 - union:
     DataRepresentation:
       - format: DataFormat
       - data: SampleData
       - sample: Sample
-      - data_seq: SampleDataSequence
-      - sample_seq: SampleSequence
+      - data_seq: SampleDataSeq
+      - sample_seq: SampleSeq
       - packed_samples: PackedSamples
     __DISCRIMINATOR__:
       - FORMAT_DATA
@@ -541,12 +597,12 @@ DATA:
 - struct:
     WRITE_DATA_Payload_DataSeq:
       - base: BaseObjectRequest
-      - data_seq: SampleDataSequence
+      - data_seq: SampleDataSeq
 
 - struct:
     WRITE_DATA_Payload_SampleSeq:
       - base: BaseObjectRequest
-      - sample_seq: SampleSequence
+      - sample_seq: SampleSeq
 
 - struct:
     WRITE_DATA_Payload_PackedSamples:
@@ -566,12 +622,12 @@ DATA:
 - struct:
     DATA_Payload_DataSeq:
       - base: RelatedObjectRequest
-      - data_seq: SampleDataSequence
+      - data_seq: SampleDataSeq
 
 - struct:
     DATA_Payload_SampleSeq:
       - base: RelatedObjectRequest
-      - sample_seq: SampleSequence
+      - sample_seq: SampleSeq
 
 - struct:
     DATA_Payload_PackedSamples:
@@ -630,48 +686,6 @@ DATA:
       - id: uint8_t
       - flags: SubmessageHeaderFlags
       - {length: uint16_t, __ENDIANNESS__: LITTLE}
-        
-        ######################################################################################        
-
-- struct:
-    Time_t:
-      - seconds: int32_t
-      - nanoseconds: uint32_t
-
-- struct:
-    String_t:
-      - size: uint32_t
-      - data: char*
-
-- struct:
-    BinarySequence_t:
-      - size: uint32_t
-      - data: uint8_t*
-
-- struct:
-    StringSequence_t:
-      - size: uint32_t
-      - data: String_t*
-
-- struct:
-    SampleDataSequence:
-      - size: uint32_t
-      - data: SampleData*
-
-- struct:
-    SampleSequence:
-      - size: uint32_t
-      - data: Sample*
-
-- struct:
-    SampleDeltaSequence:
-      - size: uint32_t
-      - data: SampleDelta*
-
-- struct:
-    PackedSamplesSequence:
-      - size: uint32_t
-      - data: PackedSamples*
 
 FILES:
   spec_file:
