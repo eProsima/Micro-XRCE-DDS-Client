@@ -33,8 +33,8 @@ typedef struct InputMessageCallback
     void (*on_submessage_header)(const SubmessageHeader* header, void* args);
 
     // Submessages
-    void (*on_status_submessage)(const StatusPayload* payload, void* args);
-    void (*on_info_submessage)  (const InfoPayload* payload, void* args);
+    void (*on_status_submessage)(const STATUS_Payload* payload, void* args);
+    void (*on_info_submessage)  (const INFO_Payload* payload, void* args);
     DataFormat (*on_data_submessage)  (const BaseObjectReply* reply, void* args);
 
     // Data payloads
@@ -42,9 +42,9 @@ typedef struct InputMessageCallback
             void* args, Endianness endianness);
     void (*on_sample_payload)         (const BaseObjectReply* reply, const Sample* sample,
             void* args, Endianness endianness);
-    void (*on_data_sequence_payload)  (const BaseObjectReply* reply, const SampleDataSequence* data_sequence,
+    void (*on_data_sequence_payload)  (const BaseObjectReply* reply, const SampleDataSeq* data_sequence,
             void* args, Endianness endianness);
-    void (*on_sample_sequence_payload)(const BaseObjectReply* reply, const SampleSequence* sample_sequence,
+    void (*on_sample_sequence_payload)(const BaseObjectReply* reply, const SampleSeq* sample_sequence,
             void* args, Endianness endianness);
     void (*on_packed_samples_payload) (const BaseObjectReply* reply, const PackedSamples* packed_samples,
             void* args, Endianness endianness);

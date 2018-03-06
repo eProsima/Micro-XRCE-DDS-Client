@@ -147,35 +147,38 @@ XRCEInfo create_client(ClientState* state, OnStatusReceived on_status, void* on_
         FILETIME epoch_ft;
         SystemTimeToFileTime(&epoch_tm, &epoch_ft);
         uint64_t epoch_time = (((uint64_t) epoch_ft.dwHighDateTime) << 32) + epoch_ft.dwLowDateTime;
-	
-        SYSTEMTIME tm;
-	FILETIME ft;
-	GetSystemTime(&tm);
-	SystemTimeToFileTime(&tm, &ft);
-	uint64_t current_time = (((uint64_t) ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
 
-	ts.tv_sec = (time_t) ((current_time - epoch_time) / 10000000);
-	ts.tv_nsec = (time_t) ((current_time - epoch_time) % 10000000);
+        SYSTEMTIME tm;
+        FILETIME ft;
+        GetSystemTime(&tm);
+        SystemTimeToFileTime(&tm, &ft);
+        uint64_t current_time = (((uint64_t) ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
+
+        ts.tv_sec = (time_t) ((current_time - epoch_time) / 10000000);
+        ts.tv_nsec = (time_t) ((current_time - epoch_time) % 10000000);
     #else
         clock_gettime(CLOCK_REALTIME, &ts);
     #endif
 
-    XRCEInfo info = {++state->next_request_id, get_num_object_id(OBJECTID_CLIENT)};
+    state->next_request_id++;
+    XRCEInfo info = {state->next_request_id, get_num_object_id(OBJECTID_CLIENT)};
 
-    CreateClientPayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = OBJECTID_CLIENT;
-    payload.representation.xrce_cookie = XRCE_COOKIE;
-    payload.representation.xrce_version = XRCE_VERSION;
-    payload.representation.xrce_vendor_id = (XrceVendorId){{0x01, 0x0F}};
-    payload.representation.client_timestamp.seconds = ts.tv_sec;
-    payload.representation.client_timestamp.nanoseconds = ts.tv_nsec;
-    payload.representation.client_key = (ClientKey){{0xAA, 0xBB, 0xCC, 0xDD}};
-    payload.representation.session_id = 0xEE;
+    CREATE_CLIENT_Payload payload;
+    payload.base.request_id = get_raw_request_id(state->next_request_id);
+    payload.base.object_id = OBJECTID_CLIENT;
+    payload.client_representation.xrce_cookie = XRCE_COOKIE;
+    payload.client_representation.xrce_version = XRCE_VERSION;
+    payload.client_representation.xrce_vendor_id = (XrceVendorId){{0x01, 0x0F}};
+    payload.client_representation.client_timestamp.seconds = ts.tv_sec;
+    payload.client_representation.client_timestamp.nanoseconds = ts.tv_nsec;
+    payload.client_representation.client_key = (ClientKey){{0xAA, 0xBB, 0xCC, 0xDD}};
+    payload.client_representation.session_id = 0xEE;
+    payload.client_representation.optional_properties = false;
+    payload.client_representation.properties.size = 0;
 
     state->session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
     state->stream_id = STREAMID_NONE;
-    state->key = payload.representation.client_key;
+    state->key = payload.client_representation.client_key;
 
     if (add_create_client_submessage(&state->output_message, &payload))
     {
@@ -189,14 +192,14 @@ XRCEInfo create_participant(ClientState* state)
 {
     XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
 
-    CreateResourcePayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
-    payload.representation.kind = OBJK_PARTICIPANT;
-    payload.representation._.participant.base2.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.participant.base2._.object_name.size = 0;
+    CREATE_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
+    payload.object_representation.kind = OBJK_PARTICIPANT;
+    payload.object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
+    payload.object_representation._.participant.base.representation._.object_reference.size = 0;
 
-    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -208,16 +211,16 @@ XRCEInfo create_topic(ClientState* state, uint16_t participant_id, String xml)
 {
     XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
 
-    CreateResourcePayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
-    payload.representation.kind = OBJK_TOPIC;
-    payload.representation._.topic.base3.format = REPRESENTATION_AS_XML_STRING;
-    payload.representation._.topic.base3._.xml.size = xml.length;
-    payload.representation._.topic.base3._.xml.data = xml.data;
-    payload.representation._.topic.participant_id = get_raw_object_id(participant_id);
+    CREATE_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
+    payload.object_representation.kind = OBJK_TOPIC;
+    payload.object_representation._.topic.base.representation.format = REPRESENTATION_AS_XML_STRING;
+    payload.object_representation._.topic.base.representation._.xml_string_represenatation.size = xml.length;
+    payload.object_representation._.topic.base.representation._.xml_string_represenatation.data = xml.data;
+    payload.object_representation._.topic.participant_id = get_raw_object_id(participant_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -229,15 +232,15 @@ XRCEInfo create_publisher(ClientState* state, uint16_t participant_id)
 {
     XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
 
-    CreateResourcePayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
-    payload.representation.kind = OBJK_PUBLISHER;
-    payload.representation._.publisher.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.publisher.base3._.object_name.size = 0;
-    payload.representation._.publisher.participant_id = get_raw_object_id(participant_id);
+    CREATE_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
+    payload.object_representation.kind = OBJK_PUBLISHER;
+    payload.object_representation._.publisher.base.representation.format = REPRESENTATION_BY_REFERENCE;
+    payload.object_representation._.publisher.base.representation._.object_name.size = 0;
+    payload.object_representation._.publisher.participant_id = get_raw_object_id(participant_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -249,15 +252,15 @@ XRCEInfo create_subscriber(ClientState* state, uint16_t participant_id)
 {
     XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
 
-    CreateResourcePayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
-    payload.representation.kind = OBJK_SUBSCRIBER;
-    payload.representation._.subscriber.base3.format = REPRESENTATION_BY_REFERENCE;
-    payload.representation._.subscriber.base3._.object_name.size = 0;
-    payload.representation._.subscriber.participant_id = get_raw_object_id(participant_id);
+    CREATE_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
+    payload.object_representation.kind = OBJK_SUBSCRIBER;
+    payload.object_representation._.subscriber.base.representation.format = REPRESENTATION_BY_REFERENCE;
+    payload.object_representation._.subscriber.base.representation._.object_name.size = 0;
+    payload.object_representation._.subscriber.participant_id = get_raw_object_id(participant_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -269,17 +272,16 @@ XRCEInfo create_data_writer(ClientState* state, uint16_t participant_id, uint16_
 {
     XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
 
-    CreateResourcePayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
-    payload.representation.kind = OBJK_DATAWRITER;
-    payload.representation._.data_writer.base3.format = REPRESENTATION_AS_XML_STRING;
-    payload.representation._.data_writer.base3._.xml.size = xml.length;
-    payload.representation._.data_writer.base3._.xml.data = xml.data;
-    payload.representation._.data_writer.participant_id = get_raw_object_id(participant_id);
-    payload.representation._.data_writer.publisher_id = get_raw_object_id(publisher_id);
+    CREATE_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
+    payload.object_representation.kind = OBJK_DATAWRITER;
+    payload.object_representation._.data_writer.base.format = REPRESENTATION_AS_XML_STRING;
+    payload.object_representation._.data_writer.base._.xml_string_represenatation.size = xml.length;
+    payload.object_representation._.data_writer.base._.xml_string_represenatation.data = xml.data;
+    payload.object_representation._.data_writer.publisher_id = get_raw_object_id(publisher_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -291,17 +293,16 @@ XRCEInfo create_data_reader(ClientState* state, uint16_t participant_id, uint16_
 {
     XRCEInfo info = {++state->next_request_id, ++state->next_object_id};
 
-    CreateResourcePayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
-    payload.representation.kind = OBJK_DATAREADER;
-    payload.representation._.data_reader.base3.format = REPRESENTATION_AS_XML_STRING;
-    payload.representation._.data_reader.base3._.xml.size = xml.length;
-    payload.representation._.data_reader.base3._.xml.data = xml.data;
-    payload.representation._.data_reader.participant_id = get_raw_object_id(participant_id);
-    payload.representation._.data_reader.subscriber_id = get_raw_object_id(subscriber_id);
+    CREATE_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
+    payload.object_representation.kind = OBJK_DATAREADER;
+    payload.object_representation._.data_reader.base.format = REPRESENTATION_AS_XML_STRING;
+    payload.object_representation._.data_reader.base._.xml_string_represenatation.size = xml.length;
+    payload.object_representation._.data_reader.base._.xml_string_represenatation.data = xml.data;
+    payload.object_representation._.data_reader.subscriber_id = get_raw_object_id(subscriber_id);
 
-    if (add_create_resource_submessage(&state->output_message, &payload, 0))
+    if (add_create_resource_submessage(&state->output_message, &payload, (CreationMode){false, false}))
     {
         PRINTL_CREATE_RESOURCE_SUBMESSAGE(&payload);
     }
@@ -313,9 +314,9 @@ XRCEInfo delete_resource(ClientState* state, uint16_t resource_id)
 {
     XRCEInfo info = {++state->next_request_id, resource_id};
 
-    DeleteResourcePayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
+    DELETE_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
 
     if (add_delete_resource_submessage(&state->output_message, &payload))
     {
@@ -338,12 +339,11 @@ XRCEInfo write_data(ClientState* state, uint16_t data_writer_id, SerializeTopic 
     {
         XRCEInfo info = {++state->next_request_id, data_writer_id};
 
-        WriteDataPayload payload;
-        payload.request.base.request_id = get_raw_request_id(info.request_id);
-        payload.request.object_id = get_raw_object_id(info.object_id);
-        payload.data_to_write.format = FORMAT_DATA;
-        payload.data_to_write._.data.size = writer.iterator - writer.init;
-        payload.data_to_write._.data.data = writer.init;
+        WRITE_DATA_Payload_Data payload;
+        payload.base.request_id = get_raw_request_id(info.request_id);
+        payload.base.object_id = get_raw_object_id(info.object_id);
+        payload.data.data = writer.init;
+        payload.data.size = writer.iterator - writer.init;
 
         if (add_write_data_submessage(&state->output_message, &payload))
         {
@@ -361,11 +361,12 @@ XRCEInfo read_data(ClientState* state, uint16_t data_reader_id, OnMessageReceive
 
     XRCEInfo info = {callback_request_id, data_reader_id};
 
-    ReadDataPayload payload;
-    payload.request.base.request_id = get_raw_request_id(info.request_id);
-    payload.request.object_id = get_raw_object_id(info.object_id);
+    READ_DATA_Payload payload;
+    payload.base.request_id = get_raw_request_id(info.request_id);
+    payload.base.object_id = get_raw_object_id(info.object_id);
+    payload.read_specification.data_format = FORMAT_DATA;
     payload.read_specification.optional_content_filter_expression = false;
-    payload.read_specification.optional_delivery_config = FORMAT_DATA;
+    payload.read_specification.optional_delivery_control = false;
 
     if (add_read_data_submessage(&state->output_message, &payload))
     {
@@ -413,7 +414,7 @@ bool on_message_header(const MessageHeader* header, const ClientKey* key, void* 
     return 1;
 }
 
-void on_status_submessage(const StatusPayload* payload, void* args)
+void on_status_submessage(const STATUS_Payload* payload, void* args)
 {
     ClientState* state = (ClientState*) args;
     PRINTL_STATUS_SUBMESSAGE(payload);
@@ -421,35 +422,38 @@ void on_status_submessage(const StatusPayload* payload, void* args)
     if(state->on_status_received)
     {
 
-        XRCEInfo info = create_xrce_info(payload->reply.base.result.request_id, payload->reply.object_id);
+        XRCEInfo info = create_xrce_info(payload->base.related_request.request_id, payload->base.related_request.object_id);
         state->on_status_received(info,
-                payload->reply.base.result.status,
-                payload->reply.base.result.implementation_status,
-                state->on_status_received_args);
+                                  payload->base.result.status,
+                                  payload->base.result.implementation_status,
+                                  state->on_status_received_args);
     }
 }
 
 DataFormat on_data_submessage(const BaseObjectReply* reply, void* args)
 {
+    DataFormat result = FORMAT_EMPTY;
     ClientState* state = (ClientState*) args;
+    XRCEInfo info = create_xrce_info(reply->related_request.request_id, reply->related_request.object_id);
 
-    XRCEInfo info = create_xrce_info(reply->base.result.request_id, reply->object_id);
     if(state->on_status_received)
     {
         state->on_status_received(info,
-                reply->base.result.status,
-                reply->base.result.implementation_status,
-                state->on_status_received_args);
+                                  reply->result.status,
+                                  reply->result.implementation_status,
+                                  state->on_status_received_args);
     }
 
-    if(reply->base.result.implementation_status == STATUS_OK)
+    if(reply->result.status == STATUS_OK)
     {
         CallbackData* callback_data = get_callback_data(&state->callback_data_storage, info.request_id);
         if(callback_data)
-            return callback_data->format;
+        {
+            result = callback_data->format;
+        }
     }
 
-    return FORMAT_BAD;
+    return result;
 }
 
 void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* args, Endianness endianness)
@@ -457,16 +461,14 @@ void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void*
     ClientState* state = (ClientState*) args;
     PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(reply, data);
 
-    XRCEInfo info = create_xrce_info(reply->base.result.request_id, reply->object_id);
+    XRCEInfo info = create_xrce_info(reply->related_request.request_id, reply->related_request.object_id);
     CallbackData* callback_data = get_callback_data(&state->callback_data_storage, info.request_id);
     if(callback_data)
     {
         MicroBuffer reader;
         init_external_buffer(&reader, data->data, data->size);
         reader.endianness = endianness;
-
         callback_data->on_message(info, &reader, callback_data->callback_args);
-
         remove_callback_data(&state->callback_data_storage, info.request_id);
     }
 }

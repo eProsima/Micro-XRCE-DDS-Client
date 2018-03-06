@@ -1,17 +1,3 @@
-// Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 #ifndef _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
 #define _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
 
@@ -23,111 +9,6 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-
-
-typedef struct ClientKey
-{
-    uint8_t data[4];
-
-} ClientKey;
-
-typedef uint8_t ObjectKind;
-#define OBJK_INVALID 0x00
-#define OBJK_PARTICIPANT 0x01
-#define OBJK_DATAWRITER 0x03
-#define OBJK_TOPIC 0x04
-#define OBJK_DATAREADER 0x07
-#define OBJK_SUBSCRIBER 0x08
-#define OBJK_PUBLISHER 0x09
-#define OBJK_TYPE 0x10
-#define OBJK_QOSPROFILE 0x11
-#define OBJK_APPLICATION 0x20
-
-
-typedef struct ObjectId
-{
-    uint8_t data[2];
-
-} ObjectId;
-#define OBJECTID_INVALID (ObjectId){{0xFF, 0xFF}}
-#define OBJECTID_CLIENT  (ObjectId){{0xFF, 0xF0}}
-#define OBJECTID_SESSION (ObjectId){{0xFF, 0xF1}}
-
-
-typedef struct XrceCookie
-{
-    uint8_t data[4];
-
-} XrceCookie;
-#define XRCE_COOKIE (XrceCookie){{0x58, 0x52, 0x43, 0x45}}
-
-
-typedef struct XrceVersion
-{
-    uint8_t data[2];
-
-} XrceVersion;
-#define XRCE_VESION_MAJOR 0x01
-#define XRCE_VESION_MINOR 0x00
-#define XRCE_VERSION (XrceVersion){{XRCE_VESION_MAJOR, XRCE_VESION_MINOR}}
-
-
-typedef struct XrceVendorId
-{
-    uint8_t data[2];
-
-} XrceVendorId;
-#define XRCE_VENDOR_INVALID {0x00, 0x00}
-
-typedef uint8_t SessionId;
-#define SESSIONID_NONE_WITHOUT_CLIENT_KEY 0x00
-#define SESSIONID_NONE_WITH_CLIENT_KEY 0x80
-
-typedef uint8_t StreamId;
-#define STREAMID_NONE 0x00
-#define STREAMID_BUILTIN_BEST_EFFORTS 0x01
-#define STREAMID_BUILTIN_RELIABLE 0x8F
-
-typedef uint8_t RepresentationFormat;
-#define REPRESENTATION_BY_REFERENCE 0x01
-#define REPRESENTATION_AS_XML_STRING 0x02
-#define REPRESENTATION_IN_BINARY 0x03
-
-
-typedef struct RequestId
-{
-    uint8_t data[2];
-
-} RequestId;
-#define STATUS_OK 0x00
-#define STATUS_OK_MATCHED 0x01
-#define STATUS_ERR_DDS_ERROR 0x80
-#define STATUS_ERR_MISMATCH 0x81
-#define STATUS_ERR_ALREADY_EXISTS 0x82
-#define STATUS_ERR_DENIED 0x83
-#define STATUS_ERR_UNKNOWN_REFERENCE 0x84
-#define STATUS_ERR_INVALID_DATA 0x85
-#define STATUS_ERR_INCOMPATIBLE 0x86
-#define STATUS_ERR_RESOURCES 0x87
-#define STATUS_LAST_OP_NONE 0x00
-#define STATUS_LAST_OP_CREATE 0x01
-#define STATUS_LAST_OP_UPDATE 0x02
-#define STATUS_LAST_OP_DELETE 0x03
-#define STATUS_LAST_OP_LOOKUP 0x04
-#define STATUS_LAST_OP_READ 0x05
-#define STATUS_LAST_OP_WRITE 0x06
-
-
-typedef enum DataFormat
-{
-    FORMAT_DATA = 0x00,
-    FORMAT_DATA_SEQ = 0x01,
-    FORMAT_SAMPLE = 0x02,
-    FORMAT_SAMPLE_SEQ = 0x03,
-    FORMAT_PACKED_SAMPLES = 0x04,
-    FORMAT_BAD = 0xFF
-
-} DataFormat;
 
 
 typedef struct Time_t
@@ -162,7 +43,166 @@ typedef struct StringSequence_t
 } StringSequence_t;
 
 
-typedef struct OBJK_CLIENT_Representation
+typedef struct ClientKey
+{
+    uint8_t data[4];
+
+} ClientKey;
+#define CLIENT_INVALID (ClientKey){0x00, 0x00, 0x00, 0x00}
+
+typedef uint8_t ObjectKind;
+#define OBJK_INVALID 0x00
+#define OBJK_PARTICIPANT 0x01
+#define OBJK_TOPIC 0x02
+#define OBJK_PUBLISHER 0x03
+#define OBJK_SUBSCRIBER 0x04
+#define OBJK_DATAWRITER 0x05
+#define OBJK_DATAREADER 0x06
+#define OBJK_TYPE 0x0A
+#define OBJK_QOSPROFILE 0x0B
+#define OBJK_APPLICATION 0x0C
+#define OBJK_AGENT 0x0D
+#define OBJK_CLIENT 0x0E
+#define OBJK_OTHER 0x0F
+
+
+typedef struct ObjectId
+{
+    uint8_t data[2];
+
+} ObjectId;
+
+
+typedef struct ObjectPrefix
+{
+    uint8_t data[2];
+
+} ObjectPrefix;
+#define OBJECTID_INVALID (ObjectId){{0x00, 0x00}}
+#define OBJECTID_AGENT   (ObjectId){{0xFF, 0xFD}}
+#define OBJECTID_CLIENT  (ObjectId){{0xFF, 0xFE}}
+#define OBJECTID_SESSION (ObjectId){{0xFF, 0xFF}}
+
+
+typedef struct XrceCookie
+{
+    uint8_t data[4];
+
+} XrceCookie;
+#define XRCE_COOKIE (XrceCookie){{0x58, 0x52, 0x43, 0x45}}
+
+
+typedef struct XrceVersion
+{
+    uint8_t data[2];
+
+} XrceVersion;
+#define XRCE_VERSION_MAJOR 0x01
+#define XRCE_VERSION_MINOR 0x00
+#define XRCE_VERSION (XrceVersion){{XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}}
+
+
+typedef struct XrceVendorId
+{
+    uint8_t data[2];
+
+} XrceVendorId;
+#define XRCE_VENDOR_INVALID {{0x00, 0x00}}
+
+typedef uint8_t SessionId;
+#define SESSIONID_NONE_WITH_CLIENT_KEY 0x00
+#define SESSIONID_NONE_WITHOUT_CLIENT_KEY 0x80
+
+typedef uint8_t StreamId;
+#define STREAMID_NONE 0x00
+#define STREAMID_BUILTIN_BEST_EFFORTS 0x01
+#define STREAMID_BUILTIN_RELIABLE 0x80
+
+
+typedef enum TransportLocatorFormat
+{
+    ADDRESS_FORMAT_SMALL = 0,
+    ADDRESS_FORMAT_MEDIUM = 1,
+    ADDRESS_FORMAT_LARGE = 2,
+    ADDRESS_FORMAT_STRING = 3
+
+} TransportLocatorFormat;
+
+
+typedef struct TransportLocatorSmall
+{
+    uint8_t address[2];
+    uint8_t locator_port;
+
+} TransportLocatorSmall;
+
+
+typedef struct TransportLocatorMedium
+{
+    uint8_t address[4];
+    uint8_t locator_port;
+
+} TransportLocatorMedium;
+
+
+typedef struct TransportLocatorLarge
+{
+    uint8_t address[16];
+    uint8_t locator_port;
+
+} TransportLocatorLarge;
+
+
+typedef struct TransportLocatorString
+{
+    String_t value;
+
+} TransportLocatorString;
+
+
+typedef union TransportLocatorU
+{
+    TransportLocatorSmall small_locator;
+    TransportLocatorMedium medium_locator;
+    TransportLocatorLarge large_locator;
+    TransportLocatorString string_locator;
+
+} TransportLocatorU;
+
+
+typedef struct TransportLocator
+{
+    uint8_t format;
+    TransportLocatorU _;
+
+} TransportLocator;
+
+
+typedef struct TransportLocatorSeq
+{
+    uint32_t size;
+    TransportLocator* data;
+
+} TransportLocatorSeq;
+
+
+typedef struct Property
+{
+    String_t name;
+    String_t value;
+
+} Property;
+
+
+typedef struct PropertySeq
+{
+    uint32_t size;
+    Property* data;
+
+} PropertySeq;
+
+
+typedef struct CLIENT_Representation
 {
     XrceCookie xrce_cookie;
     XrceVersion xrce_version;
@@ -170,84 +210,131 @@ typedef struct OBJK_CLIENT_Representation
     Time_t client_timestamp;
     ClientKey client_key;
     uint8_t session_id;
+    bool optional_properties;
+    PropertySeq properties;
 
-} OBJK_CLIENT_Representation;
+} CLIENT_Representation;
 
 
-typedef union OBJK_Representation3_BaseU
+typedef struct AGENT_Representation
 {
-    String_t object_name;
-    String_t xml;
+    XrceCookie xrce_cookie;
+    XrceVersion xrce_version;
+    XrceVendorId xrce_vendor_id;
+    Time_t agent_timestamp;
+    bool optional_properties;
+    PropertySeq properties;
+
+} AGENT_Representation;
+
+typedef uint8_t RepresentationFormat;
+#define REPRESENTATION_BY_REFERENCE 0x01
+#define REPRESENTATION_AS_XML_STRING 0x02
+#define REPRESENTATION_IN_BINARY 0x03
+#define REFERENCE_MAX_LEN 128
+
+
+typedef union OBJK_Representation3FormatsU
+{
+    String_t object_reference;
+    String_t xml_string_represenatation;
     BinarySequence_t binary_representation;
 
-} OBJK_Representation3_BaseU;
+} OBJK_Representation3FormatsU;
+
+
+typedef struct OBJK_Representation3Formats
+{
+    uint8_t format;
+    OBJK_Representation3FormatsU _;
+
+} OBJK_Representation3Formats;
+
+
+typedef union OBJK_RepresentationRefAndXMLFormatsU
+{
+    String_t object_name;
+    String_t xml_string_represenatation;
+
+} OBJK_RepresentationRefAndXMLFormatsU;
+
+
+typedef struct OBJK_RepresentationRefAndXMLFormats
+{
+    uint8_t format;
+    OBJK_RepresentationRefAndXMLFormatsU _;
+
+} OBJK_RepresentationRefAndXMLFormats;
+
+
+typedef union OBJK_RepresentationBinAndXMLFormatsU
+{
+    BinarySequence_t object_name;
+    String_t xml_string_represenatation;
+
+} OBJK_RepresentationBinAndXMLFormatsU;
+
+
+typedef struct OBJK_RepresentationBinAndXMLFormats
+{
+    uint8_t format;
+    OBJK_RepresentationBinAndXMLFormatsU _;
+
+} OBJK_RepresentationBinAndXMLFormats;
+
+
+typedef struct OBJK_RepresentationRefAndXML_Base
+{
+    OBJK_RepresentationRefAndXMLFormats representation;
+
+} OBJK_RepresentationRefAndXML_Base;
+
+
+typedef struct OBJK_RepresentationBinAndXML_Base
+{
+    OBJK_RepresentationBinAndXMLFormats representation;
+
+} OBJK_RepresentationBinAndXML_Base;
 
 
 typedef struct OBJK_Representation3_Base
 {
-    uint8_t format;
-    OBJK_Representation3_BaseU _;
+    OBJK_Representation3Formats representation;
 
 } OBJK_Representation3_Base;
 
 
-typedef union OBJK_Representation2_BaseU
-{
-    String_t object_name;
-    String_t xml;
-
-} OBJK_Representation2_BaseU;
-
-
-typedef struct OBJK_Representation2_Base
-{
-    uint8_t format;
-    OBJK_Representation2_BaseU _;
-
-} OBJK_Representation2_Base;
-
-
 typedef struct OBJK_QOSPROFILE_Representation
 {
-    OBJK_Representation2_Base base2;
+    OBJK_RepresentationRefAndXML_Base base;
 
 } OBJK_QOSPROFILE_Representation;
 
 
-typedef struct OBJK_APPLICATION_Representation
-{
-    OBJK_Representation2_Base base2;
-
-} OBJK_APPLICATION_Representation;
-
-
-typedef struct OBJK_PARTICIPANT_Representation
-{
-    OBJK_Representation2_Base base2;
-
-} OBJK_PARTICIPANT_Representation;
-
-
 typedef struct OBJK_TYPE_Representation
 {
-    OBJK_Representation3_Base base3;
-    ObjectId participant_id;
-    String_t registered_type_name;
+    OBJK_RepresentationRefAndXML_Base base;
 
 } OBJK_TYPE_Representation;
 
 
-typedef struct OBJK_TOPIC_Representation
+typedef struct OBJK_DOMAIN_Representation
 {
-    OBJK_Representation3_Base base3;
-    ObjectId participant_id;
+    OBJK_RepresentationRefAndXML_Base base;
 
-} OBJK_TOPIC_Representation;
+} OBJK_DOMAIN_Representation;
+
+
+typedef struct OBJK_APPLICATION_Representation
+{
+    OBJK_RepresentationRefAndXML_Base base;
+
+} OBJK_APPLICATION_Representation;
 
 
 typedef struct OBJK_PUBLISHER_Representation
 {
-    OBJK_Representation3_Base base3;
+    OBJK_RepresentationBinAndXML_Base base;
     ObjectId participant_id;
 
 } OBJK_PUBLISHER_Representation;
@@ -255,69 +342,101 @@ typedef struct OBJK_PUBLISHER_Representation
 
 typedef struct OBJK_SUBSCRIBER_Representation
 {
-    OBJK_Representation3_Base base3;
+    OBJK_RepresentationBinAndXML_Base base;
     ObjectId participant_id;
 
 } OBJK_SUBSCRIBER_Representation;
 
 
-typedef struct OBJK_DATAWRITER_Representation
+typedef struct DATAWRITER_Representation
 {
-    OBJK_Representation3_Base base3;
-    ObjectId participant_id;
+    OBJK_RepresentationBinAndXMLFormats base;
     ObjectId publisher_id;
 
-} OBJK_DATAWRITER_Representation;
+} DATAWRITER_Representation;
 
 
-typedef struct OBJK_DATAREADER_Representation
+typedef struct DATAREADER_Representation
 {
-    OBJK_Representation3_Base base3;
-    ObjectId participant_id;
+    OBJK_RepresentationBinAndXMLFormats base;
     ObjectId subscriber_id;
 
-} OBJK_DATAREADER_Representation;
+} DATAREADER_Representation;
 
 
-typedef struct OBJK_TYPE_Binary
+typedef struct OBJK_PARTICIPANT_Representation
 {
-    String_t type_name;
+    OBJK_Representation3_Base base;
+    int16_t domain_id;
 
-} OBJK_TYPE_Binary;
+} OBJK_PARTICIPANT_Representation;
 
 
-typedef struct OBJK_TOPIC_Binary
+typedef struct OBJK_TOPIC_Representation
+{
+    OBJK_Representation3_Base base;
+    ObjectId participant_id;
+
+} OBJK_TOPIC_Representation;
+
+
+typedef struct OBJK_DomainParticipant_Binary
+{
+    String_t domain_reference;
+    String_t qos_profile_reference;
+
+} OBJK_DomainParticipant_Binary;
+
+
+typedef struct OBJK_Topic_Binary
 {
     String_t topic_name;
+    String_t type_reference;
     String_t type_name;
 
-} OBJK_TOPIC_Binary;
+} OBJK_Topic_Binary;
 
 
-typedef struct OBJK_PUBLISHER_Binary
+typedef struct OBJK_Publisher_Binary_Qos
 {
     StringSequence_t partitions;
     BinarySequence_t group_data;
 
-} OBJK_PUBLISHER_Binary;
+} OBJK_Publisher_Binary_Qos;
 
 
-typedef struct OBJK_SUBSCRIBER_Binary
+typedef struct OBJK_Publisher_Binary
+{
+    String_t publisher_name;
+    OBJK_Publisher_Binary_Qos qos;
+
+} OBJK_Publisher_Binary;
+
+
+typedef struct OBJK_Subscriber_Binary_Qos
 {
     StringSequence_t partitions;
     BinarySequence_t group_data;
 
-} OBJK_SUBSCRIBER_Binary;
+} OBJK_Subscriber_Binary_Qos;
+
+
+typedef struct OBJK_Subscriber_Binary
+{
+    String_t subscriber_name;
+    OBJK_Subscriber_Binary_Qos qos;
+
+} OBJK_Subscriber_Binary;
 
 
 typedef enum EndpointQosFlags
 {
-    IS_RELIABLE = 0x01 << 0,
-    IS_HISTORY_KEEP_LAST = 0x01 << 1,
-    IS_OWNERSHIP_EXCLUSIVE = 0x01 << 2,
-    IS_DURABILITY_TRANSIENT_LOCAL = 0x01 << 3,
-    IS_DURABILITY_TRANSIENT = 0x01 << 4,
-    IS_DURABILITY_PERSISTANT = 0x01 << 5
+    is_reliabel = 0x01 << 0,
+    is_history_keep_last = 0x01 << 1,
+    is_ownership_exclusive = 0x01 << 2,
+    is_durability_transient_local = 0x01 << 3,
+    is_durability_transient = 0x01 << 4,
+    is_durability_persistent = 0x01 << 5
 
 } EndpointQosFlags;
 
@@ -325,20 +444,39 @@ typedef enum EndpointQosFlags
 typedef struct OBJK_Endpoint_QosBinary
 {
     uint16_t qos_flags;
+    bool optional_history_depth;
     uint16_t history_depth;
+    bool optional_deadline_msec;
     uint32_t deadline_msec;
+    bool optional_lifespan_msec;
     uint32_t lifespan_msec;
+    bool optional_user_data;
     BinarySequence_t user_data;
 
 } OBJK_Endpoint_QosBinary;
 
 
+typedef struct OBJK_DataWriter_Binary_Qos
+{
+    OBJK_Endpoint_QosBinary base;
+    uint64_t ownership_strength;
+
+} OBJK_DataWriter_Binary_Qos;
+
+
+typedef struct OBJK_DataReader_Binary_Qos
+{
+    OBJK_Endpoint_QosBinary base;
+    uint64_t timebasedfilter_msec;
+    String_t contentbased_filter;
+
+} OBJK_DataReader_Binary_Qos;
+
+
 typedef struct OBJK_DataReader_Binary
 {
     String_t topic_name;
-    OBJK_Endpoint_QosBinary endpoint_qos;
-    uint32_t timebasedfilter_msec;
-    String_t contentbased_filter;
+    OBJK_DataReader_Binary_Qos qos;
 
 } OBJK_DataReader_Binary;
 
@@ -346,14 +484,15 @@ typedef struct OBJK_DataReader_Binary
 typedef struct OBJK_DataWriter_Binary
 {
     String_t topic_name;
-    OBJK_Endpoint_QosBinary endpoint_qos;
-    uint32_t ownership_strength;
+    OBJK_DataWriter_Binary_Qos qos;
 
 } OBJK_DataWriter_Binary;
 
 
 typedef union ObjectVariantU
 {
+    AGENT_Representation agent;
+    CLIENT_Representation client;
     OBJK_APPLICATION_Representation application;
     OBJK_PARTICIPANT_Representation participant;
     OBJK_QOSPROFILE_Representation qos_profile;
@@ -361,8 +500,8 @@ typedef union ObjectVariantU
     OBJK_TOPIC_Representation topic;
     OBJK_PUBLISHER_Representation publisher;
     OBJK_SUBSCRIBER_Representation subscriber;
-    OBJK_DATAWRITER_Representation data_writer;
-    OBJK_DATAREADER_Representation data_reader;
+    DATAWRITER_Representation data_writer;
+    DATAREADER_Representation data_reader;
 
 } ObjectVariantU;
 
@@ -375,13 +514,60 @@ typedef struct ObjectVariant
 } ObjectVariant;
 
 
+typedef struct CreationMode
+{
+    bool reuse;
+    bool replace;
+
+} CreationMode;
+
+
+typedef struct RequestId
+{
+    uint8_t data[2];
+
+} RequestId;
+
+
+typedef enum StatusValue
+{
+    STATUS_OK = 0x00,
+    STATUS_OK_MATCHED = 0x01,
+    STATUS_ERR_DDS_ERROR = 0x80,
+    STATUS_ERR_MISMATCH = 0x81,
+    STATUS_ERR_ALREADY_EXISTS = 0x82,
+    STATUS_ERR_DENIED = 0x83,
+    STATUS_ERR_UNKNOWN_REFERENCE = 0x84,
+    STATUS_ERR_INVALID_DATA = 0x85,
+    STATUS_ERR_INCOMPATIBLE = 0x86,
+    STATUS_ERR_RESOURCES = 0x87
+
+} StatusValue;
+
+
 typedef struct ResultStatus
 {
-    RequestId request_id;
     uint8_t status;
     uint8_t implementation_status;
 
 } ResultStatus;
+
+
+typedef struct BaseObjectRequest
+{
+    RequestId request_id;
+    ObjectId object_id;
+
+} BaseObjectRequest;
+
+typedef BaseObjectRequest RelatedObjectRequest;
+#define STATUS_LAST_OP_NONE 0x00
+#define STATUS_LAST_OP_CREATE 0x01
+#define STATUS_LAST_OP_UPDATE 0x02
+#define STATUS_LAST_OP_DELETE 0x03
+#define STATUS_LAST_OP_LOOKUP 0x04
+#define STATUS_LAST_OP_READ 0x05
+#define STATUS_LAST_OP_WRITE 0x06
 
 
 typedef enum InfoMask
@@ -392,25 +578,34 @@ typedef enum InfoMask
 } InfoMask;
 
 
-typedef struct OBJK_DATAREADER_ActivityInfo
+typedef struct AGENT_ActivityInfo
+{
+    int16_t availibility;
+    TransportLocatorSeq address_seq;
+
+} AGENT_ActivityInfo;
+
+
+typedef struct DATAREADER_ActivityInfo
 {
     int16_t highest_acked_num;
 
-} OBJK_DATAREADER_ActivityInfo;
+} DATAREADER_ActivityInfo;
 
 
-typedef struct OBJK_DATAWRITER_ActivityInfo
+typedef struct DATAWRITER_ActivityInfo
 {
-    int16_t streaseq_num;
+    int16_t stream_seq_num;
     uint64_t sample_seq_num;
 
-} OBJK_DATAWRITER_ActivityInfo;
+} DATAWRITER_ActivityInfo;
 
 
 typedef union ActivityInfoVariantU
 {
-    OBJK_DATAWRITER_ActivityInfo data_writer;
-    OBJK_DATAREADER_ActivityInfo data_reader;
+    AGENT_ActivityInfo agent;
+    DATAWRITER_ActivityInfo data_writer;
+    DATAREADER_ActivityInfo data_reader;
 
 } ActivityInfoVariantU;
 
@@ -423,79 +618,108 @@ typedef struct ActivityInfoVariant
 } ActivityInfoVariant;
 
 
-typedef struct Info
+typedef struct ObjectInfo
 {
     ObjectVariant config;
     ActivityInfoVariant activity;
 
-} Info;
-
-
-typedef struct BaseRequest
-{
-    RequestId request_id;
-
-} BaseRequest;
-
-
-typedef struct BaseObjectRequest
-{
-    BaseRequest base;
-    ObjectId object_id;
-
-} BaseObjectRequest;
-
-
-typedef struct BaseReply
-{
-    ResultStatus result;
-    RequestId request_id;
-
-} BaseReply;
+} ObjectInfo;
 
 
 typedef struct BaseObjectReply
 {
-    BaseReply base;
-    ObjectId object_id;
+    BaseObjectRequest related_request;
+    ResultStatus result;
 
 } BaseObjectReply;
 
 
-typedef struct InfoReply
+typedef enum DataFormat
 {
-    BaseObjectReply reply;
-    ObjectVariant info;
+    FORMAT_DATA = 0x00,
+    FORMAT_SAMPLE = 0x02,
+    FORMAT_DATA_SEQ = 0x08,
+    FORMAT_SAMPLE_SEQ = 0x0A,
+    FORMAT_PACKED_SAMPLES = 0x0E,
+    FORMAT_MASK = 0x0F
 
-} InfoReply;
+} DataFormat;
 
 
 typedef struct DataDeliveryControl
 {
     uint16_t max_samples;
     uint32_t max_elapsed_time;
-    uint32_t max_rate;
+    uint32_t max_bytes_per_seconds;
+    uint32_t min_pace_period;
 
 } DataDeliveryControl;
 
 
 typedef struct ReadSpecification
 {
+    uint8_t data_format;
     bool optional_content_filter_expression;
     String_t content_filter_expression;
-    uint8_t optional_delivery_config;
-    DataDeliveryControl delivery_config;
+    bool optional_delivery_control;
+    DataDeliveryControl delivery_control;
 
 } ReadSpecification;
 
 
-typedef struct SampleInfo
+typedef enum SampleInfoFlags
 {
-    uint32_t state;
+    INSTANCE_STATE_UNREGISTERD = 0x01 << 0,
+    INSTANCE_STATE_DISPOSED = 0x01 << 1,
+    VIEW_STATE_NEW = 0x01 << 2,
+    SAMPLE_STATE_READ = 0x01 << 3
+
+} SampleInfoFlags;
+
+
+typedef enum SampleInfoFormat
+{
+    FORMAT_EMPTY = 0x00,
+    FORMAT_SEQNUM = 0x01,
+    FORMAT_TIMESTAMP = 0x02,
+    FORMAT_SEQN_TIMS = 0x03
+
+} SampleInfoFormat;
+
+
+typedef struct SeqNumberAndTimestamp
+{
     uint32_t sequence_number;
     uint32_t session_time_offset;
 
+} SeqNumberAndTimestamp;
+
+
+typedef union SampleInfoDetailU
+{
+    uint32_t sequence_number;
+    uint32_t session_time_offset;
+    SeqNumberAndTimestamp seqnum_n_timestamp;
+
+} SampleInfoDetailU;
+
+
+typedef struct SampleInfoDetail
+{
+    uint32_t format;
+    SampleInfoDetailU _;
+
+} SampleInfoDetail;
+
+
+typedef struct SampleInfo
+{
+    uint8_t state;
+    SampleInfoDetail detail;
+
 } SampleInfo;
+
+typedef uint16_t DeciSecond;
 
 
 typedef struct SampleInfoDelta
@@ -515,12 +739,12 @@ typedef struct SampleData
 } SampleData;
 
 
-typedef struct SampleDataSequence
+typedef struct SampleDataSeq
 {
     uint32_t size;
     SampleData* data;
 
-} SampleDataSequence;
+} SampleDataSeq;
 
 
 typedef struct Sample
@@ -531,12 +755,12 @@ typedef struct Sample
 } Sample;
 
 
-typedef struct SampleSequence
+typedef struct SampleSeq
 {
     uint32_t size;
     Sample* data;
 
-} SampleSequence;
+} SampleSeq;
 
 
 typedef struct SampleDelta
@@ -563,20 +787,20 @@ typedef struct PackedSamples
 } PackedSamples;
 
 
-typedef struct PackedSamplesSequence
+typedef struct SamplePackedSeq
 {
     uint32_t size;
     PackedSamples* data;
 
-} PackedSamplesSequence;
+} SamplePackedSeq;
 
 
 typedef union DataRepresentationU
 {
     SampleData data;
-    SampleDataSequence data_seq;
     Sample sample;
-    SampleSequence sample_seq;
+    SampleDataSeq data_seq;
+    SampleSeq sample_seq;
     PackedSamples packed_samples;
 
 } DataRepresentationU;
@@ -588,6 +812,173 @@ typedef struct DataRepresentation
     DataRepresentationU _;
 
 } DataRepresentation;
+
+
+typedef struct CREATE_CLIENT_Payload
+{
+    BaseObjectRequest base;
+    CLIENT_Representation client_representation;
+
+} CREATE_CLIENT_Payload;
+
+
+typedef struct CREATE_Payload
+{
+    BaseObjectRequest base;
+    ObjectVariant object_representation;
+
+} CREATE_Payload;
+
+
+typedef struct GET_INFO_Payload
+{
+    BaseObjectRequest base;
+    uint32_t info_mask;
+
+} GET_INFO_Payload;
+
+
+typedef struct DELETE_Payload
+{
+    BaseObjectRequest base;
+
+} DELETE_Payload;
+
+
+typedef struct STATUS_AGENT_Payload
+{
+    BaseObjectReply base;
+    AGENT_Representation agent_info;
+
+} STATUS_AGENT_Payload;
+
+
+typedef struct STATUS_Payload
+{
+    BaseObjectReply base;
+
+} STATUS_Payload;
+
+
+typedef struct INFO_Payload
+{
+    BaseObjectReply base;
+    ObjectInfo object_info;
+
+} INFO_Payload;
+
+
+typedef struct READ_DATA_Payload
+{
+    BaseObjectRequest base;
+    ReadSpecification read_specification;
+
+} READ_DATA_Payload;
+
+
+typedef struct WRITE_DATA_Payload_Data
+{
+    BaseObjectRequest base;
+    SampleData data;
+
+} WRITE_DATA_Payload_Data;
+
+
+typedef struct WRITE_DATA_Payload_Sample
+{
+    BaseObjectRequest base;
+    Sample sample;
+
+} WRITE_DATA_Payload_Sample;
+
+
+typedef struct WRITE_DATA_Payload_DataSeq
+{
+    BaseObjectRequest base;
+    SampleDataSeq data_seq;
+
+} WRITE_DATA_Payload_DataSeq;
+
+
+typedef struct WRITE_DATA_Payload_SampleSeq
+{
+    BaseObjectRequest base;
+    SampleSeq sample_seq;
+
+} WRITE_DATA_Payload_SampleSeq;
+
+
+typedef struct WRITE_DATA_Payload_PackedSamples
+{
+    BaseObjectRequest base;
+    PackedSamples packed_samples;
+
+} WRITE_DATA_Payload_PackedSamples;
+
+
+typedef struct DATA_Payload_Data
+{
+    BaseObjectRequest base;
+    SampleData data;
+
+} DATA_Payload_Data;
+
+
+typedef struct DATA_Payload_Sample
+{
+    BaseObjectRequest base;
+    Sample sample;
+
+} DATA_Payload_Sample;
+
+
+typedef struct DATA_Payload_DataSeq
+{
+    BaseObjectRequest base;
+    SampleDataSeq data_seq;
+
+} DATA_Payload_DataSeq;
+
+
+typedef struct DATA_Payload_SampleSeq
+{
+    BaseObjectRequest base;
+    SampleSeq sample_seq;
+
+} DATA_Payload_SampleSeq;
+
+
+typedef struct DATA_Payload_PackedSamples
+{
+    BaseObjectRequest base;
+    PackedSamples packed_samples;
+
+} DATA_Payload_PackedSamples;
+
+
+typedef struct ACKNACK_Payload
+{
+    int16_t first_unacked_seq_num;
+    uint8_t nack_bitmap[2];
+
+} ACKNACK_Payload;
+
+
+typedef struct HEARTBEAT_Payload
+{
+    int16_t first_unacked_seq_nr;
+    int16_t last_unacked_seq_nr;
+
+} HEARTBEAT_Payload;
+
+
+typedef struct MessageHeader
+{
+    uint8_t session_id;
+    uint8_t stream_id;
+    uint16_t sequence_nr;
+
+} MessageHeader;
 
 
 typedef enum SubmessageId
@@ -609,21 +1000,17 @@ typedef enum SubmessageId
 } SubmessageId;
 
 
-typedef struct MessageHeader
-{
-    uint8_t session_id;
-    uint8_t stream_id;
-    uint16_t sequence_nr;
-
-} MessageHeader;
-
-
 typedef enum SubmessageHeaderFlags
 {
     FLAG_ENDIANNESS = 0x01 << 0,
-    FLAG_REPLACE = 0x01 << 1,
+    FLAG_REUSE = 0x01 << 1,
+    FLAG_REPLACE = 0x01 << 2,
     FLAG_LAST_FRAGMENT = 0x01 << 1,
-    FLAG_REUSE = 0x01 << 2
+    FORMAT_DATA_F = 0x00,
+    FORMAT_SAMPLE_F = 0x02,
+    FORMAT_DATA_SEQ_F = 0x08,
+    FORMAT_SAMPLE_SEQ_F = 0x0A,
+    FORMAT_PACKED_SAMPLES_F = 0x0E
 
 } SubmessageHeaderFlags;
 
@@ -635,108 +1022,6 @@ typedef struct SubmessageHeader
     uint16_t length;
 
 } SubmessageHeader;
-
-
-typedef struct CreateClientPayload
-{
-    BaseObjectRequest request;
-    OBJK_CLIENT_Representation representation;
-
-} CreateClientPayload;
-
-
-typedef struct CreateResourcePayload
-{
-    BaseObjectRequest request;
-    ObjectVariant representation;
-
-} CreateResourcePayload;
-
-
-typedef struct DeleteResourcePayload
-{
-    BaseObjectRequest request;
-
-} DeleteResourcePayload;
-
-
-typedef struct StatusPayload
-{
-    BaseObjectReply reply;
-
-} StatusPayload;
-
-
-typedef struct GetInfoPayload
-{
-    BaseObjectRequest request;
-    uint32_t info_mask;
-
-} GetInfoPayload;
-
-
-typedef struct InfoPayload
-{
-    BaseObjectReply reply;
-    Info info;
-
-} InfoPayload;
-
-
-typedef struct ReadDataPayload
-{
-    BaseObjectRequest request;
-    ReadSpecification read_specification;
-
-} ReadDataPayload;
-
-
-typedef struct WriteDataPayload
-{
-    BaseObjectRequest request;
-    DataRepresentation data_to_write;
-
-} WriteDataPayload;
-
-
-typedef struct SampleDataPayloadData
-{
-    BaseObjectReply reply;
-    SampleData data;
-
-} SampleDataPayloadData;
-
-
-typedef struct SamplePayloadData
-{
-    BaseObjectReply reply;
-    Sample sample;
-
-} SamplePayloadData;
-
-
-typedef struct SampleDataSequencePayloadData
-{
-    BaseObjectReply reply;
-    SampleDataSequence data_sequence;
-
-} SampleDataSequencePayloadData;
-
-
-typedef struct SampleSequencePayloadData
-{
-    BaseObjectReply reply;
-    SampleSequence sample_sequence;
-
-} SampleSequencePayloadData;
-
-
-typedef struct PackedSamplesPayloadData
-{
-    BaseObjectReply reply;
-    PackedSamples packed_samples;
-
-} PackedSamplesPayloadData;
 
 
 #ifdef __cplusplus

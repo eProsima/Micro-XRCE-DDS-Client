@@ -103,7 +103,7 @@ void on_out_of_bounds(void* args);
 
 bool on_message_header(const MessageHeader* header, const ClientKey* key, void* args);
 
-void on_status_submessage(const StatusPayload* payload, void* args);
+void on_status_submessage(const STATUS_Payload* payload, void* args);
 DataFormat on_data_submessage(const BaseObjectReply* data_reply, void* args);
 
 void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void* args, Endianness endianness);

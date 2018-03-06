@@ -61,9 +61,9 @@ DATA:
 - define:  {XRCE_COOKIE: '(XrceCookie){0x58, 0x52, 0x43, 0x45}'}
 
 - struct:  {XrceVersion: [data: uint8_t 2]}
-- define:  {XRCE_VESION_MAJOR:  '0x01'}
-- define:  {XRCE_VESION_MINOR:  '0x00'}
-- define:  {XRCE_VERSION: '(XrceVersion){XRCE_VESION_MAJOR, XRCE_VESION_MINOR}'}
+- define:  {XRCE_VERSION_MAJOR:  '0x01'}
+- define:  {XRCE_VERSION_MINOR:  '0x00'}
+- define:  {XRCE_VERSION: '(XrceVersion){XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}'}
 
 - struct:  {XrceVendorId: [data: uint8_t 2]}
 - define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}
@@ -141,6 +141,7 @@ DATA:
         - client_key:         ClientKey
         - session_id:         SessionId
         - properties:         PropertySeq
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     AGENT_Representation:
@@ -149,6 +150,7 @@ DATA:
         - xrce_vendor_id:     XrceVendorId
         - agent_timestamp:    Time_t
         - properties:         PropertySeq
+          __OPTIONAL_CONDITION__: ['true']
         
 - typedef: {RepresentationFormat: uint8_t}
 - define:  {REPRESENTATION_BY_REFERENCE:   '0x01'}
@@ -217,18 +219,22 @@ DATA:
 - struct:
     OBJK_PUBLISHER_Representation:
       - base:    OBJK_RepresentationBinAndXML_Base
+      - participant_id: ObjectId
 
 - struct:
     OBJK_SUBSCRIBER_Representation:
       - base:    OBJK_RepresentationBinAndXML_Base
+      - participant_id: ObjectId
 
 - struct:
     DATAWRITER_Representation:
       - base:    OBJK_RepresentationBinAndXMLFormats 
+      - publisher_id: ObjectId
 
 - struct:
     DATAREADER_Representation:
       - base:    OBJK_RepresentationBinAndXMLFormats 
+      - subscriber_id: ObjectId
 
 - struct:
     OBJK_PARTICIPANT_Representation:
@@ -310,7 +316,7 @@ DATA:
         - qos: OBJK_DataReader_Binary_Qos
 
 - struct:
-    OBJK_DataWiter_Binary:
+    OBJK_DataWriter_Binary:
         - topic_name: String_t
         - qos: OBJK_DataWriter_Binary_Qos
 
@@ -329,6 +335,8 @@ DATA:
       - data_writer:    DATAWRITER_Representation
       - data_reader:    DATAREADER_Representation
     __DISCRIMINATOR__:
+      - OBJK_AGENT
+      - OBJK_CLIENT
       - OBJK_APPLICATION
       - OBJK_PARTICIPANT
       - OBJK_QOSPROFILE
@@ -358,6 +366,7 @@ DATA:
         - STATUS_ERR_INVALID_DATA:      '0x85'
         - STATUS_ERR_INCOMPATIBLE:      '0x86'
         - STATUS_ERR_RESOURCES:         '0x87'
+    __TYPE__: uint8_t
 
 - struct:
     ResultStatus:

@@ -56,42 +56,42 @@ INLINE_MES void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t
 ;
 #endif
 
-INLINE_MES void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
+INLINE_MES void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CREATE_CLIENT_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
+INLINE_MES void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DeleteResourcePayload* payload)
+INLINE_MES void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DELETE_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_STATUS_SUBMESSAGE(const StatusPayload* payload)
+INLINE_MES void PRINTL_STATUS_SUBMESSAGE(const STATUS_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_WRITE_DATA_SUBMESSAGE(const WriteDataPayload* payload)
+INLINE_MES void PRINTL_WRITE_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_READ_DATA_SUBMESSAGE(const ReadDataPayload* payload)
+INLINE_MES void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
@@ -112,14 +112,14 @@ INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE(const BaseObjectReply* reply, cons
 ;
 #endif
 
-INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSequence* payload)
+INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSeq* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSequence* payload)
+INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSeq* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else

@@ -32,30 +32,30 @@ bool end_submessage(OutputMessage *message,
                     MicroState header_beginning, MicroState payload_beginning,
                     SubmessageId id, uint8_t flags);
 
-bool try_add_create_client_submessage(OutputMessage *message, const CreateClientPayload *payload);
-bool try_add_create_resource_submessage(OutputMessage *message, const CreateResourcePayload *payload, CreationMode creation_mode);
-bool try_add_delete_resource_submessage(OutputMessage *message, const DeleteResourcePayload *payload);
-bool try_add_get_info_submessage(OutputMessage *message, const GetInfoPayload *payload);
-bool try_add_read_data_submessage(OutputMessage *message, const ReadDataPayload *payload);
-bool try_add_write_data_submessage(OutputMessage *message, const WriteDataPayload *payload);
+bool try_add_create_client_submessage(OutputMessage* message, const CREATE_CLIENT_Payload* payload);
+bool try_add_create_resource_submessage(OutputMessage* message, const CREATE_Payload* payload, CreationMode creation_mode);
+bool try_add_delete_resource_submessage(OutputMessage *message, const DELETE_Payload* payload);
+bool try_add_get_info_submessage(OutputMessage *message, const GET_INFO_Payload* payload);
+bool try_add_read_data_submessage(OutputMessage *message, const READ_DATA_Payload* payload);
+bool try_add_write_data_submessage(OutputMessage *message, const WRITE_DATA_Payload_Data* payload);
 
 // ----------------------------------------------------------------------------------
 //                                 PUBLIC API
 // ----------------------------------------------------------------------------------
-void init_output_message(OutputMessage *message, OutputMessageCallback callback,
-                         uint8_t *out_buffer, uint32_t out_buffer_size)
+void init_output_message(OutputMessage* message, OutputMessageCallback callback,
+                         uint8_t* out_buffer, uint32_t out_buffer_size)
 {
     init_external_buffer(&message->writer, out_buffer, out_buffer_size);
 
     message->callback = callback;
 }
 
-uint32_t get_message_length(OutputMessage *message)
+uint32_t get_message_length(OutputMessage* message)
 {
     return message->writer.iterator - message->writer.init;
 }
 
-bool add_create_client_submessage(OutputMessage *message, const CreateClientPayload *payload)
+bool add_create_client_submessage(OutputMessage* message, const CREATE_CLIENT_Payload* payload)
 {
     bool added = try_add_create_client_submessage(message, payload);
     if (!added)
@@ -66,12 +66,12 @@ bool add_create_client_submessage(OutputMessage *message, const CreateClientPayl
     return added;
 }
 
-bool try_add_create_client_submessage(OutputMessage *message, const CreateClientPayload *payload)
+bool try_add_create_client_submessage(OutputMessage* message, const CREATE_CLIENT_Payload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
     bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_CreateClientPayload(&message->writer, payload) &&
+               serialize_CREATE_CLIENT_Payload(&message->writer, payload) &&
                end_submessage(message, header_beginning, payload_beginning,
                               SUBMESSAGE_ID_CREATE_CLIENT, message->writer.endianness);
     if (!ret)
@@ -81,7 +81,7 @@ bool try_add_create_client_submessage(OutputMessage *message, const CreateClient
     return ret;
 }
 
-bool add_create_resource_submessage(OutputMessage *message, const CreateResourcePayload *payload, CreationMode creation_mode)
+bool add_create_resource_submessage(OutputMessage* message, const CREATE_Payload* payload, CreationMode creation_mode)
 {
     bool added = try_add_create_resource_submessage(message, payload, creation_mode);
     if (!added)
@@ -92,14 +92,25 @@ bool add_create_resource_submessage(OutputMessage *message, const CreateResource
     return added;
 }
 
-bool try_add_create_resource_submessage(OutputMessage *message, const CreateResourcePayload *payload, CreationMode creation_mode)
+bool try_add_create_resource_submessage(OutputMessage* message, const CREATE_Payload* payload, CreationMode creation_mode)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
+    uint8_t flags = 0;
+    if (creation_mode.reuse)
+    {
+        flags |= FLAG_REUSE;
+    }
+    if (creation_mode.replace)
+    {
+        flags |= FLAG_REPLACE;
+    }
+    flags |= message->writer.endianness;
+
     bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_CreateResourcePayload(&message->writer, payload) &&
+               serialize_CREATE_Payload(&message->writer, payload) &&
                end_submessage(message, header_beginning, payload_beginning,
-                              SUBMESSAGE_ID_CREATE, creation_mode | message->writer.endianness);
+                              SUBMESSAGE_ID_CREATE, flags);
     if (!ret)
     {
         restore_micro_state(&message->writer, submessage_beginning);
@@ -107,7 +118,7 @@ bool try_add_create_resource_submessage(OutputMessage *message, const CreateReso
     return ret;
 }
 
-bool add_delete_resource_submessage(OutputMessage *message, const DeleteResourcePayload *payload)
+bool add_delete_resource_submessage(OutputMessage* message, const DELETE_Payload* payload)
 {
     bool added = try_add_delete_resource_submessage(message, payload);
     if (!added)
@@ -118,12 +129,12 @@ bool add_delete_resource_submessage(OutputMessage *message, const DeleteResource
     return added;
 }
 
-bool try_add_delete_resource_submessage(OutputMessage *message, const DeleteResourcePayload *payload)
+bool try_add_delete_resource_submessage(OutputMessage* message, const DELETE_Payload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
     bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_DeleteResourcePayload(&message->writer, payload) &&
+               serialize_DELETE_Payload(&message->writer, payload) &&
                end_submessage(message, header_beginning, payload_beginning,
                               SUBMESSAGE_ID_DELETE, message->writer.endianness);
     if (!ret)
@@ -133,7 +144,7 @@ bool try_add_delete_resource_submessage(OutputMessage *message, const DeleteReso
     return ret;
 }
 
-bool add_get_info_submessage(OutputMessage *message, const GetInfoPayload *payload)
+bool add_get_info_submessage(OutputMessage* message, const GET_INFO_Payload* payload)
 {
     bool added = try_add_get_info_submessage(message, payload);
     if (!added)
@@ -144,12 +155,12 @@ bool add_get_info_submessage(OutputMessage *message, const GetInfoPayload *paylo
     return added;
 }
 
-bool try_add_get_info_submessage(OutputMessage *message, const GetInfoPayload *payload)
+bool try_add_get_info_submessage(OutputMessage* message, const GET_INFO_Payload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
     bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_GetInfoPayload(&message->writer, payload) &&
+               serialize_GET_INFO_Payload(&message->writer, payload) &&
                end_submessage(message, header_beginning, payload_beginning,
                               SUBMESSAGE_ID_GET_INFO, message->writer.endianness);
 
@@ -160,7 +171,7 @@ bool try_add_get_info_submessage(OutputMessage *message, const GetInfoPayload *p
     return ret;
 }
 
-bool add_read_data_submessage(OutputMessage *message, const ReadDataPayload *payload)
+bool add_read_data_submessage(OutputMessage* message, const READ_DATA_Payload* payload)
 {
     bool added = try_add_read_data_submessage(message, payload);
     if (!added)
@@ -171,12 +182,12 @@ bool add_read_data_submessage(OutputMessage *message, const ReadDataPayload *pay
     return added;
 }
 
-bool try_add_read_data_submessage(OutputMessage *message, const ReadDataPayload *payload)
+bool try_add_read_data_submessage(OutputMessage* message, const READ_DATA_Payload* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
     bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_ReadDataPayload(&message->writer, payload) &&
+               serialize_READ_DATA_Payload(&message->writer, payload) &&
                end_submessage(message, header_beginning, payload_beginning, SUBMESSAGE_ID_READ_DATA, message->writer.endianness);
 
     if (!ret)
@@ -186,7 +197,7 @@ bool try_add_read_data_submessage(OutputMessage *message, const ReadDataPayload 
     return ret;
 }
 
-bool add_write_data_submessage(OutputMessage *message, const WriteDataPayload *payload)
+bool add_write_data_submessage(OutputMessage* message, const WRITE_DATA_Payload_Data* payload)
 {
     bool added = try_add_write_data_submessage(message, payload);
     if (!added)
@@ -197,12 +208,12 @@ bool add_write_data_submessage(OutputMessage *message, const WriteDataPayload *p
     return added;
 }
 
-bool try_add_write_data_submessage(OutputMessage *message, const WriteDataPayload *payload)
+bool try_add_write_data_submessage(OutputMessage* message, const WRITE_DATA_Payload_Data* payload)
 {
     MicroState submessage_beginning, header_beginning, payload_beginning;
 
     bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_WriteDataPayload(&message->writer, payload) &&
+               serialize_WRITE_DATA_Payload_Data(&message->writer, payload) &&
                end_submessage(message, header_beginning, payload_beginning,
                               SUBMESSAGE_ID_WRITE_DATA, message->writer.endianness);
     if (!ret)
@@ -221,8 +232,10 @@ bool begin_message(OutputMessage *message)
     message->callback.on_initialize_message(&message_header, &key, message->callback.args);
 
     bool ret = serialize_MessageHeader(&message->writer, &message_header);
-    if (message_header.session_id >= 128)
+    if (message_header.session_id < 128)
+    {
         ret &= serialize_ClientKey(&message->writer, &key);
+    }
     return ret;
 }
 

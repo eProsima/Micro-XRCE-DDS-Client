@@ -50,7 +50,7 @@ const char* request_to_string(const BaseObjectRequest* request)
 {
     static char buffer[256];
     sprintf(buffer, "#0x%04X | id: 0x%04X",
-            get_num_request_id(request->base.request_id),
+            get_num_request_id(request->request_id),
             get_num_object_id(request->object_id));
 
     return buffer;
@@ -60,74 +60,74 @@ const char* reply_to_string(const BaseObjectReply* reply)
 {
     static char buffer[256];
     char kind[64];
-    switch(reply->base.result.status)
+    switch(reply->result.status)
     {
         case STATUS_LAST_OP_NONE:
             sprintf(kind, "NONE");
-        break;
+            break;
         case STATUS_LAST_OP_CREATE:
             sprintf(kind, "CREATE");
-        break;
+            break;
         case STATUS_LAST_OP_UPDATE:
             sprintf(kind, "UPDATE");
-        break;
+            break;
         case STATUS_LAST_OP_DELETE:
             sprintf(kind, "DELETE");
-        break;
+            break;
         case STATUS_LAST_OP_LOOKUP:
             sprintf(kind, "LOOKUP");
-        break;
+            break;
         case STATUS_LAST_OP_READ:
             sprintf(kind, "READ");
-        break;
+            break;
         case STATUS_LAST_OP_WRITE:
             sprintf(kind, "WRITE");
-        break;
+            break;
         default:
             sprintf(kind, "UNKNOWN");
     }
 
     char implementation[64];
-    switch(reply->base.result.implementation_status)
+    switch(reply->result.status)
     {
         case STATUS_OK:
             sprintf(implementation, "OK");
-        break;
+            break;
         case STATUS_OK_MATCHED:
             sprintf(implementation, "OK_MATCHED");
-        break;
+            break;
         case STATUS_ERR_DDS_ERROR:
             sprintf(implementation, "ERR_DDS_ERROR");
-        break;
+            break;
         case STATUS_ERR_MISMATCH:
             sprintf(implementation, "ERR_MISMATCH");
-        break;
+            break;
         case STATUS_ERR_ALREADY_EXISTS:
             sprintf(implementation, "ERR_ALREADY_EXISTS");
-        break;
+            break;
         case STATUS_ERR_DENIED:
             sprintf(implementation, "ERR_DENIED");
-        break;
+            break;
         case STATUS_ERR_UNKNOWN_REFERENCE:
             sprintf(implementation, "ERR_UNKNOWN_REFERENCE");
-        break;
+            break;
         case STATUS_ERR_INVALID_DATA:
             sprintf(implementation, "ERR_INVALID_DATA");
-        break;
+            break;
         case STATUS_ERR_INCOMPATIBLE:
             sprintf(implementation, "ERR_INCOMPATIBLE");
-        break;
+            break;
         case STATUS_ERR_RESOURCES:
             sprintf(implementation, "ERR_RESOURCES");
-        break;
+            break;
         default:
             sprintf(implementation, "UNKNOWN");
     }
 
     sprintf(buffer, "#0x%04X | id: 0x%04X | from #0x%04X | %s | %s",
-            get_num_request_id(reply->base.request_id),
-            get_num_object_id(reply->object_id),
-            get_num_request_id(reply->base.result.request_id),
+            get_num_request_id(reply->related_request.request_id),
+            get_num_object_id(reply->related_request.object_id),
+            get_num_request_id(reply->related_request.request_id),
             kind, implementation);
 
     return buffer;
@@ -157,55 +157,47 @@ void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t local_sequ
             RESTORE_COLOR);
 }
 
-void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CreateClientPayload* payload)
+void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CREATE_CLIENT_Payload* payload)
 {
     printf("%s%s[Create client | %s | session: 0x%02X]%s\n",
             SEND,
             YELLOW,
-            request_to_string(&payload->request),
-            payload->representation.session_id,
+            request_to_string(&payload->base),
+            payload->client_representation.session_id,
             RESTORE_COLOR);
 }
 
-void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
+void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
 {
     char content[4096];
-    switch(payload->representation.kind)
+    switch(payload->object_representation.kind)
     {
         case OBJK_PARTICIPANT:
             sprintf(content, "PARTICIPANT");
-        break;
-
+            break;
         case OBJK_TOPIC:
             sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
-                    get_num_object_id(payload->representation._.data_reader.participant_id),
-                    payload->representation._.data_reader.base3._.xml.size);
-        break;
-
+                    get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
+                    payload->object_representation._.data_reader.base._.xml_string_represenatation.size);
+            break;
         case OBJK_PUBLISHER:
             sprintf(content, "PUBLISHER | id: 0x%04X",
-                    get_num_object_id(payload->representation._.publisher.participant_id));
-        break;
-
+                    get_num_object_id(payload->object_representation._.publisher.participant_id));
+            break;
         case OBJK_SUBSCRIBER:
             sprintf(content, "SUBSCRIBER | id: 0x%04X",
-                    get_num_object_id(payload->representation._.subscriber.participant_id));
-        break;
-
+                    get_num_object_id(payload->object_representation._.subscriber.participant_id));
+            break;
         case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | id: 0x%04X | id: 0x%04X | xml: %u",
-                    get_num_object_id(payload->representation._.data_writer.participant_id),
-                    get_num_object_id(payload->representation._.data_writer.publisher_id),
-                    payload->representation._.data_writer.base3._.xml.size);
-        break;
-
+            sprintf(content, "DATA_WRITER | id: 0x%04X | xml: %u",
+                    get_num_object_id(payload->object_representation._.data_writer.publisher_id),
+                    payload->object_representation._.data_writer.base._.xml_string_represenatation.size);
+             break;
         case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | id: 0x%04X | id: 0x%04X | xml: %u",
-                    get_num_object_id(payload->representation._.data_reader.participant_id),
-                    get_num_object_id(payload->representation._.data_reader.subscriber_id),
-                    payload->representation._.data_reader.base3._.xml.size);
-        break;
-
+            sprintf(content, "DATA_READER | id: 0x%04X | xml: %u",
+                    get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
+                    payload->object_representation._.data_reader.base._.xml_string_represenatation.size);
+            break;
         default:
             sprintf(content, "UNKNOWN");
     }
@@ -213,59 +205,46 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CreateResourcePayload* payload)
     printf("%s%s[Create | %s | %s]%s\n",
             SEND,
             YELLOW,
-            request_to_string(&payload->request),
+            request_to_string(&payload->base),
             content,
             RESTORE_COLOR);
 }
 
-void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DeleteResourcePayload* payload)
+void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DELETE_Payload* payload)
 {
     printf("%s%s[Delete | %s]%s\n",
             SEND,
             YELLOW,
-            request_to_string(&payload->request),
+            request_to_string(&payload->base),
             RESTORE_COLOR);
 }
 
-void PRINTL_STATUS_SUBMESSAGE(const StatusPayload* payload)
+void PRINTL_STATUS_SUBMESSAGE(const STATUS_Payload* payload)
 {
     printf("%s%s[Status | %s]%s\n",
             RECV,
             PURPLE,
-            reply_to_string(&payload->reply),
+            reply_to_string(&payload->base),
             RESTORE_COLOR);
 }
 
-void PRINTL_WRITE_DATA_SUBMESSAGE(const WriteDataPayload* payload)
+void PRINTL_WRITE_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
 {
     char content[1024];
-    switch(payload->data_to_write.format)
-    {
-        case FORMAT_DATA:
-            sprintf(content, "DATA | size: %u", payload->data_to_write._.data.size);
-        break;
-        case FORMAT_DATA_SEQ:
-        break;
-        case FORMAT_SAMPLE:
-        break;
-        case FORMAT_SAMPLE_SEQ:
-        break;
-        case FORMAT_PACKED_SAMPLES:
-        break;
-    }
+    sprintf(content, "DATA | size: %u", payload->data.size);
 
     printf("%s%s[Write data | %s | %s]%s\n",
             SEND,
             YELLOW,
-            request_to_string(&payload->request),
+            request_to_string(&payload->base),
             content,
             RESTORE_COLOR);
 }
 
-void PRINTL_READ_DATA_SUBMESSAGE(const ReadDataPayload* payload)
+void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
 {
     char format[128];
-    switch(payload->read_specification.optional_delivery_config)
+    switch(payload->read_specification.data_format)
     {
         case FORMAT_DATA:
             sprintf(format, "FORMAT_DATA");
@@ -289,7 +268,7 @@ void PRINTL_READ_DATA_SUBMESSAGE(const ReadDataPayload* payload)
     printf("%s%s[Read data | %s | %s]%s\n",
             SEND,
             YELLOW,
-            request_to_string(&payload->request),
+            request_to_string(&payload->base),
             format,
             RESTORE_COLOR);
 }
@@ -311,14 +290,14 @@ void PRINTL_DATA_SUBMESSAGE_SAMPLE(const BaseObjectReply* reply, const Sample* p
     (void) payload;
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSequence* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSeq* payload)
 {
     //TODO
     (void) reply;
     (void) payload;
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSequence* payload)
+void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSeq* payload)
 {
     //TODO
     (void) reply;
