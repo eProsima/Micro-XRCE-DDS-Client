@@ -107,11 +107,11 @@ DATA:
 - union:
     TransportLocator:
         - format: TransportLocatorFormat
-        - small_locator: TransportLocatorSmall 
+        - small_locator: TransportLocatorSmall
         - medium_locator: TransportLocatorMedium
         - large_locator: TransportLocatorLarge
         - string_locator: TransportLocatorString
-    __DISCRIMINATOR__: 
+    __DISCRIMINATOR__:
         - ADDRESS_FORMAT_SMALL
         - ADDRESS_FORMAT_MEDIUM
         - ADDRESS_FORMAT_LARGE
@@ -151,7 +151,7 @@ DATA:
         - agent_timestamp:    Time_t
         - properties:         PropertySeq
           __OPTIONAL_CONDITION__: ['true']
-        
+
 - typedef: {RepresentationFormat: uint8_t}
 - define:  {REPRESENTATION_BY_REFERENCE:   '0x01'}
 - define:  {REPRESENTATION_AS_XML_STRING:  '0x02'}
@@ -187,7 +187,7 @@ DATA:
     __DISCRIMINATOR__:
         - REPRESENTATION_IN_BINARY
         - REPRESENTATION_AS_XML_STRING
-          
+
 - struct:
     OBJK_RepresentationRefAndXML_Base:
         - representation: OBJK_RepresentationRefAndXMLFormats
@@ -195,14 +195,14 @@ DATA:
 - struct:
     OBJK_RepresentationBinAndXML_Base:
         - representation: OBJK_RepresentationBinAndXMLFormats
-        
+
 - struct:
     OBJK_Representation3_Base:
         - representation: OBJK_Representation3Formats
 
 - struct:
     OBJK_QOSPROFILE_Representation:
-      - base:    OBJK_RepresentationRefAndXML_Base 
+      - base:    OBJK_RepresentationRefAndXML_Base
 
 - struct:
     OBJK_TYPE_Representation:
@@ -228,12 +228,12 @@ DATA:
 
 - struct:
     DATAWRITER_Representation:
-      - base:    OBJK_RepresentationBinAndXMLFormats 
+      - base:    OBJK_RepresentationBinAndXMLFormats
       - publisher_id: ObjectId
 
 - struct:
     DATAREADER_Representation:
-      - base:    OBJK_RepresentationBinAndXMLFormats 
+      - base:    OBJK_RepresentationBinAndXMLFormats
       - subscriber_id: ObjectId
 
 - struct:
@@ -243,7 +243,7 @@ DATA:
 
 - struct:
     OBJK_TOPIC_Representation:
-      - base:           OBJK_Representation3_Base    
+      - base:           OBJK_Representation3_Base
       - participant_id: ObjectId
 
 - struct:
@@ -263,7 +263,7 @@ DATA:
         - group_data: BinarySequence_t
 
 - struct:
-    OBJK_Publisher_Binary: 
+    OBJK_Publisher_Binary:
         - publisher_name: String_t
         - qos: OBJK_Publisher_Binary_Qos
 
@@ -273,7 +273,7 @@ DATA:
         - group_data: BinarySequence_t
 
 - struct:
-    OBJK_Subscriber_Binary: 
+    OBJK_Subscriber_Binary:
         - subscriber_name: String_t
         - qos: OBJK_Subscriber_Binary_Qos
 
@@ -358,7 +358,7 @@ DATA:
     StatusValue:
         - STATUS_OK:                    '0x00'
         - STATUS_OK_MATCHED:            '0x01'
-        - STATUS_ERR_DDS_ERROR:         '0x80'          
+        - STATUS_ERR_DDS_ERROR:         '0x80'
         - STATUS_ERR_MISMATCH:          '0x81'
         - STATUS_ERR_ALREADY_EXISTS:    '0x82'
         - STATUS_ERR_DENIED:            '0x83'
@@ -466,7 +466,7 @@ DATA:
 - enum:
     SampleInfoFormat:
         - FORMAT_EMPTY:     '0x00'
-        - FORMAT_SEQNUM:    '0x01'             
+        - FORMAT_SEQNUM:    '0x01'
         - FORMAT_TIMESTAMP: '0x02'
         - FORMAT_SEQN_TIMS: '0x03'
 
@@ -647,7 +647,7 @@ DATA:
     ACKNACK_Payload:
         - first_unacked_seq_num: int16_t
         - nack_bitmap: uint8_t 2
-          
+
 - struct:
     HEARTBEAT_Payload:
         - first_unacked_seq_nr: int16_t
@@ -659,7 +659,7 @@ DATA:
       - stream_id: uint8_t
       - {sequence_nr: uint16_t, __ENDIANNESS__: LITTLE}
       # - client_key: ClientKey //manage at message level.
-          
+
 - enum:
     SubmessageId:
       - SUBMESSAGE_ID_CREATE_CLIENT: '0'
@@ -685,7 +685,7 @@ DATA:
       - FLAG_LAST_FRAGMENT:         '0x01 << 1'
       - FORMAT_DATA_F:              '0x00'
       - FORMAT_SAMPLE_F:            '0x02'
-      - FORMAT_DATA_SEQ_F:          '0x08' 
+      - FORMAT_DATA_SEQ_F:          '0x08'
       - FORMAT_SAMPLE_SEQ_F:        '0x0A'
       - FORMAT_PACKED_SAMPLES_F:    '0x0E'
     __TYPE__: uint8_t

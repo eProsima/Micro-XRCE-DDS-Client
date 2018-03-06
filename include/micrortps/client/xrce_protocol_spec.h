@@ -78,10 +78,10 @@ typedef struct ObjectPrefix
     uint8_t data[2];
 
 } ObjectPrefix;
-#define OBJECTID_INVALID (ObjectId){{0x00, 0x00}}
-#define OBJECTID_AGENT   (ObjectId){{0xFF, 0xFD}}
-#define OBJECTID_CLIENT  (ObjectId){{0xFF, 0xFE}}
-#define OBJECTID_SESSION (ObjectId){{0xFF, 0xFF}}
+#define OBJECTID_INVALID (ObjectId){0x00, 0x00}
+#define OBJECTID_AGENT (ObjectId){0xFF, 0xFD}
+#define OBJECTID_CLIENT (ObjectId){0xFF, 0xFE}
+#define OBJECTID_SESSION (ObjectId){0xFF, 0xFF}
 
 
 typedef struct XrceCookie
@@ -89,7 +89,7 @@ typedef struct XrceCookie
     uint8_t data[4];
 
 } XrceCookie;
-#define XRCE_COOKIE (XrceCookie){{0x58, 0x52, 0x43, 0x45}}
+#define XRCE_COOKIE (XrceCookie){0x58, 0x52, 0x43, 0x45}
 
 
 typedef struct XrceVersion
@@ -99,7 +99,7 @@ typedef struct XrceVersion
 } XrceVersion;
 #define XRCE_VERSION_MAJOR 0x01
 #define XRCE_VERSION_MINOR 0x00
-#define XRCE_VERSION (XrceVersion){{XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}}
+#define XRCE_VERSION (XrceVersion){XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}
 
 
 typedef struct XrceVendorId
@@ -107,7 +107,7 @@ typedef struct XrceVendorId
     uint8_t data[2];
 
 } XrceVendorId;
-#define XRCE_VENDOR_INVALID {{0x00, 0x00}}
+#define XRCE_VENDOR_INVALID {0x00, 0x00}
 
 typedef uint8_t SessionId;
 #define SESSIONID_NONE_WITH_CLIENT_KEY 0x00

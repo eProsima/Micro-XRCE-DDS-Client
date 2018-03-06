@@ -109,8 +109,7 @@ bool try_add_create_resource_submessage(OutputMessage* message, const CREATE_Pay
 
     bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
                serialize_CREATE_Payload(&message->writer, payload) &&
-               end_submessage(message, header_beginning, payload_beginning,
-                              SUBMESSAGE_ID_CREATE, flags);
+               end_submessage(message, header_beginning, payload_beginning, SUBMESSAGE_ID_CREATE, flags);
     if (!ret)
     {
         restore_micro_state(&message->writer, submessage_beginning);

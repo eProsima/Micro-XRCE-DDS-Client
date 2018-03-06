@@ -1,4 +1,4 @@
-#include <micrortps/client/xrce_protocol_serialization.h>
+#include "xrce_protocol_serialization.h"
 
 bool serialize_Time_t(MicroBuffer* buffer, const Time_t* input)
 {
