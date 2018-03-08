@@ -1,3 +1,17 @@
+// Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #ifndef _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
 #define _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
 
@@ -9,6 +23,11 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
+#define STRING_SEQUENCE_MAX 10
+#define SAMPLE_SEQUENCE_MAX 10
+#define SAMPLE_DATA_SEQUENCE_MAX 10
+#define SAMPLE_DELTA_SEQUENCE_MAX 10
+#define PACKED_SAMPLES_SEQUENCE_MAX 10
 
 
 typedef struct Time_t
@@ -38,7 +57,7 @@ typedef struct BinarySequence_t
 typedef struct StringSequence_t
 {
     uint32_t size;
-    String_t* data;
+    String_t data[STRING_SEQUENCE_MAX];
 
 } StringSequence_t;
 
@@ -78,10 +97,10 @@ typedef struct ObjectPrefix
     uint8_t data[2];
 
 } ObjectPrefix;
-#define OBJECTID_INVALID (ObjectId){0x00, 0x00}
-#define OBJECTID_AGENT (ObjectId){0xFF, 0xFD}
-#define OBJECTID_CLIENT (ObjectId){0xFF, 0xFE}
-#define OBJECTID_SESSION (ObjectId){0xFF, 0xFF}
+#define OBJECTID_INVALID (ObjectId){{0x00, 0x00}}
+#define OBJECTID_AGENT (ObjectId){{0xFF, 0xFD}}
+#define OBJECTID_CLIENT (ObjectId){{0xFF, 0xFE}}
+#define OBJECTID_SESSION (ObjectId){{0xFF, 0xFF}}
 
 
 typedef struct XrceCookie
@@ -89,7 +108,7 @@ typedef struct XrceCookie
     uint8_t data[4];
 
 } XrceCookie;
-#define XRCE_COOKIE (XrceCookie){0x58, 0x52, 0x43, 0x45}
+#define XRCE_COOKIE (XrceCookie){{0x58, 0x52, 0x43, 0x45}}
 
 
 typedef struct XrceVersion
@@ -742,7 +761,7 @@ typedef struct SampleData
 typedef struct SampleDataSeq
 {
     uint32_t size;
-    SampleData* data;
+    SampleData data[SAMPLE_DATA_SEQUENCE_MAX];
 
 } SampleDataSeq;
 
@@ -758,7 +777,7 @@ typedef struct Sample
 typedef struct SampleSeq
 {
     uint32_t size;
-    Sample* data;
+    Sample data[SAMPLE_SEQUENCE_MAX];
 
 } SampleSeq;
 
@@ -774,7 +793,7 @@ typedef struct SampleDelta
 typedef struct SampleDeltaSequence
 {
     uint32_t size;
-    SampleDelta* data;
+    SampleDelta data[SAMPLE_DELTA_SEQUENCE_MAX];
 
 } SampleDeltaSequence;
 
@@ -790,7 +809,7 @@ typedef struct PackedSamples
 typedef struct SamplePackedSeq
 {
     uint32_t size;
-    PackedSamples* data;
+    PackedSamples data[PACKED_SAMPLES_SEQUENCE_MAX];
 
 } SamplePackedSeq;
 

@@ -21,7 +21,6 @@ extern "C"
 #endif
 
 #include "xrce_protocol_spec.h"
-#include "aux_memory.h"
 
 #include <microcdr/microcdr.h>
 
@@ -55,7 +54,6 @@ typedef struct InputMessageCallback
 
 typedef struct InputMessage
 {
-    AuxMemory aux_memory;
     InputMessageCallback callback;
     MicroBuffer reader;
 

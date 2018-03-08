@@ -45,7 +45,7 @@ bool try_add_write_data_submessage(OutputMessage *message, const WRITE_DATA_Payl
 void init_output_message(OutputMessage* message, OutputMessageCallback callback,
                          uint8_t* out_buffer, uint32_t out_buffer_size)
 {
-    init_external_buffer(&message->writer, out_buffer, out_buffer_size);
+    init_micro_buffer(&message->writer, out_buffer, out_buffer_size);
 
     message->callback = callback;
 }

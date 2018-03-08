@@ -27,65 +27,63 @@
 
 void init_input_message(InputMessage* message, InputMessageCallback callback, uint8_t* in_buffer, uint32_t in_buffer_size)
 {
-    init_aux_memory(&message->aux_memory);
-    init_external_buffer(&message->reader, in_buffer, 0);
+    init_micro_buffer(&message->reader, in_buffer, 0);
 
     message->callback = callback;
     message->buffer = in_buffer;
     message->buffer_size = in_buffer_size;
 }
 
-void free_input_message(InputMessage* message)
-{
-    free_aux_memory(&message->aux_memory);
-}
-
 void parse_data_payload(InputMessage* message, DataFormat format, const BaseObjectReply* reply)
 {
     MicroBuffer* reader = &message->reader;
-    AuxMemory* aux_memory = &message->aux_memory;
     InputMessageCallback* callback = &message->callback;
 
     switch(format)
     {
         case FORMAT_DATA: ;
             SampleData data;
-            deserialize_SampleData(reader, &data, aux_memory);
+            deserialize_SampleData(reader, &data);
             if(callback->on_data_payload)
             {
                 callback->on_data_payload(reply, &data, callback->args, reader->endianness);
             }
             break;
+
         case FORMAT_SAMPLE: ;
             Sample sample;
-            deserialize_Sample(reader, &sample, aux_memory);
+            deserialize_Sample(reader, &sample);
             if(callback->on_sample_payload)
             {
                 callback->on_sample_payload(reply, &sample, callback->args, reader->endianness);
             }
             break;
+
         case FORMAT_DATA_SEQ: ;
             SampleDataSeq data_sequence;
-            deserialize_SampleDataSeq(reader, &data_sequence, aux_memory);
+            deserialize_SampleDataSeq(reader, &data_sequence);
             if(callback->on_data_sequence_payload)
             {
                 callback->on_data_sequence_payload(reply, &data_sequence, callback->args, reader->endianness);
             }
             break;
+
         case FORMAT_SAMPLE_SEQ: ;
             SampleSeq sample_sequence;
-            deserialize_SampleSeq(reader, &sample_sequence, aux_memory);
+            deserialize_SampleSeq(reader, &sample_sequence);
             if(callback->on_sample_sequence_payload)
             {
                 callback->on_sample_sequence_payload(reply, &sample_sequence, callback->args, reader->endianness);
             }
             break;
+
         case FORMAT_PACKED_SAMPLES: ;
             PackedSamples packed_samples;
-            deserialize_PackedSamples(reader, &packed_samples, aux_memory);
+            deserialize_PackedSamples(reader, &packed_samples);
             if(callback->on_packed_samples_payload)
                 callback->on_packed_samples_payload(reply, &packed_samples, callback->args, reader->endianness);
              break;
+
         default:
             break;
     }
@@ -94,7 +92,6 @@ void parse_data_payload(InputMessage* message, DataFormat format, const BaseObje
 int parse_submessage(InputMessage* message)
 {
     MicroBuffer* reader = &message->reader;
-    AuxMemory* aux_memory = &message->aux_memory;
     InputMessageCallback* callback = &message->callback;
 
     // All subsessages begin with a 4 bytes alignment.
@@ -102,7 +99,7 @@ int parse_submessage(InputMessage* message)
 
     // Submessage message header.
     SubmessageHeader submessage_header;
-    deserialize_SubmessageHeader(reader, &submessage_header, NULL);
+    deserialize_SubmessageHeader(reader, &submessage_header);
     if(callback->on_submessage_header)
     {
         callback->on_submessage_header(&submessage_header, callback->args);
@@ -110,9 +107,6 @@ int parse_submessage(InputMessage* message)
 
     // Configure the reader for the specific message endianness
     reader->endianness = submessage_header.flags & FLAG_ENDIANNESS;
-
-    // We will need as much a quantity of aux memory equivalent to the payload length.
-    increase_aux_memory(&message->aux_memory, submessage_header.length);
 
     // Submessage is not complete.
     if(reader->iterator + submessage_header.length > reader->final)
@@ -127,7 +121,7 @@ int parse_submessage(InputMessage* message)
         case SUBMESSAGE_ID_STATUS:
         {
             STATUS_Payload payload;
-            deserialize_STATUS_Payload(reader, &payload, aux_memory);
+            deserialize_STATUS_Payload(reader, &payload);
             if(callback->on_status_submessage)
                 callback->on_status_submessage(&payload, callback->args);
         }
@@ -136,7 +130,7 @@ int parse_submessage(InputMessage* message)
         case SUBMESSAGE_ID_INFO:
         {
             INFO_Payload payload;
-            deserialize_INFO_Payload(reader, &payload, aux_memory);
+            deserialize_INFO_Payload(reader, &payload);
             if(callback->on_info_submessage)
                 callback->on_info_submessage(&payload, callback->args);
         }
@@ -145,7 +139,7 @@ int parse_submessage(InputMessage* message)
         case SUBMESSAGE_ID_DATA:
         {
             BaseObjectReply data_reply;
-            deserialize_BaseObjectReply(reader, &data_reply, aux_memory);
+            deserialize_BaseObjectReply(reader, &data_reply);
             if(callback->on_data_submessage)
             {
                 DataFormat format = callback->on_data_submessage(&data_reply, callback->args);
@@ -176,7 +170,7 @@ int parse_message(InputMessage* message, uint32_t length)
     MicroBuffer* reader = &message->reader;
     if(length <= message->buffer_size)
     {
-        init_external_buffer(reader, message->buffer, length);
+        init_micro_buffer(reader, message->buffer, length);
     }
     else
     {
@@ -187,10 +181,10 @@ int parse_message(InputMessage* message, uint32_t length)
     // Parse message header.
     MessageHeader message_header;
     ClientKey key;
-    deserialize_MessageHeader(reader, &message_header, NULL);
+    deserialize_MessageHeader(reader, &message_header);
     if(message_header.session_id < 128)
     {
-        deserialize_ClientKey(reader, &key, NULL);
+        deserialize_ClientKey(reader, &key);
     }
 
     // If the callback implementation fails, the message will not be parse

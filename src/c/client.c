@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <micrortps/client/client.h>
+#include "micrortps/client/client.h"
 #include "client_private.h"
 #include "log/message.h"
 #include <time.h>
@@ -336,7 +336,7 @@ XRCEInfo write_data(Session* session, uint16_t data_writer_id, SerializeTopic se
     char buffer[MAX_TOPIC_LENGTH];
 
     MicroBuffer writer;
-    init_external_buffer(&writer, (uint8_t*)buffer, MAX_TOPIC_LENGTH);
+    init_micro_buffer(&writer, (uint8_t*)buffer, MAX_TOPIC_LENGTH);
     writer.endianness = session->output_message.writer.endianness;
 
     if(serialize_topic(&writer, &(AbstractTopic){topic}))
@@ -476,7 +476,7 @@ void on_data_payload(const BaseObjectReply* reply, const SampleData* data, void*
     if(callback_data)
     {
         MicroBuffer reader;
-        init_external_buffer(&reader, data->data, data->size);
+        init_micro_buffer(&reader, data->data, data->size);
         reader.endianness = endianness;
         callback_data->on_message(info, &reader, callback_data->callback_args);
         remove_callback_data(&session->callback_data_storage, info.request_id);
@@ -495,7 +495,7 @@ bool send_to_agent(Session* session)
         if(output_length > 0)
         {
             PRINTL_SERIALIZATION(SEND, session->buffer, output_length);
-            reset_buffer(&session->output_message.writer);
+            reset_micro_buffer(&session->output_message.writer);
 
             return true;
         }
