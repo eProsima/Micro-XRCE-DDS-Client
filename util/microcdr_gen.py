@@ -128,7 +128,6 @@ class Attribute:
         array = 'array_' if self.array_value else ''
         array_size = ', ' + self.array_value if self.array_value else ''
         direction = '&' if not self.array_value else ''
-        aux = ', aux' if not State.is_basic_type(self.type) else ''
 
         if self.optional_values:
             file.write(' ' * spaces)
@@ -143,12 +142,12 @@ class Attribute:
             file.write(' ' * spaces)
             file.write(' ' * spaces)
             file.write(' ' * spaces)
-            file.write('ret &= deserialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + aux + ');\n')
+            file.write('ret &= deserialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + ');\n')
             file.write(' ' * spaces)
             file.write('}\n')
         else:
             file.write(' ' * spaces)
-            file.write('ret &= deserialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + aux + ');\n')
+            file.write('ret &= deserialize_' + endian + array + self.type + '(buffer, ' + endianness + direction + 'output->' + name + array_size + ');\n')
 
         if self.optional_values:
             file.write('\n')
@@ -208,7 +207,7 @@ class Struct:
                  '* input);\n')
 
         file.write('bool deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
-                     '* output, AuxMemory* aux);\n')
+                     '* output);\n')
 
     def writeSerializationImplementation(self, file):
         file.write('bool serialize_' + self.name + '(MicroBuffer* buffer, const ' + self.name +
@@ -217,13 +216,12 @@ class Struct:
         if len(self.attributes) == 2 and self.attributes[0].name == 'size' and self.attributes[1].name == 'data':
             data_type = self.attributes[1].type[:-1]
             if State.is_basic_type(data_type):
-                file.write('    return serialize_uint32_t(buffer, input->size) &&\n')
-                file.write('           serialize_array_' + data_type + '(buffer, input->data, input->size);\n')
+                file.write('    return serialize_sequence_' + data_type + '(buffer, input->data, input->size);\n')
             else:
                 file.write('    bool ret = serialize_uint32_t(buffer, input->size);\n')
                 file.write('    for(uint32_t i = 0; i < input->size; i++)\n')
                 file.write('    {\n')
-                file.write('        ret &= serialize_' + data_type + '(buffer, &input->data[i]);\n')
+                file.write('        ret &= serialize_' + self.attributes[1].type + '(buffer, &input->data[i]);\n')
                 file.write('    }\n')
                 file.write('    return ret;\n')
 
@@ -237,25 +235,24 @@ class Struct:
 
 
         file.write('bool deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
-                 '* output, AuxMemory* aux)\n{\n')
+                 '* output)\n{\n')
 
         if len(self.attributes) == 2 and self.attributes[0].name == 'size' and self.attributes[1].name == 'data':
             data_type = self.attributes[1].type[:-1]
 
-            file.write('    bool ret = deserialize_uint32_t(buffer, &output->size);\n')
-            file.write('    if (ret)\n')
-            file.write('    {\n')
-            file.write('        output->data = request_aux_memory(aux, output->size * sizeof(' + data_type + '));\n')
             if State.is_basic_type(data_type):
-                file.write('        ret &= deserialize_array_' + data_type + '(buffer, output->data, output->size);\n')
+                file.write('    return deserialize_sequence_' + data_type + '(buffer, &output->data, &output->size);\n')
 
             else:
+                file.write('    bool ret = deserialize_uint32_t(buffer, &output->size);\n')
+                file.write('    if (ret)\n')
+                file.write('    {\n')
                 file.write('        for(uint32_t i = 0; i < output->size; i++)\n')
                 file.write('        {\n')
-                file.write('            ret &= deserialize_' + data_type + '(buffer, &output->data[i], aux);\n')
+                file.write('            ret &= deserialize_' + self.attributes[1].type + '(buffer, &output->data[i], aux);\n')
                 file.write('        }\n')
-            file.write('    }\n')
-            file.write('    return ret;\n')
+                file.write('    }\n')
+                file.write('    return ret;\n')
 
         else:
             file.write('    bool ret = true;\n')
@@ -321,7 +318,7 @@ class Union:
 
 
         file.write('bool deserialize_' + self.name + '(MicroBuffer* buffer, ' + self.name +
-                 '* output, AuxMemory* aux)\n{\n')
+                 '* output)\n{\n')
 
         file.write('    bool ret = true;\n')
         self.discriminator.writeDeserialization(file, 4)

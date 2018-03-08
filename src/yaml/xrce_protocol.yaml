@@ -1,6 +1,15 @@
 DATA:
 
 #########################################################################################
+# MAX SIZE DEFINES
+#########################################################################################
+- define:  {STRING_SEQUENCE_MAX:              '10'}
+- define:  {SAMPLE_SEQUENCE_MAX:              '10'}
+- define:  {SAMPLE_DATA_SEQUENCE_MAX:         '10'}
+- define:  {SAMPLE_DELTA_SEQUENCE_MAX:        '10'}
+- define:  {PACKED_SAMPLES_SEQUENCE_MAX:      '10'}
+
+#########################################################################################
 # Basic types
 #########################################################################################
 
@@ -22,7 +31,7 @@ DATA:
 - struct:
     StringSequence_t:
       - size: uint32_t
-      - data: String_t*
+      - data: String_t STRING_SEQUENCE_MAX
 
 
 #########################################################################################
@@ -52,13 +61,13 @@ DATA:
 - struct:  {ObjectId:       [data: uint8_t 2]}
 - struct:  {ObjectPrefix:   [data: uint8_t 2]}
 
-- define:  {OBJECTID_INVALID:   '(ObjectId){0x00, 0x00}'}
-- define:  {OBJECTID_AGENT:     '(ObjectId){0xFF, 0xFD}'}
-- define:  {OBJECTID_CLIENT:    '(ObjectId){0xFF, 0xFE}'}
-- define:  {OBJECTID_SESSION:   '(ObjectId){0xFF, 0xFF}'}
+- define:  {OBJECTID_INVALID:   '(ObjectId){{0x00, 0x00}}'}
+- define:  {OBJECTID_AGENT:     '(ObjectId){{0xFF, 0xFD}}'}
+- define:  {OBJECTID_CLIENT:    '(ObjectId){{0xFF, 0xFE}}'}
+- define:  {OBJECTID_SESSION:   '(ObjectId){{0xFF, 0xFF}}'}
 
 - struct:  {XrceCookie: [data: uint8_t 4]}
-- define:  {XRCE_COOKIE: '(XrceCookie){0x58, 0x52, 0x43, 0x45}'}
+- define:  {XRCE_COOKIE: '(XrceCookie){{0x58, 0x52, 0x43, 0x45}}'}
 
 - struct:  {XrceVersion: [data: uint8_t 2]}
 - define:  {XRCE_VERSION_MAJOR:  '0x01'}
@@ -508,7 +517,7 @@ DATA:
 - struct:
     SampleDataSeq:
       - size: uint32_t
-      - data: SampleData*
+      - data: SampleData SAMPLE_DATA_SEQUENCE_MAX
 
 - struct:
     Sample:
@@ -518,7 +527,7 @@ DATA:
 - struct:
     SampleSeq:
       - size: uint32_t
-      - data: Sample*
+      - data: Sample SAMPLE_SEQUENCE_MAX
 
 - struct:
     SampleDelta:
@@ -528,7 +537,7 @@ DATA:
 - struct:
     SampleDeltaSequence:
       - size: uint32_t
-      - data: SampleDelta*
+      - data: SampleDelta SAMPLE_DELTA_SEQUENCE_MAX
 
 - struct:
     PackedSamples:
@@ -538,7 +547,7 @@ DATA:
 - struct:
     SamplePackedSeq:
         - size: uint32_t
-        - data: PackedSamples*
+        - data: PackedSamples PACKED_SAMPLES_SEQUENCE_MAX
 
 - union:
     DataRepresentation:
@@ -699,6 +708,20 @@ DATA:
 FILES:
   spec_file:
     head: |
+      // Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+      //
+      // Licensed under the Apache License, Version 2.0 (the "License");
+      // you may not use this file except in compliance with the License.
+      // You may obtain a copy of the License at
+      //
+      //     http://www.apache.org/licenses/LICENSE-2.0
+      //
+      // Unless required by applicable law or agreed to in writing, software
+      // distributed under the License is distributed on an "AS IS" BASIS,
+      // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      // See the License for the specific language governing permissions and
+      // limitations under the License.
+
       #ifndef _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
       #define _MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
 
@@ -719,6 +742,20 @@ FILES:
       #endif //_MICRORTPS_CLIENT_XRCE_PROTOCOL_SPEC_H_
   h_file:
     head: |
+      // Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+      //
+      // Licensed under the Apache License, Version 2.0 (the "License");
+      // you may not use this file except in compliance with the License.
+      // You may obtain a copy of the License at
+      //
+      //     http://www.apache.org/licenses/LICENSE-2.0
+      //
+      // Unless required by applicable law or agreed to in writing, software
+      // distributed under the License is distributed on an "AS IS" BASIS,
+      // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      // See the License for the specific language governing permissions and
+      // limitations under the License.
+
       #ifndef _MICRORTPS_CLIENT_XRCE_PROTOCOL_SERIALIZATION_H_
       #define _MICRORTPS_CLIENT_XRCE_PROTOCOL_SERIALIZATION_H_
 
@@ -728,7 +765,6 @@ FILES:
       #endif
 
       #include "xrce_protocol_spec.h"
-      #include "aux_memory.h"
 
       #include <microcdr/microcdr.h>
 
@@ -741,6 +777,20 @@ FILES:
       #endif //_MICRORTPS_CLIENT_XRCE_PROTOCOL_SERIALIZATION_H_
   c_file:
     head: |
-      #include "xrce_protocol_serialization.h"
+      // Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+      //
+      // Licensed under the Apache License, Version 2.0 (the "License");
+      // you may not use this file except in compliance with the License.
+      // You may obtain a copy of the License at
+      //
+      //     http://www.apache.org/licenses/LICENSE-2.0
+      //
+      // Unless required by applicable law or agreed to in writing, software
+      // distributed under the License is distributed on an "AS IS" BASIS,
+      // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      // See the License for the specific language governing permissions and
+      // limitations under the License.
+
+      #include "micrortps/client/xrce_protocol_serialization.h"
 
     tail: ""
