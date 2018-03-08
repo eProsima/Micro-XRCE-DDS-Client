@@ -86,7 +86,6 @@ uint8_t new_udp_session(Session* session,
 void close_session(Session* session)
 {
     rm_locator(session->transport_id);
-    free_input_message(&session->input_message);
 }
 
 uint16_t get_num_request_id(RequestId request_id)
@@ -163,7 +162,7 @@ uint8_t init_session(Session* session, XRCEInfo* info, OnStatusReceived on_statu
     }
 
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = get_raw_request_id(state->next_request_id);
+    payload.base.request_id = get_raw_request_id(session->next_request_id);
     payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
@@ -175,9 +174,9 @@ uint8_t init_session(Session* session, XRCEInfo* info, OnStatusReceived on_statu
     payload.client_representation.optional_properties = false;
     payload.client_representation.properties.size = 0;
 
-    state->session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
-    state->stream_id = STREAMID_NONE;
-    state->key = payload.client_representation.client_key;
+    session->session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
+    session->stream_id = STREAMID_NONE;
+    session->key = payload.client_representation.client_key;
 
     if (add_create_client_submessage(&session->output_message, &payload))
     {
@@ -367,12 +366,15 @@ bool read_data(Session* session, XRCEInfo* info, uint16_t data_reader_id, OnMess
 
     if (result)
     {
-        info->request_id = callback_request_id;
-        info->object_id = data_reader_id;
+        if (info)
+        {
+            info->request_id = callback_request_id;
+            info->object_id = data_reader_id;
+        }
 
         READ_DATA_Payload payload;
-        payload.base.request_id = get_raw_request_id(info.request_id);
-        payload.base.object_id = get_raw_object_id(info.object_id);
+        payload.base.request_id = get_raw_request_id(callback_request_id);
+        payload.base.object_id = get_raw_object_id(data_reader_id);
         payload.read_specification.data_format = FORMAT_DATA;
         payload.read_specification.optional_content_filter_expression = false;
         payload.read_specification.optional_delivery_control = false;

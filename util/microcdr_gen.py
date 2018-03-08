@@ -249,7 +249,7 @@ class Struct:
                 file.write('    {\n')
                 file.write('        for(uint32_t i = 0; i < output->size; i++)\n')
                 file.write('        {\n')
-                file.write('            ret &= deserialize_' + self.attributes[1].type + '(buffer, &output->data[i], aux);\n')
+                file.write('            ret &= deserialize_' + self.attributes[1].type + '(buffer, &output->data[i]);\n')
                 file.write('        }\n')
                 file.write('    }\n')
                 file.write('    return ret;\n')

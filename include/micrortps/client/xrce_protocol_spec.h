@@ -28,6 +28,8 @@ extern "C"
 #define SAMPLE_DATA_SEQUENCE_MAX 10
 #define SAMPLE_DELTA_SEQUENCE_MAX 10
 #define PACKED_SAMPLES_SEQUENCE_MAX 10
+#define TRANSPORT_LOCATOR_SEQUENCE_MAX 10
+#define PROPERTY_SEQUENCE_MAX 10
 
 
 typedef struct Time_t
@@ -200,7 +202,7 @@ typedef struct TransportLocator
 typedef struct TransportLocatorSeq
 {
     uint32_t size;
-    TransportLocator* data;
+    TransportLocator data[TRANSPORT_LOCATOR_SEQUENCE_MAX];
 
 } TransportLocatorSeq;
 
@@ -216,7 +218,7 @@ typedef struct Property
 typedef struct PropertySeq
 {
     uint32_t size;
-    Property* data;
+    Property data[PROPERTY_SEQUENCE_MAX];
 
 } PropertySeq;
 

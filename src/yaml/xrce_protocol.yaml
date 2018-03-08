@@ -8,6 +8,8 @@ DATA:
 - define:  {SAMPLE_DATA_SEQUENCE_MAX:         '10'}
 - define:  {SAMPLE_DELTA_SEQUENCE_MAX:        '10'}
 - define:  {PACKED_SAMPLES_SEQUENCE_MAX:      '10'}
+- define:  {TRANSPORT_LOCATOR_SEQUENCE_MAX:   '10'}
+- define:  {PROPERTY_SEQUENCE_MAX:            '10'}
 
 #########################################################################################
 # Basic types
@@ -129,7 +131,7 @@ DATA:
 - struct:
     TransportLocatorSeq:
         - size: uint32_t
-        - data: TransportLocator*
+        - data: TransportLocator TRANSPORT_LOCATOR_SEQUENCE_MAX
 
 - struct:
     Property:
@@ -139,7 +141,7 @@ DATA:
 - struct:
     PropertySeq:
         - size: uint32_t
-        - data: Property*
+        - data: Property PROPERTY_SEQUENCE_MAX
 
 - struct:
     CLIENT_Representation:

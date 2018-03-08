@@ -63,7 +63,6 @@ typedef struct InputMessage
 } InputMessage;
 
 void init_input_message(InputMessage* message, InputMessageCallback callback, uint8_t* in_buffer, uint32_t in_buffer_size);
-void free_input_message(InputMessage* message);
 
 void parse_data_payload(InputMessage* message, DataFormat format, const BaseObjectReply* reply);
 int parse_submessage(InputMessage* message);

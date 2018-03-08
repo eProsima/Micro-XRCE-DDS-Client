@@ -62,7 +62,16 @@ int main(int args, char** argv)
     /* Create udp session */
     result = new_udp_session(&my_session, my_buffer, sizeof(my_buffer),
                              4000, 2020, 2019, "127.0.0.1");
+    if (result != SESSION_CREATED)
+    {
+        return 1;
+    }
+
     result = init_session(&my_session, NULL, on_status, NULL);
+    if (result != SESSION_INIT)
+    {
+        return 2;
+    }
 
     // Creates a participant on the Agent.
     XRCEInfo participant_info = create_participant(&my_session);
@@ -89,4 +98,5 @@ int main(int args, char** argv)
     send_to_agent(&my_session);
 
     close_session(&my_session);
+
 }
