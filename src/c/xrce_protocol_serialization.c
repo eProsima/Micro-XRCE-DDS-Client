@@ -493,10 +493,10 @@ bool serialize_OBJK_RepresentationBinAndXMLFormats(MicroBuffer* buffer, const OB
         switch(input->format)
         {
             case REPRESENTATION_IN_BINARY:
-                ret &= serialize_BinarySequence_t(buffer, &input->_.object_name);
+                ret &= serialize_BinarySequence_t(buffer, &input->_.binary_representation);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= serialize_String_t(buffer, &input->_.xml_string_represenatation);
+                ret &= serialize_String_t(buffer, &input->_.string_represenatation);
                 break;
             default:
                 break;
@@ -514,10 +514,10 @@ bool deserialize_OBJK_RepresentationBinAndXMLFormats(MicroBuffer* buffer, OBJK_R
         switch(output->format)
         {
             case REPRESENTATION_IN_BINARY:
-                ret &= deserialize_BinarySequence_t(buffer, &output->_.object_name);
+                ret &= deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= deserialize_String_t(buffer, &output->_.xml_string_represenatation);
+                ret &= deserialize_String_t(buffer, &output->_.string_represenatation);
                 break;
             default:
                 break;
@@ -723,16 +723,36 @@ bool deserialize_OBJK_TOPIC_Representation(MicroBuffer* buffer, OBJK_TOPIC_Repre
 bool serialize_OBJK_DomainParticipant_Binary(MicroBuffer* buffer, const OBJK_DomainParticipant_Binary* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->domain_reference);
-    ret &= serialize_String_t(buffer, &input->qos_profile_reference);
+    ret &= serialize_bool(buffer, input->optional_domain_reference);
+    if(input->optional_domain_reference == true)
+    {
+        ret &= serialize_String_t(buffer, &input->domain_reference);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_qos_profile_reference);
+    if(input->optional_qos_profile_reference == true)
+    {
+        ret &= serialize_String_t(buffer, &input->qos_profile_reference);
+    }
+
     return ret;
 }
 
 bool deserialize_OBJK_DomainParticipant_Binary(MicroBuffer* buffer, OBJK_DomainParticipant_Binary* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->domain_reference);
-    ret &= deserialize_String_t(buffer, &output->qos_profile_reference);
+    ret &= deserialize_bool(buffer, &output->optional_domain_reference);
+    if(output->optional_domain_reference == true)
+    {
+            ret &= deserialize_String_t(buffer, &output->domain_reference);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_qos_profile_reference);
+    if(output->optional_qos_profile_reference == true)
+    {
+            ret &= deserialize_String_t(buffer, &output->qos_profile_reference);
+    }
+
     return ret;
 }
 
@@ -740,8 +760,18 @@ bool serialize_OBJK_Topic_Binary(MicroBuffer* buffer, const OBJK_Topic_Binary* i
 {
     bool ret = true;
     ret &= serialize_String_t(buffer, &input->topic_name);
-    ret &= serialize_String_t(buffer, &input->type_reference);
-    ret &= serialize_String_t(buffer, &input->type_name);
+    ret &= serialize_bool(buffer, input->optional_type_reference);
+    if(input->optional_type_reference == true)
+    {
+        ret &= serialize_String_t(buffer, &input->type_reference);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_type_name);
+    if(input->optional_type_name == true)
+    {
+        ret &= serialize_String_t(buffer, &input->type_name);
+    }
+
     return ret;
 }
 
@@ -749,72 +779,162 @@ bool deserialize_OBJK_Topic_Binary(MicroBuffer* buffer, OBJK_Topic_Binary* outpu
 {
     bool ret = true;
     ret &= deserialize_String_t(buffer, &output->topic_name);
-    ret &= deserialize_String_t(buffer, &output->type_reference);
-    ret &= deserialize_String_t(buffer, &output->type_name);
+    ret &= deserialize_bool(buffer, &output->optional_type_reference);
+    if(output->optional_type_reference == true)
+    {
+            ret &= deserialize_String_t(buffer, &output->type_reference);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_type_name);
+    if(output->optional_type_name == true)
+    {
+            ret &= deserialize_String_t(buffer, &output->type_name);
+    }
+
     return ret;
 }
 
 bool serialize_OBJK_Publisher_Binary_Qos(MicroBuffer* buffer, const OBJK_Publisher_Binary_Qos* input)
 {
     bool ret = true;
-    ret &= serialize_StringSequence_t(buffer, &input->partitions);
-    ret &= serialize_BinarySequence_t(buffer, &input->group_data);
+    ret &= serialize_bool(buffer, input->optional_partitions);
+    if(input->optional_partitions == true)
+    {
+        ret &= serialize_StringSequence_t(buffer, &input->partitions);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_group_data);
+    if(input->optional_group_data == true)
+    {
+        ret &= serialize_BinarySequence_t(buffer, &input->group_data);
+    }
+
     return ret;
 }
 
 bool deserialize_OBJK_Publisher_Binary_Qos(MicroBuffer* buffer, OBJK_Publisher_Binary_Qos* output)
 {
     bool ret = true;
-    ret &= deserialize_StringSequence_t(buffer, &output->partitions);
-    ret &= deserialize_BinarySequence_t(buffer, &output->group_data);
+    ret &= deserialize_bool(buffer, &output->optional_partitions);
+    if(output->optional_partitions == true)
+    {
+            ret &= deserialize_StringSequence_t(buffer, &output->partitions);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_group_data);
+    if(output->optional_group_data == true)
+    {
+            ret &= deserialize_BinarySequence_t(buffer, &output->group_data);
+    }
+
     return ret;
 }
 
 bool serialize_OBJK_Publisher_Binary(MicroBuffer* buffer, const OBJK_Publisher_Binary* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->publisher_name);
-    ret &= serialize_OBJK_Publisher_Binary_Qos(buffer, &input->qos);
+    ret &= serialize_bool(buffer, input->optional_publisher_name);
+    if(input->optional_publisher_name == true)
+    {
+        ret &= serialize_String_t(buffer, &input->publisher_name);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_qos);
+    if(input->optional_qos == true)
+    {
+        ret &= serialize_OBJK_Publisher_Binary_Qos(buffer, &input->qos);
+    }
+
     return ret;
 }
 
 bool deserialize_OBJK_Publisher_Binary(MicroBuffer* buffer, OBJK_Publisher_Binary* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->publisher_name);
-    ret &= deserialize_OBJK_Publisher_Binary_Qos(buffer, &output->qos);
+    ret &= deserialize_bool(buffer, &output->optional_publisher_name);
+    if(output->optional_publisher_name == true)
+    {
+            ret &= deserialize_String_t(buffer, &output->publisher_name);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_qos);
+    if(output->optional_qos == true)
+    {
+            ret &= deserialize_OBJK_Publisher_Binary_Qos(buffer, &output->qos);
+    }
+
     return ret;
 }
 
 bool serialize_OBJK_Subscriber_Binary_Qos(MicroBuffer* buffer, const OBJK_Subscriber_Binary_Qos* input)
 {
     bool ret = true;
-    ret &= serialize_StringSequence_t(buffer, &input->partitions);
-    ret &= serialize_BinarySequence_t(buffer, &input->group_data);
+    ret &= serialize_bool(buffer, input->optional_partitions);
+    if(input->optional_partitions == true)
+    {
+        ret &= serialize_StringSequence_t(buffer, &input->partitions);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_group_data);
+    if(input->optional_group_data == true)
+    {
+        ret &= serialize_BinarySequence_t(buffer, &input->group_data);
+    }
+
     return ret;
 }
 
 bool deserialize_OBJK_Subscriber_Binary_Qos(MicroBuffer* buffer, OBJK_Subscriber_Binary_Qos* output)
 {
     bool ret = true;
-    ret &= deserialize_StringSequence_t(buffer, &output->partitions);
-    ret &= deserialize_BinarySequence_t(buffer, &output->group_data);
+    ret &= deserialize_bool(buffer, &output->optional_partitions);
+    if(output->optional_partitions == true)
+    {
+            ret &= deserialize_StringSequence_t(buffer, &output->partitions);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_group_data);
+    if(output->optional_group_data == true)
+    {
+            ret &= deserialize_BinarySequence_t(buffer, &output->group_data);
+    }
+
     return ret;
 }
 
 bool serialize_OBJK_Subscriber_Binary(MicroBuffer* buffer, const OBJK_Subscriber_Binary* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->subscriber_name);
-    ret &= serialize_OBJK_Subscriber_Binary_Qos(buffer, &input->qos);
+    ret &= serialize_bool(buffer, input->optional_subscriber_name);
+    if(input->optional_subscriber_name == true)
+    {
+        ret &= serialize_String_t(buffer, &input->subscriber_name);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_qos);
+    if(input->optional_qos == true)
+    {
+        ret &= serialize_OBJK_Subscriber_Binary_Qos(buffer, &input->qos);
+    }
+
     return ret;
 }
 
 bool deserialize_OBJK_Subscriber_Binary(MicroBuffer* buffer, OBJK_Subscriber_Binary* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->subscriber_name);
-    ret &= deserialize_OBJK_Subscriber_Binary_Qos(buffer, &output->qos);
+    ret &= deserialize_bool(buffer, &output->optional_subscriber_name);
+    if(output->optional_subscriber_name == true)
+    {
+            ret &= deserialize_String_t(buffer, &output->subscriber_name);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_qos);
+    if(output->optional_qos == true)
+    {
+            ret &= deserialize_OBJK_Subscriber_Binary_Qos(buffer, &output->qos);
+    }
+
     return ret;
 }
 
@@ -884,7 +1004,12 @@ bool serialize_OBJK_DataWriter_Binary_Qos(MicroBuffer* buffer, const OBJK_DataWr
 {
     bool ret = true;
     ret &= serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
-    ret &= serialize_uint64_t(buffer, input->ownership_strength);
+    ret &= serialize_bool(buffer, input->optional_ownership_strength);
+    if(input->optional_ownership_strength == true)
+    {
+        ret &= serialize_uint64_t(buffer, input->ownership_strength);
+    }
+
     return ret;
 }
 
@@ -892,7 +1017,12 @@ bool deserialize_OBJK_DataWriter_Binary_Qos(MicroBuffer* buffer, OBJK_DataWriter
 {
     bool ret = true;
     ret &= deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
-    ret &= deserialize_uint64_t(buffer, &output->ownership_strength);
+    ret &= deserialize_bool(buffer, &output->optional_ownership_strength);
+    if(output->optional_ownership_strength == true)
+    {
+            ret &= deserialize_uint64_t(buffer, &output->ownership_strength);
+    }
+
     return ret;
 }
 
@@ -900,8 +1030,18 @@ bool serialize_OBJK_DataReader_Binary_Qos(MicroBuffer* buffer, const OBJK_DataRe
 {
     bool ret = true;
     ret &= serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
-    ret &= serialize_uint64_t(buffer, input->timebasedfilter_msec);
-    ret &= serialize_String_t(buffer, &input->contentbased_filter);
+    ret &= serialize_bool(buffer, input->optional_timebasedfilter_msec);
+    if(input->optional_timebasedfilter_msec == true)
+    {
+        ret &= serialize_uint64_t(buffer, input->timebasedfilter_msec);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_contentbased_filter);
+    if(input->optional_contentbased_filter == true)
+    {
+        ret &= serialize_String_t(buffer, &input->contentbased_filter);
+    }
+
     return ret;
 }
 
@@ -909,8 +1049,18 @@ bool deserialize_OBJK_DataReader_Binary_Qos(MicroBuffer* buffer, OBJK_DataReader
 {
     bool ret = true;
     ret &= deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
-    ret &= deserialize_uint64_t(buffer, &output->timebasedfilter_msec);
-    ret &= deserialize_String_t(buffer, &output->contentbased_filter);
+    ret &= deserialize_bool(buffer, &output->optional_timebasedfilter_msec);
+    if(output->optional_timebasedfilter_msec == true)
+    {
+            ret &= deserialize_uint64_t(buffer, &output->timebasedfilter_msec);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_contentbased_filter);
+    if(output->optional_contentbased_filter == true)
+    {
+            ret &= deserialize_String_t(buffer, &output->contentbased_filter);
+    }
+
     return ret;
 }
 
@@ -918,7 +1068,12 @@ bool serialize_OBJK_DataReader_Binary(MicroBuffer* buffer, const OBJK_DataReader
 {
     bool ret = true;
     ret &= serialize_String_t(buffer, &input->topic_name);
-    ret &= serialize_OBJK_DataReader_Binary_Qos(buffer, &input->qos);
+    ret &= serialize_bool(buffer, input->optional_qos);
+    if(input->optional_qos == true)
+    {
+        ret &= serialize_OBJK_DataReader_Binary_Qos(buffer, &input->qos);
+    }
+
     return ret;
 }
 
@@ -926,7 +1081,12 @@ bool deserialize_OBJK_DataReader_Binary(MicroBuffer* buffer, OBJK_DataReader_Bin
 {
     bool ret = true;
     ret &= deserialize_String_t(buffer, &output->topic_name);
-    ret &= deserialize_OBJK_DataReader_Binary_Qos(buffer, &output->qos);
+    ret &= deserialize_bool(buffer, &output->optional_qos);
+    if(output->optional_qos == true)
+    {
+            ret &= deserialize_OBJK_DataReader_Binary_Qos(buffer, &output->qos);
+    }
+
     return ret;
 }
 
@@ -934,7 +1094,12 @@ bool serialize_OBJK_DataWriter_Binary(MicroBuffer* buffer, const OBJK_DataWriter
 {
     bool ret = true;
     ret &= serialize_String_t(buffer, &input->topic_name);
-    ret &= serialize_OBJK_DataWriter_Binary_Qos(buffer, &input->qos);
+    ret &= serialize_bool(buffer, input->optional_qos);
+    if(input->optional_qos == true)
+    {
+        ret &= serialize_OBJK_DataWriter_Binary_Qos(buffer, &input->qos);
+    }
+
     return ret;
 }
 
@@ -942,7 +1107,12 @@ bool deserialize_OBJK_DataWriter_Binary(MicroBuffer* buffer, OBJK_DataWriter_Bin
 {
     bool ret = true;
     ret &= deserialize_String_t(buffer, &output->topic_name);
-    ret &= deserialize_OBJK_DataWriter_Binary_Qos(buffer, &output->qos);
+    ret &= deserialize_bool(buffer, &output->optional_qos);
+    if(output->optional_qos == true)
+    {
+            ret &= deserialize_OBJK_DataWriter_Binary_Qos(buffer, &output->qos);
+    }
+
     return ret;
 }
 
@@ -1201,16 +1371,36 @@ bool deserialize_ActivityInfoVariant(MicroBuffer* buffer, ActivityInfoVariant* o
 bool serialize_ObjectInfo(MicroBuffer* buffer, const ObjectInfo* input)
 {
     bool ret = true;
-    ret &= serialize_ObjectVariant(buffer, &input->config);
-    ret &= serialize_ActivityInfoVariant(buffer, &input->activity);
+    ret &= serialize_bool(buffer, input->optional_config);
+    if(input->optional_config == true)
+    {
+        ret &= serialize_ObjectVariant(buffer, &input->config);
+    }
+
+    ret &= serialize_bool(buffer, input->optional_activity);
+    if(input->optional_activity == true)
+    {
+        ret &= serialize_ActivityInfoVariant(buffer, &input->activity);
+    }
+
     return ret;
 }
 
 bool deserialize_ObjectInfo(MicroBuffer* buffer, ObjectInfo* output)
 {
     bool ret = true;
-    ret &= deserialize_ObjectVariant(buffer, &output->config);
-    ret &= deserialize_ActivityInfoVariant(buffer, &output->activity);
+    ret &= deserialize_bool(buffer, &output->optional_config);
+    if(output->optional_config == true)
+    {
+            ret &= deserialize_ObjectVariant(buffer, &output->config);
+    }
+
+    ret &= deserialize_bool(buffer, &output->optional_activity);
+    if(output->optional_activity == true)
+    {
+            ret &= deserialize_ActivityInfoVariant(buffer, &output->activity);
+    }
+
     return ret;
 }
 

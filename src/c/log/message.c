@@ -178,7 +178,7 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
         case OBJK_TOPIC:
             sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
                     get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
-                    payload->object_representation._.data_reader.base._.xml_string_represenatation.size);
+                    payload->object_representation._.data_reader.base._.string_represenatation.size);
             break;
         case OBJK_PUBLISHER:
             sprintf(content, "PUBLISHER | id: 0x%04X",
@@ -191,12 +191,12 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
         case OBJK_DATAWRITER:
             sprintf(content, "DATA_WRITER | id: 0x%04X | xml: %u",
                     get_num_object_id(payload->object_representation._.data_writer.publisher_id),
-                    payload->object_representation._.data_writer.base._.xml_string_represenatation.size);
+                    payload->object_representation._.data_writer.base._.string_represenatation.size);
              break;
         case OBJK_DATAREADER:
             sprintf(content, "DATA_READER | id: 0x%04X | xml: %u",
                     get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
-                    payload->object_representation._.data_reader.base._.xml_string_represenatation.size);
+                    payload->object_representation._.data_reader.base._.string_represenatation.size);
             break;
         default:
             sprintf(content, "UNKNOWN");

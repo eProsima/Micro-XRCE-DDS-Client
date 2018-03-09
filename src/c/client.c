@@ -240,7 +240,7 @@ XRCEInfo create_publisher(Session* session, uint16_t participant_id)
     payload.base.object_id = get_raw_object_id(info.object_id);
     payload.object_representation.kind = OBJK_PUBLISHER;
     payload.object_representation._.publisher.base.representation.format = REPRESENTATION_BY_REFERENCE;
-    payload.object_representation._.publisher.base.representation._.object_name.size = 0;
+    payload.object_representation._.publisher.base.representation._.binary_representation.size = 0;
     payload.object_representation._.publisher.participant_id = get_raw_object_id(participant_id);
 
     if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
@@ -260,7 +260,7 @@ XRCEInfo create_subscriber(Session* session, uint16_t participant_id)
     payload.base.object_id = get_raw_object_id(info.object_id);
     payload.object_representation.kind = OBJK_SUBSCRIBER;
     payload.object_representation._.subscriber.base.representation.format = REPRESENTATION_BY_REFERENCE;
-    payload.object_representation._.subscriber.base.representation._.object_name.size = 0;
+    payload.object_representation._.subscriber.base.representation._.binary_representation.size = 0;
     payload.object_representation._.subscriber.participant_id = get_raw_object_id(participant_id);
 
     if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
@@ -280,8 +280,8 @@ XRCEInfo create_data_writer(Session* session, uint16_t participant_id, uint16_t 
     payload.base.object_id = get_raw_object_id(info.object_id);
     payload.object_representation.kind = OBJK_DATAWRITER;
     payload.object_representation._.data_writer.base.format = REPRESENTATION_AS_XML_STRING;
-    payload.object_representation._.data_writer.base._.xml_string_represenatation.size = xml.length;
-    payload.object_representation._.data_writer.base._.xml_string_represenatation.data = xml.data;
+    payload.object_representation._.data_writer.base._.string_represenatation.size = xml.length;
+    payload.object_representation._.data_writer.base._.string_represenatation.data = xml.data;
     payload.object_representation._.data_writer.publisher_id = get_raw_object_id(publisher_id);
 
     if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
@@ -301,8 +301,8 @@ XRCEInfo create_data_reader(Session* session, uint16_t participant_id, uint16_t 
     payload.base.object_id = get_raw_object_id(info.object_id);
     payload.object_representation.kind = OBJK_DATAREADER;
     payload.object_representation._.data_reader.base.format = REPRESENTATION_AS_XML_STRING;
-    payload.object_representation._.data_reader.base._.xml_string_represenatation.size = xml.length;
-    payload.object_representation._.data_reader.base._.xml_string_represenatation.data = xml.data;
+    payload.object_representation._.data_reader.base._.string_represenatation.size = xml.length;
+    payload.object_representation._.data_reader.base._.string_represenatation.data = xml.data;
     payload.object_representation._.data_reader.subscriber_id = get_raw_object_id(subscriber_id);
 
     if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))

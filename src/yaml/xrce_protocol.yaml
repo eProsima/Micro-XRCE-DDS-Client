@@ -193,8 +193,8 @@ DATA:
 - union:
     OBJK_RepresentationBinAndXMLFormats:
         - format:                       RepresentationFormat
-        - object_name:                  BinarySequence_t
-        - xml_string_represenatation:   String_t
+        - binary_representation:        BinarySequence_t
+        - string_represenatation:       String_t
     __DISCRIMINATOR__:
         - REPRESENTATION_IN_BINARY
         - REPRESENTATION_AS_XML_STRING
@@ -260,33 +260,45 @@ DATA:
 - struct:
     OBJK_DomainParticipant_Binary:
         - domain_reference:         String_t
+          __OPTIONAL_CONDITION__: ['true']
         - qos_profile_reference:    String_t
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_Topic_Binary:
         - topic_name:       String_t
         - type_reference:   String_t
+          __OPTIONAL_CONDITION__: ['true']
         - type_name:        String_t
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_Publisher_Binary_Qos:
         - partitions: StringSequence_t
+          __OPTIONAL_CONDITION__: ['true']
         - group_data: BinarySequence_t
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_Publisher_Binary:
         - publisher_name: String_t
+          __OPTIONAL_CONDITION__: ['true']
         - qos: OBJK_Publisher_Binary_Qos
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_Subscriber_Binary_Qos:
         - partitions: StringSequence_t
+          __OPTIONAL_CONDITION__: ['true']
         - group_data: BinarySequence_t
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_Subscriber_Binary:
         - subscriber_name: String_t
+          __OPTIONAL_CONDITION__: ['true']
         - qos: OBJK_Subscriber_Binary_Qos
+          __OPTIONAL_CONDITION__: ['true']
 
 - enum:
     EndpointQosFlags:
@@ -314,22 +326,27 @@ DATA:
     OBJK_DataWriter_Binary_Qos:
         - base: OBJK_Endpoint_QosBinary
         - ownership_strength: uint64_t
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_DataReader_Binary_Qos:
         - base: OBJK_Endpoint_QosBinary
         - timebasedfilter_msec: uint64_t
+          __OPTIONAL_CONDITION__: ['true']
         - contentbased_filter: String_t
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_DataReader_Binary:
         - topic_name: String_t
         - qos: OBJK_DataReader_Binary_Qos
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     OBJK_DataWriter_Binary:
         - topic_name: String_t
         - qos: OBJK_DataWriter_Binary_Qos
+          __OPTIONAL_CONDITION__: ['true']
 
 - union:
     ObjectVariant:
@@ -433,7 +450,9 @@ DATA:
 - struct:
     ObjectInfo:
         - config: ObjectVariant
+          __OPTIONAL_CONDITION__: ['true']
         - activity: ActivityInfoVariant
+          __OPTIONAL_CONDITION__: ['true']
 
 - struct:
     BaseObjectReply:
@@ -462,7 +481,6 @@ DATA:
       - data_format: DataFormat
       - content_filter_expression: String_t
         __OPTIONAL_CONDITION__: ['true']
-
       - delivery_control: DataDeliveryControl
         __OPTIONAL_CONDITION__: ['true']
 

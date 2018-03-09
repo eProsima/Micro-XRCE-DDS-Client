@@ -290,8 +290,8 @@ typedef struct OBJK_RepresentationRefAndXMLFormats
 
 typedef union OBJK_RepresentationBinAndXMLFormatsU
 {
-    BinarySequence_t object_name;
-    String_t xml_string_represenatation;
+    BinarySequence_t binary_representation;
+    String_t string_represenatation;
 
 } OBJK_RepresentationBinAndXMLFormatsU;
 
@@ -403,7 +403,9 @@ typedef struct OBJK_TOPIC_Representation
 
 typedef struct OBJK_DomainParticipant_Binary
 {
+    bool optional_domain_reference;
     String_t domain_reference;
+    bool optional_qos_profile_reference;
     String_t qos_profile_reference;
 
 } OBJK_DomainParticipant_Binary;
@@ -412,7 +414,9 @@ typedef struct OBJK_DomainParticipant_Binary
 typedef struct OBJK_Topic_Binary
 {
     String_t topic_name;
+    bool optional_type_reference;
     String_t type_reference;
+    bool optional_type_name;
     String_t type_name;
 
 } OBJK_Topic_Binary;
@@ -420,7 +424,9 @@ typedef struct OBJK_Topic_Binary
 
 typedef struct OBJK_Publisher_Binary_Qos
 {
+    bool optional_partitions;
     StringSequence_t partitions;
+    bool optional_group_data;
     BinarySequence_t group_data;
 
 } OBJK_Publisher_Binary_Qos;
@@ -428,7 +434,9 @@ typedef struct OBJK_Publisher_Binary_Qos
 
 typedef struct OBJK_Publisher_Binary
 {
+    bool optional_publisher_name;
     String_t publisher_name;
+    bool optional_qos;
     OBJK_Publisher_Binary_Qos qos;
 
 } OBJK_Publisher_Binary;
@@ -436,7 +444,9 @@ typedef struct OBJK_Publisher_Binary
 
 typedef struct OBJK_Subscriber_Binary_Qos
 {
+    bool optional_partitions;
     StringSequence_t partitions;
+    bool optional_group_data;
     BinarySequence_t group_data;
 
 } OBJK_Subscriber_Binary_Qos;
@@ -444,7 +454,9 @@ typedef struct OBJK_Subscriber_Binary_Qos
 
 typedef struct OBJK_Subscriber_Binary
 {
+    bool optional_subscriber_name;
     String_t subscriber_name;
+    bool optional_qos;
     OBJK_Subscriber_Binary_Qos qos;
 
 } OBJK_Subscriber_Binary;
@@ -480,6 +492,7 @@ typedef struct OBJK_Endpoint_QosBinary
 typedef struct OBJK_DataWriter_Binary_Qos
 {
     OBJK_Endpoint_QosBinary base;
+    bool optional_ownership_strength;
     uint64_t ownership_strength;
 
 } OBJK_DataWriter_Binary_Qos;
@@ -488,7 +501,9 @@ typedef struct OBJK_DataWriter_Binary_Qos
 typedef struct OBJK_DataReader_Binary_Qos
 {
     OBJK_Endpoint_QosBinary base;
+    bool optional_timebasedfilter_msec;
     uint64_t timebasedfilter_msec;
+    bool optional_contentbased_filter;
     String_t contentbased_filter;
 
 } OBJK_DataReader_Binary_Qos;
@@ -497,6 +512,7 @@ typedef struct OBJK_DataReader_Binary_Qos
 typedef struct OBJK_DataReader_Binary
 {
     String_t topic_name;
+    bool optional_qos;
     OBJK_DataReader_Binary_Qos qos;
 
 } OBJK_DataReader_Binary;
@@ -505,6 +521,7 @@ typedef struct OBJK_DataReader_Binary
 typedef struct OBJK_DataWriter_Binary
 {
     String_t topic_name;
+    bool optional_qos;
     OBJK_DataWriter_Binary_Qos qos;
 
 } OBJK_DataWriter_Binary;
@@ -641,7 +658,9 @@ typedef struct ActivityInfoVariant
 
 typedef struct ObjectInfo
 {
+    bool optional_config;
     ObjectVariant config;
+    bool optional_activity;
     ActivityInfoVariant activity;
 
 } ObjectInfo;
