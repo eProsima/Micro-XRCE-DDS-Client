@@ -448,12 +448,12 @@ if len(sys.argv) == 4:
     file_path_points = sys.argv[1].split('.')
     file_path_slash = file_path_points[len(file_path_points) - 2].split('/')
     name = file_path_slash[len(file_path_slash) - 1]
-    headers = sys.argv[2] + ('/' if sys.argv[2][-1] != '/' else '')
-    sources = sys.argv[3] + ('/' if sys.argv[3][-1] != '/' else '')
+    spec = sys.argv[2] + ('/' if sys.argv[2][-1] != '/' else '')
+    serialization = sys.argv[3] + ('/' if sys.argv[3][-1] != '/' else '')
 
-    microCDRGen.writeSpec(headers + name + '_spec.h')
-    microCDRGen.writeSerializationHeader(headers + name + '_serialization.h')
-    microCDRGen.writeSerializationImplementation(sources + name + '_serialization.c')
+    microCDRGen.writeSpec(spec + name + '_spec.h')
+    microCDRGen.writeSerializationHeader(serialization + name + '_serialization.h')
+    microCDRGen.writeSerializationImplementation(serialization + name + '_serialization.c')
 
 else:
     print('program yaml_source headers_dir sources_dir')

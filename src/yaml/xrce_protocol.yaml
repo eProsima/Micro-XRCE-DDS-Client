@@ -766,7 +766,7 @@ FILES:
       {
       #endif
 
-      #include "xrce_protocol_spec.h"
+      #include <micrortps/client/xrce_protocol_spec.h>
 
       #include <microcdr/microcdr.h>
 
@@ -793,6 +793,6 @@ FILES:
       // See the License for the specific language governing permissions and
       // limitations under the License.
 
-      #include "micrortps/client/xrce_protocol_serialization.h"
+      #include "xrce_protocol_serialization.h"
 
     tail: ""

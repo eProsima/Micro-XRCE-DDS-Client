@@ -29,9 +29,10 @@ extern "C"
 #define SESSION_SERIALIZATION_ERR	0xF2
 
 #include <micrortps/client/config.h>
-#include <transport/micrortps_transport.h>
 #include <micrortps/client/input_message.h>
 #include <micrortps/client/output_message.h>
+
+#include <transport/micrortps_transport.h>
 
 #include <stdint.h>
 #include <stdbool.h>

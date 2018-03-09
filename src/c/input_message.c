@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <micrortps/client/input_message.h>
-#include <micrortps/client/xrce_protocol_serialization.h>
+#include "xrce_protocol_serialization.h"
 
 #include <stdlib.h>
 
