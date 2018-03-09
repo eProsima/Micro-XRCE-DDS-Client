@@ -279,9 +279,9 @@ XRCEInfo create_data_writer(Session* session, uint16_t participant_id, uint16_t 
     payload.base.request_id = get_raw_request_id(info.request_id);
     payload.base.object_id = get_raw_object_id(info.object_id);
     payload.object_representation.kind = OBJK_DATAWRITER;
-    payload.object_representation._.data_writer.base.format = REPRESENTATION_AS_XML_STRING;
-    payload.object_representation._.data_writer.base._.string_represenatation.size = xml.length;
-    payload.object_representation._.data_writer.base._.string_represenatation.data = xml.data;
+    payload.object_representation._.data_writer.base.representation.format = REPRESENTATION_AS_XML_STRING;
+    payload.object_representation._.data_writer.base.representation._.string_represenatation.size = xml.length;
+    payload.object_representation._.data_writer.base.representation._.string_represenatation.data = xml.data;
     payload.object_representation._.data_writer.publisher_id = get_raw_object_id(publisher_id);
 
     if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))
@@ -300,9 +300,9 @@ XRCEInfo create_data_reader(Session* session, uint16_t participant_id, uint16_t 
     payload.base.request_id = get_raw_request_id(info.request_id);
     payload.base.object_id = get_raw_object_id(info.object_id);
     payload.object_representation.kind = OBJK_DATAREADER;
-    payload.object_representation._.data_reader.base.format = REPRESENTATION_AS_XML_STRING;
-    payload.object_representation._.data_reader.base._.string_represenatation.size = xml.length;
-    payload.object_representation._.data_reader.base._.string_represenatation.data = xml.data;
+    payload.object_representation._.data_reader.base.representation.format = REPRESENTATION_AS_XML_STRING;
+    payload.object_representation._.data_reader.base.representation._.string_represenatation.size = xml.length;
+    payload.object_representation._.data_reader.base.representation._.string_represenatation.data = xml.data;
     payload.object_representation._.data_reader.subscriber_id = get_raw_object_id(subscriber_id);
 
     if (add_create_resource_submessage(&session->output_message, &payload, (CreationMode){false, false}))

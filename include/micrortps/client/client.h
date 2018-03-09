@@ -40,13 +40,6 @@ extern "C"
 typedef struct Session Session;
 typedef struct MicroBuffer MicroBuffer;
 
-typedef enum CreateModeFlags
-{
-    REUSE_MODE =   0x01 << 0,
-    REPLACE_MODE = 0x01 << 1
-
-} CreateModeFlags;
-
 typedef struct String
 {
     char* data;

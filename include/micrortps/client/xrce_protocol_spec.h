@@ -371,7 +371,7 @@ typedef struct OBJK_SUBSCRIBER_Representation
 
 typedef struct DATAWRITER_Representation
 {
-    OBJK_RepresentationBinAndXMLFormats base;
+    OBJK_RepresentationBinAndXML_Base base;
     ObjectId publisher_id;
 
 } DATAWRITER_Representation;
@@ -379,7 +379,7 @@ typedef struct DATAWRITER_Representation
 
 typedef struct DATAREADER_Representation
 {
-    OBJK_RepresentationBinAndXMLFormats base;
+    OBJK_RepresentationBinAndXML_Base base;
     ObjectId subscriber_id;
 
 } DATAREADER_Representation;

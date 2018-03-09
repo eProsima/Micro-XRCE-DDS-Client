@@ -239,12 +239,12 @@ DATA:
 
 - struct:
     DATAWRITER_Representation:
-      - base:    OBJK_RepresentationBinAndXMLFormats
+      - base:    OBJK_RepresentationBinAndXML_Base
       - publisher_id: ObjectId
 
 - struct:
     DATAREADER_Representation:
-      - base:    OBJK_RepresentationBinAndXMLFormats
+      - base:    OBJK_RepresentationBinAndXML_Base
       - subscriber_id: ObjectId
 
 - struct:

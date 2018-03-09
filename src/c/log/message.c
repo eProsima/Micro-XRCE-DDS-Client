@@ -59,76 +59,49 @@ const char* request_to_string(const BaseObjectRequest* request)
 const char* reply_to_string(const BaseObjectReply* reply)
 {
     static char buffer[256];
-    char kind[64];
-    switch(reply->result.status)
-    {
-        case STATUS_LAST_OP_NONE:
-            sprintf(kind, "NONE");
-            break;
-        case STATUS_LAST_OP_CREATE:
-            sprintf(kind, "CREATE");
-            break;
-        case STATUS_LAST_OP_UPDATE:
-            sprintf(kind, "UPDATE");
-            break;
-        case STATUS_LAST_OP_DELETE:
-            sprintf(kind, "DELETE");
-            break;
-        case STATUS_LAST_OP_LOOKUP:
-            sprintf(kind, "LOOKUP");
-            break;
-        case STATUS_LAST_OP_READ:
-            sprintf(kind, "READ");
-            break;
-        case STATUS_LAST_OP_WRITE:
-            sprintf(kind, "WRITE");
-            break;
-        default:
-            sprintf(kind, "UNKNOWN");
-    }
 
-    char implementation[64];
+    char status[64];
     switch(reply->result.status)
     {
         case STATUS_OK:
-            sprintf(implementation, "OK");
+            sprintf(status, "OK");
             break;
         case STATUS_OK_MATCHED:
-            sprintf(implementation, "OK_MATCHED");
+            sprintf(status, "OK_MATCHED");
             break;
         case STATUS_ERR_DDS_ERROR:
-            sprintf(implementation, "ERR_DDS_ERROR");
+            sprintf(status, "ERR_DDS_ERROR");
             break;
         case STATUS_ERR_MISMATCH:
-            sprintf(implementation, "ERR_MISMATCH");
+            sprintf(status, "ERR_MISMATCH");
             break;
         case STATUS_ERR_ALREADY_EXISTS:
-            sprintf(implementation, "ERR_ALREADY_EXISTS");
+            sprintf(status, "ERR_ALREADY_EXISTS");
             break;
         case STATUS_ERR_DENIED:
-            sprintf(implementation, "ERR_DENIED");
+            sprintf(status, "ERR_DENIED");
             break;
         case STATUS_ERR_UNKNOWN_REFERENCE:
-            sprintf(implementation, "ERR_UNKNOWN_REFERENCE");
+            sprintf(status, "ERR_UNKNOWN_REFERENCE");
             break;
         case STATUS_ERR_INVALID_DATA:
-            sprintf(implementation, "ERR_INVALID_DATA");
+            sprintf(status, "ERR_INVALID_DATA");
             break;
         case STATUS_ERR_INCOMPATIBLE:
-            sprintf(implementation, "ERR_INCOMPATIBLE");
+            sprintf(status, "ERR_INCOMPATIBLE");
             break;
         case STATUS_ERR_RESOURCES:
-            sprintf(implementation, "ERR_RESOURCES");
+            sprintf(status, "ERR_RESOURCES");
             break;
         default:
-            sprintf(implementation, "UNKNOWN");
+            sprintf(status, "UNKNOWN");
     }
 
-    sprintf(buffer, "#0x%04X | id: 0x%04X | from #0x%04X | %s | %s",
+    sprintf(buffer, "#0x%04X | id: 0x%04X | from #0x%04X | %s",
             get_num_request_id(reply->related_request.request_id),
             get_num_object_id(reply->related_request.object_id),
             get_num_request_id(reply->related_request.request_id),
-            kind, implementation);
+            status);
 
     return buffer;
 }
@@ -178,7 +151,7 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
         case OBJK_TOPIC:
             sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
                     get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
-                    payload->object_representation._.data_reader.base._.string_represenatation.size);
+                    payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;
         case OBJK_PUBLISHER:
             sprintf(content, "PUBLISHER | id: 0x%04X",
@@ -191,12 +164,12 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
         case OBJK_DATAWRITER:
             sprintf(content, "DATA_WRITER | id: 0x%04X | xml: %u",
                     get_num_object_id(payload->object_representation._.data_writer.publisher_id),
-                    payload->object_representation._.data_writer.base._.string_represenatation.size);
+                    payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
              break;
         case OBJK_DATAREADER:
             sprintf(content, "DATA_READER | id: 0x%04X | xml: %u",
                     get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
-                    payload->object_representation._.data_reader.base._.string_represenatation.size);
+                    payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;
         default:
             sprintf(content, "UNKNOWN");

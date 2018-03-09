@@ -659,7 +659,7 @@ bool deserialize_OBJK_SUBSCRIBER_Representation(MicroBuffer* buffer, OBJK_SUBSCR
 bool serialize_DATAWRITER_Representation(MicroBuffer* buffer, const DATAWRITER_Representation* input)
 {
     bool ret = true;
-    ret &= serialize_OBJK_RepresentationBinAndXMLFormats(buffer, &input->base);
+    ret &= serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
     ret &= serialize_ObjectId(buffer, &input->publisher_id);
     return ret;
 }
@@ -667,7 +667,7 @@ bool serialize_DATAWRITER_Representation(MicroBuffer* buffer, const DATAWRITER_R
 bool deserialize_DATAWRITER_Representation(MicroBuffer* buffer, DATAWRITER_Representation* output)
 {
     bool ret = true;
-    ret &= deserialize_OBJK_RepresentationBinAndXMLFormats(buffer, &output->base);
+    ret &= deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
     ret &= deserialize_ObjectId(buffer, &output->publisher_id);
     return ret;
 }
@@ -675,7 +675,7 @@ bool deserialize_DATAWRITER_Representation(MicroBuffer* buffer, DATAWRITER_Repre
 bool serialize_DATAREADER_Representation(MicroBuffer* buffer, const DATAREADER_Representation* input)
 {
     bool ret = true;
-    ret &= serialize_OBJK_RepresentationBinAndXMLFormats(buffer, &input->base);
+    ret &= serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
     ret &= serialize_ObjectId(buffer, &input->subscriber_id);
     return ret;
 }
@@ -683,7 +683,7 @@ bool serialize_DATAREADER_Representation(MicroBuffer* buffer, const DATAREADER_R
 bool deserialize_DATAREADER_Representation(MicroBuffer* buffer, DATAREADER_Representation* output)
 {
     bool ret = true;
-    ret &= deserialize_OBJK_RepresentationBinAndXMLFormats(buffer, &output->base);
+    ret &= deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
     ret &= deserialize_ObjectId(buffer, &output->subscriber_id);
     return ret;
 }

@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-ResultStatus create_participant_by_ref(ClientState* state,
+ResultStatus create_participant_by_ref(Session* session,
                                        const ObjectId object_id,
                                        const char* ref,
                                        bool reuse,
@@ -20,8 +20,8 @@ ResultStatus create_participant_by_ref(ClientState* state,
     else
     {
         CREATE_Payload payload;
-        state->next_request_id++;
-        payload.base.request_id = get_raw_request_id(state->next_request_id);
+        session->next_request_id++;
+        payload.base.request_id = get_raw_request_id(session->next_request_id);
         payload.base.object_id = object_id;
         payload.object_representation.kind = OBJK_PARTICIPANT;
         payload.object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
@@ -29,13 +29,13 @@ ResultStatus create_participant_by_ref(ClientState* state,
         payload.object_representation._.participant.base.representation._.object_reference.data = ref;
         payload.object_representation._.participant.base.representation._.object_reference.size = len;
 
-        result = create_object_sync(state, &payload, 100, reuse, replace);
+        result = create_object_sync(session, &payload, 100, reuse, replace);
     }
 
     return result;
 }
 
-ResultStatus create_topic_by_xml(ClientState* state,
+ResultStatus create_topic_by_xml(Session* session,
                                  const ObjectId object_id,
                                  const char* xml,
                                  const ObjectId participant_id,
@@ -56,21 +56,22 @@ ResultStatus create_topic_by_xml(ClientState* state,
     else
     {
         CREATE_Payload payload;
-        state->next_request_id++;
-        payload.base.request_id = get_raw_request_id(state->next_request_id);
+        session->next_request_id++;
+        payload.base.request_id = get_raw_request_id(session->next_request_id);
         payload.base.object_id = object_id;
         payload.object_representation.kind = OBJK_TOPIC;
         payload.object_representation._.topic.base.representation.format = REPRESENTATION_AS_XML_STRING;
         payload.object_representation._.topic.base.representation._.xml_string_represenatation.data = xml;
         payload.object_representation._.topic.base.representation._.xml_string_represenatation.size = strlen(xml);
+        payload.object_representation._.topic.participant_id = participant_id;
 
-        result = create_object_sync(state, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
+        result = create_object_sync(session, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
     }
 
     return result;
 }
 
-ResultStatus create_publisher_by_xml(ClientState* state,
+ResultStatus create_publisher_by_xml(Session* session,
                                      const ObjectId object_id,
                                      const char* xml,
                                      const ObjectId participant_id,
@@ -84,28 +85,29 @@ ResultStatus create_publisher_by_xml(ClientState* state,
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
-    else if ((participant_id.data[1] && 0x0F) != OBJK_PARTICIPANT)
+    else if ((participant_id.data[1] & 0x0F) != OBJK_PARTICIPANT)
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
     else
     {
         CREATE_Payload payload;
-        state->next_request_id++;
-        payload.base.request_id = get_raw_request_id(state->next_request_id);
+        session->next_request_id++;
+        payload.base.request_id = get_raw_request_id(session->next_request_id);
         payload.base.object_id = object_id;
         payload.object_representation.kind = OBJK_PUBLISHER;
         payload.object_representation._.publisher.base.representation.format = REPRESENTATION_AS_XML_STRING;
         payload.object_representation._.publisher.base.representation._.string_represenatation.data = xml;
         payload.object_representation._.publisher.base.representation._.string_represenatation.size = strlen(xml);
+        payload.object_representation._.publisher.participant_id = participant_id;
 
-        result = create_object_sync(state, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
+        result = create_object_sync(session, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
     }
 
     return result;
 }
 
-ResultStatus create_subscriber_by_xml(ClientState* state,
+ResultStatus create_subscriber_by_xml(Session* session,
                                       const ObjectId object_id,
                                       const char* xml,
                                       const ObjectId participant_id,
@@ -119,28 +121,29 @@ ResultStatus create_subscriber_by_xml(ClientState* state,
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
-    else if ((participant_id.data[1] && 0x0F) != OBJK_PARTICIPANT)
+    else if ((participant_id.data[1] & 0x0F) != OBJK_PARTICIPANT)
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
     else
     {
         CREATE_Payload payload;
-        state->next_request_id++;
-        payload.base.request_id = get_raw_request_id(state->next_request_id);
+        session->next_request_id++;
+        payload.base.request_id = get_raw_request_id(session->next_request_id);
         payload.base.object_id = object_id;
         payload.object_representation.kind = OBJK_SUBSCRIBER;
         payload.object_representation._.subscriber.base.representation.format = REPRESENTATION_AS_XML_STRING;
         payload.object_representation._.subscriber.base.representation._.string_represenatation.data = xml;
         payload.object_representation._.subscriber.base.representation._.string_represenatation.size = strlen(xml);
+        payload.object_representation._.subscriber.participant_id = participant_id;
 
-        result = create_object_sync(state, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
+        result = create_object_sync(session, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
     }
 
     return result;
 }
 
-ResultStatus create_datawriter_by_xml(ClientState* state,
+ResultStatus create_datawriter_by_xml(Session* session,
                                       const ObjectId object_id,
                                       const char* xml,
                                       const ObjectId publisher_id,
@@ -154,28 +157,29 @@ ResultStatus create_datawriter_by_xml(ClientState* state,
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
-    else if ((publisher_id.data[1] && 0x0F) != OBJK_PUBLISHER)
+    else if ((publisher_id.data[1] & 0x0F) != OBJK_PUBLISHER)
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
     else
     {
         CREATE_Payload payload;
-        state->next_request_id++;
-        payload.base.request_id = get_raw_request_id(state->next_request_id);
+        session->next_request_id++;
+        payload.base.request_id = get_raw_request_id(session->next_request_id);
         payload.base.object_id = object_id;
         payload.object_representation.kind = OBJK_DATAWRITER;
-        payload.object_representation._.subscriber.base.representation.format = REPRESENTATION_AS_XML_STRING;
-        payload.object_representation._.subscriber.base.representation._.string_represenatation.data = xml;
-        payload.object_representation._.subscriber.base.representation._.string_represenatation.size = strlen(xml);
+        payload.object_representation._.data_writer.base.representation.format = REPRESENTATION_AS_XML_STRING;
+        payload.object_representation._.data_writer.base.representation._.string_represenatation.data = xml;
+        payload.object_representation._.data_writer.base.representation._.string_represenatation.size = strlen(xml);
+        payload.object_representation._.data_writer.publisher_id = publisher_id;
 
-        result = create_object_sync(state, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
+        result = create_object_sync(session, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
     }
 
     return result;
 }
 
-ResultStatus create_datareader_by_xml(ClientState* state,
+ResultStatus create_datareader_by_xml(Session* session,
                                       const ObjectId object_id,
                                       const char* xml,
                                       const ObjectId subscriber_id,
@@ -189,28 +193,29 @@ ResultStatus create_datareader_by_xml(ClientState* state,
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
-    else if ((subscriber_id.data[1] && 0x0F) != OBJK_SUBSCRIBER)
+    else if ((subscriber_id.data[1] & 0x0F) != OBJK_SUBSCRIBER)
     {
         result.status = STATUS_ERR_UNKNOWN_REFERENCE;
     }
     else
     {
         CREATE_Payload payload;
-        state->next_request_id++;
-        payload.base.request_id = get_raw_request_id(state->next_request_id);
+        session->next_request_id++;
+        payload.base.request_id = get_raw_request_id(session->next_request_id);
         payload.base.object_id = object_id;
         payload.object_representation.kind = OBJK_DATAREADER;
-        payload.object_representation._.subscriber.base.representation.format = REPRESENTATION_AS_XML_STRING;
-        payload.object_representation._.subscriber.base.representation._.string_represenatation.data = xml;
-        payload.object_representation._.subscriber.base.representation._.string_represenatation.size = strlen(xml);
+        payload.object_representation._.data_reader.base.representation.format = REPRESENTATION_AS_XML_STRING;
+        payload.object_representation._.data_reader.base.representation._.string_represenatation.data = xml;
+        payload.object_representation._.data_reader.base.representation._.string_represenatation.size = strlen(xml);
+        payload.object_representation._.data_reader.subscriber_id = subscriber_id;
 
-        result = create_object_sync(state, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
+        result = create_object_sync(session, &payload, MICRORTPS_OBJK_TIMEOUT, reuse, replace);
     }
 
     return result;
 }
 
-ResultStatus create_object_sync(ClientState* state,
+ResultStatus create_object_sync(Session* session,
                                 const CREATE_Payload* payload,
                                 int timeout,
                                 bool reuse,
@@ -219,9 +224,9 @@ ResultStatus create_object_sync(ClientState* state,
     ResultStatus result = {STATUS_ERR_RESOURCES, MICRORTPS_ERR_MAX_TRIES};
     CreationMode creation_mode = {reuse, replace};
 
-    reset_buffer(&state->output_message.writer);
+    reset_micro_buffer(&session->output_message.writer);
     bool cond = false;
-    cond = add_create_resource_submessage(&state->output_message, payload, creation_mode);
+    cond = add_create_resource_submessage(&session->output_message, payload, creation_mode);
 
     if (cond)
     {
@@ -230,30 +235,32 @@ ResultStatus create_object_sync(ClientState* state,
         /* TODO (Julian): remove extra message size when transport delete header at UDP. */
         uint8_t status_buf[STATUS_MSG_SIZE + 7] = {0};
         MicroBuffer micro_buffer;
-        init_external_buffer(&micro_buffer, status_buf, STATUS_MSG_SIZE + 7);
+        init_micro_buffer(&micro_buffer, status_buf, STATUS_MSG_SIZE + 7);
         while ((try_counter < MICRORTPS_OBJK_MAX_TRIES) && (result.implementation_status != MICRORTPS_STATUS_OK))
         {
             try_counter++;
-            send_to_agent(state);
+            send_to_agent(session);
             /* TODO (Julian): add timeout functionality. */
-            reset_buffer(&micro_buffer);
-            int len = receive_data(status_buf, STATUS_MSG_SIZE + 7, state->transport_id);
+            reset_micro_buffer(&micro_buffer);
+            int len = receive_data(status_buf, STATUS_MSG_SIZE + 7, session->transport_id);
             if (len > 0)
             {
                 MessageHeader header;
-                deserialize_MessageHeader(&micro_buffer, &header, NULL);
+                deserialize_MessageHeader(&micro_buffer, &header);
                 if (header.session_id < 128)
                 {
                     ClientKey key;
-                    deserialize_ClientKey(&micro_buffer, &key, NULL);
+                    deserialize_ClientKey(&micro_buffer, &key);
                 }
                 SubmessageHeader sub_header;
-                deserialize_SubmessageHeader(&micro_buffer, &sub_header, NULL);
+                deserialize_SubmessageHeader(&micro_buffer, &sub_header);
                 micro_buffer.endianness = (sub_header.flags & 0x01) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
                 if (sub_header.id == SUBMESSAGE_ID_STATUS)
                 {
                     STATUS_Payload status_payload;
-                    deserialize_STATUS_Payload(&micro_buffer, &status_payload, NULL);
+                    deserialize_STATUS_Payload(&micro_buffer, &status_payload);
+                    PRINTL_STATUS_SUBMESSAGE(&status_payload);
+                    PRINTL_SERIALIZATION(RECV, session->buffer, len);
                     if (memcmp(&status_payload.base.related_request.request_id,
                                &payload->base.request_id,
                                sizeof(RequestId)) == 0)

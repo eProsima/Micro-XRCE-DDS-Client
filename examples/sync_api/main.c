@@ -42,27 +42,31 @@ int main()
 {
     ResultStatus status;
 
+    /* User buffer. */
+    char buf[1024];
+
     /* Init session. */
-    ClientState* state = new_udp_client_state(4096, 4000, 2020, 2019, "127.0.0.1");
-    create_client(state, on_status, NULL);
-    send_to_agent(state);
+    Session my_session;
+    new_udp_session(&my_session, buf, 1024, 4000, 2020, 2019, "127.0.0.1");
+    init_session(&my_session, NULL, on_status, NULL);
+    send_to_agent(&my_session);
 
     /* Create participant. */
-    ObjectId my_participant = {{0x00, 0x01}};
-    status = create_participant_by_ref(state, my_participant, "default_participant", false, false);
+    ObjectId participant_id = {{0x00, 0x01}};
+    status = create_participant_by_ref(&my_session, participant_id, "default_participant", false, false);
 
     /* Create topic. */
     const char* topic_xml = {"<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>"};
-    ObjectId my_topic = {{0x00, 0x02}};
-    status = create_topic_by_xml(state, my_topic, topic_xml, my_participant, false, false);
+    ObjectId topic_id = {{0x00, 0x02}};
+    status = create_topic_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
 
     /* Create publisher. */
     const char* publisher_xml = {"<publisher name=\"Myblisher\""};
-    ObjectId my_publisher = {{0x00, 0x03}};
-    status = create_publisher_by_xml(state, my_publisher, publisher_xml, my_participant, false, false);
+    ObjectId publisher_id = {{0x00, 0x03}};
+    status = create_publisher_by_xml(&my_session, publisher_id, publisher_xml, participant_id, false, false);
 
     /* Create data writer. */
-    const char* datawriter_xml = {"<data_writer name=\"MySquareWriter\" topic_ref=\"HelloWorldTopic\""};
-    ObjectId my_datawriter = {{0x00, 0x05}};
-    status = create_datawriter_by_xml(state, my_datawriter, datawriter_xml, my_publisher, false, false);
+    const char* datawriter_xml = {"<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>"};
+    ObjectId datawriter_id = {{0x00, 0x05}};
+    status = create_datawriter_by_xml(&my_session, datawriter_id, datawriter_xml, publisher_id, false, false);
 }
