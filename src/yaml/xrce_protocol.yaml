@@ -42,7 +42,7 @@ DATA:
 
 - struct:  {ClientKey: [data: uint8_t 4]}
 
-- define:  {CLIENT_INVALID: '(ClientKey){0x00, 0x00, 0x00, 0x00}'}
+- define:  {CLIENT_INVALID: '(ClientKey){{0x00, 0x00, 0x00, 0x00}}'}
 
 - typedef: {ObjectKind: uint8_t}
 
@@ -74,7 +74,7 @@ DATA:
 - struct:  {XrceVersion: [data: uint8_t 2]}
 - define:  {XRCE_VERSION_MAJOR:  '0x01'}
 - define:  {XRCE_VERSION_MINOR:  '0x00'}
-- define:  {XRCE_VERSION: '(XrceVersion){XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}'}
+- define:  {XRCE_VERSION: '(XrceVersion){{XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}}'}
 
 - struct:  {XrceVendorId: [data: uint8_t 2]}
 - define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}

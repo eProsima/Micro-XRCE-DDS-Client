@@ -69,7 +69,7 @@ typedef struct ClientKey
     uint8_t data[4];
 
 } ClientKey;
-#define CLIENT_INVALID (ClientKey){0x00, 0x00, 0x00, 0x00}
+#define CLIENT_INVALID (ClientKey){{0x00, 0x00, 0x00, 0x00}}
 
 typedef uint8_t ObjectKind;
 #define OBJK_INVALID 0x00
@@ -120,7 +120,7 @@ typedef struct XrceVersion
 } XrceVersion;
 #define XRCE_VERSION_MAJOR 0x01
 #define XRCE_VERSION_MINOR 0x00
-#define XRCE_VERSION (XrceVersion){XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}
+#define XRCE_VERSION (XrceVersion){{XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}}
 
 
 typedef struct XrceVendorId
