@@ -219,9 +219,9 @@ class Struct:
                 file.write('    return serialize_sequence_' + data_type + '(buffer, input->data, input->size);\n')
             else:
                 file.write('    bool ret = serialize_uint32_t(buffer, input->size);\n')
-                file.write('    for(uint32_t i = 0; i < input->size; i++)\n')
+                file.write('    for(uint32_t i = 0; i < input->size && ret; i++)\n')
                 file.write('    {\n')
-                file.write('        ret &= serialize_' + self.attributes[1].type + '(buffer, &input->data[i]);\n')
+                file.write('        ret = serialize_' + self.attributes[1].type + '(buffer, &input->data[i]);\n')
                 file.write('    }\n')
                 file.write('    return ret;\n')
 
@@ -245,12 +245,9 @@ class Struct:
 
             else:
                 file.write('    bool ret = deserialize_uint32_t(buffer, &output->size);\n')
-                file.write('    if (ret)\n')
+                file.write('    for(uint32_t i = 0; i < output->size && ret; i++)\n')
                 file.write('    {\n')
-                file.write('        for(uint32_t i = 0; i < output->size; i++)\n')
-                file.write('        {\n')
-                file.write('            ret &= deserialize_' + self.attributes[1].type + '(buffer, &output->data[i]);\n')
-                file.write('        }\n')
+                file.write('        ret = deserialize_' + self.attributes[1].type + '(buffer, &output->data[i]);\n')
                 file.write('    }\n')
                 file.write('    return ret;\n')
 

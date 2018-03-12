@@ -53,9 +53,9 @@ bool deserialize_BinarySequence_t(MicroBuffer* buffer, BinarySequence_t* output)
 bool serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* input)
 {
     bool ret = serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size; i++)
+    for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret &= serialize_String_t(buffer, &input->data[i]);
+        ret = serialize_String_t(buffer, &input->data[i]);
     }
     return ret;
 }
@@ -63,12 +63,9 @@ bool serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* inp
 bool deserialize_StringSequence_t(MicroBuffer* buffer, StringSequence_t* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if (ret)
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        for(uint32_t i = 0; i < output->size; i++)
-        {
-            ret &= deserialize_String_t(buffer, &output->data[i]);
-        }
+        ret = deserialize_String_t(buffer, &output->data[i]);
     }
     return ret;
 }
@@ -276,9 +273,9 @@ bool deserialize_TransportLocator(MicroBuffer* buffer, TransportLocator* output)
 bool serialize_TransportLocatorSeq(MicroBuffer* buffer, const TransportLocatorSeq* input)
 {
     bool ret = serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size; i++)
+    for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret &= serialize_TransportLocator(buffer, &input->data[i]);
+        ret = serialize_TransportLocator(buffer, &input->data[i]);
     }
     return ret;
 }
@@ -286,12 +283,9 @@ bool serialize_TransportLocatorSeq(MicroBuffer* buffer, const TransportLocatorSe
 bool deserialize_TransportLocatorSeq(MicroBuffer* buffer, TransportLocatorSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if (ret)
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        for(uint32_t i = 0; i < output->size; i++)
-        {
-            ret &= deserialize_TransportLocator(buffer, &output->data[i]);
-        }
+        ret = deserialize_TransportLocator(buffer, &output->data[i]);
     }
     return ret;
 }
@@ -315,9 +309,9 @@ bool deserialize_Property(MicroBuffer* buffer, Property* output)
 bool serialize_PropertySeq(MicroBuffer* buffer, const PropertySeq* input)
 {
     bool ret = serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size; i++)
+    for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret &= serialize_Property(buffer, &input->data[i]);
+        ret = serialize_Property(buffer, &input->data[i]);
     }
     return ret;
 }
@@ -325,12 +319,9 @@ bool serialize_PropertySeq(MicroBuffer* buffer, const PropertySeq* input)
 bool deserialize_PropertySeq(MicroBuffer* buffer, PropertySeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if (ret)
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        for(uint32_t i = 0; i < output->size; i++)
-        {
-            ret &= deserialize_Property(buffer, &output->data[i]);
-        }
+        ret = deserialize_Property(buffer, &output->data[i]);
     }
     return ret;
 }
@@ -1408,9 +1399,9 @@ bool deserialize_SampleData(MicroBuffer* buffer, SampleData* output)
 bool serialize_SampleDataSeq(MicroBuffer* buffer, const SampleDataSeq* input)
 {
     bool ret = serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size; i++)
+    for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret &= serialize_SampleData(buffer, &input->data[i]);
+        ret = serialize_SampleData(buffer, &input->data[i]);
     }
     return ret;
 }
@@ -1418,12 +1409,9 @@ bool serialize_SampleDataSeq(MicroBuffer* buffer, const SampleDataSeq* input)
 bool deserialize_SampleDataSeq(MicroBuffer* buffer, SampleDataSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if (ret)
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        for(uint32_t i = 0; i < output->size; i++)
-        {
-            ret &= deserialize_SampleData(buffer, &output->data[i]);
-        }
+        ret = deserialize_SampleData(buffer, &output->data[i]);
     }
     return ret;
 }
@@ -1447,9 +1435,9 @@ bool deserialize_Sample(MicroBuffer* buffer, Sample* output)
 bool serialize_SampleSeq(MicroBuffer* buffer, const SampleSeq* input)
 {
     bool ret = serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size; i++)
+    for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret &= serialize_Sample(buffer, &input->data[i]);
+        ret = serialize_Sample(buffer, &input->data[i]);
     }
     return ret;
 }
@@ -1457,12 +1445,9 @@ bool serialize_SampleSeq(MicroBuffer* buffer, const SampleSeq* input)
 bool deserialize_SampleSeq(MicroBuffer* buffer, SampleSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if (ret)
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        for(uint32_t i = 0; i < output->size; i++)
-        {
-            ret &= deserialize_Sample(buffer, &output->data[i]);
-        }
+        ret = deserialize_Sample(buffer, &output->data[i]);
     }
     return ret;
 }
@@ -1486,9 +1471,9 @@ bool deserialize_SampleDelta(MicroBuffer* buffer, SampleDelta* output)
 bool serialize_SampleDeltaSequence(MicroBuffer* buffer, const SampleDeltaSequence* input)
 {
     bool ret = serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size; i++)
+    for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret &= serialize_SampleDelta(buffer, &input->data[i]);
+        ret = serialize_SampleDelta(buffer, &input->data[i]);
     }
     return ret;
 }
@@ -1496,12 +1481,9 @@ bool serialize_SampleDeltaSequence(MicroBuffer* buffer, const SampleDeltaSequenc
 bool deserialize_SampleDeltaSequence(MicroBuffer* buffer, SampleDeltaSequence* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if (ret)
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        for(uint32_t i = 0; i < output->size; i++)
-        {
-            ret &= deserialize_SampleDelta(buffer, &output->data[i]);
-        }
+        ret = deserialize_SampleDelta(buffer, &output->data[i]);
     }
     return ret;
 }
@@ -1525,9 +1507,9 @@ bool deserialize_PackedSamples(MicroBuffer* buffer, PackedSamples* output)
 bool serialize_SamplePackedSeq(MicroBuffer* buffer, const SamplePackedSeq* input)
 {
     bool ret = serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size; i++)
+    for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret &= serialize_PackedSamples(buffer, &input->data[i]);
+        ret = serialize_PackedSamples(buffer, &input->data[i]);
     }
     return ret;
 }
@@ -1535,12 +1517,9 @@ bool serialize_SamplePackedSeq(MicroBuffer* buffer, const SamplePackedSeq* input
 bool deserialize_SamplePackedSeq(MicroBuffer* buffer, SamplePackedSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if (ret)
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        for(uint32_t i = 0; i < output->size; i++)
-        {
-            ret &= deserialize_PackedSamples(buffer, &output->data[i]);
-        }
+        ret = deserialize_PackedSamples(buffer, &output->data[i]);
     }
     return ret;
 }
