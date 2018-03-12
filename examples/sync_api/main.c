@@ -1,3 +1,4 @@
+#include "HelloWorld.h"
 #include <micrortps/client/sync_client.h>
 
 #include <stdio.h>
@@ -42,14 +43,11 @@ int main()
 {
     ResultStatus status;
 
-    /* User buffer. */
-    char buf[1024];
-
     /* Init session. */
-    Session my_session;
-    new_udp_session(&my_session, buf, 1024, 4000, 2020, 2019, "127.0.0.1");
-    init_session(&my_session, NULL, on_status, NULL);
-    send_to_agent(&my_session);
+    SyncSession my_session;
+    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
+    new_udp_session_sync(&my_session, 0x80, key, 4000, 2020, 2019, "127.0.0.1");
+    status = init_session_syn(&my_session);
 
     /* Create participant. */
     ObjectId participant_id = {{0x00, 0x01}};
@@ -69,4 +67,14 @@ int main()
     const char* datawriter_xml = {"<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>"};
     ObjectId datawriter_id = {{0x00, 0x05}};
     status = create_datawriter_by_xml(&my_session, datawriter_id, datawriter_xml, publisher_id, false, false);
+
+    return 0;
 }
+
+
+
+
+
+
+
+
