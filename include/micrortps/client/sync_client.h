@@ -26,6 +26,8 @@ extern "C"
 #define MICRORTPS_ERR_MAX_ATTEMPTS  0x01
 #define MICRORTPS_ERR_SERIALIZATION 0x02
 #define MICRORTPS_ERR_LOCATOR       0x03
+#define MICRORTPS_ERR_STREAMID      0x04
+#define MICRORTPS_ERR_STREAM_EXISTS 0x05
 
 /* Buffer sizes. */
 #define MICRORTPS_MIN_BUFFER_SIZE  64
@@ -50,18 +52,26 @@ typedef struct NoneStream
 
 typedef struct BestEffortStream
 {
+    StreamId id;
     uint8_t buf[MICRORTPS_MTU_SIZE];
     MicroBuffer micro_buffer;
     uint16_t seq_num;
+
+    struct BestEffortStream* next_stream;
+    struct BestEffortStream* prev_stream;
 
 } BestEffortStream;
 
 typedef struct ReliableStream
 {
+    StreamId id;
     uint8_t buf[MICRORTPS_MAX_MSG_NUM][MICRORTPS_MTU_SIZE];
     MicroBuffer micro_buffers[MICRORTPS_MAX_MSG_NUM];
     uint16_t seq_num;
     uint16_t bit_mask;
+
+    struct ReliableStream* next_stream;
+    struct ReliableStream* prev_stream;
 
 } ReliableStream;
 
@@ -75,8 +85,8 @@ typedef struct BuiltinStreams
 
 typedef struct UserStreams
 {
-    BestEffortStream* best_effort_streams[INPUT_BEST_EFFORT_STREAMS];
-    ReliableStream* reliable_streams[INPUT_RELIABLE_STREAMS];
+    BestEffortStream* best_effort_streams;
+    ReliableStream* reliable_streams;
 
 } UserStreams;
 
@@ -100,8 +110,23 @@ typedef struct SyncSession
 
 } SyncSession;
 
-bool add_reliable_stream(SyncSession* session, ReliableStream* stream, bool output);
-bool add_best_effort_stream(SyncSession* session, BestEffortStream* stream, bool output);
+uint8_t add_reliable_stream(SyncSession* session,
+                            ReliableStream* stream,
+                            const StreamId id,
+                            bool output);
+
+uint8_t add_best_effort_stream(SyncSession* session,
+                            BestEffortStream* stream,
+                            const StreamId id,
+                            bool output);
+
+void remove_reliable_stream(SyncSession* session,
+                            const StreamId id,
+                            bool output);
+
+void remove_best_effort_stream(SyncSession* session,
+                               const StreamId id,
+                               bool output);
 
 uint8_t* get_buffer(StreamId* id);
 bool write_topic(SyncSession* session, StreamId id, MicroBuffer* micro_buffer);

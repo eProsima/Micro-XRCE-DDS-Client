@@ -49,6 +49,14 @@ int main()
     new_udp_session_sync(&my_session, 0x80, key, 4000, 2020, 2019, "127.0.0.1");
     status = init_session_syn(&my_session);
 
+    ReliableStream my_reliable_stream;
+    add_reliable_stream(&my_session, &my_reliable_stream, 129, true);
+    remove_reliable_stream(&my_session, 129, true);
+
+    BestEffortStream my_best_effort_stream;
+    add_best_effort_stream(&my_session, &my_best_effort_stream, 2, true);
+    remove_best_effort_stream(&my_session, 2, true);
+
     /* Create participant. */
     ObjectId participant_id = {{0x00, 0x01}};
     status = create_participant_by_ref(&my_session, participant_id, "default_participant", false, false);

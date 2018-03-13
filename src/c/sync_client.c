@@ -5,6 +5,188 @@
 #include <string.h>
 #include <time.h>
 
+uint8_t add_reliable_stream(SyncSession* session,
+                            ReliableStream* stream,
+                            const StreamId id,
+                            bool output)
+{
+
+   /* Precondition. */
+   if ((id > 255) || (id < 129)) { return MICRORTPS_ERR_STREAMID; }
+
+   uint8_t result = MICRORTPS_STATUS_OK;
+
+   stream->prev_stream = NULL;
+   stream->next_stream = NULL;
+   stream->id = id;
+
+   UserStreams* reference_stream = (output) ? &session->out_user_streams : &session->in_user_streams;
+
+   if (reference_stream->reliable_streams == NULL)
+   {
+       /* Init head. */
+       reference_stream->reliable_streams = stream;
+   }
+   else
+   {
+       ReliableStream* current_stream = reference_stream->reliable_streams;
+       while ((current_stream->next_stream != NULL) && (current_stream->id < id))
+       {
+           current_stream = current_stream->next_stream;
+       }
+
+       if (current_stream->id == id)     /* Error stream exists. */
+       {
+           result = MICRORTPS_ERR_STREAM_EXISTS;
+       }
+       else if (current_stream->id > id) /* Push from. */
+       {
+           if (!current_stream->prev_stream)
+           {
+               /* Update head. */
+               reference_stream->reliable_streams = stream;
+           }
+           else
+           {
+               current_stream->prev_stream->next_stream = stream;
+           }
+           current_stream->prev_stream = stream;
+           stream->next_stream = current_stream;
+       }
+       else                              /* Push back. */
+       {
+           current_stream->next_stream = stream;
+           stream->prev_stream = current_stream;
+       }
+   }
+
+   return result;
+}
+
+uint8_t add_best_effort_stream(SyncSession* session,
+                               BestEffortStream* stream,
+                               const StreamId id,
+                               bool output)
+{
+
+   /* Precondition. */
+   if ((id > 127) || (id < 2)) { return MICRORTPS_ERR_STREAMID; }
+
+   uint8_t result = MICRORTPS_STATUS_OK;
+
+   stream->prev_stream = NULL;
+   stream->next_stream = NULL;
+   stream->id = id;
+
+   UserStreams* reference_stream = (output) ? &session->out_user_streams : &session->in_user_streams;
+
+   if (reference_stream->best_effort_streams == NULL)
+   {
+       /* Init head. */
+       reference_stream->best_effort_streams = stream;
+   }
+   else
+   {
+       BestEffortStream* current_stream = reference_stream->best_effort_streams;
+       while ((current_stream->next_stream != NULL) && (current_stream->id < id))
+       {
+           current_stream = current_stream->next_stream;
+       }
+
+       if (current_stream->id == id)     /* Error stream exists. */
+       {
+           result = MICRORTPS_ERR_STREAM_EXISTS;
+       }
+       else if (current_stream->id > id) /* Push from. */
+       {
+           if (!current_stream->prev_stream)
+           {
+               /* Update head. */
+               reference_stream->best_effort_streams = stream;
+           }
+           else
+           {
+               current_stream->prev_stream->next_stream = stream;
+           }
+           current_stream->prev_stream = stream;
+           stream->next_stream = current_stream;
+       }
+       else                              /* Push back. */
+       {
+           current_stream->next_stream = stream;
+           stream->prev_stream = current_stream;
+       }
+   }
+
+   return result;
+}
+
+void remove_reliable_stream(SyncSession* session, const StreamId id, bool output)
+{
+    UserStreams* reference_stream = (output) ? &session->out_user_streams : &session->in_user_streams;
+
+    ReliableStream* current_stream = reference_stream->reliable_streams;
+    while (current_stream && (current_stream->id < id))
+    {
+        current_stream = current_stream->next_stream;
+    }
+
+    if (current_stream)
+    {
+        if (current_stream->prev_stream && current_stream->next_stream)
+        {
+            current_stream->prev_stream->next_stream = current_stream->next_stream;
+            current_stream->next_stream->prev_stream = current_stream->prev_stream;
+        }
+        else if (!current_stream->prev_stream && current_stream->next_stream)
+        {
+            current_stream->next_stream->prev_stream = NULL;
+            reference_stream->reliable_streams =  current_stream->next_stream;
+        }
+        else if (current_stream->prev_stream && !current_stream->next_stream)
+        {
+            current_stream->prev_stream->next_stream = NULL;
+        }
+        else
+        {
+            reference_stream->reliable_streams = NULL;
+        }
+    }
+}
+
+void remove_best_effort_stream(SyncSession* session, const StreamId id, bool output)
+{
+    UserStreams* reference_stream = (output) ? &session->out_user_streams : &session->in_user_streams;
+
+    BestEffortStream* current_stream = reference_stream->best_effort_streams;
+    while (current_stream && (current_stream->id < id))
+    {
+        current_stream = current_stream->next_stream;
+    }
+
+    if (current_stream)
+    {
+        if (current_stream->prev_stream && current_stream->next_stream)
+        {
+            current_stream->prev_stream->next_stream = current_stream->next_stream;
+            current_stream->next_stream->prev_stream = current_stream->prev_stream;
+        }
+        else if (!current_stream->prev_stream && current_stream->next_stream)
+        {
+            current_stream->next_stream->prev_stream = NULL;
+            reference_stream->best_effort_streams = current_stream->next_stream;
+        }
+        else if (current_stream->prev_stream && !current_stream->next_stream)
+        {
+            current_stream->prev_stream->next_stream = NULL;
+        }
+        else
+        {
+            reference_stream->best_effort_streams = NULL;
+        }
+    }
+}
+
 uint8_t new_udp_session_sync(SyncSession* session,
                              SessionId id,
                              ClientKey key,
@@ -70,6 +252,12 @@ uint8_t new_udp_session_sync(SyncSession* session,
         session->in_builtin_streams.reliable_stream.seq_num = 0;
         session->out_builtin_streams.best_effort_stream.seq_num = 0;
         session->out_builtin_streams.reliable_stream.seq_num = 0;
+
+        /* Init user streams. */
+        session->in_user_streams.best_effort_streams = NULL;
+        session->in_user_streams.reliable_streams = NULL;
+        session->out_user_streams.best_effort_streams = NULL;
+        session->out_user_streams.reliable_streams = NULL;
     }
 
     return result;
