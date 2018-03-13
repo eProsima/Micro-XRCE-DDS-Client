@@ -36,6 +36,14 @@ int main()
 
     init_session_syn(&my_session);
 
+    ReliableStream my_reliable_stream;
+    add_reliable_stream(&my_session, &my_reliable_stream, 129, true);
+    remove_reliable_stream(&my_session, 129, true);
+
+    BestEffortStream my_best_effort_stream;
+    add_best_effort_stream(&my_session, &my_best_effort_stream, 2, true);
+    remove_best_effort_stream(&my_session, 2, true);
+
     /* Create participant. */
     ObjectId participant_id = {{0x00, 0x01}};
     create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
