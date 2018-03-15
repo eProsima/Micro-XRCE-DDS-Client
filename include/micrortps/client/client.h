@@ -8,9 +8,7 @@ extern "C"
 
 #include <micrortps/client/config.h>
 #include <micrortps/client/xrce_client.h>
-#include <micrortps/client/input_message.h>
-#include <transport/micrortps_transport.h>
-#include "xrce_protocol_serialization.h"
+#include <micrortps/transport/micrortps_transport.h>
 
 #include <stddef.h>
 #include <stdint.h>

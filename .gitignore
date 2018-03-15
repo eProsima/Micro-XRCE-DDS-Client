@@ -3,3 +3,7 @@ compile_commands.json
 .vscode
 .ycm_extra_conf.py
 .color_coded
+
+# eclipse
+.cproject
+.project

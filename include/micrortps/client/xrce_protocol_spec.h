@@ -20,6 +20,8 @@ extern "C"
 {
 #endif
 
+#include <micrortps/transport/micrortps_transport.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 
