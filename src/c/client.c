@@ -22,20 +22,27 @@
 #include <string.h>
 #include <time.h>
 
+/* ----------------------------------------------------------------------------------------------
+                                    CLIENT SESSION
+ ---------------------------------------------------------------------------------------------- */
 
-uint8_t new_udp_session(Session* session,
-                             SessionId id,
-                             ClientKey key,
-                             uint16_t send_port,
-                             uint16_t recv_port,
-                             uint16_t remote_port,
-                             const char* server_ip,
-                             OnTopic on_topic_callback,
-                             void* on_topic_args)
+uint8_t new_udp_session(Session* const session,
+                        SessionId id,
+                        ClientKey key,
+                        uint16_t remote_port,
+                        const uint8_t* const server_ip,
+                        micrortps_locator_t* const locator
+                        OnTopic on_topic_callback,
+                        void* on_topic_args)
 {
-    uint8_t result = MICRORTPS_STATUS_OK;
+    if (NULL == session || NULL == buf || NULL == server_ip || NULL == locator)
+    {
+        printf("# new_udp_session() -> BAD PARAMETERS!\n");
+        return SESSION_LOCATOR_ERR;
+    }
 
-    locator_id_t locator_id = add_udp_locator(send_port, recv_port, remote_port, server_ip);
+    uint8_t result = MICRORTPS_STATUS_OK;
+    locator_id_t locator_id = add_udp_locator_client(remote_port, server_ip, locator);
 
     if (0 >= locator_id)
     {
@@ -92,7 +99,7 @@ uint8_t new_udp_session(Session* session,
 
 void close_session(Session* session)
 {
-    rm_locator(session->transport_id);
+    remove_locator(session->transport_id);
 }
 
 bool init_session_syn(Session* session)

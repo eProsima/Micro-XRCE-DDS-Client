@@ -51,7 +51,7 @@ int main(int args, char **argv)
     uint8_t result = 0xFF;
     uint8_t my_buffer[MAXBUFLEN];
     Session my_session;
-
+    micrortps_locator_t locator;
     if (args > 3)
     {
         if (strcmp(argv[1], "serial") == 0)
@@ -60,16 +60,15 @@ int main(int args, char **argv)
         }
         else if (strcmp(argv[1], "udp") == 0 && args == 5)
         {
-            uint16_t received_port = atoi(argv[3]);
             uint16_t remote_port = atoi(argv[4]);
-            result = new_udp_session_sync(&my_session, my_buffer, sizeof(my_buffer),
-                                     4000, received_port, remote_port, argv[2]);
-            printf("<< UDP mode => recv port: %u, send port: %u >>\n", received_port, remote_port);
+
+            result = new_udp_session(&my_session, my_buffer, sizeof(my_buffer), remote_port, argv[2], &locator);
+            printf("<< UDP mode => remote port: %u >>\n", remote_port);
         }
     }
     if (result != SESSION_CREATED)
     {
-        printf("Help: program [serial | udp dest_ip recv_port send_port]\n");
+        printf("Help: program [serial | udp remote_ip remote_port]\n");
         return 1;
     }
 

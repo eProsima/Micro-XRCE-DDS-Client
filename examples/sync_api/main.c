@@ -28,7 +28,8 @@ int main()
     /* Init session. */
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    if (MICRORTPS_STATUS_OK != new_udp_session(&my_session, 0x80, key, 4000, 2020, 2019, "127.0.0.1", on_HelloWorld_topic, NULL))
+    micrortps_locator_t locator;
+    if (MICRORTPS_STATUS_OK != new_udp_session(&my_session, 0x01, key, 2019, "127.0.0.1", &locator, on_HelloWorld_topic, NULL))
     {
         return 1;
     }
