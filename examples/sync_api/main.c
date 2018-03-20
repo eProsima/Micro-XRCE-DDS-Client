@@ -40,9 +40,7 @@ int main()
     add_reliable_stream(&my_session, &my_reliable_stream, 129, true);
     remove_reliable_stream(&my_session, 129, true);
 
-    BestEffortStream my_best_effort_stream;
-    add_best_effort_stream(&my_session, &my_best_effort_stream, 2, true);
-    remove_best_effort_stream(&my_session, 2, true);
+    init_session_syn(&my_session);
 
     /* Create participant. */
     ObjectId participant_id = {{0x00, 0x01}};
@@ -73,7 +71,6 @@ int main()
     ObjectId datareader_id = {{0x00, 0x06}};
     create_datawriter_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
 
-
     BestEffortStream* best_effort = &my_session.output_best_effort_stream;
 
     HelloWorld topic1 = {1, "Hello MicroRTPS 1"};
@@ -91,8 +88,6 @@ int main()
     {
         serialize_HelloWorld_topic(topic_buffer_2, &topic2);
     }
-
-
     ReliableStream* reliable = &my_session.output_reliable_stream;
 
     HelloWorld topic3 = {1, "Hello MicroRTPS 3"};
