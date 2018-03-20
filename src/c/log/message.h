@@ -70,6 +70,13 @@ INLINE_MES void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
 ;
 #endif
 
+INLINE_MES void PRINTL_GET_INFO_SUBMESSAGE(const GET_INFO_Payload* payload)
+#ifndef MESSAGE_LOGS
+{}
+#else
+;
+#endif
+
 INLINE_MES void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DELETE_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
@@ -84,7 +91,7 @@ INLINE_MES void PRINTL_STATUS_SUBMESSAGE(const STATUS_Payload* payload)
 ;
 #endif
 
-INLINE_MES void PRINTL_WRITE_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
+INLINE_MES void PRINTL_INFO_SUBMESSAGE(const INFO_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
@@ -98,41 +105,33 @@ INLINE_MES void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
 ;
 #endif
 
-INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const BaseObjectReply* reply, const SampleData* payload)
+INLINE_MES void PRINTL_WRITE_DATA_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE(const BaseObjectReply* reply, const Sample* payload)
+INLINE_MES void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* reply)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSeq* payload)
+INLINE_MES void PRINTL_ACKNACK_SUBMESSAGE(const ACKNACK_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSeq* payload)
+INLINE_MES void PRINTL_HEARTBEAT_SUBMESSAGE(const HEARTBEAT_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
-
-INLINE_MES void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const BaseObjectReply* reply, const PackedSamples* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
 
 #ifdef __cplusplus
 }

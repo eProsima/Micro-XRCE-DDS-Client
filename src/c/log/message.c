@@ -183,6 +183,11 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
             RESTORE_COLOR);
 }
 
+void PRINTL_GET_INFO_SUBMESSAGE(const GET_INFO_Payload* payload)
+{
+    //TODO
+}
+
 void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DELETE_Payload* payload)
 {
     printf("%s%s[Delete | %s]%s\n",
@@ -201,17 +206,9 @@ void PRINTL_STATUS_SUBMESSAGE(const STATUS_Payload* payload)
             RESTORE_COLOR);
 }
 
-void PRINTL_WRITE_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
+void PRINTL_INFO_SUBMESSAGE(const INFO_Payload* payload)
 {
-    char content[1024];
-    sprintf(content, "DATA | size: %u", payload->data.size);
-
-    printf("%s%s[Write data | %s | %s]%s\n",
-            SEND,
-            YELLOW,
-            request_to_string(&payload->base),
-            content,
-            RESTORE_COLOR);
+    //TODO
 }
 
 void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
@@ -246,41 +243,47 @@ void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
             RESTORE_COLOR);
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA(const BaseObjectReply* reply, const SampleData* payload)
+void PRINTL_WRITE_DATA_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
+{
+    char content[1024];
+    sprintf(content, "DATA | size: %u", payload->data.size);
+
+    printf("%s%s[Write data | DATA | %s | %s]%s\n",
+            SEND,
+            YELLOW,
+            request_to_string(&payload->base),
+            content,
+            RESTORE_COLOR);
+}
+
+void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* payload)
 {
     printf("%s%s[Data | %s | FORMAT_DATA | size: %u]%s\n",
             RECV,
             PURPLE,
-            reply_to_string(reply),
-            payload->size,
+            request_to_string(&payload->base),
+            payload->data.size,
             RESTORE_COLOR);
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE(const BaseObjectReply* reply, const Sample* payload)
+void PRINTL_ACKNACK_SUBMESSAGE(const ACKNACK_Payload* payload)
 {
-    //TODO
-    (void) reply;
-    (void) payload;
+    printf("%s%s[Acknack | seq_num: %u | bitmap: %s]%s\n",
+            RECV,
+            PURPLE,
+            payload->first_unacked_seq_num,
+            data_to_string(payload->nack_bitmap, 2),
+            RESTORE_COLOR);
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_DATA_SEQUENCE(const BaseObjectReply* reply, const SampleDataSeq* payload)
+void PRINTL_HEARTBEAT_SUBMESSAGE(const HEARTBEAT_Payload* payload)
 {
-    //TODO
-    (void) reply;
-    (void) payload;
+    printf("%s%s[Heartbeat | first: %u | last: %u]%s\n",
+            RECV,
+            PURPLE,
+            payload->first_unacked_seq_nr,
+            payload->last_unacked_seq_nr,
+            RESTORE_COLOR);
 }
 
-void PRINTL_DATA_SUBMESSAGE_SAMPLE_SEQUENCE(const BaseObjectReply* reply, const SampleSeq* payload)
-{
-    //TODO
-    (void) reply;
-    (void) payload;
-}
-
-void PRINTL_DATA_SUBMESSAGE_PACKED_SAMPLES(const BaseObjectReply* reply, const PackedSamples* payload)
-{
-    //TODO
-    (void) reply;
-    (void) payload;
-}
 #endif

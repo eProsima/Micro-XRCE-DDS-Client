@@ -17,9 +17,12 @@ extern "C"
 #define MICRORTPS_MAX_ATTEMPTS     100
 
 /* Message sizes. */
-#define HEADER_SIZE     0x08
-#define SUBMESSAGE_SIZE 0x04
-#define STATUS_MSG_SIZE 0x18
+#define HEADER_MIN_SIZE    0x04
+#define HEADER_MAX_SIZE    0x08
+#define SUBHEADER_SIZE    0x04
+#define PAYLOAD_DATA_SIZE  0x04
+#define STATUS_MSG_SIZE    0x18
+#define HEARTBEAT_MSG_SIZE 0x04
 
 /* Micro-RTPS status. */
 #define MICRORTPS_STATUS_OK         0x00
@@ -33,6 +36,7 @@ extern "C"
 #define MICRORTPS_MIN_BUFFER_SIZE  64
 #define MICRORTPS_MTU_SIZE        512
 #define MICRORTPS_MAX_MSG_NUM      16
+#define MICRORTPS_MAX_TOPICS_READ  10
 
 /* Streams configuration. */
 #define INPUT_BEST_EFFORT_STREAMS   1
@@ -43,56 +47,31 @@ extern "C"
 /*
  * Streams.
  */
-typedef struct NoneStream
-{
-    uint8_t buf[MICRORTPS_MIN_BUFFER_SIZE];
-    MicroBuffer micro_buffer;
-
-} NoneStream;
 
 typedef struct BestEffortStream
 {
-    StreamId id;
-    uint8_t buf[MICRORTPS_MTU_SIZE];
-    MicroBuffer micro_buffer;
     uint16_t seq_num;
 
-    struct BestEffortStream* next_stream;
-    struct BestEffortStream* prev_stream;
+    uint8_t buf[MICRORTPS_MTU_SIZE];
+    MicroBuffer micro_buffer;
 
 } BestEffortStream;
 
 typedef struct ReliableStream
 {
-    StreamId id;
-    uint8_t buf[MICRORTPS_MAX_MSG_NUM][MICRORTPS_MTU_SIZE];
-    MicroBuffer micro_buffers[MICRORTPS_MAX_MSG_NUM];
     uint16_t seq_num;
-    uint16_t bit_mask;
 
-    struct ReliableStream* next_stream;
-    struct ReliableStream* prev_stream;
+    struct Buffer
+    {
+        uint8_t buf[MICRORTPS_MTU_SIZE];
+        MicroBuffer micro_buffer;
+
+    } store[MICRORTPS_MAX_MSG_NUM];
 
 } ReliableStream;
 
-typedef struct BuiltinStreams
-{
-    NoneStream none_stream;
-    BestEffortStream best_effort_stream;
-    ReliableStream reliable_stream;
+typedef void (*OnTopic)(uint32_t id, MicroBuffer* message, void *args);
 
-} BuiltinStreams;
-
-typedef struct UserStreams
-{
-    BestEffortStream* best_effort_streams;
-    ReliableStream* reliable_streams;
-
-} UserStreams;
-
-/*
- * New session.
- */
 typedef struct SyncSession
 {
     SessionId id;
@@ -100,37 +79,20 @@ typedef struct SyncSession
     locator_id_t transport_id;
     uint16_t request_id;
 
-    /* Builtin streams. */
-    BuiltinStreams in_builtin_streams;
-    BuiltinStreams out_builtin_streams;
+    uint8_t header_offset;
 
-    /* User defined streams. */
-    UserStreams in_user_streams;
-    UserStreams out_user_streams;
+    BestEffortStream input_best_effort_stream;
+    BestEffortStream output_best_effort_stream;
+    ReliableStream input_reliable_stream;
+    ReliableStream output_reliable_stream;
+
+    OnTopic on_topic_callback;
+    void* on_topic_args;
+
+    ResultStatus last_status;
 
 } SyncSession;
 
-uint8_t add_reliable_stream(SyncSession* session,
-                            ReliableStream* stream,
-                            const StreamId id,
-                            bool output);
-
-uint8_t add_best_effort_stream(SyncSession* session,
-                            BestEffortStream* stream,
-                            const StreamId id,
-                            bool output);
-
-void remove_reliable_stream(SyncSession* session,
-                            const StreamId id,
-                            bool output);
-
-void remove_best_effort_stream(SyncSession* session,
-                               const StreamId id,
-                               bool output);
-
-uint8_t* get_buffer(StreamId* id);
-bool write_topic(SyncSession* session, StreamId id, MicroBuffer* micro_buffer);
-//bool write_HelloWorld_topic(SyncSession* session, StreamId id, Serialize serialize, void* topic);
 
 uint8_t new_udp_session_sync(SyncSession* session,
                              SessionId id,
@@ -145,7 +107,7 @@ ResultStatus init_session_syn(SyncSession* session);
 /**
  * @brief create_participant_by_ref
  *
- * @param state
+ * @param session
  * @param object_id
  * @param ref
  * @param reuse
@@ -153,7 +115,7 @@ ResultStatus init_session_syn(SyncSession* session);
  *
  * @return
  */
-ResultStatus create_participant_by_ref(SyncSession* state,
+ResultStatus create_participant_by_ref(SyncSession* session,
                                        const ObjectId object_id,
                                        const char* ref,
                                        bool reuse,
@@ -161,7 +123,7 @@ ResultStatus create_participant_by_ref(SyncSession* state,
 /**
  * @brief create_topic_by_xml
  *
- * @param state
+ * @param session
  * @param object_id
  * @param xml
  * @param participant_id
@@ -170,7 +132,7 @@ ResultStatus create_participant_by_ref(SyncSession* state,
  *
  * @return
  */
-ResultStatus create_topic_by_xml(SyncSession* state,
+ResultStatus create_topic_by_xml(SyncSession* session,
                                  const ObjectId object_id,
                                  const char* xml,
                                  const ObjectId participant_id,
@@ -179,7 +141,7 @@ ResultStatus create_topic_by_xml(SyncSession* state,
 /**
  * @brief create_publisher_by_xml
  *
- * @param state
+ * @param session
  * @param object_id
  * @param xml
  * @param participant_id
@@ -188,7 +150,7 @@ ResultStatus create_topic_by_xml(SyncSession* state,
  *
  * @return
  */
-ResultStatus create_publisher_by_xml(SyncSession* state,
+ResultStatus create_publisher_by_xml(SyncSession* session,
                                      const ObjectId object_id,
                                      const char* xml,
                                      const ObjectId participant_id,
@@ -198,7 +160,7 @@ ResultStatus create_publisher_by_xml(SyncSession* state,
 /**
  * @brief create_subscriber_by_xml
  *
- * @param state
+ * @param session
  * @param object_id
  * @param xml
  * @param participant_id
@@ -207,7 +169,7 @@ ResultStatus create_publisher_by_xml(SyncSession* state,
  *
  * @return
  */
-ResultStatus create_subscriber_by_xml(SyncSession* state,
+ResultStatus create_subscriber_by_xml(SyncSession* session,
                                       const ObjectId object_id,
                                       const char* xml,
                                       const ObjectId participant_id,
@@ -216,7 +178,7 @@ ResultStatus create_subscriber_by_xml(SyncSession* state,
 /**
  * @brief create_datawriter_by_xml
  *
- * @param state
+ * @param session
  * @param object_id
  * @param xml
  * @param publisher_id
@@ -225,7 +187,7 @@ ResultStatus create_subscriber_by_xml(SyncSession* state,
  *
  * @return
  */
-ResultStatus create_datawriter_by_xml(SyncSession* state,
+ResultStatus create_datawriter_by_xml(SyncSession* session,
                                       const ObjectId object_id,
                                       const char* xml,
                                       const ObjectId publisher_id,
@@ -235,7 +197,7 @@ ResultStatus create_datawriter_by_xml(SyncSession* state,
 /**
  * @brief create_datareader_by_xml
  *
- * @param state
+ * @param session
  * @param object_id
  * @param xml
  * @param subscriber_id
@@ -244,7 +206,7 @@ ResultStatus create_datawriter_by_xml(SyncSession* state,
  *
  * @return
  */
-ResultStatus create_datareader_by_xml(SyncSession* state,
+ResultStatus create_datareader_by_xml(SyncSession* session,
                                       const ObjectId object_id,
                                       const char* xml,
                                       const ObjectId subscriber_id,
@@ -253,7 +215,7 @@ ResultStatus create_datareader_by_xml(SyncSession* state,
 /**
  * @brief create_object_sync
  *
- * @param state
+ * @param session
  * @param payload
  * @param timeout
  * @param reuse
@@ -261,11 +223,30 @@ ResultStatus create_datareader_by_xml(SyncSession* state,
  *
  * @return
  */
-ResultStatus create_object_sync(SyncSession* state,
+ResultStatus create_object_sync(SyncSession* session,
                                 const CREATE_Payload* payload,
                                 int timeout,
                                 bool reuse,
                                 bool replace);
+
+
+MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, uint16_t topic_size);
+MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, uint16_t topic_size);
+
+bool send_best_effort_message(SyncSession* session, BestEffortStream* output_stream);
+bool send_reliable_message(SyncSession* session, ReliableStream* output_stream);
+
+bool receive_best_effort(BestEffortStream* input_stream, const uint16_t seq_num);
+bool receive_reliable(ReliableStream* input_stream, MicroBuffer* submessages, uint16_t seq_num);
+
+bool send_heartbeat(SyncSession* session, ReliableStream* reference_stream);
+void check_acknack(SyncSession* session, ReliableStream* output_stream, uint16_t first_unacked_seq_num, uint8_t bitmap[2]);
+
+void process_message(SyncSession* session, MicroBuffer* input_buffer);
+void process_submessages(SyncSession* session, MicroBuffer* micro_buffer);
+void process_submessage(SyncSession* session, MicroBuffer* micro_buffer);
+
+void run_communication(SyncSession* session);
 
 #ifdef __cplusplus
 }
