@@ -24,8 +24,13 @@ extern "C"
 
 #include <micrortps/client/client.h>
 
+<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 void output_heartbeat(ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat);
 void output_acknack(ReliableStream* reference_stream, ACKNACK_Payload* acknack);
+=======
+void output_heartbeat(Session* session, ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat);
+void output_acknack(Session* session, ReliableStream* reference_stream, ACKNACK_Payload* acknack);
+>>>>>>> Refs #2679. Save state pre-compile
 
 void input_heartbeat(Session* sesson, ReliableStream* reference_stream, uint16_t first_seq_num, uint16_t last_seq_num);
 void input_acknack(Session* session, ReliableStream* reference_stream, uint16_t first_unacked_seq_num, uint8_t bitmap[2]);

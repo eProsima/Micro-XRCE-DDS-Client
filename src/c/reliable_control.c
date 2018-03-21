@@ -15,6 +15,7 @@
 #include <micrortps/client/client.h>
 #include <micrortps/client/output_message.h>
 
+<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 void output_heartbeat(ReliableStream* output_stream, HEARTBEAT_Payload* heartbeat)
 {
     heartbeat->last_unacked_seq_nr = output_stream->seq_num - 1;
@@ -30,6 +31,44 @@ void output_acknack(ReliableStream* input_stream, ACKNACK_Payload* acknack)
         uint16_t current_seq_num = input_stream->seq_num + i;
         uint8_t current_index = current_seq_num % MICRORTPS_MAX_MSG_NUM;
         MicroBuffer* current_buffer = &input_stream->store[current_index].micro_buffer;
+=======
+void output_heartbeat(Session* session, ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat)
+{
+    int32_t first = -1;
+    int32_t last = -1;
+    for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
+    {
+        uint16_t current_seq_num = reference_stream->seq_num + i;
+        uint8_t current_index = current_seq_num % MICRORTPS_MAX_MSG_NUM;
+        MicroBuffer* current_buffer = &reference_stream->store[current_index].micro_buffer;
+        if(current_buffer->iterator != current_buffer->init)
+        {
+            if(first == -1)
+            {
+                first = (current_seq_num > MICRORTPS_MAX_MSG_NUM) ? current_seq_num - MICRORTPS_MAX_MSG_NUM : 0;
+                last = first;
+            }
+            else
+            {
+                last = (current_seq_num > MICRORTPS_MAX_MSG_NUM) ? current_seq_num - MICRORTPS_MAX_MSG_NUM : 0;
+            }
+        }
+    }
+
+    heartbeat->first_unacked_seq_nr = (uint16_t) first;
+    heartbeat->last_unacked_seq_nr = (uint16_t) last;
+}
+
+void output_acknack(Session* session, ReliableStream* reference_stream, ACKNACK_Payload* acknack)
+{
+    memset(acknack->nack_bitmap, 0, 2);
+    uint16_t search_buffers_size = reference_stream->last_seq_num - reference_stream->seq_num;
+    for(uint16_t i = 0; i < search_buffers_size; i++)
+    {
+        uint16_t current_seq_num = reference_stream->seq_num + i;
+        uint8_t current_index = current_seq_num % MICRORTPS_MAX_MSG_NUM;
+        MicroBuffer* current_buffer = &reference_stream->store[current_index].micro_buffer;
+>>>>>>> Refs #2679. Save state pre-compile
         if(current_buffer->iterator == current_buffer->init)
         {
             if(8 > i)
@@ -43,6 +82,7 @@ void output_acknack(ReliableStream* input_stream, ACKNACK_Payload* acknack)
         }
     }
 
+<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
     acknack->first_unacked_seq_num = input_stream->seq_num;
 }
 
@@ -60,11 +100,36 @@ void input_heartbeat(Session* session, ReliableStream* input_stream, uint16_t fi
 }
 
 void input_acknack(Session* session, ReliableStream* output_stream, const uint16_t first_unacked_seq_num, uint8_t bitmap[2])
+=======
+    acknack->first_unacked_seq_num = reference_stream->seq_num;
+}
+
+void input_heartbeat(Session* session, ReliableStream* reference_stream, uint16_t first_seq_num, uint16_t last_seq_num)
+{
+    if(first_seq_num > reference_stream->seq_num)
+    {
+        reference_stream->seq_num = first_seq_num;
+    }
+
+    if(last_seq_num > reference_stream->seq_num)
+    {
+        reference_stream->last_seq_num = last_seq_num;
+    }
+
+    send_acknack(session, reference_stream);
+}
+
+void input_acknack(Session* session, ReliableStream* reference_stream, const uint16_t first_unacked_seq_num, uint8_t bitmap[2])
+>>>>>>> Refs #2679. Save state pre-compile
 {
     for(int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
     {
         uint8_t index = first_unacked_seq_num % MICRORTPS_MAX_MSG_NUM;
+<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
         MicroBuffer* output_buffer = &output_stream->store[index].micro_buffer;
+=======
+        MicroBuffer* output_buffer = &reference_stream->store[index].micro_buffer;
+>>>>>>> Refs #2679. Save state pre-compile
 
         if(output_buffer->iterator != output_buffer->init)
         {

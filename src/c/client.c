@@ -1,4 +1,3 @@
-
 // Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +20,6 @@
 
 #include <string.h>
 #include <time.h>
-
-/* ----------------------------------------------------------------------------------------------
-                                    CLIENT SESSION
- ---------------------------------------------------------------------------------------------- */
 
 uint8_t new_udp_session(Session* const session,
                         SessionId id,
@@ -195,7 +190,7 @@ bool create_participant_sync_by_ref(Session* session,
     session->request_id++;
 
     size_t len = strlen(ref);
-    if (strlen(ref) > REFERENCE_MAX_LEN)
+    if (len > REFERENCE_MAX_LEN)
     {
         len = REFERENCE_MAX_LEN;
     }

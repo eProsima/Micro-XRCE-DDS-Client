@@ -9,19 +9,20 @@ extern "C"
 #include <micrortps/client/config.h>
 #include <micrortps/client/xrce_client.h>
 #include <micrortps/transport/micrortps_transport.h>
+#include "xrce_protocol_serialization.h"
 
 #include <stddef.h>
 #include <stdint.h>
 
 /* Create object defines. */
 #define MICRORTPS_OBJK_TIMEOUT      10
-#define MICRORTPS_MAX_ATTEMPTS      100
+#define MICRORTPS_MAX_ATTEMPTS     100
 
 /* Message sizes. */
 #define HEADER_MIN_SIZE    0x04
 #define HEADER_MAX_SIZE    0x08
 #define SUBHEADER_SIZE     0x04
-#define PAYLOAD_DATA_SIZE  0x0C
+#define PAYLOAD_DATA_SIZE  0x08
 #define STATUS_MSG_SIZE    0x18
 #define HEARTBEAT_MSG_SIZE 0x04
 
@@ -34,6 +35,9 @@ extern "C"
 
 /* Buffer sizes. */
 #define MICRORTPS_MIN_BUFFER_SIZE  64
+#define MICRORTPS_MTU_SIZE        512
+#define MICRORTPS_MAX_MSG_NUM      16
+#define MICRORTPS_MAX_TOPICS_READ  10
 
 /* Streams configuration. */
 #define INPUT_BEST_EFFORT_STREAMS   1
