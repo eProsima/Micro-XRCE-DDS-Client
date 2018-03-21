@@ -1,5 +1,5 @@
 #include "HelloWorld.h"
-#include <micrortps/client/sync_client.h>
+#include <micrortps/client/client.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -9,7 +9,7 @@
 int main()
 {
     /* Init session. */
-    SyncSession my_session;
+    Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
     if (MICRORTPS_STATUS_OK != new_udp_session_sync(&my_session, 0x80, key, 4000, 2020, 2019, "127.0.0.1"))
     {

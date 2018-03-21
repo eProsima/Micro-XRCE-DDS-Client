@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_OUTPUT_MESSAGE_H_
-#define _MICRORTPS_CLIENT_OUTPUT_MESSAGE_H_
+#ifndef _MICRORTPS_CLIENT_RELIABLE_CONTROL_H_
+#define _MICRORTPS_CLIENT_RELIABLE_CONTROL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -24,14 +24,14 @@ extern "C"
 
 #include <micrortps/client/client.h>
 
-bool send_best_effort_message(Session* session, BestEffortStream* output_stream);
-bool send_reliable_message(Session* session, ReliableStream* output_stream);
+void output_heartbeat(Session* session, ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat);
+void output_acknack(Session* session, ReliableStream* reference_stream, ACKNACK_Payload* acknack);
 
-bool send_heartbeat(Session* session, ReliableStream* reference_stream);
-bool send_acknack(Session* session, ReliableStream* reference_stream);
+void input_heartbeat(Session* sesson, ReliableStream* reference_stream, uint16_t first_seq_num, uint16_t last_seq_num);
+void input_acknack(Session* session, ReliableStream* reference_stream, uint16_t first_unacked_seq_num, uint8_t bitmap[2]);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_OUTPUT_MESSAGE_H_
+#endif //_MICRORTPS_CLIENT_INPUT_MESSAGE_H_

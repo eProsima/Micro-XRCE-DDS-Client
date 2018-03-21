@@ -22,52 +22,20 @@ extern "C"
 
 #include "xrce_protocol_spec.h"
 
+#include <micrortps/client/client.h>
 #include <microcdr/microcdr.h>
 
+void process_message(Session* session, MicroBuffer* input_buffer);
+void process_submessages(Session* session, MicroBuffer* micro_buffer);
 
-typedef struct InputMessageCallback
-{
-    // Headers
-    bool  (*on_message_header)   (const MessageHeader* header, const ClientKey* key, void* args);
-    void (*on_submessage_header)(const SubmessageHeader* header, void* args);
+void process_status_submessage(Session* session, MicroBuffer* micro_buffer);
+void process_info_submessage(Session* session, MicroBuffer* input_buffer);
+void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer);
+void process_acknack_submessage(Session* session, MicroBuffer* input_buffer);
+void process_data_submessage(Session* session, MicroBuffer* input_buffer);
 
-    // Submessages
-    void (*on_status_submessage)(const STATUS_Payload* payload, void* args);
-    void (*on_info_submessage)  (const INFO_Payload* payload, void* args);
-    DataFormat (*on_data_submessage)  (const BaseObjectReply* reply, void* args);
-
-    // Data payloads
-    void (*on_data_payload)           (const BaseObjectReply* reply, const SampleData* data,
-            void* args, Endianness endianness);
-    void (*on_sample_payload)         (const BaseObjectReply* reply, const Sample* sample,
-            void* args, Endianness endianness);
-    void (*on_data_sequence_payload)  (const BaseObjectReply* reply, const SampleDataSeq* data_sequence,
-            void* args, Endianness endianness);
-    void (*on_sample_sequence_payload)(const BaseObjectReply* reply, const SampleSeq* sample_sequence,
-            void* args, Endianness endianness);
-    void (*on_packed_samples_payload) (const BaseObjectReply* reply, const PackedSamples* packed_samples,
-            void* args, Endianness endianness);
-
-    void* args;
-
-} InputMessageCallback;
-
-typedef struct InputMessage
-{
-    InputMessageCallback callback;
-    MicroBuffer reader;
-
-    uint8_t* buffer;
-    uint32_t buffer_size;
-
-} InputMessage;
-
-void init_input_message(InputMessage* message, InputMessageCallback callback, uint8_t* in_buffer, uint32_t in_buffer_size);
-
-void parse_data_payload(InputMessage* message, DataFormat format, const BaseObjectReply* reply);
-int parse_submessage(InputMessage* message);
-
-int parse_message(InputMessage* message, uint32_t length);
+bool receive_best_effort_message(BestEffortStream* input_stream, const uint16_t seq_num);
+bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submessages, uint16_t seq_num);
 
 #ifdef __cplusplus
 }

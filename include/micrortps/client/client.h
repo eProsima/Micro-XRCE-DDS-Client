@@ -1,19 +1,3 @@
-/*
- * Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #ifndef _MICRORTPS_CLIENT_CLIENT_H_
 #define _MICRORTPS_CLIENT_CLIENT_H_
 
@@ -22,132 +6,70 @@ extern "C"
 {
 #endif
 
-#define SESSION_CREATED				0x00
-#define SESSION_INIT				0x01
-#define SESSION_LOCATOR_OK 			0xF0
-#define SESSION_LOCATOR_ERR 		0xF1
-#define SESSION_SERIALIZATION_ERR	0xF2
-
 #include <micrortps/client/config.h>
+#include <micrortps/client/xrce_client.h>
 #include <micrortps/client/input_message.h>
-#include <micrortps/client/output_message.h>
-
 #include <transport/micrortps_transport.h>
+#include "xrce_protocol_serialization.h"
 
+#include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
-typedef struct Session Session;
-typedef struct MicroBuffer MicroBuffer;
+/* Create object defines. */
+#define MICRORTPS_OBJK_TIMEOUT      10
+#define MICRORTPS_MAX_ATTEMPTS     100
 
-typedef struct String
-{
-    char* data;
-    uint32_t length;
+/* Message sizes. */
+#define HEADER_MIN_SIZE    0x04
+#define HEADER_MAX_SIZE    0x08
+#define SUBHEADER_SIZE    0x04
+#define PAYLOAD_DATA_SIZE  0x04
+#define STATUS_MSG_SIZE    0x18
+#define HEARTBEAT_MSG_SIZE 0x04
 
-} String;
+/* Micro-RTPS status. */
+#define MICRORTPS_STATUS_OK         0x00
+#define MICRORTPS_ERR_MAX_ATTEMPTS  0x01
+#define MICRORTPS_ERR_SERIALIZATION 0x02
+#define MICRORTPS_ERR_LOCATOR       0x03
+#define MICRORTPS_ERR_STREAMID      0x04
+#define MICRORTPS_ERR_STREAM_EXISTS 0x05
 
-typedef struct AbstractTopic
-{
-    void* topic;
+/* Buffer sizes. */
+#define MICRORTPS_MIN_BUFFER_SIZE  64
+#define MICRORTPS_MTU_SIZE        512
+#define MICRORTPS_MAX_MSG_NUM      16
+#define MICRORTPS_MAX_TOPICS_READ  10
 
-} AbstractTopic;
+/* Streams configuration. */
+#define INPUT_BEST_EFFORT_STREAMS   1
+#define OUTPUT_BEST_EFFORT_STREAMS  1
+#define INPUT_RELIABLE_STREAMS      1
+#define OUTPUT_RELIABLE_STREAMS     1
 
-typedef struct XRCEInfo
-{
-    uint16_t request_id;
-    uint16_t object_id;
+/*
+ * Streams.
+ */
 
-} XRCEInfo;
+bool create_reliable_object_sync(Session* session, ReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace);
 
-typedef bool (*SerializeTopic)(MicroBuffer* writer, const AbstractTopic* topic_structure);
-typedef bool (*DeserializeTopic)(MicroBuffer* reader, AbstractTopic* topic_structure);
+MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, uint16_t topic_size);
+MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, uint16_t topic_size);
+MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size);
 
-typedef void (*OnMessageReceived)(XRCEInfo info, MicroBuffer *message, void *args);
-typedef void (*OnStatusReceived)(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
+void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uint16_t seq_num);
 
-typedef struct CallbackData
-{
-    DataFormat format;
-    OnMessageReceived on_message;
-    void *callback_args;
+void run_communication(Session* session);
 
-} CallbackData;
+bool run_until_status(Session* session);
 
-typedef struct CallbackDataStorage
-{
-    uint32_t size;
-    uint16_t initial_id;
-    bool* existence;
-    CallbackData* callbacks;
-
-} CallbackDataStorage;
-
-typedef struct Session
-{
-    locator_id_t transport_id;
-
-    uint32_t buffer_size;
-    uint8_t* buffer;
-
-    uint16_t output_sequence_number;
-    uint16_t input_sequence_number;
-
-    uint8_t session_id;
-    uint8_t stream_id;
-    ClientKey key;
-
-    OutputMessage output_message;
-    InputMessage input_message;
-
-    uint16_t next_request_id;
-    uint16_t next_object_id;
-
-    bool				existence[DATA_CALLBACK_SIZE];
-    CallbackData 		callback_data[DATA_CALLBACK_SIZE];
-    CallbackDataStorage callback_data_storage;
-
-    OnStatusReceived on_status_received;
-    void* on_status_received_args;
-
-} Session;
-
-/* ----------------------------------------------------------------------------------------------
-      Session functions
- ---------------------------------------------------------------------------------------------- */
-uint8_t new_udp_session(Session* session,
-                     uint8_t* buf,
-                     uint32_t buf_size,
-                     uint16_t send_port,
-                     uint16_t recv_port,
-                     uint16_t remote_port,
-                     const char* server_ip);
-uint8_t init_session(Session* session, XRCEInfo* info, OnStatusReceived on_status, void* on_status_args);
-void close_session(Session* session);
-
-/* ----------------------------------------------------------------------------------------------
-      XRCE Client API funcions
- ---------------------------------------------------------------------------------------------- */
-XRCEInfo create_participant(Session* session);
-XRCEInfo create_topic(Session* session, uint16_t participant_id, String xml);
-XRCEInfo create_publisher(Session* session, uint16_t participant_id);
-XRCEInfo create_subscriber(Session* session, uint16_t participant_id);
-XRCEInfo create_data_writer(Session* session, uint16_t participant_id, uint16_t publisher_id, String xml);
-XRCEInfo create_data_reader(Session* session, uint16_t participant_id, uint16_t subscriber_id, String xml);
-
-XRCEInfo delete_resource(Session* session, uint16_t resource_id);
-
-XRCEInfo write_data(Session* session, uint16_t data_writer_id, SerializeTopic serialization, void* topic);
-bool read_data(Session* session, XRCEInfo* info, uint16_t data_reader_id, OnMessageReceived on_message, void *callback_args);
-
-/* ----------------------------------------------------------------------------------------------
-      Comunication functions
- ---------------------------------------------------------------------------------------------- */
-bool send_to_agent(Session* session);
-bool receive_from_agent(Session* session);
+uint16_t get_num_request_id(RequestId request_id);
+RequestId get_raw_request_id(uint16_t request_id);
+uint16_t get_num_object_id(ObjectId object_id);
+ObjectId get_raw_object_id(uint16_t object_id);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_CLIENT_H_
+#endif // _MICRORTPS_CLIENT_CLIENT_H

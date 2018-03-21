@@ -13,266 +13,75 @@
 // limitations under the License.
 
 #include <micrortps/client/output_message.h>
+#include <micrortps/client/client.h>
+#include <micrortps/client/reliable_control.h>
 #include "xrce_protocol_serialization.h"
-
-#ifndef NDEBUG
-#include <string.h>
-#include <stdio.h>
-#endif
 
 #include <stdlib.h>
 
-// PRIVATE DEFINITIONS
-bool begin_message(OutputMessage *message);
-
-bool begin_submessage(OutputMessage *message, MicroState *submessage_beginning,
-                      MicroState *header_beginning, MicroState *payload_beginning);
-
-bool end_submessage(OutputMessage *message,
-                    MicroState header_beginning, MicroState payload_beginning,
-                    SubmessageId id, uint8_t flags);
-
-bool try_add_create_client_submessage(OutputMessage* message, const CREATE_CLIENT_Payload* payload);
-bool try_add_create_resource_submessage(OutputMessage* message, const CREATE_Payload* payload, CreationMode creation_mode);
-bool try_add_delete_resource_submessage(OutputMessage *message, const DELETE_Payload* payload);
-bool try_add_get_info_submessage(OutputMessage *message, const GET_INFO_Payload* payload);
-bool try_add_read_data_submessage(OutputMessage *message, const READ_DATA_Payload* payload);
-bool try_add_write_data_submessage(OutputMessage *message, const WRITE_DATA_Payload_Data* payload);
-
-// ----------------------------------------------------------------------------------
-//                                 PUBLIC API
-// ----------------------------------------------------------------------------------
-void init_output_message(OutputMessage* message, OutputMessageCallback callback,
-                         uint8_t* out_buffer, uint32_t out_buffer_size)
+bool send_best_effort_message(Session* session, BestEffortStream* output_stream)
 {
-    init_micro_buffer(&message->writer, out_buffer, out_buffer_size);
+    MicroBuffer* output_buffer = &output_stream->micro_buffer;
 
-    message->callback = callback;
+    stamp_header(session, output_buffer, STREAMID_BUILTIN_BEST_EFFORTS, output_stream->seq_num);
+
+    int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
+    output_stream->seq_num++;
+
+    reset_micro_buffer(output_buffer);
+    output_buffer->iterator += session->header_offset;
+
+    return bytes > 0;
 }
 
-uint32_t get_message_length(OutputMessage* message)
+bool send_reliable_message(Session* session, ReliableStream* output_stream)
 {
-    return message->writer.iterator - message->writer.init;
+    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num].micro_buffer;
+
+    stamp_header(session, output_buffer, STREAMID_BUILTIN_RELIABLE, output_stream->seq_num);
+
+    int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
+    output_stream->seq_num++;
+
+    return bytes > 0;
 }
 
-bool add_create_client_submessage(OutputMessage* message, const CREATE_CLIENT_Payload* payload)
+bool send_heartbeat(Session* session, ReliableStream* reference_stream)
 {
-    bool added = try_add_create_client_submessage(message, payload);
-    if (!added)
-    {
-        message->callback.on_out_of_bounds(message->callback.args);
-        added = try_add_create_client_submessage(message, payload);
-    }
-    return added;
+    uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE];
+    MicroBuffer output_buffer;
+    init_micro_buffer_endian(&output_buffer, buffer, sizeof(buffer), MACHINE_ENDIANNESS);
+
+    stamp_header(session, &output_buffer, STREAMID_BUILTIN_RELIABLE, 0);
+
+    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, 0, HEARTBEAT_MSG_SIZE };
+    serialize_SubmessageHeader(&output_buffer, &sub_header);
+
+    HEARTBEAT_Payload heartbeat;
+    output_heartbeat(session, reference_stream, &heartbeat);
+
+    deserialize_HEARTBEAT_Payload(&output_buffer, &heartbeat);
+
+    int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+    return bytes > 0;
 }
 
-bool try_add_create_client_submessage(OutputMessage* message, const CREATE_CLIENT_Payload* payload)
+bool send_acknack(Session* session, ReliableStream* reference_stream)
 {
-    MicroState submessage_beginning, header_beginning, payload_beginning;
+    uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE];
+    MicroBuffer output_buffer;
+    init_micro_buffer_endian(&output_buffer, buffer, sizeof(buffer), MACHINE_ENDIANNESS);
 
-    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_CREATE_CLIENT_Payload(&message->writer, payload) &&
-               end_submessage(message, header_beginning, payload_beginning,
-                              SUBMESSAGE_ID_CREATE_CLIENT, message->writer.endianness);
-    if (!ret)
-    {
-        restore_micro_state(&message->writer, submessage_beginning);
-    }
-    return ret;
-}
+    stamp_header(session, &output_buffer, STREAMID_BUILTIN_RELIABLE, 0);
 
-bool add_create_resource_submessage(OutputMessage* message, const CREATE_Payload* payload, CreationMode creation_mode)
-{
-    bool added = try_add_create_resource_submessage(message, payload, creation_mode);
-    if (!added)
-    {
-        message->callback.on_out_of_bounds(message->callback.args);
-        added = try_add_create_resource_submessage(message, payload, creation_mode);
-    }
-    return added;
-}
+    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, 0, HEARTBEAT_MSG_SIZE };
+    serialize_SubmessageHeader(&output_buffer, &sub_header);
 
-bool try_add_create_resource_submessage(OutputMessage* message, const CREATE_Payload* payload, CreationMode creation_mode)
-{
-    MicroState submessage_beginning, header_beginning, payload_beginning;
+    ACKNACK_Payload acknack;
+    output_acknack(session, reference_stream, &acknack);
 
-    uint8_t flags = 0;
-    if (creation_mode.reuse)
-    {
-        flags |= FLAG_REUSE;
-    }
-    if (creation_mode.replace)
-    {
-        flags |= FLAG_REPLACE;
-    }
-    flags |= message->writer.endianness;
+    deserialize_ACKNACK_Payload(&output_buffer, &acknack);
 
-    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_CREATE_Payload(&message->writer, payload) &&
-               end_submessage(message, header_beginning, payload_beginning, SUBMESSAGE_ID_CREATE, flags);
-    if (!ret)
-    {
-        restore_micro_state(&message->writer, submessage_beginning);
-    }
-    return ret;
-}
-
-bool add_delete_resource_submessage(OutputMessage* message, const DELETE_Payload* payload)
-{
-    bool added = try_add_delete_resource_submessage(message, payload);
-    if (!added)
-    {
-        message->callback.on_out_of_bounds(message->callback.args);
-        added = try_add_delete_resource_submessage(message, payload);
-    }
-    return added;
-}
-
-bool try_add_delete_resource_submessage(OutputMessage* message, const DELETE_Payload* payload)
-{
-    MicroState submessage_beginning, header_beginning, payload_beginning;
-
-    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_DELETE_Payload(&message->writer, payload) &&
-               end_submessage(message, header_beginning, payload_beginning,
-                              SUBMESSAGE_ID_DELETE, message->writer.endianness);
-    if (!ret)
-    {
-        restore_micro_state(&message->writer, submessage_beginning);
-    }
-    return ret;
-}
-
-bool add_get_info_submessage(OutputMessage* message, const GET_INFO_Payload* payload)
-{
-    bool added = try_add_get_info_submessage(message, payload);
-    if (!added)
-    {
-        message->callback.on_out_of_bounds(message->callback.args);
-        added = try_add_get_info_submessage(message, payload);
-    }
-    return added;
-}
-
-bool try_add_get_info_submessage(OutputMessage* message, const GET_INFO_Payload* payload)
-{
-    MicroState submessage_beginning, header_beginning, payload_beginning;
-
-    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_GET_INFO_Payload(&message->writer, payload) &&
-               end_submessage(message, header_beginning, payload_beginning,
-                              SUBMESSAGE_ID_GET_INFO, message->writer.endianness);
-
-    if (!ret)
-    {
-        restore_micro_state(&message->writer, submessage_beginning);
-    }
-    return ret;
-}
-
-bool add_read_data_submessage(OutputMessage* message, const READ_DATA_Payload* payload)
-{
-    bool added = try_add_read_data_submessage(message, payload);
-    if (!added)
-    {
-        message->callback.on_out_of_bounds(message->callback.args);
-        added = try_add_read_data_submessage(message, payload);
-    }
-    return added;
-}
-
-bool try_add_read_data_submessage(OutputMessage* message, const READ_DATA_Payload* payload)
-{
-    MicroState submessage_beginning, header_beginning, payload_beginning;
-
-    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_READ_DATA_Payload(&message->writer, payload) &&
-               end_submessage(message, header_beginning, payload_beginning, SUBMESSAGE_ID_READ_DATA, message->writer.endianness);
-
-    if (!ret)
-    {
-        restore_micro_state(&message->writer, submessage_beginning);
-    }
-    return ret;
-}
-
-bool add_write_data_submessage(OutputMessage* message, const WRITE_DATA_Payload_Data* payload)
-{
-    bool added = try_add_write_data_submessage(message, payload);
-    if (!added)
-    {
-        message->callback.on_out_of_bounds(message->callback.args);
-        added = try_add_write_data_submessage(message, payload);
-    }
-    return added;
-}
-
-bool try_add_write_data_submessage(OutputMessage* message, const WRITE_DATA_Payload_Data* payload)
-{
-    MicroState submessage_beginning, header_beginning, payload_beginning;
-
-    bool ret = begin_submessage(message, &submessage_beginning, &header_beginning, &payload_beginning) &&
-               serialize_WRITE_DATA_Payload_Data(&message->writer, payload) &&
-               end_submessage(message, header_beginning, payload_beginning,
-                              SUBMESSAGE_ID_WRITE_DATA, message->writer.endianness);
-    if (!ret)
-    {
-        restore_micro_state(&message->writer, submessage_beginning);
-    }
-    return ret;
-}
-// ----------------------------------------------------------------------------------
-//                                  PRIVATE UTILS
-// ----------------------------------------------------------------------------------
-bool begin_message(OutputMessage *message)
-{
-    MessageHeader message_header;
-    ClientKey key;
-    message->callback.on_initialize_message(&message_header, &key, message->callback.args);
-
-    bool ret = serialize_MessageHeader(&message->writer, &message_header);
-    if (message_header.session_id < 128)
-    {
-        ret &= serialize_ClientKey(&message->writer, &key);
-    }
-    return ret;
-}
-
-bool begin_submessage(OutputMessage *message, MicroState *submessage_beginning,
-                      MicroState *header_beginning, MicroState *payload_beginning)
-{
-    bool ret = true;
-    if (message->writer.iterator == message->writer.init)
-        ret &= begin_message(message);
-
-    *submessage_beginning = get_micro_state(&message->writer);
-
-    align_to(&message->writer, 4);
-    *header_beginning = get_micro_state(&message->writer);
-
-    message->writer.iterator += 4; //Space for SubMessageHeader.
-    *payload_beginning = get_micro_state(&message->writer);
-    return ret;
-}
-
-bool end_submessage(OutputMessage *message,
-                    MicroState header_beginning, MicroState payload_beginning,
-                    SubmessageId id, uint8_t flags)
-{
-    MicroState current_state = get_micro_state(&message->writer);
-
-    restore_micro_state(&message->writer, header_beginning);
-
-    SubmessageHeader header;
-    header.id = id;
-    header.flags = flags;
-    header.length = current_state.position - payload_beginning.position;
-
-    if (message->callback.on_submessage_header)
-        message->callback.on_submessage_header(&header, NULL);
-
-    bool ret = serialize_SubmessageHeader(&message->writer, &header);
-
-    restore_micro_state(&message->writer, current_state);
-    return ret;
+    int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+    return bytes > 0;
 }

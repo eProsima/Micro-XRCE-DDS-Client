@@ -13,195 +13,188 @@
 // limitations under the License.
 
 #include <micrortps/client/input_message.h>
+#include <micrortps/client/reliable_control.h>
 #include "xrce_protocol_serialization.h"
+#include "log/message.h"
 
 #include <stdlib.h>
 
-#ifndef NDEBUG
-    #include <string.h>
-    #include <stdio.h>
-    #define ERROR_PRINT(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
-#else
-    #define ERROR_PRINT(fmt, ...);
-#endif
-
-void init_input_message(InputMessage* message, InputMessageCallback callback, uint8_t* in_buffer, uint32_t in_buffer_size)
+void process_message(Session* session, MicroBuffer* input_buffer)
 {
-    init_micro_buffer(&message->reader, in_buffer, 0);
+    MessageHeader header;
+    deserialize_MessageHeader(input_buffer, &header);
+    if (0x80 <= header.session_id)
+    {
+        ClientKey key;
+        deserialize_ClientKey(input_buffer, &key);
+    }
 
-    message->callback = callback;
-    message->buffer = in_buffer;
-    message->buffer_size = in_buffer_size;
+    if(0 == header.stream_id)
+    {
+        process_submessages(session, input_buffer);
+    }
+    else if(STREAMID_BUILTIN_BEST_EFFORTS == header.stream_id)
+    {
+        BestEffortStream* input_stream = &session->input_best_effort_stream;
+        bool ready_to_process = receive_best_effort_message(input_stream, header.sequence_nr);
+        if(ready_to_process)
+        {
+            process_submessages(session, input_buffer);
+        }
+    }
+    else if(STREAMID_BUILTIN_RELIABLE == header.stream_id)
+    {
+        ReliableStream* input_stream = &session->input_reliable_stream;
+        bool ready_to_read = receive_reliable_message(input_stream, input_buffer, header.sequence_nr);
+        if(ready_to_read)
+        {
+            process_submessages(session, input_buffer);
+            for(uint16_t i = header.sequence_nr + 1; i < input_stream->seq_num; i++)
+            {
+                uint8_t current_index = i % MICRORTPS_MAX_MSG_NUM;
+                MicroBuffer* current_buffer = &input_stream->store[current_index].micro_buffer;
+                process_submessages(session, current_buffer);
+                reset_micro_buffer(current_buffer);
+            }
+        }
+    }
 }
 
-void parse_data_payload(InputMessage* message, DataFormat format, const BaseObjectReply* reply)
+void process_submessages(Session* session, MicroBuffer* input_buffer)
 {
-    MicroBuffer* reader = &message->reader;
-    InputMessageCallback* callback = &message->callback;
-
-    switch(format)
+    while(input_buffer->final - input_buffer->iterator > SUBHEADER_SIZE)
     {
-        case FORMAT_DATA: ;
-            SampleData data;
-            deserialize_SampleData(reader, &data);
-            if(callback->on_data_payload)
-            {
-                callback->on_data_payload(reply, &data, callback->args, reader->endianness);
-            }
-            break;
+        SubmessageHeader sub_header;
+        deserialize_SubmessageHeader(input_buffer, &sub_header);
+        input_buffer->endianness = (sub_header.flags & 0x01) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
 
-        case FORMAT_SAMPLE: ;
-            Sample sample;
-            deserialize_Sample(reader, &sample);
-            if(callback->on_sample_payload)
-            {
-                callback->on_sample_payload(reply, &sample, callback->args, reader->endianness);
-            }
-            break;
-
-        case FORMAT_DATA_SEQ: ;
-            SampleDataSeq data_sequence;
-            deserialize_SampleDataSeq(reader, &data_sequence);
-            if(callback->on_data_sequence_payload)
-            {
-                callback->on_data_sequence_payload(reply, &data_sequence, callback->args, reader->endianness);
-            }
-            break;
-
-        case FORMAT_SAMPLE_SEQ: ;
-            SampleSeq sample_sequence;
-            deserialize_SampleSeq(reader, &sample_sequence);
-            if(callback->on_sample_sequence_payload)
-            {
-                callback->on_sample_sequence_payload(reply, &sample_sequence, callback->args, reader->endianness);
-            }
-            break;
-
-        case FORMAT_PACKED_SAMPLES: ;
-            PackedSamples packed_samples;
-            deserialize_PackedSamples(reader, &packed_samples);
-            if(callback->on_packed_samples_payload)
-                callback->on_packed_samples_payload(reply, &packed_samples, callback->args, reader->endianness);
+        if(sub_header.length > input_buffer->final - input_buffer->iterator)
+        {
              break;
+        }
 
-        default:
-            break;
+        switch(sub_header.id)
+        {
+            case SUBMESSAGE_ID_STATUS:
+                process_status_submessage(session, input_buffer);
+                break;
+
+            case SUBMESSAGE_ID_INFO:
+                process_info_submessage(session, input_buffer);
+                break;
+
+            case SUBMESSAGE_ID_HEARTBEAT:
+                process_heartbeat_submessage(session, input_buffer);
+                break;
+
+            case SUBMESSAGE_ID_ACKNACK:
+                process_acknack_submessage(session, input_buffer);
+                break;
+
+            case SUBMESSAGE_ID_DATA:
+                process_data_submessage(session, input_buffer);
+                break;
+
+            default:
+                break;
+        }
+
+        align_to(input_buffer, 4);
     }
 }
 
-int parse_submessage(InputMessage* message)
+void process_status_submessage(Session* session, MicroBuffer* input_buffer)
 {
-    MicroBuffer* reader = &message->reader;
-    InputMessageCallback* callback = &message->callback;
+    STATUS_Payload status;
+    deserialize_STATUS_Payload(input_buffer, &status);
 
-    // All subsessages begin with a 4 bytes alignment.
-    align_to(reader, 4);
+    PRINTL_STATUS_SUBMESSAGE(&status);
 
-    // Submessage message header.
-    SubmessageHeader submessage_header;
-    deserialize_SubmessageHeader(reader, &submessage_header);
-    if(callback->on_submessage_header)
-    {
-        callback->on_submessage_header(&submessage_header, callback->args);
-    }
-
-    // Configure the reader for the specific message endianness
-    reader->endianness = submessage_header.flags & FLAG_ENDIANNESS;
-
-    // Submessage is not complete.
-    if(reader->iterator + submessage_header.length > reader->final)
-    {
-        ERROR_PRINT("Parse message error: Submessage not complete.\n", 0);
-        return 0;
-    }
-
-    // Parse payload and call the corresponding callback.
-    switch(submessage_header.id)
-    {
-        case SUBMESSAGE_ID_STATUS:
-        {
-            STATUS_Payload payload;
-            deserialize_STATUS_Payload(reader, &payload);
-            if(callback->on_status_submessage)
-                callback->on_status_submessage(&payload, callback->args);
-        }
-        break;
-
-        case SUBMESSAGE_ID_INFO:
-        {
-            INFO_Payload payload;
-            deserialize_INFO_Payload(reader, &payload);
-            if(callback->on_info_submessage)
-                callback->on_info_submessage(&payload, callback->args);
-        }
-        break;
-
-        case SUBMESSAGE_ID_DATA:
-        {
-            BaseObjectReply data_reply;
-            deserialize_BaseObjectReply(reader, &data_reply);
-            if(callback->on_data_submessage)
-            {
-                DataFormat format = callback->on_data_submessage(&data_reply, callback->args);
-                parse_data_payload(message, format, &data_reply);
-            }
-            else
-            {
-                // skip submessage.
-                reader->iterator += submessage_header.length;
-                reader->last_data_size = 0;
-            }
-        }
-        break;
-
-        default:
-            ERROR_PRINT("Parse message error: Unknown submessage id 0x%02X\n", submessage_header.id);
-            return 0;
-    }
-
-    return 1;
+    session->last_status.status = status.base.result.status;
+    session->last_status.implementation_status = MICRORTPS_STATUS_OK;
+    session->last_status_received = true;
+}
+void process_info_submessage(Session* session, MicroBuffer* input_buffer)
+{
+    //TODO
 }
 
-int parse_message(InputMessage* message, uint32_t length)
+void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer)
 {
-    InputMessageCallback* callback = &message->callback;
+    HEARTBEAT_Payload heartbeat;
+    deserialize_HEARTBEAT_Payload(input_buffer, &heartbeat);
 
-    // Init the reader
-    MicroBuffer* reader = &message->reader;
-    if(length <= message->buffer_size)
+    PRINTL_HEARTBEAT_SUBMESSAGE(&heartbeat);
+
+    ReliableStream* input_stream = &session->output_reliable_stream;
+    input_heartbeat(session, input_stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
+}
+
+void process_acknack_submessage(Session* session, MicroBuffer* input_buffer)
+{
+    ACKNACK_Payload acknack;
+    deserialize_ACKNACK_Payload(input_buffer, &acknack);
+
+    PRINTL_ACKNACK_SUBMESSAGE(&acknack);
+
+    ReliableStream* output_stream = &session->output_reliable_stream;
+    input_acknack(session, output_stream, acknack.first_unacked_seq_num, acknack.nack_bitmap);
+}
+
+void process_data_submessage(Session* session, MicroBuffer* input_buffer)
+{
+    DATA_Payload_Data payload;
+    deserialize_DATA_Payload_Data(input_buffer, &payload);
+
+    PRINTL_DATA_DATA_SUBMESSAGE(&payload);
+
+    input_buffer->iterator = payload.data.data; //delete this when the topic had been deserialized out of data payload.
+
+    uint16_t id = get_num_request_id(payload.base.request_id);
+
+    session->on_topic_callback(id, input_buffer, session->on_topic_args);
+}
+
+bool receive_best_effort(BestEffortStream* input_stream, const uint16_t seq_num)
+{
+    if(seq_num < input_stream->seq_num)
     {
-        init_micro_buffer(reader, message->buffer, length);
+        return false;
+    }
+
+    input_stream->seq_num = seq_num + 1;
+
+    return true;
+}
+
+bool receive_reliable(ReliableStream* input_stream, MicroBuffer* submessages, const uint16_t seq_num)
+{
+    uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
+    MicroBuffer* input_buffer = &input_stream->store[index].micro_buffer;
+
+    if(input_buffer->iterator != input_buffer->init
+        || seq_num < input_stream->seq_num
+        || seq_num > input_stream->seq_num + MICRORTPS_MAX_MSG_NUM)
+    {
+        return false;
+    }
+
+    if(input_stream->seq_num != seq_num)
+    {
+        serialize_array_uint8_t(input_buffer, submessages->iterator, submessages->final - submessages->iterator);
     }
     else
     {
-        ERROR_PRINT("Parse message error: Message length greater than input buffer.\n", 0);
-        return 0;
+        for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM && seq_num == input_stream->seq_num; i++)
+        {
+            uint8_t aux_index = (seq_num + i) % MICRORTPS_MAX_MSG_NUM;
+            MicroBuffer* aux_buffer = &input_stream->store[aux_index].micro_buffer;
+            if(aux_buffer->iterator == aux_buffer->init)
+            {
+                input_stream->seq_num = seq_num + i;
+            }
+        }
     }
 
-    // Parse message header.
-    MessageHeader message_header;
-    ClientKey key;
-    deserialize_MessageHeader(reader, &message_header);
-    if(message_header.session_id < 128)
-    {
-        deserialize_ClientKey(reader, &key);
-    }
-
-    // If the callback implementation fails, the message will not be parse
-    if(callback->on_message_header &&
-        !callback->on_message_header(&message_header, &key, callback->args))
-    {
-        ERROR_PRINT("Parse message error: Message header not undestood.\n", 0);
-        return 0;
-    }
-
-    // Parse all submessages of the message
-    do
-    {
-        if(!parse_submessage(message))
-            return 0;
-    }
-    while(reader->iterator < reader->final); // while another submessage fix...
-
-    return 1;
+    return input_stream->seq_num == seq_num;
 }
