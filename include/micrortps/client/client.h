@@ -35,9 +35,6 @@ extern "C"
 
 /* Buffer sizes. */
 #define MICRORTPS_MIN_BUFFER_SIZE  64
-#define MICRORTPS_MTU_SIZE        512
-#define MICRORTPS_MAX_MSG_NUM      16
-#define MICRORTPS_MAX_TOPICS_READ  10
 
 /* Streams configuration. */
 #define INPUT_BEST_EFFORT_STREAMS   1

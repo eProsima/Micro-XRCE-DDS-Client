@@ -21,19 +21,14 @@ extern "C"
 {
 #endif
 
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 #include <micrortps/client/xrce_protocol_spec.h> //TODO: remove dependence
-#include <transport/micrortps_transport.h>
+#include <micrortps/transport/micrortps_transport.h>
 #include <microcdr/microcdr.h>
 
 #define MICRORTPS_STATUS_OK      0x00
 #define MICRORTPS_MTU_SIZE        512
 #define MICRORTPS_MAX_MSG_NUM      16
 
-=======
-#include <microcdr/microcdr.h>
-
->>>>>>> Refs #2679. Save state pre-compile
 typedef struct BestEffortStream
 {
     uint16_t seq_num;
@@ -59,11 +54,7 @@ typedef struct ReliableStream
 } ReliableStream;
 
 
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 typedef void (*OnTopic)(ObjectId id, MicroBuffer* serialized_topic, void *args);
-=======
-typedef void (*OnTopic)(uint32_t id, MicroBuffer* message, void *args);
->>>>>>> Refs #2679. Save state pre-compile
 
 typedef struct Session
 {
@@ -89,24 +80,14 @@ typedef struct Session
 
 
 
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 uint8_t new_udp_session(Session* session,
-                             SessionId id,
-                             ClientKey key,
-                             uint16_t send_port,
-                             uint16_t recv_port,
-                             uint16_t remote_port,
-                             const char* server_ip,
-=======
-uint8_t new_udp_session_sync(Session* session,
-                             SessionId id,
-                             ClientKey key,
-                             uint16_t remote_port,
-                             const uint8_t* const server_ip,
-                             micrortps_locator_t* const locator,
->>>>>>> Refs #2679. Save state pre-compile
-                             OnTopic on_topic_callback,
-                             void* on_topic_args);
+                        SessionId id,
+                        ClientKey key,
+                        uint16_t remote_port,
+                        const uint8_t* const server_ip,
+                        micrortps_locator_t* const locator,
+                        OnTopic on_topic_callback,
+                        void* on_topic_args);
 
 void close_session(Session* session);
 
@@ -123,15 +104,12 @@ bool init_session_syn(Session* session);
  *
  * @return
  */
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 bool create_participant_sync_by_ref(Session* session,
-=======
-bool create_participant_by_ref(Session* session,
->>>>>>> Refs #2679. Save state pre-compile
-                               const ObjectId object_id,
-                               const char* ref,
-                               bool reuse,
-                               bool replace);
+                                    const ObjectId object_id,
+                                    const char* ref,
+                                    bool reuse,
+                                    bool replace);
+
 /**
  * @brief create_topic_by_xml
  *
@@ -144,16 +122,13 @@ bool create_participant_by_ref(Session* session,
  *
  * @return
  */
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 bool create_topic_sync_by_xml(Session* session,
-=======
-bool create_topic_by_xml(Session* session,
->>>>>>> Refs #2679. Save state pre-compile
-                         const ObjectId object_id,
-                         const char* xml,
-                         const ObjectId participant_id,
-                         bool reuse,
-                         bool replace);
+                              const ObjectId object_id,
+                              const char* xml,
+                              const ObjectId participant_id,
+                              bool reuse,
+                              bool replace);
+
 /**
  * @brief create_publisher_by_xml
  *
@@ -166,16 +141,12 @@ bool create_topic_by_xml(Session* session,
  *
  * @return
  */
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 bool create_publisher_sync_by_xml(Session* session,
-=======
-bool create_publisher_by_xml(Session* session,
->>>>>>> Refs #2679. Save state pre-compile
-                             const ObjectId object_id,
-                             const char* xml,
-                             const ObjectId participant_id,
-                             bool reuse,
-                             bool replace);
+                                  const ObjectId object_id,
+                                  const char* xml,
+                                  const ObjectId participant_id,
+                                  bool reuse,
+                                  bool replace);
 
 /**
  * @brief create_subscriber_by_xml
@@ -189,16 +160,13 @@ bool create_publisher_by_xml(Session* session,
  *
  * @return
  */
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 bool create_subscriber_sync_by_xml(Session* session,
-=======
-bool create_subscriber_by_xml(Session* session,
->>>>>>> Refs #2679. Save state pre-compile
-                              const ObjectId object_id,
-                              const char* xml,
-                              const ObjectId participant_id,
-                              bool reuse,
-                              bool replace);
+                                   const ObjectId object_id,
+                                   const char* xml,
+                                   const ObjectId participant_id,
+                                   bool reuse,
+                                   bool replace);
+
 /**
  * @brief create_datawriter_by_xml
  *
@@ -211,16 +179,12 @@ bool create_subscriber_by_xml(Session* session,
  *
  * @return
  */
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 bool create_datawriter_sync_by_xml(Session* session,
-=======
-bool create_datawriter_by_xml(Session* session,
->>>>>>> Refs #2679. Save state pre-compile
-                              const ObjectId object_id,
-                              const char* xml,
-                              const ObjectId publisher_id,
-                              bool reuse,
-                              bool replace);
+                                   const ObjectId object_id,
+                                   const char* xml,
+                                   const ObjectId publisher_id,
+                                   bool reuse,
+                                   bool replace);
 
 /**
  * @brief create_datareader_by_xml
@@ -234,19 +198,14 @@ bool create_datawriter_by_xml(Session* session,
  *
  * @return
  */
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 bool create_datareader_sync_by_xml(Session* session,
-=======
-bool create_datareader_by_xml(Session* session,
->>>>>>> Refs #2679. Save state pre-compile
-                                      const ObjectId object_id,
-                                      const char* xml,
-                                      const ObjectId subscriber_id,
-                                      bool reuse,
-                                      bool replace);
+                                   const ObjectId object_id,
+                                   const char* xml,
+                                   const ObjectId subscriber_id,
+                                   bool reuse,
+                                   bool replace);
 
 
-<<<<<<< 7daf779972c1f5854b1c1fb392d7d12fb818d852
 bool delete_object_sync(Session* session, ObjectId object_id);
 
 bool read_data_sync(Session* session, ObjectId object_id);
@@ -254,12 +213,6 @@ bool read_data_sync(Session* session, ObjectId object_id);
 MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
 MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
 
-=======
-bool delete_sync(Session* session, ObjectId object_id);
-
-bool read_data_sync(Session* session, ObjectId object_id);
-
->>>>>>> Refs #2679. Save state pre-compile
 void run_communication(Session* session);
 
 #ifdef __cplusplus
