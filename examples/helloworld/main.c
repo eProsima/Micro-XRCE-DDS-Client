@@ -17,19 +17,22 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define MAXBUFLEN 4096
+
 // ----------------------------------------------------
 //    App client
 // ----------------------------------------------------
-void on_hello_topic(XRCEInfo info, MicroBuffer *message, void* args);
-void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void* args);
-
+void on_hello_topic(uint16_t id, MicroBuffer *topic, void* args);
 void printl_hello_topic(const HelloWorld *hello_topic);
+
 void *listen_agent(void *args);
+
 bool compute_command(const char *command, Session *session);
+
 void list_commands();
 void help();
 
-String read_file(char *file_name);
+size_t read_file(const char *file_name, char* data_file, size_t buf_size);
 
 int check_input()
 {
@@ -46,7 +49,7 @@ int main(int args, char **argv)
     printf("<< HELLO WORLD XRCE CLIENT >>\n");
 
     uint8_t result = 0xFF;
-    uint8_t my_buffer[4096];
+    uint8_t my_buffer[MAXBUFLEN];
     Session my_session;
 
     if (args > 3)
@@ -59,7 +62,7 @@ int main(int args, char **argv)
         {
             uint16_t received_port = atoi(argv[3]);
             uint16_t remote_port = atoi(argv[4]);
-            result = new_udp_session(&my_session, my_buffer, sizeof(my_buffer),
+            result = new_udp_session_sync(&my_session, my_buffer, sizeof(my_buffer),
                                      4000, received_port, remote_port, argv[2]);
             printf("<< UDP mode => recv port: %u, send port: %u >>\n", received_port, remote_port);
         }
@@ -95,6 +98,7 @@ int main(int args, char **argv)
 bool compute_command(const char* command, Session* session)
 {
     char name[128];
+    char data_file[4096];
     static unsigned int hello_world_id = 0;
     int id = 0;
     int extra = 0;
@@ -102,7 +106,7 @@ bool compute_command(const char* command, Session* session)
 
     if (strcmp(name, "create_client") == 0)
     {
-        init_session(session, NULL, on_status_received, NULL);
+        init_session(session, NULL, NULL);
     }
     else if (strcmp(name, "create_participant") == 0)
     {
@@ -110,10 +114,10 @@ bool compute_command(const char* command, Session* session)
     }
     else if (strcmp(name, "create_topic") == 0 && length == 2)
     {
-        String xml = read_file("hello_topic.xml");
-        if (xml.length > 0)
+        size_t length = read_file("hello_topic.xml", data_file, MAXBUFLEN);
+        if (length > 0)
         {
-            create_topic(session, id, xml);
+            create_topic(session, id, data_file);
         }
     }
     else if (strcmp(name, "create_publisher") == 0 && length == 2)
@@ -126,18 +130,18 @@ bool compute_command(const char* command, Session* session)
     }
     else if (strcmp(name, "create_data_writer") == 0 && length == 3)
     {
-        String xml = read_file("hello_data_writer_profile.xml");
-        if (xml.length > 0)
+        size_t length = read_file("hello_data_writer_profile.xml", data_file, MAXBUFLEN);
+        if (length > 0)
         {
-            create_data_writer(session, id, extra, xml);
+            create_data_writer(session, id, extra, data_file);
         }
     }
     else if (strcmp(name, "create_data_reader") == 0 && length == 3)
     {
-        String xml = read_file("hello_data_reader_profile.xml");
-        if (xml.length > 0)
+        size_t length = read_file("hello_data_reader_profile.xml", data_file, MAXBUFLEN);
+        if (length > 0)
         {
-            create_data_reader(session, id, extra, xml);
+            create_data_reader(session, id, extra, data_file);
         }
     }
     else if (strcmp(name, "write_data") == 0 && length == 2)
@@ -149,8 +153,7 @@ bool compute_command(const char* command, Session* session)
     }
     else if (strcmp(name, "read_data") == 0 && length == 2)
     {
-        XRCEInfo info;
-        read_data(session, &info, id, on_hello_topic, NULL);
+        read_data(session, id, on_hello_topic, NULL);
     }
     else if (strcmp(name, "delete") == 0 && length == 2)
     {
@@ -175,22 +178,11 @@ bool compute_command(const char* command, Session* session)
     return true;
 }
 
-void on_hello_topic(XRCEInfo info, MicroBuffer* message, void* args)
+void on_hello_topic(uint16_t id, MicroBuffer* message, void* args)
 {
-    (void)info;
     (void)args;
     HelloWorld* topic = deserialize_HelloWorld_message(message);
     printl_hello_topic(topic);
-    deallocate_HelloWorld_topic(topic);
-}
-
-void on_status_received(XRCEInfo info, uint8_t operation, uint8_t status, void *args)
-{
-    (void)info;
-    (void)operation;
-    (void)status;
-    (void)args;
-    printf("User status callback\n");
 }
 
 void printl_hello_topic(const HelloWorld *hello_topic)
@@ -202,17 +194,15 @@ void printl_hello_topic(const HelloWorld *hello_topic)
             "\x1B[0m");
 }
 
-String read_file(char *file_name)
+size_t read_file(const char *file_name, char* data_file, size_t buf_size)
 {
     printf("READ FILE\n");
-    const size_t MAXBUFLEN = 4096;
-    char data[MAXBUFLEN];
-    String xml = {data, 0};
     FILE *fp = fopen(file_name, "r");
+    size_t length = 0;
     if (fp != NULL)
     {
-        xml.length = fread(xml.data, sizeof(char), MAXBUFLEN, fp);
-        if (xml.length == 0)
+        length = fread(data_file, sizeof(char), buf_size, fp);
+        if (length == 0)
         {
             printf("Error reading %s\n", file_name);
         }
@@ -223,7 +213,7 @@ String read_file(char *file_name)
         printf("Error opening %s\n", file_name);
     }
 
-    return xml;
+    return length;
 }
 
 void help()

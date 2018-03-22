@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #include <micrortps/client/xrce_protocol_spec.h>
-#include "../client_private.h"
+#include <micrortps/client/client.h>
 #include <stdint.h>
 
 //#if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)

@@ -150,9 +150,7 @@ void process_data_submessage(Session* session, MicroBuffer* input_buffer)
 
     input_buffer->iterator = payload.data.data; //delete this when the topic had been deserialized out of data payload.
 
-    uint16_t id = get_num_request_id(payload.base.request_id);
-
-    session->on_topic_callback(id, input_buffer, session->on_topic_args);
+    session->on_topic_callback(payload.base.object_id, input_buffer, session->on_topic_args);
 }
 
 bool receive_best_effort(BestEffortStream* input_stream, const uint16_t seq_num)

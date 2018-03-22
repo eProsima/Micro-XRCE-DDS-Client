@@ -58,7 +58,7 @@ bool send_heartbeat(Session* session, ReliableStream* reference_stream)
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     HEARTBEAT_Payload heartbeat;
-    output_heartbeat(session, reference_stream, &heartbeat);
+    output_heartbeat(reference_stream, &heartbeat);
 
     deserialize_HEARTBEAT_Payload(&output_buffer, &heartbeat);
 
@@ -78,7 +78,7 @@ bool send_acknack(Session* session, ReliableStream* reference_stream)
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     ACKNACK_Payload acknack;
-    output_acknack(session, reference_stream, &acknack);
+    output_acknack(reference_stream, &acknack);
 
     deserialize_ACKNACK_Payload(&output_buffer, &acknack);
 

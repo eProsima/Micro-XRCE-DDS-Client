@@ -22,8 +22,8 @@ extern "C"
 /* Message sizes. */
 #define HEADER_MIN_SIZE    0x04
 #define HEADER_MAX_SIZE    0x08
-#define SUBHEADER_SIZE    0x04
-#define PAYLOAD_DATA_SIZE  0x04
+#define SUBHEADER_SIZE     0x04
+#define PAYLOAD_DATA_SIZE  0x0C
 #define STATUS_MSG_SIZE    0x18
 #define HEARTBEAT_MSG_SIZE 0x04
 
@@ -37,9 +37,6 @@ extern "C"
 
 /* Buffer sizes. */
 #define MICRORTPS_MIN_BUFFER_SIZE  64
-#define MICRORTPS_MTU_SIZE        512
-#define MICRORTPS_MAX_MSG_NUM      16
-#define MICRORTPS_MAX_TOPICS_READ  10
 
 /* Streams configuration. */
 #define INPUT_BEST_EFFORT_STREAMS   1
@@ -53,13 +50,9 @@ extern "C"
 
 bool create_reliable_object_sync(Session* session, ReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace);
 
-MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, uint16_t topic_size);
-MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, uint16_t topic_size);
 MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size);
 
 void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uint16_t seq_num);
-
-void run_communication(Session* session);
 
 bool run_until_status(Session* session);
 

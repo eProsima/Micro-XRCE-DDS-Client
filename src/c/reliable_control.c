@@ -15,7 +15,7 @@
 #include <micrortps/client/client.h>
 #include <micrortps/client/output_message.h>
 
-void output_heartbeat(Session* session, ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat)
+void output_heartbeat(ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat)
 {
     int32_t first = -1;
     int32_t last = -1;
@@ -42,7 +42,7 @@ void output_heartbeat(Session* session, ReliableStream* reference_stream, HEARTB
     heartbeat->last_unacked_seq_nr = (uint16_t) last;
 }
 
-void output_acknack(Session* session, ReliableStream* reference_stream, ACKNACK_Payload* acknack)
+void output_acknack(ReliableStream* reference_stream, ACKNACK_Payload* acknack)
 {
     memset(acknack->nack_bitmap, 0, 2);
     uint16_t search_buffers_size = reference_stream->last_seq_num - reference_stream->seq_num;

@@ -16,17 +16,15 @@
 
 #include <stdio.h>
 
-String read_file(char* file_name)
+size_t read_file(const char *file_name, char* data_file, size_t buf_size)
 {
     printf("READ FILE\n");
-    const size_t MAXBUFLEN = 4096;
-    char data[MAXBUFLEN];
-    String xml = {data, 0};
     FILE *fp = fopen(file_name, "r");
+    size_t length = 0;
     if (fp != NULL)
     {
-        xml.length = fread(xml.data, sizeof(char), MAXBUFLEN, fp);
-        if (xml.length == 0)
+        length = fread(data_file, sizeof(char), buf_size, fp);
+        if (length == 0)
         {
             printf("Error reading %s\n", file_name);
         }
@@ -37,17 +35,7 @@ String read_file(char* file_name)
         printf("Error opening %s\n", file_name);
     }
 
-     return xml;
-}
-
-// User callback for receiving status messages from the Agent.
-void on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
-{
-    (void)info;
-    (void)operation;
-    (void)status;
-    (void)args;
-    // Process status message.
+    return length;
 }
 
 int main(int args, char** argv)

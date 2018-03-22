@@ -187,12 +187,17 @@ bool create_participant_sync_by_ref(Session* session,
 
     session->request_id++;
 
+    size_t len = strlen(ref);
+    if (strlen(ref) > REFERENCE_MAX_LEN)
+    {
+        len = REFERENCE_MAX_LEN;
+    }
+
     CREATE_Payload payload;
     payload.base.request_id = get_raw_request_id(session->request_id);
     payload.base.object_id = object_id;
     payload.object_representation.kind = OBJK_PARTICIPANT;
     payload.object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
-    size_t len = (strlen(ref) > REFERENCE_MAX_LEN) ? REFERENCE_MAX_LEN : strlen(ref);
     payload.object_representation._.participant.base.representation._.object_reference.data = (char*)ref; //MISRA non-compliant?
     payload.object_representation._.participant.base.representation._.object_reference.size = len;
 
@@ -364,9 +369,9 @@ bool delete_sync(Session* session, ObjectId object_id)
     return run_until_status(session);
 }
 
-bool read_data_sync(Session* session, ObjectId object_id)
+bool read_data_sync(Session* session, ObjectId data_reader_id)
 {
-    if ((object_id.data[1] & 0x0F) != OBJK_DATAREADER)
+    if ((data_reader_id.data[1] & 0x0F) != OBJK_DATAREADER)
     {
         session->last_status.status = STATUS_ERR_UNKNOWN_REFERENCE;
         session->last_status_received = true;
@@ -377,7 +382,7 @@ bool read_data_sync(Session* session, ObjectId object_id)
 
     READ_DATA_Payload payload;
     payload.base.request_id = get_raw_request_id(session->request_id);
-    payload.base.object_id = object_id;
+    payload.base.object_id = data_reader_id;
     payload.read_specification.optional_content_filter_expression = false;
     payload.read_specification.optional_delivery_control = false;
     payload.read_specification.data_format = FORMAT_DATA;
@@ -437,7 +442,7 @@ MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t subm
 }
 
 
-MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, uint16_t topic_size)
+MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
     MicroBuffer* output_buffer = &output_stream->micro_buffer;
     if(SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
@@ -448,12 +453,16 @@ MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_strea
     SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
+    BaseObjectRequest request;
+    request.request_id = (RequestId){{0, 0}};
+    request.object_id = data_writer_id;
+    serialize_BaseObjectRequest(output_buffer, &request);
     serialize_uint32_t(output_buffer, topic_size); //Remove in next version. Emulates Data payload data.
 
     return output_buffer;
 }
 
-MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, uint16_t topic_size)
+MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
     MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num].micro_buffer;
     if(SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
@@ -464,6 +473,10 @@ MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, ui
     SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
+    BaseObjectRequest request;
+    request.request_id = (RequestId){{0, 0}};
+    request.object_id = data_writer_id;
+    serialize_BaseObjectRequest(output_buffer, &request);
     serialize_uint32_t(output_buffer, topic_size); //Remove in next version. Emulates Data payload data.
 
     return output_buffer;
