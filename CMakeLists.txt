@@ -162,7 +162,6 @@ endif()
 ###############################################################################
 if(EPROSIMA_BUILD_EXAMPLES)
     #add_subdirectory(examples/helloworld)
-    #add_subdirectory(examples/quickhelloworld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/PublishHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorld)

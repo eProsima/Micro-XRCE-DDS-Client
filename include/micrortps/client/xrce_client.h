@@ -205,7 +205,6 @@ bool create_datareader_sync_by_xml(Session* session,
                                    bool reuse,
                                    bool replace);
 
-
 bool delete_object_sync(Session* session, ObjectId object_id);
 
 bool read_data_sync(Session* session, ObjectId object_id);
