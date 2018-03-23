@@ -161,9 +161,9 @@ endif()
 # Examples
 ###############################################################################
 if(EPROSIMA_BUILD_EXAMPLES)
-    add_subdirectory(examples/helloworld)
-    add_subdirectory(examples/quickhelloworld)
-    add_subdirectory(examples/shapesdemo)
+    #add_subdirectory(examples/helloworld)
+    #add_subdirectory(examples/quickhelloworld)
+    #add_subdirectory(examples/shapesdemo)
     add_subdirectory(examples/sync_api)
 endif()
 

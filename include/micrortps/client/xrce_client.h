@@ -25,6 +25,7 @@ extern "C"
 #include <transport/micrortps_transport.h>
 #include <microcdr/microcdr.h>
 
+#define MICRORTPS_STATUS_OK      0x00
 #define MICRORTPS_MTU_SIZE        512
 #define MICRORTPS_MAX_MSG_NUM      16
 
@@ -53,7 +54,7 @@ typedef struct ReliableStream
 } ReliableStream;
 
 
-typedef void (*OnTopic)(ObjectId id, MicroBuffer* topic, void *args);
+typedef void (*OnTopic)(ObjectId id, MicroBuffer* serialized_topic, void *args);
 
 typedef struct Session
 {
@@ -104,7 +105,7 @@ bool init_session_syn(Session* session);
  *
  * @return
  */
-bool create_participant_by_ref(Session* session,
+bool create_participant_sync_by_ref(Session* session,
                                const ObjectId object_id,
                                const char* ref,
                                bool reuse,
@@ -121,7 +122,7 @@ bool create_participant_by_ref(Session* session,
  *
  * @return
  */
-bool create_topic_by_xml(Session* session,
+bool create_topic_sync_by_xml(Session* session,
                          const ObjectId object_id,
                          const char* xml,
                          const ObjectId participant_id,
@@ -139,7 +140,7 @@ bool create_topic_by_xml(Session* session,
  *
  * @return
  */
-bool create_publisher_by_xml(Session* session,
+bool create_publisher_sync_by_xml(Session* session,
                              const ObjectId object_id,
                              const char* xml,
                              const ObjectId participant_id,
@@ -158,7 +159,7 @@ bool create_publisher_by_xml(Session* session,
  *
  * @return
  */
-bool create_subscriber_by_xml(Session* session,
+bool create_subscriber_sync_by_xml(Session* session,
                               const ObjectId object_id,
                               const char* xml,
                               const ObjectId participant_id,
@@ -176,7 +177,7 @@ bool create_subscriber_by_xml(Session* session,
  *
  * @return
  */
-bool create_datawriter_by_xml(Session* session,
+bool create_datawriter_sync_by_xml(Session* session,
                               const ObjectId object_id,
                               const char* xml,
                               const ObjectId publisher_id,
@@ -195,7 +196,7 @@ bool create_datawriter_by_xml(Session* session,
  *
  * @return
  */
-bool create_datareader_by_xml(Session* session,
+bool create_datareader_sync_by_xml(Session* session,
                                       const ObjectId object_id,
                                       const char* xml,
                                       const ObjectId subscriber_id,

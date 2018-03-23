@@ -153,7 +153,7 @@ void process_data_submessage(Session* session, MicroBuffer* input_buffer)
     session->on_topic_callback(payload.base.object_id, input_buffer, session->on_topic_args);
 }
 
-bool receive_best_effort(BestEffortStream* input_stream, const uint16_t seq_num)
+bool receive_best_effort_message(BestEffortStream* input_stream, const uint16_t seq_num)
 {
     if(seq_num < input_stream->seq_num)
     {
@@ -165,7 +165,7 @@ bool receive_best_effort(BestEffortStream* input_stream, const uint16_t seq_num)
     return true;
 }
 
-bool receive_reliable(ReliableStream* input_stream, MicroBuffer* submessages, const uint16_t seq_num)
+bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submessages, const uint16_t seq_num)
 {
     uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
     MicroBuffer* input_buffer = &input_stream->store[index].micro_buffer;

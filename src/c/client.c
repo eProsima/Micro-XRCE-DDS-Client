@@ -435,6 +435,8 @@ MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t subm
         return NULL;
     }
 
+    align_to(output_buffer, 4);
+
     SubmessageHeader sub_header = (SubmessageHeader){ submessage_id, output_buffer->endianness, payload_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
@@ -449,6 +451,8 @@ MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_strea
     {
         return NULL;
     }
+
+    align_to(output_buffer, 4);
 
     SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
@@ -469,6 +473,8 @@ MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, Ob
     {
         return NULL;
     }
+
+    align_to(output_buffer, 4);
 
     SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);

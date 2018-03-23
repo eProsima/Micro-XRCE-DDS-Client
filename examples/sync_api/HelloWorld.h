@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file HelloWorld.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -24,8 +24,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <micrortps/client/sync_client.h>
-#include <microcdr/microcdr.h>
+#include <micrortps/client/xrce_client.h>
 
 /*!
  * @brief This class represents the structure HelloWorld defined by the user in the IDL file.
@@ -41,8 +40,7 @@ typedef struct HelloWorld
 bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
 {
     serialize_uint32_t(writer, topic->m_index);
-    serialize_uint32_t(writer, strlen(topic->m_message) + 1);
-    serialize_array_char(writer, topic->m_message, strlen(topic->m_message) + 1);
+    serialize_sequence_char(writer, topic->m_message, strlen(topic->m_message) + 1);
 
     return true;
 }
@@ -50,10 +48,8 @@ bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
 bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
 {
     deserialize_uint32_t(reader, &topic->m_index);
-    uint32_t size = 0;
-    deserialize_uint32_t(reader, &size);
-    topic->m_message = malloc(size);
-    deserialize_array_char(reader, topic->m_message, size);
+    uint32_t m_message_size;
+    deserialize_sequence_char(reader, &topic->m_message, &m_message_size);
 
     return true;
 }
