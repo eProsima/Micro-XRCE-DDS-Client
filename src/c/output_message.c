@@ -53,19 +53,20 @@ bool send_reliable_message(Session* session, ReliableStream* output_stream)
 
 bool send_heartbeat(Session* session, ReliableStream* reference_stream)
 {
-    uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE];
+    uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE] = {0};
     MicroBuffer output_buffer;
     init_micro_buffer_endian(&output_buffer, buffer, sizeof(buffer), MACHINE_ENDIANNESS);
+    output_buffer.iterator += session->header_offset;
 
-    stamp_header(session, &output_buffer, STREAMID_BUILTIN_RELIABLE, 0);
+    stamp_header(session, &output_buffer, 0, (uint16_t)(STREAMID_BUILTIN_RELIABLE));
 
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, 0, HEARTBEAT_MSG_SIZE };
+    SubmessageHeader sub_header = (SubmessageHeader){{SUBMESSAGE_ID_HEARTBEAT, 0, HEARTBEAT_MSG_SIZE}};
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     HEARTBEAT_Payload heartbeat;
     output_heartbeat(reference_stream, &heartbeat);
 
-    deserialize_HEARTBEAT_Payload(&output_buffer, &heartbeat);
+    serialize_HEARTBEAT_Payload(&output_buffer, &heartbeat);
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
 

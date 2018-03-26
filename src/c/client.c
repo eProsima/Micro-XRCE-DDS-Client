@@ -30,10 +30,10 @@ uint8_t new_udp_session(Session* const session,
                         OnTopic on_topic_callback,
                         void* on_topic_args)
 {
-    if (NULL == session || NULL == buf || NULL == server_ip || NULL == locator)
+    if (NULL == session || NULL == server_ip || NULL == locator)
     {
         printf("# new_udp_session() -> BAD PARAMETERS!\n");
-        return SESSION_LOCATOR_ERR;
+        return MICRORTPS_ERR_LOCATOR;
     }
 
     uint8_t result = MICRORTPS_STATUS_OK;

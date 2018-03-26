@@ -23,7 +23,7 @@ void process_message(Session* session, MicroBuffer* input_buffer)
 {
     MessageHeader header;
     deserialize_MessageHeader(input_buffer, &header);
-    if (0x80 <= header.session_id)
+    if (128 > header.session_id)
     {
         ClientKey key;
         deserialize_ClientKey(input_buffer, &key);
@@ -114,6 +114,7 @@ void process_status_submessage(Session* session, MicroBuffer* input_buffer)
     session->last_status.implementation_status = MICRORTPS_STATUS_OK;
     session->last_status_received = true;
 }
+
 void process_info_submessage(Session* session, MicroBuffer* input_buffer)
 {
     //TODO
