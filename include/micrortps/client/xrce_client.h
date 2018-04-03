@@ -80,7 +80,7 @@ typedef struct Session
 
 
 
-uint8_t new_udp_session_sync(Session* session,
+uint8_t new_udp_session(Session* session,
                              SessionId id,
                              ClientKey key,
                              uint16_t send_port,

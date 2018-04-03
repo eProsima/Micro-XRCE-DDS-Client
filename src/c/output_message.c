@@ -16,6 +16,7 @@
 #include <micrortps/client/client.h>
 #include <micrortps/client/reliable_control.h>
 #include "xrce_protocol_serialization.h"
+#include "log/message.h"
 
 #include <stdlib.h>
 
@@ -27,6 +28,8 @@ bool send_best_effort_message(Session* session, BestEffortStream* output_stream)
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
     output_stream->seq_num++;
+
+    PRINTL_SERIALIZATION(SEND, output_buffer->init, output_buffer->iterator - output_buffer->init);
 
     reset_micro_buffer(output_buffer);
     output_buffer->iterator += session->header_offset;
@@ -42,6 +45,8 @@ bool send_reliable_message(Session* session, ReliableStream* output_stream)
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
     output_stream->seq_num++;
+
+    PRINTL_SERIALIZATION(SEND, output_buffer->init, output_buffer->iterator - output_buffer->init);
 
     return bytes > 0;
 }
@@ -63,6 +68,10 @@ bool send_heartbeat(Session* session, ReliableStream* reference_stream)
     deserialize_HEARTBEAT_Payload(&output_buffer, &heartbeat);
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+
+    PRINTL_HEARTBEAT_SUBMESSAGE(&heartbeat);
+    PRINTL_SERIALIZATION(SEND, output_buffer.init, output_buffer.iterator - output_buffer.init);
+
     return bytes > 0;
 }
 
@@ -83,5 +92,9 @@ bool send_acknack(Session* session, ReliableStream* reference_stream)
     deserialize_ACKNACK_Payload(&output_buffer, &acknack);
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+
+    PRINTL_ACKNACK_SUBMESSAGE(&acknack);
+    PRINTL_SERIALIZATION(SEND, output_buffer.init, output_buffer.iterator - output_buffer.init);
+
     return bytes > 0;
 }

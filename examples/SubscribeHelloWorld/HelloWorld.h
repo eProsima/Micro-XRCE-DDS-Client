@@ -54,4 +54,9 @@ bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
     return true;
 }
 
+uint32_t size_of_HelloWorld_topic(const HelloWorld* topic)
+{
+    return 4 + 4 + strlen(topic->m_message) + 1;
+}
+
 #endif // _HelloWorld_H_

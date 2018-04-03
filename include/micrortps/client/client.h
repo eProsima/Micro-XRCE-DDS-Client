@@ -17,7 +17,7 @@ extern "C"
 
 /* Create object defines. */
 #define MICRORTPS_OBJK_TIMEOUT      10
-#define MICRORTPS_MAX_ATTEMPTS     100
+#define MICRORTPS_MAX_ATTEMPTS      100
 
 /* Message sizes. */
 #define HEADER_MIN_SIZE    0x04

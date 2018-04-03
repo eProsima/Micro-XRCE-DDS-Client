@@ -245,24 +245,19 @@ void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
 
 void PRINTL_WRITE_DATA_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
 {
-    char content[1024];
-    sprintf(content, "DATA | size: %u", payload->data.size);
-
-    printf("%s%s[Write data | DATA | %s | %s]%s\n",
+    printf("%s%s[Write data | FORMAT_DATA | %s]%s\n",
             SEND,
             YELLOW,
             request_to_string(&payload->base),
-            content,
             RESTORE_COLOR);
 }
 
 void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* payload)
 {
-    printf("%s%s[Data | %s | FORMAT_DATA | size: %u]%s\n",
+    printf("%s%s[Data | FORMAT_DATA | %s]%s\n",
             RECV,
             PURPLE,
             request_to_string(&payload->base),
-            payload->data.size,
             RESTORE_COLOR);
 }
 

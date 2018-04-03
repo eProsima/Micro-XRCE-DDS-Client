@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file Shape.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -37,13 +37,12 @@ typedef struct ShapeType
     int32_t x;
     int32_t y;
     int32_t shapesize;
+
 } ShapeType;
 
-bool serialize_ShapeType_topic(MicroBuffer* writer, const AbstractTopic* topic_structure)
+bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
 {
-    ShapeType* topic = (ShapeType*) topic_structure->topic;
-    serialize_uint32_t(writer, strlen(topic->color) + 1);
-    serialize_array_char(writer, topic->color, strlen(topic->color) + 1);
+    serialize_sequence_char(writer, topic->color, strlen(topic->color) + 1);
     serialize_int32_t(writer, topic->x);
     serialize_int32_t(writer, topic->y);
     serialize_int32_t(writer, topic->shapesize);
@@ -51,24 +50,26 @@ bool serialize_ShapeType_topic(MicroBuffer* writer, const AbstractTopic* topic_s
     return true;
 }
 
-ShapeType *deserialize_ShapeType_message(MicroBuffer *message)
+bool deserialize_ShapeType_topic(MicroBuffer* message, ShapeType* topic)
 {
-    ShapeType* topic = malloc(sizeof(ShapeType));
-    uint32_t size_color = 0;
-    deserialize_uint32_t(message, &size_color);
-    topic->color = malloc(size_color);
-    deserialize_array_char(message, topic->color, size_color);
+    uint32_t color_size;
+    deserialize_sequence_char(message, &topic->color, &color_size);
     deserialize_int32_t(message, &topic->x);
     deserialize_int32_t(message, &topic->y);
     deserialize_int32_t(message, &topic->shapesize);
 
-    return topic;
+    return true;
 }
 
-void deallocate_ShapeType_topic(ShapeType *topic)
+uint32_t size_of_ShapeType_topic(const ShapeType* topic)
 {
-    free(topic->color);
-    free(topic);
+    uint32_t color_length = strlen(topic->color) + 1;
+    if(color_length % 4 != 0)
+    {
+        color_length += 4 - (color_length % 4);
+    }
+
+    return color_length + 4 + 4 + 4;
 }
 
 #endif // _Shape_H_

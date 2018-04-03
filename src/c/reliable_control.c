@@ -17,29 +17,8 @@
 
 void output_heartbeat(ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat)
 {
-    int32_t first = -1;
-    int32_t last = -1;
-    for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
-    {
-        uint16_t current_seq_num = reference_stream->seq_num + i;
-        uint8_t current_index = current_seq_num % MICRORTPS_MAX_MSG_NUM;
-        MicroBuffer* current_buffer = &reference_stream->store[current_index].micro_buffer;
-        if(current_buffer->iterator != current_buffer->init)
-        {
-            if(first == -1)
-            {
-                first = (current_seq_num > MICRORTPS_MAX_MSG_NUM) ? current_seq_num - MICRORTPS_MAX_MSG_NUM : 0;
-                last = first;
-            }
-            else
-            {
-                last = (current_seq_num > MICRORTPS_MAX_MSG_NUM) ? current_seq_num - MICRORTPS_MAX_MSG_NUM : 0;
-            }
-        }
-    }
-
-    heartbeat->first_unacked_seq_nr = (uint16_t) first;
-    heartbeat->last_unacked_seq_nr = (uint16_t) last;
+    heartbeat->last_unacked_seq_nr = reference_stream->seq_num - 1;
+    heartbeat->first_unacked_seq_nr = (heartbeat->last_unacked_seq_nr > 15) ? heartbeat->last_unacked_seq_nr - 15 : 0;
 }
 
 void output_acknack(ReliableStream* reference_stream, ACKNACK_Payload* acknack)

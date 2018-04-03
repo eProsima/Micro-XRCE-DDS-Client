@@ -23,7 +23,7 @@
 #include <time.h>
 
 
-uint8_t new_udp_session_sync(Session* session,
+uint8_t new_udp_session(Session* session,
                              SessionId id,
                              ClientKey key,
                              uint16_t send_port,
@@ -349,7 +349,7 @@ bool create_datareader_sync_by_xml(Session* session,
     return create_reliable_object_sync(session, &session->output_reliable_stream, &payload, reuse, replace);
 }
 
-bool delete_sync(Session* session, ObjectId object_id)
+bool delete_object_sync(Session* session, ObjectId object_id)
 {
     session->request_id++;
 
@@ -363,7 +363,6 @@ bool delete_sync(Session* session, ObjectId object_id)
 
     deserialize_DELETE_Payload(buffer, &payload);
 
-    PRINTL_SERIALIZATION(RECV, buffer->init, buffer->iterator - buffer->init);
     PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
 
     return run_until_status(session);
@@ -393,7 +392,6 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
 
     deserialize_READ_DATA_Payload(buffer, &payload);
 
-    PRINTL_SERIALIZATION(RECV, buffer->init, buffer->iterator - buffer->init);
     PRINTL_READ_DATA_SUBMESSAGE(&payload);
 
     return run_until_status(session);
@@ -421,7 +419,6 @@ bool create_reliable_object_sync(Session* session, ReliableStream* output_stream
     serialize_SubmessageHeader(output_buffer, &sub_header);
     restore_micro_state(output_buffer, submessage_end);
 
-    PRINTL_SERIALIZATION(RECV, output_buffer->init, output_buffer->iterator - output_buffer->init);
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(payload);
 
     return run_until_status(session);
@@ -457,11 +454,13 @@ MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_strea
     SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
-    BaseObjectRequest request;
-    request.request_id = (RequestId){{0, 0}};
-    request.object_id = data_writer_id;
-    serialize_BaseObjectRequest(output_buffer, &request);
+    WRITE_DATA_Payload_Data payload;
+    payload.base.request_id = (RequestId){{0, 0}};
+    payload.base.object_id = data_writer_id;
+    serialize_BaseObjectRequest(output_buffer, &payload.base);
     serialize_uint32_t(output_buffer, topic_size); //Remove in next version. Emulates Data payload data.
+
+    PRINTL_WRITE_DATA_DATA_SUBMESSAGE(&payload);
 
     return output_buffer;
 }
@@ -479,11 +478,13 @@ MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, Ob
     SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
-    BaseObjectRequest request;
-    request.request_id = (RequestId){{0, 0}};
-    request.object_id = data_writer_id;
-    serialize_BaseObjectRequest(output_buffer, &request);
+    WRITE_DATA_Payload_Data payload;
+    payload.base.request_id = (RequestId){{0, 0}};
+    payload.base.object_id = data_writer_id;
+    serialize_BaseObjectRequest(output_buffer, &payload.base);
     serialize_uint32_t(output_buffer, topic_size); //Remove in next version. Emulates Data payload data.
+
+    PRINTL_WRITE_DATA_DATA_SUBMESSAGE(&payload);
 
     return output_buffer;
 }
@@ -548,7 +549,7 @@ bool run_until_status(Session* session)
     //TODO add timeout
     uint32_t attempts_counter = 0;
     session->last_status_received = false;
-    while (!session->last_status_received || attempts_counter < MICRORTPS_MAX_ATTEMPTS)
+    while (!session->last_status_received && attempts_counter < MICRORTPS_MAX_ATTEMPTS)
     {
         run_communication(session);
         attempts_counter++;
