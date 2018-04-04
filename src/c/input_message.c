@@ -194,5 +194,10 @@ bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submess
         }
     }
 
+    if(input_stream->last_seq_num < seq_num)
+    {
+        input_stream->last_seq_num = seq_num;
+    }
+
     return input_stream->seq_num == seq_num;
 }

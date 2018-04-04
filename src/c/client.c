@@ -537,7 +537,7 @@ void run_communication(Session* session)
     }
 
     ReliableStream* input_reliable_stream = &session->input_reliable_stream;
-    if(input_reliable_stream->last_seq_num < input_reliable_stream->seq_num)
+    if(input_reliable_stream->last_seq_num >= input_reliable_stream->seq_num)
     {
         send_acknack(session, input_reliable_stream);
     }
