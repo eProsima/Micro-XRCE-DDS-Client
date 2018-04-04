@@ -48,14 +48,14 @@ void output_acknack(ReliableStream* input_stream, ACKNACK_Payload* acknack)
 
 void input_heartbeat(Session* session, ReliableStream* input_stream, uint16_t first_seq_num, uint16_t last_seq_num)
 {
-    if(first_seq_num > input_stream->seq_num)
+    if(input_stream->seq_num < first_seq_num)
     {
         input_stream->seq_num = first_seq_num;
     }
 
-    if(last_seq_num > input_stream->seq_num)
+    if(input_stream->seq_num <= last_seq_num)
     {
-        input_stream->last_seq_num = last_seq_num;
+        input_stream->last_seq_num = last_seq_num + 1;
     }
 }
 

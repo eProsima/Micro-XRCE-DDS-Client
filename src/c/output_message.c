@@ -70,7 +70,7 @@ bool send_heartbeat(Session* session, ReliableStream* reference_stream)
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
 
-    PRINTL_HEARTBEAT_SUBMESSAGE(&heartbeat);
+    PRINTL_HEARTBEAT_SUBMESSAGE(SEND, &heartbeat);
     PRINTL_SERIALIZATION(SEND, output_buffer.init, output_buffer.iterator - output_buffer.init);
 
     return bytes > 0;
@@ -95,7 +95,7 @@ bool send_acknack(Session* session, ReliableStream* reference_stream)
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
 
-    PRINTL_ACKNACK_SUBMESSAGE(&acknack);
+    PRINTL_ACKNACK_SUBMESSAGE(SEND, &acknack);
     PRINTL_SERIALIZATION(SEND, output_buffer.init, output_buffer.iterator - output_buffer.init);
 
     return bytes > 0;

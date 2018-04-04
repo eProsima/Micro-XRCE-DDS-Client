@@ -261,20 +261,20 @@ void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* payload)
             RESTORE_COLOR);
 }
 
-void PRINTL_ACKNACK_SUBMESSAGE(const ACKNACK_Payload* payload)
+void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
 {
     printf("%s%s[Acknack | seq_num: %u | bitmap: %s]%s\n",
-            RECV,
+            pre,
             PURPLE,
             payload->first_unacked_seq_num,
             data_to_string(payload->nack_bitmap, 2),
             RESTORE_COLOR);
 }
 
-void PRINTL_HEARTBEAT_SUBMESSAGE(const HEARTBEAT_Payload* payload)
+void PRINTL_HEARTBEAT_SUBMESSAGE(const char* pre, const HEARTBEAT_Payload* payload)
 {
     printf("%s%s[Heartbeat | first: %u | last: %u]%s\n",
-            RECV,
+            pre,
             PURPLE,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,

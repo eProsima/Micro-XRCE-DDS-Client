@@ -14,7 +14,7 @@ void on_HelloWorld_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
         {
             HelloWorld topic1;
             deserialize_HelloWorld_topic(serialized_topic, &topic1);
-            printf("Received topic: %s", topic1.m_message);
+            printf("Received topic: %s\n", topic1.m_message);
             break;
         }
 
@@ -50,7 +50,7 @@ int main()
 
     /* Create publisher. */
     const char* publisher_xml = {"<publisher name=\"MyPublisher\""};
-    ObjectId publisher_id = {{0x00, 0x03}};
+    ObjectId publisher_id = {{HELLO_WORLD_TOPIC, 0x03}};
     result = create_publisher_sync_by_xml(&my_session, publisher_id, publisher_xml, participant_id, false, false);
 
     /* Create data writer. */
@@ -111,7 +111,7 @@ int main()
         result = read_data_sync(&my_session, datareader_id);
 
         run_communication(&my_session);
-        sleep(1);
+        sleep(5);
     }
 
     return 0;

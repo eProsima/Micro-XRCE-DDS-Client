@@ -125,7 +125,7 @@ void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer)
     HEARTBEAT_Payload heartbeat;
     deserialize_HEARTBEAT_Payload(input_buffer, &heartbeat);
 
-    PRINTL_HEARTBEAT_SUBMESSAGE(&heartbeat);
+    PRINTL_HEARTBEAT_SUBMESSAGE(RECV, &heartbeat);
 
 //    ReliableStream* input_stream = &session->output_reliable_stream;
     ReliableStream* input_stream = &session->input_reliable_stream;
@@ -137,7 +137,7 @@ void process_acknack_submessage(Session* session, MicroBuffer* input_buffer)
     ACKNACK_Payload acknack;
     deserialize_ACKNACK_Payload(input_buffer, &acknack);
 
-    PRINTL_ACKNACK_SUBMESSAGE(&acknack);
+    PRINTL_ACKNACK_SUBMESSAGE(RECV, &acknack);
 
     ReliableStream* output_stream = &session->output_reliable_stream;
     input_acknack(session, output_stream, acknack.first_unacked_seq_num, acknack.nack_bitmap);
@@ -199,9 +199,9 @@ bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submess
         result = true;
     }
 
-    if(input_stream->last_seq_num < seq_num)
+    if(input_stream->last_seq_num <= seq_num)
     {
-        input_stream->last_seq_num = seq_num;
+        input_stream->last_seq_num = seq_num + 1;
     }
 
     return result;

@@ -119,14 +119,14 @@ INLINE_MES void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* reply)
 ;
 #endif
 
-INLINE_MES void PRINTL_ACKNACK_SUBMESSAGE(const ACKNACK_Payload* payload)
+INLINE_MES void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_HEARTBEAT_SUBMESSAGE(const HEARTBEAT_Payload* payload)
+INLINE_MES void PRINTL_HEARTBEAT_SUBMESSAGE(const char* pre, const HEARTBEAT_Payload* payload)
 #ifndef MESSAGE_LOGS
 {}
 #else
