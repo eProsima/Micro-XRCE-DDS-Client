@@ -26,7 +26,7 @@
 
 void help()
 {
-    printf("Help: program [serial | udp dest_ip recv_port send_port]\n");
+    printf("Help: program [serial | udp agent_ip agent_port]\n");
 }
 
 void list_commands()
@@ -236,8 +236,6 @@ int main(int args, char** argv)
 
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    uint8_t ip[] = {127, 0, 0, 1};
-    micrortps_locator_t locator;
     if(args > 3)
     {
         if(strcmp(argv[1], "serial") == 0)
@@ -245,10 +243,14 @@ int main(int args, char** argv)
             /* TODO (julian): add serial session */
             printf("<< Serial mode => dev: %s >>\n", argv[2]);
         }
-        else if(strcmp(argv[1], "udp") == 0 && args == 5)
+        else if(strcmp(argv[1], "udp") == 0 && args == 4)
         {
-            uint8_t result = new_udp_session(&my_session, 0x01, key, atoi(argv[2]), ip, &locator, on_topic, NULL);
-            if(result == MICRORTPS_ERR_LOCATOR)
+            //uint8_t ip[] = {atoi(strtok(argv[2], ".")), atoi(strtok(NULL, ".")),
+            //                atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
+            uint8_t ip[] = {127, 0, 0, 1};
+            //printf("%i.%i.%i.%i\n", ip[0], ip[1], ip[2], ip[3]);
+            uint16_t port = 1234; //atoi(argv[3]);
+            if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
             {
                 printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
                 return 1;

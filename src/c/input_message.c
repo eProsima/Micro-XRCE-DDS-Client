@@ -52,7 +52,7 @@ void process_message(Session* session, MicroBuffer* input_buffer)
             for(uint16_t i = header.sequence_nr + 1; i < input_stream->seq_num; i++)
             {
                 uint8_t current_index = i % MICRORTPS_MAX_MSG_NUM;
-                MicroBuffer* current_buffer = &input_stream->store[current_index].micro_buffer;
+                MicroBuffer* current_buffer = &input_stream->buffers[current_index].micro_buffer;
                 process_submessages(session, current_buffer);
                 reset_micro_buffer(current_buffer);
             }
@@ -172,7 +172,7 @@ bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submess
     bool result = false;
 
     uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
-    MicroBuffer* input_buffer = &input_stream->store[index].micro_buffer;
+    MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
 
     if(input_buffer->iterator != input_buffer->init
         || seq_num < input_stream->seq_num
@@ -190,7 +190,7 @@ bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submess
         for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM && seq_num == input_stream->seq_num; i++)
         {
             uint8_t aux_index = (seq_num + i) % MICRORTPS_MAX_MSG_NUM;
-            MicroBuffer* aux_buffer = &input_stream->store[aux_index].micro_buffer;
+            MicroBuffer* aux_buffer = &input_stream->buffers[aux_index].micro_buffer;
             if(aux_buffer->iterator == aux_buffer->init)
             {
                 input_stream->seq_num = seq_num + i;

@@ -39,20 +39,25 @@ size_t read_file(const char *file_name, char* data_file, size_t buf_size)
     return length;
 }
 
-int main()
+int main(int argc, char** argv)
 {
+    if(argc < 2)
+    {
+        printf("Please, specify the agent port");
+        return 1;
+    }
+
     /* Init session. */
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
     uint8_t ip[] = {127, 0, 0, 1};
-    micrortps_locator_t locator;
-    if (MICRORTPS_STATUS_OK != new_udp_session(&my_session, 0x01, key, 2019, ip, &locator, NULL, NULL))
+    uint16_t port = atoi(argv[1]);
+    if (!new_udp_session(&my_session, 0x01, key, ip, port, NULL, NULL))
     {
         return 1;
     }
 
     init_session_syn(&my_session);
-
 
 
     /* Init XRCE objects. */

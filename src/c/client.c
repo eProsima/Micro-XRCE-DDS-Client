@@ -21,29 +21,24 @@
 #include <string.h>
 #include <time.h>
 
-uint8_t new_udp_session(Session* const session,
-                        SessionId id,
-                        ClientKey key,
-                        uint16_t remote_port,
-                        const uint8_t* const server_ip,
-                        micrortps_locator_t* const locator,
-                        OnTopic on_topic_callback,
-                        void* on_topic_args)
+bool new_udp_session(Session* const session,
+                     SessionId id,
+                     ClientKey key,
+                     const uint8_t* const server_ip,
+                     uint16_t remote_port,
+                     OnTopic on_topic_callback,
+                     void* on_topic_args)
 {
-    if (NULL == session || NULL == server_ip || NULL == locator)
+    if (NULL == session || NULL == server_ip)
     {
         printf("# new_udp_session() -> BAD PARAMETERS!\n");
-        return MICRORTPS_ERR_LOCATOR;
+        return false;
     }
 
-    uint8_t result = MICRORTPS_STATUS_OK;
-    locator_id_t locator_id = add_udp_locator_client(remote_port, server_ip, locator);
+    bool result = false;
+    locator_id_t locator_id = add_udp_locator_client(remote_port, server_ip, &session->locator);
 
-    if (0 >= locator_id)
-    {
-        result = MICRORTPS_ERR_LOCATOR;
-    }
-    else
+    if (0 < locator_id)
     {
         /* Select id and key. */
         session->id = id;
@@ -57,36 +52,37 @@ uint8_t new_udp_session(Session* const session,
         /* Init streams. */
         // input best effort
         session->input_best_effort_stream.seq_num = 0;
-        init_micro_buffer(&session->input_best_effort_stream.micro_buffer,
-                          session->input_best_effort_stream.buf, MICRORTPS_MTU_SIZE);
+        init_micro_buffer(&session->input_best_effort_stream.buffer.micro_buffer,
+                          session->input_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE);
 
         // output best effort
         session->output_best_effort_stream.seq_num = 0;
-        init_micro_buffer_endian(&session->output_best_effort_stream.micro_buffer,
-                          session->output_best_effort_stream.buf, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
-        session->output_best_effort_stream.micro_buffer.iterator += session->header_offset;
+        init_micro_buffer_endian(&session->output_best_effort_stream.buffer.micro_buffer,
+                          session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
+        session->output_best_effort_stream.buffer.micro_buffer.iterator += session->header_offset;
 
         // input reliable
         session->input_reliable_stream.seq_num = 0;
         for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
-            init_micro_buffer(&session->input_reliable_stream.store[i].micro_buffer,
-                              session->input_reliable_stream.store[i].buf, MICRORTPS_MTU_SIZE);
+            init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
+                              session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
         }
 
         // output reliable
         session->output_reliable_stream.seq_num = 0;
         for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
-            init_micro_buffer_endian(&session->output_reliable_stream.store[i].micro_buffer,
-                              session->output_reliable_stream.store[i].buf, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
-            session->output_reliable_stream.store[i].micro_buffer.iterator += session->header_offset;
+            init_micro_buffer_endian(&session->output_reliable_stream.buffers[i].micro_buffer,
+                              session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
+            session->output_reliable_stream.buffers[i].micro_buffer.iterator += session->header_offset;
         }
 
         session->on_topic_callback = on_topic_callback;
         session->on_topic_args = on_topic_args;
 
         session->last_status_received = false;
+        result = true;
     }
 
     return result;
@@ -401,7 +397,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
 
 bool create_reliable_object_sync(Session* session, ReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
 {
-    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num].micro_buffer;
 
     /* Serialize CREATE_Payload. */
     MicroState submessage_begin = get_micro_state(output_buffer);
@@ -428,7 +424,7 @@ bool create_reliable_object_sync(Session* session, ReliableStream* output_stream
 
 MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
 {
-    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(SUBHEADER_SIZE + payload_size > output_buffer->final - output_buffer->iterator)
     {
         return NULL;
@@ -445,7 +441,7 @@ MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t subm
 
 MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
-    MicroBuffer* output_buffer = &output_stream->micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffer.micro_buffer;
     if(SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
     {
         return NULL;
@@ -469,7 +465,7 @@ MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_strea
 
 MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
-    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
     {
         return NULL;
@@ -508,25 +504,23 @@ void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uin
 void run_communication(Session* session)
 {
     BestEffortStream* output_best_effort_stream = &session->output_best_effort_stream;
-    MicroBuffer* output_best_effort_buffer = &output_best_effort_stream->micro_buffer;
+    MicroBuffer* output_best_effort_buffer = &output_best_effort_stream->buffer.micro_buffer;
     if(output_best_effort_buffer->iterator - output_best_effort_buffer->init > HEADER_MAX_SIZE)
     {
         send_best_effort_message(session, output_best_effort_stream);
     }
 
     ReliableStream* output_reliable_stream = &session->output_reliable_stream;
-    MicroBuffer* output_reliable_buffer = &output_reliable_stream->store[output_reliable_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[output_reliable_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(output_reliable_buffer->iterator - output_reliable_buffer->init > HEADER_MAX_SIZE)
     {
         send_reliable_message(session, output_reliable_stream);
         send_heartbeat(session, output_reliable_stream);
     }
 
-    /* TODO (Luis): add timeout funcionality */
-    /* We suppose that the time timeout will be the minimun time to get data from the netword card. */
     uint8_t buffer[MICRORTPS_MTU_SIZE];
     uint32_t length = 0;
-    while (0 < (length = receive_data(buffer, MICRORTPS_MTU_SIZE, session->transport_id)))
+    while (0 < (length = receive_data_timed(buffer, MICRORTPS_MTU_SIZE, session->transport_id, MICRORTPS_TIMEOUT)))
     {
         MicroBuffer input_buffer;
         init_micro_buffer(&input_buffer, buffer, length);

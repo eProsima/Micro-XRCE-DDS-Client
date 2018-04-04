@@ -22,7 +22,7 @@
 
 bool send_best_effort_message(Session* session, BestEffortStream* output_stream)
 {
-    MicroBuffer* output_buffer = &output_stream->micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffer.micro_buffer;
 
     stamp_header(session, output_buffer, STREAMID_BUILTIN_BEST_EFFORTS, output_stream->seq_num);
 
@@ -39,7 +39,7 @@ bool send_best_effort_message(Session* session, BestEffortStream* output_stream)
 
 bool send_reliable_message(Session* session, ReliableStream* output_stream)
 {
-    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
 
     stamp_header(session, output_buffer, STREAMID_BUILTIN_RELIABLE, output_stream->seq_num);
 

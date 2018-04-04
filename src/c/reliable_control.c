@@ -14,6 +14,7 @@
 
 #include <micrortps/client/client.h>
 #include <micrortps/client/output_message.h>
+#include <string.h>
 
 void output_heartbeat(ReliableStream* output_stream, HEARTBEAT_Payload* heartbeat)
 {
@@ -29,7 +30,7 @@ void output_acknack(ReliableStream* input_stream, ACKNACK_Payload* acknack)
     {
         uint16_t current_seq_num = input_stream->seq_num + i;
         uint8_t current_index = current_seq_num % MICRORTPS_MAX_MSG_NUM;
-        MicroBuffer* current_buffer = &input_stream->store[current_index].micro_buffer;
+        MicroBuffer* current_buffer = &input_stream->buffers[current_index].micro_buffer;
         if(current_buffer->iterator == current_buffer->init)
         {
             if(8 > i)
@@ -64,7 +65,7 @@ void input_acknack(Session* session, ReliableStream* output_stream, const uint16
     for(int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
     {
         uint8_t index = first_unacked_seq_num % MICRORTPS_MAX_MSG_NUM;
-        MicroBuffer* output_buffer = &output_stream->store[index].micro_buffer;
+        MicroBuffer* output_buffer = &output_stream->buffers[index].micro_buffer;
 
         if(output_buffer->iterator != output_buffer->init)
         {

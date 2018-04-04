@@ -15,7 +15,7 @@ extern "C"
 #include <stdint.h>
 
 /* Create object defines. */
-#define MICRORTPS_OBJK_TIMEOUT      10
+#define MICRORTPS_TIMEOUT           10
 #define MICRORTPS_MAX_ATTEMPTS     100
 
 /* Message sizes. */
@@ -27,6 +27,7 @@ extern "C"
 #define HEARTBEAT_MSG_SIZE 0x04
 
 /* Micro-RTPS status. */
+#define MICRORTPS_STATUS_OK         0x00
 #define MICRORTPS_ERR_MAX_ATTEMPTS  0x01
 #define MICRORTPS_ERR_SERIALIZATION 0x02
 #define MICRORTPS_ERR_LOCATOR       0x03

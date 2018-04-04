@@ -25,16 +25,19 @@ extern "C"
 #include <micrortps/transport/micrortps_transport.h>
 #include <microcdr/microcdr.h>
 
-#define MICRORTPS_STATUS_OK      0x00
 #define MICRORTPS_MTU_SIZE        512
 #define MICRORTPS_MAX_MSG_NUM      16
+
+typedef struct MessageBuffer
+{
+    uint8_t data[MICRORTPS_MTU_SIZE];
+    MicroBuffer micro_buffer;
+} MessageBuffer;
 
 typedef struct BestEffortStream
 {
     uint16_t seq_num;
-
-    uint8_t buf[MICRORTPS_MTU_SIZE];
-    MicroBuffer micro_buffer;
+    MessageBuffer buffer;
 
 } BestEffortStream;
 
@@ -43,13 +46,7 @@ typedef struct ReliableStream
 {
     uint16_t seq_num;
     uint16_t last_seq_num;
-
-    struct Buffer
-    {
-        uint8_t buf[MICRORTPS_MTU_SIZE];
-        MicroBuffer micro_buffer;
-
-    } store[MICRORTPS_MAX_MSG_NUM];
+    MessageBuffer buffers[MICRORTPS_MAX_MSG_NUM];
 
 } ReliableStream;
 
@@ -60,8 +57,11 @@ typedef struct Session
 {
     SessionId id;
     ClientKey key;
-    locator_id_t transport_id;
+
     uint16_t request_id;
+
+    locator_id_t transport_id;
+    micrortps_locator_t locator;
 
     uint8_t header_offset;
 
@@ -80,12 +80,11 @@ typedef struct Session
 
 
 
-uint8_t new_udp_session(Session* session,
+bool new_udp_session(Session* session,
                         SessionId id,
                         ClientKey key,
-                        uint16_t remote_port,
                         const uint8_t* const server_ip,
-                        micrortps_locator_t* const locator,
+                        uint16_t remote_port,
                         OnTopic on_topic_callback,
                         void* on_topic_args);
 

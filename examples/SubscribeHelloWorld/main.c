@@ -52,14 +52,20 @@ void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
     }
 }
 
-int main()
+int main(int argc, char** argv)
 {
+    if(argc < 2)
+    {
+        printf("Please, specify the agent port");
+        return 1;
+    }
+
     /* Init session. */
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    micrortps_locator_t locator;
     uint8_t ip[] = {127, 0, 0, 1};
-    if (MICRORTPS_STATUS_OK != new_udp_session(&my_session, 0x01, key, 2019, ip, &locator, on_topic, NULL))
+    uint16_t port = atoi(argv[1]);
+    if (!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
     {
         return 1;
     }

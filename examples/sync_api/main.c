@@ -2,7 +2,7 @@
 #include <micrortps/client/xrce_client.h>
 
 #include <stdio.h>
-#include <string.h>
+#include <unistd.h>
 
 #define HELLO_WORLD_TOPIC 1
 
@@ -30,9 +30,8 @@ int main()
     /* Init session. */
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    micrortps_locator_t locator;
     uint8_t ip[] = {127, 0, 0, 1};
-    if (MICRORTPS_STATUS_OK != new_udp_session(&my_session, 0x01, key, 2019, ip, &locator, on_HelloWorld_topic, NULL))
+    if (!new_udp_session(&my_session, 0x01, key, ip, 2019, on_HelloWorld_topic, NULL))
     {
         return 1;
     }
@@ -114,6 +113,6 @@ int main()
         sleep(5);
     }
 
-    return 0;
+    return !result;
 }
 
