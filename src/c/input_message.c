@@ -127,7 +127,8 @@ void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer)
 
     PRINTL_HEARTBEAT_SUBMESSAGE(&heartbeat);
 
-    ReliableStream* input_stream = &session->output_reliable_stream;
+//    ReliableStream* input_stream = &session->output_reliable_stream;
+    ReliableStream* input_stream = &session->input_reliable_stream;
     input_heartbeat(session, input_stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
 }
 
@@ -168,6 +169,8 @@ bool receive_best_effort_message(BestEffortStream* input_stream, const uint16_t 
 
 bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submessages, const uint16_t seq_num)
 {
+    bool result = false;
+
     uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
     MicroBuffer* input_buffer = &input_stream->store[index].micro_buffer;
 
@@ -193,6 +196,7 @@ bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submess
                 input_stream->seq_num = seq_num + i;
             }
         }
+        result = true;
     }
 
     if(input_stream->last_seq_num < seq_num)
@@ -200,5 +204,5 @@ bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submess
         input_stream->last_seq_num = seq_num;
     }
 
-    return input_stream->seq_num == seq_num;
+    return result;
 }

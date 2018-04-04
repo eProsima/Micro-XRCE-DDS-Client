@@ -39,7 +39,7 @@ bool send_best_effort_message(Session* session, BestEffortStream* output_stream)
 
 bool send_reliable_message(Session* session, ReliableStream* output_stream)
 {
-    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
 
     stamp_header(session, output_buffer, STREAMID_BUILTIN_RELIABLE, output_stream->seq_num);
 
@@ -60,7 +60,7 @@ bool send_heartbeat(Session* session, ReliableStream* reference_stream)
 
     stamp_header(session, &output_buffer, 0, (uint16_t)(STREAMID_BUILTIN_RELIABLE));
 
-    SubmessageHeader sub_header = (SubmessageHeader){{SUBMESSAGE_ID_HEARTBEAT, 0, HEARTBEAT_MSG_SIZE}};
+    SubmessageHeader sub_header = (SubmessageHeader){SUBMESSAGE_ID_HEARTBEAT, 0, HEARTBEAT_MSG_SIZE};
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     HEARTBEAT_Payload heartbeat;
@@ -81,16 +81,17 @@ bool send_acknack(Session* session, ReliableStream* reference_stream)
     uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE];
     MicroBuffer output_buffer;
     init_micro_buffer_endian(&output_buffer, buffer, sizeof(buffer), MACHINE_ENDIANNESS);
+    output_buffer.iterator += session->header_offset;
 
-    stamp_header(session, &output_buffer, STREAMID_BUILTIN_RELIABLE, 0);
+    stamp_header(session, &output_buffer, 0, (uint16_t)(STREAMID_BUILTIN_RELIABLE));
 
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, 0, HEARTBEAT_MSG_SIZE };
+    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_ACKNACK, 0, HEARTBEAT_MSG_SIZE };
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     ACKNACK_Payload acknack;
     output_acknack(reference_stream, &acknack);
 
-    deserialize_ACKNACK_Payload(&output_buffer, &acknack);
+    serialize_ACKNACK_Payload(&output_buffer, &acknack);
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
 

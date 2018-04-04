@@ -26,7 +26,7 @@ uint8_t new_udp_session(Session* const session,
                         ClientKey key,
                         uint16_t remote_port,
                         const uint8_t* const server_ip,
-                        micrortps_locator_t* const locator
+                        micrortps_locator_t* const locator,
                         OnTopic on_topic_callback,
                         void* on_topic_args)
 {
@@ -363,7 +363,7 @@ bool delete_object_sync(Session* session, ObjectId object_id)
     uint32_t payload_size = 4; //size_of_Delete_Payload(payload)
     MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_DELETE, payload_size);
 
-    deserialize_DELETE_Payload(buffer, &payload);
+    serialize_DELETE_Payload(buffer, &payload);
 
     PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
 
@@ -392,7 +392,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
     uint32_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
     MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_READ_DATA, payload_size);
 
-    deserialize_READ_DATA_Payload(buffer, &payload);
+    serialize_READ_DATA_Payload(buffer, &payload);
 
     PRINTL_READ_DATA_SUBMESSAGE(&payload);
 
@@ -428,7 +428,7 @@ bool create_reliable_object_sync(Session* session, ReliableStream* output_stream
 
 MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
 {
-    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(SUBHEADER_SIZE + payload_size > output_buffer->final - output_buffer->iterator)
     {
         return NULL;
@@ -453,7 +453,7 @@ MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_strea
 
     align_to(output_buffer, 4);
 
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
+    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_WRITE_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
     WRITE_DATA_Payload_Data payload;
@@ -469,7 +469,7 @@ MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_strea
 
 MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
-    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->store[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
     {
         return NULL;
@@ -477,7 +477,7 @@ MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, Ob
 
     align_to(output_buffer, 4);
 
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
+    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_WRITE_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
     WRITE_DATA_Payload_Data payload;
@@ -515,7 +515,7 @@ void run_communication(Session* session)
     }
 
     ReliableStream* output_reliable_stream = &session->output_reliable_stream;
-    MicroBuffer* output_reliable_buffer = &output_reliable_stream->store[output_reliable_stream->seq_num].micro_buffer;
+    MicroBuffer* output_reliable_buffer = &output_reliable_stream->store[output_reliable_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(output_reliable_buffer->iterator - output_reliable_buffer->init > HEADER_MAX_SIZE)
     {
         send_reliable_message(session, output_reliable_stream);

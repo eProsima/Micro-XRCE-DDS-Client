@@ -39,12 +39,6 @@ int main()
 
     init_session_syn(&my_session);
 
-    ReliableStream my_reliable_stream;
-    add_reliable_stream(&my_session, &my_reliable_stream, 129, true);
-    remove_reliable_stream(&my_session, 129, true);
-
-    init_session_syn(&my_session);
-
     /* Create participant. */
     ObjectId participant_id = {{0x00, 0x01}};
     result = create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
@@ -71,50 +65,53 @@ int main()
 
     /* Create data writer. */
     const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
-    ObjectId datareader_id = {{0x00, 0x06}};
+    ObjectId datareader_id = {{HELLO_WORLD_TOPIC, 0x06}};
     result = create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
 
     BestEffortStream* best_effort = &my_session.output_best_effort_stream;
 
-    HelloWorld topic1 = {1, "Hello MicroRTPS 1"};
-    uint32_t topic_size_1 = 26; // = size_of_HelloWorld_topic(&topic1)
-    MicroBuffer* topic_buffer_1 = prepare_best_effort_stream_for_topic(best_effort, datawriter_id, topic_size_1);
-    if(topic_buffer_1 != NULL)
-    {
-        serialize_HelloWorld_topic(topic_buffer_1, &topic1);
-    }
-
-    HelloWorld topic2 = {1, "Hello MicroRTPS 2"};
-    uint32_t topic_size_2 = 26; // = size_of_HelloWorld_topic(&topic2)
-    MicroBuffer* topic_buffer_2 = prepare_best_effort_stream_for_topic(best_effort, datawriter_id, topic_size_2);
-    if(topic_buffer_2 != NULL)
-    {
-        serialize_HelloWorld_topic(topic_buffer_2, &topic2);
-    }
-    ReliableStream* reliable = &my_session.output_reliable_stream;
-
-    HelloWorld topic3 = {1, "Hello MicroRTPS 3"};
-    uint32_t topic_size_3 = 26; // = size_of_HelloWorld_topic(&topic3)
-    MicroBuffer* topic_buffer_3 = prepare_reliable_stream_for_topic(reliable, datawriter_id, topic_size_3);
-    if(topic_buffer_3 != NULL)
-    {
-        serialize_HelloWorld_topic(topic_buffer_3, &topic3);
-    }
-
-    HelloWorld topic4 = {1, "Hello MicroRTPS 4"};
-    uint32_t topic_size_4 = 26; // = size_of_HelloWorld_topic(&topic4)
-    MicroBuffer* topic_buffer_4 = prepare_reliable_stream_for_topic(reliable, datawriter_id, topic_size_4);
-    if(topic_buffer_4 != NULL)
-    {
-        serialize_HelloWorld_topic(topic_buffer_4, &topic4);
-    }
-
-    read_data_sync(&my_session, datareader_id);
 
     while(true)
     {
+        HelloWorld topic1 = {18, "Hello MicroRTPS 1"};
+        uint32_t topic_size_1 = 26; // = size_of_HelloWorld_topic(&topic1)
+        MicroBuffer* topic_buffer_1 = prepare_best_effort_stream_for_topic(best_effort, datawriter_id, topic_size_1);
+        if(topic_buffer_1 != NULL)
+        {
+            serialize_HelloWorld_topic(topic_buffer_1, &topic1);
+        }
+
+        HelloWorld topic2 = {18, "Hello MicroRTPS 2"};
+        uint32_t topic_size_2 = 26; // = size_of_HelloWorld_topic(&topic2)
+        MicroBuffer* topic_buffer_2 = prepare_best_effort_stream_for_topic(best_effort, datawriter_id, topic_size_2);
+        if(topic_buffer_2 != NULL)
+        {
+            serialize_HelloWorld_topic(topic_buffer_2, &topic2);
+        }
+
+
+        ReliableStream* reliable = &my_session.output_reliable_stream;
+
+        HelloWorld topic3 = {18, "Hello MicroRTPS 3"};
+        uint32_t topic_size_3 = 26; // = size_of_HelloWorld_topic(&topic3)
+        MicroBuffer* topic_buffer_3 = prepare_reliable_stream_for_topic(reliable, datawriter_id, topic_size_3);
+        if(topic_buffer_3 != NULL)
+        {
+            serialize_HelloWorld_topic(topic_buffer_3, &topic3);
+        }
+
+        HelloWorld topic4 = {18, "Hello MicroRTPS 4"};
+        uint32_t topic_size_4 = 26; // = size_of_HelloWorld_topic(&topic4)
+        MicroBuffer* topic_buffer_4 = prepare_reliable_stream_for_topic(reliable, datawriter_id, topic_size_4);
+        if(topic_buffer_4 != NULL)
+        {
+            serialize_HelloWorld_topic(topic_buffer_4, &topic4);
+        }
+
+        result = read_data_sync(&my_session, datareader_id);
+
         run_communication(&my_session);
-        sleep(1000);
+        sleep(1);
     }
 
     return 0;

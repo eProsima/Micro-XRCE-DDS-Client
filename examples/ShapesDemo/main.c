@@ -236,6 +236,8 @@ int main(int args, char** argv)
 
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
+    uint8_t ip[] = {127, 0, 0, 1};
+    micrortps_locator_t locator;
     if(args > 3)
     {
         if(strcmp(argv[1], "serial") == 0)
@@ -245,15 +247,13 @@ int main(int args, char** argv)
         }
         else if(strcmp(argv[1], "udp") == 0 && args == 5)
         {
-            uint16_t recv_port = atoi(argv[3]);
-            uint16_t send_port = atoi(argv[4]);
-            uint8_t result = new_udp_session(&my_session, 0x80, key, 4000, send_port, recv_port, "127.0.0.1", on_topic, NULL);
+            uint8_t result = new_udp_session(&my_session, 0x01, key, atoi(argv[2]), ip, &locator, on_topic, NULL);
             if(result == MICRORTPS_ERR_LOCATOR)
             {
                 printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
                 return 1;
             }
-            printf("<< UDP mode => recv port: %u, send port: %u >>\n", recv_port, send_port);
+            printf("<< UDP mode => port: %s >>\n", argv[2]);
         }
         else
         {
