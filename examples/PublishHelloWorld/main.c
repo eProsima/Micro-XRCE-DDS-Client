@@ -41,17 +41,18 @@ size_t read_file(const char *file_name, char* data_file, size_t buf_size)
 
 int main(int argc, char** argv)
 {
-    if(argc < 2)
+    if(argc < 3)
     {
-        printf("Please, specify the agent port");
+        printf("Usage: program agent_ip agent_port");
         return 1;
     }
 
     /* Init session. */
     Session my_session;
     ClientKey key = {{0xBB, 0xBB, 0xCC, 0xDD}};
-    uint8_t ip[] = {127, 0, 0, 1};
-    uint16_t port = atoi(argv[1]);
+    uint8_t ip[] = {atoi(strtok(argv[1], ".")), atoi(strtok(NULL, ".")),
+                    atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
+    uint16_t port = atoi(argv[2]);
     if (!new_udp_session(&my_session, 0x01, key, ip, port, NULL, NULL))
     {
         return 1;

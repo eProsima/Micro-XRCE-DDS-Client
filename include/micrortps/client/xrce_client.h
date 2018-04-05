@@ -32,6 +32,7 @@ typedef struct MessageBuffer
 {
     uint8_t data[MICRORTPS_MTU_SIZE];
     MicroBuffer micro_buffer;
+
 } MessageBuffer;
 
 typedef struct BestEffortStream

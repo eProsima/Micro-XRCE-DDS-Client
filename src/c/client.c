@@ -542,7 +542,6 @@ void run_communication(Session* session)
 
 bool run_until_status(Session* session)
 {
-    //TODO add timeout
     uint32_t attempts_counter = 0;
     session->last_status_received = false;
     while (!session->last_status_received && attempts_counter < MICRORTPS_MAX_ATTEMPTS)

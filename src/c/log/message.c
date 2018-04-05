@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "message.h"
+#include <string.h>
 
 #define YELLOW_DARK    "\x1B[0;33m"
 #define PURPLE_DARK    "\x1B[0;35m"
@@ -263,9 +264,10 @@ void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* payload)
 
 void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
 {
+    const char* color = (strcmp(pre, SEND) == 0) ? YELLOW : PURPLE;
     printf("%s%s[Acknack | seq_num: %u | bitmap: %s]%s\n",
             pre,
-            PURPLE,
+            color,
             payload->first_unacked_seq_num,
             data_to_string(payload->nack_bitmap, 2),
             RESTORE_COLOR);
@@ -273,9 +275,10 @@ void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
 
 void PRINTL_HEARTBEAT_SUBMESSAGE(const char* pre, const HEARTBEAT_Payload* payload)
 {
+    const char* color = (strcmp(pre, SEND) == 0) ? YELLOW : PURPLE;
     printf("%s%s[Heartbeat | first: %u | last: %u]%s\n",
             pre,
-            PURPLE,
+            color,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,
             RESTORE_COLOR);

@@ -32,8 +32,8 @@ void help()
 void list_commands()
 {
     printf("usage: <command> [<args>]\n");
-    printf("    create_client:                                       Creates a Client\n");
-    printf("    create_participant:                                  Creates a new Participant on the current Client\n");
+    printf("    create_session:                                      Creates a Session\n");
+    printf("    create_participant:                                  Creates a new Participant on the current session\n");
     printf("    create_topic <participant id>:                       Register new Topic using <participant id> participant\n");
     printf("    create_publisher <participant id>:                   Creates a Publisher on <participant id> participant\n");
     printf("    create_subscriber <participant id>:                  Creates a Subscriber on <participant id> participant\n");
@@ -245,17 +245,15 @@ int main(int args, char** argv)
         }
         else if(strcmp(argv[1], "udp") == 0 && args == 4)
         {
-            //uint8_t ip[] = {atoi(strtok(argv[2], ".")), atoi(strtok(NULL, ".")),
-            //                atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
-            uint8_t ip[] = {127, 0, 0, 1};
-            //printf("%i.%i.%i.%i\n", ip[0], ip[1], ip[2], ip[3]);
-            uint16_t port = 1234; //atoi(argv[3]);
+            uint8_t ip[] = {atoi(strtok(argv[2], ".")), atoi(strtok(NULL, ".")),
+                            atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
+            uint16_t port = atoi(argv[3]);
             if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
             {
                 printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
                 return 1;
             }
-            printf("<< UDP mode => port: %s >>\n", argv[2]);
+            printf("<< UDP mode => port: %s >>\n", argv[3]);
         }
         else
         {
