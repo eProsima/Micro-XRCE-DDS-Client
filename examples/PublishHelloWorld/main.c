@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
     /* Init session. */
     Session my_session;
-    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
+    ClientKey key = {{0xBB, 0xBB, 0xCC, 0xDD}};
     uint8_t ip[] = {127, 0, 0, 1};
     uint16_t port = atoi(argv[1]);
     if (!new_udp_session(&my_session, 0x01, key, ip, port, NULL, NULL))
@@ -58,7 +58,6 @@ int main(int argc, char** argv)
     }
 
     init_session_syn(&my_session);
-
 
     /* Init XRCE objects. */
     ObjectId participant_id = {{0x00, 0x01}};

@@ -81,22 +81,25 @@ int main(int argc, char** argv)
     ObjectId topic_id = {{0x00, 0x02}};
     create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
 
-    const char* subscriber_xml = {"<publisher name=\"MySubscriber\""};
+    const char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
     ObjectId subscriber_id = {{HELLO_WORLD_TOPIC, 0x04}};
     create_subscriber_sync_by_xml(&my_session, subscriber_id, subscriber_xml, participant_id, false, false);
 
-    const char* datareader_xml = {"<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>"};
-    ObjectId datareader_id = {{0x00, 0x06}};
-    create_datawriter_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
+    const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
+    ObjectId datareader_id = {{HELLO_WORLD_TOPIC, 0x06}};
+    create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
 
 
-    /* Request data */
-    read_data_sync(&my_session, datareader_id);
+//    /* Request data */
+//    read_data_sync(&my_session, datareader_id);
 
 
     /* Main loop */
     while(true)
     {
+        /* Request data */
+        read_data_sync(&my_session, datareader_id);
+
         run_communication(&my_session);
 
         sleep(1);
