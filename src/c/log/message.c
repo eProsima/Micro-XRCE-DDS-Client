@@ -123,7 +123,7 @@ void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
 #ifdef MESSAGE_LOGS
 void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t local_sequence_number)
 {
-    printf("%s%sSequence number error => received: %u, expected: %u.%s\n",
+    printf("%s%sSequence number error => received: %hu, expected: %hu.%s\n",
             RECV,
             RED,
             message_sequence_number,
@@ -265,7 +265,7 @@ void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* payload)
 void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
 {
     const char* color = (strcmp(pre, SEND) == 0) ? YELLOW : PURPLE;
-    printf("%s%s[Acknack | seq_num: %u | bitmap: %s]%s\n",
+    printf("%s%s[Acknack | seq_num: %hu | bitmap: %s]%s\n",
             pre,
             color,
             payload->first_unacked_seq_num,
@@ -276,7 +276,7 @@ void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
 void PRINTL_HEARTBEAT_SUBMESSAGE(const char* pre, const HEARTBEAT_Payload* payload)
 {
     const char* color = (strcmp(pre, SEND) == 0) ? YELLOW : PURPLE;
-    printf("%s%s[Heartbeat | first: %u | last: %u]%s\n",
+    printf("%s%s[Heartbeat | first: %hu | last: %hu]%s\n",
             pre,
             color,
             payload->first_unacked_seq_nr,
