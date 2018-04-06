@@ -24,7 +24,8 @@ bool send_best_effort_message(Session* session, OutputBestEffortStream* output_s
 {
     MicroBuffer* output_buffer = &output_stream->buffer.micro_buffer;
 
-    stamp_header(session, output_buffer, STREAMID_BUILTIN_BEST_EFFORTS, ++output_stream->last_sent);
+    output_stream->last_sent = seq_num_add(output_stream->last_sent, 1);
+    stamp_header(session, output_buffer, STREAMID_BUILTIN_BEST_EFFORTS, output_stream->last_sent);
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
 
@@ -38,9 +39,10 @@ bool send_best_effort_message(Session* session, OutputBestEffortStream* output_s
 
 bool send_reliable_message(Session* session, OutputReliableStream* output_stream)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
 
-    stamp_header(session, output_buffer, STREAMID_BUILTIN_RELIABLE, ++output_stream->last_sent);
+    output_stream->last_sent = seq_num_add(output_stream->last_sent, 1);
+    stamp_header(session, output_buffer, STREAMID_BUILTIN_RELIABLE, output_stream->last_sent);
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
 

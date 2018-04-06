@@ -51,17 +51,17 @@ bool new_udp_session(Session* const session,
 
         /* Init streams. */
         // input best effort
-        session->input_best_effort_stream.last_handled = -1;
+        session->input_best_effort_stream.last_handled = UINT16_MAX;
 
         // output best effort
-        session->output_best_effort_stream.last_sent = -1;
+        session->output_best_effort_stream.last_sent = UINT16_MAX;
         init_micro_buffer_endian(&session->output_best_effort_stream.buffer.micro_buffer,
                           session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
         session->output_best_effort_stream.buffer.micro_buffer.iterator += session->header_offset;
 
         // input reliable
-        session->input_reliable_stream.last_handled = -1;
-        session->input_reliable_stream.last_announced = -1;
+        session->input_reliable_stream.last_handled = UINT16_MAX;
+        session->input_reliable_stream.last_announced = UINT16_MAX;
         for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
             init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
@@ -70,8 +70,8 @@ bool new_udp_session(Session* const session,
         session->input_reliable_stream.last_acknack_timestamp = 0;
 
         // output reliable
-        session->output_reliable_stream.last_sent = -1;
-        session->output_reliable_stream.last_acknown = -1;
+        session->output_reliable_stream.last_sent = UINT16_MAX;
+        session->output_reliable_stream.last_acknown = UINT16_MAX;
         for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
             init_micro_buffer_endian(&session->output_reliable_stream.buffers[i].micro_buffer,
@@ -383,7 +383,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
 
 bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
 
     /* Serialize CREATE_Payload. */
     MicroState submessage_begin = get_micro_state(output_buffer);
@@ -410,15 +410,12 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
 
 bool reliable_stream_is_available(OutputReliableStream* output_stream)
 {
-    int16_t last_sent = output_stream->last_sent;
-    int16_t last_acknown = output_stream->last_acknown;
-
-    return last_sent - last_acknown != MICRORTPS_MAX_MSG_NUM;
+    return seq_num_sub(output_stream->last_sent, output_stream->last_acknown) != MICRORTPS_MAX_MSG_NUM;
 }
 
 MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(!reliable_stream_is_available(output_stream)
         || SUBHEADER_SIZE + payload_size > output_buffer->final - output_buffer->iterator)
     {
@@ -460,7 +457,7 @@ MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output
 
 MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
     if(!reliable_stream_is_available(output_stream)
         || SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
     {
@@ -510,7 +507,7 @@ void run_communication(Session* session)
     OutputReliableStream* output_reliable_stream = &session->output_reliable_stream;
     if(reliable_stream_is_available(output_reliable_stream))
     {
-        MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[(output_reliable_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+        MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[seq_num_add(output_reliable_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
         if(output_reliable_buffer->iterator - output_reliable_buffer->init > HEADER_MAX_SIZE)
         {
             send_reliable_message(session, output_reliable_stream);
@@ -620,3 +617,41 @@ uint64_t get_nano_time()
     return (ts.tv_sec * 1000000000) + ts.tv_nsec;
 #endif
 }
+
+uint16_t seq_num_add(uint16_t seq_num, uint16_t increment)
+{
+    return (seq_num + increment) % (1 << 16);
+}
+
+uint16_t seq_num_sub(uint16_t seq_num, uint16_t decrement)
+{
+    uint16_t result;
+    if(decrement > seq_num)
+    {
+        result = (seq_num + ((1 << 16) - decrement)) % (1 << 16);
+    }
+    else
+    {
+        result = seq_num - decrement;
+    }
+    return result;
+}
+
+int seq_num_cmp(uint16_t seq_num_1, uint16_t seq_num_2)
+{
+    int result;
+    if(seq_num_1 == seq_num_2)
+    {
+        result = 0;
+    }
+    else if(seq_num_1 < seq_num_2 || seq_num_1 > (1 << 15))
+    {
+        result = -1;
+    }
+    else
+    {
+        result = 1;
+    }
+    return result;
+}
+

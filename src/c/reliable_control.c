@@ -18,21 +18,21 @@
 
 void output_heartbeat(OutputReliableStream* output_stream, HEARTBEAT_Payload* heartbeat)
 {
-    heartbeat->first_unacked_seq_nr = output_stream->last_acknown + 1;
+    heartbeat->first_unacked_seq_nr = seq_num_add(output_stream->last_acknown, 1);
     heartbeat->last_unacked_seq_nr = output_stream->last_sent;
 }
 
 void input_acknack(Session* session, OutputReliableStream* output_stream, const uint16_t first_unacked_seq_num, uint8_t bitmap[2])
 {
     /* Clear buffers */
-    for(int i = output_stream->last_acknown + 1; i < first_unacked_seq_num; i++)
+    for(int i = seq_num_add(output_stream->last_acknown, 1); 0 > seq_num_cmp(i, first_unacked_seq_num); i = seq_num_add(i, 1))
     {
         uint8_t index = i % MICRORTPS_MAX_MSG_NUM;
         MicroBuffer* output_buffer = &output_stream->buffers[index].micro_buffer;
         reset_micro_buffer(output_buffer);
         output_buffer->iterator += session->header_offset;
     }
-    output_stream->last_acknown = first_unacked_seq_num - 1;
+    output_stream->last_acknown = seq_num_sub(first_unacked_seq_num, 1);
 
     /* Send lost */
     for(int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
@@ -52,12 +52,12 @@ void input_acknack(Session* session, OutputReliableStream* output_stream, const 
 
 void input_heartbeat(Session* session, InputReliableStream* input_stream, uint16_t first_seq_num, uint16_t last_seq_num)
 {
-    if(input_stream->last_handled + 1 < first_seq_num)
+    if(0 > seq_num_cmp(seq_num_add(input_stream->last_handled, 1), first_seq_num))
     {
-        input_stream->last_handled = first_seq_num - 1;
+        input_stream->last_handled = seq_num_sub(first_seq_num, 1);
     }
 
-    if(input_stream->last_announced < last_seq_num)
+    if(0 > seq_num_cmp(input_stream->last_announced, last_seq_num))
     {
         input_stream->last_announced = last_seq_num;
     }
@@ -66,10 +66,10 @@ void input_heartbeat(Session* session, InputReliableStream* input_stream, uint16
 void output_acknack(InputReliableStream* input_stream, ACKNACK_Payload* acknack)
 {
     memset(acknack->nack_bitmap, 0, 2);
-    uint16_t search_buffers_size = input_stream->last_announced - input_stream->last_handled;
+    uint16_t search_buffers_size = seq_num_sub(input_stream->last_announced, input_stream->last_handled);
     for(uint16_t i = 0; i < search_buffers_size; i++)
     {
-        uint8_t current_index = (input_stream->last_handled + i + 1) % MICRORTPS_MAX_MSG_NUM;
+        uint8_t current_index = seq_num_add(input_stream->last_handled, i + 1) % MICRORTPS_MAX_MSG_NUM;
         MicroBuffer* current_buffer = &input_stream->buffers[current_index].micro_buffer;
         if(current_buffer->iterator == current_buffer->init)
         {
@@ -84,5 +84,5 @@ void output_acknack(InputReliableStream* input_stream, ACKNACK_Payload* acknack)
         }
     }
 
-    acknack->first_unacked_seq_num = input_stream->last_handled + 1;
+    acknack->first_unacked_seq_num = seq_num_add(input_stream->last_handled, 1);
 }

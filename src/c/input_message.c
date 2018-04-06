@@ -49,7 +49,7 @@ void process_message(Session* session, MicroBuffer* input_buffer)
         if(ready_to_read)
         {
             process_submessages(session, input_buffer);
-            for(uint16_t i = header.sequence_nr + 1; i <= input_stream->last_handled; i++)
+            for(uint16_t i = seq_num_add(header.sequence_nr, 1); 0 >= seq_num_cmp(i, input_stream->last_handled); i = seq_num_add(i, 1))
             {
                 uint8_t current_index = i % MICRORTPS_MAX_MSG_NUM;
                 MicroBuffer* current_buffer = &input_stream->buffers[current_index].micro_buffer;
@@ -156,7 +156,7 @@ void process_data_submessage(Session* session, MicroBuffer* input_buffer)
 
 bool receive_best_effort_message(InputBestEffortStream* input_stream, const uint16_t seq_num)
 {
-    if(seq_num <= input_stream->last_handled)
+    if(0 <= seq_num_cmp(input_stream->last_handled, seq_num))
     {
         return false;
     }
@@ -170,12 +170,13 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
 {
     bool result = false;
 
-    if(input_stream->last_handled >= seq_num || input_stream->last_handled + MICRORTPS_MAX_MSG_NUM < seq_num)
+    if(0 <= seq_num_cmp(input_stream->last_handled, seq_num)
+        || 0 > seq_num_cmp(seq_num_add(input_stream->last_handled, MICRORTPS_MAX_MSG_NUM), seq_num))
     {
         return false;
     }
 
-    if(input_stream->last_handled + 1 == seq_num)
+    if(seq_num_add(input_stream->last_handled, 1) == seq_num)
     {
         for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
@@ -183,7 +184,7 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
             MicroBuffer* aux_buffer = &input_stream->buffers[aux_index].micro_buffer;
             if(aux_buffer->iterator == aux_buffer->init)
             {
-                input_stream->last_handled += i + 1;
+                input_stream->last_handled = seq_num_add(input_stream->last_handled, i + 1);
                 break;
             }
         }
@@ -196,7 +197,7 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
         serialize_array_uint8_t(input_buffer, submessages->iterator, submessages->final - submessages->iterator);
     }
 
-    if(input_stream->last_announced < seq_num)
+    if(0 > seq_num_cmp(input_stream->last_announced, seq_num))
     {
         input_stream->last_announced = seq_num;
     }
