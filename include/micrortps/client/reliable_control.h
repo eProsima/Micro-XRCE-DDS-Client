@@ -24,11 +24,11 @@ extern "C"
 
 #include <micrortps/client/client.h>
 
-void output_heartbeat(ReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat);
-void output_acknack(ReliableStream* reference_stream, ACKNACK_Payload* acknack);
+void output_heartbeat(OutputReliableStream* reference_stream, HEARTBEAT_Payload* heartbeat);
+void output_acknack(InputReliableStream* reference_stream, ACKNACK_Payload* acknack);
 
-void input_heartbeat(Session* sesson, ReliableStream* reference_stream, uint16_t first_seq_num, uint16_t last_seq_num);
-void input_acknack(Session* session, ReliableStream* reference_stream, uint16_t first_unacked_seq_num, uint8_t bitmap[2]);
+void input_heartbeat(Session* sesson, InputReliableStream* reference_stream, uint16_t first_seq_num, uint16_t last_seq_num);
+void input_acknack(Session* session, OutputReliableStream* reference_stream, uint16_t first_unacked_seq_num, uint8_t bitmap[2]);
 
 #ifdef __cplusplus
 }

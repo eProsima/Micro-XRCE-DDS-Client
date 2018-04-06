@@ -51,32 +51,34 @@ bool new_udp_session(Session* const session,
 
         /* Init streams. */
         // input best effort
-        session->input_best_effort_stream.seq_num = 0;
-        init_micro_buffer(&session->input_best_effort_stream.buffer.micro_buffer,
-                          session->input_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE);
+        session->input_best_effort_stream.last_handled = -1;
 
         // output best effort
-        session->output_best_effort_stream.seq_num = 0;
+        session->output_best_effort_stream.last_sent = -1;
         init_micro_buffer_endian(&session->output_best_effort_stream.buffer.micro_buffer,
                           session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
         session->output_best_effort_stream.buffer.micro_buffer.iterator += session->header_offset;
 
         // input reliable
-        session->input_reliable_stream.seq_num = 0;
+        session->input_reliable_stream.last_handled = -1;
+        session->input_reliable_stream.last_announced = -1;
         for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
             init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
                               session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
         }
+        session->input_reliable_stream.last_acknack_timestamp = 0;
 
         // output reliable
-        session->output_reliable_stream.seq_num = 0;
+        session->output_reliable_stream.last_sent = -1;
+        session->output_reliable_stream.last_acknown = -1;
         for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
             init_micro_buffer_endian(&session->output_reliable_stream.buffers[i].micro_buffer,
                               session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
             session->output_reliable_stream.buffers[i].micro_buffer.iterator += session->header_offset;
         }
+        session->output_reliable_stream.last_heartbeat_timestamp = 0;
 
         session->on_topic_callback = on_topic_callback;
         session->on_topic_args = on_topic_args;
@@ -96,32 +98,16 @@ void close_session(Session* session)
 bool init_session_syn(Session* session)
 {
     /* Generate CREATE_CLIENT_Payload. */
-    struct timespec ts;
-#ifdef WIN32
-    SYSTEMTIME epoch_tm = {1970, 1, 4, 1, 0, 0, 0, 0};
-    FILETIME epoch_ft;
-    SystemTimeToFileTime(&epoch_tm, &epoch_ft);
-    uint64_t epoch_time = (((uint64_t) epoch_ft.dwHighDateTime) << 32) + epoch_ft.dwLowDateTime;
+    uint64_t nanoseconds = get_nano_time();
 
-    SYSTEMTIME tm;
-    FILETIME ft;
-    GetSystemTime(&tm);
-    SystemTimeToFileTime(&tm, &ft);
-    uint64_t current_time = (((uint64_t) ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
-
-    ts.tv_sec = (time_t) ((current_time - epoch_time) / 10000000);
-    ts.tv_nsec = (time_t) ((current_time - epoch_time) % 10000000);
-#else
-    clock_gettime(CLOCK_REALTIME, &ts);
-#endif
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = get_raw_request_id(session->request_id);
     payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
     payload.client_representation.xrce_vendor_id = (XrceVendorId){{0x01, 0x0F}};
-    payload.client_representation.client_timestamp.seconds = ts.tv_sec;
-    payload.client_representation.client_timestamp.nanoseconds = ts.tv_nsec;
+    payload.client_representation.client_timestamp.seconds = nanoseconds / 1000000000;
+    payload.client_representation.client_timestamp.nanoseconds = nanoseconds % 1000000000;
     payload.client_representation.client_key = session->key;
     payload.client_representation.session_id = session->id;
     payload.client_representation.optional_properties = false;
@@ -355,7 +341,7 @@ bool delete_object_sync(Session* session, ObjectId object_id)
     payload.base.request_id = get_raw_request_id(session->request_id);
     payload.base.object_id = object_id;
 
-    ReliableStream* reliable = &session->output_reliable_stream;
+    OutputReliableStream* reliable = &session->output_reliable_stream;
     uint32_t payload_size = 4; //size_of_Delete_Payload(payload)
     MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_DELETE, payload_size);
 
@@ -384,7 +370,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
     payload.read_specification.optional_delivery_control = false;
     payload.read_specification.data_format = FORMAT_DATA;
 
-    ReliableStream* reliable = &session->output_reliable_stream;
+    OutputReliableStream* reliable = &session->output_reliable_stream;
     uint32_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
     MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_READ_DATA, payload_size);
 
@@ -395,9 +381,9 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
     return run_until_status(session);
 }
 
-bool create_reliable_object_sync(Session* session, ReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
+bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
 
     /* Serialize CREATE_Payload. */
     MicroState submessage_begin = get_micro_state(output_buffer);
@@ -422,10 +408,19 @@ bool create_reliable_object_sync(Session* session, ReliableStream* output_stream
     return run_until_status(session);
 }
 
-MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
+bool reliable_stream_is_available(OutputReliableStream* output_stream)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
-    if(SUBHEADER_SIZE + payload_size > output_buffer->final - output_buffer->iterator)
+    int16_t last_sent = output_stream->last_sent;
+    int16_t last_acknown = output_stream->last_acknown;
+
+    return last_sent - last_acknown != MICRORTPS_MAX_MSG_NUM;
+}
+
+MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
+{
+    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    if(!reliable_stream_is_available(output_stream)
+        || SUBHEADER_SIZE + payload_size > output_buffer->final - output_buffer->iterator)
     {
         return NULL;
     }
@@ -439,7 +434,7 @@ MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t subm
 }
 
 
-MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
+MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
     MicroBuffer* output_buffer = &output_stream->buffer.micro_buffer;
     if(SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
@@ -463,10 +458,11 @@ MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_strea
     return output_buffer;
 }
 
-MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
+MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
-    if(SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
+    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    if(!reliable_stream_is_available(output_stream)
+        || SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
     {
         return NULL;
     }
@@ -503,24 +499,48 @@ void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uin
 
 void run_communication(Session* session)
 {
-    BestEffortStream* output_best_effort_stream = &session->output_best_effort_stream;
+    /* Send phase */
+    OutputBestEffortStream* output_best_effort_stream = &session->output_best_effort_stream;
     MicroBuffer* output_best_effort_buffer = &output_best_effort_stream->buffer.micro_buffer;
     if(output_best_effort_buffer->iterator - output_best_effort_buffer->init > HEADER_MAX_SIZE)
     {
         send_best_effort_message(session, output_best_effort_stream);
     }
 
-    ReliableStream* output_reliable_stream = &session->output_reliable_stream;
-    MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[output_reliable_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
-    if(output_reliable_buffer->iterator - output_reliable_buffer->init > HEADER_MAX_SIZE)
+    OutputReliableStream* output_reliable_stream = &session->output_reliable_stream;
+    if(reliable_stream_is_available(output_reliable_stream))
     {
-        send_reliable_message(session, output_reliable_stream);
-        send_heartbeat(session, output_reliable_stream);
+        MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[(output_reliable_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+        if(output_reliable_buffer->iterator - output_reliable_buffer->init > HEADER_MAX_SIZE)
+        {
+            send_reliable_message(session, output_reliable_stream);
+        }
     }
 
+    uint64_t current_ms = get_nano_time() / 1000000;
+    if(output_reliable_stream->last_acknown != output_reliable_stream->last_sent)
+    {
+        if(output_reliable_stream->last_heartbeat_timestamp + MICRORTPS_HEARTBEAT_MIN_PERIOD_MS < current_ms)
+        {
+            send_heartbeat(session, output_reliable_stream);
+            output_reliable_stream->last_heartbeat_timestamp = current_ms;
+        }
+    }
+
+    InputReliableStream* input_reliable_stream = &session->input_reliable_stream;
+    if(input_reliable_stream->last_announced != input_reliable_stream->last_handled)
+    {
+        if(input_reliable_stream->last_acknack_timestamp + MICRORTPS_HEARTBEAT_MIN_PERIOD_MS < current_ms)
+        {
+            send_acknack(session, input_reliable_stream);
+            input_reliable_stream->last_acknack_timestamp = current_ms;
+        }
+    }
+
+    /* Receive phase */
     uint8_t buffer[MICRORTPS_MTU_SIZE];
     uint32_t length = 0;
-    while (0 < (length = receive_data_timed(buffer, MICRORTPS_MTU_SIZE, session->transport_id, MICRORTPS_TIMEOUT)))
+    while (0 < (length = receive_data_timed(buffer, MICRORTPS_MTU_SIZE, session->transport_id, MICRORTPS_TIMEOUT_MS)))
     {
         MicroBuffer input_buffer;
         init_micro_buffer(&input_buffer, buffer, length);
@@ -530,12 +550,6 @@ void run_communication(Session* session)
             PRINTL_SERIALIZATION(RECV, buffer, length);
             process_message(session, &input_buffer);
         }
-    }
-
-    ReliableStream* input_reliable_stream = &session->input_reliable_stream;
-    if(input_reliable_stream->last_seq_num > input_reliable_stream->seq_num)
-    {
-        send_acknack(session, input_reliable_stream);
     }
 }
 
@@ -585,3 +599,24 @@ ObjectId get_raw_object_id(uint16_t object_id)
         return (ObjectId){{(uint8_t)(object_id), (uint8_t)object_id >> 8}};
 }
 
+uint64_t get_nano_time()
+{
+#ifdef WIN32
+    SYSTEMTIME epoch_tm = {1970, 1, 4, 1, 0, 0, 0, 0};
+    FILETIME epoch_ft;
+    SystemTimeToFileTime(&epoch_tm, &epoch_ft);
+    uint64_t epoch_time = (((uint64_t) epoch_ft.dwHighDateTime) << 32) + epoch_ft.dwLowDateTime;
+
+    SYSTEMTIME tm;
+    FILETIME ft;
+    GetSystemTime(&tm);
+    SystemTimeToFileTime(&tm, &ft);
+    uint64_t current_time = (((uint64_t) ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
+
+    return (current_time - epoch_time) * 100;
+#else
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (ts.tv_sec * 1000000000) + ts.tv_nsec;
+#endif
+}

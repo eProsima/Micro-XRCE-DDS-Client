@@ -35,21 +35,37 @@ typedef struct MessageBuffer
 
 } MessageBuffer;
 
-typedef struct BestEffortStream
+typedef struct InputBestEffortStream
 {
-    uint16_t seq_num;
+    uint16_t last_handled;
+
+} InputBestEffortStream;
+
+typedef struct OutputBestEffortStream
+{
+    uint16_t last_sent;
     MessageBuffer buffer;
 
-} BestEffortStream;
+} OutputBestEffortStream;
 
 
-typedef struct ReliableStream
+typedef struct InputReliableStream
 {
-    uint16_t seq_num;
-    uint16_t last_seq_num;
+    uint16_t last_handled;
+    uint16_t last_announced;
     MessageBuffer buffers[MICRORTPS_MAX_MSG_NUM];
+    uint64_t last_acknack_timestamp;
 
-} ReliableStream;
+} InputReliableStream;
+
+typedef struct OutputReliableStream
+{
+    uint16_t last_sent;
+    uint16_t last_acknown;
+    MessageBuffer buffers[MICRORTPS_MAX_MSG_NUM];
+    uint64_t last_heartbeat_timestamp;
+
+} OutputReliableStream;
 
 
 typedef void (*OnTopic)(ObjectId id, MicroBuffer* serialized_topic, void *args);
@@ -66,10 +82,10 @@ typedef struct Session
 
     uint8_t header_offset;
 
-    BestEffortStream input_best_effort_stream;
-    BestEffortStream output_best_effort_stream;
-    ReliableStream input_reliable_stream;
-    ReliableStream output_reliable_stream;
+    InputBestEffortStream input_best_effort_stream;
+    OutputBestEffortStream output_best_effort_stream;
+    InputReliableStream input_reliable_stream;
+    OutputReliableStream output_reliable_stream;
 
     OnTopic on_topic_callback;
     void* on_topic_args;
@@ -209,8 +225,8 @@ bool delete_object_sync(Session* session, ObjectId object_id);
 
 bool read_data_sync(Session* session, ObjectId object_id);
 
-MicroBuffer* prepare_best_effort_stream_for_topic(BestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
-MicroBuffer* prepare_reliable_stream_for_topic(ReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
+MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
+MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
 
 void run_communication(Session* session);
 

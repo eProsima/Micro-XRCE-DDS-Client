@@ -41,6 +41,25 @@ size_t read_file(const char *file_name, char* data_file, size_t buf_size)
     return length;
 }
 
+void check_and_print_error(Session* session)
+{
+    if(session->last_status_received)
+    {
+        if(session->last_status.status != STATUS_OK)
+        {
+            printf("%sStatus error%s\n", "\x1B[1;31m", "\x1B[0m");
+        }
+        else
+        {
+            //All things go well
+        }
+    }
+    else
+    {
+        printf("%sConnection error%s\n", "\x1B[1;31m", "\x1B[0m");
+    }
+}
+
 void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
 {
     if(HELLO_WORLD_TOPIC == id.data[0])
@@ -57,7 +76,7 @@ int main(int argc, char** argv)
 
     if(argc < 3)
     {
-        printf("Usage: program agent_ip agent_port");
+        printf("Usage: program agent_ip agent_port\n");
         return 1;
     }
 
@@ -73,27 +92,27 @@ int main(int argc, char** argv)
     }
 
     init_session_syn(&my_session);
-
+    check_and_print_error(&my_session);
 
     /* Init XRCE objects. */
     ObjectId participant_id = {{0x00, 0x01}};
     create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
+    check_and_print_error(&my_session);
 
     const char* topic_xml = {"<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>"};
     ObjectId topic_id = {{0x00, 0x02}};
     create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
+    check_and_print_error(&my_session);
 
     const char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
     ObjectId subscriber_id = {{HELLO_WORLD_TOPIC, 0x04}};
     create_subscriber_sync_by_xml(&my_session, subscriber_id, subscriber_xml, participant_id, false, false);
+    check_and_print_error(&my_session);
 
     const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
     ObjectId datareader_id = {{HELLO_WORLD_TOPIC, 0x06}};
     create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
-
-
-//    /* Request data */
-//    read_data_sync(&my_session, datareader_id);
+    check_and_print_error(&my_session);
 
 
     /* Main loop */
@@ -101,6 +120,7 @@ int main(int argc, char** argv)
     {
         /* Request data */
         read_data_sync(&my_session, datareader_id);
+        check_and_print_error(&my_session);
 
         run_communication(&my_session);
 

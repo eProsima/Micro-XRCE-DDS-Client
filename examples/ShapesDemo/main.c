@@ -191,7 +191,7 @@ bool compute_command(const char* command, Session* session)
         ShapeType topic = {"GREEN", 100 , 100, 50};
         ObjectId id = {{id_pre, OBJK_DATAWRITER}};
 
-        BestEffortStream* best_effort = &session->output_best_effort_stream;
+        OutputBestEffortStream* best_effort = &session->output_best_effort_stream;
         uint32_t topic_size = size_of_ShapeType_topic(&topic);
         MicroBuffer* topic_buffer = prepare_best_effort_stream_for_topic(best_effort, id, topic_size);
         if(topic_buffer != NULL)

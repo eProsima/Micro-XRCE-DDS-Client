@@ -67,11 +67,11 @@ int main()
     ObjectId datareader_id = {{HELLO_WORLD_TOPIC, 0x06}};
     result = create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
 
-    BestEffortStream* best_effort = &my_session.output_best_effort_stream;
-
 
     while(true)
     {
+        OutputBestEffortStream* best_effort = &my_session.output_best_effort_stream;
+
         HelloWorld topic1 = {18, "Hello MicroRTPS 1"};
         uint32_t topic_size_1 = 26; // = size_of_HelloWorld_topic(&topic1)
         MicroBuffer* topic_buffer_1 = prepare_best_effort_stream_for_topic(best_effort, datawriter_id, topic_size_1);
@@ -89,7 +89,7 @@ int main()
         }
 
 
-        ReliableStream* reliable = &my_session.output_reliable_stream;
+        OutputReliableStream* reliable = &my_session.output_reliable_stream;
 
         HelloWorld topic3 = {18, "Hello MicroRTPS 3"};
         uint32_t topic_size_3 = 26; // = size_of_HelloWorld_topic(&topic3)

@@ -20,14 +20,13 @@
 
 #include <stdlib.h>
 
-bool send_best_effort_message(Session* session, BestEffortStream* output_stream)
+bool send_best_effort_message(Session* session, OutputBestEffortStream* output_stream)
 {
     MicroBuffer* output_buffer = &output_stream->buffer.micro_buffer;
 
-    stamp_header(session, output_buffer, STREAMID_BUILTIN_BEST_EFFORTS, output_stream->seq_num);
+    stamp_header(session, output_buffer, STREAMID_BUILTIN_BEST_EFFORTS, ++output_stream->last_sent);
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
-    output_stream->seq_num++;
 
     PRINTL_SERIALIZATION(SEND, output_buffer->init, output_buffer->iterator - output_buffer->init);
 
@@ -37,21 +36,20 @@ bool send_best_effort_message(Session* session, BestEffortStream* output_stream)
     return bytes > 0;
 }
 
-bool send_reliable_message(Session* session, ReliableStream* output_stream)
+bool send_reliable_message(Session* session, OutputReliableStream* output_stream)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[output_stream->seq_num % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[(output_stream->last_sent + 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
 
-    stamp_header(session, output_buffer, STREAMID_BUILTIN_RELIABLE, output_stream->seq_num);
+    stamp_header(session, output_buffer, STREAMID_BUILTIN_RELIABLE, ++output_stream->last_sent);
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
-    output_stream->seq_num++;
 
     PRINTL_SERIALIZATION(SEND, output_buffer->init, output_buffer->iterator - output_buffer->init);
 
     return bytes > 0;
 }
 
-bool send_heartbeat(Session* session, ReliableStream* reference_stream)
+bool send_heartbeat(Session* session, OutputReliableStream* reference_stream)
 {
     uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE] = {0};
     MicroBuffer output_buffer;
@@ -76,7 +74,7 @@ bool send_heartbeat(Session* session, ReliableStream* reference_stream)
     return bytes > 0;
 }
 
-bool send_acknack(Session* session, ReliableStream* reference_stream)
+bool send_acknack(Session* session, InputReliableStream* reference_stream)
 {
     uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE];
     MicroBuffer output_buffer;

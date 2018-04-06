@@ -34,8 +34,8 @@ void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer);
 void process_acknack_submessage(Session* session, MicroBuffer* input_buffer);
 void process_data_submessage(Session* session, MicroBuffer* input_buffer);
 
-bool receive_best_effort_message(BestEffortStream* input_stream, const uint16_t seq_num);
-bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submessages, uint16_t seq_num);
+bool receive_best_effort_message(InputBestEffortStream* input_stream, const uint16_t seq_num);
+bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* submessages, uint16_t seq_num);
 
 #ifdef __cplusplus
 }

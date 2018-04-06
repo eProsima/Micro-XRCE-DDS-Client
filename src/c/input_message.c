@@ -35,7 +35,7 @@ void process_message(Session* session, MicroBuffer* input_buffer)
     }
     else if(STREAMID_BUILTIN_BEST_EFFORTS == header.stream_id)
     {
-        BestEffortStream* input_stream = &session->input_best_effort_stream;
+        InputBestEffortStream* input_stream = &session->input_best_effort_stream;
         bool ready_to_process = receive_best_effort_message(input_stream, header.sequence_nr);
         if(ready_to_process)
         {
@@ -44,12 +44,12 @@ void process_message(Session* session, MicroBuffer* input_buffer)
     }
     else if(STREAMID_BUILTIN_RELIABLE == header.stream_id)
     {
-        ReliableStream* input_stream = &session->input_reliable_stream;
+        InputReliableStream* input_stream = &session->input_reliable_stream;
         bool ready_to_read = receive_reliable_message(input_stream, input_buffer, header.sequence_nr);
         if(ready_to_read)
         {
             process_submessages(session, input_buffer);
-            for(uint16_t i = header.sequence_nr + 1; i < input_stream->seq_num; i++)
+            for(uint16_t i = header.sequence_nr + 1; i <= input_stream->last_handled; i++)
             {
                 uint8_t current_index = i % MICRORTPS_MAX_MSG_NUM;
                 MicroBuffer* current_buffer = &input_stream->buffers[current_index].micro_buffer;
@@ -127,8 +127,7 @@ void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer)
 
     PRINTL_HEARTBEAT_SUBMESSAGE(RECV, &heartbeat);
 
-//    ReliableStream* input_stream = &session->output_reliable_stream;
-    ReliableStream* input_stream = &session->input_reliable_stream;
+    InputReliableStream* input_stream = &session->input_reliable_stream;
     input_heartbeat(session, input_stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
 }
 
@@ -139,7 +138,7 @@ void process_acknack_submessage(Session* session, MicroBuffer* input_buffer)
 
     PRINTL_ACKNACK_SUBMESSAGE(RECV, &acknack);
 
-    ReliableStream* output_stream = &session->output_reliable_stream;
+    OutputReliableStream* output_stream = &session->output_reliable_stream;
     input_acknack(session, output_stream, acknack.first_unacked_seq_num, acknack.nack_bitmap);
 }
 
@@ -155,53 +154,51 @@ void process_data_submessage(Session* session, MicroBuffer* input_buffer)
     session->on_topic_callback(payload.base.object_id, input_buffer, session->on_topic_args);
 }
 
-bool receive_best_effort_message(BestEffortStream* input_stream, const uint16_t seq_num)
+bool receive_best_effort_message(InputBestEffortStream* input_stream, const uint16_t seq_num)
 {
-    if(seq_num < input_stream->seq_num)
+    if(seq_num <= input_stream->last_handled)
     {
         return false;
     }
 
-    input_stream->seq_num = seq_num + 1;
+    input_stream->last_handled = seq_num;
 
     return true;
 }
 
-bool receive_reliable_message(ReliableStream* input_stream, MicroBuffer* submessages, const uint16_t seq_num)
+bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* submessages, const uint16_t seq_num)
 {
     bool result = false;
 
-    uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
-    MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
-
-    if(input_buffer->iterator != input_buffer->init
-        || seq_num < input_stream->seq_num
-        || seq_num > input_stream->seq_num + MICRORTPS_MAX_MSG_NUM)
+    if(input_stream->last_handled >= seq_num || input_stream->last_handled + MICRORTPS_MAX_MSG_NUM < seq_num)
     {
         return false;
     }
 
-    if(input_stream->seq_num != seq_num)
+    if(input_stream->last_handled + 1 == seq_num)
     {
-        serialize_array_uint8_t(input_buffer, submessages->iterator, submessages->final - submessages->iterator);
-    }
-    else
-    {
-        for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM && seq_num == input_stream->seq_num; i++)
+        for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
             uint8_t aux_index = (seq_num + i) % MICRORTPS_MAX_MSG_NUM;
             MicroBuffer* aux_buffer = &input_stream->buffers[aux_index].micro_buffer;
             if(aux_buffer->iterator == aux_buffer->init)
             {
-                input_stream->seq_num = seq_num + i;
+                input_stream->last_handled += i + 1;
+                break;
             }
         }
         result = true;
     }
-
-    if(input_stream->last_seq_num <= seq_num)
+    else
     {
-        input_stream->last_seq_num = seq_num + 1;
+        uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
+        MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
+        serialize_array_uint8_t(input_buffer, submessages->iterator, submessages->final - submessages->iterator);
+    }
+
+    if(input_stream->last_announced < seq_num)
+    {
+        input_stream->last_announced = seq_num;
     }
 
     return result;

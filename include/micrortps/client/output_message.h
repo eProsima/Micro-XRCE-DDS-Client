@@ -24,11 +24,11 @@ extern "C"
 
 #include <micrortps/client/client.h>
 
-bool send_best_effort_message(Session* session, BestEffortStream* output_stream);
-bool send_reliable_message(Session* session, ReliableStream* output_stream);
+bool send_best_effort_message(Session* session, OutputBestEffortStream* output_stream);
+bool send_reliable_message(Session* session, OutputReliableStream* output_stream);
 
-bool send_heartbeat(Session* session, ReliableStream* reference_stream);
-bool send_acknack(Session* session, ReliableStream* reference_stream);
+bool send_heartbeat(Session* session, OutputReliableStream* reference_stream);
+bool send_acknack(Session* session, InputReliableStream* reference_stream);
 
 #ifdef __cplusplus
 }

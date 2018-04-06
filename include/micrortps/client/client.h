@@ -14,9 +14,11 @@ extern "C"
 #include <stddef.h>
 #include <stdint.h>
 
-/* Create object defines. */
-#define MICRORTPS_TIMEOUT           10
-#define MICRORTPS_MAX_ATTEMPTS     100
+/* Timeouts, periods. */
+#define MICRORTPS_TIMEOUT_MS                 50
+#define MICRORTPS_MAX_ATTEMPTS               50
+#define MICRORTPS_HEARTBEAT_MIN_PERIOD_MS   500
+#define MICRORTPS_ACKNACK_MIN_PERIOD_MS     500
 
 /* Message sizes. */
 #define HEADER_MIN_SIZE    0x04
@@ -47,9 +49,9 @@ extern "C"
  * Streams.
  */
 
-bool create_reliable_object_sync(Session* session, ReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace);
+bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace);
 
-MicroBuffer* prepare_reliable_stream(ReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size);
+MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size);
 
 void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uint16_t seq_num);
 
@@ -59,6 +61,9 @@ uint16_t get_num_request_id(RequestId request_id);
 RequestId get_raw_request_id(uint16_t request_id);
 uint16_t get_num_object_id(ObjectId object_id);
 ObjectId get_raw_object_id(uint16_t object_id);
+
+struct timespec;
+uint64_t get_nano_time();
 
 #ifdef __cplusplus
 }
