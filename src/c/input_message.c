@@ -176,8 +176,11 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
         return false;
     }
 
+    uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
+    MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
     if(seq_num_add(input_stream->last_handled, 1) == seq_num)
     {
+        input_buffer->iterator += submessages->final - submessages->iterator; //change by jump function
         for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
             uint8_t aux_index = (seq_num + i) % MICRORTPS_MAX_MSG_NUM;
@@ -192,8 +195,6 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
     }
     else
     {
-        uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
-        MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
         serialize_array_uint8_t(input_buffer, submessages->iterator, submessages->final - submessages->iterator);
     }
 
