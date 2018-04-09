@@ -150,9 +150,16 @@ bool init_session_syn(Session* session)
     PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
     PRINTL_SERIALIZATION(SEND, output_buffer.init, output_buffer.iterator - output_buffer.init);
 
-    send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+    uint32_t attempts_counter = 0;
+    bool result = false;
+    while(!result && attempts_counter < MICRORTPS_INIT_SESSION_MAX_ATTEMPTS)
+    {
+        send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+        result = run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
+        attempts_counter++;
+    }
 
-    return run_until_status(session);
+    return  result;
 }
 
 bool create_participant_sync_by_ref(Session* session,
@@ -343,13 +350,16 @@ bool delete_object_sync(Session* session, ObjectId object_id)
 
     OutputReliableStream* reliable = &session->output_reliable_stream;
     uint32_t payload_size = 4; //size_of_Delete_Payload(payload)
+
     MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_DELETE, payload_size);
+    if(NULL != buffer)
+    {
+        serialize_DELETE_Payload(buffer, &payload);
 
-    serialize_DELETE_Payload(buffer, &payload);
+        PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
+    }
 
-    PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
-
-    return run_until_status(session);
+    return run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
 }
 
 bool read_data_sync(Session* session, ObjectId data_reader_id)
@@ -373,12 +383,14 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
     OutputReliableStream* reliable = &session->output_reliable_stream;
     uint32_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
     MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_READ_DATA, payload_size);
+    if(NULL != buffer)
+    {
+        serialize_READ_DATA_Payload(buffer, &payload);
 
-    serialize_READ_DATA_Payload(buffer, &payload);
+        PRINTL_READ_DATA_SUBMESSAGE(&payload);
+    }
 
-    PRINTL_READ_DATA_SUBMESSAGE(&payload);
-
-    return run_until_status(session);
+    return run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
 }
 
 bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
@@ -405,7 +417,7 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
 
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(payload);
 
-    return run_until_status(session);
+    return run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
 }
 
 bool reliable_stream_is_available(OutputReliableStream* output_stream)
@@ -551,11 +563,11 @@ void run_communication(Session* session)
 }
 
 
-bool run_until_status(Session* session)
+bool run_until_status(Session* session, uint32_t attempts)
 {
     uint32_t attempts_counter = 0;
     session->last_status_received = false;
-    while (!session->last_status_received && attempts_counter < MICRORTPS_MAX_ATTEMPTS)
+    while (!session->last_status_received && attempts_counter < attempts)
     {
         run_communication(session);
         attempts_counter++;

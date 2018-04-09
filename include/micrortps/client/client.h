@@ -17,6 +17,7 @@ extern "C"
 /* Timeouts, periods. */
 #define MICRORTPS_TIMEOUT_MS                 50
 #define MICRORTPS_MAX_ATTEMPTS               50
+#define MICRORTPS_INIT_SESSION_MAX_ATTEMPTS  10
 #define MICRORTPS_HEARTBEAT_MIN_PERIOD_MS   500
 #define MICRORTPS_ACKNACK_MIN_PERIOD_MS     500
 
@@ -55,7 +56,7 @@ MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_
 
 void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uint16_t seq_num);
 
-bool run_until_status(Session* session);
+bool run_until_status(Session* session, uint32_t attempts);
 
 uint16_t get_num_request_id(RequestId request_id);
 RequestId get_raw_request_id(uint16_t request_id);
