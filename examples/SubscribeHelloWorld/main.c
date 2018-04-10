@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 
     /* Init session. */
     Session my_session;
-    ClientKey key = {{0xBB, 0xBB, 0xCC, 0xDD}};
+    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
     uint8_t ip[] = {atoi(strtok(argv[1], ".")), atoi(strtok(NULL, ".")),
                     atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
     uint16_t port = atoi(argv[2]);
@@ -91,27 +91,27 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    init_session_syn(&my_session);
+    bool result = init_session_syn(&my_session);
     check_and_print_error(&my_session);
 
     /* Init XRCE objects. */
     ObjectId participant_id = {{0x00, 0x01}};
-    create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
+    result = create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
     check_and_print_error(&my_session);
 
     const char* topic_xml = {"<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>"};
     ObjectId topic_id = {{0x00, 0x02}};
-    create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
+    result = create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
     check_and_print_error(&my_session);
 
     const char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
     ObjectId subscriber_id = {{HELLO_WORLD_TOPIC, 0x04}};
-    create_subscriber_sync_by_xml(&my_session, subscriber_id, subscriber_xml, participant_id, false, false);
+    result = create_subscriber_sync_by_xml(&my_session, subscriber_id, subscriber_xml, participant_id, false, false);
     check_and_print_error(&my_session);
 
     const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
     ObjectId datareader_id = {{HELLO_WORLD_TOPIC, 0x06}};
-    create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
+    result = create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
     check_and_print_error(&my_session);
 
 

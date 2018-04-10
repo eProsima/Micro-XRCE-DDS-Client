@@ -15,6 +15,7 @@
 #include <micrortps/client/client.h>
 #include <micrortps/client/output_message.h>
 #include <string.h>
+#include "log/message.h"
 
 void output_heartbeat(OutputReliableStream* output_stream, HEARTBEAT_Payload* heartbeat)
 {
@@ -37,14 +38,15 @@ void input_acknack(Session* session, OutputReliableStream* output_stream, const 
     /* Send lost */
     for(int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
     {
-        bool lost = (8 > i) ? (bitmap[1] << i) : (bitmap[0] << (i - 8));
+        bool lost = (8 > i) ? (bitmap[1] & (0x01 << i)) : (bitmap[0] & (0x01 << (i - 8)));
         if(lost)
         {
             uint8_t index = (first_unacked_seq_num + i) % MICRORTPS_MAX_MSG_NUM;
             MicroBuffer* output_buffer = &output_stream->buffers[index].micro_buffer;
-            if(output_buffer->iterator != output_buffer->init)
+            if((output_buffer->iterator - output_buffer->init) > session->header_offset)
             {
                 send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
+                PRINTL_SERIALIZATION(SEND, output_buffer->init, output_buffer->iterator - output_buffer->init);
             }
         }
     }

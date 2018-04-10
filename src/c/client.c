@@ -496,7 +496,7 @@ MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stre
 void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uint16_t seq_num)
 {
     MicroBuffer header_buffer;
-    init_micro_buffer(&header_buffer, output_buffer->init, HEADER_MAX_SIZE);
+    init_micro_buffer(&header_buffer, output_buffer->init, session->header_offset);
 
     MessageHeader header = (MessageHeader){session->id, id, seq_num};
     (void) serialize_MessageHeader(&header_buffer, &header);
@@ -511,7 +511,7 @@ void run_communication(Session* session)
     /* Send phase */
     OutputBestEffortStream* output_best_effort_stream = &session->output_best_effort_stream;
     MicroBuffer* output_best_effort_buffer = &output_best_effort_stream->buffer.micro_buffer;
-    if(output_best_effort_buffer->iterator - output_best_effort_buffer->init > HEADER_MAX_SIZE)
+    if(output_best_effort_buffer->iterator - output_best_effort_buffer->init > session->header_offset)
     {
         send_best_effort_message(session, output_best_effort_stream);
     }
@@ -520,7 +520,7 @@ void run_communication(Session* session)
     if(reliable_stream_is_available(output_reliable_stream))
     {
         MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[seq_num_add(output_reliable_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
-        if(output_reliable_buffer->iterator - output_reliable_buffer->init > HEADER_MAX_SIZE)
+        if(output_reliable_buffer->iterator - output_reliable_buffer->init > session->header_offset)
         {
             send_reliable_message(session, output_reliable_stream);
         }

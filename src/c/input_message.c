@@ -180,14 +180,13 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
     MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
     if(seq_num_add(input_stream->last_handled, 1) == seq_num)
     {
-        input_buffer->iterator += submessages->final - submessages->iterator; //change by jump function
-        for(uint16_t i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
+        for(uint16_t i = 1; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
             uint8_t aux_index = (seq_num + i) % MICRORTPS_MAX_MSG_NUM;
             MicroBuffer* aux_buffer = &input_stream->buffers[aux_index].micro_buffer;
             if(aux_buffer->iterator == aux_buffer->init)
             {
-                input_stream->last_handled = seq_num_add(input_stream->last_handled, i + 1);
+                input_stream->last_handled = seq_num_add(input_stream->last_handled, i);
                 break;
             }
         }
