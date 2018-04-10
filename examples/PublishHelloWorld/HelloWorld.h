@@ -42,7 +42,7 @@ bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
     serialize_uint32_t(writer, topic->m_index);
     serialize_sequence_char(writer, topic->m_message, strlen(topic->m_message) + 1);
 
-    return true;
+    return writer->error == BUFFER_OK;
 }
 
 bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
@@ -51,7 +51,7 @@ bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
     uint32_t m_message_size;
     deserialize_sequence_char(reader, &topic->m_message, &m_message_size);
 
-    return true;
+    return reader->error == BUFFER_OK;
 }
 
 uint32_t size_of_HelloWorld_topic(const HelloWorld* topic)

@@ -47,18 +47,18 @@ bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
     serialize_int32_t(writer, topic->y);
     serialize_int32_t(writer, topic->shapesize);
 
-    return true;
+    return writer->error == BUFFER_OK;
 }
 
-bool deserialize_ShapeType_topic(MicroBuffer* message, ShapeType* topic)
+bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
 {
     uint32_t color_size;
-    deserialize_sequence_char(message, &topic->color, &color_size);
-    deserialize_int32_t(message, &topic->x);
-    deserialize_int32_t(message, &topic->y);
-    deserialize_int32_t(message, &topic->shapesize);
+    deserialize_sequence_char(reader, &topic->color, &color_size);
+    deserialize_int32_t(reader, &topic->x);
+    deserialize_int32_t(reader, &topic->y);
+    deserialize_int32_t(reader, &topic->shapesize);
 
-    return true;
+    return reader->error == BUFFER_OK;
 }
 
 uint32_t size_of_ShapeType_topic(const ShapeType* topic)
