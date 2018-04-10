@@ -63,6 +63,8 @@ void input_heartbeat(Session* session, InputReliableStream* input_stream, uint16
     {
         input_stream->last_announced = last_seq_num;
     }
+
+    send_acknack(session, input_stream);
 }
 
 void output_acknack(InputReliableStream* input_stream, ACKNACK_Payload* acknack)
