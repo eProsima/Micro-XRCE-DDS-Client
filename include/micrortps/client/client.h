@@ -17,7 +17,7 @@ extern "C"
 /* Timeouts, periods. */
 #define MICRORTPS_TIMEOUT_MS                 50
 #define MICRORTPS_MAX_ATTEMPTS               50
-#define MICRORTPS_INIT_SESSION_MAX_ATTEMPTS  10
+#define MICRORTPS_SESSION_MAX_ATTEMPTS       20
 #define MICRORTPS_HEARTBEAT_MIN_PERIOD_MS    50
 #define MICRORTPS_ACKNACK_MIN_PERIOD_MS      50
 
@@ -54,10 +54,12 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
 
 MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size);
 
-void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uint16_t seq_num);
+void stamp_header(Session* session, uint8_t* output_buffer, StreamId id, uint16_t seq_num);
 
-bool run_until_status(Session* session, uint32_t attempts);
+bool run_until_status(Session* session, uint16_t status_request_id, uint32_t attempts);
+bool send_until_status(Session* session, uint16_t status_request_id, uint32_t attempts, MicroBuffer* message);
 
+// Util
 uint16_t get_num_request_id(RequestId request_id);
 RequestId get_raw_request_id(uint16_t request_id);
 uint16_t get_num_object_id(ObjectId object_id);

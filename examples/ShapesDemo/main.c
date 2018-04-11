@@ -127,7 +127,7 @@ bool compute_command(const char* command, Session* session)
 
     if(strcmp(name, "create_session") == 0)
     {
-        init_session_syn(session);
+        init_session_sync(session);
         check_and_print_error(session);
     }
     else if(strcmp(name, "create_participant") == 0 && length == 2)
@@ -215,7 +215,7 @@ bool compute_command(const char* command, Session* session)
     }
     else if(strcmp(name, "exit") == 0)
     {
-        close_session(session);
+        close_session_sync(session);
         return false;
     }
     else if(strcmp(name, "h") == 0 || strcmp(name, "help") == 0)

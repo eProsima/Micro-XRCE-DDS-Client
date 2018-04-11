@@ -34,7 +34,7 @@ int main()
         return 1;
     }
 
-    init_session_syn(&my_session);
+    init_session_sync(&my_session);
 
     /* Create participant. */
     ObjectId participant_id = {{0x00, OBJK_PARTICIPANT}};
@@ -111,7 +111,7 @@ int main()
         sleep(5);
     }
 
-    close_session(&my_session);
+    close_session_sync(&my_session);
 
     return 0;
 }

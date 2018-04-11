@@ -69,7 +69,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    init_session_syn(&my_session);
+    init_session_sync(&my_session);
     check_and_print_error(&my_session);
 
     /* Init XRCE objects. */
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
         sleep(1);
     }
 
-    close_session(&my_session);
+    close_session_sync(&my_session);
 
     return 0;
 }

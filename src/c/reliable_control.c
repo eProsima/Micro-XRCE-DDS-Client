@@ -30,8 +30,7 @@ void input_acknack(Session* session, OutputReliableStream* output_stream, const 
     {
         uint8_t index = i % MICRORTPS_MAX_MSG_NUM;
         MicroBuffer* output_buffer = &output_stream->buffers[index].micro_buffer;
-        reset_micro_buffer(output_buffer);
-        output_buffer->iterator += session->header_offset;
+        reset_micro_buffer_offset(output_buffer, session->header_offset);
     }
     output_stream->last_acknown = seq_num_sub(first_unacked_seq_num, 1);
 

@@ -55,9 +55,9 @@ bool new_udp_session(Session* const session,
 
         // output best effort
         session->output_best_effort_stream.last_sent = UINT16_MAX;
-        init_micro_buffer_endian(&session->output_best_effort_stream.buffer.micro_buffer,
-                          session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
-        session->output_best_effort_stream.buffer.micro_buffer.iterator += session->header_offset;
+        init_micro_buffer_offset(&session->output_best_effort_stream.buffer.micro_buffer,
+                                  session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE,
+                                  session->header_offset);
 
         // input reliable
         session->input_reliable_stream.last_handled = UINT16_MAX;
@@ -74,9 +74,9 @@ bool new_udp_session(Session* const session,
         session->output_reliable_stream.last_acknown = UINT16_MAX;
         for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
         {
-            init_micro_buffer_endian(&session->output_reliable_stream.buffers[i].micro_buffer,
-                              session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE, MACHINE_ENDIANNESS);
-            session->output_reliable_stream.buffers[i].micro_buffer.iterator += session->header_offset;
+            init_micro_buffer_offset(&session->output_reliable_stream.buffers[i].micro_buffer,
+                                      session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE,
+                                      session->header_offset);
         }
         session->output_reliable_stream.last_heartbeat_timestamp = 0;
 
@@ -84,18 +84,19 @@ bool new_udp_session(Session* const session,
         session->on_topic_args = on_topic_args;
 
         session->last_status_received = false;
+        session->last_status_request_id = false;
         result = true;
     }
 
     return result;
 }
 
-void close_session(Session* session)
+void free_udp_session(Session* session)
 {
     remove_locator(session->transport_id);
 }
 
-bool init_session_syn(Session* session)
+bool init_session_sync(Session* session)
 {
     /* Generate CREATE_CLIENT_Payload. */
     uint64_t nanoseconds = get_nano_time();
@@ -115,25 +116,23 @@ bool init_session_syn(Session* session)
 
     uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE];
     MicroBuffer output_buffer;
-    init_micro_buffer_endian(&output_buffer, buffer, sizeof(buffer), MACHINE_ENDIANNESS);
-
-    bool serialization_result = true;
+    init_micro_buffer(&output_buffer, buffer, sizeof(buffer));
 
     /* Serialize MessageHeader. */
     MessageHeader header;
     header.session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
     header.stream_id = 0x00;
     header.sequence_nr = 0;
-    serialization_result &= serialize_MessageHeader(&output_buffer, &header);
+    serialize_MessageHeader(&output_buffer, &header);
     if (128 > header.session_id)
     {
-        serialization_result &= serialize_ClientKey(&output_buffer, &session->key);
+        serialize_ClientKey(&output_buffer, &session->key);
     }
 
     /* Serialize CREATE_CLIENT_Payload. */
     MicroState submessage_begin = get_micro_state(&output_buffer);
     output_buffer.iterator += 4;
-    serialization_result &= serialize_CREATE_CLIENT_Payload(&output_buffer, &payload);
+    serialize_CREATE_CLIENT_Payload(&output_buffer, &payload);
     MicroState submessage_end = get_micro_state(&output_buffer);
 
     /* Serialize SubmessageHeader. */
@@ -148,18 +147,39 @@ bool init_session_syn(Session* session)
 
     /* Send message and wait for status. */
     PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
-    PRINTL_SERIALIZATION(SEND, output_buffer.init, output_buffer.iterator - output_buffer.init);
 
-    uint32_t attempts_counter = 0;
-    bool result = false;
-    while(!result && attempts_counter < MICRORTPS_INIT_SESSION_MAX_ATTEMPTS)
+    return send_until_status(session, session->request_id, MICRORTPS_SESSION_MAX_ATTEMPTS, &output_buffer);
+}
+
+bool close_session_sync(Session* session)
+{
+    uint8_t buffer[MICRORTPS_MIN_BUFFER_SIZE];
+    MicroBuffer output_buffer;
+    init_micro_buffer(&output_buffer, buffer, sizeof(buffer));
+
+    MessageHeader header;
+    header.session_id = SESSIONID_NONE_WITH_CLIENT_KEY;
+    header.stream_id = 0x00;
+    header.sequence_nr = 0;
+    serialize_MessageHeader(&output_buffer, &header);
+    if (128 > header.session_id)
     {
-        send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
-        result = run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
-        attempts_counter++;
+        serialize_ClientKey(&output_buffer, &session->key);
     }
 
-    return  result;
+    uint32_t payload_size = 4; //size_of_Delete_Payload(payload)
+
+    align_to(&output_buffer, 4);
+    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DELETE, output_buffer.endianness, payload_size };
+    serialize_SubmessageHeader(&output_buffer, &sub_header);
+
+    DELETE_Payload payload;
+    payload.base.request_id = get_raw_request_id(session->request_id);
+    payload.base.object_id = OBJECTID_CLIENT;
+    serialize_DELETE_Payload(&output_buffer, &payload);
+    PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
+
+    return send_until_status(session, session->request_id, MICRORTPS_SESSION_MAX_ATTEMPTS, &output_buffer);
 }
 
 bool create_participant_sync_by_ref(Session* session,
@@ -359,7 +379,7 @@ bool delete_object_sync(Session* session, ObjectId object_id)
         PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
     }
 
-    return run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
+    return run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
 }
 
 bool read_data_sync(Session* session, ObjectId data_reader_id)
@@ -390,7 +410,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
         PRINTL_READ_DATA_SUBMESSAGE(&payload);
     }
 
-    return run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
+    return run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
 }
 
 bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
@@ -417,7 +437,7 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
 
     PRINTL_CREATE_RESOURCE_SUBMESSAGE(payload);
 
-    return run_until_status(session, MICRORTPS_MAX_ATTEMPTS);
+    return run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
 }
 
 bool reliable_stream_is_available(OutputReliableStream* output_stream)
@@ -493,12 +513,12 @@ MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stre
 }
 
 
-void stamp_header(Session* session, MicroBuffer* output_buffer, StreamId id, uint16_t seq_num)
+void stamp_header(Session* session, uint8_t* buffer, StreamId stream_id, uint16_t seq_num)
 {
     MicroBuffer header_buffer;
-    init_micro_buffer(&header_buffer, output_buffer->init, session->header_offset);
+    init_micro_buffer(&header_buffer, buffer, session->header_offset);
 
-    MessageHeader header = (MessageHeader){session->id, id, seq_num};
+    MessageHeader header = (MessageHeader){session->id, stream_id, seq_num};
     (void) serialize_MessageHeader(&header_buffer, &header);
     if (128 > session->id)
     {
@@ -536,16 +556,6 @@ void run_communication(Session* session)
         }
     }
 
-    InputReliableStream* input_reliable_stream = &session->input_reliable_stream;
-    if(input_reliable_stream->last_announced != input_reliable_stream->last_handled)
-    {
-        if(input_reliable_stream->last_acknack_timestamp + MICRORTPS_HEARTBEAT_MIN_PERIOD_MS < current_ms)
-        {
-            send_acknack(session, input_reliable_stream);
-            input_reliable_stream->last_acknack_timestamp = current_ms;
-        }
-    }
-
     /* Receive phase */
     uint8_t buffer[MICRORTPS_MTU_SIZE];
     uint32_t length = 0;
@@ -562,8 +572,7 @@ void run_communication(Session* session)
     }
 }
 
-
-bool run_until_status(Session* session, uint32_t attempts)
+bool run_until_status(Session* session, uint16_t status_request_id, uint32_t attempts)
 {
     uint32_t attempts_counter = 0;
     session->last_status_received = false;
@@ -571,9 +580,25 @@ bool run_until_status(Session* session, uint32_t attempts)
     {
         run_communication(session);
         attempts_counter++;
+        session->last_status_received = session->last_status_request_id == status_request_id;
     }
 
     return session->last_status_received && session->last_status.status == STATUS_OK;
+}
+
+bool send_until_status(Session* session, uint16_t status_request_id, uint32_t attempts, MicroBuffer* message)
+{
+    uint32_t attempts_counter = 0;
+    bool result = false;
+    while(!result && attempts_counter < attempts)
+    {
+        send_data(message->init, (message->iterator - message->init), session->transport_id);
+        PRINTL_SERIALIZATION(SEND, message->init, message->iterator - message->init);
+        result = run_until_status(session, session->request_id, 1);
+        attempts_counter++;
+    }
+
+    return result;
 }
 
 uint16_t get_num_request_id(RequestId request_id)

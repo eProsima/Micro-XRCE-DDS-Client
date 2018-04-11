@@ -265,11 +265,18 @@ void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* payload)
 void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
 {
     const char* color = (strcmp(pre, SEND) == 0) ? YELLOW : PURPLE;
+    char bitmask[17] = {0};
+    for(int i = 0; i < 8; i++)
+    {
+        bitmask[15 - i] = (payload->nack_bitmap[1] & (1 << i)) ? '1' : '0';
+        bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
+    }
+
     printf("%s%s[Acknack | seq_num: %hu | bitmap: %s]%s\n",
             pre,
             color,
             payload->first_unacked_seq_num,
-            data_to_string(payload->nack_bitmap, 2),
+            bitmask,
             RESTORE_COLOR);
 }
 

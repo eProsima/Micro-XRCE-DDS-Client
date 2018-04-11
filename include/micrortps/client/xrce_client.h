@@ -22,7 +22,7 @@ extern "C"
 #endif
 
 #include <micrortps/client/xrce_protocol_spec.h> //TODO: remove dependence
-#include <micrortps/transport/micrortps_transport.h>
+#include <micrortps/transport/micrortps_transport.h> //TODO: remove dependence
 #include <microcdr/microcdr.h>
 
 #define MICRORTPS_MTU_SIZE        512
@@ -92,6 +92,7 @@ typedef struct Session
 
     ResultStatus last_status;
     bool last_status_received;
+    uint16_t last_status_request_id;
 
 } Session;
 
@@ -105,9 +106,10 @@ bool new_udp_session(Session* session,
                         OnTopic on_topic_callback,
                         void* on_topic_args);
 
-void close_session(Session* session);
+void free_session_udp(Session* session);
 
-bool init_session_syn(Session* session);
+bool init_session_sync(Session* session);
+bool close_session_sync(Session* session);
 
 /**
  * @brief create_participant_by_ref

@@ -112,7 +112,7 @@ void process_status_submessage(Session* session, MicroBuffer* input_buffer)
 
     session->last_status.status = status.base.result.status;
     session->last_status.implementation_status = MICRORTPS_STATUS_OK;
-    session->last_status_received = true;
+    session->last_status_request_id = get_num_request_id(status.base.related_request.request_id);
 }
 
 void process_info_submessage(Session* session, MicroBuffer* input_buffer)
@@ -152,6 +152,10 @@ void process_data_submessage(Session* session, MicroBuffer* input_buffer)
     input_buffer->iterator = payload.data.data; //delete this when the topic had been deserialized out of data payload.
 
     session->on_topic_callback(payload.base.object_id, input_buffer, session->on_topic_args);
+
+    session->last_status.status = STATUS_OK;
+    session->last_status.implementation_status = MICRORTPS_STATUS_OK;
+    session->last_status_request_id = get_num_request_id(payload.base.request_id);
 }
 
 bool receive_best_effort_message(InputBestEffortStream* input_stream, const uint16_t seq_num)
