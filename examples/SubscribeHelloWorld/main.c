@@ -45,7 +45,7 @@ void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
         HelloWorld topic;
         deserialize_HelloWorld_topic(serialized_topic, &topic);
 
-        printf("Receive topic: %s, count: %i\n", topic.m_message, topic.m_index);
+        printf("Receive topic: %s, count: %i\n", topic.message, topic.index);
     }
 }
 

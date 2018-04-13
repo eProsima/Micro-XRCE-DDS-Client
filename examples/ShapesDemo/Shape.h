@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*!
+/*! 
  * @file Shape.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -74,27 +74,31 @@ static uint32_t size_of_ShapeType_topic(const ShapeType* topic)
     return size;
 }
 
-static bool write_ShapeType_reliable(ShapeType* topic, ObjectId datawriter_id, OutputReliableStream* reliable_stream)
+static bool write_ShapeType(Session* session, ObjectId datawriter_id, StreamId stream_id, ShapeType* topic)
 {
-    bool result = false;
-    uint32_t topic_size = size_of_ShapeType_topic(topic);
-    MicroBuffer* topic_buffer = prepare_reliable_stream_for_topic(reliable_stream, datawriter_id, topic_size);
-    if (topic_buffer != NULL)
+    if (session == NULL)
     {
-        result = serialize_ShapeType_topic(topic_buffer, topic);
+        return false;
     }
-    return result;
-}
 
-static bool write_ShapeType_best_effort(ShapeType* topic, ObjectId datawriter_id, OutputBestEffortStream* best_effort_stream)
-{
     bool result = false;
     uint32_t topic_size = size_of_ShapeType_topic(topic);
-    MicroBuffer* topic_buffer = prepare_best_effort_stream_for_topic(best_effort_stream, datawriter_id, topic_size);
+    MicroBuffer* topic_buffer = NULL;
+
+    if (128 < stream_id)
+    {
+        topic_buffer = prepare_best_effort_stream_for_topic(&session->output_best_effort_stream, datawriter_id, topic_size);
+    }
+    else
+    {
+        topic_buffer = prepare_reliable_stream_for_topic(&session->output_reliable_stream, datawriter_id, topic_size);
+    }
+
     if (topic_buffer != NULL)
     {
         result = serialize_ShapeType_topic(topic_buffer, topic);
     }
+
     return result;
 }
 

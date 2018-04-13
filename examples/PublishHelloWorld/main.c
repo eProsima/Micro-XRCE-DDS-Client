@@ -84,16 +84,9 @@ int main(int argc, char** argv)
     while(true)
     {
         /* Write HelloWorld topic */
-        OutputReliableStream* best_effort = &my_session.output_reliable_stream;
-
         HelloWorld topic = {++count, "Hello DDS world!"};
-        uint32_t topic_size = size_of_HelloWorld_topic(&topic);
-        MicroBuffer* topic_buffer = prepare_reliable_stream_for_topic(best_effort, datawriter_id, topic_size);
-        if(topic_buffer != NULL)
-        {
-            serialize_HelloWorld_topic(topic_buffer, &topic);
-            printf("Send topic: %s, count: %i\n", topic.m_message, topic.m_index);
-        }
+        write_HelloWorld(&my_session, datawriter_id, STREAMID_BUILTIN_RELIABLE, &topic);
+        printf("Send topic: %s, count: %i\n", topic.message, topic.index);
 
         run_communication(&my_session);
 

@@ -190,25 +190,11 @@ bool compute_command(const char* command, Session* session)
             check_and_print_error(session);
         }
     }
-    else if(strcmp(name, "write_data_be") == 0 && length == 2)
-    {
-        ShapeType topic = {"GREEN", 100 , 100, 50};
-        ObjectId id = {{id_pre, OBJK_DATAWRITER}};
-        write_ShapeType_best_effort(&topic, id, &session->output_best_effort_stream);
-        printl_ShapeType_topic(&topic);
-    }
-    else if(strcmp(name, "write_data_rel") == 0 && length == 2)
-    {
-        ShapeType topic = {"BLUE", 10 , 10, 50};
-        ObjectId id = {{id_pre, OBJK_DATAWRITER}};
-        write_ShapeType_reliable(&topic, id, &session->output_reliable_stream);
-        printl_ShapeType_topic(&topic);
-    }
     else if(strcmp(name, "write_data") == 0 && length == 3)
     {
         ShapeType topic = {"GREEN", 100 , 100, 50};
         ObjectId id = {{id_pre, OBJK_DATAWRITER}};
-        //write_ShapeType(session, id, id_related_pre, &topic);
+        write_ShapeType(session, id, id_related_pre, &topic);
         printl_ShapeType_topic(&topic);
     }
     else if(strcmp(name, "read_data") == 0 && length == 3)
