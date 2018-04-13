@@ -148,7 +148,7 @@ bool init_session_sync(Session* session)
     /* Send message and wait for status. */
     PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
 
-    return send_until_status(session, session->request_id, MICRORTPS_SESSION_MAX_ATTEMPTS, &output_buffer);
+    return send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
 }
 
 bool close_session_sync(Session* session)
@@ -179,7 +179,7 @@ bool close_session_sync(Session* session)
     serialize_DELETE_Payload(&output_buffer, &payload);
     PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
 
-    return send_until_status(session, session->request_id, MICRORTPS_SESSION_MAX_ATTEMPTS, &output_buffer);
+    return send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
 }
 
 bool create_participant_sync_by_ref(Session* session,
@@ -382,7 +382,7 @@ bool delete_object_sync(Session* session, ObjectId object_id)
     return run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
 }
 
-bool read_data_sync(Session* session, ObjectId data_reader_id)
+bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_id)
 {
     if ((data_reader_id.data[1] & 0x0F) != OBJK_DATAREADER)
     {
@@ -400,17 +400,41 @@ bool read_data_sync(Session* session, ObjectId data_reader_id)
     payload.read_specification.optional_delivery_control = false;
     payload.read_specification.data_format = FORMAT_DATA;
 
-    OutputReliableStream* reliable = &session->output_reliable_stream;
     uint32_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
-    MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_READ_DATA, payload_size);
-    if(NULL != buffer)
-    {
-        serialize_READ_DATA_Payload(buffer, &payload);
 
-        PRINTL_READ_DATA_SUBMESSAGE(&payload);
+    bool result = false;
+    if(128 > stream_id)
+    {
+        OutputBestEffortStream* best_effort = &session->output_best_effort_stream;
+        MicroBuffer* buffer = prepare_best_effort_stream(best_effort, SUBMESSAGE_ID_READ_DATA, payload_size);
+        if(NULL != buffer)
+        {
+            serialize_READ_DATA_Payload(buffer, &payload);
+            PRINTL_READ_DATA_SUBMESSAGE(&payload);
+
+            //TODO(Luis): Fix this. Temporal approach.
+            MicroBuffer temp;
+            init_micro_buffer_offset(&temp, buffer->init, buffer->final- buffer->init, buffer->iterator - buffer->init);
+
+            send_best_effort_message(session, best_effort);
+            result = send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &temp);
+        }
+    }
+    else
+    {
+        OutputReliableStream* reliable = &session->output_reliable_stream;
+        uint32_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
+        MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_READ_DATA, payload_size);
+        if(NULL != buffer)
+        {
+            serialize_READ_DATA_Payload(buffer, &payload);
+            PRINTL_READ_DATA_SUBMESSAGE(&payload);
+
+            result = run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
+        }
     }
 
-    return run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
+    return result;
 }
 
 bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
@@ -443,6 +467,23 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
 bool reliable_stream_is_available(OutputReliableStream* output_stream)
 {
     return seq_num_sub(output_stream->last_sent, output_stream->last_acknown) != MICRORTPS_MAX_MSG_NUM;
+}
+
+MicroBuffer* prepare_best_effort_stream(OutputBestEffortStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
+{
+    MicroBuffer* output_buffer = &output_stream->buffer.micro_buffer;
+
+    if(SUBHEADER_SIZE + payload_size > output_buffer->final - output_buffer->iterator)
+    {
+        return NULL;
+    }
+
+    align_to(output_buffer, 4);
+
+    SubmessageHeader sub_header = (SubmessageHeader){ submessage_id, output_buffer->endianness, payload_size };
+    serialize_SubmessageHeader(output_buffer, &sub_header);
+
+    return output_buffer;
 }
 
 MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size)

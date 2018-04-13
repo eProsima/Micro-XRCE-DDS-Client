@@ -25,7 +25,7 @@ void check_and_print_error(Session* session)
     {
         if(session->last_status.status != STATUS_OK)
         {
-            printf("%sStatus error%s\n", "\x1B[1;31m", "\x1B[0m");
+            printf("%sStatus error (%i)%s\n", "\x1B[1;31m", session->last_status.status, "\x1B[0m");
         }
         else
         {
@@ -51,7 +51,6 @@ void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
 
 int main(int argc, char** argv)
 {
-
     if(argc < 3)
     {
         printf("Usage: program agent_ip agent_port\n");
@@ -97,7 +96,7 @@ int main(int argc, char** argv)
     while(true)
     {
         /* Request data */
-        read_data_sync(&my_session, datareader_id);
+        read_data_sync(&my_session, datareader_id, STREAMID_BUILTIN_RELIABLE);
         check_and_print_error(&my_session);
 
         run_communication(&my_session);

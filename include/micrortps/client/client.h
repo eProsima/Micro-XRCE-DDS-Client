@@ -17,7 +17,7 @@ extern "C"
 /* Timeouts, periods. */
 #define MICRORTPS_TIMEOUT_MS                 50
 #define MICRORTPS_MAX_ATTEMPTS               50
-#define MICRORTPS_SESSION_MAX_ATTEMPTS       20
+#define MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS   20
 #define MICRORTPS_HEARTBEAT_MIN_PERIOD_MS   200
 #define MICRORTPS_ACKNACK_MIN_PERIOD_MS     200
 
@@ -52,6 +52,7 @@ extern "C"
 
 bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace);
 
+MicroBuffer* prepare_best_effort_stream(OutputBestEffortStream* output_stream, uint8_t submessage_id, uint16_t payload_size);
 MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size);
 
 void stamp_header(Session* session, uint8_t* output_buffer, StreamId id, uint16_t seq_num);

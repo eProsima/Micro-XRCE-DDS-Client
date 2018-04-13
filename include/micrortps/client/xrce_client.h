@@ -225,7 +225,7 @@ bool create_datareader_sync_by_xml(Session* session,
 
 bool delete_object_sync(Session* session, ObjectId object_id);
 
-bool read_data_sync(Session* session, ObjectId object_id);
+bool read_data_sync(Session* session, ObjectId object_id, StreamId id);
 
 MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
 MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);

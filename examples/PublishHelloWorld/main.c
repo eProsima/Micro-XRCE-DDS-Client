@@ -23,7 +23,7 @@ void check_and_print_error(Session* session)
     {
         if(session->last_status.status != STATUS_OK)
         {
-            printf("%sStatus error%s\n", "\x1B[1;31m", "\x1B[0m");
+            printf("%sStatus error (%i)%s\n", "\x1B[1;31m", session->last_status.status, "\x1B[0m");
         }
         else
         {

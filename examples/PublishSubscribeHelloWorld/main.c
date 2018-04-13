@@ -105,7 +105,7 @@ int main()
             serialize_HelloWorld_topic(topic_buffer_4, &topic4);
         }
 
-        read_data_sync(&my_session, datareader_id);
+        read_data_sync(&my_session, datareader_id, STREAMID_BUILTIN_RELIABLE);
 
         run_communication(&my_session);
         sleep(5);

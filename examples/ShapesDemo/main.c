@@ -39,8 +39,8 @@ void list_commands()
     printf("    create_subscriber  <subscriber id> <participant id>: Creates a Subscriber on <participant id> participant\n");
     printf("    create_datawriter  <datawriter id> <publisher id>:   Creates a DataWriter on the publisher <publisher id>\n");
     printf("    create_datareader  <datareader id> <subscriber id>:  Creates a DataReader on the subscriber <subscriber id>\n");
-    printf("    write_data <datawriter id>:                          Write data using <data writer id> DataWriter\n");
-    printf("    read_data <datareader id>:                           Read data using <data reader id> DataReader\n");
+    printf("    write_data <datawriter id> <stream id>:              Write data into a <stream id> using <data writer id> DataWriter\n");
+    printf("    read_data <datareader id> <stream id>:               Read data from a <stream id> using <data reader id> DataReader\n");
     printf("    delete <id>:                                         Removes object with <id> identifier\n");
     printf("    exit:                                                Close program\n");
     printf("    h, help:                                             Shows this message\n");
@@ -190,25 +190,31 @@ bool compute_command(const char* command, Session* session)
             check_and_print_error(session);
         }
     }
-    else if(strcmp(name, "write_data") == 0 && length == 2)
+    else if(strcmp(name, "write_data_be") == 0 && length == 2)
     {
         ShapeType topic = {"GREEN", 100 , 100, 50};
         ObjectId id = {{id_pre, OBJK_DATAWRITER}};
-
-        OutputReliableStream* reliable = &session->output_reliable_stream;
-        uint32_t topic_size = size_of_ShapeType_topic(&topic);
-        MicroBuffer* topic_buffer = prepare_reliable_stream_for_topic(reliable, id, topic_size);
-        if(topic_buffer != NULL)
-        {
-            serialize_ShapeType_topic(topic_buffer, &topic);
-        }
-
+        write_ShapeType_best_effort(&topic, id, &session->output_best_effort_stream);
         printl_ShapeType_topic(&topic);
     }
-    else if(strcmp(name, "read_data") == 0 && length == 2)
+    else if(strcmp(name, "write_data_rel") == 0 && length == 2)
+    {
+        ShapeType topic = {"BLUE", 10 , 10, 50};
+        ObjectId id = {{id_pre, OBJK_DATAWRITER}};
+        write_ShapeType_reliable(&topic, id, &session->output_reliable_stream);
+        printl_ShapeType_topic(&topic);
+    }
+    else if(strcmp(name, "write_data") == 0 && length == 3)
+    {
+        ShapeType topic = {"GREEN", 100 , 100, 50};
+        ObjectId id = {{id_pre, OBJK_DATAWRITER}};
+        //write_ShapeType(session, id, id_related_pre, &topic);
+        printl_ShapeType_topic(&topic);
+    }
+    else if(strcmp(name, "read_data") == 0 && length == 3)
     {
         ObjectId id = {{id_pre, OBJK_DATAREADER}};
-        read_data_sync(session, id);
+        read_data_sync(session, id, id_related_pre);
         check_and_print_error(session);
     }
     else if(strcmp(name, "delete") == 0 && length == 3)

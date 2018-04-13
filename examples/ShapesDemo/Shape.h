@@ -24,8 +24,9 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <micrortps/client/client.h>
-#include <microcdr/microcdr.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <micrortps/client/xrce_client.h>
 
 /*!
  * @brief This class represents the structure ShapeType defined by the user in the IDL file.
@@ -40,7 +41,7 @@ typedef struct ShapeType
 
 } ShapeType;
 
-bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
+static bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
 {
     serialize_sequence_char(writer, topic->color, strlen(topic->color) + 1);
     serialize_int32_t(writer, topic->x);
@@ -50,10 +51,10 @@ bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
     return writer->error == BUFFER_OK;
 }
 
-bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
+static bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
 {
-    uint32_t color_size;
-    deserialize_sequence_char(reader, &topic->color, &color_size);
+    uint32_t size_color = 0;
+    deserialize_sequence_char(reader, &topic->color, &size_color);
     deserialize_int32_t(reader, &topic->x);
     deserialize_int32_t(reader, &topic->y);
     deserialize_int32_t(reader, &topic->shapesize);
@@ -61,15 +62,40 @@ bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
     return reader->error == BUFFER_OK;
 }
 
-uint32_t size_of_ShapeType_topic(const ShapeType* topic)
+static uint32_t size_of_ShapeType_topic(const ShapeType* topic)
 {
-    uint32_t color_length = strlen(topic->color) + 1;
-    if(color_length % 4 != 0)
-    {
-        color_length += 4 - (color_length % 4);
-    }
+    uint32_t size = 0;
 
-    return color_length + 4 + 4 + 4;
+    size += 4 + get_alignment(size, 4) + strlen(topic->color) + 1;
+    size += 4 + get_alignment(size, 4);
+    size += 4 + get_alignment(size, 4);
+    size += 4 + get_alignment(size, 4);
+
+    return size;
+}
+
+static bool write_ShapeType_reliable(ShapeType* topic, ObjectId datawriter_id, OutputReliableStream* reliable_stream)
+{
+    bool result = false;
+    uint32_t topic_size = size_of_ShapeType_topic(topic);
+    MicroBuffer* topic_buffer = prepare_reliable_stream_for_topic(reliable_stream, datawriter_id, topic_size);
+    if (topic_buffer != NULL)
+    {
+        result = serialize_ShapeType_topic(topic_buffer, topic);
+    }
+    return result;
+}
+
+static bool write_ShapeType_best_effort(ShapeType* topic, ObjectId datawriter_id, OutputBestEffortStream* best_effort_stream)
+{
+    bool result = false;
+    uint32_t topic_size = size_of_ShapeType_topic(topic);
+    MicroBuffer* topic_buffer = prepare_best_effort_stream_for_topic(best_effort_stream, datawriter_id, topic_size);
+    if (topic_buffer != NULL)
+    {
+        result = serialize_ShapeType_topic(topic_buffer, topic);
+    }
+    return result;
 }
 
 #endif // _Shape_H_
