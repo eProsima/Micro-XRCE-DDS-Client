@@ -33,39 +33,17 @@ void list_commands()
 {
     printf("usage: <command> [<args>]\n");
     printf("    create_session:                                      Creates a Session\n");
-    printf("    create_participant:                                  Creates a new Participant on the current session\n");
-    printf("    create_topic <participant id>:                       Register new Topic using <participant id> participant\n");
-    printf("    create_publisher <participant id>:                   Creates a Publisher on <participant id> participant\n");
-    printf("    create_subscriber <participant id>:                  Creates a Subscriber on <participant id> participant\n");
-    printf("    create_data_writer <participant id> <publisher id>:  Creates a DataWriter on the publisher <publisher id> of the <participant id> participant\n");
-    printf("    create_data_reader <participant id> <subscriber id>: Creates a DataReader on the subscriber <subscriber id> of the <participant id> participant\n");
-    printf("    write_data <data writer id>:                         Write data using <data writer id> DataWriter\n");
-    printf("    read_data <data reader id>:                          Read data using <data reader id> DataReader\n");
+    printf("    create_participant <participant id>:                 Creates a new Participant on the current session\n");
+    printf("    create_topic       <topic id> <participant id>:      Register new Topic using <participant id> participant\n");
+    printf("    create_publisher   <publisher id> <participant id>:  Creates a Publisher on <participant id> participant\n");
+    printf("    create_subscriber  <subscriber id> <participant id>: Creates a Subscriber on <participant id> participant\n");
+    printf("    create_datawriter  <datawriter id> <publisher id>:   Creates a DataWriter on the publisher <publisher id>\n");
+    printf("    create_datareader  <datareader id> <subscriber id>:  Creates a DataReader on the subscriber <subscriber id>\n");
+    printf("    write_data <datawriter id>:                          Write data using <data writer id> DataWriter\n");
+    printf("    read_data <datareader id>:                           Read data using <data reader id> DataReader\n");
     printf("    delete <id>:                                         Removes object with <id> identifier\n");
     printf("    exit:                                                Close program\n");
     printf("    h, help:                                             Shows this message\n");
-}
-
-size_t read_file(const char *file_name, char* data_file, size_t buf_size)
-{
-    printf("READ FILE\n");
-    FILE *fp = fopen(file_name, "r");
-    size_t length = 0;
-    if (fp != NULL)
-    {
-        length = fread(data_file, sizeof(char), buf_size, fp);
-        if (length == 0)
-        {
-            printf("Error reading %s\n", file_name);
-        }
-        fclose(fp);
-    }
-    else
-    {
-        printf("Error opening %s\n", file_name);
-    }
-
-    return length;
 }
 
 int check_input()
@@ -105,7 +83,7 @@ void check_and_print_error(Session* session)
     {
         if(session->last_status.status != STATUS_OK)
         {
-            printf("%sStatus error%s\n", "\x1B[1;31m", "\x1B[0m");
+            printf("%sStatus error (%i)%s\n", "\x1B[1;31m", session->last_status.status, "\x1B[0m");
         }
         else
         {
@@ -116,6 +94,32 @@ void check_and_print_error(Session* session)
     {
         printf("%sConnection error%s\n", "\x1B[1;31m", "\x1B[0m");
     }
+}
+
+size_t read_file(const char *file_name, char* data_file, size_t buf_size)
+{
+    FILE *fp = fopen(file_name, "r");
+    size_t length = 0;
+    if (fp != NULL)
+    {
+        length = fread(data_file, sizeof(char), buf_size, fp);
+        if (length == 0)
+        {
+            printf("Error reading %s\n", file_name);
+        }
+
+        if(length < buf_size)
+        {
+            data_file[length] = '\0';
+        }
+        fclose(fp);
+    }
+    else
+    {
+        printf("Error opening %s\n", file_name);
+    }
+
+    return length;
 }
 
 bool compute_command(const char* command, Session* session)
@@ -139,8 +143,8 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "create_topic") == 0 && length == 3)
     {
         char xml[XML_BUFFER_SIZE];
-        size_t read_file(const char *file_name, char* data_file, size_t buf_size);
-        if (read_file("shape_topic.xml", xml, XML_BUFFER_SIZE) > 0)
+        size_t length = read_file("shape_topic.xml", xml, XML_BUFFER_SIZE);
+        if (length > 0)
         {
             ObjectId id = {{id_pre, OBJK_TOPIC}};
             ObjectId id_related = {{id_related_pre, OBJK_PARTICIPANT}};
@@ -162,27 +166,27 @@ bool compute_command(const char* command, Session* session)
         create_subscriber_sync_by_xml(session, id, "", id_related, false, false);
         check_and_print_error(session);
     }
-    else if(strcmp(name, "create_data_writer") == 0 && length == 3)
+    else if(strcmp(name, "create_datawriter") == 0 && length == 3)
     {
         char xml[XML_BUFFER_SIZE];
-        size_t read_file(const char *file_name, char* data_file, size_t buf_size);
-        if (read_file("data_writer_profile.xml", xml, XML_BUFFER_SIZE) > 0)
+        size_t length = read_file("data_writer_profile.xml", xml, XML_BUFFER_SIZE - 1);
+        if (length > 0)
         {
-        ObjectId id = {{id_pre, OBJK_DATAWRITER}};
-        ObjectId id_related = {{id_related_pre, OBJK_PUBLISHER}};
+            ObjectId id = {{id_pre, OBJK_DATAWRITER}};
+            ObjectId id_related = {{id_related_pre, OBJK_PUBLISHER}};
             create_datawriter_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
     }
-    else if(strcmp(name, "create_data_reader") == 0 && length == 3)
+    else if(strcmp(name, "create_datareader") == 0 && length == 3)
     {
         char xml[XML_BUFFER_SIZE];
-        size_t read_file(const char *file_name, char* data_file, size_t buf_size);
-        if (read_file("data_reader_profile.xml", xml, XML_BUFFER_SIZE) > 0)
+        size_t length = read_file("data_reader_profile.xml", xml, XML_BUFFER_SIZE);
+        if (length > 0)
         {
             ObjectId id = {{id_pre, OBJK_DATAREADER}};
             ObjectId id_related = {{id_related_pre, OBJK_SUBSCRIBER}};
-            create_datawriter_sync_by_xml(session, id, xml, id_related, false, false);
+            create_datareader_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
     }
@@ -191,9 +195,9 @@ bool compute_command(const char* command, Session* session)
         ShapeType topic = {"GREEN", 100 , 100, 50};
         ObjectId id = {{id_pre, OBJK_DATAWRITER}};
 
-        OutputBestEffortStream* best_effort = &session->output_best_effort_stream;
+        OutputReliableStream* reliable = &session->output_reliable_stream;
         uint32_t topic_size = size_of_ShapeType_topic(&topic);
-        MicroBuffer* topic_buffer = prepare_best_effort_stream_for_topic(best_effort, id, topic_size);
+        MicroBuffer* topic_buffer = prepare_reliable_stream_for_topic(reliable, id, topic_size);
         if(topic_buffer != NULL)
         {
             serialize_ShapeType_topic(topic_buffer, &topic);

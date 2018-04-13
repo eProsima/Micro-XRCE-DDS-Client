@@ -252,7 +252,7 @@ bool create_publisher_sync_by_xml(Session* session,
                              bool replace)
 {
     /* Check participant and publisher ids. */
-    if ((object_id.data[1] & 0x0F) != OBJK_PUBLISHER && (participant_id.data[1] & 0x0F) != OBJK_PARTICIPANT)
+    if ((object_id.data[1] & 0x0F) != OBJK_PUBLISHER || (participant_id.data[1] & 0x0F) != OBJK_PARTICIPANT)
     {
         session->last_status.status = STATUS_ERR_UNKNOWN_REFERENCE;
         session->last_status_received = true;
@@ -281,7 +281,7 @@ bool create_subscriber_sync_by_xml(Session* session,
                               bool replace)
 {
     /* Check participant and publisher ids. */
-    if ((object_id.data[1] & 0x0F) != OBJK_SUBSCRIBER && (participant_id.data[1] & 0x0F) != OBJK_PARTICIPANT)
+    if ((object_id.data[1] & 0x0F) != OBJK_SUBSCRIBER || (participant_id.data[1] & 0x0F) != OBJK_PARTICIPANT)
     {
         session->last_status.status = STATUS_ERR_UNKNOWN_REFERENCE;
         session->last_status_received = true;
@@ -310,7 +310,7 @@ bool create_datawriter_sync_by_xml(Session* session,
                               bool replace)
 {
     /* Check publisher and datawriter ids. */
-    if ((object_id.data[1] & 0x0F) != OBJK_DATAWRITER && (publisher_id.data[1] & 0x0F) != OBJK_PUBLISHER)
+    if ((object_id.data[1] & 0x0F) != OBJK_DATAWRITER || (publisher_id.data[1] & 0x0F) != OBJK_PUBLISHER)
     {
         session->last_status.status = STATUS_ERR_UNKNOWN_REFERENCE;
         session->last_status_received = true;
@@ -339,7 +339,7 @@ bool create_datareader_sync_by_xml(Session* session,
                               bool replace)
 {
     /* Check participant and publisher ids. */
-    if ((object_id.data[1] & 0x0F) != OBJK_DATAREADER && (subscriber_id.data[1] & 0x0F) != OBJK_SUBSCRIBER)
+    if ((object_id.data[1] & 0x0F) != OBJK_DATAREADER || (subscriber_id.data[1] & 0x0F) != OBJK_SUBSCRIBER)
     {
         session->last_status.status = STATUS_ERR_UNKNOWN_REFERENCE;
         session->last_status_received = true;
