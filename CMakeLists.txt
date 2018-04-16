@@ -16,25 +16,34 @@
 # CMake build rules for micro RTPS client
 ###############################################################################
 cmake_minimum_required(VERSION 2.8.12)
-if (${CMAKE_VERSION} VERSION_GREATER 3.0)
-	cmake_policy(SET CMP0048 OLD)
+
+set(IS_TOP_LEVEL TRUE)
+if(PROJECT_SOURCE_DIR)
+    set(IS_TOP_LEVEL FALSE)
 endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
-if(DEFINED CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING
-        "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-    )
-else()
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Release' as none was specified.")
     set(CMAKE_BUILD_TYPE Release CACHE STRING
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-    )
+        FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
 ###############################################################################
 # Product information                                                         #
 ###############################################################################
-project(micrortps-client C CXX)
+if(CMAKE_VERSION VERSION_LESS 3.0)
+    project(micrortps-client C CXX)
+    set(PROJECT_VERSION_MAJOR 1)
+    set(PROJECT_VERSION_MINOR 0)
+    set(PROJECT_VERSION_PATCH 0)
+    set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+else()
+    cmake_policy(SET CMP0048 NEW)
+    project(micrortps-client VERSION "1.0.0" LANGUAGES C CXX)
+endif()
 
 # Set product name
 if(DEFINED PRODUCT_NAME)
@@ -43,13 +52,6 @@ else()
     set(PRODUCT_NAME micrortps CACHE STRING "Choose the product name in which this project is included")
 endif()
 
-###############################################################################
-# Version information                                                         #
-###############################################################################
-set(PROJECT_MAJOR_VERSION 0)
-set(PROJECT_MINOR_VERSION 4)
-set(PROJECT_MICRO_VERSION 0)
-set(PROJECT_VERSION ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_MICRO_VERSION})
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
 ###############################################################################
@@ -107,10 +109,8 @@ endif()
 # Load external eProsima projects.
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/dev/eprosima_libraries.cmake)
-if(NOT TARGET transport)
-  add_subdirectory(thirdparty/micrortps_transport)
-endif()
-add_subdirectory(thirdparty/micro-CDR)
+find_eprosima_package(micrortps_transport)
+find_eprosima_package(micro-CDR)
 
 file(GLOB CLIENT_LIB_SOURCES
     src/c/*.c
