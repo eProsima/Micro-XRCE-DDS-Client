@@ -126,7 +126,11 @@ bool compute_command(const char* command, Session* session)
     char name[128];
     int id_pre = 0;
     int id_related_pre = 0;
-    int length = sscanf(command, "%s %i %i", name, &id_pre, &id_related_pre);
+    char* color = NULL;
+    int x;
+    int y;
+    int shapesize;
+    int length = sscanf(command, "%s %i %i %s %i %i %i", name, &id_pre, &id_related_pre, color, &x, &y, &shapesize);
 
     if(strcmp(name, "create_session") == 0)
     {
@@ -136,7 +140,7 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "create_participant") == 0 && length == 2)
     {
         ObjectId id = {{id_pre, OBJK_PARTICIPANT}};
-        create_participant_sync_by_ref(session, id, "", false, false);
+        create_participant_sync_by_ref(session, id, "default_participant", false, false);
         check_and_print_error(session);
     }
     else if(strcmp(name, "create_topic") == 0 && length == 3)
@@ -189,9 +193,14 @@ bool compute_command(const char* command, Session* session)
             check_and_print_error(session);
         }
     }
-    else if(strcmp(name, "write_data") == 0 && length == 3)
+    else if(strcmp(name, "write_data") == 0 && length >= 3)
     {
         ShapeType topic = {"GREEN", 100 , 100, 50};
+        if (length == 7)
+        {
+           topic = (ShapeType){color, x , y, shapesize};
+        }
+
         ObjectId id = {{id_pre, OBJK_DATAWRITER}};
         write_ShapeType(session, id, id_related_pre, &topic);
         printl_ShapeType_topic(&topic);

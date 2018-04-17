@@ -113,6 +113,7 @@ void process_status_submessage(Session* session, MicroBuffer* input_buffer)
     session->last_status.status = status.base.result.status;
     session->last_status.implementation_status = MICRORTPS_STATUS_OK;
     session->last_status_request_id = get_num_request_id(status.base.related_request.request_id);
+    session->last_status_received = true;
 }
 
 void process_info_submessage(Session* session, MicroBuffer* input_buffer)

@@ -32,7 +32,7 @@ void on_HelloWorld_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
         {
             HelloWorld topic;
             deserialize_HelloWorld_topic(serialized_topic, &topic);
-            printf("Received topic: %s, count: %i\n", topic.message, topic.index);
+            printf("Read topic: %s, count: %i\n", topic.message, topic.index);
             break;
         }
 
@@ -57,6 +57,7 @@ int main(int argc, char** argv)
     uint16_t port = atoi(argv[2]);
     if (!new_udp_session(&my_session, 0x01, key, ip, port, on_HelloWorld_topic, NULL))
     {
+        printf("Error: socket is not available.");
         return 1;
     }
 
@@ -101,11 +102,11 @@ int main(int argc, char** argv)
     uint32_t counter = 0;
     while(true)
     {
-        HelloWorld topic = {counter, "Hello MicroRTPS!"};
+        HelloWorld topic = {counter, "Hello DDS World!"};
         if(write_HelloWorld(&my_session, datawriter_id, STREAMID_BUILTIN_RELIABLE, &topic))
         {
             counter++;
-            printf("Send topic: %s, count: %i\n", topic.message, topic.index);
+            printf("Write topic: %s, count: %i\n", topic.message, topic.index);
         }
 
         read_data_sync(&my_session, datareader_id, STREAMID_BUILTIN_RELIABLE);

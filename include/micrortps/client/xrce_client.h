@@ -101,8 +101,8 @@ typedef struct Session
 bool new_udp_session(Session* const session,
                         SessionId id,
                         ClientKey key,
-                        const uint8_t* const server_ip,
-                        uint16_t remote_port,
+                        const uint8_t* const agent_ip,
+                        uint16_t agent_port,
                         OnTopic on_topic_callback,
                         void* on_topic_args);
 

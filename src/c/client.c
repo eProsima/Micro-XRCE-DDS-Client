@@ -620,7 +620,10 @@ bool run_until_status(Session* session, uint16_t status_request_id, uint32_t att
     {
         run_communication(session);
         attempts_counter++;
-        session->last_status_received = session->last_status_request_id == status_request_id;
+        if(session->last_status_received)
+        {
+            session->last_status_received = session->last_status_request_id == status_request_id;
+        }
     }
 
     return session->last_status_received && session->last_status.status == STATUS_OK;
