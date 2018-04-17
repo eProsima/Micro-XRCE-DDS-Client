@@ -107,7 +107,7 @@ bool init_session_sync(Session* session)
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
     payload.client_representation.xrce_vendor_id = (XrceVendorId){{0x01, 0x0F}};
-    payload.client_representation.client_timestamp.seconds = nanoseconds / 1000000000;
+    payload.client_representation.client_timestamp.seconds = (int32_t)(nanoseconds / 1000000000);
     payload.client_representation.client_timestamp.nanoseconds = nanoseconds % 1000000000;
     payload.client_representation.client_key = session->key;
     payload.client_representation.session_id = session->id;
@@ -141,7 +141,7 @@ bool init_session_sync(Session* session)
     sub_header.id = SUBMESSAGE_ID_CREATE_CLIENT;
     /* TODO (Julian): introduce flags. */
     sub_header.flags = 0x07;
-    sub_header.length = (submessage_end.position - submessage_begin.position) - 4;
+    sub_header.length = (uint16_t)(submessage_end.position - submessage_begin.position) - (uint16_t)4u;
     serialize_SubmessageHeader(&output_buffer, &sub_header);
     restore_micro_state(&output_buffer, submessage_end);
 
@@ -167,7 +167,7 @@ bool close_session_sync(Session* session)
         serialize_ClientKey(&output_buffer, &session->key);
     }
 
-    uint32_t payload_size = 4; //size_of_Delete_Payload(payload)
+    uint16_t payload_size = 4; //size_of_Delete_Payload(payload)
 
     align_to(&output_buffer, 4);
     SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DELETE, output_buffer.endianness, payload_size };
@@ -210,7 +210,7 @@ bool create_participant_sync_by_ref(Session* session,
     payload.object_representation.kind = OBJK_PARTICIPANT;
     payload.object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
     payload.object_representation._.participant.base.representation._.object_reference.data = (char*)ref; //MISRA non-compliant?
-    payload.object_representation._.participant.base.representation._.object_reference.size = len;
+    payload.object_representation._.participant.base.representation._.object_reference.size = (uint32_t)len;
 
     return create_reliable_object_sync(session, &session->output_reliable_stream, &payload, reuse, replace);
 }
@@ -238,7 +238,7 @@ bool create_topic_sync_by_xml(Session* session,
     payload.object_representation.kind = OBJK_TOPIC;
     payload.object_representation._.topic.base.representation.format = REPRESENTATION_AS_XML_STRING;
     payload.object_representation._.topic.base.representation._.xml_string_represenatation.data = (char*)xml;
-    payload.object_representation._.topic.base.representation._.xml_string_represenatation.size = strlen(xml);
+    payload.object_representation._.topic.base.representation._.xml_string_represenatation.size = (uint32_t)strlen(xml);
     payload.object_representation._.topic.participant_id = participant_id;
 
     return create_reliable_object_sync(session, &session->output_reliable_stream, &payload, reuse, replace);
@@ -267,7 +267,7 @@ bool create_publisher_sync_by_xml(Session* session,
     payload.object_representation.kind = OBJK_PUBLISHER;
     payload.object_representation._.publisher.base.representation.format = REPRESENTATION_AS_XML_STRING;
     payload.object_representation._.publisher.base.representation._.string_represenatation.data = (char*)xml;
-    payload.object_representation._.publisher.base.representation._.string_represenatation.size = strlen(xml);
+    payload.object_representation._.publisher.base.representation._.string_represenatation.size = (uint32_t)strlen(xml);
     payload.object_representation._.publisher.participant_id = participant_id;
 
     return create_reliable_object_sync(session, &session->output_reliable_stream, &payload, reuse, replace);
@@ -296,7 +296,7 @@ bool create_subscriber_sync_by_xml(Session* session,
     payload.object_representation.kind = OBJK_SUBSCRIBER;
     payload.object_representation._.subscriber.base.representation.format = REPRESENTATION_AS_XML_STRING;
     payload.object_representation._.subscriber.base.representation._.string_represenatation.data = (char*)xml;
-    payload.object_representation._.subscriber.base.representation._.string_represenatation.size = strlen(xml);
+    payload.object_representation._.subscriber.base.representation._.string_represenatation.size = (uint32_t)strlen(xml);
     payload.object_representation._.subscriber.participant_id = participant_id;
 
     return create_reliable_object_sync(session, &session->output_reliable_stream, &payload, reuse, replace);
@@ -325,7 +325,7 @@ bool create_datawriter_sync_by_xml(Session* session,
     payload.object_representation.kind = OBJK_DATAWRITER;
     payload.object_representation._.data_writer.base.representation.format = REPRESENTATION_AS_XML_STRING;
     payload.object_representation._.data_writer.base.representation._.string_represenatation.data = (char*)xml;
-    payload.object_representation._.data_writer.base.representation._.string_represenatation.size = strlen(xml);
+    payload.object_representation._.data_writer.base.representation._.string_represenatation.size = (uint32_t)strlen(xml);
     payload.object_representation._.data_writer.publisher_id = publisher_id;
 
     return create_reliable_object_sync(session, &session->output_reliable_stream, &payload, reuse, replace);
@@ -354,7 +354,7 @@ bool create_datareader_sync_by_xml(Session* session,
     payload.object_representation.kind = OBJK_DATAREADER;
     payload.object_representation._.data_reader.base.representation.format = REPRESENTATION_AS_XML_STRING;
     payload.object_representation._.data_reader.base.representation._.string_represenatation.data = (char*)xml;
-    payload.object_representation._.data_reader.base.representation._.string_represenatation.size = strlen(xml);
+    payload.object_representation._.data_reader.base.representation._.string_represenatation.size = (uint32_t)strlen(xml);
     payload.object_representation._.data_reader.subscriber_id = subscriber_id;
 
     return create_reliable_object_sync(session, &session->output_reliable_stream, &payload, reuse, replace);
@@ -369,7 +369,7 @@ bool delete_object_sync(Session* session, ObjectId object_id)
     payload.base.object_id = object_id;
 
     OutputReliableStream* reliable = &session->output_reliable_stream;
-    uint32_t payload_size = 4; //size_of_Delete_Payload(payload)
+    uint16_t payload_size = 4; //size_of_Delete_Payload(payload)
 
     MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_DELETE, payload_size);
     if(NULL != buffer)
@@ -400,7 +400,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_i
     payload.read_specification.optional_delivery_control = false;
     payload.read_specification.data_format = FORMAT_DATA;
 
-    uint32_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
+    uint16_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
 
     bool result = false;
     if(128 > stream_id)
@@ -414,7 +414,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_i
 
             //TODO(Luis): Fix this. Temporal approach.
             MicroBuffer temp;
-            init_micro_buffer_offset(&temp, buffer->init, buffer->final- buffer->init, buffer->iterator - buffer->init);
+            init_micro_buffer_offset(&temp, buffer->init, (uint32_t)(buffer->final - buffer->init), (uint32_t)(buffer->iterator - buffer->init));
 
             send_best_effort_message(session, best_effort);
             result = send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &temp);
@@ -423,7 +423,6 @@ bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_i
     else
     {
         OutputReliableStream* reliable = &session->output_reliable_stream;
-        uint32_t payload_size = 7; //size_of_READ_DATA_Payload(payload)
         MicroBuffer* buffer = prepare_reliable_stream(reliable, SUBMESSAGE_ID_READ_DATA, payload_size);
         if(NULL != buffer)
         {
@@ -455,7 +454,7 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
     sub_header.flags |= output_buffer->endianness;
     sub_header.flags |= FLAG_REUSE * reuse;
     sub_header.flags |= FLAG_REPLACE * replace;
-    sub_header.length = (submessage_end.position - submessage_begin.position) - 4;
+    sub_header.length = (uint16_t)(submessage_end.position - submessage_begin.position) - (uint16_t)4u;
     serialize_SubmessageHeader(output_buffer, &sub_header);
     restore_micro_state(output_buffer, submessage_end);
 
@@ -634,8 +633,8 @@ bool send_until_status(Session* session, uint16_t status_request_id, uint32_t at
     while(!result && attempts_counter < attempts)
     {
         send_data(message->init, (message->iterator - message->init), session->transport_id);
-        PRINTL_SERIALIZATION(SEND, message->init, message->iterator - message->init);
-        result = run_until_status(session, session->request_id, 1);
+        PRINTL_SERIALIZATION(SEND, message->init, (uint32_t)(message->iterator - message->init));
+        result = run_until_status(session, status_request_id, 1);
         attempts_counter++;
     }
 
@@ -653,9 +652,13 @@ uint16_t get_num_request_id(RequestId request_id)
 RequestId get_raw_request_id(uint16_t request_id)
 {
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
+    {
         return (RequestId){{(uint8_t)(request_id >> 8), (uint8_t)request_id}};
+    }
     else
-        return (RequestId){{(uint8_t)(request_id), (uint8_t)request_id >> 8}};
+    {
+        return (RequestId){{(uint8_t)request_id, (uint8_t)(request_id >> 8)}};
+    }
 }
 
 uint16_t get_num_object_id(ObjectId object_id)
@@ -669,9 +672,13 @@ uint16_t get_num_object_id(ObjectId object_id)
 ObjectId get_raw_object_id(uint16_t object_id)
 {
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
+    {
         return (ObjectId){{(uint8_t)(object_id >> 8), (uint8_t)object_id}};
+    }
     else
-        return (ObjectId){{(uint8_t)(object_id), (uint8_t)object_id >> 8}};
+    {
+        return (ObjectId){{(uint8_t)object_id, (uint8_t)(object_id >> 8)}};
+    }
 }
 
 uint64_t get_nano_time()
@@ -732,4 +739,3 @@ int seq_num_cmp(uint16_t seq_num_1, uint16_t seq_num_2)
     }
     return result;
 }
-

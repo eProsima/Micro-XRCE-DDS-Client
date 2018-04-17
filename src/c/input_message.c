@@ -118,6 +118,8 @@ void process_status_submessage(Session* session, MicroBuffer* input_buffer)
 void process_info_submessage(Session* session, MicroBuffer* input_buffer)
 {
     //TODO
+    (void) session;
+    (void) input_buffer;
 }
 
 void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer)
@@ -198,7 +200,7 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
     }
     else
     {
-        serialize_array_uint8_t(input_buffer, submessages->iterator, submessages->final - submessages->iterator);
+        serialize_array_uint8_t(input_buffer, submessages->iterator, (uint32_t)(submessages->final - submessages->iterator));
     }
 
     if(0 > seq_num_cmp(input_stream->last_announced, seq_num))

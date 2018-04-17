@@ -187,6 +187,7 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
 void PRINTL_GET_INFO_SUBMESSAGE(const GET_INFO_Payload* payload)
 {
     //TODO
+    (void) payload;
 }
 
 void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DELETE_Payload* payload)
@@ -210,6 +211,7 @@ void PRINTL_STATUS_SUBMESSAGE(const STATUS_Payload* payload)
 void PRINTL_INFO_SUBMESSAGE(const INFO_Payload* payload)
 {
     //TODO
+    (void) payload;
 }
 
 void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)

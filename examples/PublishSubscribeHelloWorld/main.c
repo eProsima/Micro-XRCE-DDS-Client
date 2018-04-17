@@ -2,7 +2,6 @@
 #include <micrortps/client/xrce_client.h>
 
 #include <stdio.h>
-#include <unistd.h>
 
 #define HELLO_WORLD_TOPIC 1
 
@@ -113,7 +112,7 @@ int main(int argc, char** argv)
         check_and_print_error(&my_session);
 
         run_communication(&my_session);
-        sleep(2);
+        ms_sleep(2000);
     }
 
     close_session_sync(&my_session);

@@ -98,7 +98,7 @@ typedef struct Session
 
 
 
-bool new_udp_session(Session* session,
+bool new_udp_session(Session* const session,
                         SessionId id,
                         ClientKey key,
                         const uint8_t* const server_ip,

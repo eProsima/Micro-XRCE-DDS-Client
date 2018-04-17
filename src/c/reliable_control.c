@@ -26,7 +26,7 @@ void output_heartbeat(OutputReliableStream* output_stream, HEARTBEAT_Payload* he
 void input_acknack(Session* session, OutputReliableStream* output_stream, const uint16_t first_unacked_seq_num, uint8_t bitmap[2])
 {
     /* Clear buffers */
-    for(int i = seq_num_add(output_stream->last_acknown, 1); 0 > seq_num_cmp(i, first_unacked_seq_num); i = seq_num_add(i, 1))
+    for(uint16_t i = seq_num_add(output_stream->last_acknown, 1); 0 > seq_num_cmp(i, first_unacked_seq_num); i = seq_num_add(i, 1))
     {
         uint8_t index = i % MICRORTPS_MAX_MSG_NUM;
         MicroBuffer* output_buffer = &output_stream->buffers[index].micro_buffer;
@@ -45,7 +45,7 @@ void input_acknack(Session* session, OutputReliableStream* output_stream, const 
             if((output_buffer->iterator - output_buffer->init) > session->header_offset)
             {
                 send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
-                PRINTL_SERIALIZATION(SEND, output_buffer->init, output_buffer->iterator - output_buffer->init);
+                PRINTL_SERIALIZATION(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
             }
         }
     }

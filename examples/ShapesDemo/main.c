@@ -16,7 +16,6 @@
 
 #include "Shape.h"
 #include <stdio.h>
-#include <unistd.h>
 
 // ----------------------------------------------------
 //    App client
@@ -49,7 +48,7 @@ void list_commands()
 int check_input()
 {
     struct timeval tv = {0, 0};
-    fd_set fds = {{0, 0}};
+    fd_set fds = {0};
     FD_ZERO(&fds);
     FD_SET(0, &fds); //STDIN 0
     select(1, &fds, NULL, NULL, &tv);
@@ -281,7 +280,7 @@ int main(int args, char** argv)
             }
         }
 
-        usleep(100000);
+        ms_sleep(100);
     }
 }
 

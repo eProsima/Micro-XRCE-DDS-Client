@@ -25,7 +25,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <micrortps/client/xrce_client.h>
 
 /*!

@@ -15,7 +15,6 @@
 #include "HelloWorld.h"
 
 #include <stdio.h>
-#include <unistd.h>
 
 #define HELLO_WORLD_TOPIC 0x01
 
@@ -101,7 +100,7 @@ int main(int argc, char** argv)
 
         run_communication(&my_session);
 
-        sleep(1);
+        ms_sleep(1000);
     }
 
     close_session_sync(&my_session);
