@@ -41,7 +41,7 @@ typedef struct HelloWorld
 static bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
 {
     serialize_uint32_t(writer, topic->index);
-    serialize_sequence_char(writer, topic->message, strlen(topic->message) + 1);
+    serialize_sequence_char(writer, topic->message, (uint32_t)(strlen(topic->message) + 1));
 
     return writer->error == BUFFER_OK;
 }
@@ -60,7 +60,7 @@ static uint32_t size_of_HelloWorld_topic(const HelloWorld* topic)
     uint32_t size = 0;
 
     size += 4 + get_alignment(size, 4);
-    size += 4 + get_alignment(size, 4) + strlen(topic->message) + 1;
+    size += 4 + get_alignment(size, 4) + (uint32_t)(strlen(topic->message) + 1);
 
     return size;
 }

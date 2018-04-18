@@ -42,7 +42,7 @@ typedef struct ShapeType
 
 static bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
 {
-    serialize_sequence_char(writer, topic->color, strlen(topic->color) + 1);
+    serialize_sequence_char(writer, topic->color, (uint32_t)(strlen(topic->color) + 1));
     serialize_int32_t(writer, topic->x);
     serialize_int32_t(writer, topic->y);
     serialize_int32_t(writer, topic->shapesize);
@@ -65,7 +65,7 @@ static uint32_t size_of_ShapeType_topic(const ShapeType* topic)
 {
     uint32_t size = 0;
 
-    size += 4 + get_alignment(size, 4) + strlen(topic->color) + 1;
+    size += 4 + get_alignment(size, 4) + (uint32_t)(strlen(topic->color) + 1);
     size += 4 + get_alignment(size, 4);
     size += 4 + get_alignment(size, 4);
     size += 4 + get_alignment(size, 4);
