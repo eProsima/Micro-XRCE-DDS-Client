@@ -93,6 +93,7 @@ int main(int argc, char** argv)
     }
 
     close_session_sync(&my_session);
+    free_udp_session(&my_session);
 
     return 0;
 }

@@ -106,7 +106,7 @@ bool new_udp_session(Session* const session,
                         OnTopic on_topic_callback,
                         void* on_topic_args);
 
-void free_session_udp(Session* session);
+void free_udp_session(Session* session);
 
 bool init_session_sync(Session* session);
 bool close_session_sync(Session* session);

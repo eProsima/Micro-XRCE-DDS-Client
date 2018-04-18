@@ -31,18 +31,18 @@ void help()
 void list_commands()
 {
     printf("usage: <command> [<args>]\n");
-    printf("    create_session:                                      Creates a Session\n");
-    printf("    create_participant <participant id>:                 Creates a new Participant on the current session\n");
-    printf("    create_topic       <topic id> <participant id>:      Register new Topic using <participant id> participant\n");
-    printf("    create_publisher   <publisher id> <participant id>:  Creates a Publisher on <participant id> participant\n");
-    printf("    create_subscriber  <subscriber id> <participant id>: Creates a Subscriber on <participant id> participant\n");
-    printf("    create_datawriter  <datawriter id> <publisher id>:   Creates a DataWriter on the publisher <publisher id>\n");
-    printf("    create_datareader  <datareader id> <subscriber id>:  Creates a DataReader on the subscriber <subscriber id>\n");
-    printf("    write_data <datawriter id> <stream id>:              Write data into a <stream id> using <data writer id> DataWriter\n");
-    printf("    read_data <datareader id> <stream id>:               Read data from a <stream id> using <data reader id> DataReader\n");
-    printf("    delete <id>:                                         Removes object with <id> identifier\n");
-    printf("    exit:                                                Close program\n");
-    printf("    h, help:                                             Shows this message\n");
+    printf("    create_session:                                                  Creates a Session\n");
+    printf("    create_participant <participant id>:                             Creates a new Participant on the current session\n");
+    printf("    create_topic       <topic id> <participant id>:                  Register new Topic using <participant id> participant\n");
+    printf("    create_publisher   <publisher id> <participant id>:              Creates a Publisher on <participant id> participant\n");
+    printf("    create_subscriber  <subscriber id> <participant id>:             Creates a Subscriber on <participant id> participant\n");
+    printf("    create_datawriter  <datawriter id> <publisher id>:               Creates a DataWriter on the publisher <publisher id>\n");
+    printf("    create_datareader  <datareader id> <subscriber id>:              Creates a DataReader on the subscriber <subscriber id>\n");
+    printf("    write_data <datawriter id> [<stream id> <color> <x> <y> <size>]: Write data into a <stream id> using <data writer id> DataWriter\n");
+    printf("    read_data <datareader id> <stream id>:                           Read data from a <stream id> using <data reader id> DataReader\n");
+    printf("    delete <id>:                                                     Removes object with <id> identifier\n");
+    printf("    exit:                                                            Close program\n");
+    printf("    h, help:                                                         Shows this message\n");
 }
 
 int check_input()
@@ -126,12 +126,13 @@ bool compute_command(const char* command, Session* session)
     char name[128];
     int id_pre = 0;
     int id_related_pre = 0;
-    char* color = NULL;
+    char color[128];
     int x;
     int y;
     int shapesize;
     int length = sscanf(command, "%s %i %i %s %i %i %i", name, &id_pre, &id_related_pre, color, &x, &y, &shapesize);
 
+    printf("%i\n", length);
     if(strcmp(name, "create_session") == 0)
     {
         init_session_sync(session);
@@ -220,6 +221,7 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "exit") == 0)
     {
         close_session_sync(session);
+        free_udp_session(session);
         return false;
     }
     else if(strcmp(name, "h") == 0 || strcmp(name, "help") == 0)
