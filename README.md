@@ -9,7 +9,7 @@ In *Micro RTPS* a *Micro RTPS Client* can communicate with DDS Network as any ot
 
 ## Documentation
 
-You can access Micro-RTPS documentation online, which is hosted on [Read the Docs](http://micro-rtps.readthedocs.io).
+You can access Micro-RTPS documentation online, which is hosted on Read the Docs.
 
 * [Start Page](http://micro-rtps.readthedocs.io)
 * [Installation manual](http://micro-rtps.readthedocs.io/en/latest/sources.html)
