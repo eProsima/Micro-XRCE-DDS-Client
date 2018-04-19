@@ -62,7 +62,7 @@ bool new_udp_session(Session* const session,
         // input reliable
         session->input_reliable_stream.last_handled = UINT16_MAX;
         session->input_reliable_stream.last_announced = UINT16_MAX;
-        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
+        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
         {
             init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
                               session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
@@ -72,7 +72,7 @@ bool new_udp_session(Session* const session,
         // output reliable
         session->output_reliable_stream.last_sent = UINT16_MAX;
         session->output_reliable_stream.last_acknown = UINT16_MAX;
-        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; i++)
+        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
         {
             init_micro_buffer_offset(&session->output_reliable_stream.buffers[i].micro_buffer,
                                       session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE,
@@ -140,7 +140,10 @@ bool init_session_sync(Session* session)
     SubmessageHeader sub_header;
     sub_header.id = SUBMESSAGE_ID_CREATE_CLIENT;
     /* TODO (Julian): introduce flags. */
-    sub_header.flags = 0x07;
+    sub_header.flags = 0x06;
+    sub_header.flags |= FLAG_ENDIANNESS * output_buffer.endianness;
+    sub_header.flags |= FLAG_REUSE * true;
+    sub_header.flags |= FLAG_REPLACE * true;
     sub_header.length = (uint16_t)(submessage_end.position - submessage_begin.position) - (uint16_t)4u;
     serialize_SubmessageHeader(&output_buffer, &sub_header);
     restore_micro_state(&output_buffer, submessage_end);
@@ -451,7 +454,7 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
     SubmessageHeader sub_header;
     sub_header.id = SUBMESSAGE_ID_CREATE;
     sub_header.flags = 0;
-    sub_header.flags |= output_buffer->endianness;
+    sub_header.flags |= FLAG_ENDIANNESS * output_buffer->endianness;
     sub_header.flags |= FLAG_REUSE * reuse;
     sub_header.flags |= FLAG_REPLACE * replace;
     sub_header.length = (uint16_t)(submessage_end.position - submessage_begin.position) - (uint16_t)4u;
@@ -647,9 +650,13 @@ bool send_until_status(Session* session, uint16_t status_request_id, uint32_t at
 uint16_t get_num_request_id(RequestId request_id)
 {
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
+    {
         return request_id.data[1] + (request_id.data[0] << 8);
+    }
     else
+    {
         return request_id.data[0] + (request_id.data[1] << 8);
+    }
 }
 
 RequestId get_raw_request_id(uint16_t request_id)
@@ -667,9 +674,13 @@ RequestId get_raw_request_id(uint16_t request_id)
 uint16_t get_num_object_id(ObjectId object_id)
 {
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
+    {
         return object_id.data[1] + (object_id.data[0] << 8);
+    }
     else
+    {
         return object_id.data[0] + (object_id.data[1] << 8);
+    }
 }
 
 ObjectId get_raw_object_id(uint16_t object_id)
@@ -706,9 +717,12 @@ uint64_t get_nano_time()
 #endif
 }
 
+#define UINT16_SIZE (1 << 16)
+#define UINT16_MIDSIZE (1 << 15)
+
 uint16_t seq_num_add(uint16_t seq_num, uint16_t increment)
 {
-    return (seq_num + increment) % (1 << 16);
+    return (seq_num + increment) % UINT16_SIZE;
 }
 
 uint16_t seq_num_sub(uint16_t seq_num, uint16_t decrement)
@@ -716,7 +730,7 @@ uint16_t seq_num_sub(uint16_t seq_num, uint16_t decrement)
     uint16_t result;
     if(decrement > seq_num)
     {
-        result = (seq_num + ((1 << 16) - decrement)) % (1 << 16);
+        result = (seq_num + (UINT16_SIZE - decrement)) % UINT16_SIZE;
     }
     else
     {
@@ -732,7 +746,8 @@ int seq_num_cmp(uint16_t seq_num_1, uint16_t seq_num_2)
     {
         result = 0;
     }
-    else if(seq_num_1 < seq_num_2 || seq_num_1 > (1 << 15))
+    else if((seq_num_1 < seq_num_2 && (seq_num_2 - seq_num_1) < UINT16_MIDSIZE) ||
+            (seq_num_1 > seq_num_2 && (seq_num_1 - seq_num_2) > UINT16_MIDSIZE))
     {
         result = -1;
     }

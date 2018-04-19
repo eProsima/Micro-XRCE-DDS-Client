@@ -18,6 +18,7 @@
 #include "log/message.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 void process_message(Session* session, MicroBuffer* input_buffer)
 {
@@ -27,6 +28,12 @@ void process_message(Session* session, MicroBuffer* input_buffer)
     {
         ClientKey key;
         deserialize_ClientKey(input_buffer, &key);
+        printf("%X, %X, %li\n", key.data[0], key.data[1], sizeof(key.data));
+        if(0 != memcmp(key.data, session->key.data, sizeof(key.data)))
+        {
+            printf("asdasd\n");
+            return;
+        }
     }
 
     if(0 == header.stream_id)
@@ -187,7 +194,7 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
     MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
     if(seq_num_add(input_stream->last_handled, 1) == seq_num)
     {
-        for(uint16_t i = 1; i < MICRORTPS_MAX_MSG_NUM; i++)
+        for(uint16_t i = 1; i < MICRORTPS_MAX_MSG_NUM; ++i)
         {
             uint8_t aux_index = (seq_num + i) % MICRORTPS_MAX_MSG_NUM;
             MicroBuffer* aux_buffer = &input_stream->buffers[aux_index].micro_buffer;

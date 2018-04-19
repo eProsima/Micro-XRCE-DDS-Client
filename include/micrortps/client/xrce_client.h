@@ -68,7 +68,7 @@ typedef struct OutputReliableStream
 } OutputReliableStream;
 
 
-typedef void (*OnTopic)(ObjectId id, MicroBuffer* serialized_topic, void *args);
+typedef void (*OnTopic)(ObjectId id, MicroBuffer* serialized_topic, void* args);
 
 typedef struct Session
 {
@@ -99,12 +99,12 @@ typedef struct Session
 
 
 bool new_udp_session(Session* const session,
-                        SessionId id,
-                        ClientKey key,
-                        const uint8_t* const agent_ip,
-                        uint16_t agent_port,
-                        OnTopic on_topic_callback,
-                        void* on_topic_args);
+                     SessionId id,
+                     ClientKey key,
+                     const uint8_t* const agent_ip,
+                     uint16_t agent_port,
+                     OnTopic on_topic_callback,
+                     void* on_topic_args);
 
 void free_udp_session(Session* session);
 
