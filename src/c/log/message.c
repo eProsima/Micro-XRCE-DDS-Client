@@ -301,7 +301,7 @@ void debug_print_message(int direction, uint8_t* buffer, uint32_t size)
 
         if(sub_header.length > micro_buffer.final - micro_buffer.iterator)
         {
-            printf("%s%s[INCOMPLETE PAYLOAD]%s\n", dir, RED, RESTORE_COLOR);
+            printf("%s%s[INCOMPLETE SUBMESSAGE]%s\n", dir, RED, RESTORE_COLOR);
             break;
         }
 
@@ -408,6 +408,7 @@ void debug_print_message(int direction, uint8_t* buffer, uint32_t size)
 
         align_to(&micro_buffer, 4);
     }
+    print_serialization(pre, buffer, size);
 }
 
 #endif
