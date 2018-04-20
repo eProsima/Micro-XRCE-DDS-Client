@@ -301,7 +301,8 @@ void debug_print_message(int direction, uint8_t* buffer, uint32_t size)
 
         if(sub_header.length > micro_buffer.final - micro_buffer.iterator)
         {
-             break;
+            printf("%s%s[INCOMPLETE PAYLOAD]%s\n", dir, RED, RESTORE_COLOR);
+            break;
         }
 
         switch(sub_header.id)
@@ -319,53 +320,90 @@ void debug_print_message(int direction, uint8_t* buffer, uint32_t size)
                 CREATE_Payload payload;
                 deserialize_CREATE_Payload(&micro_buffer, &payload);
                 print_create_submessage(pre, &payload);
+
             } break;
 
             case SUBMESSAGE_ID_GET_INFO:
-                printf("%s%s[GET INFO MESSAGE (not supported)]%s\n", pre, RED, RESTORE_COLOR);
-                break;
+            {
+                printf("%s%s[GET INFO SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+
+            } break;
 
             case SUBMESSAGE_ID_DELETE:
             {
                 DELETE_Payload payload;
                 deserialize_DELETE_Payload(&micro_buffer, &payload);
                 print_delete_submessage(pre, &payload);
+
             } break;
 
             case SUBMESSAGE_ID_STATUS:
-                break;
+            {
+                STATUS_Payload payload;
+                deserialize_STATUS_Payload(&micro_buffer, &payload);
+                print_status_submessage(pre, &payload);
+
+            } break;
 
             case SUBMESSAGE_ID_INFO:
-                printf("%s%s[INFO MESSAGE (not supported)]%s\n", pre, RED, RESTORE_COLOR);
-                break;
+            {
+                printf("%s%s[INFO SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+            } break;
 
             case SUBMESSAGE_ID_WRITE_DATA:
-                break;
+            {
+                WRITE_DATA_Payload_Data payload;
+                deserialize_WRITE_DATA_Payload_Data(&micro_buffer, &payload);
+                print_write_data_data_submessage(pre, &payload);
+
+            } break;
 
             case SUBMESSAGE_ID_READ_DATA:
-                break;
+            {
+                READ_DATA_Payload payload;
+                deserialize_READ_DATA_Payload(&micro_buffer, &payload);
+                print_read_data_submessage(pre, &payload);
+
+            } break;
 
             case SUBMESSAGE_ID_HEARTBEAT:
-                break;
+            {
+                HEARTBEAT_Payload payload;
+                deserialize_HEARTBEAT_Payload(&micro_buffer, &payload);
+                print_heartbeat_submessage(pre, &payload);
+
+            } break;
 
             case SUBMESSAGE_ID_ACKNACK:
-                break;
+            {
+                ACKNACK_Payload payload;
+                deserialize_ACKNACK_Payload(&micro_buffer, &payload);
+                print_acknack_submessage(pre, &payload);
+
+            } break;
 
             case SUBMESSAGE_ID_DATA:
-                break;
+            {
+                ACKNACK_Payload payload;
+                deserialize_ACKNACK_Payload(&micro_buffer, &payload);
+                print_acknack_submessage(pre, &payload);
+
+            } break;
 
             case SUBMESSAGE_ID_FRAGMENT:
-                break;
+            {
+                printf("%s%s[FRAGMENT SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+            } break;
 
             case SUBMESSAGE_ID_FRAGMENT_END:
-                break;
+            {
+                printf("%s%s[FRAGMENT END SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+            } break;
 
             default:
-                printf("%s%s[UNKNOWN MESSAGE]%s\n",
-                        pre,
-                        RED,
-                        RESTORE_COLOR);
-                break;
+            {
+                printf("%s%s[UNKNOWN SUBMESSAGE]%s\n", dir, RED, RESTORE_COLOR);
+            } break;
         }
 
         align_to(&micro_buffer, 4);
