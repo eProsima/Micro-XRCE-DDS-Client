@@ -23,18 +23,10 @@ extern "C"
 #include <micrortps/client/xrce_protocol_spec.h>
 #include <micrortps/client/client.h>
 #include <stdint.h>
-
-//#if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)
 #include <stdio.h>
-#define SEND "==> "
-#define RECV "<== "
-//#endif
 
-#ifndef SERIALIZATION_LOGS
-#define INLINE_SER inline
-#else
-#define INLINE_SER
-#endif
+#define SEND 1
+#define RECV 2
 
 #ifndef MESSAGE_LOGS
 #define INLINE_MES inline
@@ -42,96 +34,21 @@ extern "C"
 #define INLINE_MES
 #endif
 
-INLINE_SER void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
-#ifndef SERIALIZATION_LOGS
-{}
-#else
-;
-#endif
 
-INLINE_MES void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t local_sequence_number)
+INLINE_MES const char* DATA_TO_STRING(const uint8_t* data, uint32_t size)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CREATE_CLIENT_Payload* payload)
+INLINE_MES void PRINT_MESSAGE(int dir, uint8_t* buffer, uint32_t size)
 #ifndef MESSAGE_LOGS
 {}
 #else
 ;
 #endif
 
-INLINE_MES void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_GET_INFO_SUBMESSAGE(const GET_INFO_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DELETE_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_STATUS_SUBMESSAGE(const STATUS_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_INFO_SUBMESSAGE(const INFO_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_WRITE_DATA_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* reply)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
-
-INLINE_MES void PRINTL_HEARTBEAT_SUBMESSAGE(const char* pre, const HEARTBEAT_Payload* payload)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
 
 #ifdef __cplusplus
 }

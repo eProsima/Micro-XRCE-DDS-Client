@@ -30,24 +30,37 @@
 
 #define RESTORE_COLOR  "\x1B[0m"
 
-#if defined(SERIALIZATION_LOGS) || defined(MESSAGE_LOGS)
-//Only one call into a printf.
-const char* data_to_string(const uint8_t* data, uint32_t size);
+#define SEND_ARROW "==> "
+#define RECV_ARROW "<== "
 
-const char* data_to_string(const uint8_t* data, uint32_t size)
+#ifndef SERIALIZATION_LOGS
+#define INLINE_SER inline
+#else
+#define INLINE_SER
+#endif
+
+#ifdef SERIALIZATION_LOGS
+static void print_serialization(const char* pre, const uint8_t* buffer, uint32_t size)
+{
+    printf("%s%s<< [%u]: %s>>%s\n",
+            pre,
+            GREY_DARK,
+            size,
+            DATA_TO_STRING(buffer, size),
+            RESTORE_COLOR);
+}
+#endif
+
+#ifdef MESSAGE_LOGS
+const char* DATA_TO_STRING(const uint8_t* data, uint32_t size)
 {
     static char buffer[4096];
     for(uint32_t i = 0; i < size; i++)
         sprintf(buffer + 3 * i, "%02X ", data[i]);
     return buffer;
 }
-#endif
 
-#ifdef MESSAGE_LOGS
-const char* request_to_string(const BaseObjectRequest* request);
-const char* reply_to_string(const BaseObjectReply* reply);
-
-const char* request_to_string(const BaseObjectRequest* request)
+static const char* request_to_string(const BaseObjectRequest* request)
 {
     static char buffer[256];
     sprintf(buffer, "#0x%04X | id: 0x%04X",
@@ -57,7 +70,7 @@ const char* request_to_string(const BaseObjectRequest* request)
     return buffer;
 }
 
-const char* reply_to_string(const BaseObjectReply* reply)
+static const char* reply_to_string(const BaseObjectReply* reply)
 {
     static char buffer[256];
 
@@ -108,40 +121,18 @@ const char* reply_to_string(const BaseObjectReply* reply)
 }
 #endif
 
-#ifdef SERIALIZATION_LOGS
-void PRINTL_SERIALIZATION(const char* pre, const uint8_t* buffer, uint32_t size)
-{
-    printf("%s%s<< [%u]: %s>>%s\n",
-            pre,
-            GREY_DARK,
-            size,
-            data_to_string(buffer, size),
-            RESTORE_COLOR);
-}
-#endif
-
 #ifdef MESSAGE_LOGS
-void PRINT_SEQUENCE_NUMBER(uint16_t message_sequence_number, uint16_t local_sequence_number)
+static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
 {
-    printf("%s%sSequence number error => received: %hu, expected: %hu.%s\n",
-            RECV,
-            RED,
-            message_sequence_number,
-            local_sequence_number,
-            RESTORE_COLOR);
-}
-
-void PRINTL_CREATE_CLIENT_SUBMESSAGE(const CREATE_CLIENT_Payload* payload)
-{
-    printf("%s%s[Create client | %s | session: 0x%02X]%s\n",
-            SEND,
-            YELLOW,
+    printf("%s[Create client | %s | session: 0x%02X key: %s]%s\n",
+            pre,
             request_to_string(&payload->base),
             payload->client_representation.session_id,
+            DATA_TO_STRING(payload->client_representation.client_key.data, 4),
             RESTORE_COLOR);
 }
 
-void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
+static void print_create_submessage(const char* pre, const CREATE_Payload* payload)
 {
     char content[4096];
     switch(payload->object_representation.kind)
@@ -176,45 +167,42 @@ void PRINTL_CREATE_RESOURCE_SUBMESSAGE(const CREATE_Payload* payload)
             sprintf(content, "UNKNOWN");
     }
 
-    printf("%s%s[Create | %s | %s]%s\n",
-            SEND,
-            YELLOW,
+    printf("%s[Create | %s | %s]%s\n",
+            pre,
             request_to_string(&payload->base),
             content,
             RESTORE_COLOR);
 }
 
-void PRINTL_GET_INFO_SUBMESSAGE(const GET_INFO_Payload* payload)
+static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload)
 {
     //TODO
     (void) payload;
 }
 
-void PRINTL_DELETE_RESOURCE_SUBMESSAGE(const DELETE_Payload* payload)
+static void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
 {
-    printf("%s%s[Delete | %s]%s\n",
-            SEND,
-            YELLOW,
+    printf("%s[Delete | %s]%s\n",
+            pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
 }
 
-void PRINTL_STATUS_SUBMESSAGE(const STATUS_Payload* payload)
+static void print_status_submessage(const char* pre, const STATUS_Payload* payload)
 {
-    printf("%s%s[Status | %s]%s\n",
-            RECV,
-            PURPLE,
+    printf("%s[Status | %s]%s\n",
+            pre,
             reply_to_string(&payload->base),
             RESTORE_COLOR);
 }
 
-void PRINTL_INFO_SUBMESSAGE(const INFO_Payload* payload)
+static void print_info_submessage(const char* pre, const INFO_Payload* payload)
 {
     //TODO
     (void) payload;
 }
 
-void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
+static void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payload)
 {
     char format[128];
     switch(payload->read_specification.data_format)
@@ -238,35 +226,31 @@ void PRINTL_READ_DATA_SUBMESSAGE(const READ_DATA_Payload* payload)
             sprintf(format, "FORMAT_DATA_UNKNOWN");
     }
 
-    printf("%s%s[Read data | %s | %s]%s\n",
-            SEND,
-            YELLOW,
+    printf("%s[Read data | %s | %s]%s\n",
+            pre,
             request_to_string(&payload->base),
             format,
             RESTORE_COLOR);
 }
 
-void PRINTL_WRITE_DATA_DATA_SUBMESSAGE(const WRITE_DATA_Payload_Data* payload)
+static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload)
 {
-    printf("%s%s[Write data | FORMAT_DATA | %s]%s\n",
-            SEND,
-            YELLOW,
+    printf("%s[Write data | FORMAT_DATA | %s]%s\n",
+            pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
 }
 
-void PRINTL_DATA_DATA_SUBMESSAGE(const DATA_Payload_Data* payload)
+static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload)
 {
-    printf("%s%s[Data | FORMAT_DATA | %s]%s\n",
-            RECV,
-            PURPLE,
+    printf("%s[Data | FORMAT_DATA | %s]%s\n",
+            pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
 }
 
-void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
+static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
 {
-    const char* color = (strcmp(pre, SEND) == 0) ? YELLOW : PURPLE;
     char bitmask[17] = {0};
     for(int i = 0; i < 8; i++)
     {
@@ -274,23 +258,118 @@ void PRINTL_ACKNACK_SUBMESSAGE(const char* pre, const ACKNACK_Payload* payload)
         bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
     }
 
-    printf("%s%s[Acknack | seq_num: %hu | bitmap: %s]%s\n",
+    printf("%s[Acknack | seq_num: %hu | bitmap: %s]%s\n",
             pre,
-            color,
             payload->first_unacked_seq_num,
             bitmask,
             RESTORE_COLOR);
 }
 
-void PRINTL_HEARTBEAT_SUBMESSAGE(const char* pre, const HEARTBEAT_Payload* payload)
+static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload)
 {
-    const char* color = (strcmp(pre, SEND) == 0) ? YELLOW : PURPLE;
-    printf("%s%s[Heartbeat | first: %hu | last: %hu]%s\n",
+    printf("%s[Heartbeat | first: %hu | last: %hu]%s\n",
             pre,
-            color,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,
             RESTORE_COLOR);
+}
+
+void debug_print_message(int direction, uint8_t* buffer, uint32_t size)
+{
+    char pre[32];
+    const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
+    const char* color = (direction == SEND) ? YELLOW : PURPLE;
+    strcpy(pre, dir);
+    strcat(pre, color);
+
+    MicroBuffer micro_buffer;
+    init_micro_buffer(&micro_buffer, buffer, size);
+
+    MessageHeader header;
+    deserialize_MessageHeader(&micro_buffer, &header);
+    if (128 > header.session_id)
+    {
+        ClientKey key;
+        deserialize_ClientKey(&micro_buffer, &key);
+    }
+
+    while(micro_buffer.final - micro_buffer.iterator > SUBHEADER_SIZE)
+    {
+        SubmessageHeader sub_header;
+        deserialize_SubmessageHeader(&micro_buffer, &sub_header);
+        micro_buffer.endianness = (sub_header.flags & 0x01) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
+
+        if(sub_header.length > micro_buffer.final - micro_buffer.iterator)
+        {
+             break;
+        }
+
+        switch(sub_header.id)
+        {
+            case SUBMESSAGE_ID_CREATE_CLIENT:
+            {
+                CREATE_CLIENT_Payload payload;
+                deserialize_CREATE_CLIENT_Payload(&micro_buffer, &payload);
+                print_create_client_submessage(pre, &payload);
+
+            } break;
+
+            case SUBMESSAGE_ID_CREATE:
+            {
+                CREATE_Payload payload;
+                deserialize_CREATE_Payload(&micro_buffer, &payload);
+                print_create_submessage(pre, &payload);
+            } break;
+
+            case SUBMESSAGE_ID_GET_INFO:
+                printf("%s%s[GET INFO MESSAGE (not supported)]%s\n", pre, RED, RESTORE_COLOR);
+                break;
+
+            case SUBMESSAGE_ID_DELETE:
+            {
+                DELETE_Payload payload;
+                deserialize_DELETE_Payload(&micro_buffer, &payload);
+                print_delete_submessage(pre, &payload);
+            } break;
+
+            case SUBMESSAGE_ID_STATUS:
+                break;
+
+            case SUBMESSAGE_ID_INFO:
+                printf("%s%s[INFO MESSAGE (not supported)]%s\n", pre, RED, RESTORE_COLOR);
+                break;
+
+            case SUBMESSAGE_ID_WRITE_DATA:
+                break;
+
+            case SUBMESSAGE_ID_READ_DATA:
+                break;
+
+            case SUBMESSAGE_ID_HEARTBEAT:
+                break;
+
+            case SUBMESSAGE_ID_ACKNACK:
+                break;
+
+            case SUBMESSAGE_ID_DATA:
+                break;
+
+            case SUBMESSAGE_ID_FRAGMENT:
+                break;
+
+            case SUBMESSAGE_ID_FRAGMENT_END:
+                break;
+
+            default:
+                printf("%s%s[UNKNOWN MESSAGE]%s\n",
+                        pre,
+                        RED,
+                        RESTORE_COLOR);
+                break;
+        }
+
+        align_to(&micro_buffer, 4);
+    }
 }
 
 #endif
