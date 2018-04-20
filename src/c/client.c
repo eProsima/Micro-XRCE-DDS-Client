@@ -601,15 +601,15 @@ void run_communication(Session* session)
 
     /* Receive phase */
     uint8_t buffer[MICRORTPS_MTU_SIZE];
-    uint32_t length = 0;
+    int length = 0;
     while (0 < (length = receive_data_timed(buffer, MICRORTPS_MTU_SIZE, session->transport_id, MICRORTPS_TIMEOUT_MS)))
     {
         MicroBuffer input_buffer;
-        init_micro_buffer(&input_buffer, buffer, length);
+        init_micro_buffer(&input_buffer, buffer, (uint32_t)length);
 
         if(input_buffer.final - input_buffer.init > session->header_offset)
         {
-            PRINTL_SERIALIZATION(RECV, buffer, length);
+            PRINTL_SERIALIZATION(RECV, buffer, (uint32_t)length);
             process_message(session, &input_buffer);
         }
     }
