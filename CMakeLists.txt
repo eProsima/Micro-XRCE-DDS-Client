@@ -176,7 +176,6 @@ endif()
 ###############################################################################
 # Packaging
 ###############################################################################
-install_eprosima_libraries()
 
 # Install public headers
 include(${PROJECT_SOURCE_DIR}/cmake/dev/set_sources.cmake)
