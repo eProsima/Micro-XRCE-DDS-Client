@@ -28,10 +28,8 @@ void process_message(Session* session, MicroBuffer* input_buffer)
     {
         ClientKey key;
         deserialize_ClientKey(input_buffer, &key);
-        printf("%X, %X, %li\n", key.data[0], key.data[1], sizeof(key.data));
         if(0 != memcmp(key.data, session->key.data, sizeof(key.data)))
         {
-            printf("asdasd\n");
             return;
         }
     }
