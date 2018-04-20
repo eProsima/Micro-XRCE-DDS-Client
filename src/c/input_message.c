@@ -113,8 +113,6 @@ void process_status_submessage(Session* session, MicroBuffer* input_buffer)
     STATUS_Payload status;
     deserialize_STATUS_Payload(input_buffer, &status);
 
-    PRINTL_STATUS_SUBMESSAGE(&status);
-
     session->last_status.status = status.base.result.status;
     session->last_status.implementation_status = MICRORTPS_STATUS_OK;
     session->last_status_request_id = get_num_request_id(status.base.related_request.request_id);
@@ -133,8 +131,6 @@ void process_heartbeat_submessage(Session* session, MicroBuffer* input_buffer)
     HEARTBEAT_Payload heartbeat;
     deserialize_HEARTBEAT_Payload(input_buffer, &heartbeat);
 
-    PRINTL_HEARTBEAT_SUBMESSAGE(RECV, &heartbeat);
-
     InputReliableStream* input_stream = &session->input_reliable_stream;
     input_heartbeat(session, input_stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
 }
@@ -144,8 +140,6 @@ void process_acknack_submessage(Session* session, MicroBuffer* input_buffer)
     ACKNACK_Payload acknack;
     deserialize_ACKNACK_Payload(input_buffer, &acknack);
 
-    PRINTL_ACKNACK_SUBMESSAGE(RECV, &acknack);
-
     OutputReliableStream* output_stream = &session->output_reliable_stream;
     input_acknack(session, output_stream, acknack.first_unacked_seq_num, acknack.nack_bitmap);
 }
@@ -154,8 +148,6 @@ void process_data_submessage(Session* session, MicroBuffer* input_buffer)
 {
     DATA_Payload_Data payload;
     deserialize_DATA_Payload_Data(input_buffer, &payload);
-
-    PRINTL_DATA_DATA_SUBMESSAGE(&payload);
 
     input_buffer->iterator = payload.data.data; //delete this when the topic had been deserialized out of data payload.
 

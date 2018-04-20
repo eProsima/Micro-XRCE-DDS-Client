@@ -149,8 +149,6 @@ bool init_session_sync(Session* session)
     restore_micro_state(&output_buffer, submessage_end);
 
     /* Send message and wait for status. */
-    PRINTL_CREATE_CLIENT_SUBMESSAGE(&payload);
-
     return send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
 }
 
@@ -180,7 +178,6 @@ bool close_session_sync(Session* session)
     payload.base.request_id = get_raw_request_id(session->request_id);
     payload.base.object_id = OBJECTID_CLIENT;
     serialize_DELETE_Payload(&output_buffer, &payload);
-    PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
 
     return send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
 }
@@ -378,8 +375,6 @@ bool delete_object_sync(Session* session, ObjectId object_id)
     if(NULL != buffer)
     {
         serialize_DELETE_Payload(buffer, &payload);
-
-        PRINTL_DELETE_RESOURCE_SUBMESSAGE(&payload);
     }
 
     return run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
@@ -413,7 +408,6 @@ bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_i
         if(NULL != buffer)
         {
             serialize_READ_DATA_Payload(buffer, &payload);
-            PRINTL_READ_DATA_SUBMESSAGE(&payload);
 
             //TODO(Luis): Fix this. Temporal approach.
             MicroBuffer temp;
@@ -430,7 +424,6 @@ bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_i
         if(NULL != buffer)
         {
             serialize_READ_DATA_Payload(buffer, &payload);
-            PRINTL_READ_DATA_SUBMESSAGE(&payload);
 
             result = run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
         }
@@ -460,8 +453,6 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
     sub_header.length = (uint16_t)(submessage_end.position - submessage_begin.position) - (uint16_t)4u;
     serialize_SubmessageHeader(output_buffer, &sub_header);
     restore_micro_state(output_buffer, submessage_end);
-
-    PRINTL_CREATE_RESOURCE_SUBMESSAGE(payload);
 
     return run_until_status(session, session->request_id, MICRORTPS_MAX_ATTEMPTS);
 }
@@ -525,8 +516,6 @@ MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output
     serialize_BaseObjectRequest(output_buffer, &payload.base);
     serialize_uint32_t(output_buffer, topic_size); //Remove in next version. Emulates Data payload data.
 
-    PRINTL_WRITE_DATA_DATA_SUBMESSAGE(&payload);
-
     return output_buffer;
 }
 
@@ -549,8 +538,6 @@ MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stre
     payload.base.object_id = data_writer_id;
     serialize_BaseObjectRequest(output_buffer, &payload.base);
     serialize_uint32_t(output_buffer, topic_size); //Remove in next version. Emulates Data payload data.
-
-    PRINTL_WRITE_DATA_DATA_SUBMESSAGE(&payload);
 
     return output_buffer;
 }
@@ -601,15 +588,15 @@ void run_communication(Session* session)
 
     /* Receive phase */
     uint8_t buffer[MICRORTPS_MTU_SIZE];
-    uint32_t length = 0;
+    int length = 0;
     while (0 < (length = receive_data_timed(buffer, MICRORTPS_MTU_SIZE, session->transport_id, MICRORTPS_TIMEOUT_MS)))
     {
         MicroBuffer input_buffer;
-        init_micro_buffer(&input_buffer, buffer, length);
+        init_micro_buffer(&input_buffer, buffer, (uint32_t)length);
 
         if(input_buffer.final - input_buffer.init > session->header_offset)
         {
-            PRINTL_SERIALIZATION(RECV, buffer, length);
+            PRINT_MESSAGE(RECV, buffer, (uint32_t)length);
             process_message(session, &input_buffer);
         }
     }
@@ -639,7 +626,7 @@ bool send_until_status(Session* session, uint16_t status_request_id, uint32_t at
     while(!result && attempts_counter < attempts)
     {
         send_data(message->init, (message->iterator - message->init), session->transport_id);
-        PRINTL_SERIALIZATION(SEND, message->init, (uint32_t)(message->iterator - message->init));
+        PRINT_MESSAGE(SEND, message->init, (uint32_t)(message->iterator - message->init));
         result = run_until_status(session, status_request_id, 1);
         attempts_counter++;
     }

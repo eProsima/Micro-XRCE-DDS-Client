@@ -28,7 +28,7 @@ bool send_best_effort_message(Session* session, OutputBestEffortStream* output_s
     stamp_header(session, output_buffer->init, STREAMID_BUILTIN_BEST_EFFORTS, output_stream->last_sent);
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
-    PRINTL_SERIALIZATION(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
+    PRINT_MESSAGE(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
 
     reset_micro_buffer_offset(output_buffer, session->header_offset);
 
@@ -43,7 +43,7 @@ bool send_reliable_message(Session* session, OutputReliableStream* output_stream
     stamp_header(session, output_buffer->init, STREAMID_BUILTIN_RELIABLE, output_stream->last_sent);
 
     int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
-    PRINTL_SERIALIZATION(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
+    PRINT_MESSAGE(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
 
     return bytes > 0;
 }
@@ -61,12 +61,11 @@ bool send_heartbeat(Session* session, OutputReliableStream* reference_stream)
     output_heartbeat(reference_stream, &heartbeat);
 
     serialize_HEARTBEAT_Payload(&output_buffer, &heartbeat);
-    PRINTL_HEARTBEAT_SUBMESSAGE(SEND, &heartbeat);
 
     stamp_header(session, output_buffer.init, 0, (uint16_t)(STREAMID_BUILTIN_RELIABLE));
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
-    PRINTL_SERIALIZATION(SEND, output_buffer.init, (uint32_t)(output_buffer.iterator - output_buffer.init));
+    PRINT_MESSAGE(SEND, buffer, (uint32_t)(output_buffer.iterator - output_buffer.init));
 
     return bytes > 0;
 }
@@ -84,12 +83,11 @@ bool send_acknack(Session* session, InputReliableStream* reference_stream)
     output_acknack(reference_stream, &acknack);
 
     serialize_ACKNACK_Payload(&output_buffer, &acknack);
-    PRINTL_ACKNACK_SUBMESSAGE(SEND, &acknack);
 
     stamp_header(session, output_buffer.init, 0, (uint16_t)(STREAMID_BUILTIN_RELIABLE));
 
     int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
-    PRINTL_SERIALIZATION(SEND, output_buffer.init, (uint32_t)(output_buffer.iterator - output_buffer.init));
+    PRINT_MESSAGE(SEND, buffer, (uint32_t)(output_buffer.iterator - output_buffer.init));
 
     return bytes > 0;
 }

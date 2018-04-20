@@ -33,12 +33,6 @@
 #define SEND_ARROW "==> "
 #define RECV_ARROW "<== "
 
-#ifndef SERIALIZATION_LOGS
-#define INLINE_SER inline
-#else
-#define INLINE_SER
-#endif
-
 #ifdef SERIALIZATION_LOGS
 static void print_serialization(const char* pre, const uint8_t* buffer, uint32_t size)
 {
@@ -119,9 +113,7 @@ static const char* reply_to_string(const BaseObjectReply* reply)
 
     return buffer;
 }
-#endif
 
-#ifdef MESSAGE_LOGS
 static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
 {
     printf("%s[Create client | %s | session: 0x%02X key: %s]%s\n",
@@ -174,11 +166,11 @@ static void print_create_submessage(const char* pre, const CREATE_Payload* paylo
             RESTORE_COLOR);
 }
 
-static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload)
+/*static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload)
 {
     //TODO
     (void) payload;
-}
+}*/
 
 static void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
 {
@@ -196,11 +188,11 @@ static void print_status_submessage(const char* pre, const STATUS_Payload* paylo
             RESTORE_COLOR);
 }
 
-static void print_info_submessage(const char* pre, const INFO_Payload* payload)
+/*static void print_info_submessage(const char* pre, const INFO_Payload* payload)
 {
     //TODO
     (void) payload;
-}
+}*/
 
 static void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payload)
 {
@@ -274,7 +266,7 @@ static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload*
             RESTORE_COLOR);
 }
 
-void debug_print_message(int direction, uint8_t* buffer, uint32_t size)
+void PRINT_MESSAGE(int direction, uint8_t* buffer, uint32_t size)
 {
     char pre[32];
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
@@ -384,9 +376,9 @@ void debug_print_message(int direction, uint8_t* buffer, uint32_t size)
 
             case SUBMESSAGE_ID_DATA:
             {
-                ACKNACK_Payload payload;
-                deserialize_ACKNACK_Payload(&micro_buffer, &payload);
-                print_acknack_submessage(pre, &payload);
+                DATA_Payload_Data payload;
+                deserialize_DATA_Payload_Data(&micro_buffer, &payload);
+                print_data_data_submessage(pre, &payload);
 
             } break;
 
