@@ -19,24 +19,27 @@ endif()
 
 project(ShapeDemoClient C)
 
-file(GLOB TEST_SOURCES main.c)
+set(SRCS main.c)
 
-add_executable(${PROJECT_NAME} ${TEST_SOURCES})
+add_executable(${PROJECT_NAME} ${SRCS})
 target_link_libraries(${PROJECT_NAME} micrortps-client)
 
 file(COPY ${PROJECT_SOURCE_DIR}/../../test/shape_topic.xml
-DESTINATION ${PROJECT_BINARY_DIR})
+    DESTINATION ${PROJECT_BINARY_DIR}
+    )
 file(COPY ${PROJECT_SOURCE_DIR}/../../test/data_reader_profile.xml
-DESTINATION ${PROJECT_BINARY_DIR})
+    DESTINATION ${PROJECT_BINARY_DIR}
+    )
 file(COPY ${PROJECT_SOURCE_DIR}/../../test/data_writer_profile.xml
-DESTINATION ${PROJECT_BINARY_DIR})
+    DESTINATION ${PROJECT_BINARY_DIR}
+    )
 
-install(TARGETS ${PROJECT_NAME}
-RUNTIME DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
-)
+install(TARGETS ${PROJECT_NAME} RUNTIME 
+    DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+    )
 
 install(FILES ${PROJECT_SOURCE_DIR}/../../test/shape_topic.xml
-                ${PROJECT_SOURCE_DIR}/../../test/data_reader_profile.xml
-                ${PROJECT_SOURCE_DIR}/../../test/data_writer_profile.xml
-        DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
-)
+              ${PROJECT_SOURCE_DIR}/../../test/data_reader_profile.xml
+              ${PROJECT_SOURCE_DIR}/../../test/data_writer_profile.xml
+    DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+    )

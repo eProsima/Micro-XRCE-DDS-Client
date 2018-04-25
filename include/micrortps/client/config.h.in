@@ -31,14 +31,6 @@
 // Endianness defines
 #ifndef __BIG_ENDIAN__
 #define __BIG_ENDIAN__ @__BIG_ENDIAN__@
-#endif
-
-#ifndef MAX_MESSAGE_SIZE
-#define MAX_MESSAGE_SIZE @MAX_MESSAGE_SIZE@
-#endif // !MAX_MESSAGE_SIZE
-
-#ifndef DATA_CALLBACK_SIZE
-#define DATA_CALLBACK_SIZE @DATA_CALLBACK_SIZE@
-#endif // !DATA_CALLBACK_SIZE
+#endif // !__BIG_ENDIAN__
 
 #endif // _MICRORTPS_CLIENT_CONFIG_H_
