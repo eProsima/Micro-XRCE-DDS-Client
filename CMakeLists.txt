@@ -98,6 +98,7 @@ set(SRCS
     src/c/log/message.c
     )
 
+# Library
 add_library(${PROJECT_NAME} STATIC ${SRCS})
 target_link_libraries(${PROJECT_NAME} PUBLIC microcdr transport)
 target_include_directories(${PROJECT_NAME} 
@@ -174,7 +175,7 @@ endif()
 ###############################################################################
 # Testing
 ###############################################################################
-if(EPROSIMA_BUILD_TESTS AND NOT EPROSIMA_INSTALLER)
+if(EPROSIMA_BUILD_TESTS)
     include(${PROJECT_SOURCE_DIR}/cmake/dev/gtest.cmake)
     check_gtest()
     if(GTEST_FOUND)
@@ -197,9 +198,9 @@ endif()
 ###############################################################################
 # Packaging
 ###############################################################################
+include(${PROJECT_SOURCE_DIR}/cmake/dev/set_sources.cmake)
 
 # Install public headers
-include(${PROJECT_SOURCE_DIR}/cmake/dev/set_sources.cmake)
 set_public_headers_directory(${PROJECT_SOURCE_DIR}/include ${PRODUCT_NAME}
     DESTINATION ${INCLUDE_INSTALL_DIR}
     COMPONENT headers
@@ -231,5 +232,3 @@ install(EXPORT ${PROJECT_NAME}Targets
     DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/cmake
     COMPONENT cmake
     )
-
-include(${PROJECT_SOURCE_DIR}/cmake/packaging/eProsimaPackaging.cmake)
