@@ -16,6 +16,7 @@
 #include <micrortps/client/reliable_control.h>
 #include <micrortps/client/input_message.h>
 #include <micrortps/client/output_message.h>
+#include "xrce_protocol_serialization.h"
 #include "log/message.h"
 
 #include <string.h>
