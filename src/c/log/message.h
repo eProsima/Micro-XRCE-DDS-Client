@@ -28,27 +28,26 @@ extern "C"
 #define SEND 1
 #define RECV 2
 
-#ifndef MESSAGE_LOGS
-#define INLINE_MES inline
+#ifdef MESSAGE_LOGS
+#define MESSAGE_LOGS_AVAILABLE 1
 #else
-#define INLINE_MES
+#define MESSAGE_LOGS_AVAILABLE 0
 #endif
 
-
-INLINE_MES const char* DATA_TO_STRING(const uint8_t* data, uint32_t size)
-#ifndef MESSAGE_LOGS
-{}
+#ifdef SERIALIZATION_LOGS
+#define SERIALIZATION_LOGS_AVAILABLE 1
 #else
-;
+#define SERIALIZATION_LOGS_AVAILABLE 0
 #endif
 
-INLINE_MES void PRINT_MESSAGE(int dir, uint8_t* buffer, uint32_t size)
-#ifndef MESSAGE_LOGS
-{}
-#else
-;
-#endif
+void print_message(int direction, uint8_t* buffer, uint32_t size);
+void print_serialization(int direction, const uint8_t* buffer, uint32_t size);
 
+#define DEBUG_PRINT_MESSAGE(direction, buffer, size) \
+    do { \
+        if (MESSAGE_LOGS_AVAILABLE) print_message(direction, buffer, size); \
+        if (SERIALIZATION_LOGS_AVAILABLE) print_serialization(direction, buffer, size); \
+    } while (0);
 
 #ifdef __cplusplus
 }

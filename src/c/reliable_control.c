@@ -45,7 +45,7 @@ void input_acknack(Session* session, OutputReliableStream* output_stream, const 
             if((output_buffer->iterator - output_buffer->init) > session->header_offset)
             {
                 send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
-                PRINT_MESSAGE(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
+                DEBUG_PRINT_MESSAGE(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
             }
         }
     }

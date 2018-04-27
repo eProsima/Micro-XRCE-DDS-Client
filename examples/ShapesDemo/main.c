@@ -16,6 +16,8 @@
 
 #include "Shape.h"
 #include <stdio.h>
+#include <sys/time.h>
+#include <sys/select.h>
 
 // ----------------------------------------------------
 //    App client
@@ -23,12 +25,16 @@
 #define XML_BUFFER_SIZE 1024
 #define SHAPE_TOPIC 0x01
 
-void help()
+void help(void)
 {
-    printf("Help: program [serial | udp agent_ip agent_port]\n");
+    printf("Usage: program <command>\n");
+    printf("List of commands:\n");
+    printf("    serial device\n");
+    printf("    udp agent_ip agent_port\n");
+    printf("    help\n");
 }
 
-void list_commands()
+void list_commands(void)
 {
     printf("usage: <command> [<args>]\n");
     printf("    create_session:                                                  Creates a Session\n");
@@ -45,7 +51,7 @@ void list_commands()
     printf("    h, help:                                                         Shows this message\n");
 }
 
-int check_input()
+int check_input(void)
 {
     struct timeval tv = {0, 0};
     fd_set fds = {0};
@@ -132,7 +138,6 @@ bool compute_command(const char* command, Session* session)
     int shapesize;
     int length = sscanf(command, "%s %i %i %s %i %i %i", name, &id_pre, &id_related_pre, color, &x, &y, &shapesize);
 
-    printf("%i\n", length);
     if(strcmp(name, "create_session") == 0)
     {
         init_session_sync(session);
@@ -147,8 +152,8 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "create_topic") == 0 && length == 3)
     {
         char xml[XML_BUFFER_SIZE];
-        size_t length = read_file("shape_topic.xml", xml, XML_BUFFER_SIZE);
-        if (length > 0)
+        size_t file_length = read_file("shape_topic.xml", xml, XML_BUFFER_SIZE);
+        if (file_length > 0)
         {
             ObjectId id = {{id_pre, OBJK_TOPIC}};
             ObjectId id_related = {{id_related_pre, OBJK_PARTICIPANT}};
@@ -173,8 +178,8 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "create_datawriter") == 0 && length == 3)
     {
         char xml[XML_BUFFER_SIZE];
-        size_t length = read_file("data_writer_profile.xml", xml, XML_BUFFER_SIZE - 1);
-        if (length > 0)
+        size_t file_length = read_file("data_writer_profile.xml", xml, XML_BUFFER_SIZE - 1);
+        if (file_length > 0)
         {
             ObjectId id = {{id_pre, OBJK_DATAWRITER}};
             ObjectId id_related = {{id_related_pre, OBJK_PUBLISHER}};
@@ -185,8 +190,8 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "create_datareader") == 0 && length == 3)
     {
         char xml[XML_BUFFER_SIZE];
-        size_t length = read_file("data_reader_profile.xml", xml, XML_BUFFER_SIZE);
-        if (length > 0)
+        size_t file_length = read_file("data_reader_profile.xml", xml, XML_BUFFER_SIZE);
+        if (file_length > 0)
         {
             ObjectId id = {{id_pre, OBJK_DATAREADER}};
             ObjectId id_related = {{id_related_pre, OBJK_SUBSCRIBER}};
@@ -243,30 +248,27 @@ int main(int args, char** argv)
 
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    if(args > 3)
+    if(args == 3 && strcmp(argv[1], "serial") == 0)
     {
-        if(strcmp(argv[1], "serial") == 0)
+        const char* device = argv[2];
+        if(!new_serial_session(&my_session, 0x01, key, device, on_topic, NULL))
         {
-            /* TODO (julian): add serial session */
-            printf("<< Serial mode => dev: %s >>\n", argv[2]);
-        }
-        else if(strcmp(argv[1], "udp") == 0 && args == 4)
-        {
-            uint8_t ip[] = {atoi(strtok(argv[2], ".")), atoi(strtok(NULL, ".")),
-                            atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
-            uint16_t port = atoi(argv[3]);
-            if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
-            {
-                printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
-                return 1;
-            }
-            printf("<< UDP mode => port: %s >>\n", argv[3]);
-        }
-        else
-        {
-            help();
+            printf("%sCan not create serial connection%s\n", "\x1B[1;31m", "\x1B[0m");
             return 1;
         }
+        printf("<< Serial mode => dev: %s >>\n", device);
+    }
+    else if(args == 4 && strcmp(argv[1], "udp") == 0)
+    {
+        uint8_t ip[] = {atoi(strtok(argv[2], ".")), atoi(strtok(NULL, ".")),
+                        atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
+        uint16_t port = atoi(argv[3]);
+        if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
+        {
+            printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
+            return 1;
+        }
+        printf("<< UDP mode => ip: %s  - port: %hu >>\n", argv[2], port);
     }
     else
     {
@@ -293,6 +295,8 @@ int main(int args, char** argv)
 
         ms_sleep(100);
     }
+
+    return 0;
 }
 
 

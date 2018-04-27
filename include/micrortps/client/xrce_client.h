@@ -98,10 +98,17 @@ typedef struct Session
 
 
 
-bool new_udp_session(Session* const session,
+bool new_serial_session(Session* session,
                      SessionId id,
                      ClientKey key,
-                     const uint8_t* const agent_ip,
+                     const char* device,
+                     OnTopic on_topic_callback,
+                     void* on_topic_args);
+
+bool new_udp_session(Session* session,
+                     SessionId id,
+                     ClientKey key,
+                     const uint8_t* agent_ip,
                      uint16_t agent_port,
                      OnTopic on_topic_callback,
                      void* on_topic_args);

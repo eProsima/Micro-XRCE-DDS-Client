@@ -48,25 +48,43 @@ void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
     }
 }
 
-int main(int argc, char** argv)
+int main(int args, char** argv)
 {
-    if(argc < 3)
+    Session my_session;
+    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
+    if(args == 3 && strcmp(argv[1], "serial") == 0)
     {
-        printf("Usage: program agent_ip agent_port\n");
+        const char* device = argv[2];
+        if(!new_serial_session(&my_session, 0x01, key, device, on_topic, NULL))
+        {
+            printf("%sCan not create serial connection%s\n", "\x1B[1;31m", "\x1B[0m");
+            return 1;
+        }
+        printf("<< Serial mode => dev: %s >>\n", device);
+    }
+    else if(args == 4 && strcmp(argv[1], "udp") == 0)
+    {
+        uint8_t ip[] = {atoi(strtok(argv[2], ".")), atoi(strtok(NULL, ".")),
+                        atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
+        uint16_t port = atoi(argv[3]);
+        if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
+        {
+            printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
+            return 1;
+        }
+        printf("<< UDP mode => ip: %s  - port: %hu >>\n", argv[2], port);
+    }
+    else
+    {
+        printf("Usage: program <command>\n");
+        printf("List of commands:\n");
+        printf("    serial device\n");
+        printf("    udp agent_ip agent_port\n");
+        printf("    help\n");
         return 1;
     }
 
     /* Init session. */
-    Session my_session;
-    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    uint8_t ip[] = {atoi(strtok(argv[1], ".")), atoi(strtok(NULL, ".")),
-                    atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
-    uint16_t port = atoi(argv[2]);
-    if (!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
-    {
-        return 1;
-    }
-
     init_session_sync(&my_session);
     check_and_print_error(&my_session);
 

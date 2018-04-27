@@ -66,7 +66,7 @@ RequestId get_raw_request_id(uint16_t request_id);
 uint16_t get_num_object_id(ObjectId object_id);
 ObjectId get_raw_object_id(uint16_t object_id);
 
-uint64_t get_nano_time();
+uint64_t get_nano_time(void);
 
 uint16_t seq_num_add(uint16_t seq_num, uint16_t increment);
 uint16_t seq_num_sub(uint16_t seq_num, uint16_t decrement);

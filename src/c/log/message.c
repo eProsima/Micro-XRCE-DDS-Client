@@ -33,20 +33,7 @@
 #define SEND_ARROW "==> "
 #define RECV_ARROW "<== "
 
-#ifdef SERIALIZATION_LOGS
-static void print_serialization(const char* pre, const uint8_t* buffer, uint32_t size)
-{
-    printf("%s%s<< [%u]: %s>>%s\n",
-            pre,
-            GREY_DARK,
-            size,
-            DATA_TO_STRING(buffer, size),
-            RESTORE_COLOR);
-}
-#endif
-
-#ifdef MESSAGE_LOGS
-const char* DATA_TO_STRING(const uint8_t* data, uint32_t size)
+static const char* data_to_string(const uint8_t* data, uint32_t size)
 {
     static char buffer[4096];
     for(uint32_t i = 0; i < size; i++)
@@ -120,7 +107,7 @@ static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_
             pre,
             request_to_string(&payload->base),
             payload->client_representation.session_id,
-            DATA_TO_STRING(payload->client_representation.client_key.data, 4),
+            data_to_string(payload->client_representation.client_key.data, 4),
             RESTORE_COLOR);
 }
 
@@ -266,7 +253,7 @@ static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload*
             RESTORE_COLOR);
 }
 
-void PRINT_MESSAGE(int direction, uint8_t* buffer, uint32_t size)
+void print_message(int direction, uint8_t* buffer, uint32_t size)
 {
     char pre[32];
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
@@ -400,7 +387,20 @@ void PRINT_MESSAGE(int direction, uint8_t* buffer, uint32_t size)
 
         align_to(&micro_buffer, 4);
     }
-    print_serialization(pre, buffer, size);
 }
 
-#endif
+void print_serialization(int direction, const uint8_t* buffer, uint32_t size)
+{
+    char pre[32];
+    const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
+    const char* color = (direction == SEND) ? YELLOW : PURPLE;
+    strcpy(pre, dir);
+    strcat(pre, color);
+
+    printf("%s%s<< [%u]: %s>>%s\n",
+            pre,
+            GREY_DARK,
+            size,
+            data_to_string(buffer, size),
+            RESTORE_COLOR);
+}

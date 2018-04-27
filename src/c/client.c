@@ -21,77 +21,83 @@
 #include <string.h>
 #include <time.h>
 
-bool new_udp_session(Session* const session,
+void new_session(Session* session, SessionId id, ClientKey key, OnTopic on_topic_callback, void* on_topic_args)
+{
+    /* Select id and key. */
+    session->id = id;
+    session->key = key;
+
+    /* Init request id. */
+    session->request_id = 0;
+    session->header_offset = (128 > id) ? HEADER_MAX_SIZE : HEADER_MIN_SIZE;
+
+    /* Init streams. */
+    // input best effort
+    session->input_best_effort_stream.last_handled = UINT16_MAX;
+
+    // output best effort
+    session->output_best_effort_stream.last_sent = UINT16_MAX;
+    init_micro_buffer_offset(&session->output_best_effort_stream.buffer.micro_buffer,
+                              session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE,
+                              session->header_offset);
+
+    // input reliable
+    session->input_reliable_stream.last_handled = UINT16_MAX;
+    session->input_reliable_stream.last_announced = UINT16_MAX;
+    for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
+    {
+        init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
+                          session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
+    }
+    session->input_reliable_stream.last_acknack_timestamp = 0;
+
+    // output reliable
+    session->output_reliable_stream.last_sent = UINT16_MAX;
+    session->output_reliable_stream.last_acknown = UINT16_MAX;
+    for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
+    {
+        init_micro_buffer_offset(&session->output_reliable_stream.buffers[i].micro_buffer,
+                                  session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE,
+                                  session->header_offset);
+    }
+    session->output_reliable_stream.last_heartbeat_timestamp = 0;
+
+    session->on_topic_callback = on_topic_callback;
+    session->on_topic_args = on_topic_args;
+
+    session->last_status_received = false;
+    session->last_status_request_id = false;
+}
+
+bool new_serial_session(Session* session,
                      SessionId id,
                      ClientKey key,
-                     const uint8_t* const server_ip,
+                     const char* device,
+                     OnTopic on_topic_callback,
+                     void* on_topic_args)
+{
+    new_session(session, id, key, on_topic_callback, on_topic_args);
+    session->transport_id = add_serial_locator(device, &session->locator);
+
+    return 0 < session->transport_id;
+}
+
+
+bool new_udp_session(Session* session,
+                     SessionId id,
+                     ClientKey key,
+                     const uint8_t* server_ip,
                      uint16_t remote_port,
                      OnTopic on_topic_callback,
                      void* on_topic_args)
 {
-    if (NULL == session || NULL == server_ip)
-    {
-        printf("# new_udp_session() -> BAD PARAMETERS!\n");
-        return false;
-    }
+    new_session(session, id, key, on_topic_callback, on_topic_args);
+    session->transport_id = add_udp_locator_client(remote_port, server_ip, &session->locator);
 
-    bool result = false;
-    locator_id_t locator_id = add_udp_locator_client(remote_port, server_ip, &session->locator);
-
-    if (0 < locator_id)
-    {
-        /* Select id and key. */
-        session->id = id;
-        session->key = key;
-        session->transport_id = locator_id;
-
-        /* Init request id. */
-        session->request_id = 0;
-        session->header_offset = (128 > id) ? HEADER_MAX_SIZE : HEADER_MIN_SIZE;
-
-        /* Init streams. */
-        // input best effort
-        session->input_best_effort_stream.last_handled = UINT16_MAX;
-
-        // output best effort
-        session->output_best_effort_stream.last_sent = UINT16_MAX;
-        init_micro_buffer_offset(&session->output_best_effort_stream.buffer.micro_buffer,
-                                  session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE,
-                                  session->header_offset);
-
-        // input reliable
-        session->input_reliable_stream.last_handled = UINT16_MAX;
-        session->input_reliable_stream.last_announced = UINT16_MAX;
-        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
-        {
-            init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
-                              session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
-        }
-        session->input_reliable_stream.last_acknack_timestamp = 0;
-
-        // output reliable
-        session->output_reliable_stream.last_sent = UINT16_MAX;
-        session->output_reliable_stream.last_acknown = UINT16_MAX;
-        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
-        {
-            init_micro_buffer_offset(&session->output_reliable_stream.buffers[i].micro_buffer,
-                                      session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE,
-                                      session->header_offset);
-        }
-        session->output_reliable_stream.last_heartbeat_timestamp = 0;
-
-        session->on_topic_callback = on_topic_callback;
-        session->on_topic_args = on_topic_args;
-
-        session->last_status_received = false;
-        session->last_status_request_id = false;
-        result = true;
-    }
-
-    return result;
+    return 0 < session->transport_id;
 }
 
-void free_udp_session(Session* session)
+void free_udp_session(Session* session) //TODO: change name to free_session or something
 {
     remove_locator(session->transport_id);
 }
@@ -596,7 +602,7 @@ void run_communication(Session* session)
 
         if(input_buffer.final - input_buffer.init > session->header_offset)
         {
-            PRINT_MESSAGE(RECV, buffer, (uint32_t)length);
+            DEBUG_PRINT_MESSAGE(RECV, buffer, (uint32_t)length);
             process_message(session, &input_buffer);
         }
     }
@@ -626,7 +632,7 @@ bool send_until_status(Session* session, uint16_t status_request_id, uint32_t at
     while(!result && attempts_counter < attempts)
     {
         send_data(message->init, (message->iterator - message->init), session->transport_id);
-        PRINT_MESSAGE(SEND, message->init, (uint32_t)(message->iterator - message->init));
+        DEBUG_PRINT_MESSAGE(SEND, message->init, (uint32_t)(message->iterator - message->init));
         result = run_until_status(session, status_request_id, 1);
         attempts_counter++;
     }
@@ -682,7 +688,7 @@ ObjectId get_raw_object_id(uint16_t object_id)
     }
 }
 
-uint64_t get_nano_time()
+uint64_t get_nano_time(void)
 {
 #ifdef WIN32
     SYSTEMTIME epoch_tm = {1970, 1, 4, 1, 0, 0, 0, 0};
