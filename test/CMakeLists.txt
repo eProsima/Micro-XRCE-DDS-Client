@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-    # TODO (julian): add standalone tests.
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+
+if(CMAKE_VERSION VERSION_LESS 3.0)
+    project(micrortps-client_tests C CXX)
+else()
+    cmake_policy(SET CMP0048 NEW)
+    project(micrortps-client_tests LANGUAGES C CXX)
 endif()
+
+# TODO (julian): add stand-alone tests.

@@ -13,9 +13,9 @@
 # limitations under the License.
 
 ###############################################################################
-# CMake build rules for micro RTPS client
+# CMake build rules for Micro RTPS Client
 ###############################################################################
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 set(IS_TOP_LEVEL TRUE)
 if(PROJECT_SOURCE_DIR)
@@ -32,7 +32,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 ###############################################################################
-# Product information                                                         #
+# Product information
 ###############################################################################
 if(CMAKE_VERSION VERSION_LESS 3.0)
     project(micrortps-client C)
@@ -42,7 +42,7 @@ if(CMAKE_VERSION VERSION_LESS 3.0)
     set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(micrortps-client VERSION "1.0.0" LANGUAGES C CXX)
+    project(micrortps-client VERSION "1.0.0" LANGUAGES C)
 endif()
 
 # Set product name
@@ -57,16 +57,16 @@ message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 ###############################################################################
 # eProsima build options
 ###############################################################################
+option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
-option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" ON)
-option(UPDATE_SUBMODULES "Update to the latest" OFF)
+option(VERBOSE "Use verbose output" ON)
 
 if(EPROSIMA_BUILD)
-    set(THIRDPARTY ON)
     set(EPROSIMA_BUILD_EXAMPLES ON)
     set(EPROSIMA_BUILD_TESTS ON)
+    set(THIRDPARTY ON)
 endif()
 
 ###############################################################################
@@ -141,8 +141,15 @@ configure_file(${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/client/config.h.in
 )
 
 ###############################################################################
-# Compile options
+# Compile setting
 ###############################################################################
+
+# Definitions
+target_compile_definitions(${PROJECT_NAME}
+    PRIVATE
+        -D$<$<BOOL:${VERBOSE}>:SERIALIZATION_LOGS>
+        -D$<$<BOOL:${VERBOSE}>:MESSAGE_LOGS>
+    )
 
 # Warnings
 if(MSVC OR MSVC_IDE)
@@ -154,21 +161,17 @@ if(MSVC OR MSVC_IDE)
             /wd4820
             /wd4255
             /wd4668
-            -DSERIALIZATION_LOGS
-            -DMESSAGE_LOGS
         )
 else()
     target_compile_options(${PROJECT_NAME}
         PRIVATE
             -pedantic
-            -Wconversion
+#            -Wconversion
             -fstrict-aliasing
             -Wall
             -Wextra
             -Wcast-align
             -Wshadow
-            -DSERIALIZATION_LOGS
-            -DMESSAGE_LOGS
         )
 endif()
 
@@ -176,13 +179,8 @@ endif()
 # Testing
 ###############################################################################
 if(EPROSIMA_BUILD_TESTS)
-    include(${PROJECT_SOURCE_DIR}/cmake/dev/gtest.cmake)
-    check_gtest()
-    if(GTEST_FOUND)
-        enable_testing()
-        include(CTest)
-        add_subdirectory(test)
-    endif()
+    enable_testing()
+    add_subdirectory(test)
 endif()
 
 ###############################################################################
