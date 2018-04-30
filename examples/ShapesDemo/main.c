@@ -130,13 +130,17 @@ size_t read_file(const char *file_name, char* data_file, size_t buf_size)
 bool compute_command(const char* command, Session* session)
 {
     char name[128];
-    int id_pre = 0;
-    int id_related_pre = 0;
+    uint32_t id_pre = 0;
+    uint32_t id_related_pre = 0;
     char color[128];
-    int x;
-    int y;
-    int shapesize;
-    int length = sscanf(command, "%s %i %i %s %i %i %i", name, &id_pre, &id_related_pre, color, &x, &y, &shapesize);
+    uint32_t x;
+    uint32_t y;
+    uint32_t shapesize;
+    int length = sscanf(command, "%s %u %u %s %u %u %u", name, &id_pre, &id_related_pre, color, &x, &y, &shapesize);
+    if(length == 4 && color[0] == '\0')
+    {
+        length = 3; //some implementations of sscanfs add 1 to length if color is empty.
+    }
 
     if(strcmp(name, "create_session") == 0)
     {
