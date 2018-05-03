@@ -16,8 +16,6 @@
 
 #include "Shape.h"
 #include <stdio.h>
-#include <sys/time.h>
-#include <sys/select.h>
 
 // ----------------------------------------------------
 //    App client
