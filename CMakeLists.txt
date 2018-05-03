@@ -82,14 +82,14 @@ endif()
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/dev/eprosima_libraries.cmake)
 find_eprosima_package(micrortps_transport)
-find_eprosima_package(micro-CDR)
+find_eprosima_package(microcdr)
 
 ###############################################################################
 # Targets
 ###############################################################################
 
 # Set source files
-set(SRCS 
+set(SRCS
     src/c/client.c
     src/c/xrce_protocol_serialization.c
     src/c/reliable_control.c
@@ -101,7 +101,7 @@ set(SRCS
 # Library
 add_library(${PROJECT_NAME} STATIC ${SRCS})
 target_link_libraries(${PROJECT_NAME} PUBLIC microcdr transport)
-target_include_directories(${PROJECT_NAME} 
+target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
