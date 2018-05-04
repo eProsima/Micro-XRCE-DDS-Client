@@ -27,7 +27,7 @@ bool send_best_effort_message(Session* session, OutputBestEffortStream* output_s
     output_stream->last_sent = seq_num_add(output_stream->last_sent, 1);
     stamp_header(session, output_buffer->init, STREAMID_BUILTIN_BEST_EFFORTS, output_stream->last_sent);
 
-    int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
+    int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->locator.locator_id);
     DEBUG_PRINT_MESSAGE(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
 
     reset_micro_buffer_offset(output_buffer, session->header_offset);
@@ -42,7 +42,7 @@ bool send_reliable_message(Session* session, OutputReliableStream* output_stream
     output_stream->last_sent = seq_num_add(output_stream->last_sent, 1);
     stamp_header(session, output_buffer->init, STREAMID_BUILTIN_RELIABLE, output_stream->last_sent);
 
-    int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
+    int32_t bytes = send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->locator.locator_id);
     DEBUG_PRINT_MESSAGE(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
 
     return bytes > 0;
@@ -65,7 +65,7 @@ bool send_heartbeat(Session* session, OutputReliableStream* reference_stream)
 
     stamp_header(session, output_buffer.init, 0, (uint16_t)(STREAMID_BUILTIN_RELIABLE));
 
-    int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+    int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->locator.locator_id);
     DEBUG_PRINT_MESSAGE(SEND, buffer, (uint32_t)(output_buffer.iterator - output_buffer.init));
 
     return bytes > 0;
@@ -88,7 +88,7 @@ bool send_acknack(Session* session, InputReliableStream* reference_stream)
 
     stamp_header(session, output_buffer.init, 0, (uint16_t)(STREAMID_BUILTIN_RELIABLE));
 
-    int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->transport_id);
+    int32_t bytes = send_data(output_buffer.init, (output_buffer.iterator - output_buffer.init), session->locator.locator_id);
     DEBUG_PRINT_MESSAGE(SEND, buffer, (uint32_t)(output_buffer.iterator - output_buffer.init));
 
     return bytes > 0;

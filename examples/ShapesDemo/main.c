@@ -228,7 +228,7 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "exit") == 0)
     {
         close_session_sync(session);
-        free_udp_session(session);
+        free_session(session);
         return false;
     }
     else if(strcmp(name, "h") == 0 || strcmp(name, "help") == 0)

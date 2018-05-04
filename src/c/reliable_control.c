@@ -44,7 +44,7 @@ void input_acknack(Session* session, OutputReliableStream* output_stream, const 
             MicroBuffer* output_buffer = &output_stream->buffers[index].micro_buffer;
             if((output_buffer->iterator - output_buffer->init) > session->header_offset)
             {
-                send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->transport_id);
+                send_data(output_buffer->init, (output_buffer->iterator - output_buffer->init), session->locator.locator_id);
                 DEBUG_PRINT_MESSAGE(SEND, output_buffer->init, (uint32_t)(output_buffer->iterator - output_buffer->init));
             }
         }

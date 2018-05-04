@@ -78,9 +78,7 @@ bool new_serial_session(Session* session,
                      void* on_topic_args)
 {
     new_session(session, id, key, on_topic_callback, on_topic_args);
-    session->transport_id = add_serial_locator(device, &session->locator);
-
-    return 0 < session->transport_id;
+    return 0 < add_serial_locator(device, &session->locator);
 }
 
 
@@ -93,14 +91,12 @@ bool new_udp_session(Session* session,
                      void* on_topic_args)
 {
     new_session(session, id, key, on_topic_callback, on_topic_args);
-    session->transport_id = add_udp_locator_client(remote_port, server_ip, &session->locator);
-
-    return 0 < session->transport_id;
+    return 0 < add_udp_locator_client(remote_port, server_ip, &session->locator);
 }
 
-void free_udp_session(Session* session) //TODO: change name to free_session or something
+void free_session(Session* session) //TODO: change name to free_session or something
 {
-    remove_locator(session->transport_id);
+    remove_locator(session->locator.locator_id);
 }
 
 bool init_session_sync(Session* session)
@@ -596,7 +592,7 @@ void run_communication(Session* session)
     /* Receive phase */
     uint8_t buffer[MICRORTPS_MTU_SIZE];
     int length = 0;
-    while (0 < (length = receive_data_timed(buffer, MICRORTPS_MTU_SIZE, session->transport_id, MICRORTPS_TIMEOUT_MS)))
+    while (0 < (length = receive_data_timed(buffer, MICRORTPS_MTU_SIZE, session->locator.locator_id, MICRORTPS_TIMEOUT_MS)))
     {
         MicroBuffer input_buffer;
         init_micro_buffer(&input_buffer, buffer, (uint32_t)length);
@@ -632,7 +628,7 @@ bool send_until_status(Session* session, uint16_t status_request_id, uint32_t at
     bool result = false;
     while(!result && attempts_counter < attempts)
     {
-        send_data(message->init, (message->iterator - message->init), session->transport_id);
+        send_data(message->init, (message->iterator - message->init), session->locator.locator_id);
         DEBUG_PRINT_MESSAGE(SEND, message->init, (uint32_t)(message->iterator - message->init));
         result = run_until_status(session, status_request_id, 1);
         attempts_counter++;

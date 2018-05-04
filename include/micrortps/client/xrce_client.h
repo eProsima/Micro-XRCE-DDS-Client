@@ -77,7 +77,6 @@ typedef struct Session
 
     uint16_t request_id;
 
-    locator_id_t transport_id;
     micrortps_locator_t locator;
 
     uint8_t header_offset;
@@ -113,7 +112,7 @@ bool new_udp_session(Session* session,
                      OnTopic on_topic_callback,
                      void* on_topic_args);
 
-void free_udp_session(Session* session);
+void free_session(Session* session);
 
 bool init_session_sync(Session* session);
 bool close_session_sync(Session* session);

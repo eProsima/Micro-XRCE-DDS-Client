@@ -117,7 +117,7 @@ int main(int args, char** argv)
     }
 
     close_session_sync(&my_session);
-    free_udp_session(&my_session);
+    free_session(&my_session);
 
     return 0;
 }
