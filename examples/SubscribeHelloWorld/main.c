@@ -64,15 +64,21 @@ int main(int args, char** argv)
     }
     else if(args == 4 && strcmp(argv[1], "udp") == 0)
     {
-        uint8_t ip[] = {atoi(strtok(argv[2], ".")), atoi(strtok(NULL, ".")),
-                        atoi(strtok(NULL, ".")), atoi(strtok(NULL, "."))};
+        uint8_t ip[4];
+        int length = sscanf(argv[2], "%d.%d.%d.%d", (int*)&ip[0], (int*)&ip[1], (int*)&ip[2], (int*)&ip[3]);
+        if(length != 4)
+        {
+            printf("%sIP must have th format a.b.c.d%s\n", "\x1B[1;31m", "\x1B[0m");
+            return 1;
+        }
+
         uint16_t port = atoi(argv[3]);
-        if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
+        if(!new_udp_session(&my_session, 0x01, key, ip, port, NULL, NULL))
         {
             printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
             return 1;
         }
-        printf("<< UDP mode => ip: %s  - port: %hu >>\n", argv[2], port);
+        printf("<< UDP mode => ip: %s - port: %hu >>\n", argv[2], port);
     }
     else
     {

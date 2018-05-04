@@ -254,13 +254,45 @@ static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload*
             RESTORE_COLOR);
 }
 
+void print_header(const char* dir, const MessageHeader* header, bool printable)
+{
+
+    if(printable)
+    {
+        char stream_representation;
+        switch(header->stream_id)
+        {
+            case STREAMID_NONE:
+                stream_representation = 'N';
+                break;
+            case STREAMID_BUILTIN_BEST_EFFORTS:
+                stream_representation = 'B';
+                break;
+            case STREAMID_BUILTIN_RELIABLE:
+                stream_representation = 'R';
+                break;
+            default:
+                stream_representation = '-';
+        }
+
+        uint16_t seq_num = 0;
+        if(header->stream_id != 0)
+        {
+            seq_num = header->sequence_nr;
+        }
+
+        printf("%s%s[%c | %hu]%s", dir, GREY_LIGHT, stream_representation, seq_num, RESTORE_COLOR);
+    }
+    else
+    {
+        printf("           ");
+    }
+}
+
 void print_message(int direction, uint8_t* buffer, uint32_t size)
 {
-    char pre[32];
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
-    strcpy(pre, dir);
-    strcat(pre, color);
 
     MicroBuffer micro_buffer;
     init_micro_buffer(&micro_buffer, buffer, size);
@@ -273,15 +305,20 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
         deserialize_ClientKey(&micro_buffer, &key);
     }
 
+    //bool is_reliable = header.stream_id
+
+    bool first_submessage = true;
     while(micro_buffer.final - micro_buffer.iterator > SUBHEADER_SIZE)
     {
         SubmessageHeader sub_header;
         deserialize_SubmessageHeader(&micro_buffer, &sub_header);
         micro_buffer.endianness = (sub_header.flags & 0x01) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
 
+        print_header(dir, &header, first_submessage);
+
         if(sub_header.length > micro_buffer.final - micro_buffer.iterator)
         {
-            printf("%s%s[INCOMPLETE SUBMESSAGE]%s\n", dir, RED, RESTORE_COLOR);
+            printf("%s[INCOMPLETE SUBMESSAGE]%s\n", RED, RESTORE_COLOR);
             break;
         }
 
@@ -291,7 +328,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 CREATE_CLIENT_Payload payload;
                 deserialize_CREATE_CLIENT_Payload(&micro_buffer, &payload);
-                print_create_client_submessage(pre, &payload);
+                print_create_client_submessage(color, &payload);
 
             } break;
 
@@ -299,13 +336,13 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 CREATE_Payload payload;
                 deserialize_CREATE_Payload(&micro_buffer, &payload);
-                print_create_submessage(pre, &payload);
+                print_create_submessage(color, &payload);
 
             } break;
 
             case SUBMESSAGE_ID_GET_INFO:
             {
-                printf("%s%s[GET INFO SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+                printf("%s[GET INFO SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
 
             } break;
 
@@ -313,7 +350,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 DELETE_Payload payload;
                 deserialize_DELETE_Payload(&micro_buffer, &payload);
-                print_delete_submessage(pre, &payload);
+                print_delete_submessage(color, &payload);
 
             } break;
 
@@ -321,20 +358,20 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 STATUS_Payload payload;
                 deserialize_STATUS_Payload(&micro_buffer, &payload);
-                print_status_submessage(pre, &payload);
+                print_status_submessage(color, &payload);
 
             } break;
 
             case SUBMESSAGE_ID_INFO:
             {
-                printf("%s%s[INFO SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+                printf("%s[INFO SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
             } break;
 
             case SUBMESSAGE_ID_WRITE_DATA:
             {
                 WRITE_DATA_Payload_Data payload;
                 deserialize_WRITE_DATA_Payload_Data(&micro_buffer, &payload);
-                print_write_data_data_submessage(pre, &payload);
+                print_write_data_data_submessage(color, &payload);
 
             } break;
 
@@ -342,7 +379,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 READ_DATA_Payload payload;
                 deserialize_READ_DATA_Payload(&micro_buffer, &payload);
-                print_read_data_submessage(pre, &payload);
+                print_read_data_submessage(color, &payload);
 
             } break;
 
@@ -350,7 +387,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 HEARTBEAT_Payload payload;
                 deserialize_HEARTBEAT_Payload(&micro_buffer, &payload);
-                print_heartbeat_submessage(pre, &payload);
+                print_heartbeat_submessage(color, &payload);
 
             } break;
 
@@ -358,7 +395,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 ACKNACK_Payload payload;
                 deserialize_ACKNACK_Payload(&micro_buffer, &payload);
-                print_acknack_submessage(pre, &payload);
+                print_acknack_submessage(color, &payload);
 
             } break;
 
@@ -366,40 +403,37 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             {
                 DATA_Payload_Data payload;
                 deserialize_DATA_Payload_Data(&micro_buffer, &payload);
-                print_data_data_submessage(pre, &payload);
+                print_data_data_submessage(color, &payload);
 
             } break;
 
             case SUBMESSAGE_ID_FRAGMENT:
             {
-                printf("%s%s[FRAGMENT SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+                printf("%s[FRAGMENT SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
             } break;
 
             case SUBMESSAGE_ID_FRAGMENT_END:
             {
-                printf("%s%s[FRAGMENT END SUBMESSAGE (not supported)]%s\n", dir, RED, RESTORE_COLOR);
+                printf("%s[FRAGMENT END SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
             } break;
 
             default:
             {
-                printf("%s%s[UNKNOWN SUBMESSAGE]%s\n", dir, RED, RESTORE_COLOR);
+                printf("%s[UNKNOWN SUBMESSAGE]%s\n", RED, RESTORE_COLOR);
             } break;
         }
 
         align_to(&micro_buffer, 4);
+        first_submessage = false;
     }
 }
 
 void print_serialization(int direction, const uint8_t* buffer, uint32_t size)
 {
-    char pre[32];
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
-    const char* color = (direction == SEND) ? YELLOW : PURPLE;
-    strcpy(pre, dir);
-    strcat(pre, color);
 
     printf("%s%s<< [%u]: %s>>%s\n",
-            pre,
+            dir,
             GREY_DARK,
             size,
             data_to_string(buffer, size),
