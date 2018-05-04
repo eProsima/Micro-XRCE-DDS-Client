@@ -73,7 +73,7 @@ int main(int args, char** argv)
         }
 
         uint16_t port = atoi(argv[3]);
-        if(!new_udp_session(&my_session, 0x01, key, ip, port, NULL, NULL))
+        if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
         {
             printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
             return 1;
