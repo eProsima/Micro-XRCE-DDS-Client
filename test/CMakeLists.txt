@@ -21,5 +21,6 @@ else()
     project(micrortps-client_tests LANGUAGES C CXX)
 endif()
 
+add_subdirectory(integration/interaction)
 add_subdirectory(integration/cross_serialization)
 add_subdirectory(integration/xrce_serialization)
