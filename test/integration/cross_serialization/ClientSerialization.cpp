@@ -1,6 +1,6 @@
 #include "ClientSerialization.hpp"
 #include <micrortps/client/xrce_protocol_spec.h>
-#include <xrce_protocol_serialization.h>
+#include "xrce_protocol_serialization.h"
 
 #define BUFFER_LENGTH 1024
 
