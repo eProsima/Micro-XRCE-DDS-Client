@@ -2,9 +2,6 @@
     path = thirdparty/micrortps_transport
     url = git@gitlab.sambaserver.eprosima.com:eProsima/micrortps-transports.git
     branch = feature/new_trasnport_api
-[submodule "microcdr"]
-	path = microcdr
-	url = git@gitlab.sambaserver.eprosima.com:eProsima/microcdr.git
 [submodule "thirdparty/microcdr"]
 	path = thirdparty/microcdr
 	url = git@gitlab.sambaserver.eprosima.com:eProsima/microcdr.git

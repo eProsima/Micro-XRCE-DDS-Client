@@ -15,7 +15,7 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 if (${CMAKE_VERSION} VERSION_GREATER 3.0)
-    cmake_policy(SET CMP0048 OLD)
+    cmake_policy(SET CMP0048 NEW)
 endif()
 
 project(PublishSubscribeHelloWorldClient C)

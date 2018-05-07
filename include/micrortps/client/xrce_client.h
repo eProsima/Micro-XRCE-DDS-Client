@@ -21,6 +21,7 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/xrce_client_dll.h>
 #include <micrortps/client/xrce_protocol_spec.h> //TODO: remove dependence
 #include <micrortps/transport/micrortps_transport.h> //TODO: remove dependence
 #include <microcdr/microcdr.h>
@@ -97,25 +98,25 @@ typedef struct Session
 
 
 
-bool new_serial_session(Session* session,
-                     SessionId id,
-                     ClientKey key,
-                     const char* device,
-                     OnTopic on_topic_callback,
-                     void* on_topic_args);
+client_DllAPI bool new_serial_session(Session* session,
+                                      SessionId id,
+                                      ClientKey key,
+                                      const char* device,
+                                      OnTopic on_topic_callback,
+                                      void* on_topic_args);
 
-bool new_udp_session(Session* session,
-                     SessionId id,
-                     ClientKey key,
-                     const uint8_t* agent_ip,
-                     uint16_t agent_port,
-                     OnTopic on_topic_callback,
-                     void* on_topic_args);
+client_DllAPI bool new_udp_session(Session* session,
+                                   SessionId id,
+                                   ClientKey key,
+                                   const uint8_t* agent_ip,
+                                   uint16_t agent_port,
+                                   OnTopic on_topic_callback,
+                                   void* on_topic_args);
 
-void free_session(Session* session);
+client_DllAPI void free_session(Session* session);
 
-bool init_session_sync(Session* session);
-bool close_session_sync(Session* session);
+client_DllAPI bool init_session_sync(Session* session);
+client_DllAPI bool close_session_sync(Session* session);
 
 /**
  * @brief create_participant_by_ref
@@ -128,11 +129,11 @@ bool close_session_sync(Session* session);
  *
  * @return
  */
-bool create_participant_sync_by_ref(Session* session,
-                                    const ObjectId object_id,
-                                    const char* ref,
-                                    bool reuse,
-                                    bool replace);
+client_DllAPI bool create_participant_sync_by_ref(Session* session,
+                                                  const ObjectId object_id,
+                                                  const char* ref,
+                                                  bool reuse,
+                                                  bool replace);
 
 /**
  * @brief create_topic_by_xml
@@ -146,12 +147,12 @@ bool create_participant_sync_by_ref(Session* session,
  *
  * @return
  */
-bool create_topic_sync_by_xml(Session* session,
-                              const ObjectId object_id,
-                              const char* xml,
-                              const ObjectId participant_id,
-                              bool reuse,
-                              bool replace);
+client_DllAPI bool create_topic_sync_by_xml(Session* session,
+                                            const ObjectId object_id,
+                                            const char* xml,
+                                            const ObjectId participant_id,
+                                            bool reuse,
+                                            bool replace);
 
 /**
  * @brief create_publisher_by_xml
@@ -165,12 +166,12 @@ bool create_topic_sync_by_xml(Session* session,
  *
  * @return
  */
-bool create_publisher_sync_by_xml(Session* session,
-                                  const ObjectId object_id,
-                                  const char* xml,
-                                  const ObjectId participant_id,
-                                  bool reuse,
-                                  bool replace);
+client_DllAPI bool create_publisher_sync_by_xml(Session* session,
+                                                const ObjectId object_id,
+                                                const char* xml,
+                                                const ObjectId participant_id,
+                                                bool reuse,
+                                                bool replace);
 
 /**
  * @brief create_subscriber_by_xml
@@ -184,12 +185,12 @@ bool create_publisher_sync_by_xml(Session* session,
  *
  * @return
  */
-bool create_subscriber_sync_by_xml(Session* session,
-                                   const ObjectId object_id,
-                                   const char* xml,
-                                   const ObjectId participant_id,
-                                   bool reuse,
-                                   bool replace);
+client_DllAPI bool create_subscriber_sync_by_xml(Session* session,
+                                                 const ObjectId object_id,
+                                                 const char* xml,
+                                                 const ObjectId participant_id,
+                                                 bool reuse,
+                                                 bool replace);
 
 /**
  * @brief create_datawriter_by_xml
@@ -203,12 +204,12 @@ bool create_subscriber_sync_by_xml(Session* session,
  *
  * @return
  */
-bool create_datawriter_sync_by_xml(Session* session,
-                                   const ObjectId object_id,
-                                   const char* xml,
-                                   const ObjectId publisher_id,
-                                   bool reuse,
-                                   bool replace);
+client_DllAPI bool create_datawriter_sync_by_xml(Session* session,
+                                                 const ObjectId object_id,
+                                                 const char* xml,
+                                                 const ObjectId publisher_id,
+                                                 bool reuse,
+                                                 bool replace);
 
 /**
  * @brief create_datareader_by_xml
@@ -222,21 +223,21 @@ bool create_datawriter_sync_by_xml(Session* session,
  *
  * @return
  */
-bool create_datareader_sync_by_xml(Session* session,
-                                   const ObjectId object_id,
-                                   const char* xml,
-                                   const ObjectId subscriber_id,
-                                   bool reuse,
-                                   bool replace);
+client_DllAPI bool create_datareader_sync_by_xml(Session* session,
+                                                 const ObjectId object_id,
+                                                 const char* xml,
+                                                 const ObjectId subscriber_id,
+                                                 bool reuse,
+                                                 bool replace);
 
-bool delete_object_sync(Session* session, ObjectId object_id);
+client_DllAPI bool delete_object_sync(Session* session, ObjectId object_id);
 
-bool read_data_sync(Session* session, ObjectId object_id, StreamId id);
+client_DllAPI bool read_data_sync(Session* session, ObjectId object_id, StreamId id);
 
-MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
-MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
+client_DllAPI MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
+client_DllAPI MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size);
 
-void run_communication(Session* session);
+client_DllAPI void run_communication(Session* session);
 
 #ifdef __cplusplus
 }

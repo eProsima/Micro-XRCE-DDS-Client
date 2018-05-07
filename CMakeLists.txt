@@ -45,23 +45,14 @@ else()
     project(micrortps-client VERSION "1.0.0" LANGUAGES C)
 endif()
 
-# Set product name
-if(DEFINED PRODUCT_NAME)
-    set(PRODUCT_NAME ${PRODUCT_NAME} CACHE STRING "Choose the product name in which this project is included")
-else()
-    set(PRODUCT_NAME micrortps CACHE STRING "Choose the product name in which this project is included")
-endif()
-
-message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
-
 ###############################################################################
 # eProsima build options
 ###############################################################################
 option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
-option(THIRDPARTY "Activate the build of thirdparties" ON)
-option(VERBOSE "Use verbose output" ON)
+option(THIRDPARTY "Activate the build of thirdparties" OFF)
+option(VERBOSE "Use verbose output" OFF)
 
 if(EPROSIMA_BUILD)
     set(EPROSIMA_BUILD_EXAMPLES ON)
@@ -81,8 +72,8 @@ endif()
 # Load external eProsima projects.
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/dev/eprosima_libraries.cmake)
-find_eprosima_package(micrortps_transport)
-find_eprosima_package(microcdr)
+eprosima_find_package(micrortps_transport)
+eprosima_find_package(microcdr)
 
 ###############################################################################
 # Targets
@@ -99,8 +90,8 @@ set(SRCS
     )
 
 # Library
-add_library(${PROJECT_NAME} STATIC ${SRCS})
-target_link_libraries(${PROJECT_NAME} PUBLIC microcdr transport)
+add_library(${PROJECT_NAME} ${SRCS})
+target_link_libraries(${PROJECT_NAME} PUBLIC microcdr micrortps-transport)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -136,8 +127,8 @@ else()
 endif()
 
 # Create source file with the define
-configure_file(${PROJECT_SOURCE_DIR}/include/${PRODUCT_NAME}/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/${PRODUCT_NAME}/client/config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
 )
 
 ###############################################################################
@@ -150,29 +141,19 @@ target_compile_definitions(${PROJECT_NAME}
         -D$<$<BOOL:${VERBOSE}>:SERIALIZATION_LOGS>
         -D$<$<BOOL:${VERBOSE}>:MESSAGE_LOGS>
     )
+get_target_property(TARGER_TYPE ${PROJECT_NAME} TYPE)
+if((MSVC OR MSVC_IDE) AND (TARGET_TYPE STREQUAL "SHARED_LIBRARY"))
+    target_compile_definitions(${PROJECT_NAME}
+        PUBLIC
+            -DBUILDING_SHARED_LIB
+        )
+endif()
 
 # Warnings
 if(MSVC OR MSVC_IDE)
-    target_compile_options(${PROJECT_NAME}
-        PRIVATE
-            /W4
-            /wd4700
-            /wd4996
-            /wd4820
-            /wd4255
-            /wd4668
-        )
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668")
 else()
-    target_compile_options(${PROJECT_NAME}
-        PRIVATE
-            -pedantic
-#            -Wconversion
-            -fstrict-aliasing
-            -Wall
-            -Wextra
-            -Wcast-align
-            -Wshadow
-        )
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -fstrict-aliasing -Wall -Wextra -Wcast-align -Wshadow")
 endif()
 
 ###############################################################################
@@ -196,28 +177,8 @@ endif()
 ###############################################################################
 # Packaging
 ###############################################################################
-include(${PROJECT_SOURCE_DIR}/cmake/dev/set_sources.cmake)
 
-# Install public headers
-set_public_headers_directory(${PROJECT_SOURCE_DIR}/include ${PRODUCT_NAME}
-    DESTINATION ${INCLUDE_INSTALL_DIR}
-    COMPONENT headers
-    )
-
-# Install config.h header
-set_public_header(${PROJECT_BINARY_DIR}/include ${PRODUCT_NAME}/client/ config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/${PRODUCT_NAME}/client
-    COMPONENT headers
-    INSTALL
-    )
-
-# Install examples
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples/
-    DESTINATION examples/${PRODUCT_NAME}/client
-    COMPONENT examples
-    PATTERN "examples/*/CMakeLists.txt" EXCLUDE
-    )
-
+# Install library
 install(TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}Targets
     RUNTIME DESTINATION ${BIN_INSTALL_DIR}
@@ -226,6 +187,25 @@ install(TARGETS ${PROJECT_NAME}
     COMPONENT libraries
     )
 
+# Install includes
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/micrortps/client/
+    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+    FILES_MATCHING PATTERN "*.h"
+    )
+
+# Install config.h
+install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+    )
+
+# Install examples
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples/
+    DESTINATION examples/micrortps/client
+    COMPONENT examples
+    PATTERN "examples/*/CMakeLists.txt" EXCLUDE
+    )
+
+# Export library
 install(EXPORT ${PROJECT_NAME}Targets
     DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/cmake
     COMPONENT cmake
