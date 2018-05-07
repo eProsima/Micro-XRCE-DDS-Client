@@ -18,7 +18,7 @@
 
 if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
 
-    project(XRCESerializationInTestClient CXX)
+    project(xrce-serialization-intest-client CXX)
     set(SRCS ClientSerialization.cpp)
     add_library(${PROJECT_NAME} ${SRCS})
 
