@@ -1,3 +1,6 @@
+#ifndef IN_TEST_CLIENT_CROSS_SERIALIZATION_HPP
+#define IN_TEST_CLIENT_CROSS_SERIALIZATION_HPP
+
 #include <cstdint>
 #include <vector>
 
@@ -25,3 +28,4 @@ struct ClientSerialization
     static std::vector<uint8_t> heartbeat_payload();
 };
 
+#endif //IN_TEST_CLIENT_CROSS_SERIALIZATION_HPP

@@ -21,4 +21,5 @@ else()
     project(micrortps-client_tests LANGUAGES C CXX)
 endif()
 
-# TODO (julian): add stand-alone tests.
+add_subdirectory(integration/cross_serialization)
+add_subdirectory(integration/xrce_serialization)
