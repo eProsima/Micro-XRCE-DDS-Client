@@ -17,6 +17,12 @@
 #include "Shape.h"
 #include <stdio.h>
 
+#ifdef _WIN32
+#include <Winsock2.h>
+#else
+#include <sys/select.h>
+#endif
+
 // ----------------------------------------------------
 //    App client
 // ----------------------------------------------------

@@ -35,14 +35,14 @@ endif()
 # Product information
 ###############################################################################
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(micrortps-client C)
+    project(micrortps_client C)
     set(PROJECT_VERSION_MAJOR 1)
     set(PROJECT_VERSION_MINOR 0)
     set(PROJECT_VERSION_PATCH 0)
     set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(micrortps-client VERSION "1.0.0" LANGUAGES C)
+    project(micrortps_client VERSION "1.0.0" LANGUAGES C)
 endif()
 
 ###############################################################################
@@ -91,7 +91,7 @@ set(SRCS
 
 # Library
 add_library(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} PUBLIC microcdr micrortps-transport)
+target_link_libraries(${PROJECT_NAME} PUBLIC microcdr micrortps_transport)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -160,6 +160,19 @@ endif()
 # Testing
 ###############################################################################
 if(EPROSIMA_BUILD_TESTS)
+    # Static library only for test purposes
+    add_library(${PROJECT_NAME}_static STATIC ${SRCS})
+    target_link_libraries(${PROJECT_NAME}_static PUBLIC microcdr micrortps_transport)
+    target_include_directories(${PROJECT_NAME}_static
+        PUBLIC
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+            $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+        PRIVATE
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
+        )
+
+    # Enable test
     include(${PROJECT_SOURCE_DIR}/cmake/dev/gtest.cmake)
     enable_testing()
     add_subdirectory(test)

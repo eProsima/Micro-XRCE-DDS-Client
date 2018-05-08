@@ -22,7 +22,7 @@ project(PublishHelloWorldClient)
 set(SRCS main.c)
 
 add_executable(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} micrortps-client)
+target_link_libraries(${PROJECT_NAME} micrortps_client)
 
 file(COPY ${PROJECT_SOURCE_DIR}/../../test/hello_topic.xml
     DESTINATION ${PROJECT_BINARY_DIR}

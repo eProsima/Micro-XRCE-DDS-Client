@@ -3,7 +3,7 @@
 
 #if defined(_WIN32)
 #if defined(BUILDING_SHARED_LIB)
-#if defined(micrortps-client_EXPORTS)
+#if defined(micrortps_client_EXPORTS)
 #define client_DllAPI __declspec( dllexport )
 #else
 #define client_DllAPI __declspec( dllimport )

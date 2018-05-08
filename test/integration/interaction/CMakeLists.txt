@@ -20,10 +20,10 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
 
     project(interaction-intest-client CXX)
     set(SRCS ClientInteraction.cpp)
-    add_library(${PROJECT_NAME} ${SRCS})
+    add_library(${PROJECT_NAME} STATIC ${SRCS})
 
-    target_link_libraries(${PROJECT_NAME} micrortps-client)
-    get_Target_property(MICRORTPS_CLIENT_DIR micrortps-client SOURCE_DIR)
+    target_link_libraries(${PROJECT_NAME} micrortps_client)
+    get_target_property(MICRORTPS_CLIENT_DIR micrortps_client SOURCE_DIR)
     target_include_directories(${PROJECT_NAME}
         PUBLIC
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

@@ -23,7 +23,7 @@ project(PublishSubscribeHelloWorldClient C)
 set(SRCS main.c)
 
 add_executable(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} micrortps-client)
+target_link_libraries(${PROJECT_NAME} micrortps_client)
 
 
 install(TARGETS ${PROJECT_NAME}

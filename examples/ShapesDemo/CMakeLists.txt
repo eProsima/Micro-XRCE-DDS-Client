@@ -22,7 +22,19 @@ project(ShapeDemoClient C)
 set(SRCS main.c)
 
 add_executable(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} micrortps-client)
+
+if(MSVC OR MSVC_IDE)
+    target_link_libraries(${PROJECT_NAME} 
+        PRIVATE
+            micrortps_client
+            Ws2_32
+        )
+else()
+    target_link_libraries(${PROJECT_NAME} 
+        PRIVATE
+            micrortps_client
+        )
+endif()
 
 file(COPY ${PROJECT_SOURCE_DIR}/../../test/shape_topic.xml
     DESTINATION ${PROJECT_BINARY_DIR}
