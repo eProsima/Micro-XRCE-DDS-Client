@@ -160,6 +160,7 @@ endif()
 # Testing
 ###############################################################################
 if(EPROSIMA_BUILD_TESTS)
+    include(${PROJECT_SOURCE_DIR}/cmake/dev/gtest.cmake)
     enable_testing()
     add_subdirectory(test)
 endif()
