@@ -26,6 +26,7 @@ void check_and_print_error(Session* session)
 
 void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
 {
+    (void) args;
     switch(id.data[0])
     {
         case HELLO_WORLD_TOPIC:

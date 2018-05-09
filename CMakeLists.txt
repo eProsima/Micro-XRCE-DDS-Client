@@ -91,7 +91,7 @@ set(SRCS
 
 # Library
 add_library(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} PUBLIC microcdr micrortps-transport)
+target_link_libraries(${PROJECT_NAME} PUBLIC microcdr micrortps_transport)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

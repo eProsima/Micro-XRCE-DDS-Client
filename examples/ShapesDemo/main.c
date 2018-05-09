@@ -78,6 +78,7 @@ void printl_ShapeType_topic(const ShapeType* shape_topic)
 
 void on_topic(ObjectId id, MicroBuffer *message, void* args)
 {
+    (void) args;
     if(SHAPE_TOPIC ==  id.data[0])
     {
         ShapeType topic;

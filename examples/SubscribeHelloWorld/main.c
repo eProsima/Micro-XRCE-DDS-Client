@@ -39,6 +39,7 @@ void check_and_print_error(Session* session)
 
 void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
 {
+    (void) args;
     if(HELLO_WORLD_TOPIC == id.data[0])
     {
         HelloWorld topic;
