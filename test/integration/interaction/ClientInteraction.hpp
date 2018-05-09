@@ -6,6 +6,8 @@
 #include <chrono>
 #include <atomic>
 #include <thread>
+#include <iostream>
+#include <cstring>
 
 #define CLIENT_MAX_NUM_ATTEMPTS    100
 #define CLIENT_MAX_TIME_WAIT        10
@@ -18,7 +20,7 @@ public:
     Client(const ClientKey& client_key, const uint8_t ip[4], const uint16_t port)
         : session_(),
           client_key_(client_key),
-          ip_{ip[0], ip[1], ip[2], ip[4]},
+          ip_{ip[0], ip[1], ip[2], ip[3]},
           port_(port)
     {
     }
@@ -135,6 +137,11 @@ public:
         }
     }
 
+    bool close()
+    {
+        return close_session_sync(&session_);
+    }
+
     const HelloWorld& get_topic() const { return topic_; }
 
 private:
@@ -172,6 +179,11 @@ public:
             std::this_thread::sleep_for(std::chrono::milliseconds(CLIENT_MAX_TIME_WAIT));
         }
         running_cond_ = false;
+    }
+
+    bool close()
+    {
+        return close_session_sync(&session_);
     }
 
     const HelloWorld& get_topic() const { return topic_; }

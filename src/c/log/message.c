@@ -104,7 +104,7 @@ static const char* reply_to_string(const BaseObjectReply* reply)
 
 static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
 {
-    printf("%s[Create client | %s | session: 0x%02X key: %s]%s\n",
+    printf("%s[Create client | %s | session: 0x%02X | key: %s]%s\n",
             pre,
             request_to_string(&payload->base),
             payload->client_representation.session_id,
