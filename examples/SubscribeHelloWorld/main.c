@@ -52,7 +52,7 @@ void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
 int main(int args, char** argv)
 {
     Session my_session;
-    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
+    ClientKey key = {{0xBB, 0xBB, 0xBB, 0xBB}};
     if(args == 3 && strcmp(argv[1], "serial") == 0)
     {
         const char* device = argv[2];

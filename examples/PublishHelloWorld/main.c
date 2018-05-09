@@ -38,7 +38,7 @@ void check_and_print_error(Session* session)
 int main(int args, char** argv)
 {
     Session my_session;
-    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
+    ClientKey key = {{0xAA, 0xAA, 0xAA, 0xAA}};
     if(args == 3 && strcmp(argv[1], "serial") == 0)
     {
         const char* device = argv[2];
