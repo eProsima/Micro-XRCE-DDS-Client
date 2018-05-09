@@ -67,7 +67,7 @@ int check_input(void)
 
 void printl_ShapeType_topic(const ShapeType* shape_topic)
 {
-    printf("        %s[%s | x: %u | y: %u | size: %u]%s\n",
+    printf("%s[<SHAPE> | %s | x: %u | y: %u | size: %u]%s\n",
             "\x1B[1;34m",
             shape_topic->color,
             shape_topic->x,
@@ -83,6 +83,7 @@ void on_topic(ObjectId id, MicroBuffer *message, void* args)
     {
         ShapeType topic;
         deserialize_ShapeType_topic(message, &topic);
+        printf("Receiving... ");
         printl_ShapeType_topic(&topic);
     }
 }
@@ -91,18 +92,18 @@ void check_and_print_error(Session* session)
 {
     if(session->last_status_received)
     {
-        if(session->last_status.status != STATUS_OK)
+        if(session->last_status.status == STATUS_OK)
         {
-            printf("%sStatus error (%i)%s\n", "\x1B[1;31m", session->last_status.status, "\x1B[0m");
+            printf("%s[OK]%s\n", "\x1B[1;32m", "\x1B[0m");
         }
         else
         {
-            //All things go well
+            printf("%s[Status error: %i]%s\n", "\x1B[1;31m", session->last_status.status, "\x1B[0m");
         }
     }
     else
     {
-        printf("%sConnection error%s\n", "\x1B[1;31m", "\x1B[0m");
+        printf("%s[Connection error]%s\n", "\x1B[1;31m", "\x1B[0m");
     }
 }
 
@@ -218,6 +219,7 @@ bool compute_command(const char* command, Session* session)
 
         ObjectId id = {{id_pre, OBJK_DATAWRITER}};
         write_ShapeType(session, id, id_related_pre, &topic);
+        printf("Sending... ");
         printl_ShapeType_topic(&topic);
     }
     else if(strcmp(name, "read_data") == 0 && length == 3)
@@ -232,9 +234,13 @@ bool compute_command(const char* command, Session* session)
         delete_object_sync(session, id);
         check_and_print_error(session);
     }
-    else if(strcmp(name, "exit") == 0)
+    else if(strcmp(name, "delete_session") == 0)
     {
         close_session_sync(session);
+        check_and_print_error(session);
+    }
+    else if(strcmp(name, "exit") == 0)
+    {
         free_session(session);
         return false;
     }

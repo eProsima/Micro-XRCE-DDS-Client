@@ -33,7 +33,12 @@ public:
 
     bool close_session()
     {
-        return close_session_sync(&session_);
+        bool result = close_session_sync(&session_);
+        if(result)
+        {
+            free_session(&session_);
+        }
+        return result;
     }
 
     bool create_participant()
@@ -117,6 +122,7 @@ public:
 
     bool init()
     {
+        //TODO(Luis): use the Client parent functions instead.
         bool result = true;
         result &= new_udp_session(&session_, 0x01, client_key_, ip_, port_, NULL, NULL);
         result &= init_session_sync(&session_);
@@ -139,7 +145,7 @@ public:
 
     bool close()
     {
-        return close_session_sync(&session_);
+        return close_session();
     }
 
     const HelloWorld& get_topic() const { return topic_; }
@@ -160,6 +166,7 @@ public:
 
     bool init()
     {
+        //TODO(Luis): use the Client parent functions instead.
         bool result = true;
         result &= new_udp_session(&session_, 0x01, client_key_, ip_, port_, on_topic, NULL);
         result &= init_session_sync(&session_);
@@ -183,7 +190,7 @@ public:
 
     bool close()
     {
-        return close_session_sync(&session_);
+        return close_session();
     }
 
     const HelloWorld& get_topic() const { return topic_; }

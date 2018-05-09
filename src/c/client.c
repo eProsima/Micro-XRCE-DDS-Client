@@ -94,7 +94,7 @@ bool new_udp_session(Session* session,
     return 0 < add_udp_locator_client(remote_port, server_ip, &session->locator);
 }
 
-void free_session(Session* session) //TODO: change name to free_session or something
+void free_session(Session* session)
 {
     remove_locator(session->locator.locator_id);
 }
@@ -182,7 +182,12 @@ bool close_session_sync(Session* session)
     payload.base.object_id = OBJECTID_CLIENT;
     serialize_DELETE_Payload(&output_buffer, &payload);
 
-    return send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
+    bool result = send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
+    if(session->last_status_received && session->last_status.status == STATUS_ERR_UNKNOWN_REFERENCE);
+    {
+        result = true; //it's already closed.
+    }
+    return result;
 }
 
 bool create_participant_sync_by_ref(Session* session,

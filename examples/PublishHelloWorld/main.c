@@ -16,23 +16,26 @@
 
 #include <stdio.h>
 
-void check_and_print_error(Session* session)
+void check_and_print_error(Session* session, const char* where)
 {
     if(session->last_status_received)
     {
-        if(session->last_status.status != STATUS_OK)
+        if(session->last_status.status == STATUS_OK)
         {
-            printf("%sStatus error (%i)%s\n", "\x1B[1;31m", session->last_status.status, "\x1B[0m");
+            return; //All things go well
         }
         else
         {
-            //All things go well
+            printf("%sStatus error (%i)%s", "\x1B[1;31m", session->last_status.status, "\x1B[0m");
         }
     }
     else
     {
-        printf("%sConnection error%s\n", "\x1B[1;31m", "\x1B[0m");
+        printf("%sConnection error", "\x1B[1;31m");
     }
+
+    printf(" at %s%s\n", where, "\x1B[0m");
+    exit(1);
 }
 
 int main(int args, char** argv)
@@ -79,28 +82,27 @@ int main(int args, char** argv)
 
     /* Init session. */
     init_session_sync(&my_session);
-    check_and_print_error(&my_session);
+    check_and_print_error(&my_session, "init session");
 
     /* Init XRCE objects. */
     ObjectId participant_id = {{0x00, OBJK_PARTICIPANT}};
     create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
-    check_and_print_error(&my_session);
+    check_and_print_error(&my_session, "create participant");
 
     const char* topic_xml = {"<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>"};
     ObjectId topic_id = {{0x00, OBJK_TOPIC}};
     create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
-    check_and_print_error(&my_session);
+    check_and_print_error(&my_session, "create topic");
 
     const char* publisher_xml = {"<publisher name=\"MyPublisher\""};
     ObjectId publisher_id = {{0x00, OBJK_PUBLISHER}};
     create_publisher_sync_by_xml(&my_session, publisher_id, publisher_xml, participant_id, false, false);
-    check_and_print_error(&my_session);
+    check_and_print_error(&my_session, "create publisher");
 
     const char* datawriter_xml = {"<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>"};
     ObjectId datawriter_id = {{0x00, OBJK_DATAWRITER}};
     create_datawriter_sync_by_xml(&my_session, datawriter_id, datawriter_xml, publisher_id, false, false);
-    check_and_print_error(&my_session);
-
+    check_and_print_error(&my_session, "create datawriter");
 
     /* Main loop */
     int32_t count = 0;
@@ -117,6 +119,8 @@ int main(int args, char** argv)
     }
 
     close_session_sync(&my_session);
+    check_and_print_error(&my_session, "close session");
+
     free_session(&my_session);
 
     return 0;
