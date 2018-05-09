@@ -2,7 +2,7 @@
 #define XRCE_CLIENT_DLL_H
 
 #if defined(_WIN32)
-#if defined(BUILDING_SHARED_LIB)
+#if defined(micrortps_client_SHARED)
 #if defined(micrortps_client_EXPORTS)
 #define client_DllAPI __declspec( dllexport )
 #else
