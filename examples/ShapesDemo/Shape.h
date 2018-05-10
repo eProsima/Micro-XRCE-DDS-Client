@@ -86,11 +86,11 @@ static bool write_ShapeType(Session* session, ObjectId datawriter_id, StreamId s
 
     if (128 < stream_id)
     {
-        topic_buffer = prepare_best_effort_stream_for_topic(&session->output_best_effort_stream, datawriter_id, topic_size);
+        topic_buffer = prepare_best_effort_stream_for_topic(&session->output_best_effort_stream, datawriter_id, (uint16_t)topic_size);
     }
     else
     {
-        topic_buffer = prepare_reliable_stream_for_topic(&session->output_reliable_stream, datawriter_id, topic_size);
+        topic_buffer = prepare_reliable_stream_for_topic(&session->output_reliable_stream, datawriter_id, (uint16_t)topic_size);
     }
 
     if (topic_buffer != NULL)

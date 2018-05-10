@@ -174,7 +174,10 @@ bool close_session_sync(Session* session)
     uint16_t payload_size = 4; //size_of_Delete_Payload(payload)
 
     align_to(&output_buffer, 4);
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_DELETE, output_buffer.endianness, payload_size };
+    SubmessageHeader sub_header;
+    sub_header.id = SUBMESSAGE_ID_DELETE;
+    sub_header.flags = output_buffer.endianness;
+    sub_header.length = payload_size;
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     DELETE_Payload payload;
@@ -481,7 +484,10 @@ MicroBuffer* prepare_best_effort_stream(OutputBestEffortStream* output_stream, u
 
     align_to(output_buffer, 4);
 
-    SubmessageHeader sub_header = (SubmessageHeader){ submessage_id, output_buffer->endianness, payload_size };
+    SubmessageHeader sub_header;
+    sub_header.id = submessage_id;
+    sub_header.flags = output_buffer->endianness;
+    sub_header.length = payload_size;
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
     return output_buffer;
@@ -498,7 +504,10 @@ MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_
 
     align_to(output_buffer, 4);
 
-    SubmessageHeader sub_header = (SubmessageHeader){ submessage_id, output_buffer->endianness, payload_size };
+    SubmessageHeader sub_header;
+    sub_header.id = submessage_id;
+    sub_header.flags = output_buffer->endianness;
+    sub_header.length = payload_size;
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
     return output_buffer;
@@ -515,7 +524,10 @@ MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output
 
     align_to(output_buffer, 4);
 
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_WRITE_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
+    SubmessageHeader sub_header;
+    sub_header.id = SUBMESSAGE_ID_WRITE_DATA;
+    sub_header.flags = output_buffer->endianness;
+    sub_header.length = PAYLOAD_DATA_SIZE + topic_size;
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
     WRITE_DATA_Payload_Data payload;
@@ -538,7 +550,10 @@ MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stre
 
     align_to(output_buffer, 4);
 
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_WRITE_DATA, output_buffer->endianness, PAYLOAD_DATA_SIZE + topic_size };
+    SubmessageHeader sub_header;
+    sub_header.id = SUBMESSAGE_ID_WRITE_DATA;
+    sub_header.flags = output_buffer->endianness;
+    sub_header.length = PAYLOAD_DATA_SIZE + topic_size;
     serialize_SubmessageHeader(output_buffer, &sub_header);
 
     WRITE_DATA_Payload_Data payload;
@@ -556,7 +571,10 @@ void stamp_header(Session* session, uint8_t* buffer, StreamId stream_id, uint16_
     MicroBuffer header_buffer;
     init_micro_buffer(&header_buffer, buffer, session->header_offset);
 
-    MessageHeader header = (MessageHeader){session->id, stream_id, seq_num};
+    MessageHeader header;
+    header.session_id = session->id;
+    header.stream_id = stream_id;
+    header.sequence_nr = seq_num;
     (void) serialize_MessageHeader(&header_buffer, &header);
     if (128 > session->id)
     {
@@ -656,14 +674,18 @@ uint16_t get_num_request_id(RequestId request_id)
 
 RequestId get_raw_request_id(uint16_t request_id)
 {
+    RequestId raw_request;
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
     {
-        return (RequestId){{(uint8_t)(request_id >> 8), (uint8_t)request_id}};
+        raw_request.data[0] = (uint8_t)(request_id >> 8);
+        raw_request.data[1] = (uint8_t)(request_id);
     }
     else
     {
-        return (RequestId){{(uint8_t)request_id, (uint8_t)(request_id >> 8)}};
+        raw_request.data[0] = (uint8_t)(request_id);
+        raw_request.data[1] = (uint8_t)(request_id >> 8);
     }
+    return raw_request;
 }
 
 uint16_t get_num_object_id(ObjectId object_id)
@@ -680,14 +702,18 @@ uint16_t get_num_object_id(ObjectId object_id)
 
 ObjectId get_raw_object_id(uint16_t object_id)
 {
+    ObjectId raw_object;
     if(MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
     {
-        return (ObjectId){{(uint8_t)(object_id >> 8), (uint8_t)object_id}};
+        raw_object.data[0] = (uint8_t)(object_id >> 8);
+        raw_object.data[1] = (uint8_t)(object_id);
     }
     else
     {
-        return (ObjectId){{(uint8_t)object_id, (uint8_t)(object_id >> 8)}};
+        raw_object.data[0] = (uint8_t)(object_id);
+        raw_object.data[1] = (uint8_t)(object_id >> 8);
     }
+    return raw_object;
 }
 
 uint64_t get_nano_time(void)

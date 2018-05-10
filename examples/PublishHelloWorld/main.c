@@ -62,7 +62,7 @@ int main(int args, char** argv)
             return 1;
         }
 
-        uint16_t port = atoi(argv[3]);
+        uint16_t port = (uint16_t)atoi(argv[3]);
         if(!new_udp_session(&my_session, 0x01, key, ip, port, NULL, NULL))
         {
             printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
@@ -109,7 +109,9 @@ int main(int args, char** argv)
     while(true)
     {
         /* Write HelloWorld topic */
-        HelloWorld topic = {++count, "Hello DDS world!"};
+        HelloWorld topic;
+	topic.index = ++count;
+	topic.message = "Hello DDS world!";
         write_HelloWorld(&my_session, datawriter_id, STREAMID_BUILTIN_RELIABLE, &topic);
         printf("Send topic: %s, count: %i\n", topic.message, topic.index);
 

@@ -54,8 +54,10 @@ bool send_heartbeat(Session* session, OutputReliableStream* reference_stream)
     MicroBuffer output_buffer;
     init_micro_buffer_offset(&output_buffer, buffer, sizeof(buffer), session->header_offset);
 
-    SubmessageHeader sub_header = (SubmessageHeader){SUBMESSAGE_ID_HEARTBEAT,
-                                  output_buffer.endianness & FLAG_ENDIANNESS, HEARTBEAT_MSG_SIZE};
+    SubmessageHeader sub_header;
+    sub_header.id = SUBMESSAGE_ID_HEARTBEAT;
+    sub_header.flags = output_buffer.endianness && FLAG_ENDIANNESS;
+    sub_header.length = HEARTBEAT_MSG_SIZE;
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     HEARTBEAT_Payload heartbeat;
@@ -77,8 +79,10 @@ bool send_acknack(Session* session, InputReliableStream* reference_stream)
     MicroBuffer output_buffer;
     init_micro_buffer_offset(&output_buffer, buffer, sizeof(buffer), session->header_offset);
 
-    SubmessageHeader sub_header = (SubmessageHeader){ SUBMESSAGE_ID_ACKNACK,
-                                  output_buffer.endianness & FLAG_ENDIANNESS, HEARTBEAT_MSG_SIZE };
+    SubmessageHeader sub_header;
+    sub_header.id = SUBMESSAGE_ID_ACKNACK;
+    sub_header.flags = output_buffer.endianness && FLAG_ENDIANNESS;
+    sub_header.length = HEARTBEAT_MSG_SIZE;
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     ACKNACK_Payload acknack;

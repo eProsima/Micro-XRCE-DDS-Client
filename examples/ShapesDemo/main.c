@@ -136,13 +136,13 @@ size_t read_file(const char *file_name, char* data_file, size_t buf_size)
 bool compute_command(const char* command, Session* session)
 {
     char name[128];
-    uint32_t id_pre = 0;
-    uint32_t id_related_pre = 0;
+    uint8_t id_pre = 0;
+    uint8_t id_related_pre = 0;
     char color[128];
     uint32_t x;
     uint32_t y;
     uint32_t shapesize;
-    int length = sscanf(command, "%s %u %u %s %u %u %u", name, &id_pre, &id_related_pre, color, &x, &y, &shapesize);
+    int length = sscanf(command, "%s %hhu %hhu %s %u %u %u", name, &id_pre, &id_related_pre, color, &x, &y, &shapesize);
     if(length == 4 && color[0] == '\0')
     {
         length = 3; //some implementations of sscanfs add 1 to length if color is empty.
@@ -155,7 +155,9 @@ bool compute_command(const char* command, Session* session)
     }
     else if(strcmp(name, "create_participant") == 0 && length == 2)
     {
-        ObjectId id = {{id_pre, OBJK_PARTICIPANT}};
+        ObjectId id;
+	id.data[0] = id_pre;
+	id.data[1] = OBJK_PARTICIPANT;
         create_participant_sync_by_ref(session, id, "default_participant", false, false);
         check_and_print_error(session);
     }
@@ -165,23 +167,35 @@ bool compute_command(const char* command, Session* session)
         size_t file_length = read_file("shape_topic.xml", xml, XML_BUFFER_SIZE);
         if (file_length > 0)
         {
-            ObjectId id = {{id_pre, OBJK_TOPIC}};
-            ObjectId id_related = {{id_related_pre, OBJK_PARTICIPANT}};
+            ObjectId id;
+	    id.data[0] = id_pre;
+	    id.data[1] = OBJK_TOPIC;
+            ObjectId id_related;
+	    id_related.data[0] = id_related_pre;
+	    id_related.data[1] = OBJK_PARTICIPANT;
             create_topic_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
     }
     else if(strcmp(name, "create_publisher") == 0 && length == 3)
     {
-        ObjectId id = {{id_pre, OBJK_PUBLISHER}};
-        ObjectId id_related = {{id_related_pre, OBJK_PARTICIPANT}};
+        ObjectId id;
+	id.data[0] = id_pre;
+	id.data[1] = OBJK_PUBLISHER;
+        ObjectId id_related;
+	id_related.data[0] = id_related_pre;
+	id_related.data[1] = OBJK_PARTICIPANT;
         create_publisher_sync_by_xml(session, id, "", id_related, false, false);
         check_and_print_error(session);
     }
     else if(strcmp(name, "create_subscriber") == 0 && length == 3)
     {
-        ObjectId id = {{id_pre, OBJK_SUBSCRIBER}};
-        ObjectId id_related = {{id_related_pre, OBJK_PARTICIPANT}};
+        ObjectId id;
+	id.data[0] = id_pre;
+	id.data[1] = OBJK_SUBSCRIBER;
+        ObjectId id_related;
+	id_related.data[0] = id_related_pre;
+	id_related.data[1] = OBJK_PARTICIPANT;
         create_subscriber_sync_by_xml(session, id, "", id_related, false, false);
         check_and_print_error(session);
     }
@@ -191,8 +205,12 @@ bool compute_command(const char* command, Session* session)
         size_t file_length = read_file("data_writer_profile.xml", xml, XML_BUFFER_SIZE - 1);
         if (file_length > 0)
         {
-            ObjectId id = {{id_pre, OBJK_DATAWRITER}};
-            ObjectId id_related = {{id_related_pre, OBJK_PUBLISHER}};
+            ObjectId id;
+	    id.data[0] = id_pre;
+	    id.data[1] = OBJK_DATAWRITER;
+            ObjectId id_related;
+	    id_related.data[0] = id_related_pre;
+	    id_related.data[1] = OBJK_PUBLISHER;
             create_datawriter_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
@@ -203,8 +221,12 @@ bool compute_command(const char* command, Session* session)
         size_t file_length = read_file("data_reader_profile.xml", xml, XML_BUFFER_SIZE);
         if (file_length > 0)
         {
-            ObjectId id = {{id_pre, OBJK_DATAREADER}};
-            ObjectId id_related = {{id_related_pre, OBJK_SUBSCRIBER}};
+            ObjectId id;
+	    id.data[0] = id_pre;
+	    id.data[1] = OBJK_DATAREADER;
+            ObjectId id_related;
+	    id_related.data[0] = id_related_pre;
+	    id_related.data[1] = OBJK_SUBSCRIBER;
             create_datareader_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
@@ -214,23 +236,32 @@ bool compute_command(const char* command, Session* session)
         ShapeType topic = {"GREEN", 100 , 100, 50};
         if (length == 7)
         {
-           topic = (ShapeType){color, x , y, shapesize};
+	   topic.color = color;
+	   topic.x = x;
+	   topic.y = y;
+	   topic.shapesize = shapesize;
         }
 
-        ObjectId id = {{id_pre, OBJK_DATAWRITER}};
+        ObjectId id;
+	id.data[0] = id_pre;
+	id.data[1] = OBJK_DATAWRITER;
         write_ShapeType(session, id, id_related_pre, &topic);
         printf("Sending... ");
         printl_ShapeType_topic(&topic);
     }
     else if(strcmp(name, "read_data") == 0 && length == 3)
     {
-        ObjectId id = {{id_pre, OBJK_DATAREADER}};
+        ObjectId id;
+	id.data[0] = id_pre;
+	id.data[1] = OBJK_DATAREADER;
         read_data_sync(session, id, id_related_pre);
         check_and_print_error(session);
     }
     else if(strcmp(name, "delete") == 0 && length == 3)
     {
-        ObjectId id = {{id_pre, id_related_pre}};
+        ObjectId id;
+	id.data[0] = id_pre;
+	id.data[1] = id_related_pre;
         delete_object_sync(session, id);
         check_and_print_error(session);
     }
@@ -283,7 +314,7 @@ int main(int args, char** argv)
             return 1;
         }
 
-        uint16_t port = atoi(argv[3]);
+        uint16_t port = (uint16_t)atoi(argv[3]);
         if(!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
         {
             printf("%sCan not create a socket%s\n", "\x1B[1;31m", "\x1B[0m");
