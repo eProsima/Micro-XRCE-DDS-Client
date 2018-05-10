@@ -101,6 +101,7 @@ void free_session(Session* session)
 
 bool init_session_sync(Session* session)
 {
+
     /* Generate CREATE_CLIENT_Payload. */
     uint64_t nanoseconds = get_nano_time();
 
@@ -186,10 +187,45 @@ bool close_session_sync(Session* session)
     serialize_DELETE_Payload(&output_buffer, &payload);
 
     bool result = send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
-    if(session->last_status_received && session->last_status.status == STATUS_ERR_UNKNOWN_REFERENCE);
+    if(session->last_status_received && session->last_status.status == STATUS_ERR_UNKNOWN_REFERENCE)
     {
         result = true; //it's already closed.
     }
+
+    if (result)
+    {
+        /* Update streams. */
+        // input best effort
+        session->input_best_effort_stream.last_handled = UINT16_MAX;
+    
+        // output best effort
+        session->output_best_effort_stream.last_sent = UINT16_MAX;
+        init_micro_buffer_offset(&session->output_best_effort_stream.buffer.micro_buffer,
+                                  session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE,
+                                  session->header_offset);
+    
+        // input reliable
+        session->input_reliable_stream.last_handled = UINT16_MAX;
+        session->input_reliable_stream.last_announced = UINT16_MAX;
+        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
+        {
+            init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
+                              session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
+        }
+        session->input_reliable_stream.last_acknack_timestamp = 0;
+    
+        // output reliable
+        session->output_reliable_stream.last_sent = UINT16_MAX;
+        session->output_reliable_stream.last_acknown = UINT16_MAX;
+        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
+        {
+            init_micro_buffer_offset(&session->output_reliable_stream.buffers[i].micro_buffer,
+                                      session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE,
+                                      session->header_offset);
+        }
+        session->output_reliable_stream.last_heartbeat_timestamp = 0;
+    }
+
     return result;
 }
 
