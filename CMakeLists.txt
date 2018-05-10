@@ -91,6 +91,7 @@ set(SRCS
 
 # Library
 add_library(${PROJECT_NAME} ${SRCS})
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 target_link_libraries(${PROJECT_NAME} PUBLIC microcdr micrortps_transport)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
