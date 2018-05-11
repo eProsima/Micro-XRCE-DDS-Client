@@ -213,13 +213,6 @@ install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
     DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
     )
 
-# Install examples
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples/
-    DESTINATION examples/micrortps/client
-    COMPONENT examples
-    PATTERN "examples/*/CMakeLists.txt" EXCLUDE
-    )
-
 # Export library
 install(EXPORT ${PROJECT_NAME}Targets
     DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/cmake

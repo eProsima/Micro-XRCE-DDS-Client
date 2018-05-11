@@ -19,27 +19,22 @@ endif()
 
 project(PublishHelloWorldClient)
 
-set(SRCS main.c)
-
-add_executable(${PROJECT_NAME} ${SRCS})
+add_executable(${PROJECT_NAME} main.c)
 target_link_libraries(${PROJECT_NAME} micrortps_client)
 
-file(COPY ${PROJECT_SOURCE_DIR}/../../test/hello_topic.xml
-    DESTINATION ${PROJECT_BINARY_DIR}
-    )
-file(COPY ${PROJECT_SOURCE_DIR}/../../test/hello_data_reader_profile.xml
-    DESTINATION ${PROJECT_BINARY_DIR}
-    )
-file(COPY ${PROJECT_SOURCE_DIR}/../../test/hello_data_writer_profile.xml
-    DESTINATION ${PROJECT_BINARY_DIR}
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION examples/micrortps/${PROJECT_NAME}/${BIN_INSTALL_DIR}
     )
 
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/
+    DESTINATION  examples/micrortps/${PROJECT_NAME}
+    FILES_MATCHING PATTERN "*.h"
+                   PATTERN "*.c"
+                   PATTERN "*.idl"
     )
 
 install(FILES ${PROJECT_SOURCE_DIR}/../../test/hello_topic.xml
               ${PROJECT_SOURCE_DIR}/../../test/hello_data_reader_profile.xml
               ${PROJECT_SOURCE_DIR}/../../test/hello_data_writer_profile.xml
-    DESTINATION examples/${PRODUCT_NAME}/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+    DESTINATION examples/micrortps/${PROJECT_NAME}/${BIN_INSTALL_DIR}
     )
