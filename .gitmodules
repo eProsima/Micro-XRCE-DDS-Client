@@ -1,6 +1,6 @@
 [submodule "thirdparty/micrortps_transport"]
     path = thirdparty/micrortps_transport
-    url = git@github.com:eProsima/micrortps-RTPS-transport.git
+    url = git@github.com:eProsima/micro-RTPS-transport.git
 [submodule "thirdparty/microcdr"]
 	path = thirdparty/microcdr
 	url = git@github.com:eProsima/micro-CDR.git
