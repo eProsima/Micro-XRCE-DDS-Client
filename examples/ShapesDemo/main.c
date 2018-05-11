@@ -51,6 +51,7 @@ void list_commands(void)
     printf("    write_data <datawriter id> [<stream id> <color> <x> <y> <size>]: Write data into a <stream id> using <data writer id> DataWriter\n");
     printf("    read_data <datareader id> <stream id>:                           Read data from a <stream id> using <data reader id> DataReader\n");
     printf("    delete <id>:                                                     Removes object with <id> identifier\n");
+    printf("    delete_session:                                                  Deletes a session\n");
     printf("    exit:                                                            Close program\n");
     printf("    h, help:                                                         Shows this message\n");
 }
