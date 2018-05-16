@@ -56,7 +56,7 @@ void process_message(Session* session, MicroBuffer* input_buffer)
             process_submessages(session, input_buffer);
             for(uint16_t i = seq_num_add(header.sequence_nr, 1); 0 >= seq_num_cmp(i, input_stream->last_handled); i = seq_num_add(i, 1))
             {
-                uint8_t current_index = i % MICRORTPS_MAX_MSG_NUM;
+                uint8_t current_index = i % MICRORTPS_RELIABLE_HISTORY;
                 MicroBuffer* current_buffer = &input_stream->buffers[current_index].micro_buffer;
                 process_submessages(session, current_buffer);
                 reset_micro_buffer(current_buffer);
@@ -175,18 +175,18 @@ bool receive_reliable_message(InputReliableStream* input_stream, MicroBuffer* su
     bool result = false;
 
     if(0 <= seq_num_cmp(input_stream->last_handled, seq_num)
-        || 0 > seq_num_cmp(seq_num_add(input_stream->last_handled, MICRORTPS_MAX_MSG_NUM), seq_num))
+        || 0 > seq_num_cmp(seq_num_add(input_stream->last_handled, MICRORTPS_RELIABLE_HISTORY), seq_num))
     {
         return false;
     }
 
-    uint8_t index = seq_num % MICRORTPS_MAX_MSG_NUM;
+    uint8_t index = seq_num % MICRORTPS_RELIABLE_HISTORY;
     MicroBuffer* input_buffer = &input_stream->buffers[index].micro_buffer;
     if(seq_num_add(input_stream->last_handled, 1) == seq_num)
     {
-        for(uint16_t i = 1; i < MICRORTPS_MAX_MSG_NUM; ++i)
+        for(uint16_t i = 1; i < MICRORTPS_RELIABLE_HISTORY; ++i)
         {
-            uint8_t aux_index = (seq_num + i) % MICRORTPS_MAX_MSG_NUM;
+            uint8_t aux_index = (seq_num + i) % MICRORTPS_RELIABLE_HISTORY;
             MicroBuffer* aux_buffer = &input_stream->buffers[aux_index].micro_buffer;
             if(aux_buffer->iterator == aux_buffer->init)
             {

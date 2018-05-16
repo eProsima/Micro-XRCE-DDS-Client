@@ -121,15 +121,13 @@ else()
     set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
 endif()
 
-# Endianness configuration
-include(${PROJECT_SOURCE_DIR}/cmake/common/check_configuration.cmake)
-
-option(CHECK_ENDIANNESS "Enable/disable endiannes checking" ON)
-if(CHECK_ENDIANNESS)
-    check_endianness()
-else()
-    message(STATUS "WARNING!! micrortps-client without check endianness")
-endif()
+# Project options
+set(_MICRORTPS_MTU_SIZE_ 512 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_RELIABLE_HISTORY_ 16 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_TIMEOUT_MS_ 1 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_CONNECTION_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_HEARTBEAT_MIN_PERIOD_MS_ 200 CACHE STRING "Define maximum transmission unit size to be used")
 
 # Create source file with the define
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
@@ -222,7 +220,7 @@ install(EXPORT ${PROJECT_NAME}Targets
     DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/cmake
     )
 
-# Package configuration 
+# Package configuration
 include(CMakePackageConfigHelpers)
 configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/common/Config.cmake.in
     ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Config.cmake

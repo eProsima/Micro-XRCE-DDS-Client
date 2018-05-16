@@ -37,7 +37,7 @@ bool send_best_effort_message(Session* session, OutputBestEffortStream* output_s
 
 bool send_reliable_message(Session* session, OutputReliableStream* output_stream)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_RELIABLE_HISTORY].micro_buffer;
 
     output_stream->last_sent = seq_num_add(output_stream->last_sent, 1);
     stamp_header(session, output_buffer->init, STREAMID_BUILTIN_RELIABLE, output_stream->last_sent);
@@ -82,7 +82,7 @@ bool send_acknack(Session* session, InputReliableStream* reference_stream)
     SubmessageHeader sub_header;
     sub_header.id = SUBMESSAGE_ID_ACKNACK;
     sub_header.flags = output_buffer.endianness && FLAG_ENDIANNESS;
-    sub_header.length = HEARTBEAT_MSG_SIZE;
+    sub_header.length = ACKNACK_MSG_SIZE;
     serialize_SubmessageHeader(&output_buffer, &sub_header);
 
     ACKNACK_Payload acknack;

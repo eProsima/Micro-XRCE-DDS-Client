@@ -13,41 +13,19 @@ extern "C"
 #include <stddef.h>
 #include <stdint.h>
 
-/* Timeouts, periods. */
-#define MICRORTPS_TIMEOUT_MS                 50
-#define MICRORTPS_MAX_ATTEMPTS               50
-#define MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS   20
-#define MICRORTPS_HEARTBEAT_MIN_PERIOD_MS   200
-#define MICRORTPS_ACKNACK_MIN_PERIOD_MS     200
-
 /* Message sizes. */
 #define HEADER_MIN_SIZE    0x04
 #define HEADER_MAX_SIZE    0x08
 #define SUBHEADER_SIZE     0x04
 #define PAYLOAD_DATA_SIZE  0x08
-#define STATUS_MSG_SIZE    0x18
 #define HEARTBEAT_MSG_SIZE 0x04
+#define ACKNACK_MSG_SIZE   0x04
 
 /* Micro-RTPS status. */
 #define MICRORTPS_STATUS_OK         0x00
-#define MICRORTPS_ERR_MAX_ATTEMPTS  0x01
-#define MICRORTPS_ERR_SERIALIZATION 0x02
-#define MICRORTPS_ERR_LOCATOR       0x03
-#define MICRORTPS_ERR_STREAMID      0x04
-#define MICRORTPS_ERR_STREAM_EXISTS 0x05
 
 /* Buffer sizes. */
 #define MICRORTPS_MIN_BUFFER_SIZE  64
-
-/* Streams configuration. */
-#define INPUT_BEST_EFFORT_STREAMS   1
-#define OUTPUT_BEST_EFFORT_STREAMS  1
-#define INPUT_RELIABLE_STREAMS      1
-#define OUTPUT_RELIABLE_STREAMS     1
-
-/*
- * Streams.
- */
 
 bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace);
 

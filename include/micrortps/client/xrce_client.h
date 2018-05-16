@@ -21,13 +21,12 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/config.h>
 #include <micrortps/client/xrce_client_dll.h>
 #include <micrortps/client/xrce_protocol_spec.h> //TODO: remove dependence
 #include <micrortps/transport/micrortps_transport.h> //TODO: remove dependence
 #include <microcdr/microcdr.h>
 
-#define MICRORTPS_MTU_SIZE        512
-#define MICRORTPS_MAX_MSG_NUM      16
 
 typedef struct MessageBuffer
 {
@@ -54,8 +53,7 @@ typedef struct InputReliableStream
 {
     uint16_t last_handled;
     uint16_t last_announced;
-    MessageBuffer buffers[MICRORTPS_MAX_MSG_NUM];
-    uint64_t last_acknack_timestamp;
+    MessageBuffer buffers[MICRORTPS_RELIABLE_HISTORY];
 
 } InputReliableStream;
 
@@ -63,7 +61,7 @@ typedef struct OutputReliableStream
 {
     uint16_t last_sent;
     uint16_t last_acknown;
-    MessageBuffer buffers[MICRORTPS_MAX_MSG_NUM];
+    MessageBuffer buffers[MICRORTPS_RELIABLE_HISTORY];
     uint64_t last_heartbeat_timestamp;
 
 } OutputReliableStream;

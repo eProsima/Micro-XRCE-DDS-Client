@@ -22,17 +22,8 @@
 #include <string.h>
 #include <time.h>
 
-void new_session(Session* session, SessionId id, ClientKey key, OnTopic on_topic_callback, void* on_topic_args)
+void init_session_data(Session* session)
 {
-    /* Select id and key. */
-    session->id = id;
-    session->key = key;
-
-    /* Init request id. */
-    session->request_id = 0;
-    session->header_offset = (128 > id) ? HEADER_MAX_SIZE : HEADER_MIN_SIZE;
-
-    /* Init streams. */
     // input best effort
     session->input_best_effort_stream.last_handled = UINT16_MAX;
 
@@ -45,29 +36,42 @@ void new_session(Session* session, SessionId id, ClientKey key, OnTopic on_topic
     // input reliable
     session->input_reliable_stream.last_handled = UINT16_MAX;
     session->input_reliable_stream.last_announced = UINT16_MAX;
-    for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
+    for (int i = 0; i < MICRORTPS_RELIABLE_HISTORY; ++i)
     {
         init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
                           session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
     }
-    session->input_reliable_stream.last_acknack_timestamp = 0;
 
     // output reliable
     session->output_reliable_stream.last_sent = UINT16_MAX;
     session->output_reliable_stream.last_acknown = UINT16_MAX;
-    for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
+    for (int i = 0; i < MICRORTPS_RELIABLE_HISTORY; ++i)
     {
         init_micro_buffer_offset(&session->output_reliable_stream.buffers[i].micro_buffer,
                                   session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE,
                                   session->header_offset);
     }
     session->output_reliable_stream.last_heartbeat_timestamp = 0;
+}
 
+void new_session(Session* session, SessionId id, ClientKey key, OnTopic on_topic_callback, void* on_topic_args)
+{
+    /* Select id and key. */
+    session->id = id;
+    session->key = key;
+
+    /* Init request id. */
+    session->request_id = 0;
+    session->header_offset = (128 > id) ? HEADER_MAX_SIZE : HEADER_MIN_SIZE;
+
+    /* Init streams. */
     session->on_topic_callback = on_topic_callback;
     session->on_topic_args = on_topic_args;
 
     session->last_status_received = false;
     session->last_status_request_id = false;
+
+    init_session_data(session);
 }
 
 bool new_serial_session(Session* session,
@@ -153,7 +157,7 @@ bool init_session_sync(Session* session)
     restore_micro_state(&output_buffer, submessage_end);
 
     /* Send message and wait for status. */
-    return send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
+    return send_until_status(session, session->request_id, MICRORTPS_CONNECTION_MAX_ATTEMPTS, &output_buffer);
 }
 
 bool close_session_sync(Session* session)
@@ -186,44 +190,15 @@ bool close_session_sync(Session* session)
     payload.base.object_id = OBJECTID_CLIENT;
     serialize_DELETE_Payload(&output_buffer, &payload);
 
-    bool result = send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &output_buffer);
-    if(session->last_status_received && session->last_status.status == STATUS_ERR_UNKNOWN_REFERENCE)
+    bool result = send_until_status(session, session->request_id, MICRORTPS_CONNECTION_MAX_ATTEMPTS, &output_buffer);
+    if(!result && session->last_status_received && session->last_status.status == STATUS_ERR_UNKNOWN_REFERENCE)
     {
         result = true; //it's already closed.
     }
 
     if (result)
     {
-        /* Update streams. */
-        // input best effort
-        session->input_best_effort_stream.last_handled = UINT16_MAX;
-    
-        // output best effort
-        session->output_best_effort_stream.last_sent = UINT16_MAX;
-        init_micro_buffer_offset(&session->output_best_effort_stream.buffer.micro_buffer,
-                                  session->output_best_effort_stream.buffer.data, MICRORTPS_MTU_SIZE,
-                                  session->header_offset);
-    
-        // input reliable
-        session->input_reliable_stream.last_handled = UINT16_MAX;
-        session->input_reliable_stream.last_announced = UINT16_MAX;
-        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
-        {
-            init_micro_buffer(&session->input_reliable_stream.buffers[i].micro_buffer,
-                              session->input_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE);
-        }
-        session->input_reliable_stream.last_acknack_timestamp = 0;
-    
-        // output reliable
-        session->output_reliable_stream.last_sent = UINT16_MAX;
-        session->output_reliable_stream.last_acknown = UINT16_MAX;
-        for (int i = 0; i < MICRORTPS_MAX_MSG_NUM; ++i)
-        {
-            init_micro_buffer_offset(&session->output_reliable_stream.buffers[i].micro_buffer,
-                                      session->output_reliable_stream.buffers[i].data, MICRORTPS_MTU_SIZE,
-                                      session->header_offset);
-        }
-        session->output_reliable_stream.last_heartbeat_timestamp = 0;
+        init_session_data(session);
     }
 
     return result;
@@ -461,7 +436,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_i
             init_micro_buffer_offset(&temp, buffer->init, (uint32_t)(buffer->final - buffer->init), (uint32_t)(buffer->iterator - buffer->init));
 
             send_best_effort_message(session, best_effort);
-            result = send_until_status(session, session->request_id, MICRORTPS_BEST_EFFORT_MAX_ATTEMPTS, &temp);
+            result = send_until_status(session, session->request_id, MICRORTPS_CONNECTION_MAX_ATTEMPTS, &temp);
         }
     }
     else
@@ -481,7 +456,7 @@ bool read_data_sync(Session* session, ObjectId data_reader_id, StreamId stream_i
 
 bool create_reliable_object_sync(Session* session, OutputReliableStream* output_stream, const CREATE_Payload* payload, bool reuse, bool replace)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_RELIABLE_HISTORY].micro_buffer;
 
     /* Serialize CREATE_Payload. */
     MicroState submessage_begin = get_micro_state(output_buffer);
@@ -506,7 +481,7 @@ bool create_reliable_object_sync(Session* session, OutputReliableStream* output_
 
 bool reliable_stream_is_available(OutputReliableStream* output_stream)
 {
-    return seq_num_sub(output_stream->last_sent, output_stream->last_acknown) != MICRORTPS_MAX_MSG_NUM;
+    return seq_num_sub(output_stream->last_sent, output_stream->last_acknown) != MICRORTPS_RELIABLE_HISTORY;
 }
 
 MicroBuffer* prepare_best_effort_stream(OutputBestEffortStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
@@ -531,7 +506,7 @@ MicroBuffer* prepare_best_effort_stream(OutputBestEffortStream* output_stream, u
 
 MicroBuffer* prepare_reliable_stream(OutputReliableStream* output_stream, uint8_t submessage_id, uint16_t payload_size)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_RELIABLE_HISTORY].micro_buffer;
     if(!reliable_stream_is_available(output_stream)
         || SUBHEADER_SIZE + payload_size > output_buffer->final - output_buffer->iterator)
     {
@@ -577,7 +552,7 @@ MicroBuffer* prepare_best_effort_stream_for_topic(OutputBestEffortStream* output
 
 MicroBuffer* prepare_reliable_stream_for_topic(OutputReliableStream* output_stream, ObjectId data_writer_id, uint16_t topic_size)
 {
-    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+    MicroBuffer* output_buffer = &output_stream->buffers[seq_num_add(output_stream->last_sent, 1) % MICRORTPS_RELIABLE_HISTORY].micro_buffer;
     if(!reliable_stream_is_available(output_stream)
         || SUBHEADER_SIZE + PAYLOAD_DATA_SIZE + topic_size > output_buffer->final - output_buffer->iterator)
     {
@@ -631,7 +606,7 @@ void run_communication(Session* session)
     OutputReliableStream* output_reliable_stream = &session->output_reliable_stream;
     if(reliable_stream_is_available(output_reliable_stream))
     {
-        MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[seq_num_add(output_reliable_stream->last_sent, 1) % MICRORTPS_MAX_MSG_NUM].micro_buffer;
+        MicroBuffer* output_reliable_buffer = &output_reliable_stream->buffers[seq_num_add(output_reliable_stream->last_sent, 1) % MICRORTPS_RELIABLE_HISTORY].micro_buffer;
         if(output_reliable_buffer->iterator - output_reliable_buffer->init > session->header_offset)
         {
             send_reliable_message(session, output_reliable_stream);
@@ -684,16 +659,21 @@ bool run_until_status(Session* session, uint16_t status_request_id, uint32_t att
 bool send_until_status(Session* session, uint16_t status_request_id, uint32_t attempts, MicroBuffer* message)
 {
     uint32_t attempts_counter = 0;
-    bool result = false;
-    while(!result && attempts_counter < attempts)
+    session->last_status_received = false;
+    while (!session->last_status_received && attempts_counter < attempts)
     {
         send_data(message->init, (message->iterator - message->init), session->locator.locator_id);
         DEBUG_PRINT_MESSAGE(SEND, message->init, (uint32_t)(message->iterator - message->init));
-        result = run_until_status(session, status_request_id, 1);
+
+        run_communication(session);
         attempts_counter++;
+        if(session->last_status_received)
+        {
+            session->last_status_received = session->last_status_request_id == status_request_id;
+        }
     }
 
-    return result;
+    return session->last_status_received && session->last_status.status == STATUS_OK;
 }
 
 uint16_t get_num_request_id(RequestId request_id)
