@@ -53,7 +53,7 @@ typedef struct InputReliableStream
 {
     uint16_t last_handled;
     uint16_t last_announced;
-    MessageBuffer buffers[MICRORTPS_MAX_MSG_NUM];
+    MessageBuffer buffers[MICRORTPS_RELIABLE_HISTORY];
 
 } InputReliableStream;
 
