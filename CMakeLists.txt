@@ -121,6 +121,14 @@ else()
     set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
 endif()
 
+# Project options
+set(_MICRORTPS_MTU_SIZE_ 512 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_RELIABLE_HISTORY_ 16 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_TIMEOUT_MS_ 1 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_CONNECTION_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit size to be used")
+set(_MICRORTPS_HEARTBEAT_MIN_PERIOD_MS_ 200 CACHE STRING "Define maximum transmission unit size to be used")
+
 # Create source file with the define
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
