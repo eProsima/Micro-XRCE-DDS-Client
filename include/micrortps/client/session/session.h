@@ -20,6 +20,25 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/session/session_info.h>
+#include <micrortps/client/session/stream_storage.h>
+#include <micrortps/client/communication/communication.h>
+
+// ===============================================================
+//                            PUBLIC
+// ===============================================================
+typedef struct Session
+{
+    SessionInfo info;
+    StreamStorage streams;
+    Communication* communication;
+    int last_request_id;
+} Session;
+
+int create_session(Session* session, StreamId id, const char* key, Communication* comm);
+int delete_session(Session* session);
+void run_session(Session* session, int max_attemps, int poll_ms);
+int generate_request_id(Session* session);
 
 #ifdef __cplusplus
 }

@@ -20,6 +20,29 @@ extern "C"
 {
 #endif
 
+typedef struct HeaderStamp
+{
+    SessionInfo info;
+    StreamId id;
+    uint16_t seq_num;
+};
+
+typedef struct SessionInfo
+{
+    uint8_t id;
+    uint8_t* key;
+
+} SessionInfo;
+
+void init_session_info(SessionInfo* info, uint8_t* id, const char* key);
+
+void write_create_session_message(SessionInfo* info, MicroBuffer* mb);
+void write_delete_session_message(SessionInfo* info, MicroBuffer* mb);
+int read_status_agent_message(SessionInfo* info, MicroBuffer* buffer);
+
+void stamp_message_header(SessionInfo* info, MicroBuffer* buffer, StreamId stream, uint16_t seq_num);
+void stamp_control_header(SessionInfo* info, MicroBuffer* buffer, StreamId stream, uint16_t seq_num);
+HeaderStamp read_reader_stamp(SessionInfo* info, MicroBuffer* buffer);
 
 #ifdef __cplusplus
 }

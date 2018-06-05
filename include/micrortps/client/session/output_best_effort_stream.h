@@ -20,6 +20,18 @@ extern "C"
 {
 #endif
 
+#include <microcdr/microcdr.h>
+
+typedef struct OutputBestEffortStream
+{
+    StreamId id;
+    uint16_t seq_num;
+    char* buffer;
+};
+
+void init_output_best_effort_stream(OutputBestEffortStream* stream, StreamId id, uint8_t* buffer);
+prepare_best_effort_stream_to_write(OutputBestEffortStream* stream, int size);
+prepare_best_effort_stream_to_send(OutputBestEffortStream* stream, MicroBuffer* buffer);
 
 #ifdef __cplusplus
 }

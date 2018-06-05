@@ -20,6 +20,21 @@ extern "C"
 {
 #endif
 
+typedef struct InputReliableStream
+{
+    StreamId id;
+    FIFOStructureHere fifo;
+    uint16_t last_handle;
+    uint16_t last_announced;
+
+} InputReliableStream;
+
+void init_input_reliable_stream(InputReliableStream* stream, StreamId id, uint8_t* buffer);
+bool prepare_reliable_stream_to_receive(InputReliableStream* stream, uint8_t* buffer, size_t length, int seq_num);
+bool next_input_reliable_buffer_avaliable(InputReliableStream* stream, Microbuffer* mb);
+bool update_input_reliable_stream_confirmation(InputReliableStream* stream);
+int write_acknack(InputReliableStream* stream, MicroBuffer* mb);
+void process_heartbeat(InputReliableStream* stream, uint16_t* first_seq_num, uint16_t last_seq_num);
 
 #ifdef __cplusplus
 }

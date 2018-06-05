@@ -20,6 +20,44 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/session/output_best_effort_stream.h>
+#include <micrortps/client/session/output_reliable_stream.h>
+#include <micrortps/client/session/input_best_effort_stream.h>
+#include <micrortps/client/session/input_reliable_stream.h>
+
+#ifndef MAX_OUTPUT_BEST_EFFORT_STREAMS
+#define MAX_OUTPUT_BEST_EFFORT_STREAMS 1
+#endif
+
+#ifndef MAX_OUTPUT_RELIABLE_STREAMS
+#define MAX_OUTPUT_RELIABLE_STREAMS 1
+#endif
+
+#ifndef MAX_INPUT_BEST_EFFORT_STREAMS
+#define MAX_INPUT_BEST_EFFORT_STREAMS 1
+#endif
+
+#ifndef MAX_INPUT_RELIABLE_STREAMS
+#define MAX_INPUT_RELIABLE_STREAMS 1
+#endif
+
+typedef struct StreamStorage
+{
+    OutputBestEffortStream output_best_effort[MAX_OUTPUT_BEST_EFFORT_STREAMS];
+    uint8_t output_best_effort_size;
+    OutputReliableStream output_reliable[MAX_OUTPUT_RELIABLE_STREAMS];
+    uint8_t output_reliable_size;
+    InputBestEffortStream input_best_effort[MAX_INPUT_BEST_EFFORT_STREAMS];
+    uint8_t input_best_effort_size;
+    InputReliableStream input_reliable[MAX_INPUT_RELIABLE_STREAMS];
+    uint8_t input_reliable_size;
+
+} StreamStorage;
+
+StreamId add_output_best_effort_buffer(uint8_t* buffer, size_t size);
+StreamId add_output_reliable_buffer(uint8_t* buffer, size_t size);
+StreamId add_input_best_effort_buffer(uint8_t* buffer, size_t size);
+StreamId add_input_reliable_buffer(uint8_t* buffer, size_t size);
 
 #ifdef __cplusplus
 }
