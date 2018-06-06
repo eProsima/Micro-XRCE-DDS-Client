@@ -12,30 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H_
-#define _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H_
+#define _MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <microcdr/microcdr.h>
+#include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
-typedef struct OutputBestEffortStream
+#define RECV_DATA_OK 0
+#define RECV_DATA_TIMEOUT 1
+
+typedef struct Communication Communication;
+struct Communication
 {
-    MicroBuffer mb;
-    uint16_t seq_num;
-
-} OutputBestEffortStream;
-
-void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer);
-bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t* buffer, size_t* length);
-MicroBuffer* prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size);
+    size_t (*send_data)(Communication* communication, uint8_t* buffer, size_t length);
+    int (*recv_data)(Communication* communication, uint8_t* buffer, size_t* length, uint32_t poll_ms);
+    bool (*is_reliable)(void);
+};
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H
+#endif // _MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H

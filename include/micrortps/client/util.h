@@ -12,30 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H_
-#define _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICRORTPS_CLIENT_UTIL_H_
+#define _MICRORTPS_CLIENT_UTIL_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <microcdr/microcdr.h>
-#include <stddef.h>
+#include <stdint.h>
 
-typedef struct OutputBestEffortStream
-{
-    MicroBuffer mb;
-    uint16_t seq_num;
-
-} OutputBestEffortStream;
-
-void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer);
-bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t* buffer, size_t* length);
-MicroBuffer* prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size);
+uint32_t get_nano_time(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H
+#endif // _MICRORTPS_CLIENT_UTIL_H

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H_
-#define _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICRORTPS_CLIENT_SESSION_STREAM_ID_H_
+#define _MICRORTPS_CLIENT_SESSION_STREAM_ID_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -21,21 +21,36 @@ extern "C"
 #endif
 
 #include <microcdr/microcdr.h>
-#include <stddef.h>
 
-typedef struct OutputBestEffortStream
+typedef enum StreamType
 {
-    MicroBuffer mb;
-    uint16_t seq_num;
+    NONE_STREAM,
+    BEST_EFFORT_STREAM,
+    RELIABLE_STREAM
 
-} OutputBestEffortStream;
+} StreamType;
 
-void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer);
-bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t* buffer, size_t* length);
-MicroBuffer* prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size);
+typedef enum StreamDirection
+{
+    INPUT_STREAM,
+    OUTPUT_STREAM
+
+} StreamDirection;
+
+typedef struct StreamId
+{
+    uint8_t raw;
+    uint8_t index;
+    StreamType type;
+    StreamDirection direction;
+
+} StreamId;
+
+StreamId create_stream_id(uint8_t index, StreamType type, StreamDirection direction);
+StreamId create_stream_id_from_raw(uint8_t stream_id_raw, StreamDirection direction);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_OUTPUT_BEST_EFFORT_STREAM_H
+#endif // _MICRORTPS_CLIENT_SESSION_STREAM_ID_H

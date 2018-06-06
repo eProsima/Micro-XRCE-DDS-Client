@@ -20,19 +20,23 @@ extern "C"
 {
 #endif
 
+
+#include <microcdr/microcdr.h>
+#include <stddef.h>
+
 typedef struct InputReliableStream
 {
-    StreamId id;
-    FIFOStructureHere fifo;
+    //FIFOStructureHere fifo;
     uint16_t last_handle;
     uint16_t last_announced;
 
 } InputReliableStream;
 
-void init_input_reliable_stream(InputReliableStream* stream, StreamId id, uint8_t* buffer);
-bool prepare_reliable_stream_to_receive(InputReliableStream* stream, uint8_t* buffer, size_t length, int seq_num);
-bool next_input_reliable_buffer_avaliable(InputReliableStream* stream, Microbuffer* mb);
-bool update_input_reliable_stream_confirmation(InputReliableStream* stream);
+void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer);
+bool receive_reliable_message(InputReliableStream* stream, int seq_num, MicroBuffer* mb);
+bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb);
+
+bool input_reliable_stream_must_confirm(InputReliableStream* stream);
 int write_acknack(InputReliableStream* stream, MicroBuffer* mb);
 void process_heartbeat(InputReliableStream* stream, uint16_t* first_seq_num, uint16_t last_seq_num);
 

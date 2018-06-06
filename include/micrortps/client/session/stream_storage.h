@@ -24,6 +24,7 @@ extern "C"
 #include <micrortps/client/session/output_reliable_stream.h>
 #include <micrortps/client/session/input_best_effort_stream.h>
 #include <micrortps/client/session/input_reliable_stream.h>
+#include <micrortps/client/session/stream_id.h>
 
 #ifndef MAX_OUTPUT_BEST_EFFORT_STREAMS
 #define MAX_OUTPUT_BEST_EFFORT_STREAMS 1
@@ -58,6 +59,13 @@ StreamId add_output_best_effort_buffer(uint8_t* buffer, size_t size);
 StreamId add_output_reliable_buffer(uint8_t* buffer, size_t size);
 StreamId add_input_best_effort_buffer(uint8_t* buffer, size_t size);
 StreamId add_input_reliable_buffer(uint8_t* buffer, size_t size);
+
+OutputBestEffortStream* get_output_best_effort_stream(StreamStorage* storage, uint8_t index);
+OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t index);
+InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint8_t index);
+InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t index);
+
+bool read_stream_header(StreamStorage* storage, MicroBuffer* mb, StreamId* stream_id, uint16_t* seq_num);
 
 #ifdef __cplusplus
 }

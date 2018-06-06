@@ -20,24 +20,25 @@ extern "C"
 {
 #endif
 
+#include <microcdr/microcdr.h>
+#include <stddef.h>
+
 typedef struct OutputReliableStream
 {
-    StreamId id;
-    FIFOStrutureHere fifo;
+    MicroBuffer mb;
     int last_sent;
     int last_acknown;
     int next_heartbeat_time_stamp;
 
 } OutputReliableStream;
 
-void init_output_reliable_stream(OutputReliableStream* stream, int id, uint8_t* buffer);
-void prepare_reliable_stream_to_write(OutputReliableStream* stream, MicroBuffer* mb, int size);
-void prepare_reliable_next_buffer_to_send(OutputReliableStream* stream, MicroBuffer* mb);
-size_t reliable_buffer_to_send(OutputReliableStream* stream, char* buffer);
+void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer);
+bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t* buffer, size_t* length);
+bool prepare_reliable_stream_to_write(OutputReliableStream* stream, int size);
 
-bool update_output_reliable_stream_time(OutputReliableStream* stream, int current_timestamp);
+bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp);
 void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
-int write_heartbeat(OutputReliableStream* stream, Microbuffer* mb);
+int write_heartbeat(OutputReliableStream* stream, MicroBuffer* mb);
 
 #ifdef __cplusplus
 }

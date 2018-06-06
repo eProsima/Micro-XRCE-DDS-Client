@@ -20,15 +20,17 @@ extern "C"
 {
 #endif
 
+#include <stdint.h>
+#include <stdbool.h>
+
 typedef struct InputBestEffortStream
 {
-    StreamId id;
     uint16_t seq_num;
 
 } InputBestEffortStream;
 
-void init_input_best_effort_stream(uint16_t seq_num);
-bool prepare_best_effort_stream_to_receive(uint16_t seq_num);
+void init_input_best_effort_stream(InputBestEffortStream* stream);
+bool receive_best_effort_message(InputBestEffortStream* stream, uint16_t seq_num);
 
 #ifdef __cplusplus
 }
