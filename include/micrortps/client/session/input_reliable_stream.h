@@ -21,8 +21,10 @@ extern "C"
 #endif
 
 
-#include <microcdr/microcdr.h>
-#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+typedef struct MicroBuffer MicroBuffer;
 
 typedef struct InputReliableStream
 {
@@ -33,7 +35,7 @@ typedef struct InputReliableStream
 } InputReliableStream;
 
 void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer);
-bool receive_reliable_message(InputReliableStream* stream, int seq_num, MicroBuffer* mb);
+bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, MicroBuffer* mb);
 bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb);
 
 bool input_reliable_stream_must_confirm(InputReliableStream* stream);

@@ -20,12 +20,16 @@ extern "C"
 {
 #endif
 
-#include <microcdr/microcdr.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 
+typedef struct MicroBuffer MicroBuffer;
 typedef struct OutputBestEffortStream
 {
-    MicroBuffer mb;
+    uint8_t* buffer;
+    uint8_t* iterator;
+    size_t size;
     uint16_t seq_num;
 
 } OutputBestEffortStream;

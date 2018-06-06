@@ -20,15 +20,21 @@ extern "C"
 {
 #endif
 
-#include <microcdr/microcdr.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+typedef struct MicroBuffer MicroBuffer;
 
 typedef struct OutputReliableStream
 {
-    MicroBuffer mb;
-    int last_sent;
-    int last_acknown;
-    int next_heartbeat_time_stamp;
+    uint8_t* buffer;
+    uint8_t* iterator;
+    size_t size;
+
+    uint16_t last_sent;
+    uint16_t last_acknown;
+    uint32_t next_heartbeat_time_stamp;
 
 } OutputReliableStream;
 
