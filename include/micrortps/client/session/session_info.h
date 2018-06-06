@@ -20,7 +20,6 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/session/stream_id.h>
 #include <microcdr/microcdr.h>
 #include <stddef.h>
 
@@ -31,13 +30,6 @@ typedef struct SessionInfo
 
 } SessionInfo;
 
-typedef struct HeaderStamp
-{
-    SessionInfo info;
-    StreamId stream_id;
-    uint16_t seq_num;
-
-} HeaderStamp;
 
 void init_session_info(SessionInfo* info, uint8_t* id, const char* key);
 
