@@ -90,6 +90,13 @@ set(SRCS
     src/c/profile/session/delete_entities.c
     src/c/profile/session/read_access.c
     src/c/profile/session/status_answer.c
+    src/c/session/input_best_effort_stream.c
+    src/c/session/input_reliable_stream.c
+    src/c/session/output_best_effort_stream.c
+    src/c/session/session.c
+    src/c/session/session_info.c
+    src/c/session/stream_id.c
+    src/c/session/stream_storage.c
     src/c/xrce_protocol_serialization.c
     src/c/log/message.c
     )

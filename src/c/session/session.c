@@ -1,5 +1,5 @@
 #include <micrortps/client/session/session.h>
-#include <micrortps/client/util.h>
+#include <micrortps/client/util/time.h>
 
 #define HEARTBEAT_MAX_MSG_SIZE 50
 #define ACKNACK_MAX_MSG_SIZE 50
