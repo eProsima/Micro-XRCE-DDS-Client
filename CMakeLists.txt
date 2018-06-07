@@ -80,6 +80,9 @@ eprosima_find_package(microcdr)
 
 # Set source files
 set(SRCS
+    src/c/profile/communication/udp_transport_linux.c
+    src/c/profile/communication/tcp_transport_linux.c
+    src/c/profile/communication/uart_transport_linux.c
     src/c/profile/extension/discovery_access.c
     src/c/profile/session/create_entities_bin.c
     src/c/profile/session/create_entities_ref.c
