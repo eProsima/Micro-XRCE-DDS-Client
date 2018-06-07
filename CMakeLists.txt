@@ -60,6 +60,22 @@ if(EPROSIMA_BUILD)
     set(THIRDPARTY ON)
 endif()
 
+# Profiles options
+option(PROFILE_CREATE_ENTITIES_BIN "Activate CreateEntitiesBIN profile" OFF) 
+option(PROFILE_CREATE_ENTITIES_REF "Activate CreateEntitiesREF profile" OFF) 
+option(PROFILE_CREATE_ENTITIES_XML "Activate CreateEntitiesXML profile" OFF) 
+option(PROFILE_UDP_TRANSPORT "Activate UDPTransport profile" OFF) 
+option(PROFILE_TCP_TRANSPORT "Activate TCPTransport profile" OFF) 
+option(PROFILE_UART_TRANSPORT "Activate UARTTransport profile" OFF) 
+option(PROFILE_DISCOVERY_ACCESS "Activate DiscoveryAccess profile" OFF)
+option(PROFILE_READ_ACCESS "Activate ReadAccess profile" OFF)
+option(PROFILE_STATUS_ANSWER "Activate StatusAnswer profile" OFF)
+if(PROFILE_CREATE_ENTITIES_BIN OR PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
+    set(PROFILE_DELETE_ENTITIES ON)
+else()
+    set(PROFILE_DELETE_ENTITIES OFF)
+endif()
+
 ###############################################################################
 # Check MSVC architecture
 ###############################################################################
@@ -75,21 +91,39 @@ include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
 eprosima_find_package(microcdr)
 
 ###############################################################################
-# Targets
+# Sources 
 ###############################################################################
 
-# Set source files
+# Transport source
+foreach(TRANSPORT_TYPE UDP TCP UART)
+    if(PROFILE_${TRANSPORT_TYPE}_TRANSPORT)
+        string(TOLOWER ${TRANSPORT_TYPE} TT)
+        if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+            set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_linux.c)
+        elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+            set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_windows.c)
+        elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
+            if(${PLATFORM_NAME} STREQUAL "NuttX")
+                set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_nuttx.c)
+            elseif(${PLATFORM_NAME} STREQUAL "FreeRTOS")
+                set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_freertos.c)
+            endif()
+        endif()
+    endif()
+endforeach()
+
+# Other sources
 set(SRCS
-    src/c/profile/communication/udp_transport_linux.c
-    src/c/profile/communication/tcp_transport_linux.c
-    src/c/profile/communication/uart_transport_linux.c
-    src/c/profile/extension/discovery_access.c
-    src/c/profile/session/create_entities_bin.c
-    src/c/profile/session/create_entities_ref.c
-    src/c/profile/session/create_entities_xml.c
-    src/c/profile/session/delete_entities.c
-    src/c/profile/session/read_access.c
-    src/c/profile/session/status_answer.c
+    ${UDP_SRCS}
+    ${TCP_SRCS}
+    ${UART_SRCS}
+    $<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:src/c/profile/extension/discovery_access.c>
+    $<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:src/c/profile/session/create_entities_bin.c>
+    $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
+    $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
+    $<$<BOOL:${PROFILE_DELETE_ENTITIES}>:src/c/profile/session/delete_entities.c>
+    $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
+    $<$<BOOL:${PROFILE_STATUS_ANSWER}>:src/c/profile/session/status_answer.c>
     src/c/session/input_best_effort_stream.c
     src/c/session/input_reliable_stream.c
     src/c/session/output_best_effort_stream.c
@@ -101,7 +135,10 @@ set(SRCS
     src/c/log/message.c
     )
 
-# Library
+###############################################################################
+# Target
+###############################################################################
+
 add_library(${PROJECT_NAME} ${SRCS})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
