@@ -31,8 +31,9 @@ typedef struct Communication Communication;
 struct Communication
 {
     size_t (*send_data)(Communication* communication, uint8_t* buffer, size_t length);
-    int (*recv_data)(Communication* communication, uint8_t* buffer, size_t* length, uint32_t poll_ms);
+    int (*recv_data)(Communication* communication, uint8_t** buffer, size_t* length, uint32_t poll_ms);
     bool (*is_reliable)(void);
+    size_t (*mtu)(void);
 };
 
 #ifdef __cplusplus

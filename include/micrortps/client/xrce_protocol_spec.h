@@ -681,7 +681,7 @@ typedef enum DataFormat
     FORMAT_DATA_SEQ = 0x08,
     FORMAT_SAMPLE_SEQ = 0x0A,
     FORMAT_PACKED_SAMPLES = 0x0E,
-    FORMAT_MASK = 0x0F
+    FORMAT_MASK = 0x0E
 
 } DataFormat;
 

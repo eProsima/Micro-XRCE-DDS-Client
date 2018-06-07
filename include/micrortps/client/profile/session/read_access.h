@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_SESSION_READ_ACCESS_H_ 
+#ifndef _MICRORTPS_CLIENT_PROFILE_SESSION_READ_ACCESS_H_
 #define _MICRORTPS_CLIENT_PROFILE_SESSION_READ_ACCESS_H_
 
 #ifdef __cplusplus
@@ -53,7 +53,6 @@ typedef struct ReadConfig
 typedef void (*TopicCallback)(MicroBuffer* buffer, ObjectId object_id, StreamId stream_id, void* args);
 
 int write_read_data(Session* session, StreamId stream_id, ReadConfig* read_config);
-void read_data(MicroBuffer* micro_buffer, StreamId stream_id);
 
 #ifdef __cplusplus
 }

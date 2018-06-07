@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_SESSION_STATUS_ANSWER_H_ 
+#ifndef _MICRORTPS_CLIENT_PROFILE_SESSION_STATUS_ANSWER_H_
 #define _MICRORTPS_CLIENT_PROFILE_SESSION_STATUS_ANSWER_H_
 
 #ifdef __cplusplus
@@ -28,7 +28,6 @@ extern "C"
 // TODO (julian): move to session.h
 typedef void (*StatusCallback)(int status, ObjectId object_id, StreamId stream_id, void* args);
 void set_status_callback(StatusCallback callback, void* args);
-void read_status_submessage(MicroBuffer* payload, StreamId stream_id);
 
 #ifdef __cplusplus
 }

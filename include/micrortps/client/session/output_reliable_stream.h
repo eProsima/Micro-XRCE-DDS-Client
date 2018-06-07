@@ -39,7 +39,7 @@ typedef struct OutputReliableStream
 } OutputReliableStream;
 
 void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer);
-bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t* buffer, size_t* length);
+bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length);
 bool prepare_reliable_stream_to_write(OutputReliableStream* stream, int size);
 
 bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp);

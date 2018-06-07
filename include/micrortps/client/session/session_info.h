@@ -38,8 +38,9 @@ void write_delete_session_message(SessionInfo* info, MicroBuffer* mb);
 int read_status_agent_message(SessionInfo* info, MicroBuffer* buffer);
 
 void stamp_session_header(SessionInfo* info, uint8_t* buffer);
-bool read_session_header(SessionInfo* info, MicroBuffer* bm, SessionInfo* message_info);
-bool session_matching(SessionInfo* info, SessionInfo* message_info);
+bool read_session_header(SessionInfo* info, MicroBuffer* bm);
+
+bool session_matching(SessionInfo* info, SessionInfo* other);
 
 size_t session_header_offset(SessionInfo* info);
 

@@ -1,18 +1,24 @@
 #include <micrortps/client/session/session.h>
 #include <micrortps/client/util/time.h>
+#include "../xrce_protocol_serialization.h"
 
 #define HEARTBEAT_MAX_MSG_SIZE 50
 #define ACKNACK_MAX_MSG_SIZE 50
-
-void read_message(Session* session, MicroBuffer* message);
-void read_stream(Session* session, MicroBuffer* message);
-void read_submessages(Session* session, MicroBuffer* submessages, StreamId stream_id);
-void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id);
-void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id);
+#define SUBHEADER_SIZE 4
 
 void send_message(Session* session, uint8_t* buffer, size_t length);
 void send_heartbeat(Session* session, OutputReliableStream* stream);
 void send_acknack(Session* session, InputReliableStream* stream);
+
+void read_message(Session* session, MicroBuffer* message);
+void read_stream(Session* session, MicroBuffer* message);
+void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id);
+void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
+
+void read_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment); //TODO
+void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id); //TODO
+void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id); //TODO
+
 
 void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
 {
@@ -22,7 +28,7 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
     {
         OutputBestEffortStream* stream = &session->streams.output_best_effort[i];
         uint8_t* buffer; size_t length;
-        if(prepare_best_effort_buffer_to_send(stream, buffer, &length))
+        if(prepare_best_effort_buffer_to_send(stream, &buffer, &length))
         {
             send_message(session, buffer, length);
         }
@@ -32,7 +38,7 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
     {
         OutputReliableStream* stream = &session->streams.output_reliable[i];
         uint8_t* buffer; size_t length;
-        while(prepare_next_reliable_buffer_to_send(stream, buffer, &length))
+        while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length))
         {
             send_message(session, buffer, length);
         }
@@ -47,7 +53,7 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
     for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; i++)
     {
         uint8_t* data; size_t length;
-        int read_status = session->communication->recv_data(session->communication, data, &length, poll_ms);
+        int read_status = session->communication->recv_data(session->communication, &data, &length, poll_ms);
         if(read_status == RECV_DATA_OK)
         {
             MicroBuffer mb;
@@ -94,13 +100,9 @@ void send_acknack(Session* session, InputReliableStream* stream)
 
 void read_message(Session* session, MicroBuffer* mb)
 {
-    SessionInfo message_info;
-    if(read_session_header(&session->info, mb, &message_info))
+    if(read_session_header(&session->info, mb))
     {
-        if(session_matching(&session->info, &message_info))
-        {
-            read_stream(session, mb);
-        }
+        read_stream(session, mb);
     }
 }
 
@@ -114,7 +116,7 @@ void read_stream(Session* session, MicroBuffer* mb)
         {
             case NONE_STREAM:
             {
-                read_submessages(session, mb, stream_id);
+                read_submessage_list(session, mb, stream_id);
                 break;
             }
             case BEST_EFFORT_STREAM:
@@ -122,7 +124,7 @@ void read_stream(Session* session, MicroBuffer* mb)
                 InputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
                 if(stream && receive_best_effort_message(stream, seq_num))
                 {
-                    read_submessages(session, mb, stream_id);
+                    read_submessage_list(session, mb, stream_id);
                 }
                 break;
             }
@@ -131,16 +133,70 @@ void read_stream(Session* session, MicroBuffer* mb)
                 InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
                 if(stream && receive_reliable_message(stream, seq_num, mb))
                 {
-                    read_submessages(session, mb, stream_id);
+                    read_submessage_list(session, mb, stream_id);
                     MicroBuffer next_mb;
                     while(next_input_reliable_buffer_available(stream, &next_mb))
                     {
-                        read_submessages(session, &next_mb, stream_id);
+                        read_submessage_list(session, &next_mb, stream_id);
                     }
                 }
                 break;
             }
+            default:
+                break;
         }
+    }
+}
+
+void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id)
+{
+    while(micro_buffer_remaining(submessages) > SUBHEADER_SIZE)
+    {
+        SubmessageHeader subheader;
+        deserialize_SubmessageHeader(submessages, &subheader);
+        submessages->endianness = (subheader.flags & FLAG_ENDIANNESS) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
+
+        if(micro_buffer_remaining(submessages) > subheader.length) //CHECK: or >= ??
+        {
+             break;
+        }
+
+        read_submessage(session, submessages, subheader.id, stream_id, subheader.flags);
+
+        align_to(submessages, 4);
+    }
+}
+
+void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags)
+{
+    switch(submessage_id)
+    {
+        case SUBMESSAGE_ID_STATUS:
+            #ifdef PROFILE_STATUS_ANSWER
+            read_status_submessage(session, submessage, stream_id);
+            #endif
+            break;
+
+        case SUBMESSAGE_ID_DATA:
+            #ifdef PROFILE_DATA_ACCESS
+            read_data_submessage(session, submessage, stream_id, flags & FORMAT_MASK);
+            #endif
+            break;
+
+        case SUBMESSAGE_ID_FRAGMENT:
+            read_fragment(session, submessage, stream_id, 0 != (flags & FLAG_LAST_FRAGMENT));
+            break;
+
+        case SUBMESSAGE_ID_HEARTBEAT:
+            read_heartbeat(session, submessage, stream_id);
+            break;
+
+        case SUBMESSAGE_ID_ACKNACK:
+            read_acknack(session, submessage, stream_id);
+            break;
+
+        default:
+            break;
     }
 }
 

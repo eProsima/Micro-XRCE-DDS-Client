@@ -33,10 +33,18 @@ typedef struct Session
 
 } Session;
 
-int create_session(Session* session, StreamId id, const char* key, Communication* comm);
-int delete_session(Session* session);
+int create_session(Session* session, StreamId id, const char* key, Communication* comm); //TODO
+int delete_session(Session* session); //TODO
 void run_session(Session* session, size_t max_attemps, uint32_t poll_ms);
-int generate_request_id(Session* session);
+int generate_request_id(Session* session); //TODO
+
+#ifdef PROFILE_STATUS_ANSWER
+void read_status_submessage(Session* session, MicroBuffer* submessage, StreamId id); //TODO
+#endif
+
+#ifdef PROFILE_DATA_ACCESS
+void read_data_submessage(Session* session, MicroBuffer* submessage, StreamId id, uint8_t flags);
+#endif
 
 #ifdef __cplusplus
 }

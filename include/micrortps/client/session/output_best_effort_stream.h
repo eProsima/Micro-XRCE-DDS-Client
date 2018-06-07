@@ -35,7 +35,7 @@ typedef struct OutputBestEffortStream
 } OutputBestEffortStream;
 
 void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer);
-bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t* buffer, size_t* length);
+bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t** buffer, size_t* length);
 MicroBuffer* prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size);
 
 #ifdef __cplusplus
