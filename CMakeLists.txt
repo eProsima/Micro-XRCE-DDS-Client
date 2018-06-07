@@ -80,6 +80,13 @@ eprosima_find_package(microcdr)
 
 # Set source files
 set(SRCS
+    src/c/profile/extension/discovery_access.c
+    src/c/profile/session/create_entities_bin.c
+    src/c/profile/session/create_entities_ref.c
+    src/c/profile/session/create_entities_xml.c
+    src/c/profile/session/delete_entities.c
+    src/c/profile/session/read_access.c
+    src/c/profile/session/status_answer.c
     src/c/xrce_protocol_serialization.c
     src/c/log/message.c
     )

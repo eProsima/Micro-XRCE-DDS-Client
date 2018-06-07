@@ -308,7 +308,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
     //bool is_reliable = header.stream_id
 
     bool first_submessage = true;
-    while(micro_buffer.final - micro_buffer.iterator > SUBHEADER_SIZE)
+    while(micro_buffer.final - micro_buffer.iterator > 8)
     {
         SubmessageHeader sub_header;
         deserialize_SubmessageHeader(&micro_buffer, &sub_header);
