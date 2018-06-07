@@ -1,4 +1,4 @@
-// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_EXTENSION_DISCOVERY_ACCESS_H_ 
-#define _MICRORTPS_CLIENT_PROFILE_EXTENSION_DISCOVERY_ACCESS_H_
+#ifndef _MICRORTPS_CLIENT_SESSION_OBJECT_ID_H_
+#define _MICRORTPS_CLIENT_SESSION_OBJECT_ID_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/communication/communication.h>
+#include <stdint.h>
 
-typedef struct DiscoveryAccess
+typedef struct ObjectId
 {
-    Communication* communication;
+    uint16_t id;
+    uint8_t prefix;
 
-} DiscoveryAccess;
-
-int get_info(Communication* communication);
+} ObjectId;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_PROFILE_EXTENSION_DISCOVERY_ACCESS_H_
+#endif // _MICRORTPS_CLIENT_SESSION_OBJECT_ID_H

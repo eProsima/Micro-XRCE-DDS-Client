@@ -20,17 +20,10 @@ extern "C"
 {
 #endif
 
-// TODO (julian): uncomment when merge with feature/streams
-//#include <micrortps/client/session/session.h>
-//#include <micrortps/client/session/stream_id.h>
-//#include <micrortps/client/session/object_id.h>
+#include <micrortps/client/session/session.h>
+#include <micrortps/client/session/stream_id.h>
+#include <micrortps/client/session/object_id.h>
 #include <stdint.h>
-
-// TODO (julian): remove when merge with feature/streams
-typedef void Session;
-typedef void StreamId;
-typedef void ObjectId;
-typedef void MicroBuffer;
 
 // TODO (julian): move to session.h
 typedef void (*StatusCallback)(int status, ObjectId object_id, StreamId stream_id, void* args);
