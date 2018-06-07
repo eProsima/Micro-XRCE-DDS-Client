@@ -72,7 +72,6 @@ endif()
 # Load external eProsima projects.
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
-eprosima_find_package(micrortps_transport)
 eprosima_find_package(microcdr)
 
 ###############################################################################
@@ -81,11 +80,7 @@ eprosima_find_package(microcdr)
 
 # Set source files
 set(SRCS
-    src/c/client.c
     src/c/xrce_protocol_serialization.c
-    src/c/reliable_control.c
-    src/c/input_message.c
-    src/c/output_message.c
     src/c/log/message.c
     )
 
