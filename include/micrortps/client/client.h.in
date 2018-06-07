@@ -1,0 +1,69 @@
+// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef _MICRORTPS_CLIENT_H_
+#define _MICRORTPS_CLIENT_H_
+
+#cmakedefine PROFILE_CREATE_ENTITIES_BIN
+#cmakedefine PROFILE_CREATE_ENTITIES_REF
+#cmakedefine PROFILE_CREATE_ENTITIES_XML
+#cmakedefine PROFILE_DELETE_ENTITIES
+#cmakedefine PROFILE_READ_ACCESS
+#cmakedefine PROFILE_STATUS_ANSWER
+#cmakedefine PROFILE_DISCOVERY_ACCESS
+#cmakedefine PROFILE_UDP_TRANSPORT
+#cmakedefine PROFILE_TCP_TRANSPORT
+#cmakedefine PROFILE_UART_TRANSPORT
+
+#ifdef PROFILE_CREATE_ENTITIES_BIN
+#include <micrortps/client/profile/session/create_entities_bin.h>
+#endif //PROFILE_CREATE_ENTITIES_BIN
+
+#ifdef PROFILE_CREATE_ENTITIES_REF
+#include <micrortps/client/profile/session/create_entities_ref.h>
+#endif //PROFILE_CREATE_ENTITIES_REF
+
+#ifdef PROFILE_CREATE_ENTITIES_XML
+#include <micrortps/client/profile/session/create_entities_ref.h>
+#endif //PROFILE_CREATE_ENTITIES_XML
+
+#ifdef PROFILE_DELETE_ENTITIES
+#include <micrortps/client/profile/session/delete_entities.h>
+#endif //PROFILE_DELETE_ENTITIES
+
+#ifdef PROFILE_READ_ACCESS
+#include <micrortps/client/profile/session/read_access.h>
+#endif //PROFILE_READ_ACCESS
+
+#ifdef PROFILE_STATUS_ANSWER
+#include <micrortps/client/profile/session/status_answer.h>
+#endif //PROFILE_STATUS_ANSWER
+
+#ifdef PROFILE_DISCOVERY_ACCESS
+#include <micrortps/client/profile/extension/discovery_access.h>
+#endif //PROFILE_DISCOVERY_ACCESS
+
+#ifdef PROFILE_UDP_TRANSPORT
+#include <micrortps/client/profile/communication/udp_transport.h>
+#endif //PROFILE_UDP_TRANSPORT
+
+#ifdef PROFILE_TCP_TRANSPORT
+#include <micrortps/client/profile/communication/tcp_transport.h>
+#endif //PROFILE_TCP_TRANSPORT
+
+#ifdef PROFILE_UART_TRANSPORT
+#include <micrortps/client/profile/communication/uart_transport.h>
+#endif //PROFILE_UART_TRANSPORT
+
+#endif // _MICRORTPS_CLIENT_H_

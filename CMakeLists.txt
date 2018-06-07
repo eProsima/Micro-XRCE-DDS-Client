@@ -61,6 +61,7 @@ if(EPROSIMA_BUILD)
 endif()
 
 # Profiles options
+option(COMPLETE_PROFILE "Activate all profiles" OFF)
 option(PROFILE_CREATE_ENTITIES_BIN "Activate CreateEntitiesBIN profile" OFF) 
 option(PROFILE_CREATE_ENTITIES_REF "Activate CreateEntitiesREF profile" OFF) 
 option(PROFILE_CREATE_ENTITIES_XML "Activate CreateEntitiesXML profile" OFF) 
@@ -70,6 +71,19 @@ option(PROFILE_STATUS_ANSWER "Activate StatusAnswer profile" OFF)
 option(PROFILE_UDP_TRANSPORT "Activate UDPTransport profile" OFF) 
 option(PROFILE_TCP_TRANSPORT "Activate TCPTransport profile" OFF) 
 option(PROFILE_UART_TRANSPORT "Activate UARTTransport profile" OFF) 
+
+if(COMPLETE_PROFILE)
+    set(PROFILE_CREATE_ENTITIES_BIN ON) 
+    set(PROFILE_CREATE_ENTITIES_REF ON) 
+    set(PROFILE_CREATE_ENTITIES_XML ON) 
+    set(PROFILE_READ_ACCESS ON)
+    set(PROFILE_DISCOVERY_ACCESS ON)
+    set(PROFILE_STATUS_ANSWER ON)
+    set(PROFILE_UDP_TRANSPORT ON) 
+    set(PROFILE_TCP_TRANSPORT ON) 
+    set(PROFILE_UART_TRANSPORT ON) 
+endif()
+
 if(PROFILE_CREATE_ENTITIES_BIN OR PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
     set(PROFILE_DELETE_ENTITIES ON)
 else()
@@ -138,7 +152,6 @@ set(SRCS
 ###############################################################################
 # Target
 ###############################################################################
-
 add_library(${PROJECT_NAME} ${SRCS})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
@@ -178,9 +191,12 @@ set(_MICRORTPS_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit s
 set(_MICRORTPS_CONNECTION_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit size to be used")
 set(_MICRORTPS_HEARTBEAT_MIN_PERIOD_MS_ 200 CACHE STRING "Define maximum transmission unit size to be used")
 
-# Create source file with the define
+# Create source files with the define
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
+)
+configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/client.h.in
+    ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
 )
 
 ###############################################################################
@@ -271,6 +287,11 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/micrortps/client/
 
 # Install config.h
 install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+    )
+
+# Install client.h
+install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
     DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
     )
 
