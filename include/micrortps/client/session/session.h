@@ -28,15 +28,20 @@ typedef struct Session
 {
     SessionInfo info;
     StreamStorage streams;
-    Communication* communication;
+    Communication* comm;
     int last_request_id;
 
 } Session;
 
-int create_session(Session* session, StreamId id, const char* key, Communication* comm); //TODO
+int create_session(Session* session, uint8_t session_id, const char* key, Communication* comm); //TODO
 int delete_session(Session* session); //TODO
 void run_session(Session* session, size_t max_attemps, uint32_t poll_ms);
 int generate_request_id(Session* session); //TODO
+
+StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
+StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_size);
+StreamId create_input_best_effort_stream(Session* session);
+StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size);
 
 #ifdef PROFILE_STATUS_ANSWER
 void read_status_submessage(Session* session, MicroBuffer* submessage, StreamId id); //TODO

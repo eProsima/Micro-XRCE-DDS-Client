@@ -31,10 +31,11 @@ typedef struct OutputBestEffortStream
     uint8_t* iterator;
     size_t size;
     uint16_t seq_num;
+    uint8_t prefix_size;
 
 } OutputBestEffortStream;
 
-void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer);
+void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
 bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t** buffer, size_t* length);
 MicroBuffer* prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size);
 

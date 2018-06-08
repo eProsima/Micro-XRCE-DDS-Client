@@ -55,10 +55,12 @@ typedef struct StreamStorage
 
 } StreamStorage;
 
-StreamId add_output_best_effort_buffer(uint8_t* buffer, size_t size);
-StreamId add_output_reliable_buffer(uint8_t* buffer, size_t size);
-StreamId add_input_best_effort_buffer(uint8_t* buffer, size_t size);
-StreamId add_input_reliable_buffer(uint8_t* buffer, size_t size);
+void init_stream_storage(StreamStorage* storage);
+
+StreamId add_output_best_effort_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, uint8_t offset);
+StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t offset);
+StreamId add_input_best_effort_buffer(StreamStorage* storage);
+StreamId add_input_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history);
 
 OutputBestEffortStream* get_output_best_effort_stream(StreamStorage* storage, uint8_t index);
 OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t index);

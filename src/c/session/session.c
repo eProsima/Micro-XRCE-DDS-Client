@@ -4,97 +4,196 @@
 
 #define HEARTBEAT_MAX_MSG_SIZE 50
 #define ACKNACK_MAX_MSG_SIZE 50
+#define CREATE_SESSION_MAX_MSG_SIZE 50
+#define DELETE_SESSION_MAX_MSG_SIZE 50
 #define SUBHEADER_SIZE 4
+#define MAX_HEADER_SIZE 8
+
+#define MAX_CONNECTION_ATTEMPS 10
+
+int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 
 void send_message(Session* session, uint8_t* buffer, size_t length);
-void send_heartbeat(Session* session, OutputReliableStream* stream);
-void send_acknack(Session* session, InputReliableStream* stream);
+void write_send_heartbeat(Session* session, OutputReliableStream* stream);
+void write_send_acknack(Session* session, InputReliableStream* stream);
 
 void read_message(Session* session, MicroBuffer* message);
 void read_stream(Session* session, MicroBuffer* message);
 void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id);
 void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
 
-void read_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment); //TODO
-void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id); //TODO
-void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id); //TODO
+void read_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment);
+void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id);
+void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id);
 
+int create_session(Session* session, uint8_t session_id, const char* key, Communication* comm)
+{
+    session->comm = comm;
+    session->last_request_id = 0;
+    init_session_info(&session->info, session_id, key);
+    init_stream_storage(&session->streams);
+
+    uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
+    MicroBuffer mb;
+    init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
+
+    write_create_session_message(&session->info, &mb, get_nano_time());
+    return wait_status_agent(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+}
+
+int delete_session(Session* session)
+{
+    uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
+    MicroBuffer mb;
+    init_micro_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
+
+    write_delete_session_message(&session->info, &mb);
+    return wait_status_agent(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+}
+
+int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts)
+{
+    int status_agent = 0;
+    uint32_t poll_ms = 1;
+    for(size_t i = 0; i < attempts || status_agent; i++)
+    {
+        send_message(session, buffer, length);
+
+        uint8_t* in_buffer; size_t in_length;
+        int read_status = session->comm->recv_data(session->comm, &in_buffer, &in_length, poll_ms);
+        if(read_status == RECV_DATA_OK)
+        {
+            MicroBuffer in_mb;
+            init_micro_buffer(&in_mb, in_buffer, in_length);
+            read_status_agent_message(&session->info, &in_mb, &status_agent);
+        }
+        else if (read_status == RECV_DATA_TIMEOUT)
+        {
+            poll_ms *= 2;
+        }
+    }
+
+    return status_agent;
+}
+
+int generate_request_id(Session* session)
+{
+    return session->last_request_id++;
+}
+
+StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size)
+{
+    return add_output_best_effort_buffer(&session->streams, buffer, size, session_header_offset(&session->info));
+}
+
+StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_size)
+{
+    size_t history = size / message_size;
+    return add_output_reliable_buffer(&session->streams, buffer, size, history, session_header_offset(&session->info));
+}
+
+StreamId create_input_best_effort_stream(Session* session)
+{
+    return add_input_best_effort_buffer(&session->streams);
+}
+
+StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size)
+{
+    size_t history = size / session->comm->mtu(session->comm);
+    return add_input_reliable_buffer(&session->streams, buffer, size, history);
+}
 
 void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
 {
     (void) max_attemps; (void) poll_ms;
 
-    for(int i = 0; i < session->streams.output_best_effort_size; i++)
+    for(unsigned i = 0; i < session->streams.output_best_effort_size; i++)
     {
         OutputBestEffortStream* stream = &session->streams.output_best_effort[i];
         uint8_t* buffer; size_t length;
         if(prepare_best_effort_buffer_to_send(stream, &buffer, &length))
         {
+            stamp_session_header(&session->info, buffer);
             send_message(session, buffer, length);
         }
     }
 
-    for(int i = 0; i < session->streams.output_reliable_size; i++)
+    for(unsigned i = 0; i < session->streams.output_reliable_size; i++)
     {
         OutputReliableStream* stream = &session->streams.output_reliable[i];
-        uint8_t* buffer; size_t length;
-        while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length))
+        uint8_t* buffer; size_t length; bool is_fragment;
+        while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &is_fragment))
         {
+            buffer += ((is_fragment) ? 0 : SUBHEADER_SIZE);
+            stamp_session_header(&session->info, buffer);
             send_message(session, buffer, length);
         }
 
         if(output_reliable_stream_must_notify(stream, get_nano_time()))
         {
-            send_heartbeat(session, stream);
+            write_send_heartbeat(session, stream);
         }
     }
 
     int recv_status = RECV_DATA_OK;
     for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; i++)
     {
-        uint8_t* data; size_t length;
-        int read_status = session->communication->recv_data(session->communication, &data, &length, poll_ms);
+        uint8_t* buffer; size_t length;
+        int read_status = session->comm->recv_data(session->comm, &buffer, &length, poll_ms);
         if(read_status == RECV_DATA_OK)
         {
             MicroBuffer mb;
-            init_micro_buffer(&mb, data, length);
+            init_micro_buffer(&mb, buffer, length);
             read_message(session, &mb);
         }
     }
 
-    for(int i = 0; i < session->streams.input_reliable_size; i++)
+    for(unsigned i = 0; i < session->streams.output_reliable_size; i++)
     {
+        OutputReliableStream* stream = &session->streams.output_reliable[i];
+        uint8_t* buffer; size_t length;
+        if(output_reliable_stream_must_send(stream, &buffer, &length))
+        {
+            send_message(session, buffer, length);
+        }
+    }
+
+    for(unsigned i = 0; i < session->streams.input_reliable_size; i++)
+    {
+        //NOTE: check input_reliable_for_fragments here. Add a struct InputReliable to manage it.
+
         InputReliableStream* stream = &session->streams.input_reliable[i];
         if(input_reliable_stream_must_confirm(stream))
         {
-            send_acknack(session, stream);
+           write_send_acknack(session, stream);
         }
     }
 }
 
 void send_message(Session* session, uint8_t* buffer, size_t length)
 {
-    stamp_session_header(&session->info, buffer);
-    session->communication->send_data(session->communication, buffer, length);
+    session->comm->send_data(session->comm, buffer, length);
 }
 
-void send_heartbeat(Session* session, OutputReliableStream* stream)
+void write_send_heartbeat(Session* session, OutputReliableStream* stream)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_heartbeat(stream, &mb);
+    stamp_session_header(&session->info, mb.init);
     send_message(session, heartbeat_buffer, micro_buffer_length(&mb));
 }
 
-void send_acknack(Session* session, InputReliableStream* stream)
+void write_send_acknack(Session* session, InputReliableStream* stream)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_acknack(stream, &mb);
+    stamp_session_header(&session->info, mb.init);
     send_message(session, acknack_buffer, micro_buffer_length(&mb));
 }
 
@@ -200,3 +299,33 @@ void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessa
     }
 }
 
+void read_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment)
+{
+    (void)session; (void)payload; (void)stream_id; (void)last_fragment;
+    //TODO
+    //Save flag into InputReliable to control it later in run_sesion stage
+}
+
+void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id)
+{
+    HEARTBEAT_Payload heartbeat;
+    deserialize_HEARTBEAT_Payload(payload, &heartbeat);
+
+    InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
+    process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
+
+}
+
+void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id)
+{
+    ACKNACK_Payload acknack;
+    deserialize_ACKNACK_Payload(payload, &acknack);
+
+    OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
+
+    uint16_t bitmap = (MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
+        ? ((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]
+        : (uint16_t)acknack.nack_bitmap[0] + ((uint16_t)acknack.nack_bitmap[1] << 8);
+
+    process_acknack(stream, acknack.first_unacked_seq_num, bitmap);
+}

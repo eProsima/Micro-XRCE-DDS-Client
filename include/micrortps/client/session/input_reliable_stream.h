@@ -20,27 +20,26 @@ extern "C"
 {
 #endif
 
-
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef struct MicroBuffer MicroBuffer;
 
 typedef struct InputReliableStream
 {
-    //FIFOStructureHere fifo;
     uint16_t last_handle;
     uint16_t last_announced;
 
 } InputReliableStream;
 
-void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer);
+void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, size_t size, size_t history);
 bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, MicroBuffer* mb);
 bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb);
 
 bool input_reliable_stream_must_confirm(InputReliableStream* stream);
 int write_acknack(InputReliableStream* stream, MicroBuffer* mb);
-void process_heartbeat(InputReliableStream* stream, uint16_t* first_seq_num, uint16_t last_seq_num);
+void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
 
 #ifdef __cplusplus
 }

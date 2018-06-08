@@ -31,11 +31,11 @@ typedef struct SessionInfo
 } SessionInfo;
 
 
-void init_session_info(SessionInfo* info, uint8_t* id, const char* key);
+void init_session_info(SessionInfo* info, uint8_t id, const char* key);
 
-void write_create_session_message(SessionInfo* info, MicroBuffer* mb);
+void write_create_session_message(SessionInfo* info, MicroBuffer* mb, uint32_t time_stamp);
 void write_delete_session_message(SessionInfo* info, MicroBuffer* mb);
-int read_status_agent_message(SessionInfo* info, MicroBuffer* buffer);
+bool read_status_agent_message(SessionInfo* info, MicroBuffer* buffer, int* status_agent);
 
 void stamp_session_header(SessionInfo* info, uint8_t* buffer);
 bool read_session_header(SessionInfo* info, MicroBuffer* bm);
