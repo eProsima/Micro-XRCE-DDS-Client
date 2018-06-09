@@ -56,14 +56,17 @@
 
 #ifdef PROFILE_UDP_TRANSPORT
 #include <micrortps/client/profile/communication/udp_transport.h>
+#include <micrortps/client/profile/transport/udp_transport.h>
 #endif //PROFILE_UDP_TRANSPORT
 
 #ifdef PROFILE_TCP_TRANSPORT
 #include <micrortps/client/profile/communication/tcp_transport.h>
+#include <micrortps/client/profile/transport/tcp_transport.h>
 #endif //PROFILE_TCP_TRANSPORT
 
 #ifdef PROFILE_UART_TRANSPORT
 #include <micrortps/client/profile/communication/uart_transport.h>
+#include <micrortps/client/profile/transport/uart_transport.h>
 #endif //PROFILE_UART_TRANSPORT
 
 #endif // _MICRORTPS_CLIENT_H_

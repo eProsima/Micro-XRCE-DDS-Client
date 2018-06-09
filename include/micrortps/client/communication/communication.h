@@ -1,4 +1,4 @@
-// Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ extern "C"
 typedef struct Communication Communication;
 struct Communication
 {
-    size_t (*send_data)(Communication* communication, uint8_t* buffer, size_t length);
-    int (*recv_data)(Communication* communication, uint8_t** buffer, size_t* length, uint32_t poll_ms);
+    intmax_t (*send_data)(Communication* communication, uint8_t* buf, size_t len);
+    intmax_t (*recv_data)(Communication* communication, uint8_t** buf, size_t* len, uint32_t poll_ms);
     bool (*is_reliable)(Communication* communication);
     size_t (*mtu)(Communication* communication);
 };
@@ -40,4 +40,4 @@ struct Communication
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H
+#endif //_MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H_

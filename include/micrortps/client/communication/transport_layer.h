@@ -12,35 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_COMMUNICATION_UDP_TRANSPORT_H_
-#define _MICRORTPS_CLIENT_PROFILE_COMMUNICATION_UDP_TRANSPORT_H_
+#ifndef _MICRORTPS_CLIENT_COMMUNICATION_TRANSPORT_LAYER_H_
+#define _MICRORTPS_CLIENT_COMMUNICATION_TRANSPORT_LAYER_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-    
-#include <micrortps/client/communication/transport_layer.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
-#define UDP_TRANSPORT_LINUX_MTU 512
+#include <micrortps/client/communication/communication.h>
 
-typedef struct UDPTransport UDPTransport;
-struct UDPTransport
+typedef struct TransportLayer TransportLayer;
+struct TransportLayer
 {
-    TransportLayer* transport_layer;
-    uint8_t buffer[UDP_TRANSPORT_LINUX_MTU];
-    int socketfd;
-    struct sockaddr remote_addr;
+    Communication* communication;
+    int (*open_transport)(TransportLayer* transport_layer, const char* ip, uint16_t port);
+    int (*close_transport)(TransportLayer* transport_layer);
 };
-
-int init_udp_transport(UDPTransport* udp_transport, const char* ip, uint16_t port);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_PROFILE_COMMUNICATION_UDP_TRANSPORT_H_
+#endif //_MICRORTPS_CLIENT_COMMUNICATION_TRANSPORT_LAYER_H_

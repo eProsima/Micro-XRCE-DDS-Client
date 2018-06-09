@@ -1,4 +1,4 @@
-# Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+# Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -113,14 +113,26 @@ foreach(TRANSPORT_TYPE UDP TCP UART)
     if(PROFILE_${TRANSPORT_TYPE}_TRANSPORT)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-            set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_linux.c)
+            set(${TRANSPORT_TYPE}_SRCS
+#                src/c/profile/communication/${TT}/${TT}_transport_linux.c
+                src/c/profile/transport/${TT}_transport_linux.c
+                )
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-            set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_windows.c)
+            set(${TRANSPORT_TYPE}_SRCS
+#                src/c/profile/communication/${TT}/${TT}_transport_windows.c
+                src/c/profile/transport/${TT}_transport_windows.c
+                )
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "NuttX")
-                set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_nuttx.c)
+                set(${TRANSPORT_TYPE}_SRCS
+#                    src/c/profile/communication/${TT}/${TT}_transport_nuttx.c
+                    src/c/profile/transport/${TT}_transport_nuttx.c
+                    )
             elseif(${PLATFORM_NAME} STREQUAL "FreeRTOS")
-                set(UDP_SRCS src/c/profile/communication/${TT}/${TT}_transport_freertos.c)
+                set(${TRANSPORT_TYPE}_SRCS
+#                    src/c/profile/communication/${TT}/${TT}_transport_freertos.c
+                    src/c/profile/transport/${TT}_transport_freertos.c
+                    )
             endif()
         endif()
     endif()
