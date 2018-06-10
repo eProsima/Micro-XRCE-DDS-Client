@@ -1,11 +1,5 @@
 #include <micrortps/client/profile/transport/udp_transport.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/poll.h>
-#include <string.h>
-#include <errno.h>
+#include <winsock2.h>
 
 #define UDP_TRANSPORT_MTU 512
 
@@ -15,9 +9,9 @@ intmax_t recv_data(UDPTransport* transport, void** buf, size_t* len, int timeout
 struct UDPProperties
 {
     uint8_t buffer[UDP_TRANSPORT_MTU];
-    int socket_fd;
+    SOCKET socket_fd;
     struct sockaddr remote_addr;
-    struct pollfd poll_fd;
+    WSAPOLLFD poll_fd;
 };
 
 int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
@@ -28,10 +22,10 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
     transport->recv_data = recv_data;
 
     // Socket initialization.
-    transport->properties->socket_fd = socket(PF_INET, SOCK_DGRAM, 0);
-    if (-1 == transport->properties->socket_fd)
+    transport->properties->socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (INVALID_SOCKET == transport->properties->socket_fd)
     {
-        result = -errno;
+        result = -WSAGetLastError();
     }
 
     if (0 < result)
@@ -42,7 +36,7 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
         temp_addr.sin_port = port;
         temp_addr.sin_addr.s_addr = inet_addr(ip);
         memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
-        transport->properties->remote_addr = *((struct sockaddr *) &temp_addr);
+        transport->properties->remote_addr = *((struct sockaddr *)&temp_addr);
 
         // Poll setup.
         transport->properties->poll_fd.fd = transport->properties->socket_fd;
@@ -54,7 +48,7 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
                                 sizeof(transport->properties->remote_addr));
         if (-1 == connected)
         {
-            result = -errno;
+            result = -WSAGetLastError();
         }
     }
 
@@ -66,7 +60,7 @@ intmax_t send_data(UDPTransport* transport, const void* buf, size_t len)
     intmax_t result = 0;
 
     int sent = send(transport->properties->socket_fd, buf, len, 0);
-    result = (sent <= 0) ? (intmax_t)sent : (intmax_t)-errno;
+    result = (SOCKET_ERROR != sent) ? (intmax_t)sent : (intmax_t)-WSAGetLastError();
 
     return result;
 }
@@ -75,13 +69,13 @@ intmax_t recv_data(UDPTransport* transport, void** buf, size_t* len, int timeout
 {
     intmax_t result = 0;
 
-    int poll_rv = poll(&transport->properties->poll_fd, 1, timeout);
+    int poll_rv = WSAPoll(&transport->properties->poll_fd, 1, timeout);
     if (0 < poll_rv)
     {
         int received = recv(transport->properties->socket_fd,
                             (void*)transport->properties->buffer,
                             sizeof(transport->properties->buffer), 0);
-        if (0 <= received)
+        if (SOCKET_ERROR != received)
         {
             *len = (size_t)received;
             *buf = (void*)transport->properties->buffer;
@@ -90,7 +84,7 @@ intmax_t recv_data(UDPTransport* transport, void** buf, size_t* len, int timeout
         {
             *len = 0;
             *buf = NULL;
-            result = (intmax_t)-errno;
+            result = (intmax_t)-WSAGetLastError();
         }
     }
     else if (0 == poll_rv)
@@ -102,7 +96,7 @@ intmax_t recv_data(UDPTransport* transport, void** buf, size_t* len, int timeout
     {
         *len = 0;
         *buf = NULL;
-        result = (intmax_t)-errno;
+        result = (intmax_t)-WSAGetLastError();
     }
 
     return result;

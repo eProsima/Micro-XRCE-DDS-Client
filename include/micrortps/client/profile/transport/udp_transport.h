@@ -28,8 +28,8 @@ typedef struct UDPProperties UDPProperties;
 typedef struct UDPTransport UDPTransport;
 struct UDPTransport
 {
-    intmax_t (*send_data)(UDPTransport* transport, const char* buf, size_t len);
-    intmax_t (*recv_data)(UDPTransport* transport, char** buf, size_t* len);
+    intmax_t (*send_data)(UDPTransport* transport, const void* buf, size_t len);
+    intmax_t (*recv_data)(UDPTransport* transport, void** buf, size_t* len, int timeout);
     UDPProperties* properties;
 };
 

@@ -28,8 +28,8 @@ typedef struct TCPProperties TCPProperties;
 typedef struct TCPTransport TCPTransport;
 struct TCPTransport
 {
-    intmax_t (*send_data)(TCPTransport* transport, char* buf, size_t len);
-    intmax_t (*recv_data)(TCPTransport* transport, char** buf, size_t* len);
+    intmax_t (*send_data)(TCPTransport* transport, const void* buf, size_t len);
+    intmax_t (*recv_data)(TCPTransport* transport, void** buf, size_t* len, int timeout);
     TCPProperties* properties;
 };
 

@@ -126,7 +126,7 @@ foreach(TRANSPORT_TYPE UDP TCP UART)
             if(${PLATFORM_NAME} STREQUAL "NuttX")
                 set(${TRANSPORT_TYPE}_SRCS
 #                    src/c/profile/communication/${TT}/${TT}_transport_nuttx.c
-                    src/c/profile/transport/${TT}_transport_nuttx.c
+                    src/c/profile/transport/${TT}_transport_linux.c
                     )
             elseif(${PLATFORM_NAME} STREQUAL "FreeRTOS")
                 set(${TRANSPORT_TYPE}_SRCS
