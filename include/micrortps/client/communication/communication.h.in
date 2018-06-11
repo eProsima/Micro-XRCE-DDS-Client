@@ -21,14 +21,17 @@
 
 #ifdef PROFILE_UDP_TRANSPORT
 #include <micrortps/client/profile/transport/udp_transport_@PLATFORM_NAME@.h>
+#define UDP_TRANSPORT_KIND 0
 #endif //PROFILE_UDP_TRANSPORT
 
 #ifdef PROFILE_TCP_TRANSPORT
 #include <micrortps/client/profile/transport/tcp_transport_@PLATFORM_NAME@.h>
+#define TCP_TRANSPORT_KIND 1
 #endif //PROFILE_TCP_TRANSPORT
 
 #ifdef PROFILE_UART_TRANSPORT
 #include <micrortps/client/profile/transport/uart_transport_@PLATFORM_NAME@.h>
+#define UART_TRANSPORT_KIND 2
 #endif //PROFILE_UART_TRANSPORT
 
 #ifdef __cplusplus
@@ -51,7 +54,23 @@ struct Communication
 #ifdef PROFILE_UART_TRANSPORT
     UARTTransport* uart_transport;
 #endif //PROFILE_UART_TRANSPORT
+    uint8_t transport_kind;
 };
+
+#ifdef PROFILE_UDP_TRANSPORT
+int init_udp_comm(Communication* communication, UDPTransport* transport);
+#endif //PROFILE_UDP_TRANSPORT
+
+#ifdef PROFILE_TCP_TRANSPORT
+int init_tcp_comm(Communication* communication, TCPTransport* transport);
+#endif //PROFILE_TCP_TRANSPORT
+
+#ifdef PROFILE_UART_TRANSPORT
+int init_uart_comm(Communication* communication, UARTTransport* transport);
+#endif //PROFILE_UART_TRANSPORT
+
+intmax_t send_data(Communication* comm, const void* buf, size_t len);
+intmax_t recv_data(Communication* comm, void** buf, size_t* len, int timeout);
 
 #ifdef __cplusplus
 }

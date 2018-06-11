@@ -129,8 +129,8 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
     for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; ++i)
     {
         uint8_t* data; size_t length;
+        int read_status = (int)recv_data(session->communication, (void*)data, &length, poll_ms);
 //        int read_status = session->communication->recv_data(session->communication, data, &length, poll_ms);
-        int read_status = 0;
         if(read_status == RECV_DATA_OK)
         {
             MicroBuffer mb;
