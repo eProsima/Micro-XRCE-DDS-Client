@@ -12,37 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_OUTPUT_RELIABLE_STREAM_H_
-#define _MICRORTPS_CLIENT_OUTPUT_RELIABLE_STREAM_H_
+#ifndef _MICRORTPS_CLIENT_SESSION_OUTPUT_RELIABLE_STREAM_H_
+#define _MICRORTPS_CLIENT_SESSION_OUTPUT_RELIABLE_STREAM_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#include <micrortps/client/session/seq_num.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 
 typedef struct MicroBuffer MicroBuffer;
 
 typedef struct OutputReliableStream
 {
     uint8_t* buffer;
-    uint8_t* iterator;
+    size_t writer;
     size_t size;
     size_t history;
+    uint8_t offset;
 
-    uint16_t last_sent;
-    uint16_t last_acknown;
+    SeqNum last_written;
+    SeqNum last_sent;
+    SeqNum last_acknown;
+
     uint16_t nack_bitmap;
     uint32_t next_heartbeat_time_stamp;
 
 } OutputReliableStream;
 
 void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t offset);
-bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, bool* is_fragment);
-bool prepare_reliable_stream_to_write(OutputReliableStream* stream, MicroBuffer* mb, int size);
+bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
+bool prepare_reliable_stream_to_write(OutputReliableStream* stream, int size, MicroBuffer* mb);
 
 bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp);
 bool output_reliable_stream_must_send(OutputReliableStream* stream, uint8_t** buffer, size_t *length);
@@ -53,4 +59,4 @@ int write_heartbeat(OutputReliableStream* stream, MicroBuffer* mb);
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_OUTPUT_RELIABLE_STREAM_H_
+#endif // _MICRORTPS_CLIENT_SESSION_OUTPUT_RELIABLE_STREAM_H_

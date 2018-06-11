@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_STREAM_STORAGE_H_
-#define _MICRORTPS_CLIENT_STREAM_STORAGE_H_
+#ifndef _MICRORTPS_CLIENT_SESSION_STREAM_STORAGE_H_
+#define _MICRORTPS_CLIENT_SESSION_STREAM_STORAGE_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -67,10 +67,8 @@ OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t
 InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint8_t index);
 InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t index);
 
-bool read_stream_header(StreamStorage* storage, MicroBuffer* mb, StreamId* stream_id, uint16_t* seq_num);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_STREAM_STORAGE_H
+#endif // _MICRORTPS_CLIENT_SESSION_STREAM_STORAGE_H

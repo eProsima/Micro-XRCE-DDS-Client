@@ -14,11 +14,11 @@
 int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 
 void send_message(Session* session, uint8_t* buffer, size_t length);
-void write_send_heartbeat(Session* session, OutputReliableStream* stream);
-void write_send_acknack(Session* session, InputReliableStream* stream);
+void write_send_heartbeat(Session* session, StreamId stream);
+void write_send_acknack(Session* session, StreamId stream);
 
 void read_message(Session* session, MicroBuffer* message);
-void read_stream(Session* session, MicroBuffer* message);
+void read_stream(Session* session, MicroBuffer* message, StreamId id, uint16_t seq_num);
 void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id);
 void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
 
@@ -55,7 +55,7 @@ int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t a
 {
     int status_agent = 0;
     uint32_t poll_ms = 1;
-    for(size_t i = 0; i < attempts || status_agent; i++)
+    for(size_t i = 0; i < attempts || status_agent; ++i)
     {
         send_message(session, buffer, length);
 
@@ -78,18 +78,20 @@ int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t a
 
 int generate_request_id(Session* session)
 {
-    return session->last_request_id++;
+    return ++session->last_request_id;
 }
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size)
 {
-    return add_output_best_effort_buffer(&session->streams, buffer, size, session_header_offset(&session->info));
+    uint8_t offset = session_header_offset(&session->info);
+    return add_output_best_effort_buffer(&session->streams, buffer, size, offset);
 }
 
 StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_size)
 {
     size_t history = size / message_size;
-    return add_output_reliable_buffer(&session->streams, buffer, size, history, session_header_offset(&session->info));
+    uint8_t offset = session_header_offset(&session->info) + SUBHEADER_SIZE;
+    return add_output_reliable_buffer(&session->streams, buffer, size, history, offset);
 }
 
 StreamId create_input_best_effort_stream(Session* session)
@@ -107,36 +109,39 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
 {
     (void) max_attemps; (void) poll_ms;
 
-    for(unsigned i = 0; i < session->streams.output_best_effort_size; i++)
+    for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
         OutputBestEffortStream* stream = &session->streams.output_best_effort[i];
-        uint8_t* buffer; size_t length;
-        if(prepare_best_effort_buffer_to_send(stream, &buffer, &length))
+        StreamId id = create_stream_id(i, BEST_EFFORT_STREAM, OUTPUT_STREAM);
+
+        uint8_t* buffer; size_t length; uint16_t seq_num;
+        if(prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
-            stamp_session_header(&session->info, buffer);
+            stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
         }
     }
 
-    for(unsigned i = 0; i < session->streams.output_reliable_size; i++)
+    for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
     {
         OutputReliableStream* stream = &session->streams.output_reliable[i];
-        uint8_t* buffer; size_t length; bool is_fragment;
-        while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &is_fragment))
+        StreamId id = create_stream_id(i, RELIABLE_STREAM, OUTPUT_STREAM);
+
+        uint8_t* buffer; size_t length; uint16_t seq_num;
+        while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
-            buffer += ((is_fragment) ? 0 : SUBHEADER_SIZE);
-            stamp_session_header(&session->info, buffer);
+            stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
         }
 
         if(output_reliable_stream_must_notify(stream, get_nano_time()))
         {
-            write_send_heartbeat(session, stream);
+            write_send_heartbeat(session, id);
         }
     }
 
     int recv_status = RECV_DATA_OK;
-    for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; i++)
+    for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; ++i)
     {
         uint8_t* buffer; size_t length;
         int read_status = session->comm->recv_data(session->comm, &buffer, &length, poll_ms);
@@ -148,7 +153,7 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
         }
     }
 
-    for(unsigned i = 0; i < session->streams.output_reliable_size; i++)
+    for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
     {
         OutputReliableStream* stream = &session->streams.output_reliable[i];
         uint8_t* buffer; size_t length;
@@ -158,14 +163,16 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
         }
     }
 
-    for(unsigned i = 0; i < session->streams.input_reliable_size; i++)
+    for(unsigned i = 0; i < session->streams.input_reliable_size; ++i)
     {
         //NOTE: check input_reliable_for_fragments here. Add a struct InputReliable to manage it.
 
         InputReliableStream* stream = &session->streams.input_reliable[i];
+        StreamId id = create_stream_id(i, RELIABLE_STREAM, INPUT_STREAM);
+
         if(input_reliable_stream_must_confirm(stream))
         {
-           write_send_acknack(session, stream);
+            write_send_acknack(session, id);
         }
     }
 }
@@ -175,75 +182,74 @@ void send_message(Session* session, uint8_t* buffer, size_t length)
     session->comm->send_data(session->comm, buffer, length);
 }
 
-void write_send_heartbeat(Session* session, OutputReliableStream* stream)
+void write_send_heartbeat(Session* session, StreamId id)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
 
+    OutputReliableStream* stream = &session->streams.output_reliable[id.index];
     write_heartbeat(stream, &mb);
-    stamp_session_header(&session->info, mb.init);
+    stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, heartbeat_buffer, micro_buffer_length(&mb));
 }
 
-void write_send_acknack(Session* session, InputReliableStream* stream)
+void write_send_acknack(Session* session, StreamId id)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
 
+    InputReliableStream* stream = &session->streams.input_reliable[id.index];
     write_acknack(stream, &mb);
-    stamp_session_header(&session->info, mb.init);
+    stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, acknack_buffer, micro_buffer_length(&mb));
 }
 
 void read_message(Session* session, MicroBuffer* mb)
 {
-    if(read_session_header(&session->info, mb))
+    uint8_t stream_id_raw; uint16_t seq_num;
+    if(read_session_header(&session->info, mb, &stream_id_raw, &seq_num))
     {
-        read_stream(session, mb);
+        StreamId id = create_stream_id_from_raw(stream_id_raw, INPUT_STREAM);
+        read_stream(session, mb, id, seq_num);
     }
 }
 
-void read_stream(Session* session, MicroBuffer* mb)
+void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t seq_num)
 {
-    StreamId stream_id;
-    uint16_t seq_num;
-    if(read_stream_header(&session->streams, mb, &stream_id, &seq_num))
+    switch(stream_id.type)
     {
-        switch(stream_id.type)
+        case NONE_STREAM:
         {
-            case NONE_STREAM:
+            read_submessage_list(session, mb, stream_id);
+            break;
+        }
+        case BEST_EFFORT_STREAM:
+        {
+            InputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
+            if(stream && receive_best_effort_message(stream, seq_num))
             {
                 read_submessage_list(session, mb, stream_id);
-                break;
             }
-            case BEST_EFFORT_STREAM:
-            {
-                InputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
-                if(stream && receive_best_effort_message(stream, seq_num))
-                {
-                    read_submessage_list(session, mb, stream_id);
-                }
-                break;
-            }
-            case RELIABLE_STREAM:
-            {
-                InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
-                if(stream && receive_reliable_message(stream, seq_num, mb))
-                {
-                    read_submessage_list(session, mb, stream_id);
-                    MicroBuffer next_mb;
-                    while(next_input_reliable_buffer_available(stream, &next_mb))
-                    {
-                        read_submessage_list(session, &next_mb, stream_id);
-                    }
-                }
-                break;
-            }
-            default:
-                break;
+            break;
         }
+        case RELIABLE_STREAM:
+        {
+            InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
+            if(stream && receive_reliable_message(stream, seq_num, mb->init, micro_buffer_length(mb)))
+            {
+                read_submessage_list(session, mb, stream_id);
+                MicroBuffer next_mb;
+                while(next_input_reliable_buffer_available(stream, &next_mb))
+                {
+                    read_submessage_list(session, &next_mb, stream_id);
+                }
+            }
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -312,8 +318,10 @@ void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id)
     deserialize_HEARTBEAT_Payload(payload, &heartbeat);
 
     InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
-    process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
-
+    if(stream)
+    {
+        process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
+    }
 }
 
 void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id)
@@ -322,10 +330,12 @@ void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id)
     deserialize_ACKNACK_Payload(payload, &acknack);
 
     OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
+    if(stream)
+    {
+        uint16_t bitmap = (MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
+            ? ((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]
+            : (uint16_t)acknack.nack_bitmap[0] + ((uint16_t)acknack.nack_bitmap[1] << 8);
 
-    uint16_t bitmap = (MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
-        ? ((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]
-        : (uint16_t)acknack.nack_bitmap[0] + ((uint16_t)acknack.nack_bitmap[1] << 8);
-
-    process_acknack(stream, acknack.first_unacked_seq_num, bitmap);
+        process_acknack(stream, acknack.first_unacked_seq_num, bitmap);
+    }
 }

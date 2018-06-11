@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_INFO_H_
-#define _MICRORTPS_CLIENT_SESSION_INFO_H_
+#ifndef _MICRORTPS_CLIENT_SESSION_SESSION_INFO_H_
+#define _MICRORTPS_CLIENT_SESSION_SESSION_INFO_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -37,15 +37,15 @@ void write_create_session_message(SessionInfo* info, MicroBuffer* mb, uint32_t t
 void write_delete_session_message(SessionInfo* info, MicroBuffer* mb);
 bool read_status_agent_message(SessionInfo* info, MicroBuffer* buffer, int* status_agent);
 
-void stamp_session_header(SessionInfo* info, uint8_t* buffer);
-bool read_session_header(SessionInfo* info, MicroBuffer* bm);
+void stamp_session_header(SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);
+bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num);
 
 bool session_matching(SessionInfo* info, SessionInfo* other);
 
-size_t session_header_offset(SessionInfo* info);
+uint8_t session_header_offset(SessionInfo* info);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_INFO_H
+#endif // _MICRORTPS_CLIENT_SESSION_SESSION_INFO_H

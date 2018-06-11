@@ -12,30 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_INPUT_BEST_EFFORT_STREAM_H_
-#define _MICRORTPS_CLIENT_SESSION_INPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICRORTPS_CLIENT_SESSION_SEQ_NUM_H_
+#define _MICRORTPS_CLIENT_SESSION_SEQ_NUM_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/session/seq_num.h>
-
 #include <stdint.h>
-#include <stdbool.h>
 
-typedef struct InputBestEffortStream
-{
-    SeqNum last_handled;
+typedef uint16_t SeqNum;
 
-} InputBestEffortStream;
-
-void init_input_best_effort_stream(InputBestEffortStream* stream);
-bool receive_best_effort_message(InputBestEffortStream* stream, SeqNum seq_num);
+SeqNum seq_num_add(SeqNum seq_num, SeqNum increment);
+SeqNum seq_num_sub(SeqNum seq_num, SeqNum decrement);
+int seq_num_cmp(SeqNum seq_num_1, SeqNum seq_num_2);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_INPUT_BEST_EFFORT_STREAM_H_
+#endif // _MICRORTPS_CLIENT_SESSION_SEQ_NUM_H_
