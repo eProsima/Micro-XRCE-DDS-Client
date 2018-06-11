@@ -40,12 +40,8 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
 
 intmax_t send_udp_data(UDPTransport* transport, const void* buf, size_t len)
 {
-    intmax_t result = 0;
-
     int sent = send(transport->socket_fd, buf, len, 0);
-    result = (sent <= 0) ? (intmax_t)sent : (intmax_t)-errno;
-
-    return result;
+    return (sent <= 0) ? (intmax_t)sent : (intmax_t)-errno;
 }
 
 intmax_t recv_udp_data(UDPTransport* transport, void** buf, size_t* len, int timeout)
@@ -65,20 +61,15 @@ intmax_t recv_udp_data(UDPTransport* transport, void** buf, size_t* len, int tim
         }
         else
         {
-            *len = 0;
-            *buf = NULL;
             result = (intmax_t)-errno;
         }
     }
     else if (0 == poll_rv)
     {
-        *len = 0;
-        *buf = NULL;
+        result = -1;
     }
     else
     {
-        *len = 0;
-        *buf = NULL;
         result = (intmax_t)-errno;
     }
 

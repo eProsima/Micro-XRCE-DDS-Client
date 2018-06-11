@@ -85,16 +85,9 @@ intmax_t recv_udp_data(UDPTransport* transport, void** buf, size_t* len, int tim
             *len = (size_t)received;
             *buf = (void*)transport->buffer;
         }
-        else
-        {
-            *len = 0;
-            *buf = NULL;
-        }
     }
     else
     {
-        *len = 0;
-        *buf = NULL;
         result = -1;
     }
 

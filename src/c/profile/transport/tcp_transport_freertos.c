@@ -66,8 +66,6 @@ intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int tim
         received == -pdFREERTOS_ERRNO_EINTR ||
         received == -pdFREERTOS_ERRNO_EINVAL)
     {
-        *len = 0;
-        *buf = NULL;
         result = -1;
     }
     else
