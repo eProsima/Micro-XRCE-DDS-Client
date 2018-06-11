@@ -22,9 +22,9 @@ extern "C"
 
 #include <micrortps/client/session/session_info.h>
 #include <micrortps/client/session/stream_storage.h>
-#include <micrortps/client/communication/communication.h>
-#include <micrortps/client/profile/transport/transport.h>
+//#include <micrortps/client/communication/communication.h>
 
+typedef struct Communication Communication;
 
 typedef struct Session
 {
@@ -32,7 +32,6 @@ typedef struct Session
     StreamStorage streams;
     Communication* comm;
     int last_request_id;
-    TransportContainer* transport_container;
 
 } Session;
 

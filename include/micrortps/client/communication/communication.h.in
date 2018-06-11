@@ -12,28 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_TRANSPORT_H_
-#define _MICRORTPS_CLIENT_TRANSPORT_H_
+#ifndef _MICRORTPS_CLIENT_COMMUNICATION_H_
+#define _MICRORTPS_CLIENT_COMMUNICATION_H_
+
+#cmakedefine PROFILE_UDP_TRANSPORT
+#cmakedefine PROFILE_TCP_TRANSPORT
+#cmakedefine PROFILE_UART_TRANSPORT
+
+#ifdef PROFILE_UDP_TRANSPORT
+#include <micrortps/client/profile/transport/udp_transport_@PLATFORM_NAME@.h>
+#endif //PROFILE_UDP_TRANSPORT
+
+#ifdef PROFILE_TCP_TRANSPORT
+#include <micrortps/client/profile/transport/tcp_transport_@PLATFORM_NAME@.h>
+#endif //PROFILE_TCP_TRANSPORT
+
+#ifdef PROFILE_UART_TRANSPORT
+#include <micrortps/client/profile/transport/uart_transport_@PLATFORM_NAME@.h>
+#endif //PROFILE_UART_TRANSPORT
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#ifdef PROFILE_UDP_TRANSPORT
-#include <micrortps/client/profile/transport/udp_transport.h>
-#endif //PROFILE_UDP_TRANSPORT
+#define RECV_DATA_OK 0
+#define RECV_DATA_TIMEOUT 1
 
-#ifdef PROFILE_TCP_TRANSPORT
-#include <micrortps/client/profile/transport/tcp_transport.h>
-#endif //PROFILE_TCP_TRANSPORT
-
-#ifdef PROFILE_UART_TRANSPORT
-#include <micrortps/client/profile/transport/uart_transport.h>
-#endif //PROFILE_UART_TRANSPORT
-
-typedef struct TransportContainer TransportContainer;
-struct TransportContainer
+typedef struct Communication Communication;
+struct Communication
 {
 #ifdef PROFILE_UDP_TRANSPORT
     UDPTransport* udp_transport;
@@ -50,4 +57,4 @@ struct TransportContainer
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_TRANSPORT_H_
+#endif //_MICRORTPS_CLIENT_COMMUNICATION_H_

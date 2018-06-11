@@ -22,9 +22,6 @@
 #cmakedefine PROFILE_READ_ACCESS
 #cmakedefine PROFILE_STATUS_ANSWER
 #cmakedefine PROFILE_DISCOVERY_ACCESS
-#cmakedefine PROFILE_UDP_TRANSPORT
-#cmakedefine PROFILE_TCP_TRANSPORT
-#cmakedefine PROFILE_UART_TRANSPORT
 
 #ifdef PROFILE_CREATE_ENTITIES_BIN
 #include <micrortps/client/profile/session/create_entities_bin.h>
@@ -54,19 +51,6 @@
 #include <micrortps/client/profile/extension/discovery_access.h>
 #endif //PROFILE_DISCOVERY_ACCESS
 
-#ifdef PROFILE_UDP_TRANSPORT
-#include <micrortps/client/profile/communication/udp_transport.h>
-#include <micrortps/client/profile/transport/udp_transport.h>
-#endif //PROFILE_UDP_TRANSPORT
-
-#ifdef PROFILE_TCP_TRANSPORT
-#include <micrortps/client/profile/communication/tcp_transport.h>
-#include <micrortps/client/profile/transport/tcp_transport.h>
-#endif //PROFILE_TCP_TRANSPORT
-
-#ifdef PROFILE_UART_TRANSPORT
-#include <micrortps/client/profile/communication/uart_transport.h>
-#include <micrortps/client/profile/transport/uart_transport.h>
-#endif //PROFILE_UART_TRANSPORT
+#include <micrortps/client/communication/communication.h>
 
 #endif // _MICRORTPS_CLIENT_H_

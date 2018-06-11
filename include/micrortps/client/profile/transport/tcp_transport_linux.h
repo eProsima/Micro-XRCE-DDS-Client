@@ -12,35 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_COMMUNICATION_UDP_TRANSPORT_H_
-#define _MICRORTPS_CLIENT_PROFILE_COMMUNICATION_UDP_TRANSPORT_H_
+#ifndef _MICRORTPS_CLIENT_TCP_TRANSPORT_LINUX_H_
+#define _MICRORTPS_CLIENT_TCP_TRANSPORT_LINUX_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-    
-#include <micrortps/client/communication/transport_layer.h>
+
+#include <stddef.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/poll.h>
+#include <string.h>
+#include <errno.h>
 
-#define UDP_TRANSPORT_LINUX_MTU 512
+#define TCP_TRANSPORT_MTU 512
 
-typedef struct UDPTransport UDPTransport;
-struct UDPTransport
+typedef struct TCPTransport TCPTransport;
+struct TCPTransport
 {
-    TransportLayer* transport_layer;
-    uint8_t buffer[UDP_TRANSPORT_LINUX_MTU];
-    int socketfd;
+    uint8_t buffer[TCP_TRANSPORT_MTU];
+    int socket_fd;
     struct sockaddr remote_addr;
+    struct pollfd poll_fd;
 };
 
-int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
+int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
+intmax_t send_tcp_data(TCPTransport* transport, const void* buf, size_t len);
+intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int timeout);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_PROFILE_COMMUNICATION_UDP_TRANSPORT_H_
+#endif //_MICRORTPS_CLIENT_TCP_TRANSPORT_LINUX_H_

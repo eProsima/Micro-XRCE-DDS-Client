@@ -12,29 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_TCP_TRANSPORT_H_
-#define _MICRORTPS_CLIENT_TCP_TRANSPORT_H_
+#ifndef _MICRORTPS_CLIENT_UDP_TRANSPORT_WINDOWS_H_
+#define _MICRORTPS_CLIENT_UDP_TRANSPORT_WINDOWS_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stddef.h>
+#include <winsock2.h>
 #include <stdint.h>
+#include <stddef.h>
 
-typedef struct TCPProperties TCPProperties;
+#define UDP_TRANSPORT_MTU 512
 
-typedef struct TCPTransport TCPTransport;
-struct TCPTransport
+typedef struct UDPTransport UDPTransport;
+struct UDPTransport
 {
-    intmax_t (*send_data)(TCPTransport* transport, const void* buf, size_t len);
-    intmax_t (*recv_data)(TCPTransport* transport, void** buf, size_t* len, int timeout);
-    TCPProperties* properties;
+    uint8_t buffer[UDP_TRANSPORT_MTU];
+    SOCKET socket_fd;
+    struct sockaddr remote_addr;
+    WSAPOLLFD poll_fd;
 };
+
+int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
+intmax_t send_udp_data(UDPTransport* transport, const void* buf, size_t len);
+intmax_t recv_udp_data(UDPTransport* transport, void** buf, size_t* len, int timeout);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_TCP_TRANSPORT_H_
+#endif //_MICRORTPS_CLIENT_UDP_TRANSPORT_WINDOWS_H_

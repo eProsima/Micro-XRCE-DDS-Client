@@ -117,18 +117,21 @@ foreach(TRANSPORT_TYPE UDP TCP UART)
 #                src/c/profile/communication/${TT}/${TT}_transport_linux.c
                 src/c/profile/transport/${TT}_transport_linux.c
                 )
+
+            set(PLATFORM_NAME linux)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             set(${TRANSPORT_TYPE}_SRCS
 #                src/c/profile/communication/${TT}/${TT}_transport_windows.c
                 src/c/profile/transport/${TT}_transport_windows.c
                 )
+            set(PLATFROM_NAME windows)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
-            if(${PLATFORM_NAME} STREQUAL "NuttX")
+            if(${PLATFORM_NAME} STREQUAL "nuttx")
                 set(${TRANSPORT_TYPE}_SRCS
 #                    src/c/profile/communication/${TT}/${TT}_transport_nuttx.c
                     src/c/profile/transport/${TT}_transport_linux.c
                     )
-            elseif(${PLATFORM_NAME} STREQUAL "FreeRTOS")
+            elseif(${PLATFORM_NAME} STREQUAL "freertos")
                 set(${TRANSPORT_TYPE}_SRCS
 #                    src/c/profile/communication/${TT}/${TT}_transport_freertos.c
                     src/c/profile/transport/${TT}_transport_freertos.c
@@ -206,10 +209,13 @@ set(_MICRORTPS_HEARTBEAT_MIN_PERIOD_MS_ 200 CACHE STRING "Define maximum transmi
 # Create source files with the define
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
-)
+    )
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/client.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
-)
+    )
+configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/communication/communication.h.in
+    ${PROJECT_BINARY_DIR}/include/micrortps/client/communication/communication.h
+    )
 
 ###############################################################################
 # Compile setting
@@ -227,9 +233,9 @@ target_compile_definitions(${PROJECT_NAME}
         -D$<$<BOOL:${PROFILE_READ_ACCESS}>:PROFILE_READ_ACCESS>
         -D$<$<BOOL:${PROFILE_STATUS_ANSWER}>:PROFILE_STATUS_ANSWER>
         -D$<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:PROFILE_DISCOVERY_ACCESS>
-        -D$<$<BOOL:${PROFILE_UDP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
-        -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_TCP_TRANSPORT>
-        -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UART_TRANSPORT>
+#        -D$<$<BOOL:${PROFILE_UDP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
+#        -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_TCP_TRANSPORT>
+#        -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UART_TRANSPORT>
     )
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
 if((MSVC OR MSVC_IDE) AND (TARGET_TYPE STREQUAL "SHARED_LIBRARY"))
@@ -305,6 +311,11 @@ install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
 # Install client.h
 install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
     DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+    )
+
+# Install communication.h
+install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/communication/communication.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client/communication
     )
 
 # Export library
