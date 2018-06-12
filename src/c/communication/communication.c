@@ -5,6 +5,7 @@ int init_udp_comm(Communication* communication, UDPTransport* transport)
 {
     communication->udp_transport = transport;
     communication->transport_kind = UDP_TRANSPORT_KIND;
+    return 0;
 }
 #endif //PROFILE_UDP_TRANSPORT
 
@@ -13,6 +14,7 @@ int init_tcp_comm(Communication* communication, TCPTransport* transport)
 {
     communication->tcp_transport = transport;
     communication->transport_kind = TCP_TRANSPORT_KIND;
+    return 0;
 }
 #endif //PROFILE_TCP_TRANSPORT
 
@@ -21,6 +23,7 @@ int init_uart_comm(Communication* communication, UARTTransport* transport)
 {
     communication->uart_transport = transport;
     communication->transport_kind = UART_TRANSPORT_KIND;
+    return 0;
 }
 #endif //PROFILE_UART_TRANSPORT
 

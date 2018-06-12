@@ -114,26 +114,22 @@ foreach(TRANSPORT_TYPE UDP TCP UART)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             set(${TRANSPORT_TYPE}_SRCS
-#                src/c/profile/communication/${TT}/${TT}_transport_linux.c
                 src/c/profile/transport/${TT}_transport_linux.c
                 )
 
             set(PLATFORM_NAME linux)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             set(${TRANSPORT_TYPE}_SRCS
-#                src/c/profile/communication/${TT}/${TT}_transport_windows.c
                 src/c/profile/transport/${TT}_transport_windows.c
                 )
             set(PLATFROM_NAME windows)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "nuttx")
                 set(${TRANSPORT_TYPE}_SRCS
-#                    src/c/profile/communication/${TT}/${TT}_transport_nuttx.c
                     src/c/profile/transport/${TT}_transport_linux.c
                     )
             elseif(${PLATFORM_NAME} STREQUAL "freertos")
                 set(${TRANSPORT_TYPE}_SRCS
-#                    src/c/profile/communication/${TT}/${TT}_transport_freertos.c
                     src/c/profile/transport/${TT}_transport_freertos.c
                     )
             endif()
@@ -153,6 +149,7 @@ set(SRCS
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${UART_SRCS}
+    src/c/communication/communication.c
     src/c/session/input_best_effort_stream.c
     src/c/session/input_reliable_stream.c
     src/c/session/output_best_effort_stream.c
