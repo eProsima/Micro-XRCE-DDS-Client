@@ -3,6 +3,9 @@
 #define UINT16_SIZE (1 << 16)
 #define UINT16_MIDSIZE (1 << 15)
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 SeqNum seq_num_add(SeqNum seq_num, SeqNum increment)
 {
     return (seq_num + increment) % UINT16_SIZE;

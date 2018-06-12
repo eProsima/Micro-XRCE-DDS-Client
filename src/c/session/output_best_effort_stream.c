@@ -1,6 +1,9 @@
 #include <micrortps/client/session/output_best_effort_stream.h>
 #include <microcdr/microcdr.h>
 
+//==================================================================
+//                              PUBLIC
+//==================================================================
 void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset)
 {
     stream->buffer = buffer;

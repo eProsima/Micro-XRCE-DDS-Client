@@ -1,5 +1,8 @@
 #include <micrortps/client/session/stream_storage.h>
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 void init_stream_storage(StreamStorage* storage)
 {
     storage->output_best_effort_size = 0;

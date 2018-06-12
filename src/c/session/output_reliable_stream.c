@@ -1,6 +1,9 @@
 #include <micrortps/client/session/output_reliable_stream.h>
 #include <microcdr/microcdr.h>
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t offset)
 {
     stream->buffer = buffer;

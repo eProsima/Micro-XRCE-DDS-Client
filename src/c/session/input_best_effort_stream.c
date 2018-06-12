@@ -1,5 +1,8 @@
 #include <micrortps/client/session/input_best_effort_stream.h>
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 void init_input_best_effort_stream(InputBestEffortStream* stream)
 {
     stream->last_handled = UINT16_MAX;

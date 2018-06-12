@@ -5,6 +5,9 @@
 bool is_input_buffer_empty(InputReliableStream* stream, size_t position);
 void set_input_buffer_empty(InputReliableStream* stream, size_t position);
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, size_t size, size_t history)
 {
     stream->buffer = buffer;
@@ -25,7 +28,7 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
         if(is_input_buffer_empty(stream, current_buffer_pos))
         {
             SeqNum next = seq_num_add(stream->last_handled, 1);
-            if(seq_num_cmp(seq_num, next)) //TODO: and is not fragment (except last)
+            if(seq_num == next) //TODO: and is not fragment (except last)
             {
                 stream->last_handled = next;
                 result = true;
@@ -75,6 +78,9 @@ void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint
     (void) stream; (void) first_seq_num; (void)last_seq_num;
 }
 
+//==================================================================
+//                             PRIVATE
+//==================================================================
 bool is_buffer_empty(InputReliableStream* stream, size_t position)
 {
     return 0 == stream->buffer[position + 1];

@@ -3,6 +3,9 @@
 #define BEST_EFFORT_STREAM_THRESHOLD 1
 #define RELIABLE_STREAM_THRESHOLD 128
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 StreamId create_stream_id(uint8_t index, StreamType type, StreamDirection direction)
 {
     StreamId stream_id;

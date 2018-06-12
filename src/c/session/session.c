@@ -26,6 +26,10 @@ void read_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, b
 void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id);
 void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id);
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
+
 int create_session(Session* session, uint8_t session_id, const char* key, Communication* comm)
 {
     session->comm = comm;
@@ -49,31 +53,6 @@ int delete_session(Session* session)
 
     write_delete_session_message(&session->info, &mb);
     return wait_status_agent(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
-}
-
-int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts)
-{
-    int status_agent = 0;
-    uint32_t poll_ms = 1;
-    for(size_t i = 0; i < attempts || status_agent; ++i)
-    {
-        send_message(session, buffer, length);
-
-        uint8_t* in_buffer; size_t in_length;
-        int read_status = session->comm->recv_data(session->comm, &in_buffer, &in_length, poll_ms);
-        if(read_status == RECV_DATA_OK)
-        {
-            MicroBuffer in_mb;
-            init_micro_buffer(&in_mb, in_buffer, in_length);
-            read_status_agent_message(&session->info, &in_mb, &status_agent);
-        }
-        else if (read_status == RECV_DATA_TIMEOUT)
-        {
-            poll_ms *= 2;
-        }
-    }
-
-    return status_agent;
 }
 
 int generate_request_id(Session* session)
@@ -107,8 +86,6 @@ StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t 
 
 void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
 {
-    (void) max_attemps; (void) poll_ms;
-
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
         OutputBestEffortStream* stream = &session->streams.output_best_effort[i];
@@ -175,6 +152,35 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
             write_send_acknack(session, id);
         }
     }
+}
+
+
+//==================================================================
+//                             PRIVATE
+//==================================================================
+int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts)
+{
+    int status_agent = 0;
+    uint32_t poll_ms = 1;
+    for(size_t i = 0; i < attempts || status_agent; ++i)
+    {
+        send_message(session, buffer, length);
+
+        uint8_t* in_buffer; size_t in_length;
+        int read_status = session->comm->recv_data(session->comm, &in_buffer, &in_length, poll_ms);
+        if(read_status == RECV_DATA_OK)
+        {
+            MicroBuffer in_mb;
+            init_micro_buffer(&in_mb, in_buffer, in_length);
+            read_status_agent_message(&session->info, &in_mb, &status_agent);
+        }
+        else if (read_status == RECV_DATA_TIMEOUT)
+        {
+            poll_ms *= 2;
+        }
+    }
+
+    return status_agent;
 }
 
 void send_message(Session* session, uint8_t* buffer, size_t length)
