@@ -79,15 +79,6 @@ DATA:
 - struct:  {XrceVendorId: [data: uint8_t 2]}
 - define:  {XRCE_VENDOR_INVALID: '{0x00, 0x00}'}
 
-- typedef: {SessionId: uint8_t}
-- define:  {SESSIONID_NONE_WITH_CLIENT_KEY:     '0x00'}
-- define:  {SESSIONID_NONE_WITHOUT_CLIENT_KEY:  '0x80'}
-
-- typedef: {StreamId: uint8_t}
-- define:  {STREAMID_NONE:                  '0x00'}
-- define:  {STREAMID_BUILTIN_BEST_EFFORTS:  '0x01'}
-- define:  {STREAMID_BUILTIN_RELIABLE:      '0x80'}
-
 - enum:
     TransportLocatorFormat:
         - ADDRESS_FORMAT_SMALL:     '0'
@@ -682,49 +673,6 @@ DATA:
         - first_unacked_seq_nr: int16_t
         - last_unacked_seq_nr: int16_t
 
-- struct:
-    MessageHeader:
-      - session_id: uint8_t
-      - stream_id: uint8_t
-      - {sequence_nr: uint16_t, __ENDIANNESS__: LITTLE}
-      # - client_key: ClientKey //manage at message level.
-
-- enum:
-    SubmessageId:
-      - SUBMESSAGE_ID_CREATE_CLIENT: '0'
-      - SUBMESSAGE_ID_CREATE:        '1'
-      - SUBMESSAGE_ID_GET_INFO:      '2'
-      - SUBMESSAGE_ID_DELETE:        '3'
-      - SUBMESSAGE_ID_STATUS:        '4'
-      - SUBMESSAGE_ID_INFO:          '5'
-      - SUBMESSAGE_ID_WRITE_DATA:    '6'
-      - SUBMESSAGE_ID_READ_DATA:     '7'
-      - SUBMESSAGE_ID_DATA:          '8'
-      - SUBMESSAGE_ID_ACKNACK:       '9'
-      - SUBMESSAGE_ID_HEARTBEAT:     '10'
-      - SUBMESSAGE_ID_FRAGMENT:      '12'
-      - SUBMESSAGE_ID_FRAGMENT_END:  '13'
-    __TYPE__: uint8_t
-
-- enum:
-    SubmessageHeaderFlags:
-      - FLAG_ENDIANNESS:            '0x01 << 0'
-      - FLAG_REUSE:                 '0x01 << 1'
-      - FLAG_REPLACE:               '0x01 << 2'
-      - FLAG_LAST_FRAGMENT:         '0x01 << 1'
-      - FORMAT_DATA_F:              '0x00'
-      - FORMAT_SAMPLE_F:            '0x02'
-      - FORMAT_DATA_SEQ_F:          '0x08'
-      - FORMAT_SAMPLE_SEQ_F:        '0x0A'
-      - FORMAT_PACKED_SAMPLES_F:    '0x0E'
-    __TYPE__: uint8_t
-
-- struct:
-    SubmessageHeader:
-      - id: uint8_t
-      - flags: SubmessageHeaderFlags
-      - {length: uint16_t, __ENDIANNESS__: LITTLE}
-
 FILES:
   spec_file:
     head: |
@@ -784,7 +732,7 @@ FILES:
       {
       #endif
 
-      #include <micrortps/client/xrce_protocol_spec.h>
+      #include "xrce_protocol_spec.h"
 
       #include <microcdr/microcdr.h>
 

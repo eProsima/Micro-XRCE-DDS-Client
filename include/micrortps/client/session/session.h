@@ -33,10 +33,12 @@ typedef struct Session
 
 } Session;
 
-int create_session(Session* session, uint8_t session_id, const char* key, Communication* comm); //TODO
-int delete_session(Session* session); //TODO
+int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
+int delete_session(Session* session);
+
 void run_session(Session* session, size_t max_attemps, uint32_t poll_ms);
-int generate_request_id(Session* session); //TODO
+
+int generate_request_id(Session* session);
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
 StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_size);

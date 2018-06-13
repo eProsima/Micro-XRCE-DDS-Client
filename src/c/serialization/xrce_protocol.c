@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "xrce_protocol_serialization.h"
+#include <micrortps/client/serialization/xrce_protocol.h>
+#include <microcdr/microcdr.h>
 
 bool serialize_Time_t(MicroBuffer* buffer, const Time_t* input)
 {
@@ -2089,41 +2090,4 @@ bool deserialize_HEARTBEAT_Payload(MicroBuffer* buffer, HEARTBEAT_Payload* outpu
     ret &= deserialize_int16_t(buffer, &output->last_unacked_seq_nr);
     return ret;
 }
-
-bool serialize_MessageHeader(MicroBuffer* buffer, const MessageHeader* input)
-{
-    bool ret = true;
-    ret &= serialize_uint8_t(buffer, input->session_id);
-    ret &= serialize_uint8_t(buffer, input->stream_id);
-    ret &= serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->sequence_nr);
-    return ret;
-}
-
-bool deserialize_MessageHeader(MicroBuffer* buffer, MessageHeader* output)
-{
-    bool ret = true;
-    ret &= deserialize_uint8_t(buffer, &output->session_id);
-    ret &= deserialize_uint8_t(buffer, &output->stream_id);
-    ret &= deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->sequence_nr);
-    return ret;
-}
-
-bool serialize_SubmessageHeader(MicroBuffer* buffer, const SubmessageHeader* input)
-{
-    bool ret = true;
-    ret &= serialize_uint8_t(buffer, input->id);
-    ret &= serialize_uint8_t(buffer, input->flags);
-    ret &= serialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, input->length);
-    return ret;
-}
-
-bool deserialize_SubmessageHeader(MicroBuffer* buffer, SubmessageHeader* output)
-{
-    bool ret = true;
-    ret &= deserialize_uint8_t(buffer, &output->id);
-    ret &= deserialize_uint8_t(buffer, &output->flags);
-    ret &= deserialize_endian_uint16_t(buffer, LITTLE_ENDIANNESS, &output->length);
-    return ret;
-}
-
 

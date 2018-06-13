@@ -20,27 +20,28 @@ extern "C"
 {
 #endif
 
-#include <microcdr/microcdr.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 
+typedef struct MicroBuffer MicroBuffer;
 typedef struct SessionInfo
 {
     uint8_t id;
-    uint8_t* key;
+    uint8_t key[4];
 
 } SessionInfo;
 
 
-void init_session_info(SessionInfo* info, uint8_t id, const char* key);
+void init_session_info(SessionInfo* info, uint8_t id, uint32_t key);
 
-void write_create_session_message(SessionInfo* info, MicroBuffer* mb, uint32_t time_stamp);
-void write_delete_session_message(SessionInfo* info, MicroBuffer* mb);
+void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds);
+void write_delete_session(SessionInfo* info, MicroBuffer* mb);
 bool read_status_agent_message(SessionInfo* info, MicroBuffer* buffer, int* status_agent);
 
+void stamp_first_session_header(SessionInfo* info, uint8_t* buffer);
 void stamp_session_header(SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);
 bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num);
-
-bool session_matching(SessionInfo* info, SessionInfo* other);
 
 uint8_t session_header_offset(SessionInfo* info);
 

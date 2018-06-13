@@ -1,19 +1,25 @@
 #include <micrortps/client/session/session.h>
 #include <micrortps/client/util/time.h>
-#include "../xrce_protocol_serialization.h"
+#include <micrortps/client/serialization/xrce_subheader.h>
+#include <micrortps/client/serialization/xrce_protocol.h>
+#include "../log/message.h"
 
+// Autogenerate this defines by the protocol?
 #define HEARTBEAT_MAX_MSG_SIZE 50
 #define ACKNACK_MAX_MSG_SIZE 50
 #define CREATE_SESSION_MAX_MSG_SIZE 50
 #define DELETE_SESSION_MAX_MSG_SIZE 50
 #define SUBHEADER_SIZE 4
-#define MAX_HEADER_SIZE 8
 
 #define MAX_CONNECTION_ATTEMPS 10
+
+#define INITIAL_REQUEST_ID 2
 
 int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 
 void send_message(Session* session, uint8_t* buffer, size_t length);
+int recv_message(Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms);
+
 void write_send_heartbeat(Session* session, StreamId stream);
 void write_send_acknack(Session* session, StreamId stream);
 
@@ -30,10 +36,10 @@ void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id);
 //                             PUBLIC
 //==================================================================
 
-int create_session(Session* session, uint8_t session_id, const char* key, Communication* comm)
+int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
 {
     session->comm = comm;
-    session->last_request_id = 0;
+    session->last_request_id = INITIAL_REQUEST_ID;
     init_session_info(&session->info, session_id, key);
     init_stream_storage(&session->streams);
 
@@ -41,7 +47,8 @@ int create_session(Session* session, uint8_t session_id, const char* key, Commun
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
-    write_create_session_message(&session->info, &mb, get_nano_time());
+    write_create_session(&session->info, &mb, get_nano_time());
+    stamp_first_session_header(&session->info, mb.init);
     return wait_status_agent(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
@@ -51,7 +58,8 @@ int delete_session(Session* session)
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
-    write_delete_session_message(&session->info, &mb);
+    write_delete_session(&session->info, &mb);
+    stamp_session_header(&session->info, 0, 0, mb.init);
     return wait_status_agent(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
@@ -186,6 +194,14 @@ int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t a
 void send_message(Session* session, uint8_t* buffer, size_t length)
 {
     session->comm->send_data(session->comm, buffer, length);
+    DEBUG_PRINT_MESSAGE(SEND, buffer, length);
+}
+
+int recv_message(Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms)
+{
+    int read_status = session->comm->recv_data(session->comm, buffer, length, poll_ms);
+    DEBUG_PRINT_MESSAGE(SEND, *buffer, *length);
+    return read_status;
 }
 
 void write_send_heartbeat(Session* session, StreamId id)
@@ -195,6 +211,7 @@ void write_send_heartbeat(Session* session, StreamId id)
     init_micro_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     OutputReliableStream* stream = &session->streams.output_reliable[id.index];
+
     write_heartbeat(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, heartbeat_buffer, micro_buffer_length(&mb));
@@ -207,6 +224,7 @@ void write_send_acknack(Session* session, StreamId id)
     init_micro_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     InputReliableStream* stream = &session->streams.input_reliable[id.index];
+
     write_acknack(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, acknack_buffer, micro_buffer_length(&mb));
@@ -264,7 +282,7 @@ void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId s
     while(micro_buffer_remaining(submessages) > SUBHEADER_SIZE)
     {
         SubmessageHeader subheader;
-        deserialize_SubmessageHeader(submessages, &subheader);
+        deserialize_submessage_header(submessages, &subheader);
         submessages->endianness = (subheader.flags & FLAG_ENDIANNESS) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
 
         if(micro_buffer_remaining(submessages) > subheader.length) //CHECK: or >= ??
