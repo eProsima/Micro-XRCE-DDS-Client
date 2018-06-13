@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <FreeRTOS_sockets.h>
+#include <FreeRTOS_Sockets.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -35,8 +35,8 @@ struct TCPTransport
 };
 
 int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
-intmax_t send_tcp_data(TCPTransport* transport, const void* buf, size_t len);
-intmax_t recv_tcp_data(TCPTransport* transport, void** buf,  size_t* len, int timeout);
+intmax_t send_tcp_data(TCPTransport* transport, const uint8_t* buf, size_t len);
+intmax_t recv_tcp_data(TCPTransport* transport, uint8_t** buf,  size_t* len, int timeout);
 
 #ifdef __cplusplus
 }

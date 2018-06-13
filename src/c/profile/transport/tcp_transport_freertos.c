@@ -33,11 +33,11 @@ int init_udp_transport(TCPTransport* transport, const char* ip, uint16_t port)
     return result;
 }
 
-intmax_t send_tcp_data(TCPTransport* transport, const void* buf, size_t len)
+intmax_t send_tcp_data(TCPTransport* transport, const uint8_t* buf, size_t len)
 {
     intmax_t result = 0;
 
-    BaseType_t sent = FreeRTOS_send(transport->socket_fd, buf, len, 0);
+    BaseType_t sent = FreeRTOS_send(transport->socket_fd, (void*)buf, len, 0);
     if (sent == -pdFREERTOS_ERRNO_EWOULDBLOCK ||
         sent == -pdFREERTOS_ERRNO_EINVAL ||
         sent == -pdFREERTOS_ERRNO_EINTR)
@@ -48,7 +48,7 @@ intmax_t send_tcp_data(TCPTransport* transport, const void* buf, size_t len)
     return result;
 }
 
-intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int timeout)
+intmax_t recv_tcp_data(TCPTransport* transport, uint8_t** buf, size_t* len, int timeout)
 {
     intmax_t result = 0;
 
@@ -71,7 +71,7 @@ intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int tim
     else
     {
         *len = (size_t)received;
-        *buf = (void*)transport->buffer;
+        *buf = transport->buffer;
     }
 
     return result;

@@ -24,7 +24,7 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
     return result;
 }
 
-intmax_t send_udp_data(UDPTransport* transport, const void* buf, size_t len)
+intmax_t send_udp_data(UDPTransport* transport, const uint8_t* buf, size_t len)
 {
     intmax_t result = 0;
 
@@ -40,7 +40,7 @@ intmax_t send_udp_data(UDPTransport* transport, const void* buf, size_t len)
 
     // Send with zero copy behaviour.
     int32_t sent = FreeRTOS_sendto(transport->socket_fd,
-                                   out_buffer,
+                                   (void*)out_buffer,
                                    len,
                                    FREERTOS_ZERO_COPY,
                                    &transport->remote_addr,
@@ -55,7 +55,7 @@ intmax_t send_udp_data(UDPTransport* transport, const void* buf, size_t len)
     return result;
 }
 
-intmax_t recv_udp_data(UDPTransport* transport, void** buf, size_t* len, int timeout)
+intmax_t recv_udp_data(UDPTransport* transport, uint8_t** buf, size_t* len, int timeout)
 {
     (void) timeout;
     intmax_t result = 0;
@@ -83,7 +83,7 @@ intmax_t recv_udp_data(UDPTransport* transport, void** buf, size_t* len, int tim
         if (remote_addr.sin_addr == transport->remote_addr.sin_addr)
         {
             *len = (size_t)received;
-            *buf = (void*)transport->buffer;
+            *buf = transport->buffer;
         }
     }
     else

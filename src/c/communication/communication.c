@@ -27,7 +27,7 @@ int init_uart_comm(Communication* communication, UARTTransport* transport)
 }
 #endif //PROFILE_UART_TRANSPORT
 
-intmax_t send_data(Communication* comm, const void* buf, size_t len)
+intmax_t send_data(Communication* comm, const uint8_t* buf, size_t len)
 {
     intmax_t result = 0;
 
@@ -43,6 +43,9 @@ intmax_t send_data(Communication* comm, const void* buf, size_t len)
             break;
 #endif //PROFILE_TCP_TRANSPORT
 #ifdef PROFILE_UART_TRANSPORT
+        case UART_TRANSPORT_KIND:
+            result = send_uart_data(comm->uart_transport, buf, len);
+            break;
 #endif //PROFILE_UART_TRANSPORT
         default:
             break;
@@ -51,7 +54,7 @@ intmax_t send_data(Communication* comm, const void* buf, size_t len)
     return result;
 }
 
-intmax_t recv_data(Communication* comm, void** buf, size_t* len, int timeout)
+intmax_t recv_data(Communication* comm, uint8_t** buf, size_t* len, int timeout)
 {
     intmax_t result = 0;
 
@@ -67,6 +70,9 @@ intmax_t recv_data(Communication* comm, void** buf, size_t* len, int timeout)
             break;
 #endif //PROFILE_TCP_TRANSPORT
 #ifdef PROFILE_UART_TRANSPORT
+        case UART_TRANSPORT_KIND:
+            result = recv_uart_data(comm->uart_transport, buf, len, timeout);
+            break;
 #endif //PROFILE_UART_TRANSPORT
         default:
             break;

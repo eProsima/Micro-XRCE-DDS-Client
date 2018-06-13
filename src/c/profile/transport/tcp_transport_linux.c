@@ -38,13 +38,13 @@ int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port)
     return result;
 }
 
-intmax_t send_tcp_data(TCPTransport* transport, const void* buf, size_t len)
+intmax_t send_tcp_data(TCPTransport* transport, const uint8_t* buf, size_t len)
 {
-    int sent = send(transport->socket_fd, buf, len,  0);
-    return (sent <= 0) ? (intmax_t)sent : (intmax_t)-errno;
+    intmax_t sent = send(transport->socket_fd, (void*)buf, len,  0);
+    return (sent <= 0) ? sent : -errno;
 }
 
-intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int timeout)
+intmax_t recv_tcp_data(TCPTransport* transport, uint8_t** buf, size_t* len, int timeout)
 {
     intmax_t result = 0;
 
@@ -57,11 +57,11 @@ intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int tim
         if (0 <= received)
         {
             *len = (size_t)result;
-            *buf = (void*)transport->buffer;
+            *buf = transport->buffer;
         }
         else
         {
-            result = (intmax_t)-errno;
+            result = -errno;
         }
     }
     else if (0 == poll_rv)
@@ -70,7 +70,7 @@ intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int tim
     }
     else
     {
-        result = (intmax_t)-errno;
+        result = -errno;
     }
 
     return result;

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_UART_TRANSPORT_H_
-#define _MICRORTPS_CLIENT_UART_TRANSPORT_H_
+#ifndef _MICRORTPS_CLIENT_UART_TRANSPORT_LINUX_H_
+#define _MICRORTPS_CLIENT_UART_TRANSPORT_LINUX_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -22,21 +22,25 @@ extern "C"
 
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/poll.h>
 
-typedef struct UARTProperties UARTProperties;
+#define UART_TRANSPORT_MTU 512
 
 typedef struct UARTTransport UARTTransport;
 struct UARTTransport
 {
-    intmax_t (*send_data)(UARTTransport* transport, char* buf, size_t len);
-    intmax_t (*recv_data)(UARTTransport* transport, char** buf, size_t* len);
-    UARTProperties* properties;
+    uint8_t buffer[UART_TRANSPORT_MTU];
+    int fd;
+    uint8_t addr;
+    struct pollfd poll_fd;
 };
 
-int init_uart_transport(UARTTransport* transport, const char* device);
+int init_uart_transport(UARTTransport* transport, const char* device, const uint8_t addr);
+intmax_t send_uart_data(UARTTransport* transport, const uint8_t* buf, size_t len);
+intmax_t recv_uart_data(UARTTransport* transport, uint8_t** buf, size_t* len, int timeout);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_UDP_TRANSPORT_H_
+#endif //_MICRORTPS_CLIENT_UART_TRANSPORT_LINUX_H_

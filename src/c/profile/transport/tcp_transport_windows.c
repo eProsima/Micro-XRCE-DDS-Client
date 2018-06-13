@@ -39,13 +39,13 @@ int init_udp_transport(TCPTransport* transport, const char* ip, uint16_t port)
     return result;
 }
 
-intmax_t send_tcp_data(TCPTransport* transport, const void* buf, size_t len)
+intmax_t send_tcp_data(TCPTransport* transport, const uint8_t* buf, size_t len)
 {
-    int sent = send(transport->socket_fd, buf, len, 0);
-    return (SOCKET_ERROR != sent) ? (intmax_t)sent : (intmax_t)-WSAGetLastError();
+    intmax_t sent = send(transport->socket_fd, buf, len, 0);
+    return (SOCKET_ERROR != sent) ? sent : -WSAGetLastError();
 }
 
-intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int timeout)
+intmax_t recv_tcp_data(TCPTransport* transport, uint8_t** buf, size_t* len, int timeout)
 {
     intmax_t result = 0;
 
@@ -58,11 +58,11 @@ intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int tim
        if (SOCKET_ERROR != received)
        {
            *len = (size_t)received;
-           *buf = (void*)transport->buffer;
+           *buf = transport->buffer;
        }
        else
        {
-           result = (intmax_t)-WSAGetLastError();
+           result = -WSAGetLastError();
        }
     }
     else if (0 == poll_rv)
@@ -71,7 +71,7 @@ intmax_t recv_tcp_data(TCPTransport* transport, void** buf, size_t* len, int tim
     }
     else
     {
-        result = (intmax_t)-WSAGetLastError();
+        result = -WSAGetLastError();
     }
 
     return result;

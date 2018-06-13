@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H_
-#define _MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H_
+#ifndef _MICRORTPS_CLIENT_COMMUNICATION_SERIAL_PROTOCOL_H_
+#define _MICRORTPS_CLIENT_COMMUNICATION_SERIAL_PROTOCOL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -22,22 +22,16 @@ extern "C"
 
 #include <stdint.h>
 #include <stddef.h>
-#include <stdbool.h>
 
-#define RECV_DATA_OK 0
-#define RECV_DATA_TIMEOUT 1
+#define MICRORTPS_FRAMING_FLAG 0x7E
+#define MICRORTPS_FRAMING_ESP 0x7D
+#define MICRORTPS_FRAMING_XOR 0x20
 
-typedef struct Communication Communication;
-struct Communication
-{
-    intmax_t (*send_data)(Communication* communication, uint8_t* buf, size_t len);
-    intmax_t (*recv_data)(Communication* communication, uint8_t** buf, size_t* len, uint32_t poll_ms);
-    bool (*is_reliable)(Communication* communication);
-    size_t (*mtu)(Communication* communication);
-};
+uint16_t calculate_crc(const uint8_t* buffer, size_t len);
+void update_crc(uint16_t* crc, const uint8_t data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_COMMUNICATION_COMMUNICATION_H_
+#endif //_MICRORTPS_CLIENT_COMMUNICATION_SERIAL_PROTOCOL_H_

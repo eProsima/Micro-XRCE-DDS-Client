@@ -103,6 +103,7 @@ endif()
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
 eprosima_find_package(microcdr)
+#eprosima_find_package(micrortps_transport)
 
 ###############################################################################
 # Sources 
@@ -150,6 +151,7 @@ set(SRCS
     ${TCP_SRCS}
     ${UART_SRCS}
     src/c/communication/communication.c
+    src/c/communication/serial_protocol.c
     src/c/session/input_best_effort_stream.c
     src/c/session/input_reliable_stream.c
     src/c/session/output_best_effort_stream.c
@@ -230,9 +232,6 @@ target_compile_definitions(${PROJECT_NAME}
         -D$<$<BOOL:${PROFILE_READ_ACCESS}>:PROFILE_READ_ACCESS>
         -D$<$<BOOL:${PROFILE_STATUS_ANSWER}>:PROFILE_STATUS_ANSWER>
         -D$<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:PROFILE_DISCOVERY_ACCESS>
-#        -D$<$<BOOL:${PROFILE_UDP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
-#        -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_TCP_TRANSPORT>
-#        -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UART_TRANSPORT>
     )
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
 if((MSVC OR MSVC_IDE) AND (TARGET_TYPE STREQUAL "SHARED_LIBRARY"))

@@ -42,8 +42,8 @@ struct UDPTransport
 };
 
 int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
-intmax_t send_udp_data(UDPTransport* transport, const void* buf, size_t len);
-intmax_t recv_udp_data(UDPTransport* transport, void** buf, size_t* len, int timeout);
+intmax_t send_udp_data(UDPTransport* transport, const uint8_t* buf, size_t len);
+intmax_t recv_udp_data(UDPTransport* transport, uint8_t** buf, size_t* len, int timeout);
 
 #ifdef __cplusplus
 }
