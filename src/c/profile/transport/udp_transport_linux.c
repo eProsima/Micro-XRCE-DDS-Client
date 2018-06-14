@@ -38,13 +38,13 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
     return result;
 }
 
-intmax_t send_udp_data(UDPTransport* transport, const uint8_t* buf, size_t len)
+intmax_t send_udp_msg(UDPTransport* transport, const uint8_t* buf, size_t len)
 {
     intmax_t sent = send(transport->socket_fd, (void*)buf, len, 0);
     return (sent <= 0) ? sent : -errno;
 }
 
-intmax_t recv_udp_data(UDPTransport* transport, uint8_t** buf, size_t* len, int timeout)
+intmax_t recv_udp_msg(UDPTransport* transport, uint8_t** buf, size_t* len, int timeout)
 {
     intmax_t result = 0;
 

@@ -103,7 +103,7 @@ endif()
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
 eprosima_find_package(microcdr)
-#eprosima_find_package(micrortps_transport)
+eprosima_find_package(micrortps_transport)
 
 ###############################################################################
 # Sources 

@@ -39,13 +39,13 @@ int init_udp_transport(TCPTransport* transport, const char* ip, uint16_t port)
     return result;
 }
 
-intmax_t send_tcp_data(TCPTransport* transport, const uint8_t* buf, size_t len)
+intmax_t send_tcp_msg(TCPTransport* transport, const uint8_t* buf, size_t len)
 {
     intmax_t sent = send(transport->socket_fd, buf, len, 0);
     return (SOCKET_ERROR != sent) ? sent : -WSAGetLastError();
 }
 
-intmax_t recv_tcp_data(TCPTransport* transport, uint8_t** buf, size_t* len, int timeout)
+intmax_t recv_tcp_msg(TCPTransport* transport, uint8_t** buf, size_t* len, int timeout)
 {
     intmax_t result = 0;
 

@@ -1,4 +1,6 @@
 #include <micrortps/client/communication/serial_protocol.h>
+#include <errno.h>
+#include <string.h>
 
 // CRC-16 table for POLY 0x8005 (x^16 + x^15 + x^2 + 1).
 static const uint16_t crc16_table[256] = {
@@ -50,3 +52,75 @@ void update_crc(uint16_t* crc, const uint8_t data)
 {
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }   
+
+intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* input_buffer, const size_t input_len, const uint8_t addr)
+{
+    intmax_t result = 0;
+    uint16_t crc = 0;
+    size_t index_output = 0;
+
+    // Check output buffer size.
+    if (sizeof(serial_io->output_buffer) - MICRORTPS_SERIAL_OVERHEAD < input_len)
+    {
+        result = -EMSGSIZE;
+    }
+
+    if (0 <= result)
+    {
+        // Write header.
+        serial_io->output_buffer[0] = MICRORTPS_FRAMING_FLAG;
+        serial_io->output_buffer[1] = addr;
+        serial_io->output_buffer[2] = (uint8_t)input_len;
+        index_output = 3;
+
+        // Write payload and update CRC.
+        uint8_t next_octet = 0x00;
+        for (unsigned int i = 0; i < input_len && index_output + 3 < sizeof(serial_io->output_buffer); ++i)
+        {
+            next_octet = *(input_buffer + i);
+            update_crc(&crc, next_octet);
+            if (next_octet == MICRORTPS_FRAMING_FLAG || next_octet == MICRORTPS_FRAMING_ESP)
+            {
+                if (index_output + 4 <= sizeof(serial_io->output_buffer))
+                {
+                    serial_io->output_buffer[index_output] = MICRORTPS_FRAMING_ESP;
+                    serial_io->output_buffer[index_output + 1] = next_octet ^ MICRORTPS_FRAMING_XOR;
+                    index_output += 2;
+                }
+                else
+                {
+                    result = -EMSGSIZE;
+                    break;
+                }
+            }
+            else
+            {
+                if (index_output + 3 <= sizeof(serial_io->output_buffer))
+                {
+                    serial_io->output_buffer[index_output] = next_octet;
+                    ++index_output;
+                }
+                else
+                {
+                    result = -EMSGSIZE;
+                    break;
+                }
+            }
+        }
+
+        // Write CRC.
+        if (0 <= result)
+        {
+            memcpy(&serial_io->output_buffer[index_output], &crc, sizeof(crc));
+            index_output += 2;
+            result = index_output;
+        }
+    }
+
+    return result;
+}
+
+intmax_t read_serial_msg(SerialIO* serial_io, read_callback cb, uint8_t* output_buffer, const size_t output_len)
+{
+    return 0;
+}

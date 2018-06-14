@@ -27,24 +27,24 @@ int init_uart_comm(Communication* communication, UARTTransport* transport)
 }
 #endif //PROFILE_UART_TRANSPORT
 
-intmax_t send_data(Communication* comm, const uint8_t* buf, size_t len)
+intmax_t send_msg(Communication* comm, const uint8_t* buf, size_t len)
 {
     intmax_t result = 0;
 
     switch (comm->transport_kind) {
 #ifdef PROFILE_UDP_TRANSPORT
         case UDP_TRANSPORT_KIND:
-            result = send_udp_data(comm->udp_transport, buf, len);
+            result = send_udp_msg(comm->udp_transport, buf, len);
             break;
 #endif //PROFILE_UDP_TRANSPORT
 #ifdef PROFILE_TCP_TRANSPORT
         case TCP_TRANSPORT_KIND:
-            result = send_tcp_data(comm->tcp_transport, buf, len);
+            result = send_tcp_msg(comm->tcp_transport, buf, len);
             break;
 #endif //PROFILE_TCP_TRANSPORT
 #ifdef PROFILE_UART_TRANSPORT
         case UART_TRANSPORT_KIND:
-            result = send_uart_data(comm->uart_transport, buf, len);
+            result = send_uart_msg(comm->uart_transport, buf, len);
             break;
 #endif //PROFILE_UART_TRANSPORT
         default:
@@ -61,17 +61,17 @@ intmax_t recv_data(Communication* comm, uint8_t** buf, size_t* len, int timeout)
     switch (comm->transport_kind) {
 #ifdef PROFILE_UDP_TRANSPORT
         case UDP_TRANSPORT_KIND:
-            result = recv_udp_data(comm->udp_transport, buf, len, timeout);
+            result = recv_udp_msg(comm->udp_transport, buf, len, timeout);
             break;
 #endif //PROFILE_UDP_TRANSPORT
 #ifdef PROFILE_TCP_TRANSPORT
         case TCP_TRANSPORT_KIND:
-            result = recv_tcp_data(comm->tcp_transport, buf, len, timeout);
+            result = recv_tcp_msg(comm->tcp_transport, buf, len, timeout);
             break;
 #endif //PROFILE_TCP_TRANSPORT
 #ifdef PROFILE_UART_TRANSPORT
         case UART_TRANSPORT_KIND:
-            result = recv_uart_data(comm->uart_transport, buf, len, timeout);
+            result = recv_uart_msg(comm->uart_transport, buf, len, timeout);
             break;
 #endif //PROFILE_UART_TRANSPORT
         default:

@@ -69,8 +69,8 @@ int init_tcp_comm(Communication* communication, TCPTransport* transport);
 int init_uart_comm(Communication* communication, UARTTransport* transport);
 #endif //PROFILE_UART_TRANSPORT
 
-intmax_t send_data(Communication* comm, const uint8_t* buf, size_t len);
-intmax_t recv_data(Communication* comm, uint8_t** buf, size_t* len, int timeout);
+intmax_t send_msg(Communication* comm, const uint8_t* buf, size_t len);
+intmax_t recv_msg(Communication* comm, uint8_t** buf, size_t* len, int timeout);
 
 #ifdef __cplusplus
 }
