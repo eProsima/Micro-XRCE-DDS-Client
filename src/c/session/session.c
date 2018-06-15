@@ -88,7 +88,8 @@ StreamId create_input_best_effort_stream(Session* session)
 
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size)
 {
-    size_t history = size / session->comm->mtu(session->comm);
+//    size_t history = size / session->comm->mtu(session->comm);
+    size_t history = 0;
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
@@ -129,12 +130,12 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
     for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; ++i)
     {
         uint8_t* data; size_t length;
-        int read_status = (int)recv_data(session->communication, (void*)data, &length, poll_ms);
-//        int read_status = session->communication->recv_data(session->communication, data, &length, poll_ms);
+        // TODO (luis): change to recv_message().
+        int read_status = recv_msg(session->comm, &data, &length, poll_ms);
         if(read_status == RECV_DATA_OK)
         {
             MicroBuffer mb;
-            init_micro_buffer(&mb, buffer, length);
+            init_micro_buffer(&mb, data, length);
             read_message(session, &mb);
         }
     }
@@ -194,13 +195,13 @@ int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t a
 
 void send_message(Session* session, uint8_t* buffer, size_t length)
 {
-//    session->communication->send_data(session->communication, buffer, length);
+    (void) send_msg(session->comm, buffer, length);
     DEBUG_PRINT_MESSAGE(SEND, buffer, length);
 }
 
 int recv_message(Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms)
 {
-    int read_status = session->comm->recv_data(session->comm, buffer, length, poll_ms);
+    int read_status = recv_msg(session->comm, buffer, length, poll_ms);
     DEBUG_PRINT_MESSAGE(SEND, *buffer, *length);
     return read_status;
 }

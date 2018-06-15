@@ -64,6 +64,7 @@ bool read_status_agent_message(SessionInfo* info, MicroBuffer* buffer, int* stat
 {
     (void) info; (void) buffer; (void) status_agent;
     //TODO
+    return 0;
 }
 
 void stamp_first_session_header(SessionInfo* info, uint8_t* buffer)
@@ -116,5 +117,6 @@ int process_status_agent(SessionInfo* info)
 {
     (void) info;
     //TODO
+    return 0;
 }
 

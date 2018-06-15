@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "message.h"
-#include "xrce_protocol_serialization.h"
+#include <micrortps/client/serialization/xrce_protocol.h>
 #include <string.h>
 
 #define YELLOW_DARK    "\x1B[0;33m"

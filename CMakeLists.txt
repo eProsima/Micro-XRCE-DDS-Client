@@ -159,8 +159,8 @@ set(SRCS
     src/c/session/session_info.c
     src/c/session/stream_id.c
     src/c/session/stream_storage.c
-    src/c/xrce_protocol_serialization.c
-    src/c/log/message.c
+    src/c/serialization/xrce_protocol.c
+#    src/c/log/message.c
     )
 
 ###############################################################################
