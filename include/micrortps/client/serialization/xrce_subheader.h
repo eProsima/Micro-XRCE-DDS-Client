@@ -25,49 +25,8 @@ extern "C"
 
 typedef struct MicroBuffer MicroBuffer;
 
-typedef enum SubmessageId
-{
-    SUBMESSAGE_ID_CREATE_CLIENT = 0,
-    SUBMESSAGE_ID_CREATE = 1,
-    SUBMESSAGE_ID_GET_INFO = 2,
-    SUBMESSAGE_ID_DELETE = 3,
-    SUBMESSAGE_ID_STATUS = 4,
-    SUBMESSAGE_ID_INFO = 5,
-    SUBMESSAGE_ID_WRITE_DATA = 6,
-    SUBMESSAGE_ID_READ_DATA = 7,
-    SUBMESSAGE_ID_DATA = 8,
-    SUBMESSAGE_ID_ACKNACK = 9,
-    SUBMESSAGE_ID_HEARTBEAT = 10,
-    SUBMESSAGE_ID_FRAGMENT = 12,
-    SUBMESSAGE_ID_FRAGMENT_END = 13
-
-} SubmessageId;
-
-typedef enum SubmessageHeaderFlags
-{
-    FLAG_ENDIANNESS = 0x01 << 0,
-    FLAG_REUSE = 0x01 << 1,
-    FLAG_REPLACE = 0x01 << 2,
-    FLAG_LAST_FRAGMENT = 0x01 << 1,
-    FORMAT_DATA_F = 0x00,
-    FORMAT_SAMPLE_F = 0x02,
-    FORMAT_DATA_SEQ_F = 0x08,
-    FORMAT_SAMPLE_SEQ_F = 0x0A,
-    FORMAT_PACKED_SAMPLES_F = 0x0E
-
-} SubmessageHeaderFlags;
-
-
-typedef struct SubmessageHeader
-{
-    uint8_t id;
-    uint8_t flags;
-    uint16_t length;
-
-} SubmessageHeader;
-
-void serialize_submessage_header(MicroBuffer* buffer, const SubmessageHeader* input);
-void deserialize_submessage_header(MicroBuffer* buffer, SubmessageHeader* output);
+void serialize_submessage_header(MicroBuffer* buffer, uint8_t id, uint8_t flags, uint16_t length);
+void deserialize_submessage_header(MicroBuffer* buffer, uint8_t* id, uint8_t* flags, uint16_t* length);
 
 #ifdef __cplusplus
 }

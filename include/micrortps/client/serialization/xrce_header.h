@@ -33,17 +33,8 @@ extern "C"
 
 typedef struct MicroBuffer MicroBuffer;
 
-typedef struct MessageHeader
-{
-    uint8_t session_id;
-    uint8_t stream_id;
-    uint16_t sequence_nr;
-    uint8_t key[CLIENT_KEY_SIZE];
-
-} MessageHeader;
-
-void serialize_message_header(MicroBuffer* buffer, const MessageHeader* input);
-void deserialize_message_header(MicroBuffer* buffer, MessageHeader* output);
+void serialize_message_header(MicroBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key);
+void deserialize_message_header(MicroBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key);
 
 #ifdef __cplusplus
 }

@@ -24,8 +24,41 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-void stamp_submessage_header(MicroBuffer* buffer, uint8_t submessage, uint16_t length, uint8_t flags);
-bool read_submessage_header(MicroBuffer* buffer, uint8_t* submessage, uint16_t* length, uint8_t flags);
+#define SUBHEADER_SIZE 4
+
+typedef enum SubmessageId
+{
+    SUBMESSAGE_ID_CREATE_CLIENT = 0,
+    SUBMESSAGE_ID_CREATE = 1,
+    SUBMESSAGE_ID_GET_INFO = 2,
+    SUBMESSAGE_ID_DELETE = 3,
+    SUBMESSAGE_ID_STATUS = 4,
+    SUBMESSAGE_ID_INFO = 5,
+    SUBMESSAGE_ID_WRITE_DATA = 6,
+    SUBMESSAGE_ID_READ_DATA = 7,
+    SUBMESSAGE_ID_DATA = 8,
+    SUBMESSAGE_ID_ACKNACK = 9,
+    SUBMESSAGE_ID_HEARTBEAT = 10,
+    SUBMESSAGE_ID_FRAGMENT = 12,
+    SUBMESSAGE_ID_FRAGMENT_END = 13
+
+} SubmessageId;
+
+typedef enum SubmessageFlags
+{
+    FLAG_REUSE = 0x01 << 1,
+    FLAG_REPLACE = 0x01 << 2,
+    FLAG_LAST_FRAGMENT = 0x01 << 1,
+    FLAG_FORMAT_DATA = 0x00,
+    FLAG_FORMAT_SAMPLE = 0x02,
+    FLAG_FORMAT_DATA_SEQ = 0x08,
+    FLAG_FORMAT_SAMPLE_SEQ = 0x0A,
+    FLAG_FORMAT_PACKED_SAMPLES = 0x0E
+
+} SubmessageFlags;
+
+void write_submessage_header(MicroBuffer* mb, SubmessageId submessage_id, uint16_t length, SubmessageFlags flags);
+bool read_submessage_header(MicroBuffer* mb, SubmessageId* submessage_id, uint16_t* length, SubmessageFlags* flags);
 
 #ifdef __cplusplus
 }

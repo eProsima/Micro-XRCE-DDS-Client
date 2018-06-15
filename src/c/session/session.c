@@ -1,15 +1,15 @@
 #include <micrortps/client/session/session.h>
-#include <micrortps/client/util/time.h>
-#include <micrortps/client/serialization/xrce_subheader.h>
+#include <micrortps/client/session/submessage.h>
 #include <micrortps/client/serialization/xrce_protocol.h>
+#include <micrortps/client/serialization/xrce_protocol.h>
+#include <micrortps/client/util/time.h>
 #include "../log/message.h"
 
 // Autogenerate this defines by the protocol?
-#define HEARTBEAT_MAX_MSG_SIZE 50
-#define ACKNACK_MAX_MSG_SIZE 50
-#define CREATE_SESSION_MAX_MSG_SIZE 50
-#define DELETE_SESSION_MAX_MSG_SIZE 50
-#define SUBHEADER_SIZE 4
+#define HEARTBEAT_MAX_MSG_SIZE 16
+#define ACKNACK_MAX_MSG_SIZE 16
+#define CREATE_SESSION_MAX_MSG_SIZE 38
+#define DELETE_SESSION_MAX_MSG_SIZE 16
 
 #define MAX_CONNECTION_ATTEMPS 10
 
@@ -175,7 +175,7 @@ int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t a
         send_message(session, buffer, length);
 
         uint8_t* in_buffer; size_t in_length;
-        int read_status = session->comm->recv_data(session->comm, &in_buffer, &in_length, poll_ms);
+        int read_status = recv_message(session, &in_buffer, &in_length, poll_ms);
         if(read_status == RECV_DATA_OK)
         {
             MicroBuffer in_mb;
@@ -279,20 +279,10 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
 
 void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id)
 {
-    while(micro_buffer_remaining(submessages) > SUBHEADER_SIZE)
+    SubmessageId id; uint16_t length; SubmessageFlags flags;
+    while(read_submessage_header(submessages, &id, &length, &flags) && micro_buffer_remaining(submessages) >= length)
     {
-        SubmessageHeader subheader;
-        deserialize_submessage_header(submessages, &subheader);
-        submessages->endianness = (subheader.flags & FLAG_ENDIANNESS) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
-
-        if(micro_buffer_remaining(submessages) > subheader.length) //CHECK: or >= ??
-        {
-             break;
-        }
-
-        read_submessage(session, submessages, subheader.id, stream_id, subheader.flags);
-
-        align_to(submessages, 4);
+        read_submessage(session, submessages, id, stream_id, flags);
     }
 }
 

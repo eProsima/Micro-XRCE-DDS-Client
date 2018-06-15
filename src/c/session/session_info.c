@@ -1,13 +1,13 @@
 #include <micrortps/client/session/session_info.h>
+#include <micrortps/client/session/submessage.h>
 #include <micrortps/client/serialization/xrce_protocol.h>
 #include <micrortps/client/serialization/xrce_header.h>
-#include <micrortps/client/serialization/xrce_subheader.h>
 #include <microcdr/microcdr.h>
 
 #include <string.h>
 
 // Remove when Microcdr support size_of functions
-#define CREATE_CLIENT_PAYLOAD_SIZE 26
+#define CREATE_CLIENT_PAYLOAD_SIZE 30
 #define DELETE_CLIENT_PAYLOAD_SIZE 4
 
 #define REQUEST_ID_CREATE_CLIENT (RequestId){{0x00, 0x00}}
@@ -31,10 +31,7 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
 
 void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds)
 {
-    SubmessageHeader subheader;
-    subheader.id = SUBMESSAGE_ID_CREATE_CLIENT;
-    subheader.flags = FLAG_ENDIANNESS * mb->endianness;
-    subheader.length = CREATE_CLIENT_PAYLOAD_SIZE;
+    write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
 
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = REQUEST_ID_CREATE_CLIENT;
@@ -48,24 +45,18 @@ void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanosecon
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
 
-    (void) serialize_submessage_header(mb, &subheader);
     (void) serialize_CREATE_CLIENT_Payload(mb, &payload);
 }
 
 void write_delete_session(SessionInfo* info, MicroBuffer* mb)
 {
-    (void) info; // not used
-
-    SubmessageHeader subheader;
-    subheader.id = SUBMESSAGE_ID_DELETE;
-    subheader.flags = FLAG_ENDIANNESS * mb->endianness;
-    subheader.length = DELETE_CLIENT_PAYLOAD_SIZE;
+    (void) info;
+    write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
 
     DELETE_Payload payload;
     payload.base.request_id = REQUEST_ID_DELETE_CLIENT;
     payload.base.object_id = OBJECTID_CLIENT;
 
-    (void) serialize_submessage_header(mb, &subheader);
     (void) serialize_DELETE_Payload(mb, &payload);
 }
 
@@ -77,30 +68,19 @@ bool read_status_agent_message(SessionInfo* info, MicroBuffer* buffer, int* stat
 
 void stamp_first_session_header(SessionInfo* info, uint8_t* buffer)
 {
-    MessageHeader header;
-    header.session_id = info->id;
-    header.stream_id = 0;
-    header.sequence_nr = 0;
-    memcpy(header.key, info->key, CLIENT_KEY_SIZE);
-
     MicroBuffer mb;
     init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
-    (void) serialize_message_header(&mb, &header);
+    uint8_t session_id = SESSION_ID_WITHOUT_CLIENT_KEY & info->id;
+    (void) serialize_message_header(&mb, session_id, 0, 0, info->key);
 }
 
 void stamp_session_header(SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer)
 {
-    MessageHeader header;
-    header.session_id = info->id;
-    header.stream_id = stream_id_raw;
-    header.sequence_nr = seq_num;
-    memcpy(header.key, info->key, CLIENT_KEY_SIZE);
-
     MicroBuffer mb;
     init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
-    (void) serialize_message_header(&mb, &header);
+    (void) serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }
 
 bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num)
@@ -108,18 +88,15 @@ bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_
     bool must_be_read = micro_buffer_remaining(mb) > MAX_HEADER_SIZE;
     if(must_be_read)
     {
-        MessageHeader header;
-        deserialize_message_header(mb, &header);
+        uint8_t session_id; uint8_t key[CLIENT_KEY_SIZE];
+        (void) deserialize_message_header(mb, &session_id, stream_id_raw, seq_num, key);
 
-        *stream_id_raw = header.stream_id;
-        *seq_num = header.sequence_nr;
-
-        must_be_read = header.session_id == info->id;
+        must_be_read = session_id == info->id;
         if(must_be_read)
         {
             if (SESSION_ID_WITHOUT_CLIENT_KEY > info->id)
             {
-                must_be_read &= (0 == memcmp(header.key, info->key, sizeof(info->key)));
+                must_be_read &= (0 == memcmp(key, info->key, sizeof(info->key)));
             }
         }
     }
