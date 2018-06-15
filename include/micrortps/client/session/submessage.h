@@ -20,11 +20,12 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/serialization/xrce_subheader.h>
 #include <stdint.h>
 #include <stdbool.h>
 
 #define SUBHEADER_SIZE 4
+
+typedef struct MicroBuffer MicroBuffer;
 
 typedef enum SubmessageId
 {

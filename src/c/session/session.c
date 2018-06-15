@@ -1,7 +1,6 @@
 #include <micrortps/client/session/session.h>
 #include <micrortps/client/session/submessage.h>
 #include <micrortps/client/serialization/xrce_protocol.h>
-#include <micrortps/client/serialization/xrce_protocol.h>
 #include <micrortps/client/util/time.h>
 #include "../log/message.h"
 
