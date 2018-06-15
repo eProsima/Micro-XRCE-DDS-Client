@@ -2,6 +2,10 @@
 #include <errno.h>
 #include <string.h>
 
+intmax_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t len);
+inline uint8_t get_next_octet(SerialInputBuffer* input, uint16_t* relative_position);
+inline bool add_next_octet(SerialOutputBuffer* output, uint8_t octet, uint16_t* position);
+
 // CRC-16 table for POLY 0x8005 (x^16 + x^15 + x^2 + 1).
 static const uint16_t crc16_table[256] = {
     0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -53,14 +57,24 @@ void update_crc(uint16_t* crc, const uint8_t data)
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }   
 
-intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* input_buffer, const size_t input_len, const uint8_t addr)
+int init_serial_io(SerialIO* serial_io, uint8_t addr)
+{
+    serial_io->input.head = 0;
+    serial_io->input.market = 0;
+    serial_io->input.tail = 0;
+    serial_io->addr = addr;
+    return 0;
+}
+
+intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len)
 {
     intmax_t result = 0;
     uint16_t crc = 0;
-    size_t index_output = 0;
+    uint16_t position = 1;
+    uint16_t writing_len = 0;
 
     // Check output buffer size.
-    if (sizeof(serial_io->output_buffer) - MICRORTPS_SERIAL_OVERHEAD < input_len)
+    if (MICRORTPS_SERIAL_MTU < len || sizeof(serial_io->output.buffer) - MICRORTPS_SERIAL_OVERHEAD < len)
     {
         result = -EMSGSIZE;
     }
@@ -68,59 +82,198 @@ intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* input_buffer, cons
     if (0 <= result)
     {
         // Write header.
-        serial_io->output_buffer[0] = MICRORTPS_FRAMING_FLAG;
-        serial_io->output_buffer[1] = addr;
-        serial_io->output_buffer[2] = (uint8_t)input_len;
-        index_output = 3;
+        serial_io->output.buffer[0] = MICRORTPS_FRAMING_FLAG;
+        (void) add_next_octet(&serial_io->output, serial_io->addr, &position);
+        (void) add_next_octet(&serial_io->output, (uint8_t)len, &position);
 
-        // Write payload and update CRC.
-        uint8_t next_octet = 0x00;
-        for (unsigned int i = 0; i < input_len && index_output + 3 < sizeof(serial_io->output_buffer); ++i)
+        // Write payload.
+        uint8_t octet = 0;
+        bool octet_written = true;
+        while (writing_len < len && octet_written)
         {
-            next_octet = *(input_buffer + i);
-            update_crc(&crc, next_octet);
-            if (next_octet == MICRORTPS_FRAMING_FLAG || next_octet == MICRORTPS_FRAMING_ESP)
-            {
-                if (index_output + 4 <= sizeof(serial_io->output_buffer))
-                {
-                    serial_io->output_buffer[index_output] = MICRORTPS_FRAMING_ESP;
-                    serial_io->output_buffer[index_output + 1] = next_octet ^ MICRORTPS_FRAMING_XOR;
-                    index_output += 2;
-                }
-                else
-                {
-                    result = -EMSGSIZE;
-                    break;
-                }
-            }
-            else
-            {
-                if (index_output + 3 <= sizeof(serial_io->output_buffer))
-                {
-                    serial_io->output_buffer[index_output] = next_octet;
-                    ++index_output;
-                }
-                else
-                {
-                    result = -EMSGSIZE;
-                    break;
-                }
-            }
+            octet = *(buf + writing_len);
+            octet_written = add_next_octet(&serial_io->output, octet, &position);
+            update_crc(&crc, octet);
+            ++writing_len;
         }
 
-        // Write CRC.
-        if (0 <= result)
+        if (writing_len == len)
         {
-            memcpy(&serial_io->output_buffer[index_output], &crc, sizeof(crc));
-            index_output += 2;
-            result = index_output;
+            octet_written = add_next_octet(&serial_io->output, (uint8_t)(crc >> 8), &position) &&
+                            add_next_octet(&serial_io->output, (uint8_t)(crc & 0xFF), &position);
+            result = (octet_written) ? writing_len : -EMSGSIZE;
+        }
+        else
+        {
+            result = -EMSGSIZE;
         }
     }
 
     return result;
 }
 
-intmax_t read_serial_msg(SerialIO* serial_io, read_callback cb, uint8_t* output_buffer, const size_t output_len)
+intmax_t read_serial_msg(SerialIO* serial_io, read_callback cb, void* cb_arg, uint8_t* buf, size_t len)
 {
-    return 0;
+    intmax_t result = 0;
+
+    // Read from serial.
+    size_t available_len = 0;
+    if (serial_io->input.head < serial_io->input.tail)
+    {
+        available_len = sizeof(serial_io->input.buffer) - serial_io->input.tail;
+    }
+    else
+    {
+        available_len = serial_io->input.head - serial_io->input.tail;
+    }
+    result = cb(cb_arg, &serial_io->input.buffer[serial_io->input.tail], available_len);
+
+    // Update tail.
+    if (0 < result)
+    {
+        serial_io->input.tail = (serial_io->input.tail + (uint16_t)result) % sizeof(serial_io->input.buffer);
+    }
+
+    // Clean garbage data.
+    uint8_t octet = serial_io->input.buffer[serial_io->input.market];
+    uint16_t next_market = (serial_io->input.market + 1) % sizeof(serial_io->input.buffer);
+    if (serial_io->input.head == serial_io->input.market)
+    {
+        while (MICRORTPS_FRAMING_FLAG != octet && next_market != serial_io->input.tail)
+        {
+            octet = serial_io->input.buffer[next_market];
+            serial_io->input.market = next_market;
+            serial_io->input.head = next_market;
+            next_market = (serial_io->input.market + 1) % sizeof(serial_io->input.buffer);
+        }
+    }
+
+    // Update market.
+    while (MICRORTPS_FRAMING_FLAG != octet && next_market != serial_io->input.tail)
+    {
+        octet = serial_io->input.buffer[next_market];
+        serial_io->input.market = next_market;
+    }
+
+    // Check if message was found.
+    if (MICRORTPS_FRAMING_FLAG == octet)
+    {
+        // Procession row message.
+        result = process_input_message(&serial_io->input, buf, len);
+        serial_io->input.head = serial_io->input.tail;
+    }
+
+    return result;
+}
+
+intmax_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t len)
+{
+    intmax_t result = 0;
+    uint16_t raw_len = 0;
+    uint16_t raw_position = 0;
+    uint8_t addr = 0;
+    uint8_t msg_len = 0;
+    uint8_t payload_position = 0;
+    uint16_t crc = 0;
+
+    // Precondition.
+    raw_len = (input->head < input->market) ? (input->market - input->head) :
+                                              (MICRORTPS_SERIAL_BUFFER_SIZE - input->market + input->head);
+    if (MICRORTPS_SERIAL_OVERHEAD > raw_len)
+    {
+        // TODO (julian): define message error.
+        return -1;
+    }
+
+    // Read address.
+    addr = get_next_octet(input, &raw_position);
+
+    // Read payload length.
+    msg_len = get_next_octet(input, &raw_position);
+
+    // Check condition.
+    if (msg_len > len)
+    {
+        return -EMSGSIZE;
+    }
+
+    // Check condition.
+    if (msg_len > raw_len - MICRORTPS_SERIAL_OVERHEAD)
+    {
+        // TODO (julian): define message error.
+        return -1;
+    }
+
+    // Read payload.
+    uint8_t octet;
+    while (payload_position < msg_len && raw_position < raw_len - 2)
+    {
+        octet = get_next_octet(input, &raw_position);
+        update_crc(&crc, octet);
+        *(buf + payload_position) = octet;
+        ++payload_position;
+    }
+
+    // Check condition.
+    if (payload_position != msg_len || raw_position < raw_len - 2)
+    {
+        // TODO (julian): define message error.
+        return -1;
+    }
+    else
+    {
+        result = payload_position;
+    }
+
+    // Check CRC.
+    uint16_t msg_crc;
+    octet = get_next_octet(input, &raw_position);
+    msg_crc = (uint16_t)octet << 8;
+    octet = get_next_octet(input, &raw_position);
+    msg_crc = msg_crc & (uint16_t)octet;
+
+    if (msg_crc != crc)
+    {
+        // TODO (julian): define message error.
+        return -1;
+    }
+
+    return result;
+}
+
+uint8_t get_next_octet(SerialInputBuffer* input, uint16_t* relative_position)
+{
+    uint8_t result = input->buffer[(input->head + *relative_position) % sizeof(input->buffer)];
+    *relative_position += 1;
+    if (MICRORTPS_FRAMING_FLAG == result || MICRORTPS_FRAMING_ESP == result)
+    {
+        result = input->buffer[(input->head + *relative_position) % sizeof(input->buffer)] ^ MICRORTPS_FRAMING_XOR;
+        *relative_position += 1;
+    }
+    return result;
+}
+
+bool add_next_octet(SerialOutputBuffer* output, uint8_t octet, uint16_t* position)
+{
+    bool result = false;
+    if (MICRORTPS_FRAMING_FLAG == octet || MICRORTPS_FRAMING_ESP == octet)
+    {
+        if (*position < sizeof(output->buffer))
+        {
+            output->buffer[*position] = MICRORTPS_FRAMING_ESP;
+            output->buffer[*position + 1] = octet ^ MICRORTPS_FRAMING_XOR;
+            *position += 2;
+            result = true;
+        }
+    }
+    else
+    {
+        if (*position <= sizeof(output->buffer))
+        {
+            output->buffer[*position] = octet;
+            *position += 1;
+            result = true;
+        }
+    }
+    return result;
 }
