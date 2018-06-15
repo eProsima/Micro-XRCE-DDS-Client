@@ -14,7 +14,7 @@
 #define REQUEST_ID_DELETE_CLIENT (RequestId){{0x00, 0x01}}
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
 
-int process_status_agent(SessionInfo* info);
+int process_status_agent(SessionInfo* info, uint8_t status, AGENT_Representation* agent);
 
 //==================================================================
 //                             PUBLIC
@@ -31,7 +31,7 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
 
 void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds)
 {
-    write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
 
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = REQUEST_ID_CREATE_CLIENT;
@@ -51,7 +51,7 @@ void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanosecon
 void write_delete_session(SessionInfo* info, MicroBuffer* mb)
 {
     (void) info;
-    write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
 
     DELETE_Payload payload;
     payload.base.request_id = REQUEST_ID_DELETE_CLIENT;
@@ -60,11 +60,18 @@ void write_delete_session(SessionInfo* info, MicroBuffer* mb)
     (void) serialize_DELETE_Payload(mb, &payload);
 }
 
-bool read_status_agent_message(SessionInfo* info, MicroBuffer* buffer, int* status_agent)
+bool read_status_agent(SessionInfo* info, MicroBuffer* buffer, int* status_agent)
 {
-    (void) info; (void) buffer; (void) status_agent;
-    //TODO
-    return 0;
+    bool must_be_read = false;
+
+    STATUS_AGENT_Payload payload;
+    must_be_read = deserialize_STATUS_AGENT_Payload(buffer, &payload);
+    if(must_be_read)
+    {
+        *status_agent = process_status_agent(info, payload.base.result.status, &payload.agent_info);
+    }
+
+    return must_be_read;
 }
 
 void stamp_first_session_header(SessionInfo* info, uint8_t* buffer)
@@ -97,7 +104,7 @@ bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_
         {
             if (SESSION_ID_WITHOUT_CLIENT_KEY > info->id)
             {
-                must_be_read &= (0 == memcmp(key, info->key, sizeof(info->key)));
+                must_be_read &= (0 == memcmp(key, info->key, CLIENT_KEY_SIZE));
             }
         }
     }
@@ -113,9 +120,9 @@ uint8_t session_header_offset(SessionInfo* info)
 //==================================================================
 //                            PRIVATE
 //==================================================================
-int process_status_agent(SessionInfo* info)
+int process_status_agent(SessionInfo* info, uint8_t status, AGENT_Representation* agent)
 {
-    (void) info;
+    (void) info; (void) status; (void) agent;
     //TODO
     return 0;
 }

@@ -51,6 +51,6 @@
 #include <micrortps/client/profile/extension/discovery_access.h>
 #endif //PROFILE_DISCOVERY_ACCESS
 
-#include <micrortps/client/communication/communication.h>
+#include <micrortps/client/communication/communication.h> //sure??
 
 #endif // _MICRORTPS_CLIENT_H_

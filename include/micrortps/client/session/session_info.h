@@ -37,7 +37,7 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key);
 
 void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds);
 void write_delete_session(SessionInfo* info, MicroBuffer* mb);
-bool read_status_agent_message(SessionInfo* info, MicroBuffer* buffer, int* status_agent);
+bool read_status_agent(SessionInfo* info, MicroBuffer* buffer, int* status_agent);
 
 void stamp_first_session_header(SessionInfo* info, uint8_t* buffer);
 void stamp_session_header(SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);

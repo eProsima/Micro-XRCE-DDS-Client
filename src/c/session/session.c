@@ -16,6 +16,7 @@
 #define INITIAL_REQUEST_ID 2
 
 int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
+bool read_status_agent_message(Session* session, MicroBuffer* message, int* status);
 
 void send_message(Session* session, uint8_t* buffer, size_t length);
 int recv_message(Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms);
@@ -181,7 +182,7 @@ int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t a
         {
             MicroBuffer in_mb;
             init_micro_buffer(&in_mb, in_buffer, in_length);
-            read_status_agent_message(&session->info, &in_mb, &status_agent);
+            (void) read_status_agent_message(&session->info, &in_mb, &status_agent);
         }
         else if (read_status == RECV_DATA_TIMEOUT)
         {
@@ -190,6 +191,22 @@ int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t a
     }
 
     return status_agent;
+}
+
+bool read_status_agent_message(Session* session, MicroBuffer* message, int* status)
+{
+    bool must_be_read = false;
+    uint8_t stream_id_raw; uint16_t seq_num;
+    if(read_session_header(&session->info, message, &stream_id_raw, &seq_num))
+    {
+        SubmessageId id; uint16_t length; SubmessageFlags flags;
+        if(read_submessage_header(message, &id, &length, &flags))
+        {
+            must_be_read = read_status_agent(&session->info, message, status);
+        }
+    }
+
+    return must_be_read;
 }
 
 void send_message(Session* session, uint8_t* buffer, size_t length)
@@ -281,7 +298,7 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
 void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id)
 {
     SubmessageId id; uint16_t length; SubmessageFlags flags;
-    while(read_submessage_header(submessages, &id, &length, &flags) && micro_buffer_remaining(submessages) >= length)
+    while(read_submessage_header(submessages, &id, &length, &flags))
     {
         read_submessage(session, submessages, id, stream_id, flags);
     }
