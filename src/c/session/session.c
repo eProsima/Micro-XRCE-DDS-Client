@@ -2,8 +2,8 @@
 #include <micrortps/client/session/submessage.h>
 #include <micrortps/client/serialization/xrce_protocol.h>
 #include <micrortps/client/util/time.h>
-#include "../log/message.h"
 #include <micrortps/client/communication/communication.h>
+#include "../log/message.h"
 
 // Autogenerate this defines by the protocol?
 #define HEARTBEAT_MAX_MSG_SIZE 16
@@ -130,8 +130,7 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
     for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; ++i)
     {
         uint8_t* data; size_t length;
-        // TODO (luis): change to recv_message().
-        int read_status = recv_msg(session->comm, &data, &length, poll_ms);
+        int read_status = recv_message(session, &data, &length, poll_ms);
         if(read_status == RECV_DATA_OK)
         {
             MicroBuffer mb;

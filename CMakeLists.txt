@@ -62,26 +62,26 @@ endif()
 
 # Profiles options
 option(COMPLETE_PROFILE "Activate all profiles" OFF)
-option(PROFILE_CREATE_ENTITIES_BIN "Activate CreateEntitiesBIN profile" OFF) 
-option(PROFILE_CREATE_ENTITIES_REF "Activate CreateEntitiesREF profile" OFF) 
-option(PROFILE_CREATE_ENTITIES_XML "Activate CreateEntitiesXML profile" OFF) 
+option(PROFILE_CREATE_ENTITIES_BIN "Activate CreateEntitiesBIN profile" OFF)
+option(PROFILE_CREATE_ENTITIES_REF "Activate CreateEntitiesREF profile" OFF)
+option(PROFILE_CREATE_ENTITIES_XML "Activate CreateEntitiesXML profile" OFF)
 option(PROFILE_READ_ACCESS "Activate ReadAccess profile" OFF)
 option(PROFILE_DISCOVERY_ACCESS "Activate DiscoveryAccess profile" OFF)
 option(PROFILE_STATUS_ANSWER "Activate StatusAnswer profile" OFF)
-option(PROFILE_UDP_TRANSPORT "Activate UDPTransport profile" OFF) 
-option(PROFILE_TCP_TRANSPORT "Activate TCPTransport profile" OFF) 
-option(PROFILE_UART_TRANSPORT "Activate UARTTransport profile" OFF) 
+option(PROFILE_UDP_TRANSPORT "Activate UDPTransport profile" OFF)
+option(PROFILE_TCP_TRANSPORT "Activate TCPTransport profile" OFF)
+option(PROFILE_UART_TRANSPORT "Activate UARTTransport profile" OFF)
 
 if(COMPLETE_PROFILE)
-    set(PROFILE_CREATE_ENTITIES_BIN ON) 
-    set(PROFILE_CREATE_ENTITIES_REF ON) 
-    set(PROFILE_CREATE_ENTITIES_XML ON) 
+    set(PROFILE_CREATE_ENTITIES_BIN ON)
+    set(PROFILE_CREATE_ENTITIES_REF ON)
+    set(PROFILE_CREATE_ENTITIES_XML ON)
     set(PROFILE_READ_ACCESS ON)
     set(PROFILE_DISCOVERY_ACCESS ON)
     set(PROFILE_STATUS_ANSWER ON)
-    set(PROFILE_UDP_TRANSPORT ON) 
-    set(PROFILE_TCP_TRANSPORT ON) 
-    set(PROFILE_UART_TRANSPORT ON) 
+    set(PROFILE_UDP_TRANSPORT ON)
+    set(PROFILE_TCP_TRANSPORT ON)
+    set(PROFILE_UART_TRANSPORT ON)
 endif()
 
 if(PROFILE_CREATE_ENTITIES_BIN OR PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
@@ -106,7 +106,7 @@ eprosima_find_package(microcdr)
 eprosima_find_package(micrortps_transport)
 
 ###############################################################################
-# Sources 
+# Sources
 ###############################################################################
 
 # Transport source
@@ -160,6 +160,9 @@ set(SRCS
     src/c/session/stream_id.c
     src/c/session/stream_storage.c
     src/c/serialization/xrce_protocol.c
+    src/c/serialization/xrce_header.c
+    src/c/serialization/xrce_subheader.c
+    src/c/serialization/util.c
 #    src/c/log/message.c
     )
 

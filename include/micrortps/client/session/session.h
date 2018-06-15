@@ -22,7 +22,6 @@ extern "C"
 
 #include <micrortps/client/session/session_info.h>
 #include <micrortps/client/session/stream_storage.h>
-//#include <micrortps/client/communication/communication.h>
 
 typedef struct Communication Communication;
 
