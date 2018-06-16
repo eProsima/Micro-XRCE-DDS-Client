@@ -13,9 +13,11 @@
 
 #define MAX_CONNECTION_ATTEMPS 10
 
-#define INITIAL_REQUEST_ID 2
+#define INITIAL_REQUEST_ID 0x000F
 
-int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
+bool listen_message(Session* session, uint32_t poll_ms);
+
+bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 bool read_status_agent_message(Session* session, MicroBuffer* message, int* status);
 
 void send_message(Session* session, uint8_t* buffer, size_t length);
@@ -64,7 +66,7 @@ int delete_session(Session* session)
     return wait_status_agent(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
-int generate_request_id(Session* session)
+uint16_t generate_request_id(Session* session)
 {
     return ++session->last_request_id;
 }
@@ -90,11 +92,11 @@ StreamId create_input_best_effort_stream(Session* session)
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size)
 {
 //    size_t history = size / session->comm->mtu(session->comm);
-    size_t history = 0;
+    size_t history = 1;
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
-void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
+void run_session(Session* session, size_t read_attemps, uint32_t poll_ms)
 {
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -127,17 +129,9 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
         }
     }
 
-    int recv_status = RECV_DATA_OK;
-    for(size_t i = 0; i < max_attemps || recv_status == RECV_DATA_TIMEOUT; ++i)
+    for(size_t i = 0; i < read_attemps; i++)
     {
-        uint8_t* data; size_t length;
-        int read_status = recv_message(session, &data, &length, poll_ms);
-        if(read_status == RECV_DATA_OK)
-        {
-            MicroBuffer mb;
-            init_micro_buffer(&mb, data, length);
-            read_message(session, &mb);
-        }
+        (void) listen_message(session, poll_ms);
     }
 
     for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
@@ -168,45 +162,36 @@ void run_session(Session* session, size_t max_attemps, uint32_t poll_ms)
 //==================================================================
 //                             PRIVATE
 //==================================================================
-int wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts)
+bool listen_message(Session* session, uint32_t poll_ms)
 {
-    int status_agent = 0;
-    uint32_t poll_ms = 1;
-    for(size_t i = 0; i < attempts || status_agent; ++i)
+    //NOTE: Assuming that recv_message return always a message if it can mount it in 'poll_ms' milliseconds.
+    uint8_t* data; size_t length;
+    bool must_be_read = (RECV_DATA_OK == recv_message(session, &data, &length, poll_ms));
+    if(must_be_read)
     {
-        send_message(session, buffer, length);
-
-        uint8_t* in_buffer; size_t in_length;
-        int read_status = recv_message(session, &in_buffer, &in_length, poll_ms);
-        if(read_status == RECV_DATA_OK)
-        {
-            MicroBuffer in_mb;
-            init_micro_buffer(&in_mb, in_buffer, in_length);
-            (void) read_status_agent_message(&session->info, &in_mb, &status_agent);
-        }
-        else if (read_status == RECV_DATA_TIMEOUT)
-        {
-            poll_ms *= 2;
-        }
-    }
-
-    return status_agent;
-}
-
-bool read_status_agent_message(Session* session, MicroBuffer* message, int* status)
-{
-    bool must_be_read = false;
-    uint8_t stream_id_raw; uint16_t seq_num;
-    if(read_session_header(&session->info, message, &stream_id_raw, &seq_num))
-    {
-        SubmessageId id; uint16_t length; SubmessageFlags flags;
-        if(read_submessage_header(message, &id, &length, &flags))
-        {
-            must_be_read = read_status_agent(&session->info, message, status);
-        }
+        MicroBuffer mb;
+        init_micro_buffer(&mb, data, length);
+        read_message(session, &mb);
     }
 
     return must_be_read;
+}
+
+bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts)
+{
+    uint32_t poll_ms = 1;
+    for(size_t i = 0; i < attempts && check_session_info_pending_request(&session->info); ++i)
+    {
+        send_message(session, buffer, length);
+        poll_ms = listen_message(session, poll_ms) ? 1 : poll_ms * 2;
+    }
+
+    bool status_agent_received = check_session_info_pending_request(&session->info);
+    if(status_agent_received)
+    {
+        restore_session_info_request(&session->info);
+    }
+    return status_agent_received;
 }
 
 void send_message(Session* session, uint8_t* buffer, size_t length)
@@ -308,6 +293,13 @@ void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessa
 {
     switch(submessage_id)
     {
+        case SUBMESSAGE_ID_STATUS_AGENT:
+            if(stream_id.type == NONE_STREAM)
+            {
+                read_status_agent(&session->info, submessage);
+            }
+            break;
+
         case SUBMESSAGE_ID_STATUS:
             #ifdef PROFILE_STATUS_ANSWER
             read_status_submessage(session, submessage, stream_id);

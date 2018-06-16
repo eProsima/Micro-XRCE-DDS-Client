@@ -30,16 +30,16 @@ typedef struct Session
     SessionInfo info;
     StreamStorage streams;
     Communication* comm;
-    int last_request_id;
+    uint16_t last_request_id;
 
 } Session;
 
 int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
 int delete_session(Session* session);
 
-void run_session(Session* session, size_t max_attemps, uint32_t poll_ms);
+void run_session(Session* session, size_t read_attemps, uint32_t poll_ms);
 
-int generate_request_id(Session* session);
+uint16_t generate_request_id(Session* session);
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
 StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_size);

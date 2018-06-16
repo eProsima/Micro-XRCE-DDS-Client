@@ -24,11 +24,14 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
+
 typedef struct MicroBuffer MicroBuffer;
 typedef struct SessionInfo
 {
     uint8_t id;
     uint8_t key[4];
+    uint8_t state;
+    uint8_t request;
 
 } SessionInfo;
 
@@ -37,13 +40,15 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key);
 
 void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds);
 void write_delete_session(SessionInfo* info, MicroBuffer* mb);
-bool read_status_agent(SessionInfo* info, MicroBuffer* buffer, int* status_agent);
+void read_status_agent(SessionInfo* info, MicroBuffer* buffer);
 
 void stamp_first_session_header(SessionInfo* info, uint8_t* buffer);
 void stamp_session_header(SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);
 bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num);
 
 uint8_t session_header_offset(SessionInfo* info);
+bool check_session_info_pending_request(SessionInfo* info);
+void restore_session_info_request(SessionInfo* info);
 
 #ifdef __cplusplus
 }

@@ -10,11 +10,13 @@
 #define CREATE_CLIENT_PAYLOAD_SIZE 30
 #define DELETE_CLIENT_PAYLOAD_SIZE 4
 
-#define REQUEST_ID_CREATE_CLIENT (RequestId){{0x00, 0x00}}
-#define REQUEST_ID_DELETE_CLIENT (RequestId){{0x00, 0x01}}
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
 
-int process_status_agent(SessionInfo* info, uint8_t status, AGENT_Representation* agent);
+#define NO_REQUEST            0
+#define STATE_LOGOUT          1
+#define STATE_LOGIN           2
+
+void process_status_agent(SessionInfo* info, uint8_t status, AGENT_Representation* agent);
 
 //==================================================================
 //                             PUBLIC
@@ -27,6 +29,8 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
     info->key[1] = (key << 8) >> 24;
     info->key[2] = (key << 16) >> 24;
     info->key[3] = (key << 24) >> 24;
+    info->state = STATE_LOGOUT;
+    info->request = NO_REQUEST;
 }
 
 void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds)
@@ -34,7 +38,7 @@ void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanosecon
     (void) write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
 
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = REQUEST_ID_CREATE_CLIENT;
+    payload.base.request_id = (RequestId){{0x00, STATE_LOGIN}};
     payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
@@ -46,32 +50,33 @@ void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanosecon
     payload.client_representation.optional_properties = false;
 
     (void) serialize_CREATE_CLIENT_Payload(mb, &payload);
+
+    info->request = STATE_LOGIN;
 }
 
 void write_delete_session(SessionInfo* info, MicroBuffer* mb)
 {
-    (void) info;
     (void) write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
 
     DELETE_Payload payload;
-    payload.base.request_id = REQUEST_ID_DELETE_CLIENT;
+    payload.base.request_id = (RequestId){{0x00, STATE_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
     (void) serialize_DELETE_Payload(mb, &payload);
+
+    info->request = STATE_LOGOUT;
 }
 
-bool read_status_agent(SessionInfo* info, MicroBuffer* buffer, int* status_agent)
+void read_status_agent(SessionInfo* info, MicroBuffer* buffer)
 {
-    bool must_be_read = false;
-
     STATUS_AGENT_Payload payload;
-    must_be_read = deserialize_STATUS_AGENT_Payload(buffer, &payload);
-    if(must_be_read)
+    if(deserialize_STATUS_AGENT_Payload(buffer, &payload))
     {
-        *status_agent = process_status_agent(info, payload.base.result.status, &payload.agent_info);
+        if(payload.base.related_request.request_id.data[0] == info->request)
+        {
+            process_status_agent(info, payload.base.result.status, &payload.agent_info);
+        }
     }
-
-    return must_be_read;
 }
 
 void stamp_first_session_header(SessionInfo* info, uint8_t* buffer)
@@ -117,13 +122,27 @@ uint8_t session_header_offset(SessionInfo* info)
     return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MAX_HEADER_SIZE;
 }
 
+bool check_session_info_pending_request(SessionInfo* info)
+{
+    return NO_REQUEST != info->request;
+}
+
+void restore_session_info_request(SessionInfo* info)
+{
+    info->request = NO_REQUEST;
+}
+
 //==================================================================
 //                            PRIVATE
 //==================================================================
-int process_status_agent(SessionInfo* info, uint8_t status, AGENT_Representation* agent)
+void process_status_agent(SessionInfo* info, uint8_t status, AGENT_Representation* agent)
 {
-    (void) info; (void) status; (void) agent;
-    //TODO
-    return 0;
+    (void) agent;
+    if(status == STATUS_OK)
+    {
+        info->state = info->request;
+    }
+
+    info->request = NO_REQUEST;
 }
 
