@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-// Remove when Microcdr support size_of functions
+// Remove when Microcdr supports size_of functions
 #define CREATE_CLIENT_PAYLOAD_SIZE 30
 #define DELETE_CLIENT_PAYLOAD_SIZE 4
 
@@ -35,8 +35,6 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
 
 void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds)
 {
-    (void) write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
-
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, STATE_LOGIN}};
     payload.base.object_id = OBJECTID_CLIENT;
@@ -49,6 +47,7 @@ void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanosecon
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
 
+    (void) write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
     (void) serialize_CREATE_CLIENT_Payload(mb, &payload);
 
     info->request = STATE_LOGIN;
@@ -56,12 +55,11 @@ void write_create_session(SessionInfo* info, MicroBuffer* mb, uint32_t nanosecon
 
 void write_delete_session(SessionInfo* info, MicroBuffer* mb)
 {
-    (void) write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
-
     DELETE_Payload payload;
     payload.base.request_id = (RequestId){{0x00, STATE_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
+    (void) write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
     (void) serialize_DELETE_Payload(mb, &payload);
 
     info->request = STATE_LOGOUT;

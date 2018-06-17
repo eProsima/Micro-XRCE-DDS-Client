@@ -36,6 +36,7 @@ typedef struct InputReliableStream
 
     SeqNum last_handled;
     SeqNum last_announced;
+    bool must_confirm;
 
 } InputReliableStream;
 
@@ -44,8 +45,8 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
 bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb);
 
 bool input_reliable_stream_must_confirm(InputReliableStream* stream);
-int write_acknack(InputReliableStream* stream, MicroBuffer* mb);
-void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
+void write_acknack(InputReliableStream* stream, MicroBuffer* mb);
+void read_heartbeat(InputReliableStream* stream, MicroBuffer* payload);
 
 #ifdef __cplusplus
 }

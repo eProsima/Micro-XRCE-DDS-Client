@@ -1,6 +1,5 @@
 #include <micrortps/client/session/session.h>
 #include <micrortps/client/session/submessage.h>
-#include <micrortps/client/serialization/xrce_protocol.h>
 #include <micrortps/client/util/time.h>
 #include <micrortps/client/communication/communication.h>
 #include "../log/message.h"
@@ -32,8 +31,6 @@ void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId s
 void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
 
 void read_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment);
-void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id);
-void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id);
 
 //==================================================================
 //                             PUBLIC
@@ -140,7 +137,7 @@ void run_session(Session* session, size_t read_attemps, uint32_t poll_ms)
         uint8_t* buffer; size_t length;
         if(output_reliable_stream_must_send(stream, &buffer, &length))
         {
-            send_message(session, buffer, length);
+            send_message(session, buffer, length); //fix: it must send several messages.
         }
     }
 
@@ -289,39 +286,51 @@ void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId s
     }
 }
 
-void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags)
+void read_submessage(Session* session, MicroBuffer* payload, uint8_t submessage_id, StreamId stream_id, uint8_t flags)
 {
     switch(submessage_id)
     {
         case SUBMESSAGE_ID_STATUS_AGENT:
             if(stream_id.type == NONE_STREAM)
             {
-                read_status_agent(&session->info, submessage);
+                read_status_agent(&session->info, payload);
             }
             break;
 
         case SUBMESSAGE_ID_STATUS:
             #ifdef PROFILE_STATUS_ANSWER
-            read_status_submessage(session, submessage, stream_id);
+            read_status_submessage(session, payload, stream_id);
             #endif
             break;
 
         case SUBMESSAGE_ID_DATA:
             #ifdef PROFILE_DATA_ACCESS
-            read_data_submessage(session, submessage, stream_id, flags & FORMAT_MASK);
+            read_data_submessage(session, payload, stream_id, flags & FORMAT_MASK);
             #endif
             break;
 
         case SUBMESSAGE_ID_FRAGMENT:
-            read_fragment(session, submessage, stream_id, 0 != (flags & FLAG_LAST_FRAGMENT));
+            read_fragment(session, payload, stream_id, 0 != (flags & FLAG_LAST_FRAGMENT));
             break;
 
         case SUBMESSAGE_ID_HEARTBEAT:
-            read_heartbeat(session, submessage, stream_id);
+            {
+                InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
+                if(stream)
+                {
+                    read_heartbeat(stream, payload);
+                }
+            }
             break;
 
         case SUBMESSAGE_ID_ACKNACK:
-            read_acknack(session, submessage, stream_id);
+            {
+                OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
+                if(stream)
+                {
+                    read_acknack(stream, payload);
+                }
+            }
             break;
 
         default:
@@ -331,35 +340,6 @@ void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessa
 
 void read_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment)
 {
-    (void)session; (void)payload; (void)stream_id; (void)last_fragment;
+    (void) session; (void) payload; (void) stream_id; (void) last_fragment;
     //TODO
-    //Save flag into InputReliable to control it later in run_sesion stage
-}
-
-void read_heartbeat(Session* session, MicroBuffer* payload, StreamId stream_id)
-{
-    HEARTBEAT_Payload heartbeat;
-    deserialize_HEARTBEAT_Payload(payload, &heartbeat);
-
-    InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
-    if(stream)
-    {
-        process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
-    }
-}
-
-void read_acknack(Session* session, MicroBuffer* payload, StreamId stream_id)
-{
-    ACKNACK_Payload acknack;
-    deserialize_ACKNACK_Payload(payload, &acknack);
-
-    OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
-    if(stream)
-    {
-        uint16_t bitmap = (MACHINE_ENDIANNESS == LITTLE_ENDIANNESS)
-            ? ((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]
-            : (uint16_t)acknack.nack_bitmap[0] + ((uint16_t)acknack.nack_bitmap[1] << 8);
-
-        process_acknack(stream, acknack.first_unacked_seq_num, bitmap);
-    }
 }

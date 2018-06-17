@@ -43,6 +43,7 @@ typedef struct OutputReliableStream
 
     uint16_t nack_bitmap;
     uint32_t next_heartbeat_time_stamp;
+    uint8_t next_heartbeat_tries;
 
 } OutputReliableStream;
 
@@ -52,8 +53,8 @@ bool prepare_reliable_stream_to_write(OutputReliableStream* stream, int size, Mi
 
 bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp);
 bool output_reliable_stream_must_send(OutputReliableStream* stream, uint8_t** buffer, size_t *length);
-void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
-int write_heartbeat(OutputReliableStream* stream, MicroBuffer* mb);
+void write_heartbeat(OutputReliableStream* stream, MicroBuffer* mb);
+void read_acknack(OutputReliableStream* stream, MicroBuffer* payload);
 
 #ifdef __cplusplus
 }
