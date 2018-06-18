@@ -150,19 +150,21 @@ set(SRCS
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${UART_SRCS}
-    src/c/communication/communication.c
-    src/c/communication/serial_protocol.c
-    src/c/session/input_best_effort_stream.c
-    src/c/session/input_reliable_stream.c
-    src/c/session/output_best_effort_stream.c
-    src/c/session/session.c
-    src/c/session/session_info.c
-    src/c/session/stream_id.c
-    src/c/session/stream_storage.c
-    src/c/serialization/xrce_protocol.c
-    src/c/serialization/xrce_header.c
-    src/c/serialization/xrce_subheader.c
-    src/c/serialization/util.c
+    src/c/core/communication/communication.c
+    src/c/core/communication/serial_protocol.c
+    src/c/core/session/input_best_effort_stream.c
+    src/c/core/session/input_reliable_stream.c
+    src/c/core/session/output_best_effort_stream.c
+    src/c/core/session/output_reliable_stream.c
+    src/c/core/session/session.c
+    src/c/core/session/session_info.c
+    src/c/core/session/stream_id.c
+    src/c/core/session/stream_storage.c
+    src/c/core/session/submessage.c
+    src/c/core/serialization/xrce_protocol.c
+    src/c/core/serialization/xrce_header.c
+    src/c/core/serialization/xrce_subheader.c
+    src/c/core/util/time.c
 #    src/c/log/message.c
     )
 
