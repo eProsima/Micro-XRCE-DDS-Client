@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_STREAM_ID_H_
-#define _MICRORTPS_CLIENT_SESSION_STREAM_ID_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_STREAM_ID_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_STREAM_ID_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -53,4 +53,4 @@ StreamId create_stream_id_from_raw(uint8_t stream_id_raw, StreamDirection direct
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_STREAM_ID_H
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_STREAM_ID_H

@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_C_LOG_MESSAGE_PRIVATE_H_
-#define _MICRORTPS_C_LOG_MESSAGE_PRIVATE_H_
+#ifndef _PRIVATE_MICRORTPS_CORE_SESSION_C_LOG_MESSAGE_H_
+#define _PRIVATE_MICRORTPS_CORE_SESSION_C_LOG_MESSAGE_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-//#include <micrortps/client/xrce_protocol_spec.h>
-#include <micrortps/client/serialization/xrce_protocol.h>
-//#include <micrortps/client/client.h>
+#include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -54,4 +52,4 @@ void print_serialization(int direction, const uint8_t* buffer, uint32_t size);
 }
 #endif
 
-#endif //_MICRORTPS_C_LOG_MESSAGE_PRIVATE_H_
+#endif // _PRIVATE_MICRORTPS_CORE_SESSION_C_LOG_MESSAGE_H_

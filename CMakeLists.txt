@@ -217,8 +217,8 @@ configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/client.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
     )
-configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/communication/communication.h.in
-    ${PROJECT_BINARY_DIR}/include/micrortps/client/communication/communication.h
+configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/core/communication/communication.h.in
+    ${PROJECT_BINARY_DIR}/include/micrortps/client/core/communication/communication.h
     )
 
 ###############################################################################

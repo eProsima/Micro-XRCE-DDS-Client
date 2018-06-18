@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_SESSION_INFO_H_
-#define _MICRORTPS_CLIENT_SESSION_SESSION_INFO_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_SESSION_INFO_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_SESSION_INFO_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -54,4 +54,4 @@ void restore_session_info_request(SessionInfo* info);
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_SESSION_INFO_H
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_SESSION_INFO_H

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_SUBMESSAGE_H_
-#define _MICRORTPS_CLIENT_SESSION_SUBMESSAGE_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_SUBMESSAGE_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_SUBMESSAGE_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -65,4 +65,4 @@ bool read_submessage_header(MicroBuffer* mb, SubmessageId* submessage_id, uint16
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SUBMESSAGE_H_
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_SUBMESSAGE_H_

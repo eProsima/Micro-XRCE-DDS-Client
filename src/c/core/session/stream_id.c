@@ -1,4 +1,4 @@
-#include <micrortps/client/session/stream_id.h>
+#include <micrortps/client/core/session/stream_id.h>
 //#include "../xrce_protocol_serialization.h"
 
 #define BEST_EFFORT_STREAM_THRESHOLD 1

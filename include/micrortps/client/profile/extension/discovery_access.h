@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_EXTENSION_DISCOVERY_ACCESS_H_ 
+#ifndef _MICRORTPS_CLIENT_PROFILE_EXTENSION_DISCOVERY_ACCESS_H_
 #define _MICRORTPS_CLIENT_PROFILE_EXTENSION_DISCOVERY_ACCESS_H_
 
 #ifdef __cplusplus
@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/communication/communication.h>
+#include <micrortps/client/core/communication/communication.h>
 
 typedef struct DiscoveryAccess
 {

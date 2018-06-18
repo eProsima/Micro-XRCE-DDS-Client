@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SERIALIZATION_HEADER_H_
-#define _MICRORTPS_CLIENT_SERIALIZATION_HEADER_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SERIALIZATION_HEADER_H_
+#define _MICRORTPS_CLIENT_CORE_SERIALIZATION_HEADER_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -40,4 +40,4 @@ void deserialize_message_header(MicroBuffer* mb, uint8_t* session_id, uint8_t* s
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SERIALIZATION_HEADER_H_
+#endif // _MICRORTPS_CLIENT_CORE_SERIALIZATION_HEADER_H_

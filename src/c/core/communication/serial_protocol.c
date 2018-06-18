@@ -1,4 +1,4 @@
-#include <micrortps/client/communication/serial_protocol.h>
+#include <micrortps/client/core/communication/serial_protocol.h>
 #include <errno.h>
 #include <string.h>
 
@@ -55,7 +55,7 @@ uint16_t calculate_crc(const uint8_t *buffer, size_t len)
 void update_crc(uint16_t* crc, const uint8_t data)
 {
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
-}   
+}
 
 int init_serial_io(SerialIO* serial_io, uint8_t addr)
 {

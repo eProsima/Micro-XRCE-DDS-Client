@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_INPUT_BEST_EFFORT_STREAM_H_
-#define _MICRORTPS_CLIENT_SESSION_INPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_INPUT_BEST_EFFORT_STREAM_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_INPUT_BEST_EFFORT_STREAM_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/session/seq_num.h>
+#include <micrortps/client/core/session/seq_num.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -38,4 +38,4 @@ bool receive_best_effort_message(InputBestEffortStream* stream, SeqNum seq_num);
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_INPUT_BEST_EFFORT_STREAM_H_
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_INPUT_BEST_EFFORT_STREAM_H_

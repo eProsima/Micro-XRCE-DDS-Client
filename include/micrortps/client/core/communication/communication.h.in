@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_COMMUNICATION_H_
-#define _MICRORTPS_CLIENT_COMMUNICATION_H_
+#ifndef _MICRORTPS_CLIENT_CORE_COMMUNICATION_COMMUNICATION_H_
+#define _MICRORTPS_CLIENT_CORE_COMMUNICATION_COMMUNICATION_H_
 
 #cmakedefine PROFILE_UDP_TRANSPORT
 #cmakedefine PROFILE_TCP_TRANSPORT
@@ -41,6 +41,9 @@ extern "C"
 
 #define RECV_DATA_OK 0
 #define RECV_DATA_TIMEOUT 1
+
+#include <stdint.h>
+#include <stddef.h>
 
 typedef struct Communication Communication;
 struct Communication
@@ -76,4 +79,4 @@ intmax_t recv_msg(Communication* comm, uint8_t** buf, size_t* len, int timeout);
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_COMMUNICATION_H_
+#endif //_MICRORTPS_CLIENT_CORE_COMMUNICATION_COMMUNICATION_H_

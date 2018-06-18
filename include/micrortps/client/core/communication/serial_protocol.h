@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_COMMUNICATION_SERIAL_PROTOCOL_H_
-#define _MICRORTPS_CLIENT_COMMUNICATION_SERIAL_PROTOCOL_H_
+#ifndef _MICRORTPS_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_
+#define _MICRORTPS_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -68,4 +68,4 @@ intmax_t read_serial_msg(SerialIO* serial_io, read_callback cb, void* cb_arg, ui
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_COMMUNICATION_SERIAL_PROTOCOL_H_
+#endif //_MICRORTPS_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_

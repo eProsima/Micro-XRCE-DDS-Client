@@ -1,4 +1,4 @@
-#include <micrortps/client/session/stream_storage.h>
+#include <micrortps/client/core/session/stream_storage.h>
 
 //==================================================================
 //                             PUBLIC

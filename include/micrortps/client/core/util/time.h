@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_UTIL_TIME_H_
-#define _MICRORTPS_CLIENT_UTIL_TIME_H_
+#ifndef _MICRORTPS_CLIENT_CORE_UTIL_TIME_H_
+#define _MICRORTPS_CLIENT_CORE_UTIL_TIME_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -28,4 +28,4 @@ uint32_t get_nano_time(void);
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_UTIL_TIME_H_
+#endif // _MICRORTPS_CLIENT_CORE_UTIL_TIME_H_

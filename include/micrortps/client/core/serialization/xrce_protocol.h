@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SERIALIZATION_XRCE_PROTOCOL_H_
-#define _MICRORTPS_CLIENT_SERIALIZATION_XRCE_PROTOCOL_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_H_
+#define _MICRORTPS_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_H_
 
 #ifdef __cplusplus
 extern "C"

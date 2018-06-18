@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_SEQ_NUM_H_
-#define _MICRORTPS_CLIENT_SESSION_SEQ_NUM_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_SEQ_NUM_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_SEQ_NUM_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -32,4 +32,4 @@ int seq_num_cmp(SeqNum seq_num_1, SeqNum seq_num_2);
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_SEQ_NUM_H_
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_SEQ_NUM_H_

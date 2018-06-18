@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_OUTPUT_BEST_EFFORT_STREAM_H_
-#define _MICRORTPS_CLIENT_SESSION_OUTPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_OUTPUT_BEST_EFFORT_STREAM_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_OUTPUT_BEST_EFFORT_STREAM_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/session/seq_num.h>
+#include <micrortps/client/core/session/seq_num.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -46,4 +46,4 @@ bool prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t 
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_OUTPUT_BEST_EFFORT_STREAM_H
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_OUTPUT_BEST_EFFORT_STREAM_H

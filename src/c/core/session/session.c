@@ -1,8 +1,8 @@
-#include <micrortps/client/session/session.h>
-#include <micrortps/client/session/submessage.h>
-#include <micrortps/client/util/time.h>
-#include <micrortps/client/communication/communication.h>
-#include "../log/message.h"
+#include <micrortps/client/core/session/session.h>
+#include <micrortps/client/core/session/submessage.h>
+#include <micrortps/client/core/util/time.h>
+#include <micrortps/client/core/communication/communication.h>
+#include "log/message.h"
 
 // Autogenerate this defines by the protocol?
 #define HEARTBEAT_MAX_MSG_SIZE 16

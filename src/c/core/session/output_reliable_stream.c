@@ -1,6 +1,6 @@
-#include <micrortps/client/session/output_reliable_stream.h>
-#include <micrortps/client/session/submessage.h>
-#include <micrortps/client/serialization/xrce_protocol.h>
+#include <micrortps/client/core/session/output_reliable_stream.h>
+#include <micrortps/client/core/session/submessage.h>
+#include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <microcdr/microcdr.h>
 
 // Remove when Microcdr supports size_of functions

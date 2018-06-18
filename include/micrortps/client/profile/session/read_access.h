@@ -20,9 +20,9 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/session/session.h>
-#include <micrortps/client/session/stream_id.h>
-#include <micrortps/client/session/object_id.h>
+#include <micrortps/client/core/session/session.h>
+#include <micrortps/client/core/session/stream_id.h>
+#include <micrortps/client/core/session/object_id.h>
 #include <stdint.h>
 
 typedef struct ContentFilter

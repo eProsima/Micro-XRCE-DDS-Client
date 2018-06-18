@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_SESSION_H_
-#define _MICRORTPS_CLIENT_SESSION_SESSION_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_SESSION_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_SESSION_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/session/session_info.h>
-#include <micrortps/client/session/stream_storage.h>
+#include <micrortps/client/core/session/session_info.h>
+#include <micrortps/client/core/session/stream_storage.h>
 
 typedef struct Communication Communication;
 
@@ -58,4 +58,4 @@ void read_data_submessage(Session* session, MicroBuffer* submessage, StreamId id
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_SESSION_H
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_SESSION_H

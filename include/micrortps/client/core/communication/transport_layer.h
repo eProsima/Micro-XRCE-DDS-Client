@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_COMMUNICATION_TRANSPORT_LAYER_H_
-#define _MICRORTPS_CLIENT_COMMUNICATION_TRANSPORT_LAYER_H_
+#ifndef _MICRORTPS_CLIENT_CORE_COMMUNICATION_TRANSPORT_LAYER_H_
+#define _MICRORTPS_CLIENT_CORE_COMMUNICATION_TRANSPORT_LAYER_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/communication/communication.h>
+#include <micrortps/client/core/communication/communication.h>
 
 typedef struct TransportLayer TransportLayer;
 struct TransportLayer
@@ -34,4 +34,4 @@ struct TransportLayer
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_COMMUNICATION_TRANSPORT_LAYER_H_
+#endif //_MICRORTPS_CLIENT_CORE_COMMUNICATION_TRANSPORT_LAYER_H_

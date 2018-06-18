@@ -1,4 +1,4 @@
-#include <micrortps/client/communication/communication.h>
+#include <micrortps/client/core/communication/communication.h>
 
 #ifdef PROFILE_UDP_TRANSPORT
 int init_udp_comm(Communication* communication, UDPTransport* transport)

@@ -1,4 +1,4 @@
-#include <micrortps/client/session/output_best_effort_stream.h>
+#include <micrortps/client/core/session/output_best_effort_stream.h>
 #include <microcdr/microcdr.h>
 
 //==================================================================

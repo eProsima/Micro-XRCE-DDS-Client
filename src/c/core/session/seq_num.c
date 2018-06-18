@@ -1,4 +1,4 @@
-#include <micrortps/client/session/seq_num.h>
+#include <micrortps/client/core/session/seq_num.h>
 
 #define UINT16_SIZE (1 << 16)
 #define UINT16_MIDSIZE (1 << 15)

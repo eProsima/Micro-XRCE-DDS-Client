@@ -1,4 +1,5 @@
-#include <micrortps/client/session/submessage.h>
+#include <micrortps/client/core/session/submessage.h>
+#include <micrortps/client/core/serialization/xrce_subheader.h>
 #include <microcdr/microcdr.h>
 
 #define FLAG_ENDIANNESS 1

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <micrortps/client/serialization/xrce_protocol.h>
+#include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <microcdr/microcdr.h>
 
 bool serialize_Time_t(MicroBuffer* buffer, const Time_t* input)

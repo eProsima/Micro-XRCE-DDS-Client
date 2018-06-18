@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_SESSION_STREAM_STORAGE_H_
-#define _MICRORTPS_CLIENT_SESSION_STREAM_STORAGE_H_
+#ifndef _MICRORTPS_CLIENT_CORE_SESSION_STREAM_STORAGE_H_
+#define _MICRORTPS_CLIENT_CORE_SESSION_STREAM_STORAGE_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/session/output_best_effort_stream.h>
-#include <micrortps/client/session/output_reliable_stream.h>
-#include <micrortps/client/session/input_best_effort_stream.h>
-#include <micrortps/client/session/input_reliable_stream.h>
-#include <micrortps/client/session/stream_id.h>
+#include <micrortps/client/core/session/output_best_effort_stream.h>
+#include <micrortps/client/core/session/output_reliable_stream.h>
+#include <micrortps/client/core/session/input_best_effort_stream.h>
+#include <micrortps/client/core/session/input_reliable_stream.h>
+#include <micrortps/client/core/session/stream_id.h>
 
 #ifndef MAX_OUTPUT_BEST_EFFORT_STREAMS
 #define MAX_OUTPUT_BEST_EFFORT_STREAMS 1
@@ -71,4 +71,4 @@ InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t i
 }
 #endif
 
-#endif // _MICRORTPS_CLIENT_SESSION_STREAM_STORAGE_H
+#endif // _MICRORTPS_CLIENT_CORE_SESSION_STREAM_STORAGE_H

@@ -1,6 +1,6 @@
-#include <micrortps/client/session/input_reliable_stream.h>
-#include <micrortps/client/session/submessage.h>
-#include <micrortps/client/serialization/xrce_protocol.h>
+#include <micrortps/client/core/session/input_reliable_stream.h>
+#include <micrortps/client/core/session/submessage.h>
+#include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <microcdr/microcdr.h>
 #include <string.h>
 
