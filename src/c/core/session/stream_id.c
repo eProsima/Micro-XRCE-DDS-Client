@@ -1,8 +1,5 @@
 #include <micrortps/client/core/session/stream_id.h>
-//#include "../xrce_protocol_serialization.h"
-
-#define BEST_EFFORT_STREAM_THRESHOLD 1
-#define RELIABLE_STREAM_THRESHOLD  128
+#include <micrortps/client/core/serialization/xrce_header.h>
 
 //==================================================================
 //                             PUBLIC

@@ -165,7 +165,7 @@ set(SRCS
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/core/util/time.c
-#    src/c/log/message.c
+    src/c/core/session/log/message.c
     )
 
 ###############################################################################

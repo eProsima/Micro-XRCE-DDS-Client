@@ -13,7 +13,11 @@
 // limitations under the License.
 
 #include "message.h"
-#include <micrortps/client/serialization/xrce_protocol.h>
+
+#include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <micrortps/client/core/serialization/xrce_header.h>
+#include <micrortps/client/core/session/submessage.h>
+#include <microcdr/microcdr.h>
 #include <string.h>
 
 #define YELLOW_DARK    "\x1B[0;33m"
@@ -34,6 +38,11 @@
 #define SEND_ARROW "==> "
 #define RECV_ARROW "<== "
 
+static uint16_t array_2_to_num(const uint8_t* array_2)
+{
+    return ((uint16_t)array_2[0] << 8) + (uint16_t)array_2[1];
+}
+
 static const char* data_to_string(const uint8_t* data, uint32_t size)
 {
     static char buffer[4096];
@@ -46,8 +55,8 @@ static const char* request_to_string(const BaseObjectRequest* request)
 {
     static char buffer[256];
     sprintf(buffer, "#0x%04X | id: 0x%04X",
-            get_num_request_id(request->request_id),
-            get_num_object_id(request->object_id));
+            array_2_to_num(request->request_id.data),
+            array_2_to_num(request->object_id.data));
 
     return buffer;
 }
@@ -94,9 +103,9 @@ static const char* reply_to_string(const BaseObjectReply* reply)
     }
 
     sprintf(buffer, "#0x%04X | id: 0x%04X | from #0x%04X | %s",
-            get_num_request_id(reply->related_request.request_id),
-            get_num_object_id(reply->related_request.object_id),
-            get_num_request_id(reply->related_request.request_id),
+            array_2_to_num(reply->related_request.request_id.data),
+            array_2_to_num(reply->related_request.object_id.data),
+            array_2_to_num(reply->related_request.request_id.data),
             status);
 
     return buffer;
@@ -122,25 +131,25 @@ static void print_create_submessage(const char* pre, const CREATE_Payload* paylo
             break;
         case OBJK_TOPIC:
             sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
-                    get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
+                    array_2_to_num(payload->object_representation._.data_reader.subscriber_id.data),
                     payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;
         case OBJK_PUBLISHER:
             sprintf(content, "PUBLISHER | id: 0x%04X",
-                    get_num_object_id(payload->object_representation._.publisher.participant_id));
+                    array_2_to_num(payload->object_representation._.publisher.participant_id.data));
             break;
         case OBJK_SUBSCRIBER:
             sprintf(content, "SUBSCRIBER | id: 0x%04X",
-                    get_num_object_id(payload->object_representation._.subscriber.participant_id));
+                    array_2_to_num(payload->object_representation._.subscriber.participant_id.data));
             break;
         case OBJK_DATAWRITER:
             sprintf(content, "DATA_WRITER | id: 0x%04X | xml: %u",
-                    get_num_object_id(payload->object_representation._.data_writer.publisher_id),
+                    array_2_to_num(payload->object_representation._.data_writer.publisher_id.data),
                     payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
              break;
         case OBJK_DATAREADER:
             sprintf(content, "DATA_READER | id: 0x%04X | xml: %u",
-                    get_num_object_id(payload->object_representation._.data_reader.subscriber_id),
+                    array_2_to_num(payload->object_representation._.data_reader.subscriber_id.data),
                     payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;
         default:
@@ -254,34 +263,34 @@ static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload*
             RESTORE_COLOR);
 }
 
-void print_header(const char* dir, const MessageHeader* header, bool printable)
+void print_header(const char* dir, uint8_t stream_id, uint16_t seq_num, bool printable)
 {
 
     if(printable)
     {
         char stream_representation;
-        switch(header->stream_id)
+        switch(stream_id)
         {
-            case STREAMID_NONE:
+            case 0:
                 stream_representation = 'N';
                 break;
-            case STREAMID_BUILTIN_BEST_EFFORTS:
+            case BEST_EFFORT_STREAM_THRESHOLD:
                 stream_representation = 'B';
                 break;
-            case STREAMID_BUILTIN_RELIABLE:
+            case RELIABLE_STREAM_THRESHOLD:
                 stream_representation = 'R';
                 break;
             default:
                 stream_representation = '-';
         }
 
-        uint16_t seq_num = 0;
-        if(header->stream_id != 0)
+        uint16_t seq_num_to_print = 0;
+        if(stream_id != 0)
         {
-            seq_num = header->sequence_nr;
+            seq_num_to_print = seq_num;
         }
 
-        printf("%s%s[%c | %hu]%s", dir, GREY_LIGHT, stream_representation, seq_num, RESTORE_COLOR);
+        printf("%s%s[%c | %hu]%s", dir, GREY_LIGHT, stream_representation, seq_num_to_print, RESTORE_COLOR);
     }
     else
     {
@@ -294,40 +303,24 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
 
-    MicroBuffer micro_buffer;
-    init_micro_buffer(&micro_buffer, buffer, size);
+    MicroBuffer mb;
+    init_micro_buffer(&mb, buffer, size);
 
-    MessageHeader header;
-    deserialize_MessageHeader(&micro_buffer, &header);
-    if (128 > header.session_id)
+    uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
+    (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
+
+    bool submessage_counter = true;
+    SubmessageId submessage_id; SubmessageFlags flags; uint16_t length;
+    while(read_submessage_header(&mb, &submessage_id, &length, &flags))
     {
-        ClientKey key;
-        deserialize_ClientKey(&micro_buffer, &key);
-    }
+        print_header(dir, stream_id_raw, seq_num, 0 == submessage_counter);
 
-    //bool is_reliable = header.stream_id
-
-    bool first_submessage = true;
-    while(micro_buffer.final - micro_buffer.iterator > 8)
-    {
-        SubmessageHeader sub_header;
-        deserialize_SubmessageHeader(&micro_buffer, &sub_header);
-        micro_buffer.endianness = (sub_header.flags & 0x01) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
-
-        print_header(dir, &header, first_submessage);
-
-        if(sub_header.length > micro_buffer.final - micro_buffer.iterator)
-        {
-            printf("%s[INCOMPLETE SUBMESSAGE]%s\n", RED, RESTORE_COLOR);
-            break;
-        }
-
-        switch(sub_header.id)
+        switch(submessage_id)
         {
             case SUBMESSAGE_ID_CREATE_CLIENT:
             {
                 CREATE_CLIENT_Payload payload;
-                deserialize_CREATE_CLIENT_Payload(&micro_buffer, &payload);
+                deserialize_CREATE_CLIENT_Payload(&mb, &payload);
                 print_create_client_submessage(color, &payload);
 
             } break;
@@ -335,7 +328,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_CREATE:
             {
                 CREATE_Payload payload;
-                deserialize_CREATE_Payload(&micro_buffer, &payload);
+                deserialize_CREATE_Payload(&mb, &payload);
                 print_create_submessage(color, &payload);
 
             } break;
@@ -349,7 +342,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_DELETE:
             {
                 DELETE_Payload payload;
-                deserialize_DELETE_Payload(&micro_buffer, &payload);
+                deserialize_DELETE_Payload(&mb, &payload);
                 print_delete_submessage(color, &payload);
 
             } break;
@@ -357,7 +350,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_STATUS:
             {
                 STATUS_Payload payload;
-                deserialize_STATUS_Payload(&micro_buffer, &payload);
+                deserialize_STATUS_Payload(&mb, &payload);
                 print_status_submessage(color, &payload);
 
             } break;
@@ -370,7 +363,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_WRITE_DATA:
             {
                 WRITE_DATA_Payload_Data payload;
-                deserialize_WRITE_DATA_Payload_Data(&micro_buffer, &payload);
+                deserialize_WRITE_DATA_Payload_Data(&mb, &payload);
                 print_write_data_data_submessage(color, &payload);
 
             } break;
@@ -378,7 +371,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_READ_DATA:
             {
                 READ_DATA_Payload payload;
-                deserialize_READ_DATA_Payload(&micro_buffer, &payload);
+                deserialize_READ_DATA_Payload(&mb, &payload);
                 print_read_data_submessage(color, &payload);
 
             } break;
@@ -386,7 +379,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_HEARTBEAT:
             {
                 HEARTBEAT_Payload payload;
-                deserialize_HEARTBEAT_Payload(&micro_buffer, &payload);
+                deserialize_HEARTBEAT_Payload(&mb, &payload);
                 print_heartbeat_submessage(color, &payload);
 
             } break;
@@ -394,7 +387,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_ACKNACK:
             {
                 ACKNACK_Payload payload;
-                deserialize_ACKNACK_Payload(&micro_buffer, &payload);
+                deserialize_ACKNACK_Payload(&mb, &payload);
                 print_acknack_submessage(color, &payload);
 
             } break;
@@ -402,7 +395,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
             case SUBMESSAGE_ID_DATA:
             {
                 DATA_Payload_Data payload;
-                deserialize_DATA_Payload_Data(&micro_buffer, &payload);
+                deserialize_DATA_Payload_Data(&mb, &payload);
                 print_data_data_submessage(color, &payload);
 
             } break;
@@ -412,19 +405,18 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
                 printf("%s[FRAGMENT SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
             } break;
 
-            case SUBMESSAGE_ID_FRAGMENT_END:
-            {
-                printf("%s[FRAGMENT END SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
-            } break;
-
             default:
             {
                 printf("%s[UNKNOWN SUBMESSAGE]%s\n", RED, RESTORE_COLOR);
             } break;
         }
 
-        align_to(&micro_buffer, 4);
-        first_submessage = false;
+        submessage_counter++;
+    }
+
+    if(micro_buffer_remaining(&mb) < length)
+    {
+        printf("%s[INCOMPLETE SUBMESSAGE]%s\n", RED, RESTORE_COLOR);
     }
 }
 

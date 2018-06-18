@@ -20,7 +20,6 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <stdint.h>
 #include <stdio.h>
 
