@@ -52,9 +52,9 @@ bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t*
 bool prepare_reliable_stream_to_write(OutputReliableStream* stream, int size, MicroBuffer* mb);
 
 bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp);
-bool output_reliable_stream_must_send(OutputReliableStream* stream, uint8_t** buffer, size_t *length);
-void write_heartbeat(OutputReliableStream* stream, MicroBuffer* mb);
-void read_acknack(OutputReliableStream* stream, MicroBuffer* payload);
+bool next_reliable_nack_buffer_to_send(const OutputReliableStream* stream, uint8_t** buffer, size_t *length, SeqNum* seq_num_it);
+void write_heartbeat(const OutputReliableStream* stream, MicroBuffer* mb);
+void read_submessage_acknack(OutputReliableStream* stream, MicroBuffer* payload);
 
 #ifdef __cplusplus
 }

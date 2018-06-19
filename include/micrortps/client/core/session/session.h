@@ -47,11 +47,11 @@ StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size);
 
 #ifdef PROFILE_STATUS_ANSWER
-void read_status_submessage(Session* session, MicroBuffer* submessage, StreamId id); //TODO
+void read_submessage_status(Session* session, MicroBuffer* submessage, StreamId id);
 #endif
 
 #ifdef PROFILE_DATA_ACCESS
-void read_data_submessage(Session* session, MicroBuffer* submessage, StreamId id, uint8_t flags);
+void read_submessge_data(Session* session, MicroBuffer* submessage, StreamId id, uint8_t format);
 #endif
 
 #ifdef __cplusplus

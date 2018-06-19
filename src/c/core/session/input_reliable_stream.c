@@ -1,7 +1,6 @@
 #include <micrortps/client/core/session/input_reliable_stream.h>
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
-#include <microcdr/microcdr.h>
 #include <string.h>
 
 // Remove when Microcdr supports size_of functions
@@ -10,9 +9,9 @@
 #define NACK_BITMAP_SIZE       16
 
 void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
-uint16_t compute_nack_bitmap(InputReliableStream* stream);
+uint16_t compute_nack_bitmap(const InputReliableStream* stream);
 
-bool is_input_buffer_empty(InputReliableStream* stream, size_t position);
+bool is_input_buffer_empty(const InputReliableStream* stream, size_t position);
 void set_input_buffer_empty(InputReliableStream* stream, size_t position);
 
 //==================================================================
@@ -81,7 +80,7 @@ bool input_reliable_stream_must_confirm(InputReliableStream* stream)
     return result;
 }
 
-void write_acknack(InputReliableStream* stream, MicroBuffer* mb)
+void write_acknack(const InputReliableStream* stream, MicroBuffer* mb)
 {
     uint16_t nack_bitmap = compute_nack_bitmap(stream);
 
@@ -95,7 +94,7 @@ void write_acknack(InputReliableStream* stream, MicroBuffer* mb)
     (void) stream; (void) mb;
 }
 
-void read_heartbeat(InputReliableStream* stream, MicroBuffer* payload)
+void read_submessage_heartbeat(InputReliableStream* stream, MicroBuffer* payload)
 {
     HEARTBEAT_Payload heartbeat;
     deserialize_HEARTBEAT_Payload(payload, &heartbeat);
@@ -121,7 +120,7 @@ void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint
     stream->must_confirm = true;
 }
 
-uint16_t compute_nack_bitmap(InputReliableStream* stream)
+uint16_t compute_nack_bitmap(const InputReliableStream* stream)
 {
     uint16_t nack_bitmap = 0;
     uint16_t messages_to_process = seq_num_sub(stream->last_announced, stream->last_handled);
@@ -140,7 +139,7 @@ uint16_t compute_nack_bitmap(InputReliableStream* stream)
     return nack_bitmap;
 }
 
-bool is_buffer_empty(InputReliableStream* stream, size_t position)
+bool is_buffer_empty(const InputReliableStream* stream, size_t position)
 {
     return 0 == stream->buffer[position + 1];
 }

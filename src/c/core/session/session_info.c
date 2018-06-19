@@ -2,7 +2,6 @@
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <micrortps/client/core/serialization/xrce_header.h>
-#include <microcdr/microcdr.h>
 
 #include <string.h>
 
@@ -65,7 +64,7 @@ void write_delete_session(SessionInfo* info, MicroBuffer* mb)
     info->request = STATE_LOGOUT;
 }
 
-void read_status_agent(SessionInfo* info, MicroBuffer* buffer)
+void read_submessage_status_agent(SessionInfo* info, MicroBuffer* buffer)
 {
     STATUS_AGENT_Payload payload;
     if(deserialize_STATUS_AGENT_Payload(buffer, &payload))
@@ -77,7 +76,7 @@ void read_status_agent(SessionInfo* info, MicroBuffer* buffer)
     }
 }
 
-void stamp_first_session_header(SessionInfo* info, uint8_t* buffer)
+void stamp_first_session_header(const SessionInfo* info, uint8_t* buffer)
 {
     MicroBuffer mb;
     init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
@@ -86,7 +85,7 @@ void stamp_first_session_header(SessionInfo* info, uint8_t* buffer)
     (void) serialize_message_header(&mb, session_id, 0, 0, info->key);
 }
 
-void stamp_session_header(SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer)
+void stamp_session_header(const SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer)
 {
     MicroBuffer mb;
     init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
@@ -94,7 +93,7 @@ void stamp_session_header(SessionInfo* info, uint8_t stream_id_raw, uint16_t seq
     (void) serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }
 
-bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num)
+bool read_session_header(const SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num)
 {
     bool must_be_read = micro_buffer_remaining(mb) > MAX_HEADER_SIZE;
     if(must_be_read)
@@ -115,12 +114,12 @@ bool read_session_header(SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_
     return must_be_read;
 }
 
-uint8_t session_header_offset(SessionInfo* info)
+uint8_t session_header_offset(const SessionInfo* info)
 {
     return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MAX_HEADER_SIZE;
 }
 
-bool check_session_info_pending_request(SessionInfo* info)
+bool check_session_info_pending_request(const SessionInfo* info)
 {
     return NO_REQUEST != info->request;
 }

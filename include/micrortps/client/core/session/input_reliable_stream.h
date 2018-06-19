@@ -45,8 +45,8 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
 bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb);
 
 bool input_reliable_stream_must_confirm(InputReliableStream* stream);
-void write_acknack(InputReliableStream* stream, MicroBuffer* mb);
-void read_heartbeat(InputReliableStream* stream, MicroBuffer* payload);
+void write_acknack(const InputReliableStream* stream, MicroBuffer* mb);
+void read_submessage_heartbeat(InputReliableStream* stream, MicroBuffer* payload);
 
 #ifdef __cplusplus
 }

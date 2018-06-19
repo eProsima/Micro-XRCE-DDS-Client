@@ -269,19 +269,17 @@ void print_header(const char* dir, uint8_t stream_id, uint16_t seq_num, bool pri
     if(printable)
     {
         char stream_representation;
-        switch(stream_id)
+        if(0 == stream_id)
         {
-            case 0:
-                stream_representation = 'N';
-                break;
-            case BEST_EFFORT_STREAM_THRESHOLD:
-                stream_representation = 'B';
-                break;
-            case RELIABLE_STREAM_THRESHOLD:
-                stream_representation = 'R';
-                break;
-            default:
-                stream_representation = '-';
+            stream_representation = 'N';
+        }
+        else if(1 <= stream_id)
+        {
+            stream_representation = 'B';
+        }
+        else if(0x80 <= stream_id)
+        {
+            stream_representation = 'R';
         }
 
         uint16_t seq_num_to_print = 0;

@@ -1,12 +1,12 @@
 #include <micrortps/client/core/session/output_reliable_stream.h>
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
-#include <microcdr/microcdr.h>
 
 // Remove when Microcdr supports size_of functions
 #define HEARTBEAT_PAYLOAD_SIZE 4
 
 #define MIN_HEARTBEAT_TIME_INTERVAL_NS 1000000
+#define SUBMESSAGE_LENGTH_OFFSET             2
 
 void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
 
@@ -19,7 +19,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
     stream->writer = offset;
     stream->size = size;
     stream->history = history;
-    stream->offset = offset;
+    stream->offset = offset + SUBHEADER_SIZE + SUBMESSAGE_LENGTH_OFFSET;
 
     stream->last_written = UINT16_MAX;
     stream->last_sent = UINT16_MAX;
@@ -71,14 +71,14 @@ bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t c
     return false;
 }
 
-bool output_reliable_stream_must_send(OutputReliableStream* stream, uint8_t** buffer, size_t *length)
+bool next_reliable_nack_buffer_to_send(const OutputReliableStream* stream, uint8_t** buffer, size_t *length, SeqNum* seq_num_it)
 {
     //TODO
-    (void) stream; (void) buffer; (void) length;
+    (void) stream; (void) buffer; (void) length; (void) seq_num_it;
     return false;
 }
 
-void write_heartbeat(OutputReliableStream* stream, MicroBuffer* mb)
+void write_heartbeat(const OutputReliableStream* stream, MicroBuffer* mb)
 {
     HEARTBEAT_Payload payload;
     payload.first_unacked_seq_nr = seq_num_add(stream->last_acknown, 1);
@@ -88,7 +88,7 @@ void write_heartbeat(OutputReliableStream* stream, MicroBuffer* mb)
     (void) serialize_HEARTBEAT_Payload(mb, &payload);
 }
 
-void read_acknack(OutputReliableStream* stream, MicroBuffer* payload)
+void read_submessage_acknack(OutputReliableStream* stream, MicroBuffer* payload)
 {
     ACKNACK_Payload acknack;
     deserialize_ACKNACK_Payload(payload, &acknack);

@@ -22,6 +22,7 @@ extern "C"
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <microcdr/microcdr.h>
 
 #define STRING_SEQUENCE_MAX 10
 #define SAMPLE_SEQUENCE_MAX 10

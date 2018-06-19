@@ -37,6 +37,7 @@ bool prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t 
     if(available_to_write)
     {
         init_micro_buffer_offset(mb, stream->buffer, stream->writer + size, stream->writer);
+        stream->writer += size;
     }
 
     return available_to_write;

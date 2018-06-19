@@ -1,5 +1,4 @@
 #include <micrortps/client/core/serialization/xrce_header.h>
-#include <microcdr/microcdr.h>
 
 void serialize_message_header(MicroBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key)
 {

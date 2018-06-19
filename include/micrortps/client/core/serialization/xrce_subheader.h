@@ -23,7 +23,7 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct MicroBuffer MicroBuffer;
+#include <microcdr/microcdr.h>
 
 void serialize_submessage_header(MicroBuffer* buffer, uint8_t id, uint8_t flags, uint16_t length);
 void deserialize_submessage_header(MicroBuffer* buffer, uint8_t* id, uint8_t* flags, uint16_t* length);
