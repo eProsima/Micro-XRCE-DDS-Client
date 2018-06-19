@@ -57,20 +57,17 @@ void update_crc(uint16_t* crc, const uint8_t data)
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-int init_serial_io(SerialIO* serial_io, uint8_t addr)
+void init_serial_io(SerialIO* serial_io, uint8_t addr)
 {
-    serial_io->input.head = 0;
-    serial_io->input.market = 0;
-    serial_io->input.tail = 0;
+    serial_io->input.state = EMPTY;
     serial_io->addr = addr;
-    return 0;
 }
 
 intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len)
 {
     intmax_t result = 0;
     uint16_t crc = 0;
-    uint16_t position = 1;
+    uint16_t position = 0;
     uint16_t writing_len = 0;
 
     // Check output buffer size.
@@ -82,7 +79,6 @@ intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len)
     if (0 <= result)
     {
         // Write header.
-        serial_io->output.buffer[0] = MICRORTPS_FRAMING_FLAG;
         (void) add_next_octet(&serial_io->output, serial_io->addr, &position);
         (void) add_next_octet(&serial_io->output, (uint8_t)len, &position);
 
@@ -97,70 +93,148 @@ intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len)
             ++writing_len;
         }
 
+        // Write CRC and end flag.
         if (writing_len == len)
         {
             octet_written = add_next_octet(&serial_io->output, (uint8_t)(crc >> 8), &position) &&
                             add_next_octet(&serial_io->output, (uint8_t)(crc & 0xFF), &position);
-            result = (octet_written) ? writing_len : -EMSGSIZE;
+            result = (octet_written) ? position : -EMSGSIZE;
         }
         else
         {
             result = -EMSGSIZE;
+        }
+
+        // Write end flag.
+        if (0 < result)
+        {
+            serial_io->output.buffer[position] = MICRORTPS_FRAMING_FLAG;
+            result = ++position;
         }
     }
 
     return result;
 }
 
-intmax_t read_serial_msg(SerialIO* serial_io, read_callback cb, void* cb_arg, uint8_t* buf, size_t len)
+intmax_t read_serial_msg(SerialIO* serial_io, read_callback read_cb, void* cb_arg, uint8_t* buf, size_t len)
 {
     intmax_t result = 0;
+    bool exit_flag = false;
+    bool read_taken = false;
 
-    // Read from serial.
-    size_t available_len = 0;
-    if (serial_io->input.head < serial_io->input.tail)
+    /*
+     * State Machine.
+     */
+    while (!exit_flag)
     {
-        available_len = sizeof(serial_io->input.buffer) - serial_io->input.tail;
-    }
-    else
-    {
-        available_len = serial_io->input.head - serial_io->input.tail;
-    }
-    result = cb(cb_arg, &serial_io->input.buffer[serial_io->input.tail], available_len);
+        switch (serial_io->input.state) {
+            case EMPTY:
+            {
+                if (!read_taken)
+                {
+                    serial_io->input.head = 0;
+                    serial_io->input.market = 1;
+                    serial_io->input.tail = 0;
 
-    // Update tail.
-    if (0 < result)
-    {
-        serial_io->input.tail = (serial_io->input.tail + (uint16_t)result) % sizeof(serial_io->input.buffer);
-    }
+                    result = read_cb(cb_arg, serial_io->input.buffer, sizeof(serial_io->input.buffer));
+                    read_taken = true;
+                    if (0 < result)
+                    {
+                        serial_io->input.tail = (serial_io->input.tail + result) % sizeof(serial_io->input.buffer);
+                        serial_io->input.state = DATA_AVAILABLE;
+                    }
+                }
+                else
+                {
+                    result = 0;
+                    exit_flag = true;
+                }
+                break;
+            }
+            case DATA_AVAILABLE:
+            {
+                while (DATA_AVAILABLE == serial_io->input.state)
+                {
+                    if (MICRORTPS_FRAMING_FLAG == serial_io->input.buffer[serial_io->input.head])
+                    {
+                        serial_io->input.market = (serial_io->input.head + 1) % sizeof(serial_io->input.buffer);
+                        serial_io->input.state = MESSAGE_INIT;
+                    }
+                    else
+                    {
+                        serial_io->input.head = (serial_io->input.head + 1) % sizeof(serial_io->input.buffer);
+                        if (serial_io->input.head == serial_io->input.tail)
+                        {
+                            serial_io->input.state = EMPTY;
+                        }
+                    }
+                }
+                break;
+            }
+            case MESSAGE_INIT:
+            {
+                while (MESSAGE_INIT == serial_io->input.state)
+                {
+                    if (serial_io->input.market == serial_io->input.tail)
+                    {
+                        serial_io->input.state = MESSAGE_INCOMPLETE;
+                    }
+                    else
+                    {
+                        if (MICRORTPS_FRAMING_FLAG == serial_io->input.buffer[serial_io->input.market])
+                        {
+                            serial_io->input.state = MESSAGE_AVAILABLE;
+                        }
+                        serial_io->input.market = (serial_io->input.market + 1) % sizeof(serial_io->input.buffer);
+                    }
+                }
+                break;
+            }
+            case MESSAGE_INCOMPLETE:
+            {
+                if (!read_taken)
+                {
+                    size_t available_len = 0;
+                    if (serial_io->input.head < serial_io->input.tail)
+                    {
+                        available_len = sizeof(serial_io->input.buffer) - serial_io->input.tail;
+                    }
+                    else
+                    {
+                        available_len = serial_io->input.head - serial_io->input.tail;
+                    }
 
-    // Clean garbage data.
-    uint8_t octet = serial_io->input.buffer[serial_io->input.market];
-    uint16_t next_market = (serial_io->input.market + 1) % sizeof(serial_io->input.buffer);
-    if (serial_io->input.head == serial_io->input.market)
-    {
-        while (MICRORTPS_FRAMING_FLAG != octet && next_market != serial_io->input.tail)
-        {
-            octet = serial_io->input.buffer[next_market];
-            serial_io->input.market = next_market;
-            serial_io->input.head = next_market;
-            next_market = (serial_io->input.market + 1) % sizeof(serial_io->input.buffer);
+                    result = read_cb(cb_arg, &serial_io->input.buffer[serial_io->input.tail], available_len);
+                    read_taken = true;
+                    if (0 < result)
+                    {
+                        serial_io->input.tail = (serial_io->input.tail + result) % sizeof(serial_io->input.buffer);
+                        serial_io->input.state = DATA_AVAILABLE;
+                    }
+                }
+                else
+                {
+                    result = 0;
+                    exit_flag = true;
+                }
+                break;
+            }
+            case MESSAGE_AVAILABLE:
+            {
+                result = process_input_message(&serial_io->input, buf, len);
+                serial_io->input.head = (serial_io->input.market - 1) % sizeof(serial_io->input.buffer);
+                serial_io->input.state = (serial_io->input.head != serial_io->input.tail) ? DATA_AVAILABLE : EMPTY;
+                if (0 <= result)
+                {
+                    exit_flag = true;
+                }
+                break;
+            }
+            default:
+                result = 0;
+                exit_flag = true;
+                break;
         }
-    }
-
-    // Update market.
-    while (MICRORTPS_FRAMING_FLAG != octet && next_market != serial_io->input.tail)
-    {
-        octet = serial_io->input.buffer[next_market];
-        serial_io->input.market = next_market;
-    }
-
-    // Check if message was found.
-    if (MICRORTPS_FRAMING_FLAG == octet)
-    {
-        // Procession row message.
-        result = process_input_message(&serial_io->input, buf, len);
-        serial_io->input.head = serial_io->input.tail;
     }
 
     return result;
@@ -170,7 +244,7 @@ intmax_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t le
 {
     intmax_t result = 0;
     uint16_t raw_len = 0;
-    uint16_t raw_position = 0;
+    uint16_t raw_position = 1;
     uint8_t addr = 0;
     uint8_t msg_len = 0;
     uint8_t payload_position = 0;
@@ -215,7 +289,7 @@ intmax_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t le
     }
 
     // Check condition.
-    if (payload_position != msg_len || raw_position < raw_len - 2)
+    if (payload_position != msg_len || raw_position > raw_len - 2)
     {
         // TODO (julian): define message error.
         return -1;
@@ -230,7 +304,7 @@ intmax_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t le
     octet = get_next_octet(input, &raw_position);
     msg_crc = (uint16_t)octet << 8;
     octet = get_next_octet(input, &raw_position);
-    msg_crc = msg_crc & (uint16_t)octet;
+    msg_crc = msg_crc | (uint16_t)octet;
 
     if (msg_crc != crc)
     {
@@ -244,18 +318,21 @@ intmax_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t le
 uint8_t get_next_octet(SerialInputBuffer* input, uint16_t* relative_position)
 {
     uint8_t result = input->buffer[(input->head + *relative_position) % sizeof(input->buffer)];
+
     *relative_position += 1;
     if (MICRORTPS_FRAMING_FLAG == result || MICRORTPS_FRAMING_ESP == result)
     {
         result = input->buffer[(input->head + *relative_position) % sizeof(input->buffer)] ^ MICRORTPS_FRAMING_XOR;
         *relative_position += 1;
     }
+
     return result;
 }
 
 bool add_next_octet(SerialOutputBuffer* output, uint8_t octet, uint16_t* position)
 {
     bool result = false;
+
     if (MICRORTPS_FRAMING_FLAG == octet || MICRORTPS_FRAMING_ESP == octet)
     {
         if (*position < sizeof(output->buffer))
@@ -275,5 +352,6 @@ bool add_next_octet(SerialOutputBuffer* output, uint8_t octet, uint16_t* positio
             result = true;
         }
     }
+
     return result;
 }

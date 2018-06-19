@@ -28,9 +28,20 @@ extern "C"
 #define MICRORTPS_FRAMING_ESP 0x7D
 #define MICRORTPS_FRAMING_XOR 0x20
 
-#define MICRORTPS_SERIAL_OVERHEAD 5
-#define MICRORTPS_SERIAL_BUFFER_SIZE 517
 #define MICRORTPS_SERIAL_MTU 256
+#define MICRORTPS_SERIAL_OVERHEAD 5
+#define MICRORTPS_SERIAL_BUFFER_SIZE 2 * (MICRORTPS_SERIAL_MTU + MICRORTPS_SERIAL_OVERHEAD)
+#define MICRORTPS_MAX_READ_ATTEMPS 1
+
+typedef enum InputBufferState
+{
+    EMPTY,
+    DATA_AVAILABLE,
+    MESSAGE_INIT,
+    MESSAGE_INCOMPLETE,
+    MESSAGE_AVAILABLE
+
+} InputBufferState;
 
 typedef struct SerialInputBuffer SerialInputBuffer;
 struct SerialInputBuffer
@@ -39,6 +50,7 @@ struct SerialInputBuffer
     uint16_t head;
     uint16_t market;
     uint16_t tail;
+    InputBufferState state;
 };
 
 typedef struct SerialOutputBuffer SerialOutputBuffer;
@@ -60,9 +72,9 @@ typedef intmax_t (*read_callback)(void*, uint8_t*, size_t);
 uint16_t calculate_crc(const uint8_t* buffer, size_t len);
 void update_crc(uint16_t* crc, const uint8_t data);
 
-int init_serial_io(SerialIO* serial_io, uint8_t addr);
+void init_serial_io(SerialIO* serial_io, uint8_t addr);
 intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len);
-intmax_t read_serial_msg(SerialIO* serial_io, read_callback cb, void* cb_arg, uint8_t* buf, size_t len);
+intmax_t read_serial_msg(SerialIO* serial_io, read_callback read_cb, void* cb_arg, uint8_t* buf, size_t len);
 
 #ifdef __cplusplus
 }
