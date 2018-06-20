@@ -134,7 +134,7 @@ void run_session(Session* session, size_t read_attemps, uint32_t poll_ms)
     {
         OutputReliableStream* stream = &session->streams.output_reliable[i];
         uint8_t* buffer; size_t length;
-        SeqNum seq_num_it = 0;
+        SeqNum seq_num_it = begin_output_nack_buffer_it(stream);
         if(next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
         {
             send_message(session, buffer, length);
@@ -261,7 +261,7 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
         case RELIABLE_STREAM:
         {
             InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
-            if(stream && receive_reliable_message(stream, seq_num, mb->init, micro_buffer_length(mb)))
+            if(stream && receive_reliable_message(stream, seq_num, mb->iterator, micro_buffer_length(mb)))
             {
                 read_submessage_list(session, mb, stream_id);
                 MicroBuffer next_mb;

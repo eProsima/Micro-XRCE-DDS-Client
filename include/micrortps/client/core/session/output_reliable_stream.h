@@ -32,7 +32,6 @@ typedef struct MicroBuffer MicroBuffer;
 typedef struct OutputReliableStream
 {
     uint8_t* buffer;
-    size_t writer;
     size_t size;
     size_t history;
     uint8_t offset;
@@ -41,17 +40,17 @@ typedef struct OutputReliableStream
     SeqNum last_sent;
     SeqNum last_acknown;
 
-    uint16_t nack_bitmap;
     uint32_t next_heartbeat_time_stamp;
     uint8_t next_heartbeat_tries;
 
 } OutputReliableStream;
 
 void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t offset);
+bool prepare_reliable_stream_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb);
 bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
-bool prepare_reliable_stream_to_write(OutputReliableStream* stream, int size, MicroBuffer* mb);
 
 bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp);
+SeqNum begin_output_nack_buffer_it(const OutputReliableStream* stream);
 bool next_reliable_nack_buffer_to_send(const OutputReliableStream* stream, uint8_t** buffer, size_t *length, SeqNum* seq_num_it);
 void write_heartbeat(const OutputReliableStream* stream, MicroBuffer* mb);
 void read_submessage_acknack(OutputReliableStream* stream, MicroBuffer* payload);

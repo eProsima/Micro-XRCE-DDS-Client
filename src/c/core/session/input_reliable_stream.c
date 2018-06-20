@@ -4,15 +4,17 @@
 #include <string.h>
 
 // Remove when Microcdr supports size_of functions
-#define ACKNACK_PAYLOAD_SIZE    4
+#define ACKNACK_PAYLOAD_SIZE     4
 
-#define NACK_BITMAP_SIZE       16
+#define INTERNAL_BUFFER_OFFSET   1
 
 void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
 uint16_t compute_nack_bitmap(const InputReliableStream* stream);
 
-bool is_input_buffer_empty(const InputReliableStream* stream, size_t position);
-void set_input_buffer_empty(InputReliableStream* stream, size_t position);
+bool is_input_buffer_empty(uint8_t* buffer);
+void set_input_buffer_empty(uint8_t* buffer, bool is_empty);
+uint8_t* get_input_buffer(const InputReliableStream* stream, size_t history_pos);
+size_t get_input_buffer_size(const InputReliableStream* stream);
 
 //==================================================================
 //                             PUBLIC
@@ -36,8 +38,8 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
     if(0 > seq_num_cmp(stream->last_handled, seq_num) || 0 <= seq_num_cmp(last_history, seq_num))
     {
         /* Check if the message received is not already received */
-        size_t current_buffer_pos = (stream->size / stream->history) * (stream->last_handled % stream->history);
-        if(is_input_buffer_empty(stream, current_buffer_pos))
+        uint8_t* internal_buffer = get_input_buffer(stream, stream->last_handled % stream->history);
+        if(is_input_buffer_empty(internal_buffer))
         {
             /* Process the message */
             SeqNum next = seq_num_add(stream->last_handled, 1);
@@ -48,7 +50,7 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
             }
             else
             {
-                memcpy(stream->buffer + current_buffer_pos, buffer, length);
+                memcpy(internal_buffer, buffer, length);
             }
         }
     }
@@ -56,17 +58,17 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
     return result;
 }
 
+
 bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb)
 {
     SeqNum next = seq_num_add(stream->last_handled, 1);
-    size_t max_message_size = stream->size / stream->history;
-    size_t current_buffer_pos = (stream->last_handled % stream->history) * max_message_size;
-    bool available_to_read = !is_input_buffer_empty(stream, current_buffer_pos);
+    uint8_t* internal_buffer = get_input_buffer(stream, next % stream->history);
+    bool available_to_read = !is_input_buffer_empty(internal_buffer);
     if(available_to_read)
     {
         stream->last_handled = next;
-        init_micro_buffer(mb, stream->buffer, current_buffer_pos);
-        set_input_buffer_empty(stream, current_buffer_pos);
+        init_micro_buffer(mb, internal_buffer, get_input_buffer_size(stream));
+        set_input_buffer_empty(internal_buffer, true);
     }
 
     return available_to_read;
@@ -123,14 +125,13 @@ void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint
 uint16_t compute_nack_bitmap(const InputReliableStream* stream)
 {
     uint16_t nack_bitmap = 0;
-    uint16_t messages_to_process = seq_num_sub(stream->last_announced, stream->last_handled);
-    size_t max_message_size = stream->size / stream->history;
-    int history_buffers = (NACK_BITMAP_SIZE < messages_to_process) ? NACK_BITMAP_SIZE : messages_to_process;
-    for(int i = 0; i < history_buffers; i++)
+    size_t buffers_to_ack = seq_num_sub(stream->last_announced, stream->last_handled);
+
+    for(size_t i = 0; i < buffers_to_ack; i++)
     {
-        uint16_t current_pos = seq_num_add(stream->last_handled, i + 1);
-        size_t current_buffer_pos = (current_pos % stream->history) * max_message_size;
-        if(is_input_buffer_empty(stream, current_buffer_pos))
+        SeqNum seq_num = seq_num_add(stream->last_handled, i + 1);
+        uint8_t* internal_buffer = get_input_buffer(stream, seq_num % stream->history);
+        if(is_input_buffer_empty(internal_buffer))
         {
             nack_bitmap |= 1 << i;
         }
@@ -139,12 +140,22 @@ uint16_t compute_nack_bitmap(const InputReliableStream* stream)
     return nack_bitmap;
 }
 
-bool is_buffer_empty(const InputReliableStream* stream, size_t position)
+bool is_input_buffer_empty(uint8_t* buffer)
 {
-    return 0 == stream->buffer[position + 1];
+    return false == (bool)*(buffer - INTERNAL_BUFFER_OFFSET);
 }
 
-void set_buffer_empty(InputReliableStream* stream, size_t position)
+void set_input_buffer_empty(uint8_t* buffer, bool is_empty)
 {
-    stream->buffer[position + 1] = 0;
+    *(buffer - INTERNAL_BUFFER_OFFSET) = is_empty;
+}
+
+uint8_t* get_input_buffer(const InputReliableStream* stream, size_t history_pos)
+{
+    return stream->buffer + history_pos * (stream->size / stream->history) + INTERNAL_BUFFER_OFFSET;
+}
+
+size_t get_input_buffer_size(const InputReliableStream* stream)
+{
+    return (stream->size / stream->history) - INTERNAL_BUFFER_OFFSET;
 }
