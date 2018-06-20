@@ -150,7 +150,6 @@ set(SRCS
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${UART_SRCS}
-    src/c/core/communication/communication.c
     src/c/core/communication/serial_protocol.c
     src/c/core/session/input_best_effort_stream.c
     src/c/core/session/input_reliable_stream.c
@@ -217,9 +216,6 @@ configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/client.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
     )
-configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/core/communication/communication.h.in
-    ${PROJECT_BINARY_DIR}/include/micrortps/client/core/communication/communication.h
-    )
 
 ###############################################################################
 # Compile setting
@@ -237,6 +233,9 @@ target_compile_definitions(${PROJECT_NAME}
         -D$<$<BOOL:${PROFILE_READ_ACCESS}>:PROFILE_READ_ACCESS>
         -D$<$<BOOL:${PROFILE_STATUS_ANSWER}>:PROFILE_STATUS_ANSWER>
         -D$<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:PROFILE_DISCOVERY_ACCESS>
+        -D$<$<BOOL:${PROFILE_UDP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
+        -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
+        -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
     )
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
 if((MSVC OR MSVC_IDE) AND (TARGET_TYPE STREQUAL "SHARED_LIBRARY"))
@@ -312,11 +311,6 @@ install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
 # Install client.h
 install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
     DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
-    )
-
-# Install communication.h
-install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/communication/communication.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client/communication
     )
 
 # Export library

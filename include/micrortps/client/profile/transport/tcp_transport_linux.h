@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/core/communication/communication.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -39,11 +40,10 @@ struct TCPTransport
     int socket_fd;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
+    Communication comm;
 };
 
 int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
-intmax_t send_tcp_msg(TCPTransport* transport, const uint8_t* buf, size_t len);
-intmax_t recv_tcp_msg(TCPTransport* transport, uint8_t** buf, size_t* len, int timeout);
 
 #ifdef __cplusplus
 }

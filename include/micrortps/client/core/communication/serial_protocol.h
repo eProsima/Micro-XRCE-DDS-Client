@@ -48,7 +48,7 @@ struct SerialInputBuffer
 {
     uint8_t buffer[MICRORTPS_SERIAL_BUFFER_SIZE];
     uint16_t head;
-    uint16_t market;
+    uint16_t marker;
     uint16_t tail;
     InputBufferState state;
 };
@@ -67,14 +67,11 @@ struct SerialIO
     uint8_t addr;
 };
 
-typedef intmax_t (*read_callback)(void*, uint8_t*, size_t);
-
-uint16_t calculate_crc(const uint8_t* buffer, size_t len);
-void update_crc(uint16_t* crc, const uint8_t data);
+typedef uint16_t (*read_callback)(void*, uint8_t*, size_t);
 
 void init_serial_io(SerialIO* serial_io, uint8_t addr);
-intmax_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len);
-intmax_t read_serial_msg(SerialIO* serial_io, read_callback read_cb, void* cb_arg, uint8_t* buf, size_t len);
+uint16_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len);
+uint8_t read_serial_msg(SerialIO* serial_io, read_callback read_cb, void* cb_arg, uint8_t* buf, size_t len);
 
 #ifdef __cplusplus
 }

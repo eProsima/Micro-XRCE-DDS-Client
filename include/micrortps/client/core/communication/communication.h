@@ -12,35 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_TCP_TRANSPORT_WINDOWS_H_
-#define _MICRORTPS_CLIENT_TCP_TRANSPORT_WINDOWS_H_
+#ifndef _MICRORTPS_CLIENT_COMMUNICATION_H_
+#define _MICRORTPS_CLIENT_COMMUNICATION_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/communication/communication.h>
-#include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
-#define TCP_TRANSPORT_MTU 512
+#define RECV_DATA_OK 0
+#define RECV_DATA_TIMEOUT 1
 
-typedef struct TCPTransport TCPTransport;
-struct TCPTransport
+typedef bool (*send_msg_func)(void* instance, const uint8_t* buf, size_t len);
+typedef bool (*recv_msg_func)(void* instance, uint8_t** buf, size_t* len, int timeout);
+typedef int (*comm_error_func)();
+
+typedef struct Communication Communication;
+struct Communication
 {
-    uint8_t buffer[TCP_TRANSPORT_MTU];
-    SOCKET socket_fd;
-    struct sockaddr remote_addr;
-    WSAPOLLFD poll_fd;
-    Communication comm;
+    void* instance;
+    send_msg_func send_msg;
+    recv_msg_func recv_msg;
+    comm_error_func comm_error;
 };
-
-int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_TCP_TRANSPORT_WINDOWS_H_
+#endif //_MICRORTPS_CLIENT_COMMUNICATION_H_

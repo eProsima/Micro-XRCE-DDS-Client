@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/communication/communication.h>
 #include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -33,11 +34,10 @@ struct UDPTransport
     SOCKET socket_fd;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
+    Communication comm;
 };
 
 int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
-intmax_t send_udp_msg(UDPTransport* transport, const uint8_t* buf, size_t len);
-intmax_t recv_udp_msg(UDPTransport* transport, uint8_t** buf, size_t* len, int timeout);
 
 
 #ifdef __cplusplus

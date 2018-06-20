@@ -20,7 +20,8 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/communication/serial_protocol.h>
+#include <micrortps/client/core/communication/communication.h>
+#include <micrortps/client/core/communication/serial_protocol.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/poll.h>
@@ -31,15 +32,15 @@ typedef struct UARTTransport UARTTransport;
 struct UARTTransport
 {
     uint8_t buffer[UART_TRANSPORT_MTU];
-    SerialIO serial_io;
     int fd;
     uint8_t addr;
     struct pollfd poll_fd;
+    SerialIO serial_io;
+    Communication comm;
 };
 
-int init_uart_transport(UARTTransport* transport, const char* device, const uint8_t addr);
-intmax_t send_uart_msg(UARTTransport* transport, const uint8_t* buf, size_t len);
-intmax_t recv_uart_msg(UARTTransport* transport, uint8_t** buf, size_t* len, int timeout);
+int init_uart_transport(UARTTransport* transport, const char* device, uint8_t addr);
+int init_uart_transport_fd(UARTTransport* transport, const int fd, uint8_t addr);
 
 #ifdef __cplusplus
 }

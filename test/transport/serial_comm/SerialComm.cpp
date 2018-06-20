@@ -19,16 +19,18 @@ SerialComm::SerialComm() :
     /*
      * Init master's transport.
      */
-    master.fd = fds[1];
-    init_serial_io(&master.serial_io, 0x00);
-    uint8_t flag = MICRORTPS_FRAMING_FLAG;
-    write(master.fd, &flag, 1);
+    init_uart_transport_fd(&master, fds[1], 0x00);
+//    master.fd = fds[1];
+//    init_serial_io(&master.serial_io, 0x00);
+//    uint8_t flag = MICRORTPS_FRAMING_FLAG;
+//    write(master.fd, &flag, 1);
 
     /*
      * Init slave's transport.
      */
-    slave.fd = fds[0];
-    init_serial_io(&slave.serial_io, 0x01);
+    init_uart_transport_fd(&slave, fds[0], 0x01);
+//    slave.fd = fds[0];
+//    init_serial_io(&slave.serial_io, 0x01);
 }
 
 TEST_F(SerialComm, WorstStuffingTest)
@@ -38,16 +40,16 @@ TEST_F(SerialComm, WorstStuffingTest)
     size_t input_msg_len;
 
     memset(output_msg, MICRORTPS_FRAMING_FLAG, sizeof(output_msg));
-    ASSERT_GT(send_uart_msg(&master, output_msg, sizeof(output_msg)), 0);
+    ASSERT_TRUE(master.comm.send_msg(&master, output_msg, sizeof(output_msg)));
 
-    ASSERT_GT(recv_uart_msg(&slave, &input_msg, &input_msg_len, 0), 0);
+    ASSERT_TRUE(slave.comm.recv_msg(&slave, &input_msg, &input_msg_len, 0));
     ASSERT_EQ(memcmp(output_msg, input_msg, sizeof(output_msg)), 0);
 }
 
 TEST_F(SerialComm, MessageOverflowTest)
 {
     uint8_t output_msg[MICRORTPS_SERIAL_MTU + 1] = {0};
-    ASSERT_LT(send_uart_msg(&master, output_msg, sizeof(output_msg)), 0);
+    ASSERT_FALSE(master.comm.send_msg(&master, output_msg, sizeof(output_msg)));
 }
 
 TEST_F(SerialComm, FatigueTest)
@@ -67,21 +69,21 @@ TEST_F(SerialComm, FatigueTest)
 
     for (unsigned int i = 0; i < msgs_size; ++i)
     {
-        if (0 < send_uart_msg(&master, output_msg, sizeof(output_msg)))
+        if ( master.comm.send_msg(&master, output_msg, sizeof(output_msg)))
         {
             ++sent_counter;
         }
 
         if (i % receiver_ratio == 0)
         {
-            if (0 < recv_uart_msg(&slave, &input_msg, &input_msg_len, 0))
+            if (slave.comm.recv_msg(&slave, &input_msg, &input_msg_len, 0))
             {
                 ++recv_counter;
             }
         }
     }
 
-    while (0 < recv_uart_msg(&slave, &input_msg, &input_msg_len, 0))
+    while (slave.comm.recv_msg(&slave, &input_msg, &input_msg_len, 0))
     {
         ++recv_counter;
     }
