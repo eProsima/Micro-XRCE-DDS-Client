@@ -58,8 +58,8 @@ typedef enum SubmessageFlags
 
 } SubmessageFlags;
 
-bool write_submessage_header(MicroBuffer* mb, SubmessageId submessage_id, uint16_t length, SubmessageFlags flags);
-bool read_submessage_header(MicroBuffer* mb, SubmessageId* submessage_id, uint16_t* length, SubmessageFlags* flags);
+bool write_submessage_header(MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
+bool read_submessage_header(MicroBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags);
 
 #ifdef __cplusplus
 }

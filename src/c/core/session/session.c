@@ -14,12 +14,12 @@
 
 #define INITIAL_REQUEST_ID 0x000F
 
-bool listen_message(Session* session, uint32_t poll_ms);
+bool listen_message(Session* session, int poll_ms);
 
 bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 
 void send_message(const Session* session, uint8_t* buffer, size_t length);
-bool recv_message(const Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms);
+bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms);
 
 void write_send_heartbeat(const Session* session, StreamId stream);
 void write_send_acknack(const Session* session, StreamId stream);
@@ -90,7 +90,7 @@ StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t 
     return add_input_reliable_buffer(&session->streams, buffer, size, message_data_size);
 }
 
-void run_session(Session* session, size_t read_attemps, uint32_t poll_ms)
+void run_session(Session* session, size_t read_attemps, int poll_ms)
 {
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -157,7 +157,7 @@ void run_session(Session* session, size_t read_attemps, uint32_t poll_ms)
 //==================================================================
 //                             PRIVATE
 //==================================================================
-bool listen_message(Session* session, uint32_t poll_ms)
+bool listen_message(Session* session, int poll_ms)
 {
     //NOTE: Assuming that recv_message return always a message if it can mount it in 'poll_ms' milliseconds.
     uint8_t* data; size_t length;
@@ -174,7 +174,7 @@ bool listen_message(Session* session, uint32_t poll_ms)
 
 bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts)
 {
-    uint32_t poll_ms = 1;
+    int poll_ms = 1;
     for(size_t i = 0; i < attempts && check_session_info_pending_request(&session->info); ++i)
     {
         send_message(session, buffer, length);
@@ -191,19 +191,20 @@ bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t 
 
 void send_message(const Session* session, uint8_t* buffer, size_t length)
 {
-    (void) session->comm->send_msg(session->comm->instance, buffer, length);
-    DEBUG_PRINT_MESSAGE(SEND, buffer, length);
+    ////listen_message((Session*)session, 1000);
+    bool send = session->comm->send_msg(session->comm->instance, buffer, length);
+    if(send)
+    {
+        DEBUG_PRINT_MESSAGE(SEND, buffer, length);
+    }
 }
 
-bool recv_message(const Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms)
+bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms)
 {
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
-    printf("asas\n");
-    //printf("asas %d\n", (int)received);
-    //if(received)
+    if(received)
     {
-        //printf("asas\n");
-        //DEBUG_PRINT_MESSAGE(SEND, *buffer, *length);
+        DEBUG_PRINT_MESSAGE(SEND, *buffer, *length);
     }
     return received;
 }
@@ -283,7 +284,7 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
 
 void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id)
 {
-    SubmessageId id; uint16_t length; SubmessageFlags flags;
+    uint8_t id; uint16_t length; uint8_t flags;
     while(read_submessage_header(submessages, &id, &length, &flags))
     {
         read_submessage(session, submessages, id, stream_id, flags);

@@ -269,7 +269,6 @@ static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload*
 
 void print_header(const char* dir, uint8_t stream_id, uint16_t seq_num, bool printable)
 {
-
     if(printable)
     {
         char stream_representation;
@@ -312,7 +311,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
     (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
     size_t submessage_counter = 0;
-    SubmessageId submessage_id; SubmessageFlags flags; uint16_t length;
+    uint8_t submessage_id; uint16_t length; uint8_t flags;
     while(read_submessage_header(&mb, &submessage_id, &length, &flags))
     {
         print_header(dir, stream_id_raw, seq_num, 0 == submessage_counter);

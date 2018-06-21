@@ -33,14 +33,14 @@ static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
     if (0 < poll_rv)
     {
         ssize_t bytes_received = recv(transport->socket_fd, (void*)transport->buffer, sizeof(transport->buffer), 0);
-        if (0 <= bytes_received)
+        if (0 < bytes_received)
         {
             *len = (size_t)bytes_received;
             *buf = transport->buffer;
         }
         else
         {
-            //rv = false;
+            rv = false;
         }
     }
     else if (0 == poll_rv)
@@ -80,7 +80,7 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
         temp_addr.sin_family = AF_INET;
-        temp_addr.sin_port = port;
+        temp_addr.sin_port = htons(port);
         temp_addr.sin_addr.s_addr = inet_addr(ip);
         memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
         transport->remote_addr = *((struct sockaddr *) &temp_addr);

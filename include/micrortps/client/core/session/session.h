@@ -37,7 +37,7 @@ typedef struct Session
 bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
 bool delete_session(Session* session);
 
-void run_session(Session* session, size_t read_attemps, uint32_t poll_ms);
+void run_session(Session* session, size_t read_attemps, int poll_ms);
 
 uint16_t generate_request_id(Session* session);
 
