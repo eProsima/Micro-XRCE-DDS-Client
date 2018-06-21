@@ -12,10 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "HelloWorld.h"
+#include <micrortps/client/client.h>
 
 #include <stdio.h>
 
+
+int main(int args, char** argv)
+{
+    (void) args; (void) argv;
+
+    //Session session;
+
+    //UDPTransport udp;
+
+    //create_session(&session, 128, 0xAABBCCDD, udp);
+
+    return 0;
+}
+
+/*
 void check_and_print_error(Session* session, const char* where)
 {
     if(session->last_status_received)
@@ -38,7 +53,6 @@ void check_and_print_error(Session* session, const char* where)
     exit(1);
 }
 
-int main(int args, char** argv)
 {
     Session my_session;
     ClientKey key = {{0xAA, 0xAA, 0xAA, 0xAA}};
@@ -80,11 +94,11 @@ int main(int args, char** argv)
         return 1;
     }
 
-    /* Init session. */
+    // Init session.
     init_session_sync(&my_session);
     check_and_print_error(&my_session, "init session");
 
-    /* Init XRCE objects. */
+    // Init XRCE objects.
     ObjectId participant_id = {{0x00, OBJK_PARTICIPANT}};
     create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
     check_and_print_error(&my_session, "create participant");
@@ -104,11 +118,11 @@ int main(int args, char** argv)
     create_datawriter_sync_by_xml(&my_session, datawriter_id, datawriter_xml, publisher_id, false, false);
     check_and_print_error(&my_session, "create datawriter");
 
-    /* Main loop */
+    // Main loop
     int32_t count = 0;
     while(true)
     {
-        /* Write HelloWorld topic */
+        // Write HelloWorld topic
         HelloWorld topic;
         topic.index = ++count;
         topic.message = "Hello DDS world!";
@@ -127,3 +141,4 @@ int main(int args, char** argv)
 
     return 0;
 }
+*/
