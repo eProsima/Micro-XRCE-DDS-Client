@@ -73,11 +73,10 @@ StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, siz
     return add_output_best_effort_buffer(&session->streams, buffer, size, header_offset);
 }
 
-StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_size)
+StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_data_size)
 {
-    size_t history = size / message_size;
     uint8_t header_offset = session_header_offset(&session->info);
-    return add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
+    return add_output_reliable_buffer(&session->streams, buffer, size, message_data_size, header_offset);
 }
 
 StreamId create_input_best_effort_stream(Session* session)
@@ -87,9 +86,8 @@ StreamId create_input_best_effort_stream(Session* session)
 
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size)
 {
-    // size_t history = size / session->comm->mtu(session->comm);
-    size_t history = 1;
-    return add_input_reliable_buffer(&session->streams, buffer, size, history);
+    size_t message_data_size = 128; //session->comm->mtu(session->comm);
+    return add_input_reliable_buffer(&session->streams, buffer, size, message_data_size);
 }
 
 void run_session(Session* session, size_t read_attemps, uint32_t poll_ms)

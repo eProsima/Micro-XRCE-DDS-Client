@@ -54,4 +54,3 @@ StreamId create_stream_id_from_raw(uint8_t stream_id_raw, StreamDirection direct
 
     return stream_id;
 }
-

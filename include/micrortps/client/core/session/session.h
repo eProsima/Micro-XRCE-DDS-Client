@@ -42,7 +42,7 @@ void run_session(Session* session, size_t read_attemps, uint32_t poll_ms);
 uint16_t generate_request_id(Session* session);
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
-StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_size);
+StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_data_size);
 StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size);
 

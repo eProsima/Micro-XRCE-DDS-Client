@@ -19,12 +19,12 @@ size_t get_output_buffer_size(const OutputReliableStream* stream);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t offset)
+void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t message_data_size, uint8_t header_offset)
 {
     stream->buffer = buffer;
     stream->size = size;
-    stream->history = history;
-    stream->offset = offset + SUBHEADER_SIZE;
+    stream->offset = header_offset + SUBHEADER_SIZE;
+    stream->history = size / (message_data_size + stream->offset + INTERNAL_BUFFER_OFFSET);
 
     for(size_t i = 0; i < stream->history; i++)
     {
@@ -32,7 +32,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
         set_output_buffer_length(internal_buffer, stream->offset);
     }
 
-    stream->last_written = UINT16_MAX;
+    stream->last_written = 0;
     stream->last_sent = UINT16_MAX;
     stream->last_acknown = UINT16_MAX;
 
@@ -79,13 +79,17 @@ bool prepare_reliable_stream_to_write(OutputReliableStream* stream, size_t size,
 
 bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num)
 {
-    bool data_to_send = (0 >= seq_num_cmp(stream->last_sent, stream->last_written));
+    bool data_to_send = (0 > seq_num_cmp(stream->last_sent, stream->last_written));
     if(data_to_send)
     {
         stream->last_sent = seq_num_add(stream->last_sent, 1);
         *seq_num = stream->last_sent;
         *buffer = get_output_buffer(stream, stream->last_sent % stream->history);
         *length = get_output_buffer_length(*buffer);
+        if(stream->last_sent == stream->last_written)
+        {
+            stream->last_written = seq_num_add(stream->last_written, 1);
+        }
     }
     return data_to_send;
 }

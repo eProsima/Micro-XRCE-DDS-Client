@@ -14,6 +14,18 @@ void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buf
     stream->last_send = UINT16_MAX;
 }
 
+bool prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size, MicroBuffer* mb)
+{
+    bool available_to_write = stream->writer + size <= stream->size;
+    if(available_to_write)
+    {
+        init_micro_buffer_offset(mb, stream->buffer, stream->writer + size, stream->writer);
+        stream->writer += size;
+    }
+
+    return available_to_write;
+}
+
 bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num)
 {
     bool data_to_send = stream->writer > stream->offset;
@@ -31,14 +43,3 @@ bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t*
     return data_to_send;
 }
 
-bool prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size, MicroBuffer* mb)
-{
-    bool available_to_write = stream->writer + size <= stream->size;
-    if(available_to_write)
-    {
-        init_micro_buffer_offset(mb, stream->buffer, stream->writer + size, stream->writer);
-        stream->writer += size;
-    }
-
-    return available_to_write;
-}

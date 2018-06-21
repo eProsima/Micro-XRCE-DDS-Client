@@ -45,7 +45,7 @@ typedef struct OutputReliableStream
 
 } OutputReliableStream;
 
-void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t offset);
+void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t message_data_size, uint8_t header_offset);
 bool prepare_reliable_stream_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb);
 bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
 
