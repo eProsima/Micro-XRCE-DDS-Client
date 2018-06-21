@@ -19,7 +19,7 @@ bool listen_message(Session* session, uint32_t poll_ms);
 bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 
 void send_message(const Session* session, uint8_t* buffer, size_t length);
-int recv_message(const Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms);
+bool recv_message(const Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms);
 
 void write_send_heartbeat(const Session* session, StreamId stream);
 void write_send_acknack(const Session* session, StreamId stream);
@@ -35,7 +35,7 @@ void read_submessage_fragment(Session* session, MicroBuffer* payload, StreamId s
 //                             PUBLIC
 //==================================================================
 
-int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
+bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
 {
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
@@ -51,7 +51,7 @@ int create_session(Session* session, uint8_t session_id, uint32_t key, Communica
     return wait_status_agent(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
-int delete_session(Session* session)
+bool delete_session(Session* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     MicroBuffer mb;
@@ -161,7 +161,7 @@ bool listen_message(Session* session, uint32_t poll_ms)
 {
     //NOTE: Assuming that recv_message return always a message if it can mount it in 'poll_ms' milliseconds.
     uint8_t* data; size_t length;
-    bool must_be_read = (RECV_DATA_OK == recv_message(session, &data, &length, poll_ms));
+    bool must_be_read = recv_message(session, &data, &length, poll_ms);
     if(must_be_read)
     {
         MicroBuffer mb;
@@ -191,15 +191,21 @@ bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t 
 
 void send_message(const Session* session, uint8_t* buffer, size_t length)
 {
-    (void) send_msg(session->comm, buffer, length);
+    (void) session->comm->send_msg(session->comm->instance, buffer, length);
     DEBUG_PRINT_MESSAGE(SEND, buffer, length);
 }
 
-int recv_message(const Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms)
+bool recv_message(const Session* session, uint8_t**buffer, size_t* length, uint32_t poll_ms)
 {
-    int read_status = recv_msg(session->comm, buffer, length, poll_ms);
-    DEBUG_PRINT_MESSAGE(SEND, *buffer, *length);
-    return read_status;
+    bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
+    printf("asas\n");
+    //printf("asas %d\n", (int)received);
+    //if(received)
+    {
+        //printf("asas\n");
+        //DEBUG_PRINT_MESSAGE(SEND, *buffer, *length);
+    }
+    return received;
 }
 
 void write_send_heartbeat(const Session* session, StreamId id)

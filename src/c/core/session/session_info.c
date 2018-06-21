@@ -6,7 +6,7 @@
 #include <string.h>
 
 // Remove when Microcdr supports size_of functions
-#define CREATE_CLIENT_PAYLOAD_SIZE 30
+#define CREATE_CLIENT_PAYLOAD_SIZE 26
 #define DELETE_CLIENT_PAYLOAD_SIZE 4
 
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
@@ -116,7 +116,7 @@ bool read_session_header(const SessionInfo* info, MicroBuffer* mb, uint8_t* stre
 
 uint8_t session_header_offset(const SessionInfo* info)
 {
-    return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MAX_HEADER_SIZE;
+    return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MIN_HEADER_SIZE;
 }
 
 bool check_session_info_pending_request(const SessionInfo* info)

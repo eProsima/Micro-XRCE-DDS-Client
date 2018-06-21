@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
-#include <stdio.h>
+#include <stddef.h>
 
 #define SEND 1
 #define RECV 2
@@ -38,8 +38,8 @@ extern "C"
 #define SERIALIZATION_LOGS_AVAILABLE 0
 #endif
 
-void print_message(int direction, uint8_t* buffer, uint32_t size);
-void print_serialization(int direction, const uint8_t* buffer, uint32_t size);
+void print_message(int direction, uint8_t* buffer, size_t size);
+void print_serialization(int direction, const uint8_t* buffer, size_t size);
 
 #define DEBUG_PRINT_MESSAGE(direction, buffer, size) \
     do { \

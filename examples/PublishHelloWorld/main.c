@@ -21,11 +21,11 @@ int main(int args, char** argv)
 {
     (void) args; (void) argv;
 
-    //Session session;
+    static UDPTransport udp;
+    init_udp_transport(&udp, "127.0.0.1", 2000);
 
-    //UDPTransport udp;
-
-    //create_session(&session, 128, 0xAABBCCDD, udp);
+    Session session;
+    create_session(&session, 128, 0xAABBCCDD, &udp.comm);
 
     return 0;
 }

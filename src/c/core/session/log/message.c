@@ -19,6 +19,7 @@
 #include <micrortps/client/core/session/submessage.h>
 #include <microcdr/microcdr.h>
 #include <string.h>
+#include <stdio.h>
 
 #define YELLOW_DARK    "\x1B[0;33m"
 #define PURPLE_DARK    "\x1B[0;35m"
@@ -38,6 +39,8 @@
 #define SEND_ARROW "==> "
 #define RECV_ARROW "<== "
 
+#define DATA_TO_STRING_BUFFER 4096
+
 static uint16_t array_2_to_num(const uint8_t* array_2)
 {
     return ((uint16_t)array_2[0] << 8) + (uint16_t)array_2[1];
@@ -48,6 +51,7 @@ static const char* data_to_string(const uint8_t* data, uint32_t size)
     static char buffer[4096];
     for(uint32_t i = 0; i < size; i++)
         sprintf(buffer + 3 * i, "%02X ", data[i]);
+    buffer[3 * size] = '\0';
     return buffer;
 }
 
@@ -296,7 +300,7 @@ void print_header(const char* dir, uint8_t stream_id, uint16_t seq_num, bool pri
     }
 }
 
-void print_message(int direction, uint8_t* buffer, uint32_t size)
+void print_message(int direction, uint8_t* buffer, size_t size)
 {
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
@@ -307,7 +311,7 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
     uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
     (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
-    bool submessage_counter = true;
+    size_t submessage_counter = 0;
     SubmessageId submessage_id; SubmessageFlags flags; uint16_t length;
     while(read_submessage_header(&mb, &submessage_id, &length, &flags))
     {
@@ -411,18 +415,13 @@ void print_message(int direction, uint8_t* buffer, uint32_t size)
 
         submessage_counter++;
     }
-
-    if(micro_buffer_remaining(&mb) < length)
-    {
-        printf("%s[INCOMPLETE SUBMESSAGE]%s\n", RED, RESTORE_COLOR);
-    }
 }
 
-void print_serialization(int direction, const uint8_t* buffer, uint32_t size)
+void print_serialization(int direction, const uint8_t* buffer, size_t size)
 {
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
 
-    printf("%s%s<< [%u]: %s>>%s\n",
+    printf("%s%s<< [%zu]: %s>>%s\n",
             dir,
             GREY_DARK,
             size,

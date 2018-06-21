@@ -34,8 +34,8 @@ typedef struct Session
 
 } Session;
 
-int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
-int delete_session(Session* session);
+bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
+bool delete_session(Session* session);
 
 void run_session(Session* session, size_t read_attemps, uint32_t poll_ms);
 

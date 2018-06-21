@@ -123,7 +123,7 @@ foreach(TRANSPORT_TYPE UDP TCP UART)
             set(${TRANSPORT_TYPE}_SRCS
                 src/c/profile/transport/${TT}_transport_windows.c
                 )
-            set(PLATFROM_NAME windows)
+            set(PLATFORM_NAME windows)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "nuttx")
                 set(${TRANSPORT_TYPE}_SRCS
@@ -160,6 +160,7 @@ set(SRCS
     src/c/core/session/stream_id.c
     src/c/core/session/stream_storage.c
     src/c/core/session/submessage.c
+    src/c/core/session/seq_num.c
     src/c/core/serialization/xrce_protocol.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c

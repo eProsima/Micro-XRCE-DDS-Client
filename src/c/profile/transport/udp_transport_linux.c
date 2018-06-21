@@ -38,6 +38,10 @@ static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
             *len = (size_t)bytes_received;
             *buf = transport->buffer;
         }
+        else
+        {
+            //rv = false;
+        }
     }
     else if (0 == poll_rv)
     {
@@ -71,7 +75,7 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
         rv = errno;
     }
 
-    if (0 < rv)
+    if (0 == rv)
     {
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;

@@ -84,7 +84,8 @@ bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t*
     {
         stream->last_sent = seq_num_add(stream->last_sent, 1);
         *seq_num = stream->last_sent;
-        *buffer = get_output_buffer(stream, stream->last_sent % stream->history);
+        // When fragment, the SUBHEADER_SIZE must not be added
+        *buffer = get_output_buffer(stream, stream->last_sent % stream->history) + SUBHEADER_SIZE;
         *length = get_output_buffer_length(*buffer);
         if(stream->last_sent == stream->last_written)
         {
@@ -125,7 +126,8 @@ bool next_reliable_nack_buffer_to_send(const OutputReliableStream* stream, uint8
         check_next_buffer = 0 >= seq_num_cmp(*seq_num_it, stream->last_sent);
         if(check_next_buffer)
         {
-            *buffer = get_output_buffer(stream, *seq_num_it % stream->history);
+            // When fragment, the SUBHEADER_SIZE must not be added
+            *buffer = get_output_buffer(stream, *seq_num_it % stream->history) + SUBHEADER_SIZE;
             *length = get_output_buffer_length(*buffer);
             it_updated = *length != stream->offset;
         }
