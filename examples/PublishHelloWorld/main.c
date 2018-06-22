@@ -22,7 +22,7 @@ int main(int args, char** argv)
     (void) args; (void) argv;
 
     UDPTransport udp;
-    init_udp_transport(&udp, "127.0.0.1", 2000);
+    init_udp_transport(&udp, "127.0.0.1", 2019);
 
     Session session;
     create_session(&session, 128, 0xAABBCCDD, &udp.comm);

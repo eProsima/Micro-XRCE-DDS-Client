@@ -181,7 +181,7 @@ bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t 
         poll_ms = listen_message(session, poll_ms) ? 1 : poll_ms * 2;
     }
 
-    bool status_agent_received = check_session_info_pending_request(&session->info);
+    bool status_agent_received = !check_session_info_pending_request(&session->info);
     if(status_agent_received)
     {
         restore_session_info_request(&session->info);

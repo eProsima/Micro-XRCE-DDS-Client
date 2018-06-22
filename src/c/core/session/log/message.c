@@ -181,6 +181,14 @@ static void print_delete_submessage(const char* pre, const DELETE_Payload* paylo
             RESTORE_COLOR);
 }
 
+static void print_status_agent_submessage(const char* pre, const STATUS_Payload* payload)
+{
+    printf("%s[Status | %s]%s\n",
+            pre,
+            reply_to_string(&payload->base),
+            RESTORE_COLOR);
+}
+
 static void print_status_submessage(const char* pre, const STATUS_Payload* payload)
 {
     printf("%s[Status | %s]%s\n",
@@ -346,6 +354,13 @@ void print_message(int direction, uint8_t* buffer, size_t size)
                 deserialize_DELETE_Payload(&mb, &payload);
                 print_delete_submessage(color, &payload);
 
+            } break;
+
+            case SUBMESSAGE_ID_STATUS_AGENT:
+            {
+                STATUS_AGENT_Payload payload;
+                deserialize_STATUS_AGENT_Payload(&mb, &payload);
+                print_status_agent_submessage(color, &payload);
             } break;
 
             case SUBMESSAGE_ID_STATUS:
