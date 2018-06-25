@@ -16,6 +16,8 @@ void set_output_buffer_length(uint8_t* buffer, size_t length);
 uint8_t* get_output_buffer(const OutputReliableStream* stream, size_t history_pos);
 size_t get_output_buffer_size(const OutputReliableStream* stream);
 
+// Implementation Node: the SUBHEADER_SIZE must be used to represent the header of the fragment.
+
 //==================================================================
 //                             PUBLIC
 //==================================================================
@@ -23,7 +25,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
 {
     stream->buffer = buffer;
     stream->size = size;
-    stream->offset = header_offset + SUBHEADER_SIZE;
+    stream->offset = header_offset;
     stream->history = size / (message_data_size + stream->offset + INTERNAL_BUFFER_OFFSET);
 
     for(size_t i = 0; i < stream->history; i++)
@@ -38,6 +40,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
 
     stream->next_heartbeat_time_stamp = UINT32_MAX;
     stream->next_heartbeat_tries = 0;
+    stream->send_lost = false;
 }
 
 bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb)
@@ -79,19 +82,19 @@ bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size,
 
 bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num)
 {
-    bool data_to_send = (0 > seq_num_cmp(stream->last_sent, stream->last_written));
+    *seq_num = seq_num_add(stream->last_sent, 1);
+    *buffer = get_output_buffer(stream, *seq_num % stream->history);
+    *length = get_output_buffer_length(*buffer);
+    bool data_to_send = 0 >= seq_num_cmp(*seq_num, stream->last_written) && *length > stream->offset;
     if(data_to_send)
     {
-        stream->last_sent = seq_num_add(stream->last_sent, 1);
-        *seq_num = stream->last_sent;
-        // When fragment, the SUBHEADER_SIZE must not be added
-        *buffer = get_output_buffer(stream, stream->last_sent % stream->history) + SUBHEADER_SIZE;
-        *length = get_output_buffer_length(*buffer);
+        stream->last_sent = *seq_num;
         if(stream->last_sent == stream->last_written)
         {
             stream->last_written = seq_num_add(stream->last_written, 1);
         }
     }
+
     return data_to_send;
 }
 
@@ -116,20 +119,27 @@ SeqNum begin_output_nack_buffer_it(const OutputReliableStream* stream)
     return stream->last_acknown;
 }
 
-bool next_reliable_nack_buffer_to_send(const OutputReliableStream* stream, uint8_t** buffer, size_t *length, SeqNum* seq_num_it)
+bool next_reliable_nack_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t *length, SeqNum* seq_num_it)
 {
-    bool check_next_buffer = true;
     bool it_updated = false;
-    while(check_next_buffer && !it_updated)
+    if(stream->send_lost)
     {
-        *seq_num_it = seq_num_add(*seq_num_it, 1);
-        check_next_buffer = 0 >= seq_num_cmp(*seq_num_it, stream->last_sent);
-        if(check_next_buffer)
+        bool check_next_buffer = true;
+        while(check_next_buffer && !it_updated)
         {
-            // When fragment, the SUBHEADER_SIZE must not be added
-            *buffer = get_output_buffer(stream, *seq_num_it % stream->history) + SUBHEADER_SIZE;
-            *length = get_output_buffer_length(*buffer);
-            it_updated = *length != stream->offset;
+            *seq_num_it = seq_num_add(*seq_num_it, 1);
+            check_next_buffer = 0 >= seq_num_cmp(*seq_num_it, stream->last_sent);
+            if(check_next_buffer)
+            {
+                *buffer = get_output_buffer(stream, *seq_num_it % stream->history);
+                *length = get_output_buffer_length(*buffer);
+                it_updated = *length != stream->offset;
+            }
+        }
+
+        if(!it_updated)
+        {
+            stream->send_lost = false;
         }
     }
 
@@ -173,6 +183,10 @@ void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t fir
     for(size_t i = 0; i < buffers_to_check_clean; i++)
     {
         if(i & bitmap) /* message lost */
+        {
+            stream->send_lost = true;
+        }
+        else
         {
             SeqNum seq_num = seq_num_add(first_unacked_seq_num, i);
             uint8_t* internal_buffer = get_output_buffer(stream, seq_num % stream->history);

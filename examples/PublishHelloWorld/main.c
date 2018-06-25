@@ -39,17 +39,20 @@ int main(int args, char** argv)
     set_status_callback(&session, on_status, NULL);
 
     // Streams
-    uint8_t output_best_effort_stream_buffer[256];
-    StreamId out_best_effort = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
+    //uint8_t output_best_effort_stream_buffer[256];
+    //StreamId best_effort_out = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
+
+    uint8_t output_reliable_stream_buffer[256 * 8];
+    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 256 * 8, 200);
 
     // Create entities
     mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
     mrObjectId topic_id = create_object_id(0x01, TOPIC_ID);
     char* participant_xml = "<xml representation>";
-    (void) write_configure_topic_xml(&session, out_best_effort, topic_id, participant_id, participant_xml, 0);
+    (void) write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, participant_xml, 0);
 
     // Send and receive messages
-    run_session(&session, 20, 50);
+    run_session(&session, 1, 1);
 
     // Delete resources
     delete_session(&session);
