@@ -1,5 +1,5 @@
 #include <micrortps/client/profile/session/read_access.h>
-#include "../../xrce_protocol_serialization.h"
+#include <micrortps/client/core/serialization/xrce_protocol.h>
 
 void read_format_data(Session* session, MicroBuffer* submessage, StreamId stream_id);
 void read_format_sample(Session* session, MicroBuffer* submessage, StreamId stream_id);

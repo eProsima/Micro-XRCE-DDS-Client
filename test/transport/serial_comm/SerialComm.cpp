@@ -1,59 +1,72 @@
+#define _GNU_SOURCE
+
 #include <SerialComm.hpp>
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-SerialComm::SerialComm() :
-    fds{0},
-    master{0},
-    slave{0}
+SerialComm::SerialComm() : fd_(-1), master_{0}, slave_{0} { }
+
+SerialComm::~SerialComm()
 {
-    /*
-     * Init pipes.
-     */
-    pipe(fds);
-    fcntl(fds[0], F_SETFL, O_NONBLOCK);
-    fcntl(fds[1], F_SETFL, O_NONBLOCK);
-    fcntl(fds[1], F_SETPIPE_SZ, 4096);
+    (void) unlink("/tmp/uart_fifo");
+}
 
-    /*
-     * Init master's transport.
-     */
-    init_uart_transport_fd(&master, fds[1], 0x00);
-//    master.fd = fds[1];
-//    init_serial_io(&master.serial_io, 0x00);
-//    uint8_t flag = MICRORTPS_FRAMING_FLAG;
-//    write(master.fd, &flag, 1);
+int SerialComm::init()
+{
+    int rv = 0;
 
-    /*
-     * Init slave's transport.
-     */
-    init_uart_transport_fd(&slave, fds[0], 0x01);
-//    slave.fd = fds[0];
-//    init_serial_io(&slave.serial_io, 0x01);
+    (void) unlink("/tmp/uart_fifo");
+    if (0 < mkfifo("/tmp/uart_fifo", S_IRWXU | S_IRWXG | S_IRWXO))
+    {
+        rv = -1;
+    }
+    else
+    {
+        fd_ = open("/tmp/uart_fifo", O_RDWR | O_NONBLOCK);
+        if (0 < fd_)
+        {
+            fcntl(fd_, F_SETFL, O_NONBLOCK);
+            fcntl(fd_, F_SETPIPE_SZ, 4096);
+            if (init_uart_transport_fd(&master_, fd_, 0x01, 0x00) != 0 ||
+                init_uart_transport_fd(&slave_, fd_, 0x00, 0x01 != 0))
+            {
+                rv = -1;
+            }
+        }
+        else
+        {
+            rv = -1;
+        }
+    }
+
+    return rv;
 }
 
 TEST_F(SerialComm, WorstStuffingTest)
 {
+    ASSERT_EQ(init(), 0);
     uint8_t output_msg[MICRORTPS_SERIAL_MTU];
     uint8_t* input_msg;
     size_t input_msg_len;
 
-    memset(output_msg, MICRORTPS_FRAMING_FLAG, sizeof(output_msg));
-    ASSERT_TRUE(master.comm.send_msg(&master, output_msg, sizeof(output_msg)));
+    memset(output_msg, MICRORTPS_FRAMING_END_FLAG, sizeof(output_msg));
+    ASSERT_TRUE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 
-    ASSERT_TRUE(slave.comm.recv_msg(&slave, &input_msg, &input_msg_len, 0));
+    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     ASSERT_EQ(memcmp(output_msg, input_msg, sizeof(output_msg)), 0);
 }
 
 TEST_F(SerialComm, MessageOverflowTest)
 {
+    ASSERT_EQ(init(), 0);
     uint8_t output_msg[MICRORTPS_SERIAL_MTU + 1] = {0};
-    ASSERT_FALSE(master.comm.send_msg(&master, output_msg, sizeof(output_msg)));
+    ASSERT_FALSE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 }
 
 TEST_F(SerialComm, FatigueTest)
 {
+    ASSERT_EQ(init(), 0);
     unsigned int msgs_size = 2048;
     unsigned int sent_counter = 0;
     unsigned int recv_counter = 0;
@@ -69,21 +82,21 @@ TEST_F(SerialComm, FatigueTest)
 
     for (unsigned int i = 0; i < msgs_size; ++i)
     {
-        if ( master.comm.send_msg(&master, output_msg, sizeof(output_msg)))
+        if ( master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)))
         {
             ++sent_counter;
         }
 
         if (i % receiver_ratio == 0)
         {
-            if (slave.comm.recv_msg(&slave, &input_msg, &input_msg_len, 0))
+            if (slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0))
             {
                 ++recv_counter;
             }
         }
     }
 
-    while (slave.comm.recv_msg(&slave, &input_msg, &input_msg_len, 0))
+    while (slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0))
     {
         ++recv_counter;
     }

@@ -15,21 +15,37 @@
 #include <micrortps/client/client.h>
 
 #include <stdio.h>
-
+#include <sys/stat.h>
+#include <fcntl.h>
 
 int main(int args, char** argv)
 {
     (void) args; (void) argv;
 
-    UDPTransport udp;
-    init_udp_transport(&udp, "127.0.0.1", 2019);
+    UARTTransport uart;
+    int fd = open("/dev/pts/7", O_RDWR | O_NOCTTY | O_NONBLOCK);
+    init_uart_transport_fd(&uart, fd, 0x00, 0x01);
 
     Session session;
-    create_session(&session, 128, 0xAABBCCDD, &udp.comm);
+    create_session(&session, 128, 0xAABBCCDD, &uart.comm);
     delete_session(&session);
 
     return 0;
 }
+
+//int main(int args, char** argv)
+//{
+//    (void) args; (void) argv;
+//
+//    UDPTransport udp;
+//    init_udp_transport(&udp, "127.0.0.1", 2019);
+//
+//    Session session;
+//    create_session(&session, 128, 0xAABBCCDD, &udp.comm);
+//    delete_session(&session);
+//
+//    return 0;
+//}
 
 /*
 void check_and_print_error(Session* session, const char* where)

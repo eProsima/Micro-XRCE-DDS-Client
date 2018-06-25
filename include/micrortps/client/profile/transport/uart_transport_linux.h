@@ -33,14 +33,15 @@ struct UARTTransport
 {
     uint8_t buffer[UART_TRANSPORT_MTU];
     int fd;
-    uint8_t addr;
+    uint8_t remote_addr;
+    uint8_t local_addr;
     struct pollfd poll_fd;
     SerialIO serial_io;
     Communication comm;
 };
 
-int init_uart_transport(UARTTransport* transport, const char* device, uint8_t addr);
-int init_uart_transport_fd(UARTTransport* transport, const int fd, uint8_t addr);
+int init_uart_transport(UARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
+int init_uart_transport_fd(UARTTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
 
 #ifdef __cplusplus
 }

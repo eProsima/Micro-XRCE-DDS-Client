@@ -24,22 +24,21 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-#define MICRORTPS_FRAMING_FLAG 0x7E
-#define MICRORTPS_FRAMING_ESP 0x7D
-#define MICRORTPS_FRAMING_XOR 0x20
+#define MICRORTPS_FRAMING_END_FLAG 0x7E
+#define MICRORTPS_FRAMING_ESC_FLAG 0x7D
+#define MICRORTPS_FRAMING_XOR_FLAG 0x20
 
 #define MICRORTPS_SERIAL_MTU 255
 #define MICRORTPS_SERIAL_OVERHEAD 5
 #define MICRORTPS_SERIAL_BUFFER_SIZE 2 * (MICRORTPS_SERIAL_MTU + MICRORTPS_SERIAL_OVERHEAD)
-#define MICRORTPS_MAX_READ_ATTEMPS 1
 
 typedef enum InputBufferState
 {
-    EMPTY,
-    DATA_AVAILABLE,
-    MESSAGE_INIT,
-    MESSAGE_INCOMPLETE,
-    MESSAGE_AVAILABLE
+    SERIAL_BUFFER_EMPTY,
+    SERIAL_DATA_AVAILABLE,
+    SERIAL_MESSAGE_INIT,
+    SERIAL_MESSAGE_INCOMPLETE,
+    SERIAL_MESSAGE_AVAILABLE
 
 } InputBufferState;
 
@@ -64,14 +63,14 @@ struct SerialIO
 {
     SerialInputBuffer input;
     SerialOutputBuffer output;
-    uint8_t addr;
 };
 
-typedef uint16_t (*read_callback)(void*, uint8_t*, size_t);
+typedef uint16_t (*read_cb)(void*, uint8_t*, size_t, int);
 
-void init_serial_io(SerialIO* serial_io, uint8_t addr);
-uint16_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len);
-uint8_t read_serial_msg(SerialIO* serial_io, read_callback read_cb, void* cb_arg, uint8_t* buf, size_t len);
+void init_serial_io(SerialIO* serial_io);
+uint16_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t addr);
+uint8_t read_serial_msg(SerialIO* serial_io, read_cb cb, void* cb_arg,
+                        uint8_t* buf, size_t len, uint8_t* addr, int timeout);
 
 #ifdef __cplusplus
 }

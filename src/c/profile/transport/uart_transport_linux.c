@@ -1,29 +1,39 @@
 #include <micrortps/client/profile/transport/uart_transport_linux.h>
 #include <fcntl.h>
-#include <errno.h>
 #include <unistd.h>
+#include <errno.h>
 
 /*******************************************************************************
- * Private function declarations.
+ * Static members.
  *******************************************************************************/
 static int uart_errno = 0;
 
 /*******************************************************************************
- * Function declarations.
+ * Private function declarations.
  *******************************************************************************/
-static uint16_t read_uart_data(void* transport, uint8_t* buf, size_t len);
+static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int timeout);
 static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static int get_uart_error();
 
 /*******************************************************************************
  * Private function definitions.
  *******************************************************************************/
-static uint16_t read_uart_data(void* transport, uint8_t* buf, size_t len)
+static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int timeout)
 {
-    UARTTransport* uart_transport = (UARTTransport*)transport;
-    ssize_t bytes_read = read(uart_transport->fd, buf, len);
-    return (0 < bytes_read) ? bytes_read : 0;
+    uint16_t rv = 0;
+    UARTTransport* transport = (UARTTransport*)instance;
+
+    int poll_rv = poll(&transport->poll_fd, 1, timeout);
+    if (0 < poll_rv)
+    {
+        ssize_t bytes_read = read(transport->fd, buf, len);
+        if (0 < bytes_read)
+        {
+            rv = (uint16_t)bytes_read;
+        }
+    }
+
+    return rv;
 }
 
 static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
@@ -31,32 +41,29 @@ static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
     bool rv = false;
     UARTTransport* transport = (UARTTransport*)instance;
 
-    uint16_t bytes_written = write_serial_msg(&transport->serial_io, buf, len);
+    uint16_t bytes_written = write_serial_msg(&transport->serial_io, buf, len, transport->local_addr);
     if (0 < bytes_written)
     {
         ssize_t bytes_sent = write(transport->fd, transport->serial_io.output.buffer, (size_t)bytes_written);
-        if (bytes_sent == bytes_written)
+        if (0 < bytes_sent && (uint16_t)bytes_sent == bytes_written)
         {
             rv = true;
         }
-        else
-        {
-            uart_errno = -1;
-        }
     }
+    uart_errno = rv ? 0 : -1;
 
     return rv;
 }
 
 static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
-    (void)timeout;
     bool rv = true;
     UARTTransport* transport = (UARTTransport*)instance;
+    uint8_t addr;
 
     uint8_t bytes_read = read_serial_msg(&transport->serial_io, read_uart_data, instance,
-                                         transport->buffer, sizeof(transport->buffer));
-    if (0 < bytes_read)
+                                         transport->buffer, sizeof(transport->buffer), &addr, timeout);
+    if (0 < bytes_read && addr == transport->remote_addr)
     {
         *len = bytes_read;
         *buf = transport->buffer;
@@ -78,66 +85,68 @@ static int get_uart_error()
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-int init_uart_transport(UARTTransport* transport, const char* device, uint8_t addr)
+int init_uart_transport(UARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
 {
-    int rv = 0;
+    int rv = -1;
 
     /* Open device */
-    transport->addr = addr;
+    transport->remote_addr = remote_addr;
+    transport->local_addr = local_addr;
     transport->fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (transport->fd != -1)
     {
         /* Init SerialIO. */
-        init_serial_io(&transport->serial_io, addr);
+        init_serial_io(&transport->serial_io);
 
         /* Send init flag. */
-        uint8_t flag = MICRORTPS_FRAMING_FLAG;
+        uint8_t flag = MICRORTPS_FRAMING_END_FLAG;
         ssize_t bytes_written = write(transport->fd, &flag, 1);
-        if (0 < bytes_written)
+        if (0 < bytes_written && 1 == bytes_written)
         {
-            rv = -1;
-        }
-        else
-        {
+            /* Poll setup. */
+            transport->poll_fd.fd = transport->fd;
+            transport->poll_fd.events = POLLIN;
+
             /* Interface setup. */
             transport->comm.instance = (void*)transport;
             transport->comm.send_msg = send_uart_msg;
             transport->comm.recv_msg = recv_uart_msg;
             transport->comm.comm_error = get_uart_error;
+            rv = 0;
         }
-    }
-    else
-    {
-        rv = -1;
     }
 
     return rv ;
 }
 
-int init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t addr)
+int init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
-    int rv = 0;
+    int rv = -1;
 
     /* Open device */
-    transport->addr = addr;
+    transport->remote_addr = remote_addr;
+    transport->local_addr = local_addr;
     transport->fd = fd;
 
     /* Init SerialIO. */
-    init_serial_io(&transport->serial_io, addr);
+    init_serial_io(&transport->serial_io);
 
     /* Send init flag. */
-    uint8_t flag = MICRORTPS_FRAMING_FLAG;
+    uint8_t flag = MICRORTPS_FRAMING_END_FLAG;
     ssize_t bytes_written = write(transport->fd, &flag, 1);
-    if (0 < bytes_written)
+    if (0 < bytes_written && 1 == bytes_written)
     {
-        rv = -1;
-    }
+        /* Poll setup. */
+        transport->poll_fd.fd = transport->fd;
+        transport->poll_fd.events = POLLIN;
 
-    /* Interface setup. */
-    transport->comm.instance = (void*)transport;
-    transport->comm.send_msg = send_uart_msg;
-    transport->comm.recv_msg = recv_uart_msg;
-    transport->comm.comm_error = get_uart_error;
+        /* Interface setup. */
+        transport->comm.instance = (void*)transport;
+        transport->comm.send_msg = send_uart_msg;
+        transport->comm.recv_msg = recv_uart_msg;
+        transport->comm.comm_error = get_uart_error;
+        rv = 0;
+    }
 
     return rv;
 }

@@ -22,11 +22,13 @@ class SerialComm : public testing::Test
 {
 public:
     SerialComm();
+    ~SerialComm();
+    int init();
 
 protected:
-    int fds[2];
-    UARTTransport master;
-    UARTTransport slave;
+    int fd_;
+    UARTTransport master_;
+    UARTTransport slave_;
 };
 
 #endif //_MICRORTPS_TEST_TRANSPORT_SERIALCOMM_HPP_
