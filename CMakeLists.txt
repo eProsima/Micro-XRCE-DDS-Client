@@ -161,6 +161,7 @@ set(SRCS
     src/c/core/session/stream_storage.c
     src/c/core/session/submessage.c
     src/c/core/session/seq_num.c
+    src/c/core/session/object_id.c
     src/c/core/serialization/xrce_protocol.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c

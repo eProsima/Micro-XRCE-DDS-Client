@@ -181,9 +181,9 @@ static void print_delete_submessage(const char* pre, const DELETE_Payload* paylo
             RESTORE_COLOR);
 }
 
-static void print_status_agent_submessage(const char* pre, const STATUS_Payload* payload)
+static void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload)
 {
-    printf("%s[Status | %s]%s\n",
+    printf("%s[Status agent | %s]%s\n",
             pre,
             reply_to_string(&payload->base),
             RESTORE_COLOR);

@@ -1001,7 +1001,6 @@ typedef struct HEARTBEAT_Payload
 
 } HEARTBEAT_Payload;
 
-typedef struct MicroBuffer MicroBuffer;
 bool serialize_Time_t(MicroBuffer* buffer, const Time_t* input);
 bool deserialize_Time_t(MicroBuffer* buffer, Time_t* output);
 

@@ -2,9 +2,10 @@
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/util/time.h>
 #include <micrortps/client/core/communication/communication.h>
+#include <micrortps/client/core/serialization/xrce_protocol.h>
 #include "log/message.h"
 
-// Autogenerate this defines by the protocol?
+// Autogenerate these defines by the protocol?
 #define HEARTBEAT_MAX_MSG_SIZE 16
 #define ACKNACK_MAX_MSG_SIZE 16
 #define CREATE_SESSION_MAX_MSG_SIZE 38
@@ -12,11 +13,12 @@
 
 #define MAX_CONNECTION_ATTEMPS 10
 
-#define INITIAL_REQUEST_ID 0x000F
+#define INITIAL_REQUEST_ID 0x0010
+
 
 bool listen_message(Session* session, int poll_ms);
 
-bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts);
+bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 
 void send_message(const Session* session, uint8_t* buffer, size_t length);
 bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms);
@@ -35,10 +37,14 @@ void read_submessage_fragment(Session* session, MicroBuffer* payload, StreamId s
 //                             PUBLIC
 //==================================================================
 
-bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
+int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
 {
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
+
+    session->on_status = NULL;
+    session->on_status_args = NULL;
+
     init_session_info(&session->info, session_id, key);
     init_stream_storage(&session->streams);
 
@@ -47,11 +53,13 @@ bool create_session(Session* session, uint8_t session_id, uint32_t key, Communic
     init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_create_session(&session->info, &mb, get_nano_time());
-    stamp_first_session_header(&session->info, mb.init);
-    return wait_status_agent(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    stamp_create_session_header(&session->info, mb.init);
+    set_session_info_request(&session->info, STATE_LOGIN);
+
+    return wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
-bool delete_session(Session* session)
+int delete_session(Session* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     MicroBuffer mb;
@@ -59,12 +67,43 @@ bool delete_session(Session* session)
 
     write_delete_session(&session->info, &mb);
     stamp_session_header(&session->info, 0, 0, mb.init);
-    return wait_status_agent(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    set_session_info_request(&session->info, STATE_LOGOUT);
+
+    return wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
-uint16_t generate_request_id(Session* session)
+uint8_t generate_request_id(Session* session)
 {
-    return ++session->last_request_id;
+    uint8_t last_request_id = (UINT8_MAX == session->last_request_id)
+        ? INITIAL_REQUEST_ID
+        : session->last_request_id;
+
+    session->last_request_id = last_request_id + 1;
+    return last_request_id;
+}
+
+bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb)
+{
+    bool available = false;
+    switch(stream_id.type)
+    {
+        case BEST_EFFORT_STREAM:
+        {
+            OutputBestEffortStream* stream = get_output_best_effort_stream(&session->streams, stream_id.index);
+            available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
+            break;
+        }
+        case RELIABLE_STREAM:
+        {
+            OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
+            available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
+            break;
+        }
+        default:
+            break;
+    }
+
+    return available;
 }
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size)
@@ -88,6 +127,12 @@ StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t 
 {
     size_t message_data_size = 128; //session->comm->mtu(session->comm);
     return add_input_reliable_buffer(&session->streams, buffer, size, message_data_size);
+}
+
+void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)
+{
+    session->on_status = on_status_func;
+    session->on_status_args = args;
 }
 
 void run_session(Session* session, size_t read_attemps, int poll_ms)
@@ -172,26 +217,26 @@ bool listen_message(Session* session, int poll_ms)
     return must_be_read;
 }
 
-bool wait_status_agent(Session* session, uint8_t* buffer, size_t length, size_t attempts)
+bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_t attempts)
 {
     int poll_ms = 1;
-    for(size_t i = 0; i < attempts && check_session_info_pending_request(&session->info); ++i)
+    for(size_t i = 0; i < attempts && session_info_pending_request(&session->info); ++i)
     {
         send_message(session, buffer, length);
         poll_ms = listen_message(session, poll_ms) ? 1 : poll_ms * 2;
     }
 
-    bool status_agent_received = !check_session_info_pending_request(&session->info);
-    if(status_agent_received)
+    bool received = !session_info_pending_request(&session->info);
+    if(!received)
     {
-        restore_session_info_request(&session->info);
+        reset_session_info_request(&session->info);
     }
-    return status_agent_received;
+
+    return received;
 }
 
 void send_message(const Session* session, uint8_t* buffer, size_t length)
 {
-    ////listen_message((Session*)session, 1000);
     bool send = session->comm->send_msg(session->comm->instance, buffer, length);
     if(send)
     {
@@ -204,7 +249,7 @@ bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int p
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
     if(received)
     {
-        DEBUG_PRINT_MESSAGE(SEND, *buffer, *length);
+        DEBUG_PRINT_MESSAGE(RECV, *buffer, *length);
     }
     return received;
 }
@@ -298,13 +343,18 @@ void read_submessage(Session* session, MicroBuffer* payload, uint8_t submessage_
         case SUBMESSAGE_ID_STATUS_AGENT:
             if(stream_id.type == NONE_STREAM)
             {
-                read_submessage_status_agent(&session->info, payload);
+                read_create_session_status(&session->info, payload);
             }
             break;
 
         case SUBMESSAGE_ID_STATUS:
+            if(stream_id.type == NONE_STREAM)
+            {
+                read_delete_session_status(&session->info, payload);
+            }
+
             #ifdef PROFILE_STATUS_ANSWER
-            read_submessage_status(session, payload, stream_id);
+            read_submessage_status(session, payload);
             #endif
             break;
 
@@ -347,4 +397,21 @@ void read_submessage_fragment(Session* session, MicroBuffer* payload, StreamId s
 {
     (void) session; (void) payload; (void) stream_id; (void) last_fragment;
     //TODO
+}
+
+void read_submessage_status(Session* session, MicroBuffer* submessage)
+{
+    STATUS_Payload payload;
+    deserialize_STATUS_Payload(submessage, &payload);
+
+    if(session->on_status != NULL)
+    {
+        mrObjectId object_id = create_object_id_from_raw(payload.base.related_request.object_id.data);
+        uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
+                            + payload.base.related_request.request_id.data[1];
+        uint8_t status = payload.base.result.status;
+
+
+        session->on_status(session, object_id, request_id, status, session->on_status_args);
+    }
 }

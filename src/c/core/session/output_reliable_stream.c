@@ -40,7 +40,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
     stream->next_heartbeat_tries = 0;
 }
 
-bool prepare_reliable_stream_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb)
+bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb)
 {
     /* Check if the message fit it the current buffer */
     uint8_t* internal_buffer = get_output_buffer(stream, stream->last_written % stream->history);

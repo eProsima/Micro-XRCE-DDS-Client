@@ -35,7 +35,7 @@
 #endif //PROFILE_CREATE_ENTITIES_REF
 
 #ifdef PROFILE_CREATE_ENTITIES_XML
-#include <micrortps/client/profile/session/create_entities_ref.h>
+#include <micrortps/client/profile/session/create_entities_xml.h>
 #endif //PROFILE_CREATE_ENTITIES_XML
 
 #ifdef PROFILE_DELETE_ENTITIES

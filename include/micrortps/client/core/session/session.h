@@ -22,33 +22,40 @@ extern "C"
 
 #include <micrortps/client/core/session/session_info.h>
 #include <micrortps/client/core/session/stream_storage.h>
+#include <micrortps/client/core/session/object_id.h>
 
 typedef struct Communication Communication;
+typedef struct Session Session;
 
-typedef struct Session
+typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
+
+struct Session
 {
     SessionInfo info;
     StreamStorage streams;
     Communication* comm;
-    uint16_t last_request_id;
+    uint8_t last_request_id;
 
-} Session;
+    OnStatusFunc on_status;
+    void* on_status_args;
+};
 
-bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
-bool delete_session(Session* session);
+int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
+int delete_session(Session* session);
 
 void run_session(Session* session, size_t read_attemps, int poll_ms);
 
-uint16_t generate_request_id(Session* session);
+uint8_t generate_request_id(Session* session);
+bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb);
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
 StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_data_size);
 StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size);
 
-#ifdef PROFILE_STATUS_ANSWER
-void read_submessage_status(Session* session, MicroBuffer* submessage, StreamId id);
-#endif
+void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
+
+void read_submessage_status(Session* session, MicroBuffer* submessage);
 
 #ifdef PROFILE_DATA_ACCESS
 void read_submessge_data(Session* session, MicroBuffer* submessage, StreamId id, uint8_t format);

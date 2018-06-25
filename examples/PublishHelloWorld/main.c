@@ -19,48 +19,40 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-//int main(int args, char** argv)
-//{
-//    (void) args; (void) argv;
-//
-//    UARTTransport uart;
-//    int fd = open("/dev/pts/7", O_RDWR | O_NOCTTY | O_NONBLOCK);
-//    init_uart_transport_fd(&uart, fd, 0x00, 0x01);
-//
-//    Session session;
-//    create_session(&session, 128, 0xAABBCCDD, &uart.comm);
-//    delete_session(&session);
-//
-//    return 0;
-//}
-
-//int main(int args, char** argv)
-//{
-//    (void) args; (void) argv;
-//
-//    UDPTransport udp;
-//    init_udp_transport(&udp, "127.0.0.1", 2019);
-//
-//    Session session;
-//    create_session(&session, 128, 0xAABBCCDD, &udp.comm);
-//    delete_session(&session);
-//
-//    return 0;
-//}
+void on_status(Session* session, mrObjectId id, uint16_t request_id, uint8_t status, void* args)
+{
+    (void) session; (void) id; (void) request_id; (void) status; (void) args;
+    printf("Status received!\n");
+}
 
 int main(int args, char** argv)
 {
     (void) args; (void) argv;
 
-    TCPTransport tcp;
-    init_tcp_transport(&tcp, "127.0.0.1", 2019);
+    // Transport
+    UDPTransport udp;
+    init_udp_transport(&udp, "127.0.0.1", 2019);
 
+    // Session
     Session session;
-    create_session(&session, 128, 0xAABBCCDD, &tcp.comm);
-    delete_session(&session);
+    create_session(&session, 128, 0xAABBCCDD, &udp.comm);
+    set_status_callback(&session, on_status, NULL);
 
-    shutdown(tcp.poll_fd.fd, SHUT_WR);
-    close(tcp.poll_fd.fd);
+    // Streams
+    uint8_t output_best_effort_stream_buffer[256];
+    StreamId out_best_effort = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
+
+    // Create entities
+    mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
+    mrObjectId topic_id = create_object_id(0x01, TOPIC_ID);
+    char* participant_xml = "<xml representation>";
+    (void) write_configure_topic_xml(&session, out_best_effort, topic_id, participant_id, participant_xml, 0);
+
+    // Send and receive messages
+    run_session(&session, 20, 50);
+
+    // Delete resources
+    delete_session(&session);
 
     return 0;
 }

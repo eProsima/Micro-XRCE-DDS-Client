@@ -22,11 +22,9 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/session/session.h>
-#include <micrortps/client/core/session/stream_id.h>
-#include <micrortps/client/core/session/object_id.h>
 #include <stdint.h>
 
-int write_delete_entity(Session* session, StreamId stream_id, ObjectId object_id);
+uint16_t write_delete_entity(Session* session, StreamId stream_id, mrObjectId object_id);
 
 #ifdef __cplusplus
 }

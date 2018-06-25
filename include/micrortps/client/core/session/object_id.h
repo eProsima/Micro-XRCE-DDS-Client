@@ -22,12 +22,28 @@ extern "C"
 
 #include <stdint.h>
 
-typedef struct ObjectId
+const uint8_t APPLICATION_ID;
+const uint8_t QOS_PROFILE_ID;
+const uint8_t TYPE_ID;
+const uint8_t DOMAIN_ID;
+const uint8_t PARTICIPANT_ID;
+const uint8_t TOPIC_ID;
+const uint8_t PUBLISHER_ID;
+const uint8_t SUBSCRIBER_ID;
+const uint8_t DATAWRITER_ID;
+const uint8_t DATAREADER_ID;
+
+typedef struct mrObjectId
 {
     uint16_t id;
-    uint8_t prefix;
+    uint8_t type;
 
-} ObjectId;
+} mrObjectId;
+
+mrObjectId create_object_id(uint16_t id, uint8_t type);
+mrObjectId create_object_id_from_raw(uint8_t* raw);
+
+void object_id_to_raw(mrObjectId object_id, uint8_t* raw);
 
 #ifdef __cplusplus
 }

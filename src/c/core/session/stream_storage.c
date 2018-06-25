@@ -13,7 +13,7 @@ void init_stream_storage(StreamStorage* storage)
 
 StreamId add_output_best_effort_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset)
 {
-    uint8_t index = ++storage->output_best_effort_size;
+    uint8_t index = storage->output_best_effort_size++;
     // assert for index
     OutputBestEffortStream* stream = &storage->output_best_effort[index];
     init_output_best_effort_stream(stream, buffer, size, header_offset);
@@ -22,7 +22,7 @@ StreamId add_output_best_effort_buffer(StreamStorage* storage, uint8_t* buffer, 
 
 StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t message_data_size, uint8_t header_offset)
 {
-    uint8_t index = ++storage->output_reliable_size;
+    uint8_t index = storage->output_reliable_size++;
     // assert for index
     OutputReliableStream* stream = &storage->output_reliable[index];
     init_output_reliable_stream(stream, buffer, size, message_data_size, header_offset);
@@ -31,7 +31,7 @@ StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, siz
 
 StreamId add_input_best_effort_buffer(StreamStorage* storage)
 {
-    uint8_t index = ++storage->input_best_effort_size;
+    uint8_t index = storage->input_best_effort_size++;
     // assert for index
     InputBestEffortStream* stream = &storage->input_best_effort[index];
     init_input_best_effort_stream(stream);
@@ -40,7 +40,7 @@ StreamId add_input_best_effort_buffer(StreamStorage* storage)
 
 StreamId add_input_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t message_data_size)
 {
-    uint8_t index = ++storage->input_reliable_size;
+    uint8_t index = storage->input_reliable_size++;
     // assert for index
     InputReliableStream* stream = &storage->input_reliable[index];
     init_input_reliable_stream(stream, buffer, size, message_data_size);

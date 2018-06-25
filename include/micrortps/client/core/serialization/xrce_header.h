@@ -22,6 +22,7 @@ extern "C"
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <microcdr/microcdr.h>
 
 #define CLIENT_KEY_SIZE 4
 
@@ -30,9 +31,6 @@ extern "C"
 
 #define SESSION_ID_WITH_CLIENT_KEY 0x00
 #define SESSION_ID_WITHOUT_CLIENT_KEY 0x80
-
-
-#include <microcdr/microcdr.h>
 
 void serialize_message_header(MicroBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key);
 void deserialize_message_header(MicroBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key);

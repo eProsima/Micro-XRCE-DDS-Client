@@ -22,7 +22,6 @@ extern "C"
 
 #include <stdint.h>
 #include <stdbool.h>
-
 #include <microcdr/microcdr.h>
 
 void serialize_submessage_header(MicroBuffer* buffer, uint8_t id, uint8_t flags, uint16_t length);
