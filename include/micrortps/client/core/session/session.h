@@ -27,7 +27,13 @@ extern "C"
 typedef struct Communication Communication;
 typedef struct Session Session;
 
-typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
+typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
+                              uint8_t status, void* args);
+
+#ifdef PROFILE_DATA_ACCESS
+typedef void (*OnTopicFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
+                             MicroBuffer* mb, StreamId stream_id, void* args);
+#endif
 
 struct Session
 {
@@ -38,6 +44,12 @@ struct Session
 
     OnStatusFunc on_status;
     void* on_status_args;
+
+#ifdef PROFILE_DATA_ACCESS
+    OnTopicFunc on_topic;
+    void* on_topic_args;
+#endif
+
 };
 
 int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
@@ -54,11 +66,11 @@ StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size);
 
 void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
-
 void read_submessage_status(Session* session, MicroBuffer* submessage);
 
 #ifdef PROFILE_DATA_ACCESS
 void read_submessge_data(Session* session, MicroBuffer* submessage, StreamId id, uint8_t format);
+void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args);
 #endif
 
 #ifdef __cplusplus

@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include <micrortps/client/client.h>
-
 #include <stdio.h>
 
 void on_status(Session* session, mrObjectId id, uint16_t request_id, uint8_t status, void* args)
 {
     (void) session; (void) id; (void) request_id; (void) status; (void) args;
     printf("Status received!\n");
+}
+
+void on_topic(Session* session, mrObjectId id, uint16_t request_id, MicroBuffer* mb, void* args)
+{
+    (void) session; (void) id; (void) request_id; (void) mb; (void) args;
+    printf("Topic received!\n");
 }
 
 int main(int args, char** argv)
@@ -35,6 +39,7 @@ int main(int args, char** argv)
     Session session;
     create_session(&session, 128, 0xAABBCCDD, &udp.comm);
     set_status_callback(&session, on_status, NULL);
+//    set_topic_callback(&session, on_topic, NULL);
 
     // Streams
     //uint8_t output_best_effort_stream_buffer[256];

@@ -126,33 +126,59 @@ static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_
 
 static void print_create_submessage(const char* pre, const CREATE_Payload* payload)
 {
+    char type[4];
+    switch(payload->object_representation._.participant.base.representation.format)
+    {
+        case REPRESENTATION_AS_XML_STRING:
+            strcpy(type, "xml");
+            break;
+
+        case REPRESENTATION_BY_REFERENCE:
+            strcpy(type, "ref");
+            break;
+
+        case REPRESENTATION_IN_BINARY:
+            strcpy(type, "bin");
+            break;
+
+    }
+
     char content[4096];
     switch(payload->object_representation.kind)
     {
         case OBJK_PARTICIPANT:
-            sprintf(content, "PARTICIPANT");
+            sprintf(content, "PARTICIPANT | %s: %u",
+                    type,
+                    payload->object_representation._.participant.base.representation._.xml_string_represenatation.size);
             break;
         case OBJK_TOPIC:
-            sprintf(content, "TOPIC | id: 0x%s | xml: %u",
+            sprintf(content, "TOPIC | id: 0x%s | %s: %u",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
-                    payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
+                    type,
+                    payload->object_representation._.topic.base.representation._.xml_string_represenatation.size);
             break;
         case OBJK_PUBLISHER:
-            sprintf(content, "PUBLISHER | id: 0x%s",
-                    print_array_2(payload->object_representation._.publisher.participant_id.data));
+            sprintf(content, "PUBLISHER | id: 0x%s | %s: %u",
+                    print_array_2(payload->object_representation._.publisher.participant_id.data),
+                    type,
+                    payload->object_representation._.publisher.base.representation._.string_represenatation.size);
             break;
         case OBJK_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | id: 0x%s",
-                    print_array_2(payload->object_representation._.subscriber.participant_id.data));
+            sprintf(content, "SUBSCRIBER | id: 0x%s | %s: %u",
+                    print_array_2(payload->object_representation._.subscriber.participant_id.data),
+                    type,
+                    payload->object_representation._.subscriber.base.representation._.string_represenatation.size);
             break;
         case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | id: 0x%s | xml: %u",
+            sprintf(content, "DATA_WRITER | id: 0x%s | %s: %u",
                     print_array_2(payload->object_representation._.data_writer.publisher_id.data),
+                    type,
                     payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
              break;
         case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | id: 0x%s | xml: %u",
+            sprintf(content, "DATA_READER | id: 0x%s | %s: %u",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
+                    type,
                     payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;
         default:

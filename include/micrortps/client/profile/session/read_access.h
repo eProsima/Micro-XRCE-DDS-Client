@@ -49,9 +49,6 @@ typedef struct ReadConfig
 
 } ReadConfig;
 
-// TODO (julian): move to session.h
-typedef void (*TopicCallback)(MicroBuffer* buffer, ObjectId object_id, StreamId stream_id, void* args);
-
 int write_read_data(Session* session, StreamId stream_id, ReadConfig* read_config);
 
 #ifdef __cplusplus

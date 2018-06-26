@@ -135,6 +135,14 @@ void set_status_callback(Session* session, OnStatusFunc on_status_func, void* ar
     session->on_status_args = args;
 }
 
+#ifdef PROFILE_DATA_ACCESS
+void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args)
+{
+    session->on_topic = on_topic_func;
+    session->on_topic_args = args;
+}
+#endif
+
 void run_session(Session* session, size_t read_attemps, int poll_ms)
 {
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)

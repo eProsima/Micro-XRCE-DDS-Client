@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <micrortps/client/client.h>
-
 #include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
