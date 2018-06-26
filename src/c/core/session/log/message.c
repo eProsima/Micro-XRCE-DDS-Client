@@ -60,8 +60,8 @@ static const char* data_to_string(const uint8_t* data, uint32_t size)
 static const char* request_to_string(const BaseObjectRequest* request)
 {
     static char buffer[256];
-    sprintf(buffer, "#0x%s", print_array_2(request->request_id.data));
-    sprintf(buffer + 7, " | id: 0x%s", print_array_2(request->object_id.data));
+    int pos = sprintf(buffer, "#0x%s", print_array_2(request->request_id.data));
+    sprintf(buffer + pos, " | id: 0x%s", print_array_2(request->object_id.data));
 
     return buffer;
 }
@@ -133,7 +133,7 @@ static void print_create_submessage(const char* pre, const CREATE_Payload* paylo
             sprintf(content, "PARTICIPANT");
             break;
         case OBJK_TOPIC:
-            sprintf(content, "TOPIC | id: 0x%s | topic: %u",
+            sprintf(content, "TOPIC | id: 0x%s | xml: %u",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;

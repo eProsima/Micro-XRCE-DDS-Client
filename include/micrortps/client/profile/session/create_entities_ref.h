@@ -21,46 +21,22 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/core/session/session.h>
-#include <micrortps/client/core/session/stream_id.h>
-#include <micrortps/client/core/session/object_id.h>
-#include <stdint.h>
+#include <micrortps/client/profile/session/common_create_entities.h>
 
-int write_create_quo_profile_ref(Session* session,
-                                 StreamId stream_id,
-                                 ObjectId object_id,
-                                 char* object_reference_str,
-                                 uint32_t object_reference_size,
-                                 uint8_t flags);
+uint16_t write_create_qos_profile_ref(Session* session, StreamId stream_id,
+                                         mrObjectId object_id, char* ref, uint8_t flags);
 
-int write_create_type_ref(Session* session,
-                          StreamId stream_id,
-                          ObjectId object_id,
-                          char* object_reference_str,
-                          uint32_t object_reference_size,
-                          uint8_t flags);
+uint16_t write_create_type_ref(Session* session, StreamId stream_id,
+                                  mrObjectId object_id, char* ref, uint8_t flags);
 
-int write_create_domain_ref(Session* session,
-                            StreamId stream_id,
-                            ObjectId object_id,
-                            char* object_reference_str,
-                            uint32_t object_reference_size,
-                            uint8_t flags);
+uint16_t write_create_domain_ref(Session* session, StreamId stream_id,
+                                    mrObjectId object_id, char* ref, uint8_t flags);
 
-int write_create_participant_ref(Session* session,
-                                 StreamId stream_id,
-                                 ObjectId object_id,
-                                 char* object_reference_str,
-                                 uint32_t object_reference_size,
-                                 uint8_t flags);
+uint16_t write_create_participant_ref(Session* session, StreamId stream_id,
+                                         mrObjectId object_id, char* ref, uint8_t flags);
 
-int write_create_topic_ref(Session* session,
-                           StreamId stream_id,
-                           ObjectId object_id,
-                           char* object_reference_str,
-                           uint32_t object_reference_size,
-                           ObjectId participant_id,
-                           uint8_t flags);
+uint16_t write_create_topic_ref(Session* session, StreamId stream_id,
+                                         mrObjectId object_id, mrObjectId participant_id, char* ref, uint8_t flags);
 
 #ifdef __cplusplus
 }

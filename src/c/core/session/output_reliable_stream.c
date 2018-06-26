@@ -48,7 +48,9 @@ bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size,
     /* Check if the message fit it the current buffer */
     uint8_t* internal_buffer = get_output_buffer(stream, stream->last_written % stream->history);
     bool available_to_write = false;
-    if(get_output_buffer_length(internal_buffer) + size <= get_output_buffer_size(stream))
+    size_t length = get_output_buffer_length(internal_buffer);
+    size_t padding = (length % 4 != 0) ? 4 - (length % 4) : 0; //possible padding between submessages
+    if(length + padding + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
         available_to_write = stream->last_written % stream->history != stream->last_acknown % stream->history;
@@ -60,7 +62,7 @@ bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size,
                 /* Check if there is space in the stream history to write */
                 SeqNum next = seq_num_add(stream->last_written, 1);
                 available_to_write = next % stream->history != stream->last_acknown % stream->history;
-                if(!available_to_write)
+                if(available_to_write)
                 {
                     internal_buffer = get_output_buffer(stream, next % stream->history);
                     stream->last_written = next;
@@ -72,7 +74,8 @@ bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size,
     if(available_to_write)
     {
         size_t current_length = get_output_buffer_length(internal_buffer);
-        size_t future_length = current_length + size;
+        size_t current_padding = (current_length % 4 != 0) ? 4 - (current_length % 4) : 0;
+        size_t future_length = current_length + current_padding + size;
         set_output_buffer_length(internal_buffer, future_length);
         init_micro_buffer_offset(mb, internal_buffer, future_length, current_length);
     }
@@ -197,7 +200,9 @@ void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t fir
 
 size_t get_output_buffer_length(uint8_t* buffer)
 {
-    return (size_t)*(buffer - INTERNAL_BUFFER_OFFSET);
+    size_t length;
+    memcpy(&length, buffer - INTERNAL_BUFFER_OFFSET, sizeof(size_t));
+    return length;
 }
 
 void set_output_buffer_length(uint8_t* buffer, size_t length)

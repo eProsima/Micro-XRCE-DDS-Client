@@ -12,13 +12,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "HelloWorld.h"
+
+#include <micrortps/client/client.h>
 
 #include <stdio.h>
 
-#define HELLO_WORLD_TOPIC 0x01
+void on_status(Session* session, mrObjectId id, uint16_t request_id, uint8_t status, void* args)
+{
+    (void) session; (void) id; (void) request_id; (void) status; (void) args;
+    printf("Status received!\n");
+}
 
-void check_and_print_error(Session* session, const char* where)
+int main(int args, char** argv)
+{
+    (void) args; (void) argv;
+
+    // Transport
+    UDPTransport udp;
+    init_udp_transport(&udp, "127.0.0.1", 2019);
+
+    // Session
+    Session session;
+    create_session(&session, 128, 0xAABBCCDD, &udp.comm);
+    set_status_callback(&session, on_status, NULL);
+
+    // Streams
+    //uint8_t output_best_effort_stream_buffer[256];
+    //StreamId best_effort_out = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
+    uint8_t output_reliable_stream_buffer[2048];
+    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 2048, 1000);
+
+    uint8_t input_reliable_stream_buffer[2048];
+    create_input_reliable_stream(&session, input_reliable_stream_buffer, 2048);
+
+    // Create entities
+    mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
+    char* participant_ref = "default participant";
+    write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, 0);
+
+    mrObjectId topic_id = create_object_id(0x01, TOPIC_ID);
+    char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
+    write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, 0);
+
+    mrObjectId subscriber_id = create_object_id(0x01, SUBSCRIBER_ID);
+    char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
+    write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, 0);
+
+    mrObjectId datareader_id = create_object_id(0x01, DATAREADER_ID);
+    char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
+    write_configure_datareader_xml(&session, reliable_out, datareader_id, participant_id, datareader_xml, 0);
+
+    // Send and receive messages
+    run_session(&session, 20, 10);
+
+    // Delete resources
+    delete_session(&session);
+
+    return 0;
+}
+
+/*void check_and_print_error(Session* session, const char* where)
 {
     if(session->last_status_received)
     {
@@ -94,11 +147,9 @@ int main(int args, char** argv)
         return 1;
     }
 
-    /* Init session. */
     init_session_sync(&my_session);
     check_and_print_error(&my_session, "init_session");
 
-    /* Init XRCE objects. */
     ObjectId participant_id = {{0x00, OBJK_PARTICIPANT}};
     create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
     check_and_print_error(&my_session, "create participant");
@@ -118,10 +169,8 @@ int main(int args, char** argv)
     create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
     check_and_print_error(&my_session, "create datareader");
 
-    /* Main loop */
     while(true)
     {
-        /* Request data */
         read_data_sync(&my_session, datareader_id, STREAMID_BUILTIN_RELIABLE);
         check_and_print_error(&my_session, "read_data");
 
@@ -137,3 +186,4 @@ int main(int args, char** argv)
 
     return 0;
 }
+*/

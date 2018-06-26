@@ -41,16 +41,28 @@ int main(int args, char** argv)
     // Streams
     //uint8_t output_best_effort_stream_buffer[256];
     //StreamId best_effort_out = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
-    uint8_t output_reliable_stream_buffer[256 * 8];
-    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 256 * 8, 200);
-    uint8_t input_reliable_stream_buffer[256 * 8];
-    create_input_reliable_stream(&session, input_reliable_stream_buffer, 256 * 8);
+    uint8_t output_reliable_stream_buffer[2048];
+    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 2048, 1000);
+
+    uint8_t input_reliable_stream_buffer[2048];
+    create_input_reliable_stream(&session, input_reliable_stream_buffer, 2048);
 
     // Create entities
-    mrObjectId participant_id = create_object_id(0x0F, PARTICIPANT_ID);
-    mrObjectId topic_id = create_object_id(0x02, TOPIC_ID);
-    char* participant_xml = "<xml representation>";
-    (void) write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, participant_xml, 0);
+    mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
+    char* participant_ref = "default participant";
+    write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, 0);
+
+    mrObjectId topic_id = create_object_id(0x01, TOPIC_ID);
+    char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
+    write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, 0);
+
+    mrObjectId publisher_id = create_object_id(0x01, PUBLISHER_ID);
+    char* publisher_xml = "<publisher name=\"MyPublisher\"";
+    write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, 0);
+
+    mrObjectId datawriter_id = create_object_id(0x01, DATAWRITER_ID);
+    char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
+    write_configure_datawriter_xml(&session, reliable_out, datawriter_id, participant_id, datawriter_xml, 0);
 
     // Send and receive messages
     run_session(&session, 20, 10);
