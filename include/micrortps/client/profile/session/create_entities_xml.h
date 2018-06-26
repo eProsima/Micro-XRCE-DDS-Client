@@ -20,10 +20,7 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/core/session/session.h>
-
-const uint8_t ENTITY_REPLACE;
-const uint8_t ENTITY_REUSE;
+#include <micrortps/client/profile/session/common_create_entities.h>
 
 uint16_t write_configure_qos_profile_xml(Session* session, StreamId stream_id,
                                          mrObjectId object_id, char* xml, uint8_t flags);

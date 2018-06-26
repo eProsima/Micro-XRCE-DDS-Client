@@ -41,9 +41,11 @@
 
 #define DATA_TO_STRING_BUFFER 4096
 
-static uint16_t array_2_to_num(const uint8_t* array_2)
+static char* print_array_2(const uint8_t* array_2)
 {
-    return ((uint16_t)array_2[0] << 8) + (uint16_t)array_2[1];
+    static char buffer[256];
+    sprintf(buffer, "%02X%02X", array_2[0], array_2[1]);
+    return buffer;
 }
 
 static const char* data_to_string(const uint8_t* data, uint32_t size)
@@ -58,9 +60,8 @@ static const char* data_to_string(const uint8_t* data, uint32_t size)
 static const char* request_to_string(const BaseObjectRequest* request)
 {
     static char buffer[256];
-    sprintf(buffer, "#0x%04X | id: 0x%04X",
-            array_2_to_num(request->request_id.data),
-            array_2_to_num(request->object_id.data));
+    sprintf(buffer, "#0x%s", print_array_2(request->request_id.data));
+    sprintf(buffer + 7, " | id: 0x%s", print_array_2(request->object_id.data));
 
     return buffer;
 }
@@ -106,10 +107,8 @@ static const char* reply_to_string(const BaseObjectReply* reply)
             sprintf(status, "UNKNOWN");
     }
 
-    sprintf(buffer, "#0x%04X | id: 0x%04X | from #0x%04X | %s",
-            array_2_to_num(reply->related_request.request_id.data),
-            array_2_to_num(reply->related_request.object_id.data),
-            array_2_to_num(reply->related_request.request_id.data),
+    sprintf(buffer, "%s | %s",
+            request_to_string(&reply->related_request),
             status);
 
     return buffer;
@@ -117,7 +116,7 @@ static const char* reply_to_string(const BaseObjectReply* reply)
 
 static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
 {
-    printf("%s[Create client | %s | session: 0x%02X | key: %s]%s\n",
+    printf("%s[CREATE CLIENT | %s | session: 0x%02X | key: %s]%s\n",
             pre,
             request_to_string(&payload->base),
             payload->client_representation.session_id,
@@ -134,33 +133,33 @@ static void print_create_submessage(const char* pre, const CREATE_Payload* paylo
             sprintf(content, "PARTICIPANT");
             break;
         case OBJK_TOPIC:
-            sprintf(content, "TOPIC | id: 0x%04X | topic: %u",
-                    array_2_to_num(payload->object_representation._.data_reader.subscriber_id.data),
+            sprintf(content, "TOPIC | id: 0x%s | topic: %u",
+                    print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;
         case OBJK_PUBLISHER:
-            sprintf(content, "PUBLISHER | id: 0x%04X",
-                    array_2_to_num(payload->object_representation._.publisher.participant_id.data));
+            sprintf(content, "PUBLISHER | id: 0x%s",
+                    print_array_2(payload->object_representation._.publisher.participant_id.data));
             break;
         case OBJK_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | id: 0x%04X",
-                    array_2_to_num(payload->object_representation._.subscriber.participant_id.data));
+            sprintf(content, "SUBSCRIBER | id: 0x%s",
+                    print_array_2(payload->object_representation._.subscriber.participant_id.data));
             break;
         case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | id: 0x%04X | xml: %u",
-                    array_2_to_num(payload->object_representation._.data_writer.publisher_id.data),
+            sprintf(content, "DATA_WRITER | id: 0x%s | xml: %u",
+                    print_array_2(payload->object_representation._.data_writer.publisher_id.data),
                     payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
              break;
         case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | id: 0x%04X | xml: %u",
-                    array_2_to_num(payload->object_representation._.data_reader.subscriber_id.data),
+            sprintf(content, "DATA_READER | id: 0x%s | xml: %u",
+                    print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
             break;
         default:
             sprintf(content, "UNKNOWN");
     }
 
-    printf("%s[Create | %s | %s]%s\n",
+    printf("%s[CREATE | %s | %s]%s\n",
             pre,
             request_to_string(&payload->base),
             content,
@@ -175,7 +174,7 @@ static void print_create_submessage(const char* pre, const CREATE_Payload* paylo
 
 static void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
 {
-    printf("%s[Delete | %s]%s\n",
+    printf("%s[DELETE | %s]%s\n",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
@@ -183,7 +182,7 @@ static void print_delete_submessage(const char* pre, const DELETE_Payload* paylo
 
 static void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload)
 {
-    printf("%s[Status agent | %s]%s\n",
+    printf("%s[STATUS AGENT | %s]%s\n",
             pre,
             reply_to_string(&payload->base),
             RESTORE_COLOR);
@@ -191,7 +190,7 @@ static void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Pa
 
 static void print_status_submessage(const char* pre, const STATUS_Payload* payload)
 {
-    printf("%s[Status | %s]%s\n",
+    printf("%s[STATUS | %s]%s\n",
             pre,
             reply_to_string(&payload->base),
             RESTORE_COLOR);
@@ -227,7 +226,7 @@ static void print_read_data_submessage(const char* pre, const READ_DATA_Payload*
             sprintf(format, "FORMAT_DATA_UNKNOWN");
     }
 
-    printf("%s[Read data | %s | %s]%s\n",
+    printf("%s[READ DATA | %s | %s]%s\n",
             pre,
             request_to_string(&payload->base),
             format,
@@ -236,7 +235,7 @@ static void print_read_data_submessage(const char* pre, const READ_DATA_Payload*
 
 static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload)
 {
-    printf("%s[Write data | FORMAT_DATA | %s]%s\n",
+    printf("%s[WRITE DATA | FORMAT_DATA | %s]%s\n",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
@@ -244,7 +243,7 @@ static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_P
 
 static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload)
 {
-    printf("%s[Data | FORMAT_DATA | %s]%s\n",
+    printf("%s[DATA | FORMAT_DATA | %s]%s\n",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
@@ -259,7 +258,7 @@ static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* pay
         bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
     }
 
-    printf("%s[Acknack | seq_num: %hu | bitmap: %s]%s\n",
+    printf("%s[ACKNACK | seq_num: %hu | bitmap: %s]%s\n",
             pre,
             payload->first_unacked_seq_num,
             bitmask,
@@ -268,7 +267,7 @@ static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* pay
 
 static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload)
 {
-    printf("%s[Heartbeat | first: %hu | last: %hu]%s\n",
+    printf("%s[HEARTBEAT | first: %hu | last: %hu]%s\n",
             pre,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,
@@ -284,13 +283,13 @@ void print_header(const char* dir, uint8_t stream_id, uint16_t seq_num, bool pri
         {
             stream_representation = 'N';
         }
-        else if(1 <= stream_id)
-        {
-            stream_representation = 'B';
-        }
         else if(0x80 <= stream_id)
         {
             stream_representation = 'R';
+        }
+        else if(1 <= stream_id)
+        {
+            stream_representation = 'B';
         }
 
         uint16_t seq_num_to_print = 0;

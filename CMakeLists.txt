@@ -67,7 +67,6 @@ option(PROFILE_CREATE_ENTITIES_REF "Activate CreateEntitiesREF profile" OFF)
 option(PROFILE_CREATE_ENTITIES_XML "Activate CreateEntitiesXML profile" OFF)
 option(PROFILE_READ_ACCESS "Activate ReadAccess profile" OFF)
 option(PROFILE_DISCOVERY_ACCESS "Activate DiscoveryAccess profile" OFF)
-option(PROFILE_STATUS_ANSWER "Activate StatusAnswer profile" OFF)
 option(PROFILE_UDP_TRANSPORT "Activate UDPTransport profile" OFF)
 option(PROFILE_TCP_TRANSPORT "Activate TCPTransport profile" OFF)
 option(PROFILE_UART_TRANSPORT "Activate UARTTransport profile" OFF)
@@ -78,16 +77,15 @@ if(COMPLETE_PROFILE)
     set(PROFILE_CREATE_ENTITIES_XML CACHE BOOL ON)
     set(PROFILE_READ_ACCESS CACHE BOOL ON)
     set(PROFILE_DISCOVERY_ACCESS CACHE BOOL ON)
-    set(PROFILE_STATUS_ANSWER CACHE BOOL ON)
     set(PROFILE_UDP_TRANSPORT CACHE BOOL ON)
     set(PROFILE_TCP_TRANSPORT CACHE BOOL ON)
     set(PROFILE_UART_TRANSPORT CACHE BOOL ON)
 endif()
 
 if(PROFILE_CREATE_ENTITIES_BIN OR PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
-    set(PROFILE_DELETE_ENTITIES ON)
+    set(PROFILE_COMMON_CREATE_ENTITIES ON)
 else()
-    set(PROFILE_DELETE_ENTITIES OFF)
+    set(PROFILE_COMMON_CREATE_ENTITIES OFF)
 endif()
 
 ###############################################################################
@@ -140,12 +138,11 @@ endforeach()
 
 # Other sources
 set(SRCS
+    $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:src/c/profile/session/create_entities_bin.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
-    $<$<BOOL:${PROFILE_DELETE_ENTITIES}>:src/c/profile/session/delete_entities.c>
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
-    $<$<BOOL:${PROFILE_STATUS_ANSWER}>:src/c/profile/session/status_answer.c>
     $<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:src/c/profile/extension/discovery_access.c>
     ${UDP_SRCS}
     ${TCP_SRCS}
@@ -231,13 +228,11 @@ target_compile_definitions(${PROJECT_NAME}
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:PROFILE_CREATE_ENTITIES_BIN>
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:PROFILE_CREATE_ENTITIES_REF>
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:PROFILE_CREATE_ENTITIES_XML>
-        -D$<$<BOOL:${PROFILE_DELETE_ENTITIES}>:PROFILE_DELETE_ENTITIES>
         -D$<$<BOOL:${PROFILE_READ_ACCESS}>:PROFILE_READ_ACCESS>
-        -D$<$<BOOL:${PROFILE_STATUS_ANSWER}>:PROFILE_STATUS_ANSWER>
         -D$<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:PROFILE_DISCOVERY_ACCESS>
         -D$<$<BOOL:${PROFILE_UDP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
-        -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
-        -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
+        -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_TCP_TRANSPORT>
+        -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UART_TRANSPORT>
     )
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
 if((MSVC OR MSVC_IDE) AND (TARGET_TYPE STREQUAL "SHARED_LIBRARY"))

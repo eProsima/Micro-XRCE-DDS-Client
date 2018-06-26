@@ -1,4 +1,3 @@
-
 // Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_SESSION_DELETE_ENTITIES_H_
-#define _MICRORTPS_CLIENT_PROFILE_SESSION_DELETE_ENTITIES_H_
+#ifndef _MICRORTPS_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
+#define _MICRORTPS_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -22,12 +21,18 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/session/session.h>
-#include <stdint.h>
 
-uint16_t write_delete_entity(Session* session, StreamId stream_id, mrObjectId object_id);
+const uint8_t ENTITY_REPLACE;
+const uint8_t ENTITY_REUSE;
+
+typedef struct CREATE_Payload CREATE_Payload;
+
+uint16_t common_create_entity(Session* session, StreamId stream_id,
+                              mrObjectId object_id, size_t xml_ref_size, uint8_t flags,
+                              CREATE_Payload* payload);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_PROFILE_SESSION_DELETE_ENTITIES_H_
+#endif //_MICRORTPS_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_

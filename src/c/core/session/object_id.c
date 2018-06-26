@@ -31,7 +31,7 @@ mrObjectId create_object_id_from_raw(uint8_t* raw)
 void object_id_to_raw(mrObjectId object_id, uint8_t* raw)
 {
     raw[0] = (uint8_t) (object_id.id >> 4);
-    raw[1] = (((uint8_t) (object_id.id)) << 4) * object_id.type;
+    raw[1] = (((uint8_t) (object_id.id)) << 4) + object_id.type;
 }
 
 uint16_t pack_object_id(mrObjectId object_id)
