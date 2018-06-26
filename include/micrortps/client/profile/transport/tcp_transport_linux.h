@@ -29,15 +29,33 @@ extern "C"
 #include <arpa/inet.h>
 #include <sys/poll.h>
 #include <string.h>
+#include <unistd.h>
 #include <errno.h>
 
 #define TCP_TRANSPORT_MTU 512
 
+typedef enum TCPInputBufferState
+{
+    TCP_BUFFER_EMPTY,
+    TCP_SIZE_INCOMPLETE,
+    TCP_SIZE_READ,
+    TCP_MESSAGE_INCOMPLETE,
+    TCP_MESSAGE_AVAILABLE
+} TCPInputBufferState;
+
+typedef struct TCPInputBuffer TCPInputBuffer;
+struct TCPInputBuffer
+{
+    uint8_t buffer[TCP_TRANSPORT_MTU];
+    uint16_t position;
+    TCPInputBufferState state;
+    uint16_t msg_size;
+};
+
 typedef struct TCPTransport TCPTransport;
 struct TCPTransport
 {
-    uint8_t buffer[TCP_TRANSPORT_MTU];
-    int socket_fd;
+    TCPInputBuffer input_buffer;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
     Communication comm;
