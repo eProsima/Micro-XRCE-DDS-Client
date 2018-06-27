@@ -24,13 +24,16 @@ extern "C"
 #include <micrortps/client/core/session/stream_storage.h>
 #include <micrortps/client/core/session/object_id.h>
 
+#define INVALID_REQUEST_ID 0
+
 typedef struct Communication Communication;
 typedef struct Session Session;
+typedef struct BaseObjectRequest BaseObjectRequest;
 
 typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
                               uint8_t status, void* args);
 
-#ifdef PROFILE_DATA_ACCESS
+#ifdef PROFILE_READ_ACCESS
 typedef void (*OnTopicFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
                              MicroBuffer* mb, StreamId stream_id, void* args);
 #endif
@@ -40,12 +43,12 @@ struct Session
     SessionInfo info;
     StreamStorage streams;
     Communication* comm;
-    uint8_t last_request_id;
+    uint16_t last_request_id;
 
     OnStatusFunc on_status;
     void* on_status_args;
 
-#ifdef PROFILE_DATA_ACCESS
+#ifdef PROFILE_READ_ACCESS
     OnTopicFunc on_topic;
     void* on_topic_args;
 #endif
@@ -55,22 +58,21 @@ struct Session
 int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
 int delete_session(Session* session);
 
-void run_session(Session* session, size_t read_attemps, int poll_ms);
-
-uint8_t generate_request_id(Session* session);
-bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb);
+void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
 StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_data_size);
 StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size);
 
-void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
-void read_submessage_status(Session* session, MicroBuffer* submessage);
+void run_session(Session* session, size_t read_attemps, int poll_ms);
 
-#ifdef PROFILE_DATA_ACCESS
-void read_submessge_data(Session* session, MicroBuffer* submessage, StreamId id, uint8_t format);
+bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb);
+uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base);
+
+#ifdef PROFILE_READ_ACCESS
 void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args);
+void read_submessage_data(Session* session, MicroBuffer* submessage, StreamId id, uint8_t format);
 #endif
 
 #ifdef __cplusplus

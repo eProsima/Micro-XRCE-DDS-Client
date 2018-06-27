@@ -53,7 +53,8 @@ bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size,
     if(length + padding + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
-        available_to_write = stream->last_written % stream->history != stream->last_acknown % stream->history;
+        SeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
+        available_to_write = 0 >= seq_num_cmp(stream->last_written, last_available);
         if(!available_to_write)
         {
             /* Check if the message fit in a new empty buffer */
@@ -61,7 +62,7 @@ bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size,
             {
                 /* Check if there is space in the stream history to write */
                 SeqNum next = seq_num_add(stream->last_written, 1);
-                available_to_write = next % stream->history != stream->last_acknown % stream->history;
+                available_to_write = 0 >= seq_num_cmp(next, last_available);
                 if(available_to_write)
                 {
                     internal_buffer = get_output_buffer(stream, next % stream->history);
@@ -88,7 +89,10 @@ bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t*
     *seq_num = seq_num_add(stream->last_sent, 1);
     *buffer = get_output_buffer(stream, *seq_num % stream->history);
     *length = get_output_buffer_length(*buffer);
-    bool data_to_send = 0 >= seq_num_cmp(*seq_num, stream->last_written) && *length > stream->offset;
+
+    bool data_to_send = 0 >= seq_num_cmp(*seq_num, stream->last_written)
+                        && *length > stream->offset
+                        && seq_num_sub(stream->last_sent, stream->last_acknown) != stream->history;
     if(data_to_send)
     {
         stream->last_sent = *seq_num;
@@ -100,7 +104,6 @@ bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t*
 
     return data_to_send;
 }
-
 
 bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp)
 {

@@ -5,30 +5,26 @@
 const uint8_t ENTITY_REPLACE = (uint8_t)FLAG_REPLACE;
 const uint8_t ENTITY_REUSE = (uint8_t)FLAG_REUSE;
 
-uint16_t create_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base);
-
 //==================================================================
 //                              PUBLIC
 //==================================================================
 uint16_t write_delete_entity(Session* session, StreamId stream_id, mrObjectId object_id)
 {
-    DELETE_Payload payload;
-    uint16_t request_id = create_base_object_request(session, object_id, &payload.base);
+    uint16_t request_id = INVALID_REQUEST_ID;
 
-    // Change this when microcdr supports size_of functionobject id.
+    DELETE_Payload payload;
+
+    // Change this when microcdr supports size_of function.
     int payload_length = 0; //DELETE_Payload_size(&payload);
-    payload_length += 4; // delete payload (request id * object_id), no padding.
+    payload_length += 4; // delete payload (request id + object_id), no padding.
 
     MicroBuffer mb;
     bool available = prepare_stream_to_write(session, stream_id, payload_length + SUBHEADER_SIZE, &mb);
     if(available)
     {
+        request_id = init_base_object_request(session, object_id, &payload.base);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
         (void) serialize_DELETE_Payload(&mb, &payload);
-    }
-    else
-    {
-        request_id = 0;
     }
 
     return request_id;
@@ -38,7 +34,7 @@ uint16_t common_create_entity(Session* session, StreamId stream_id,
                                   mrObjectId object_id, size_t xml_ref_size, uint8_t flags,
                                   CREATE_Payload* payload)
 {
-    uint16_t request_id = create_base_object_request(session, object_id, &payload->base);
+    uint16_t request_id = INVALID_REQUEST_ID;
 
     // Change this when microcdr supports size_of function. Currently, DOMAIN_ID is not supported.
     size_t payload_length = 0; //CREATE_Payload_size(&payload);
@@ -56,27 +52,11 @@ uint16_t common_create_entity(Session* session, StreamId stream_id,
     bool available = prepare_stream_to_write(session, stream_id, payload_length + SUBHEADER_SIZE, &mb);
     if(available)
     {
+        request_id = init_base_object_request(session, object_id, &payload->base);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, flags);
         (void) serialize_CREATE_Payload(&mb, payload);
     }
-    else
-    {
-        request_id = 0;
-    }
 
     return request_id;
 }
 
-//==================================================================
-//                              PRIVATE
-//==================================================================
-uint16_t create_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base)
-{
-    uint16_t request_id = generate_request_id(session);
-
-    base->request_id.data[0] = (uint8_t) (request_id >> 8);
-    base->request_id.data[1] = (uint8_t) request_id;
-    object_id_to_raw(object_id, base->object_id.data);
-
-    return request_id;
-}

@@ -21,9 +21,9 @@ void on_status(Session* session, mrObjectId id, uint16_t request_id, uint8_t sta
     printf("Status received!\n");
 }
 
-void on_topic(Session* session, mrObjectId id, uint16_t request_id, MicroBuffer* mb, void* args)
+void on_topic(Session* session, mrObjectId id, uint16_t request_id, MicroBuffer* mb, StreamId stream_id, void* args)
 {
-    (void) session; (void) id; (void) request_id; (void) mb; (void) args;
+    (void) session; (void) id; (void) request_id; (void) mb; (void) stream_id; (void) args;
     printf("Topic received!\n");
 }
 
@@ -39,13 +39,13 @@ int main(int args, char** argv)
     Session session;
     create_session(&session, 128, 0xAABBCCDD, &udp.comm);
     set_status_callback(&session, on_status, NULL);
-//    set_topic_callback(&session, on_topic, NULL);
+    set_topic_callback(&session, on_topic, NULL);
 
     // Streams
     //uint8_t output_best_effort_stream_buffer[256];
     //StreamId best_effort_out = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
     uint8_t output_reliable_stream_buffer[2048];
-    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 2048, 1000);
+    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 2048, 2000);
 
     uint8_t input_reliable_stream_buffer[2048];
     create_input_reliable_stream(&session, input_reliable_stream_buffer, 2048);
@@ -66,6 +66,16 @@ int main(int args, char** argv)
     mrObjectId datareader_id = create_object_id(0x01, DATAREADER_ID);
     char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
     write_configure_datareader_xml(&session, reliable_out, datareader_id, participant_id, datareader_xml, 0);
+
+    run_session(&session, 0, 0); //only send messages to the agent, not waiting fot the incoming messages.
+
+    // Configure read
+    DeliveryControl delivery_control;
+    delivery_control.max_bytes_per_second = 1024;
+    delivery_control.max_elapsed_time = 100;
+    delivery_control.max_samples = 50;
+    delivery_control.min_pace_period = 1;
+    write_read_data(&session, reliable_out, datareader_id, MR_FORMAT_DATA, &delivery_control);
 
     // Send and receive messages
     run_session(&session, 20, 10);

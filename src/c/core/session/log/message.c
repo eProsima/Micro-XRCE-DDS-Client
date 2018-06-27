@@ -252,10 +252,11 @@ static void print_read_data_submessage(const char* pre, const READ_DATA_Payload*
             sprintf(format, "FORMAT_DATA_UNKNOWN");
     }
 
-    printf("%s[READ DATA | %s | %s]%s\n",
+    printf("%s[READ DATA | %s | %s | dc: %s]%s\n",
             pre,
             request_to_string(&payload->base),
             format,
+            (payload->read_specification.optional_delivery_control) ? "true" : "false",
             RESTORE_COLOR);
 }
 

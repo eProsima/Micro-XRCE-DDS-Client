@@ -21,16 +21,12 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/session/session.h>
-#include <micrortps/client/core/session/stream_id.h>
-#include <micrortps/client/core/session/object_id.h>
-#include <stdint.h>
 
-typedef struct ContentFilter
-{
-   char* expression;
-   uint32_t len;
-
-} ContentFilter;
+const uint8_t MR_FORMAT_DATA;
+const uint8_t MR_FORMAT_SAMPLE;
+const uint8_t MR_FORMAT_DATA_SEQ;
+const uint8_t MR_FORMAT_SAMPLE_SEQ;
+const uint8_t MR_FORMAT_PACKED_SAMPLEs;
 
 typedef struct DeliveryControl
 {
@@ -41,15 +37,7 @@ typedef struct DeliveryControl
 
 } DeliveryControl;
 
-typedef struct ReadConfig
-{
-   uint8_t data_format;
-   ContentFilter* content_filter;
-   DeliveryControl* delivery_control;
-
-} ReadConfig;
-
-int write_read_data(Session* session, StreamId stream_id, ReadConfig* read_config);
+uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id, uint8_t format, DeliveryControl* control);
 
 #ifdef __cplusplus
 }

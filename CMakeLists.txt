@@ -52,7 +52,8 @@ option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
 option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
-option(VERBOSE "Use verbose output" OFF)
+option(VERBOSE_SERIALIZATION "Use verbose output" OFF)
+option(VERBOSE_MESSAGE "Use verbose output" OFF)
 
 if(EPROSIMA_BUILD)
     set(EPROSIMA_BUILD_EXAMPLES ON)
@@ -223,8 +224,8 @@ configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/client.h.in
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
-        -D$<$<BOOL:${VERBOSE}>:SERIALIZATION_LOGS>
-        -D$<$<BOOL:${VERBOSE}>:MESSAGE_LOGS>
+        -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:SERIALIZATION_LOGS>
+        -D$<$<BOOL:${VERBOSE_MESSAGE}>:MESSAGE_LOGS>
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:PROFILE_CREATE_ENTITIES_BIN>
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:PROFILE_CREATE_ENTITIES_REF>
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:PROFILE_CREATE_ENTITIES_XML>

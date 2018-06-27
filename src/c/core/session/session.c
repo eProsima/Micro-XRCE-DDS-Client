@@ -15,6 +15,7 @@
 
 #define INITIAL_REQUEST_ID 0x0010
 
+uint16_t generate_request_id(Session* session);
 
 bool listen_message(Session* session, int poll_ms);
 
@@ -32,6 +33,7 @@ void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId s
 void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
 
 void read_submessage_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment);
+void read_submessage_status(Session* session, MicroBuffer* submessage);
 
 //==================================================================
 //                             PUBLIC
@@ -72,39 +74,19 @@ int delete_session(Session* session)
     return wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
-uint8_t generate_request_id(Session* session)
+void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)
 {
-    uint8_t last_request_id = (UINT8_MAX == session->last_request_id)
-        ? INITIAL_REQUEST_ID
-        : session->last_request_id;
-
-    session->last_request_id = last_request_id + 1;
-    return last_request_id;
+    session->on_status = on_status_func;
+    session->on_status_args = args;
 }
 
-bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb)
+#ifdef PROFILE_READ_ACCESS
+void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args)
 {
-    bool available = false;
-    switch(stream_id.type)
-    {
-        case BEST_EFFORT_STREAM:
-        {
-            OutputBestEffortStream* stream = get_output_best_effort_stream(&session->streams, stream_id.index);
-            available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
-            break;
-        }
-        case RELIABLE_STREAM:
-        {
-            OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
-            available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
-            break;
-        }
-        default:
-            break;
-    }
-
-    return available;
+    session->on_topic = on_topic_func;
+    session->on_topic_args = args;
 }
+#endif
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size)
 {
@@ -128,20 +110,6 @@ StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t 
     size_t message_data_size = 128; //session->comm->mtu(session->comm);
     return add_input_reliable_buffer(&session->streams, buffer, size, message_data_size);
 }
-
-void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)
-{
-    session->on_status = on_status_func;
-    session->on_status_args = args;
-}
-
-#ifdef PROFILE_DATA_ACCESS
-void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args)
-{
-    session->on_topic = on_topic_func;
-    session->on_topic_args = args;
-}
-#endif
 
 void run_session(Session* session, size_t read_attemps, int poll_ms)
 {
@@ -206,10 +174,54 @@ void run_session(Session* session, size_t read_attemps, int poll_ms)
     }
 }
 
+bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb)
+{
+    bool available = false;
+    switch(stream_id.type)
+    {
+        case BEST_EFFORT_STREAM:
+        {
+            OutputBestEffortStream* stream = get_output_best_effort_stream(&session->streams, stream_id.index);
+            available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
+            break;
+        }
+        case RELIABLE_STREAM:
+        {
+            OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
+            available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
+            break;
+        }
+        default:
+            break;
+    }
+
+    return available;
+}
+
+uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base)
+{
+    uint16_t request_id = generate_request_id(session);
+
+    base->request_id.data[0] = (uint8_t) (request_id >> 8);
+    base->request_id.data[1] = (uint8_t) request_id;
+    object_id_to_raw(object_id, base->object_id.data);
+
+    return request_id;
+}
 
 //==================================================================
 //                             PRIVATE
 //==================================================================
+uint16_t generate_request_id(Session* session)
+{
+    uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
+        ? INITIAL_REQUEST_ID
+        : session->last_request_id;
+
+    session->last_request_id = last_request_id + 1;
+    return last_request_id;
+}
+
 bool listen_message(Session* session, int poll_ms)
 {
     //NOTE: Assuming that recv_message return always a message if it can mount it in 'poll_ms' milliseconds.
@@ -360,14 +372,14 @@ void read_submessage(Session* session, MicroBuffer* payload, uint8_t submessage_
             {
                 read_delete_session_status(&session->info, payload);
             }
-
-            #ifdef PROFILE_STATUS_ANSWER
-            read_submessage_status(session, payload);
-            #endif
+            else
+            {
+                read_submessage_status(session, payload);
+            }
             break;
 
         case SUBMESSAGE_ID_DATA:
-            #ifdef PROFILE_DATA_ACCESS
+            #ifdef PROFILE_READ_ACCESS
             read_submessage_data(session, payload, stream_id, flags & FORMAT_MASK);
             #endif
             break;
@@ -418,7 +430,6 @@ void read_submessage_status(Session* session, MicroBuffer* submessage)
         uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
                             + payload.base.related_request.request_id.data[1];
         uint8_t status = payload.base.result.status;
-
 
         session->on_status(session, object_id, request_id, status, session->on_status_args);
     }
