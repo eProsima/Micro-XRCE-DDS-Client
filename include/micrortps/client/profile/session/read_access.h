@@ -22,11 +22,11 @@ extern "C"
 
 #include <micrortps/client/core/session/session.h>
 
-const uint8_t MR_FORMAT_DATA;
-const uint8_t MR_FORMAT_SAMPLE;
-const uint8_t MR_FORMAT_DATA_SEQ;
-const uint8_t MR_FORMAT_SAMPLE_SEQ;
-const uint8_t MR_FORMAT_PACKED_SAMPLEs;
+extern const uint8_t MR_FORMAT_DATA;
+extern const uint8_t MR_FORMAT_SAMPLE;
+extern const uint8_t MR_FORMAT_DATA_SEQ;
+extern const uint8_t MR_FORMAT_SAMPLE_SEQ;
+extern const uint8_t MR_FORMAT_PACKED_SAMPLEs;
 
 typedef struct DeliveryControl
 {

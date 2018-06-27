@@ -24,6 +24,21 @@ void on_status(Session* session, mrObjectId id, uint16_t request_id, uint8_t sta
     printf("Status received!\n");
 }
 
+//int main(int args, char** argv)
+//{
+//    (void) args; (void) argv;
+//
+//    UARTTransport uart;
+//    int fd = open("/dev/pts/2", O_RDWR | O_NOCTTY | O_NONBLOCK);
+//    init_uart_transport_fd(&uart, fd, 0x00, 0x01);
+//
+//    Session session;
+//    create_session(&session, 128, 0xAABBCCDD, &uart.comm);
+//    delete_session(&session);
+//
+//    return 0;
+//}
+
 int main(int args, char** argv)
 {
     (void) args; (void) argv;
@@ -71,6 +86,23 @@ int main(int args, char** argv)
 
     return 0;
 }
+
+//int main(int args, char** argv)
+//{
+//    (void) args; (void) argv;
+//
+//    TCPTransport tcp;
+//    init_tcp_transport(&tcp, "127.0.0.1", 2019);
+//
+//    Session session;
+//    create_session(&session, 128, 0xAABBCCDD, &tcp.comm);
+//    delete_session(&session);
+//
+//    shutdown(tcp.poll_fd.fd, SHUT_WR);
+//    close(tcp.poll_fd.fd);
+//
+//    return 0;
+//}
 
 /*
 void check_and_print_error(Session* session, const char* where)

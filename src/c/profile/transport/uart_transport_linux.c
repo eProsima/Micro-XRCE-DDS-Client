@@ -26,7 +26,7 @@ static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int tim
     int poll_rv = poll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
     {
-        ssize_t bytes_read = read(transport->fd, buf, len);
+        ssize_t bytes_read = read(transport->poll_fd.fd, buf, len);
         if (0 < bytes_read)
         {
             rv = (uint16_t)bytes_read;
@@ -44,7 +44,7 @@ static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
     uint16_t bytes_written = write_serial_msg(&transport->serial_io, buf, len, transport->local_addr);
     if (0 < bytes_written)
     {
-        ssize_t bytes_sent = write(transport->fd, transport->serial_io.output.buffer, (size_t)bytes_written);
+        ssize_t bytes_sent = write(transport->poll_fd.fd, transport->serial_io.output.buffer, (size_t)bytes_written);
         if (0 < bytes_sent && (uint16_t)bytes_sent == bytes_written)
         {
             rv = true;
@@ -92,19 +92,18 @@ int init_uart_transport(UARTTransport* transport, const char* device, uint8_t re
     /* Open device */
     transport->remote_addr = remote_addr;
     transport->local_addr = local_addr;
-    transport->fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if (transport->fd != -1)
+    transport->poll_fd.fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if (transport->poll_fd.fd != -1)
     {
         /* Init SerialIO. */
         init_serial_io(&transport->serial_io);
 
         /* Send init flag. */
         uint8_t flag = MICRORTPS_FRAMING_END_FLAG;
-        ssize_t bytes_written = write(transport->fd, &flag, 1);
+        ssize_t bytes_written = write(transport->poll_fd.fd, &flag, 1);
         if (0 < bytes_written && 1 == bytes_written)
         {
             /* Poll setup. */
-            transport->poll_fd.fd = transport->fd;
             transport->poll_fd.events = POLLIN;
 
             /* Interface setup. */
@@ -126,18 +125,17 @@ int init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_addr
     /* Open device */
     transport->remote_addr = remote_addr;
     transport->local_addr = local_addr;
-    transport->fd = fd;
+    transport->poll_fd.fd = fd;
 
     /* Init SerialIO. */
     init_serial_io(&transport->serial_io);
 
     /* Send init flag. */
     uint8_t flag = MICRORTPS_FRAMING_END_FLAG;
-    ssize_t bytes_written = write(transport->fd, &flag, 1);
+    ssize_t bytes_written = write(transport->poll_fd.fd, &flag, 1);
     if (0 < bytes_written && 1 == bytes_written)
     {
         /* Poll setup. */
-        transport->poll_fd.fd = transport->fd;
         transport->poll_fd.events = POLLIN;
 
         /* Interface setup. */

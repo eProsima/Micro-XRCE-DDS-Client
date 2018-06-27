@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 #include <SerialComm.hpp>
 #include <stdint.h>
 #include <unistd.h>
@@ -82,7 +80,7 @@ TEST_F(SerialComm, FatigueTest)
 
     for (unsigned int i = 0; i < msgs_size; ++i)
     {
-        if ( master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)))
+        if (master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)))
         {
             ++sent_counter;
         }

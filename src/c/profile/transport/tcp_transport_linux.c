@@ -78,7 +78,7 @@ bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
         }
         else
         {
-            rv = ECONNABORTED;
+            rv = false;
         }
     }
     else

@@ -22,16 +22,16 @@ extern "C"
 
 #include <stdint.h>
 
-const uint8_t APPLICATION_ID;
-const uint8_t QOS_PROFILE_ID;
-const uint8_t TYPE_ID;
-const uint8_t DOMAIN_ID;
-const uint8_t PARTICIPANT_ID;
-const uint8_t TOPIC_ID;
-const uint8_t PUBLISHER_ID;
-const uint8_t SUBSCRIBER_ID;
-const uint8_t DATAWRITER_ID;
-const uint8_t DATAREADER_ID;
+extern const uint8_t APPLICATION_ID;
+extern const uint8_t QOS_PROFILE_ID;
+extern const uint8_t TYPE_ID;
+extern const uint8_t DOMAIN_ID;
+extern const uint8_t PARTICIPANT_ID;
+extern const uint8_t TOPIC_ID;
+extern const uint8_t PUBLISHER_ID;
+extern const uint8_t SUBSCRIBER_ID;
+extern const uint8_t DATAWRITER_ID;
+extern const uint8_t DATAREADER_ID;
 
 typedef struct mrObjectId
 {

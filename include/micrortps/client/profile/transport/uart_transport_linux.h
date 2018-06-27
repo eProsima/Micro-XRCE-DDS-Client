@@ -32,7 +32,6 @@ typedef struct UARTTransport UARTTransport;
 struct UARTTransport
 {
     uint8_t buffer[UART_TRANSPORT_MTU];
-    int fd;
     uint8_t remote_addr;
     uint8_t local_addr;
     struct pollfd poll_fd;

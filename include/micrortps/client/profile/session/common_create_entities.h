@@ -22,8 +22,8 @@ extern "C"
 
 #include <micrortps/client/core/session/session.h>
 
-const uint8_t ENTITY_REPLACE;
-const uint8_t ENTITY_REUSE;
+extern const uint8_t ENTITY_REPLACE;
+extern const uint8_t ENTITY_REUSE;
 
 typedef struct CREATE_Payload CREATE_Payload;
 

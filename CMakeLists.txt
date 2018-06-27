@@ -252,7 +252,7 @@ if(EPROSIMA_BUILD_TESTS)
     #add_subdirectory(test/integration/interaction)
     #add_subdirectory(test/integration/cross_serialization)
     #add_subdirectory(test/integration/xrce_serialization)
-    #add_subdirectory(test/transport/serial_comm)
+    add_subdirectory(test/transport/serial_comm)
     add_subdirectory(test/unitary/streams/output_best_effort)
 endif()
 
