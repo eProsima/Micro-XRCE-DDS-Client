@@ -13,16 +13,9 @@ SeqNum seq_num_add(SeqNum seq_num, SeqNum increment)
 
 SeqNum seq_num_sub(SeqNum seq_num, SeqNum decrement)
 {
-    uint16_t result;
-    if(decrement > seq_num)
-    {
-        result = (seq_num + (UINT16_SIZE - decrement)) % UINT16_SIZE;
-    }
-    else
-    {
-        result = seq_num - decrement;
-    }
-    return result;
+    return (decrement > seq_num)
+        ? (seq_num + (UINT16_SIZE - decrement)) % UINT16_SIZE
+        : seq_num - decrement;
 }
 
 int seq_num_cmp(SeqNum seq_num_1, SeqNum seq_num_2)

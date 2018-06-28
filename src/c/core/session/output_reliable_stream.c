@@ -9,12 +9,12 @@
 #define MIN_HEARTBEAT_TIME_INTERVAL_NS 1000000 // 1ms
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
-void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
+static void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
 
-size_t get_output_buffer_length(uint8_t* buffer);
-void set_output_buffer_length(uint8_t* buffer, size_t length);
-uint8_t* get_output_buffer(const OutputReliableStream* stream, size_t history_pos);
-size_t get_output_buffer_size(const OutputReliableStream* stream);
+static size_t get_output_buffer_length(uint8_t* buffer);
+static void set_output_buffer_length(uint8_t* buffer, size_t length);
+static uint8_t* get_output_buffer(const OutputReliableStream* stream, size_t history_pos);
+static size_t get_output_buffer_size(const OutputReliableStream* stream);
 
 // Implementation note: the SUBHEADER_SIZE must be used to represent the header of the fragment.
 
@@ -106,7 +106,7 @@ bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t*
     return data_to_send;
 }
 
-bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp)
+bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint64_t current_timestamp)
 {
     if(0 > seq_num_cmp(stream->last_acknown, stream->last_sent))
     {
@@ -115,7 +115,7 @@ bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t c
     else
     {
         stream->next_heartbeat_tries = 0;
-        stream->next_heartbeat_time_stamp = UINT32_MAX;
+        stream->next_heartbeat_time_stamp = UINT64_MAX;
     }
 
     return stream->next_heartbeat_time_stamp <= current_timestamp;
@@ -202,24 +202,24 @@ void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t fir
     }
 }
 
-size_t get_output_buffer_length(uint8_t* buffer)
+inline size_t get_output_buffer_length(uint8_t* buffer)
 {
     size_t length;
     memcpy(&length, buffer - INTERNAL_BUFFER_OFFSET, sizeof(size_t));
     return length;
 }
 
-void set_output_buffer_length(uint8_t* buffer, size_t length)
+inline void set_output_buffer_length(uint8_t* buffer, size_t length)
 {
     memcpy(buffer - INTERNAL_BUFFER_OFFSET, &length, sizeof(size_t));
 }
 
-uint8_t* get_output_buffer(const OutputReliableStream* stream, size_t history_pos)
+inline uint8_t* get_output_buffer(const OutputReliableStream* stream, size_t history_pos)
 {
     return stream->buffer + history_pos * (stream->size / stream->history) + INTERNAL_BUFFER_OFFSET;
 }
 
-size_t get_output_buffer_size(const OutputReliableStream* stream)
+inline size_t get_output_buffer_size(const OutputReliableStream* stream)
 {
     return (stream->size / stream->history) - INTERNAL_BUFFER_OFFSET;
 }

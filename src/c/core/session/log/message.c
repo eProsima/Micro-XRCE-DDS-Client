@@ -36,303 +36,32 @@
 
 #define RESTORE_COLOR  "\x1B[0m"
 
-#define SEND_ARROW YELLOW "=>> " RESTORE_COLOR
-#define RECV_ARROW PURPLE "<<= " RESTORE_COLOR
+#define SEND_ARROW       YELLOW "=>> " RESTORE_COLOR
+#define RECV_ARROW       PURPLE "<<= " RESTORE_COLOR
 
-#define DATA_TO_STRING_BUFFER 4096
+#define DATA_TO_STRING_BUFFER     4096
 
-static char* print_array_2(const uint8_t* array_2)
-{
-    static char buffer[256];
-    sprintf(buffer, "%02X%02X", array_2[0], array_2[1]);
-    return buffer;
-}
+static char* print_array_2(const uint8_t* array_2);
+static const char* data_to_string(const uint8_t* data, uint32_t size);
+static const char* request_to_string(const BaseObjectRequest* request);
+static const char* reply_to_string(const BaseObjectReply* reply);
+static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload);
+static void print_create_submessage(const char* pre, const CREATE_Payload* payload);
+//static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload);
+static void print_delete_submessage(const char* pre, const DELETE_Payload* payload);
+static void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload);
+static void print_status_submessage(const char* pre, const STATUS_Payload* payload);
+//static void print_info_submessage(const char* pre, const INFO_Payload* payload);
+static void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payload);
+static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload);
+static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload);
+static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload);
+static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload);
+static void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_num, bool printable);
 
-static const char* data_to_string(const uint8_t* data, uint32_t size)
-{
-    static char buffer[4096];
-    for(uint32_t i = 0; i < size; i++)
-        sprintf(buffer + 3 * i, "%02X ", data[i]);
-    buffer[3 * size] = '\0';
-    return buffer;
-}
-
-static const char* request_to_string(const BaseObjectRequest* request)
-{
-    static char buffer[256];
-    int pos = sprintf(buffer, "#0x%s", print_array_2(request->request_id.data));
-    sprintf(buffer + pos, " | id: 0x%s", print_array_2(request->object_id.data));
-
-    return buffer;
-}
-
-static const char* reply_to_string(const BaseObjectReply* reply)
-{
-    static char buffer[256];
-
-    char status[64];
-    switch(reply->result.status)
-    {
-        case STATUS_OK:
-            sprintf(status, "OK");
-            break;
-        case STATUS_OK_MATCHED:
-            sprintf(status, "OK_MATCHED");
-            break;
-        case STATUS_ERR_DDS_ERROR:
-            sprintf(status, "ERR_DDS_ERROR");
-            break;
-        case STATUS_ERR_MISMATCH:
-            sprintf(status, "ERR_MISMATCH");
-            break;
-        case STATUS_ERR_ALREADY_EXISTS:
-            sprintf(status, "ERR_ALREADY_EXISTS");
-            break;
-        case STATUS_ERR_DENIED:
-            sprintf(status, "ERR_DENIED");
-            break;
-        case STATUS_ERR_UNKNOWN_REFERENCE:
-            sprintf(status, "ERR_UNKNOWN_REFERENCE");
-            break;
-        case STATUS_ERR_INVALID_DATA:
-            sprintf(status, "ERR_INVALID_DATA");
-            break;
-        case STATUS_ERR_INCOMPATIBLE:
-            sprintf(status, "ERR_INCOMPATIBLE");
-            break;
-        case STATUS_ERR_RESOURCES:
-            sprintf(status, "ERR_RESOURCES");
-            break;
-        default:
-            sprintf(status, "UNKNOWN");
-    }
-
-    sprintf(buffer, "%s | %s",
-            request_to_string(&reply->related_request),
-            status);
-
-    return buffer;
-}
-
-static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
-{
-    printf("%s[CREATE CLIENT | %s | session: 0x%02X | key: %s]%s\n",
-            pre,
-            request_to_string(&payload->base),
-            payload->client_representation.session_id,
-            data_to_string(payload->client_representation.client_key.data, 4),
-            RESTORE_COLOR);
-}
-
-static void print_create_submessage(const char* pre, const CREATE_Payload* payload)
-{
-    char type[4];
-    switch(payload->object_representation._.participant.base.representation.format)
-    {
-        case REPRESENTATION_AS_XML_STRING:
-            strcpy(type, "xml");
-            break;
-
-        case REPRESENTATION_BY_REFERENCE:
-            strcpy(type, "ref");
-            break;
-
-        case REPRESENTATION_IN_BINARY:
-            strcpy(type, "bin");
-            break;
-
-    }
-
-    char content[4096];
-    switch(payload->object_representation.kind)
-    {
-        case OBJK_PARTICIPANT:
-            sprintf(content, "PARTICIPANT | %s: %u",
-                    type,
-                    payload->object_representation._.participant.base.representation._.xml_string_represenatation.size);
-            break;
-        case OBJK_TOPIC:
-            sprintf(content, "TOPIC | id: 0x%s | %s: %u",
-                    print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
-                    type,
-                    payload->object_representation._.topic.base.representation._.xml_string_represenatation.size);
-            break;
-        case OBJK_PUBLISHER:
-            sprintf(content, "PUBLISHER | id: 0x%s | %s: %u",
-                    print_array_2(payload->object_representation._.publisher.participant_id.data),
-                    type,
-                    payload->object_representation._.publisher.base.representation._.string_represenatation.size);
-            break;
-        case OBJK_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | id: 0x%s | %s: %u",
-                    print_array_2(payload->object_representation._.subscriber.participant_id.data),
-                    type,
-                    payload->object_representation._.subscriber.base.representation._.string_represenatation.size);
-            break;
-        case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | id: 0x%s | %s: %u",
-                    print_array_2(payload->object_representation._.data_writer.publisher_id.data),
-                    type,
-                    payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
-             break;
-        case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | id: 0x%s | %s: %u",
-                    print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
-                    type,
-                    payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
-            break;
-        default:
-            sprintf(content, "UNKNOWN");
-    }
-
-    printf("%s[CREATE | %s | %s]%s\n",
-            pre,
-            request_to_string(&payload->base),
-            content,
-            RESTORE_COLOR);
-}
-
-/*static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload)
-{
-    //TODO
-    (void) payload;
-}*/
-
-static void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
-{
-    printf("%s[DELETE | %s]%s\n",
-            pre,
-            request_to_string(&payload->base),
-            RESTORE_COLOR);
-}
-
-static void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload)
-{
-    printf("%s[STATUS AGENT | %s]%s\n",
-            pre,
-            reply_to_string(&payload->base),
-            RESTORE_COLOR);
-}
-
-static void print_status_submessage(const char* pre, const STATUS_Payload* payload)
-{
-    printf("%s[STATUS | %s]%s\n",
-            pre,
-            reply_to_string(&payload->base),
-            RESTORE_COLOR);
-}
-
-/*static void print_info_submessage(const char* pre, const INFO_Payload* payload)
-{
-    //TODO
-    (void) payload;
-}*/
-
-static void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payload)
-{
-    char format[128];
-    switch(payload->read_specification.data_format)
-    {
-        case FORMAT_DATA:
-            sprintf(format, "FORMAT_DATA");
-        break;
-        case FORMAT_DATA_SEQ:
-            sprintf(format, "FORMAT_DATA_SEQ");
-        break;
-        case FORMAT_SAMPLE:
-            sprintf(format, "FORMAT_SAMPLE");
-        break;
-        case FORMAT_SAMPLE_SEQ:
-            sprintf(format, "FORMAT_SAMPLE_SEQ");
-        break;
-        case FORMAT_PACKED_SAMPLES:
-            sprintf(format, "FORMAT_PACKED_SAMPLES");
-        break;
-        default:
-            sprintf(format, "FORMAT_DATA_UNKNOWN");
-    }
-
-    printf("%s[READ DATA | %s | %s | dc: %s]%s\n",
-            pre,
-            request_to_string(&payload->base),
-            format,
-            (payload->read_specification.optional_delivery_control) ? "true" : "false",
-            RESTORE_COLOR);
-}
-
-static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload)
-{
-    printf("%s[WRITE DATA | FORMAT_DATA | %s]%s\n",
-            pre,
-            request_to_string(&payload->base),
-            RESTORE_COLOR);
-}
-
-static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload)
-{
-    printf("%s[DATA | FORMAT_DATA | %s]%s\n",
-            pre,
-            request_to_string(&payload->base),
-            RESTORE_COLOR);
-}
-
-static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
-{
-    char bitmask[17] = {0};
-    for(int i = 0; i < 8; i++)
-    {
-        bitmask[15 - i] = (payload->nack_bitmap[1] & (1 << i)) ? '1' : '0';
-        bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
-    }
-
-    printf("%s[ACKNACK | seq_num: %hu | bitmap: %s]%s\n",
-            pre,
-            payload->first_unacked_seq_num,
-            bitmask,
-            RESTORE_COLOR);
-}
-
-static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload)
-{
-    printf("%s[HEARTBEAT | first: %hu | last: %hu]%s\n",
-            pre,
-            payload->first_unacked_seq_nr,
-            payload->last_unacked_seq_nr,
-            RESTORE_COLOR);
-}
-
-void print_header(const char* dir, uint8_t stream_id, uint16_t seq_num, bool printable)
-{
-    if(printable)
-    {
-        char stream_representation;
-        if(0 == stream_id)
-        {
-            stream_representation = 'N';
-        }
-        else if(0x80 <= stream_id)
-        {
-            stream_representation = 'R';
-        }
-        else if(1 <= stream_id)
-        {
-            stream_representation = 'B';
-        }
-
-        uint16_t seq_num_to_print = 0;
-        if(stream_id != 0)
-        {
-            seq_num_to_print = seq_num;
-        }
-
-        printf("%s%s[%c | %hu]%s", dir, GREY_LIGHT, stream_representation, seq_num_to_print, RESTORE_COLOR);
-    }
-    else
-    {
-        printf("           ");
-    }
-}
-
+//==================================================================
+//                             PUBLIC
+//==================================================================
 void print_message(int direction, uint8_t* buffer, size_t size)
 {
     const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
@@ -348,7 +77,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
     uint8_t submessage_id; uint16_t length; uint8_t flags;
     while(read_submessage_header(&mb, &submessage_id, &length, &flags))
     {
-        print_header(dir, stream_id_raw, seq_num, 0 == submessage_counter);
+        print_header(size, dir, stream_id_raw, seq_num, 0 == submessage_counter);
 
         switch(submessage_id)
         {
@@ -468,3 +197,299 @@ void print_serialization(int direction, const uint8_t* buffer, size_t size)
             data_to_string(buffer, size),
             RESTORE_COLOR);
 }
+
+//==================================================================
+//                             PRIVATE
+//==================================================================
+char* print_array_2(const uint8_t* array_2)
+{
+    static char buffer[256];
+    sprintf(buffer, "%02X%02X", array_2[0], array_2[1]);
+    return buffer;
+}
+
+const char* data_to_string(const uint8_t* data, uint32_t size)
+{
+    static char buffer[4096];
+    for(uint32_t i = 0; i < size; i++)
+        sprintf(buffer + 3 * i, "%02X ", data[i]);
+    buffer[3 * size] = '\0';
+    return buffer;
+}
+
+const char* request_to_string(const BaseObjectRequest* request)
+{
+    static char buffer[256];
+    int pos = sprintf(buffer, "req: 0x%s", print_array_2(request->request_id.data));
+    sprintf(buffer + pos, " | obj: 0x%s", print_array_2(request->object_id.data));
+
+    return buffer;
+}
+
+const char* reply_to_string(const BaseObjectReply* reply)
+{
+    static char buffer[256];
+
+    char status[64];
+    switch(reply->result.status)
+    {
+        case STATUS_OK:
+            sprintf(status, "OK");
+            break;
+        case STATUS_OK_MATCHED:
+            sprintf(status, "OK_MATCHED");
+            break;
+        case STATUS_ERR_DDS_ERROR:
+            sprintf(status, "ERR_DDS_ERROR");
+            break;
+        case STATUS_ERR_MISMATCH:
+            sprintf(status, "ERR_MISMATCH");
+            break;
+        case STATUS_ERR_ALREADY_EXISTS:
+            sprintf(status, "ERR_ALREADY_EXISTS");
+            break;
+        case STATUS_ERR_DENIED:
+            sprintf(status, "ERR_DENIED");
+            break;
+        case STATUS_ERR_UNKNOWN_REFERENCE:
+            sprintf(status, "ERR_UNKNOWN_REFERENCE");
+            break;
+        case STATUS_ERR_INVALID_DATA:
+            sprintf(status, "ERR_INVALID_DATA");
+            break;
+        case STATUS_ERR_INCOMPATIBLE:
+            sprintf(status, "ERR_INCOMPATIBLE");
+            break;
+        case STATUS_ERR_RESOURCES:
+            sprintf(status, "ERR_RESOURCES");
+            break;
+        default:
+            sprintf(status, "UNKNOWN");
+    }
+
+    sprintf(buffer, "%s | %s",
+            request_to_string(&reply->related_request),
+            status);
+
+    return buffer;
+}
+
+void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
+{
+    printf("%s[CREATE CLIENT | %s | session: 0x%02X | key: %s]%s\n",
+            pre,
+            request_to_string(&payload->base),
+            payload->client_representation.session_id,
+            data_to_string(payload->client_representation.client_key.data, 4),
+            RESTORE_COLOR);
+}
+
+void print_create_submessage(const char* pre, const CREATE_Payload* payload)
+{
+    char type[4];
+    switch(payload->object_representation._.participant.base.representation.format)
+    {
+        case REPRESENTATION_AS_XML_STRING:
+            strcpy(type, "xml");
+            break;
+
+        case REPRESENTATION_BY_REFERENCE:
+            strcpy(type, "ref");
+            break;
+
+        case REPRESENTATION_IN_BINARY:
+            strcpy(type, "bin");
+            break;
+
+    }
+
+    char content[4096];
+    switch(payload->object_representation.kind)
+    {
+        case OBJK_PARTICIPANT:
+            sprintf(content, "PARTICIPANT | %s: %u",
+                    type,
+                    payload->object_representation._.participant.base.representation._.xml_string_represenatation.size);
+            break;
+        case OBJK_TOPIC:
+            sprintf(content, "TOPIC | obj: 0x%s | %s: %u",
+                    print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
+                    type,
+                    payload->object_representation._.topic.base.representation._.xml_string_represenatation.size);
+            break;
+        case OBJK_PUBLISHER:
+            sprintf(content, "PUBLISHER | obj: 0x%s | %s: %u",
+                    print_array_2(payload->object_representation._.publisher.participant_id.data),
+                    type,
+                    payload->object_representation._.publisher.base.representation._.string_represenatation.size);
+            break;
+        case OBJK_SUBSCRIBER:
+            sprintf(content, "SUBSCRIBER | obj: 0x%s | %s: %u",
+                    print_array_2(payload->object_representation._.subscriber.participant_id.data),
+                    type,
+                    payload->object_representation._.subscriber.base.representation._.string_represenatation.size);
+            break;
+        case OBJK_DATAWRITER:
+            sprintf(content, "DATA_WRITER | obj: 0x%s | %s: %u",
+                    print_array_2(payload->object_representation._.data_writer.publisher_id.data),
+                    type,
+                    payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
+             break;
+        case OBJK_DATAREADER:
+            sprintf(content, "DATA_READER | obj: 0x%s | %s: %u",
+                    print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
+                    type,
+                    payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
+            break;
+        default:
+            sprintf(content, "UNKNOWN");
+    }
+
+    printf("%s[CREATE | %s | %s]%s\n",
+            pre,
+            request_to_string(&payload->base),
+            content,
+            RESTORE_COLOR);
+}
+
+/*void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload)
+{
+    //TODO
+    (void) payload;
+}*/
+
+void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
+{
+    printf("%s[DELETE | %s]%s\n",
+            pre,
+            request_to_string(&payload->base),
+            RESTORE_COLOR);
+}
+
+void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload)
+{
+    printf("%s[STATUS AGENT | %s]%s\n",
+            pre,
+            reply_to_string(&payload->base),
+            RESTORE_COLOR);
+}
+
+void print_status_submessage(const char* pre, const STATUS_Payload* payload)
+{
+    printf("%s[STATUS | %s]%s\n",
+            pre,
+            reply_to_string(&payload->base),
+            RESTORE_COLOR);
+}
+
+/*void print_info_submessage(const char* pre, const INFO_Payload* payload)
+{
+    //TODO
+    (void) payload;
+}*/
+
+void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payload)
+{
+    char format[128];
+    switch(payload->read_specification.data_format)
+    {
+        case FORMAT_DATA:
+            sprintf(format, "FORMAT_DATA");
+        break;
+        case FORMAT_DATA_SEQ:
+            sprintf(format, "FORMAT_DATA_SEQ");
+        break;
+        case FORMAT_SAMPLE:
+            sprintf(format, "FORMAT_SAMPLE");
+        break;
+        case FORMAT_SAMPLE_SEQ:
+            sprintf(format, "FORMAT_SAMPLE_SEQ");
+        break;
+        case FORMAT_PACKED_SAMPLES:
+            sprintf(format, "FORMAT_PACKED_SAMPLES");
+        break;
+        default:
+            sprintf(format, "FORMAT_DATA_UNKNOWN");
+    }
+
+    printf("%s[READ DATA | %s | %s | dc: %s]%s\n",
+            pre,
+            request_to_string(&payload->base),
+            format,
+            (payload->read_specification.optional_delivery_control) ? "true" : "false",
+            RESTORE_COLOR);
+}
+
+void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload)
+{
+    printf("%s[WRITE DATA | FORMAT_DATA | %s]%s\n",
+            pre,
+            request_to_string(&payload->base),
+            RESTORE_COLOR);
+}
+
+void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload)
+{
+    printf("%s[DATA | FORMAT_DATA | %s]%s\n",
+            pre,
+            request_to_string(&payload->base),
+            RESTORE_COLOR);
+}
+
+void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
+{
+    char bitmask[17] = {0};
+    for(int i = 0; i < 8; i++)
+    {
+        bitmask[15 - i] = (payload->nack_bitmap[1] & (1 << i)) ? '1' : '0';
+        bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
+    }
+
+    printf("%s[ACKNACK | seq_num: %hu | bitmap: %s]%s\n",
+            pre,
+            payload->first_unacked_seq_num,
+            bitmask,
+            RESTORE_COLOR);
+}
+
+void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload)
+{
+    printf("%s[HEARTBEAT | first: %hu | last: %hu]%s\n",
+            pre,
+            payload->first_unacked_seq_nr,
+            payload->last_unacked_seq_nr,
+            RESTORE_COLOR);
+}
+
+void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_num, bool printable)
+{
+    if(printable)
+    {
+        char stream_representation;
+        if(0 == stream_id)
+        {
+            stream_representation = 'N';
+        }
+        else if(0x80 <= stream_id)
+        {
+            stream_representation = 'R';
+        }
+        else // if(1 <= stream_id)
+        {
+            stream_representation = 'B';
+        }
+
+        uint16_t seq_num_to_print = 0;
+        if(stream_id != 0)
+        {
+            seq_num_to_print = seq_num;
+        }
+
+        printf("%s%s%3zu: [%c | %hu]%s", dir, GREY_LIGHT, size, stream_representation, seq_num_to_print, RESTORE_COLOR);
+    }
+    else
+    {
+        printf("                ");
+    }
+}
+

@@ -3,6 +3,9 @@
 
 #define FLAG_ENDIANNESS 1
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 bool write_submessage_header(MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags)
 {
     align_to(mb, 4);

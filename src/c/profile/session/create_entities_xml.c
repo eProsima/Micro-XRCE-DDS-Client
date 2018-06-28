@@ -2,7 +2,7 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <string.h>
 
-uint16_t create_entity_xml(Session* session, StreamId stream_id,
+static uint16_t create_entity_xml(Session* session, StreamId stream_id,
                                   mrObjectId object_id, char* xml, uint8_t flags,
                                   CREATE_Payload* payload);
 
@@ -126,7 +126,7 @@ uint16_t write_configure_datareader_xml(Session* session, StreamId stream_id,
 //                             PRIVATE
 //==================================================================
 
-uint16_t create_entity_xml(Session* session, StreamId stream_id,
+inline uint16_t create_entity_xml(Session* session, StreamId stream_id,
                                   mrObjectId object_id, char* xml, uint8_t flags,
                                   CREATE_Payload* payload)
 {

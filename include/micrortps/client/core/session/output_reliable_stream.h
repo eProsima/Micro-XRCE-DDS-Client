@@ -40,7 +40,7 @@ typedef struct OutputReliableStream
     SeqNum last_sent;
     SeqNum last_acknown;
 
-    uint32_t next_heartbeat_time_stamp;
+    uint64_t next_heartbeat_time_stamp;
     uint8_t next_heartbeat_tries;
     bool send_lost;
 
@@ -50,7 +50,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
 bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb);
 bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
 
-bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint32_t current_timestamp);
+bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint64_t current_timestamp);
 SeqNum begin_output_nack_buffer_it(const OutputReliableStream* stream);
 bool next_reliable_nack_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t *length, SeqNum* seq_num_it);
 void write_heartbeat(const OutputReliableStream* stream, MicroBuffer* mb);

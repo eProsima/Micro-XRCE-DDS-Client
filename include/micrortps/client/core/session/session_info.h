@@ -40,10 +40,10 @@ typedef struct SessionInfo
 
 void init_session_info(SessionInfo* info, uint8_t id, uint32_t key);
 
-void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds);
+void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds);
 void write_delete_session(const SessionInfo* info, MicroBuffer* mb);
-void read_create_session_status(SessionInfo* info, MicroBuffer* buffer);
-void read_delete_session_status(SessionInfo* info, MicroBuffer* buffer);
+void read_create_session_status(SessionInfo* info, MicroBuffer* mb);
+void read_delete_session_status(SessionInfo* info, MicroBuffer* mb);
 
 void stamp_create_session_header(const SessionInfo* info, uint8_t* buffer);
 void stamp_session_header(const SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);

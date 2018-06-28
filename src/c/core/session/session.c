@@ -5,7 +5,7 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include "log/message.h"
 
-// Autogenerate these defines by the protocol?
+// Autogenerate these defines by the protocol generator tool?
 #define HEARTBEAT_MAX_MSG_SIZE 16
 #define ACKNACK_MAX_MSG_SIZE 16
 #define CREATE_SESSION_MAX_MSG_SIZE 38
@@ -15,25 +15,25 @@
 
 #define INITIAL_REQUEST_ID 0x0010
 
-uint16_t generate_request_id(Session* session);
+static uint16_t generate_request_id(Session* session);
 
-bool listen_message(Session* session, int poll_ms);
+static bool listen_message(Session* session, int poll_ms);
 
-bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_t attempts);
+static bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_t attempts);
 
-void send_message(const Session* session, uint8_t* buffer, size_t length);
-bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms);
+static void send_message(const Session* session, uint8_t* buffer, size_t length);
+static bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms);
 
-void write_send_heartbeat(const Session* session, StreamId stream);
-void write_send_acknack(const Session* session, StreamId stream);
+static void write_send_heartbeat(const Session* session, StreamId stream);
+static void write_send_acknack(const Session* session, StreamId stream);
 
-void read_message(Session* session, MicroBuffer* message);
-void read_stream(Session* session, MicroBuffer* message, StreamId id, uint16_t seq_num);
-void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id);
-void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
+static void read_message(Session* session, MicroBuffer* message);
+static void read_stream(Session* session, MicroBuffer* message, StreamId id, uint16_t seq_num);
+static void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id);
+static void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
 
-void read_submessage_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment);
-void read_submessage_status(Session* session, MicroBuffer* submessage);
+static void read_submessage_fragment(Session* session, MicroBuffer* payload, StreamId stream_id, bool last_fragment);
+static void read_submessage_status(Session* session, MicroBuffer* submessage);
 
 //==================================================================
 //                             PUBLIC
@@ -211,7 +211,7 @@ uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseOb
 //==================================================================
 //                             PRIVATE
 //==================================================================
-uint16_t generate_request_id(Session* session)
+inline uint16_t generate_request_id(Session* session)
 {
     uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
         ? INITIAL_REQUEST_ID
@@ -254,7 +254,7 @@ bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_
     return received;
 }
 
-void send_message(const Session* session, uint8_t* buffer, size_t length)
+inline void send_message(const Session* session, uint8_t* buffer, size_t length)
 {
     bool send = session->comm->send_msg(session->comm->instance, buffer, length);
     if(send)
@@ -263,7 +263,7 @@ void send_message(const Session* session, uint8_t* buffer, size_t length)
     }
 }
 
-bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms)
+inline bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms)
 {
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
     if(received)

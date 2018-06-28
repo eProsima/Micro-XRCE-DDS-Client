@@ -8,13 +8,13 @@
 
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
-void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
-uint16_t compute_nack_bitmap(const InputReliableStream* stream);
+static void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
+static uint16_t compute_nack_bitmap(const InputReliableStream* stream);
 
-size_t get_input_buffer_length(uint8_t* buffer);
-void set_input_buffer_length(uint8_t* buffer, size_t length);
-uint8_t* get_input_buffer(const InputReliableStream* stream, size_t history_pos);
-size_t get_input_buffer_size(const InputReliableStream* stream);
+static size_t get_input_buffer_length(uint8_t* buffer);
+static void set_input_buffer_length(uint8_t* buffer, size_t length);
+static uint8_t* get_input_buffer(const InputReliableStream* stream, size_t history_pos);
+static size_t get_input_buffer_size(const InputReliableStream* stream);
 
 //==================================================================
 //                             PUBLIC
@@ -148,22 +148,22 @@ uint16_t compute_nack_bitmap(const InputReliableStream* stream)
     return nack_bitmap;
 }
 
-size_t get_input_buffer_length(uint8_t* buffer)
+inline size_t get_input_buffer_length(uint8_t* buffer)
 {
     return (size_t)*(buffer - INTERNAL_BUFFER_OFFSET);
 }
 
-void set_input_buffer_length(uint8_t* buffer, size_t length)
+inline void set_input_buffer_length(uint8_t* buffer, size_t length)
 {
     memcpy(buffer - INTERNAL_BUFFER_OFFSET, &length, sizeof(size_t));
 }
 
-uint8_t* get_input_buffer(const InputReliableStream* stream, size_t history_pos)
+inline uint8_t* get_input_buffer(const InputReliableStream* stream, size_t history_pos)
 {
     return stream->buffer + history_pos * (stream->size / stream->history) + INTERNAL_BUFFER_OFFSET;
 }
 
-size_t get_input_buffer_size(const InputReliableStream* stream)
+inline size_t get_input_buffer_size(const InputReliableStream* stream)
 {
     return (stream->size / stream->history) - INTERNAL_BUFFER_OFFSET;
 }

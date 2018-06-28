@@ -51,7 +51,7 @@ static inline bool add_next_octet(SerialOutputBuffer* output, uint8_t octet, uin
 /*******************************************************************************
  * Private function definitions.
  *******************************************************************************/
-static uint8_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t len, uint8_t* addr)
+uint8_t process_input_message(SerialInputBuffer* input, uint8_t* buf, size_t len, uint8_t* addr)
 {
     bool cond = true;
     uint16_t msg_len = 0;
@@ -111,12 +111,12 @@ static uint8_t process_input_message(SerialInputBuffer* input, uint8_t* buf, siz
     return cond ? payload_len : 0;
 }
 
-static void update_crc(uint16_t* crc, const uint8_t data)
+void update_crc(uint16_t* crc, const uint8_t data)
 {
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-static inline uint8_t get_next_octet(SerialInputBuffer* input, uint16_t* relative_position)
+uint8_t get_next_octet(SerialInputBuffer* input, uint16_t* relative_position)
 {
     uint8_t rv = input->buffer[(input->head + *relative_position) % sizeof(input->buffer)];
 
@@ -130,7 +130,7 @@ static inline uint8_t get_next_octet(SerialInputBuffer* input, uint16_t* relativ
     return rv;
 }
 
-static inline bool add_next_octet(SerialOutputBuffer* output, uint8_t octet, uint16_t* position)
+bool add_next_octet(SerialOutputBuffer* output, uint8_t octet, uint16_t* position)
 {
     bool rv = false;
 
@@ -288,7 +288,7 @@ uint8_t read_serial_msg(SerialIO* serial_io, read_cb cb, void* cb_arg,
                         else
                         {
                             serial_io->input.state = SERIAL_BUFFER_EMPTY;
-                        }   
+                        }
                     }
                 }
                 break;

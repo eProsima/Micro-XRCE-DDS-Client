@@ -1,5 +1,8 @@
 #include <micrortps/client/core/serialization/xrce_subheader.h>
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 void serialize_submessage_header(MicroBuffer* mb, uint8_t id, uint8_t flags, uint16_t length)
 {
     (void) serialize_uint8_t(mb, id);

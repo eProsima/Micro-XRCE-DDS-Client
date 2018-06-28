@@ -12,6 +12,9 @@ const uint8_t SUBSCRIBER_ID = OBJK_SUBSCRIBER;
 const uint8_t DATAWRITER_ID = OBJK_DATAWRITER;
 const uint8_t DATAREADER_ID = OBJK_DATAREADER;
 
+//==================================================================
+//                             PUBLIC
+//==================================================================
 mrObjectId create_object_id(uint16_t id, uint8_t type)
 {
     mrObjectId object_id;

@@ -11,8 +11,8 @@
 
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
 
-void process_create_session_status(SessionInfo* info, uint8_t status, AGENT_Representation* agent);
-void process_delete_session_status(SessionInfo* info, uint8_t status);
+static void process_create_session_status(SessionInfo* info, uint8_t status, AGENT_Representation* agent);
+static void process_delete_session_status(SessionInfo* info, uint8_t status);
 
 //==================================================================
 //                             PUBLIC
@@ -28,7 +28,7 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
     info->state = STATE_LOGOUT;
 }
 
-void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint32_t nanoseconds)
+void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, STATE_LOGIN}};
@@ -57,10 +57,10 @@ void write_delete_session(const SessionInfo* info, MicroBuffer* mb)
     (void) serialize_DELETE_Payload(mb, &payload);
 }
 
-void read_create_session_status(SessionInfo* info, MicroBuffer* buffer)
+void read_create_session_status(SessionInfo* info, MicroBuffer* mb)
 {
     STATUS_AGENT_Payload payload;
-    if(deserialize_STATUS_AGENT_Payload(buffer, &payload))
+    if(deserialize_STATUS_AGENT_Payload(mb, &payload))
     {
         //TODO: check objectid too
         if(STATE_LOGIN == payload.base.related_request.request_id.data[1])
@@ -70,10 +70,10 @@ void read_create_session_status(SessionInfo* info, MicroBuffer* buffer)
     }
 }
 
-void read_delete_session_status(SessionInfo* info, MicroBuffer* buffer)
+void read_delete_session_status(SessionInfo* info, MicroBuffer* mb)
 {
     STATUS_Payload payload;
-    if(deserialize_STATUS_Payload(buffer, &payload))
+    if(deserialize_STATUS_Payload(mb, &payload))
     {
         //TODO: check objectid too
         if(STATE_LOGOUT == payload.base.related_request.request_id.data[1])
@@ -144,7 +144,7 @@ bool session_info_pending_request(const SessionInfo* info)
 //==================================================================
 //                            PRIVATE
 //==================================================================
-void process_create_session_status(SessionInfo* info, uint8_t status, AGENT_Representation* agent)
+inline void process_create_session_status(SessionInfo* info, uint8_t status, AGENT_Representation* agent)
 {
     (void) agent;
     if(STATE_LOGIN == info->request && status == STATUS_OK)
@@ -153,7 +153,7 @@ void process_create_session_status(SessionInfo* info, uint8_t status, AGENT_Repr
     }
 }
 
-void process_delete_session_status(SessionInfo* info, uint8_t status)
+inline void process_delete_session_status(SessionInfo* info, uint8_t status)
 {
     if(STATE_LOGOUT == info->request && status == STATUS_OK)
     {

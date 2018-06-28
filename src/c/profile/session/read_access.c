@@ -8,15 +8,15 @@ const uint8_t MR_FORMAT_DATA_SEQ = FORMAT_DATA_SEQ;
 const uint8_t MR_FORMAT_SAMPLE_SEQ = FORMAT_SAMPLE_SEQ;
 const uint8_t MR_FORMAT_PACKED_SAMPLES = FORMAT_PACKED_SAMPLES;
 
-void read_format_data(Session* session, MicroBuffer* payload,
+static void read_format_data(Session* session, MicroBuffer* payload,
                       StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-void read_format_sample(Session* session, MicroBuffer* payload,
+static void read_format_sample(Session* session, MicroBuffer* payload,
                         StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-void read_format_data_seq(Session* session, MicroBuffer* payload,
+static void read_format_data_seq(Session* session, MicroBuffer* payload,
                           StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-void read_format_sample_seq(Session* session, MicroBuffer* payload,
+static void read_format_sample_seq(Session* session, MicroBuffer* payload,
                             StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-void read_format_packed_samples(Session* session, MicroBuffer* payload,
+static void read_format_packed_samples(Session* session, MicroBuffer* payload,
                                 StreamId stream_id, mrObjectId object_id, uint16_t request_id);
 
 //==================================================================
@@ -98,7 +98,7 @@ void read_submessage_data(Session* session, MicroBuffer* submessage, StreamId st
 //==================================================================
 //                            PRIVATE
 //==================================================================
-void read_format_data(Session* session, MicroBuffer* payload,
+inline void read_format_data(Session* session, MicroBuffer* payload,
                       StreamId stream_id, mrObjectId object_id, uint16_t request_id)
 {
     uint32_t offset;

@@ -2,7 +2,7 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <string.h>
 
-uint16_t create_entity_ref(Session* session, StreamId stream_id,
+static uint16_t create_entity_ref(Session* session, StreamId stream_id,
                                   mrObjectId object_id, char* ref, uint8_t flags,
                                   CREATE_Payload* payload);
 
@@ -66,7 +66,7 @@ uint16_t write_create_topic_ref(Session* session, StreamId stream_id,
 //                             PRIVATE
 //==================================================================
 
-uint16_t create_entity_ref(Session* session, StreamId stream_id,
+inline uint16_t create_entity_ref(Session* session, StreamId stream_id,
                                   mrObjectId object_id, char* ref, uint8_t flags,
                                   CREATE_Payload* payload)
 {
