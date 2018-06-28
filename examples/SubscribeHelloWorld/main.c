@@ -44,11 +44,12 @@ int main(int args, char** argv)
     // Streams
     //uint8_t output_best_effort_stream_buffer[256];
     //StreamId best_effort_out = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
-    uint8_t output_reliable_stream_buffer[2048];
-    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 2048, 2000);
 
-    uint8_t input_reliable_stream_buffer[2048];
-    create_input_reliable_stream(&session, input_reliable_stream_buffer, 2048);
+    uint8_t output_reliable_stream_buffer[4096];
+    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 4096, 8);
+
+    uint8_t input_reliable_stream_buffer[UDP_TRANSPORT_MTU * 8];
+    create_input_reliable_stream(&session, input_reliable_stream_buffer, UDP_TRANSPORT_MTU * 8, 8);
 
     // Create entities
     mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
@@ -66,8 +67,6 @@ int main(int args, char** argv)
     mrObjectId datareader_id = create_object_id(0x01, DATAREADER_ID);
     char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
     write_configure_datareader_xml(&session, reliable_out, datareader_id, participant_id, datareader_xml, 0);
-
-    run_session(&session, 0, 0); //only send messages to the agent, not waiting fot the incoming messages.
 
     // Configure read
     DeliveryControl delivery_control;

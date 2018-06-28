@@ -61,9 +61,9 @@ int delete_session(Session* session);
 void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
-StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t message_data_size);
+StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
 StreamId create_input_best_effort_stream(Session* session);
-StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size);
+StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
 
 void run_session(Session* session, size_t read_attemps, int poll_ms);
 

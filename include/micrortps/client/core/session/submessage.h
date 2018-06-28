@@ -22,6 +22,7 @@ extern "C"
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #define SUBHEADER_SIZE 4
 
@@ -61,6 +62,7 @@ typedef enum SubmessageFlags
 
 bool write_submessage_header(MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
 bool read_submessage_header(MicroBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags);
+size_t submessage_padding(size_t length);
 
 #ifdef __cplusplus
 }

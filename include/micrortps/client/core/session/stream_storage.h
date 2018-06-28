@@ -58,9 +58,9 @@ typedef struct StreamStorage
 void init_stream_storage(StreamStorage* storage);
 
 StreamId add_output_best_effort_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset);
-StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t message_data_size, uint8_t header_offset);
+StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset);
 StreamId add_input_best_effort_buffer(StreamStorage* storage);
-StreamId add_input_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t message_data_size);
+StreamId add_input_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history);
 
 OutputBestEffortStream* get_output_best_effort_stream(StreamStorage* storage, uint8_t index);
 OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t index);

@@ -6,7 +6,7 @@
 // Remove when Microcdr supports size_of functions
 #define HEARTBEAT_PAYLOAD_SIZE 4
 
-#define MIN_HEARTBEAT_TIME_INTERVAL_NS 1000000
+#define MIN_HEARTBEAT_TIME_INTERVAL_NS 1000000 // 1ms
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
 void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
@@ -16,17 +16,19 @@ void set_output_buffer_length(uint8_t* buffer, size_t length);
 uint8_t* get_output_buffer(const OutputReliableStream* stream, size_t history_pos);
 size_t get_output_buffer_size(const OutputReliableStream* stream);
 
-// Implementation Node: the SUBHEADER_SIZE must be used to represent the header of the fragment.
+// Implementation note: the SUBHEADER_SIZE must be used to represent the header of the fragment.
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t message_data_size, uint8_t header_offset)
+void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset)
 {
+    // assert for history (must be 2^)
+
     stream->buffer = buffer;
     stream->size = size;
     stream->offset = header_offset;
-    stream->history = size / (message_data_size + stream->offset + INTERNAL_BUFFER_OFFSET);
+    stream->history = history;
 
     for(size_t i = 0; i < stream->history; i++)
     {
@@ -45,30 +47,29 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
 
 bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb)
 {
-    /* Check if the message fit it the current buffer */
-    uint8_t* internal_buffer = get_output_buffer(stream, stream->last_written % stream->history);
     bool available_to_write = false;
+
+    uint8_t* internal_buffer = get_output_buffer(stream, stream->last_written % stream->history);
     size_t length = get_output_buffer_length(internal_buffer);
-    size_t padding = (length % 4 != 0) ? 4 - (length % 4) : 0; //possible padding between submessages
-    if(length + padding + size <= get_output_buffer_size(stream))
+
+    /* Check if the message fit it the current buffer */
+    if(length + submessage_padding(length) + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
         SeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
         available_to_write = 0 >= seq_num_cmp(stream->last_written, last_available);
-        if(!available_to_write)
+    }
+    /* Check if the message fit in a new empty buffer */
+    else if(stream->offset + size <= get_output_buffer_size(stream))
+    {
+        /* Check if there is space in the stream history to write */
+        SeqNum next = seq_num_add(stream->last_written, 1);
+        SeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
+        available_to_write = 0 >= seq_num_cmp(next, last_available);
+        if(available_to_write)
         {
-            /* Check if the message fit in a new empty buffer */
-            if(stream->offset + size <= get_output_buffer_size(stream))
-            {
-                /* Check if there is space in the stream history to write */
-                SeqNum next = seq_num_add(stream->last_written, 1);
-                available_to_write = 0 >= seq_num_cmp(next, last_available);
-                if(available_to_write)
-                {
-                    internal_buffer = get_output_buffer(stream, next % stream->history);
-                    stream->last_written = next;
-                }
-            }
+            internal_buffer = get_output_buffer(stream, next % stream->history);
+            stream->last_written = next;
         }
     }
 

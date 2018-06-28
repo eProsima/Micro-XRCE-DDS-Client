@@ -36,8 +36,8 @@
 
 #define RESTORE_COLOR  "\x1B[0m"
 
-#define SEND_ARROW "==> "
-#define RECV_ARROW "<== "
+#define SEND_ARROW YELLOW "=>> " RESTORE_COLOR
+#define RECV_ARROW PURPLE "<<= " RESTORE_COLOR
 
 #define DATA_TO_STRING_BUFFER 4096
 

@@ -19,11 +19,12 @@ size_t get_input_buffer_size(const InputReliableStream* stream);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, size_t size, size_t message_data_size)
+void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, size_t size, size_t history)
 {
+    // assert for history (must be 2^)
     stream->buffer = buffer;
     stream->size = size;
-    stream->history = size / (message_data_size + INTERNAL_BUFFER_OFFSET);
+    stream->history = history;
 
     for(size_t i = 0; i < stream->history; i++)
     {
@@ -49,7 +50,7 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
         {
             /* Process the message */
             SeqNum next = seq_num_add(stream->last_handled, 1);
-            if(seq_num == next) //TODO (fragment): ... && is not fragment (except last)
+            if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
             {
                 stream->last_handled = next;
                 result = true;

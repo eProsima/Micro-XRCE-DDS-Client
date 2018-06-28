@@ -40,11 +40,11 @@ int main(int args, char** argv)
     // Streams
     //uint8_t output_best_effort_stream_buffer[256];
     //StreamId best_effort_out = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
-    uint8_t output_reliable_stream_buffer[2048];
-    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 2048, 1000);
+    uint8_t output_reliable_stream_buffer[4096];
+    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, 4096, 8);
 
-    uint8_t input_reliable_stream_buffer[2048];
-    create_input_reliable_stream(&session, input_reliable_stream_buffer, 2048);
+    uint8_t input_reliable_stream_buffer[UDP_TRANSPORT_MTU * 8];
+    create_input_reliable_stream(&session, input_reliable_stream_buffer, UDP_TRANSPORT_MTU * 8, 8);
 
     // Create entities
     mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
