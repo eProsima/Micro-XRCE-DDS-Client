@@ -102,7 +102,6 @@ endif()
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
 eprosima_find_package(microcdr)
-eprosima_find_package(micrortps_transport)
 
 ###############################################################################
 # Sources
@@ -140,11 +139,11 @@ endforeach()
 # Other sources
 set(SRCS
     $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
-    $<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:src/c/profile/session/create_entities_bin.c>
+    #$<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:src/c/profile/session/create_entities_bin.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
-    $<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:src/c/profile/extension/discovery_access.c>
+    #$<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:src/c/profile/extension/discovery_access.c>
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${UART_SRCS}
@@ -170,13 +169,14 @@ set(SRCS
 ###############################################################################
 # Target
 ###############################################################################
+set(BUILD_SHARED_LIBS OFF)
 add_library(${PROJECT_NAME} ${SRCS})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
     C_STANDARD 99
     C_STANDARD_REQUIRED YES
     )
-target_link_libraries(${PROJECT_NAME} PUBLIC microcdr micrortps_transport)
+target_link_libraries(${PROJECT_NAME} PUBLIC microcdr)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -202,12 +202,7 @@ else()
 endif()
 
 # Project options
-set(_MICRORTPS_MTU_SIZE_ 512 CACHE STRING "Define maximum transmission unit size to be used")
-set(_MICRORTPS_RELIABLE_HISTORY_ 16 CACHE STRING "Define maximum transmission unit size to be used")
-set(_MICRORTPS_TIMEOUT_MS_ 1 CACHE STRING "Define maximum transmission unit size to be used")
-set(_MICRORTPS_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit size to be used")
-set(_MICRORTPS_CONNECTION_MAX_ATTEMPTS_ 20 CACHE STRING "Define maximum transmission unit size to be used")
-set(_MICRORTPS_HEARTBEAT_MIN_PERIOD_MS_ 200 CACHE STRING "Define maximum transmission unit size to be used")
+#set(_MICRORTPS_HEARTBEAT_MIN_PERIOD_MS_ 200 CACHE STRING "Define maximum transmission unit size to be used")
 
 # Create source files with the define
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
@@ -251,25 +246,14 @@ else()
 endif()
 
 ###############################################################################
-# Testing
+# Test
 ###############################################################################
 if(EPROSIMA_BUILD_TESTS)
-    # Static library only for test purposes
-    add_library(${PROJECT_NAME}_static STATIC ${SRCS})
-    target_link_libraries(${PROJECT_NAME}_static PUBLIC microcdr micrortps_transport)
-    target_include_directories(${PROJECT_NAME}_static
-        PUBLIC
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-            $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-            $<INSTALL_INTERFACE:include>
-        PRIVATE
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
-        )
-
-    # Enable test
-    include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
-    enable_testing()
-    add_subdirectory(test)
+    #add_subdirectory(test/integration/interaction)
+    #add_subdirectory(test/integration/cross_serialization)
+    #add_subdirectory(test/integration/xrce_serialization)
+    #add_subdirectory(test/transport/serial_comm)
+    add_subdirectory(test/unitary/streams/output_best_effort)
 endif()
 
 ###############################################################################

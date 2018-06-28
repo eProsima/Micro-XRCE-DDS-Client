@@ -1,7 +1,0 @@
-<dds>
-    <topic>
-        <kind>WITH_KEY</kind>
-        <name>Square</name>
-        <dataType>ShapeType</dataType>
-    </topic>
-</dds>

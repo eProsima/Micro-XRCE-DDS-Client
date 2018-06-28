@@ -1,6 +1,0 @@
-<dds>
-<topic>
-    <name>HelloWorldPubSubTopic</name>
-    <dataType>HelloWorld</dataType>
-</topic>
-</dds>

@@ -34,8 +34,3 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/
                    PATTERN "*.idl"
     )
 
-install(FILES ${PROJECT_SOURCE_DIR}/../../test/hello_topic.xml
-              ${PROJECT_SOURCE_DIR}/../../test/hello_data_reader_profile.xml
-              ${PROJECT_SOURCE_DIR}/../../test/hello_data_writer_profile.xml
-    DESTINATION examples/micrortps/${PROJECT_NAME}/${BIN_INSTALL_DIR}
-    )

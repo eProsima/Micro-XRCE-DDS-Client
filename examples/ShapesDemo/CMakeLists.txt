@@ -21,19 +21,19 @@ project(ShapeDemoClient C)
 
 add_executable(${PROJECT_NAME} main.c)
 if(MSVC OR MSVC_IDE)
-    target_link_libraries(${PROJECT_NAME} 
+    target_link_libraries(${PROJECT_NAME}
         PRIVATE
             micrortps_client
             Ws2_32
         )
 else()
-    target_link_libraries(${PROJECT_NAME} 
+    target_link_libraries(${PROJECT_NAME}
         PRIVATE
             micrortps_client
         )
 endif()
 
-install(TARGETS ${PROJECT_NAME} 
+install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION examples/micrortps/${PROJECT_NAME}/${BIN_INSTALL_DIR}
     )
 
@@ -42,10 +42,4 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/
     FILES_MATCHING PATTERN "*.h"
                    PATTERN "*.c"
                    PATTERN "*.idl"
-    )
-
-install(FILES ${PROJECT_SOURCE_DIR}/../../test/shape_topic.xml
-              ${PROJECT_SOURCE_DIR}/../../test/data_reader_profile.xml
-              ${PROJECT_SOURCE_DIR}/../../test/data_writer_profile.xml
-    DESTINATION examples/micrortps/${PROJECT_NAME}/${BIN_INSTALL_DIR}
     )
