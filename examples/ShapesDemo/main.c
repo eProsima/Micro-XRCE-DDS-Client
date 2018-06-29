@@ -157,8 +157,8 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "create_participant") == 0 && length == 2)
     {
         ObjectId id;
-	id.data[0] = id_pre;
-	id.data[1] = OBJK_PARTICIPANT;
+        id.data[0] = id_pre;
+        id.data[1] = OBJK_PARTICIPANT;
         create_participant_sync_by_ref(session, id, "default_participant", false, false);
         check_and_print_error(session);
     }
@@ -169,11 +169,11 @@ bool compute_command(const char* command, Session* session)
         if (file_length > 0)
         {
             ObjectId id;
-	    id.data[0] = id_pre;
-	    id.data[1] = OBJK_TOPIC;
+            id.data[0] = id_pre;
+            id.data[1] = OBJK_TOPIC;
             ObjectId id_related;
-	    id_related.data[0] = id_related_pre;
-	    id_related.data[1] = OBJK_PARTICIPANT;
+            id_related.data[0] = id_related_pre;
+            id_related.data[1] = OBJK_PARTICIPANT;
             create_topic_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
@@ -181,22 +181,22 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "create_publisher") == 0 && length == 3)
     {
         ObjectId id;
-	id.data[0] = id_pre;
-	id.data[1] = OBJK_PUBLISHER;
+        id.data[0] = id_pre;
+        id.data[1] = OBJK_PUBLISHER;
         ObjectId id_related;
-	id_related.data[0] = id_related_pre;
-	id_related.data[1] = OBJK_PARTICIPANT;
+        id_related.data[0] = id_related_pre;
+        id_related.data[1] = OBJK_PARTICIPANT;
         create_publisher_sync_by_xml(session, id, "", id_related, false, false);
         check_and_print_error(session);
     }
     else if(strcmp(name, "create_subscriber") == 0 && length == 3)
     {
         ObjectId id;
-	id.data[0] = id_pre;
-	id.data[1] = OBJK_SUBSCRIBER;
+        id.data[0] = id_pre;
+        id.data[1] = OBJK_SUBSCRIBER;
         ObjectId id_related;
-	id_related.data[0] = id_related_pre;
-	id_related.data[1] = OBJK_PARTICIPANT;
+        id_related.data[0] = id_related_pre;
+        id_related.data[1] = OBJK_PARTICIPANT;
         create_subscriber_sync_by_xml(session, id, "", id_related, false, false);
         check_and_print_error(session);
     }
@@ -207,11 +207,11 @@ bool compute_command(const char* command, Session* session)
         if (file_length > 0)
         {
             ObjectId id;
-	    id.data[0] = id_pre;
-	    id.data[1] = OBJK_DATAWRITER;
+            id.data[0] = id_pre;
+            id.data[1] = OBJK_DATAWRITER;
             ObjectId id_related;
-	    id_related.data[0] = id_related_pre;
-	    id_related.data[1] = OBJK_PUBLISHER;
+            id_related.data[0] = id_related_pre;
+            id_related.data[1] = OBJK_PUBLISHER;
             create_datawriter_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
@@ -223,11 +223,11 @@ bool compute_command(const char* command, Session* session)
         if (file_length > 0)
         {
             ObjectId id;
-	    id.data[0] = id_pre;
-	    id.data[1] = OBJK_DATAREADER;
+            id.data[0] = id_pre;
+            id.data[1] = OBJK_DATAREADER;
             ObjectId id_related;
-	    id_related.data[0] = id_related_pre;
-	    id_related.data[1] = OBJK_SUBSCRIBER;
+            id_related.data[0] = id_related_pre;
+            id_related.data[1] = OBJK_SUBSCRIBER;
             create_datareader_sync_by_xml(session, id, xml, id_related, false, false);
             check_and_print_error(session);
         }
@@ -237,15 +237,15 @@ bool compute_command(const char* command, Session* session)
         ShapeType topic = {"GREEN", 100 , 100, 50};
         if (length == 7)
         {
-	   topic.color = color;
-	   topic.x = x;
-	   topic.y = y;
-	   topic.shapesize = shapesize;
+            topic.color = color;
+            topic.x = x;
+            topic.y = y;
+            topic.shapesize = shapesize;
         }
 
         ObjectId id;
-	id.data[0] = id_pre;
-	id.data[1] = OBJK_DATAWRITER;
+        id.data[0] = id_pre;
+        id.data[1] = OBJK_DATAWRITER;
         write_ShapeType(session, id, id_related_pre, &topic);
         printf("Sending... ");
         printl_ShapeType_topic(&topic);
@@ -253,16 +253,16 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "read_data") == 0 && length == 3)
     {
         ObjectId id;
-	id.data[0] = id_pre;
-	id.data[1] = OBJK_DATAREADER;
+        id.data[0] = id_pre;
+        id.data[1] = OBJK_DATAREADER;
         read_data_sync(session, id, id_related_pre);
         check_and_print_error(session);
     }
     else if(strcmp(name, "delete") == 0 && length == 3)
     {
         ObjectId id;
-	id.data[0] = id_pre;
-	id.data[1] = id_related_pre;
+        id.data[0] = id_pre;
+        id.data[1] = id_related_pre;
         delete_object_sync(session, id);
         check_and_print_error(session);
     }

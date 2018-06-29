@@ -130,8 +130,8 @@ int main(int args, char** argv)
     while(true)
     {
         HelloWorld topic;
-	topic.index = counter;
-	topic.message = "Hello DDS World!";
+        topic.index = counter;
+        topic.message = "Hello DDS World!";
         if(write_HelloWorld(&my_session, datawriter_id, STREAMID_BUILTIN_RELIABLE, &topic))
         {
             counter++;

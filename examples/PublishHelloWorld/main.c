@@ -110,8 +110,8 @@ int main(int args, char** argv)
     {
         /* Write HelloWorld topic */
         HelloWorld topic;
-	topic.index = ++count;
-	topic.message = "Hello DDS world!";
+        topic.index = ++count;
+        topic.message = "Hello DDS world!";
         write_HelloWorld(&my_session, datawriter_id, STREAMID_BUILTIN_RELIABLE, &topic);
         printf("Send topic: %s, count: %i\n", topic.message, topic.index);
 

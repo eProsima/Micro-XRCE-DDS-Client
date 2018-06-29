@@ -76,7 +76,7 @@ static bool write_HelloWorld(Session* session, ObjectId datawriter_id, StreamId 
     uint32_t topic_size = size_of_HelloWorld_topic(topic);
     MicroBuffer* topic_buffer = NULL;
 
-    if (128 < stream_id)
+    if (128 > stream_id)
     {
         topic_buffer = prepare_best_effort_stream_for_topic(&session->output_best_effort_stream, datawriter_id, topic_size);
     }
