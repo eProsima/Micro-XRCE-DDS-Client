@@ -112,6 +112,10 @@ void read_submessage_heartbeat(InputReliableStream* stream, MicroBuffer* payload
     process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
 }
 
+bool is_input_reliable_stream_busy(InputReliableStream* stream)
+{
+    return stream->must_confirm;
+}
 //==================================================================
 //                             PRIVATE
 //==================================================================

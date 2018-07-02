@@ -48,6 +48,7 @@ bool input_reliable_stream_must_confirm(InputReliableStream* stream);
 void write_acknack(const InputReliableStream* stream, MicroBuffer* mb);
 void read_submessage_heartbeat(InputReliableStream* stream, MicroBuffer* payload);
 
+bool is_input_reliable_stream_busy(InputReliableStream* stream);
 #ifdef __cplusplus
 }
 #endif

@@ -40,7 +40,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
     stream->last_sent = UINT16_MAX;
     stream->last_acknown = UINT16_MAX;
 
-    stream->next_heartbeat_time_stamp = UINT32_MAX;
+    stream->next_heartbeat_time_stamp = UINT64_MAX;
     stream->next_heartbeat_tries = 0;
     stream->send_lost = false;
 }
@@ -110,12 +110,18 @@ bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint64_t c
 {
     if(0 > seq_num_cmp(stream->last_acknown, stream->last_sent))
     {
+        if(UINT64_MAX == stream->next_heartbeat_time_stamp) //comprobar si es menor
+        {
+            stream->next_heartbeat_time_stamp = current_timestamp;
+        }
+
         stream->next_heartbeat_time_stamp += MIN_HEARTBEAT_TIME_INTERVAL_NS * ++stream->next_heartbeat_tries;
+        //printf("%lu      %lu    %li\n", stream->next_heartbeat_time_stamp, current_timestamp, ((int64_t)stream->next_heartbeat_time_stamp) - ((int64_t)current_timestamp));
     }
     else
     {
         stream->next_heartbeat_tries = 0;
-        stream->next_heartbeat_time_stamp = UINT64_MAX;
+        stream->next_heartbeat_time_stamp = UINT64_MAX; // eliminar
     }
 
     return stream->next_heartbeat_time_stamp <= current_timestamp;
@@ -170,7 +176,12 @@ void read_submessage_acknack(OutputReliableStream* stream, MicroBuffer* payload)
 
     uint16_t nack_bitmap = ((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1];
 
-    process_acknack(stream, acknack.first_unacked_seq_num, nack_bitmap);
+    process_acknack(stream, nack_bitmap, acknack.first_unacked_seq_num - 1);
+}
+
+bool is_output_reliable_stream_busy(OutputReliableStream* stream)
+{
+    return 0 > seq_num_cmp(stream->last_acknown, stream->last_sent);
 }
 
 //==================================================================

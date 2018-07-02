@@ -65,9 +65,8 @@ StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t
 StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
 
-void run_session(Session* session, size_t read_attemps, int poll_ms);
+size_t run_session(Session* session, size_t max_attempts, int poll_ms);
 
-bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb);
 uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base);
 
 #ifdef PROFILE_READ_ACCESS

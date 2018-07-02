@@ -9,7 +9,8 @@
 bool write_submessage_header(MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags)
 {
     align_to(mb, 4);
-    mb->endianness = (flags & FLAG_ENDIANNESS) ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
+    mb->endianness = MACHINE_ENDIANNESS;
+    flags |= mb->endianness;
     serialize_submessage_header(mb, submessage_id, flags, length);
 
     return micro_buffer_remaining(mb) >= length;

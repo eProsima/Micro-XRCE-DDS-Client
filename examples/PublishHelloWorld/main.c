@@ -76,7 +76,7 @@ int main(int args, char** argv)
 
     mrObjectId datawriter_id = create_object_id(0x01, DATAWRITER_ID);
     char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-    write_configure_datawriter_xml(&session, reliable_out, datawriter_id, participant_id, datawriter_xml, 0);
+    write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, 0);
 
     // Send and receive messages
     run_session(&session, 20, 10);

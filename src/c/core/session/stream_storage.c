@@ -82,3 +82,43 @@ InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t i
     }
     return NULL;
 }
+
+bool prepare_stream_to_write(StreamStorage* storage, StreamId stream_id, size_t size, MicroBuffer* mb)
+{
+    bool available = false;
+    switch(stream_id.type)
+    {
+        case BEST_EFFORT_STREAM:
+        {
+            OutputBestEffortStream* stream = get_output_best_effort_stream(storage, stream_id.index);
+            available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
+            break;
+        }
+        case RELIABLE_STREAM:
+        {
+            OutputReliableStream* stream = get_output_reliable_stream(storage, stream_id.index);
+            available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
+            break;
+        }
+        default:
+            break;
+    }
+
+    return available;
+}
+
+bool busy_streams(StreamStorage* storage)
+{
+    bool busy = false;
+    for(unsigned i = 0; i < storage->output_reliable_size && !busy; ++i)
+    {
+        busy = is_output_reliable_stream_busy(&storage->output_reliable[i]);
+    }
+
+    for(unsigned i = 0; i < storage->input_reliable_size && !busy; ++i)
+    {
+        busy = is_input_reliable_stream_busy(&storage->input_reliable[i]);
+    }
+
+    return busy;
+}

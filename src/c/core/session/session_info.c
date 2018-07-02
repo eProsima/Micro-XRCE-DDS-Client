@@ -88,8 +88,7 @@ void stamp_create_session_header(const SessionInfo* info, uint8_t* buffer)
     MicroBuffer mb;
     init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
-    uint8_t session_id = SESSION_ID_WITHOUT_CLIENT_KEY & info->id;
-    (void) serialize_message_header(&mb, session_id, 0, 0, info->key);
+    (void) serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
 void stamp_session_header(const SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer)

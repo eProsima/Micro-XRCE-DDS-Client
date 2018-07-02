@@ -680,9 +680,9 @@ typedef enum DataFormat
 typedef struct DataDeliveryControl
 {
     uint16_t max_samples;
-    uint32_t max_elapsed_time;
-    uint32_t max_bytes_per_seconds;
-    uint32_t min_pace_period;
+    uint16_t max_elapsed_time;
+    uint16_t max_bytes_per_seconds;
+    uint16_t min_pace_period;
 
 } DataDeliveryControl;
 

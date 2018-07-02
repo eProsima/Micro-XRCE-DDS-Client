@@ -1413,9 +1413,9 @@ bool serialize_DataDeliveryControl(MicroBuffer* buffer, const DataDeliveryContro
 {
     bool ret = true;
     ret &= serialize_uint16_t(buffer, input->max_samples);
-    ret &= serialize_uint32_t(buffer, input->max_elapsed_time);
-    ret &= serialize_uint32_t(buffer, input->max_bytes_per_seconds);
-    ret &= serialize_uint32_t(buffer, input->min_pace_period);
+    ret &= serialize_uint16_t(buffer, input->max_elapsed_time);
+    ret &= serialize_uint16_t(buffer, input->max_bytes_per_seconds);
+    ret &= serialize_uint16_t(buffer, input->min_pace_period);
     return ret;
 }
 
@@ -1423,9 +1423,9 @@ bool deserialize_DataDeliveryControl(MicroBuffer* buffer, DataDeliveryControl* o
 {
     bool ret = true;
     ret &= deserialize_uint16_t(buffer, &output->max_samples);
-    ret &= deserialize_uint32_t(buffer, &output->max_elapsed_time);
-    ret &= deserialize_uint32_t(buffer, &output->max_bytes_per_seconds);
-    ret &= deserialize_uint32_t(buffer, &output->min_pace_period);
+    ret &= deserialize_uint16_t(buffer, &output->max_elapsed_time);
+    ret &= deserialize_uint16_t(buffer, &output->max_bytes_per_seconds);
+    ret &= deserialize_uint16_t(buffer, &output->min_pace_period);
     return ret;
 }
 

@@ -67,6 +67,9 @@ OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t
 InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint8_t index);
 InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t index);
 
+bool prepare_stream_to_write(StreamStorage* storage, StreamId stream_id, size_t size, MicroBuffer* mb);
+bool busy_streams(StreamStorage* storage);
+
 #ifdef __cplusplus
 }
 #endif

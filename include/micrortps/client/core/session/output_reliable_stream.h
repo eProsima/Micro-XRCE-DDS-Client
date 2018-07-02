@@ -56,6 +56,8 @@ bool next_reliable_nack_buffer_to_send(OutputReliableStream* stream, uint8_t** b
 void write_heartbeat(const OutputReliableStream* stream, MicroBuffer* mb);
 void read_submessage_acknack(OutputReliableStream* stream, MicroBuffer* payload);
 
+bool is_output_reliable_stream_busy(OutputReliableStream* stream);
+
 #ifdef __cplusplus
 }
 #endif

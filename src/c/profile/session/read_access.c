@@ -40,14 +40,14 @@ uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datare
     }
 
     // Change this when microcdr supports size_of function.
-    int payload_length = 0; //READ_DATA_Payload_size(&payload);
+    size_t payload_length = 0; //READ_DATA_Payload_size(&payload);
     payload_length += 4; // (request id + object_id), no padding.
     payload_length += 3; // format and two optionals.
     payload_length += (control != NULL) ? 1 : 0; // padding
     payload_length += (control != NULL) ? 8 : 0; // delivery control
 
     MicroBuffer mb;
-    bool available = prepare_stream_to_write(session, stream_id, payload_length + SUBHEADER_SIZE, &mb);
+    bool available = prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb);
     if(available)
     {
         request_id = init_base_object_request(session, datareader_id, &payload.base);

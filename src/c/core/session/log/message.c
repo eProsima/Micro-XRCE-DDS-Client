@@ -468,15 +468,15 @@ void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_
         char stream_representation;
         if(0 == stream_id)
         {
-            stream_representation = 'N';
+            stream_representation = 'n';
         }
         else if(0x80 <= stream_id)
         {
-            stream_representation = 'R';
+            stream_representation = 'r';
         }
         else // if(1 <= stream_id)
         {
-            stream_representation = 'B';
+            stream_representation = 'b';
         }
 
         uint16_t seq_num_to_print = 0;
@@ -485,11 +485,11 @@ void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_
             seq_num_to_print = seq_num;
         }
 
-        printf("%s%s%3zu: [%c | %hu]%s", dir, GREY_LIGHT, size, stream_representation, seq_num_to_print, RESTORE_COLOR);
+        printf("%s%s%3zu: [%c:%2X | %2hu] %s", dir, GREY_LIGHT, size, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
     }
     else
     {
-        printf("                ");
+        printf("                     ");
     }
 }
 

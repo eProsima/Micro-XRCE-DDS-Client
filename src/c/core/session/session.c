@@ -11,6 +11,7 @@
 #define CREATE_SESSION_MAX_MSG_SIZE 38
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 
+#define MIN_WAIT_POLL           1 //ms
 #define MAX_CONNECTION_ATTEMPS 10
 
 #define INITIAL_REQUEST_ID 0x0010
@@ -110,7 +111,7 @@ StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t 
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
-void run_session(Session* session, size_t read_attemps, int poll_ms)
+size_t run_session(Session* session, size_t max_attempts, int poll_ms)
 {
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -143,59 +144,50 @@ void run_session(Session* session, size_t read_attemps, int poll_ms)
         }
     }
 
-    for(size_t i = 0; i < read_attemps; i++)
+    size_t attempts = 0;
+    for(; attempts < max_attempts; attempts++)
     {
-        (void) listen_message(session, poll_ms);
-    }
-
-    for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
-    {
-        OutputReliableStream* stream = &session->streams.output_reliable[i];
-        uint8_t* buffer; size_t length;
-        SeqNum seq_num_it = begin_output_nack_buffer_it(stream);
-        if(next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
+        bool received = listen_message(session, poll_ms);
+        if(!received && !busy_streams(&session->streams))
         {
-            send_message(session, buffer, length);
+            break; // if there is nothing known to do, exit
+        }
+
+        for(unsigned i = 0; i < session->streams.input_reliable_size; ++i)
+        {
+            //NOTE: check input_reliable_for_fragments here. Add a struct InputReliable to manage it.
+
+            InputReliableStream* stream = &session->streams.input_reliable[i];
+            StreamId id = create_stream_id(i, RELIABLE_STREAM, INPUT_STREAM);
+
+            if(input_reliable_stream_must_confirm(stream))
+            {
+                write_send_acknack(session, id);
+            }
+        }
+
+        for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
+        {
+            OutputReliableStream* stream = &session->streams.output_reliable[i];
+            StreamId id = create_stream_id(i, RELIABLE_STREAM, OUTPUT_STREAM);
+
+            if(output_reliable_stream_must_notify(stream, get_nano_time()))
+            {
+                write_send_heartbeat(session, id);
+            }
+
+            uint8_t* buffer; size_t length;
+            SeqNum seq_num_it = begin_output_nack_buffer_it(stream);
+            if(next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
+            {
+                send_message(session, buffer, length);
+            }
         }
     }
 
-    for(unsigned i = 0; i < session->streams.input_reliable_size; ++i)
-    {
-        //NOTE: check input_reliable_for_fragments here. Add a struct InputReliable to manage it.
-
-        InputReliableStream* stream = &session->streams.input_reliable[i];
-        StreamId id = create_stream_id(i, RELIABLE_STREAM, INPUT_STREAM);
-
-        if(input_reliable_stream_must_confirm(stream))
-        {
-            write_send_acknack(session, id);
-        }
-    }
+    return attempts;
 }
 
-bool prepare_stream_to_write(Session* session, StreamId stream_id, size_t size, MicroBuffer* mb)
-{
-    bool available = false;
-    switch(stream_id.type)
-    {
-        case BEST_EFFORT_STREAM:
-        {
-            OutputBestEffortStream* stream = get_output_best_effort_stream(&session->streams, stream_id.index);
-            available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
-            break;
-        }
-        case RELIABLE_STREAM:
-        {
-            OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
-            available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
-            break;
-        }
-        default:
-            break;
-    }
-
-    return available;
-}
 
 uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base)
 {
@@ -242,7 +234,7 @@ bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_
     for(size_t i = 0; i < attempts && session_info_pending_request(&session->info); ++i)
     {
         send_message(session, buffer, length);
-        poll_ms = listen_message(session, poll_ms) ? 1 : poll_ms * 2;
+        poll_ms = listen_message(session, poll_ms) ? MIN_WAIT_POLL : poll_ms * 2;
     }
 
     bool received = !session_info_pending_request(&session->info);
@@ -256,11 +248,8 @@ bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_
 
 inline void send_message(const Session* session, uint8_t* buffer, size_t length)
 {
-    bool send = session->comm->send_msg(session->comm->instance, buffer, length);
-    if(send)
-    {
-        DEBUG_PRINT_MESSAGE(SEND, buffer, length);
-    }
+    (void) session->comm->send_msg(session->comm->instance, buffer, length);
+    DEBUG_PRINT_MESSAGE(SEND, buffer, length);
 }
 
 inline bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms)

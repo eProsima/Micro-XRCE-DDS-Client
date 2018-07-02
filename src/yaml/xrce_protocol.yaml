@@ -463,9 +463,9 @@ DATA:
 - struct:
     DataDeliveryControl:
       - max_samples:            uint16_t
-      - max_elapsed_time:       uint32_t
-      - max_bytes_per_seconds:  uint32_t
-      - min_pace_period:        uint32_t
+      - max_elapsed_time:       uint16_t
+      - max_bytes_per_seconds:  uint16_t
+      - min_pace_period:        uint16_t
 
 - struct:
     ReadSpecification:
