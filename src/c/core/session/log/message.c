@@ -17,6 +17,7 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <micrortps/client/core/serialization/xrce_header.h>
 #include <micrortps/client/core/session/submessage.h>
+#include <micrortps/client/core/util/time.h>
 #include <microcdr/microcdr.h>
 #include <string.h>
 #include <stdio.h>
@@ -36,8 +37,8 @@
 
 #define RESTORE_COLOR  "\x1B[0m"
 
-#define SEND_ARROW       YELLOW "=>> " RESTORE_COLOR
-#define RECV_ARROW       PURPLE "<<= " RESTORE_COLOR
+#define SEND_ARROW       "=>> "
+#define RECV_ARROW       "<<= "
 
 #define DATA_TO_STRING_BUFFER     4096
 
@@ -57,14 +58,21 @@ static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_P
 static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload);
 static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload);
 static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload);
-static void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_num, bool printable);
+static void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, bool printable);
+static void print_tail();
+
+static int64_t initial_log_time = 0;
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
+void init_log_timer()
+{
+    initial_log_time = get_milli_time();
+}
+
 void print_message(int direction, uint8_t* buffer, size_t size)
 {
-    const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
 
     MicroBuffer mb;
@@ -77,7 +85,12 @@ void print_message(int direction, uint8_t* buffer, size_t size)
     uint8_t submessage_id; uint16_t length; uint8_t flags;
     while(read_submessage_header(&mb, &submessage_id, &length, &flags))
     {
-        print_header(size, dir, stream_id_raw, seq_num, 0 == submessage_counter);
+        if(submessage_counter != 0)
+        {
+            printf("\n");
+        }
+
+        print_header(size, direction, stream_id_raw, seq_num, 0 == submessage_counter);
 
         switch(submessage_id)
         {
@@ -99,7 +112,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
 
             case SUBMESSAGE_ID_GET_INFO:
             {
-                printf("%s[GET INFO SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
+                printf("%s[GET INFO SUBMESSAGE (not supported)]%s", RED, RESTORE_COLOR);
 
             } break;
 
@@ -128,7 +141,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
 
             case SUBMESSAGE_ID_INFO:
             {
-                printf("%s[INFO SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
+                printf("%s[INFO SUBMESSAGE (not supported)]%s", RED, RESTORE_COLOR);
             } break;
 
             case SUBMESSAGE_ID_WRITE_DATA:
@@ -173,17 +186,19 @@ void print_message(int direction, uint8_t* buffer, size_t size)
 
             case SUBMESSAGE_ID_FRAGMENT:
             {
-                printf("%s[FRAGMENT SUBMESSAGE (not supported)]%s\n", RED, RESTORE_COLOR);
+                printf("%s[FRAGMENT SUBMESSAGE (not supported)]%s", RED, RESTORE_COLOR);
             } break;
 
             default:
             {
-                printf("%s[UNKNOWN SUBMESSAGE]%s\n", RED, RESTORE_COLOR);
+                printf("%s[UNKNOWN SUBMESSAGE]%s", RED, RESTORE_COLOR);
             } break;
         }
 
         submessage_counter++;
     }
+    print_tail();
+    printf("\n");
 }
 
 void print_serialization(int direction, const uint8_t* buffer, size_t size)
@@ -276,7 +291,7 @@ const char* reply_to_string(const BaseObjectReply* reply)
 
 void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
 {
-    printf("%s[CREATE CLIENT | %s | session: 0x%02X | key: %s]%s\n",
+    printf("%s[CREATE CLIENT | %s | session: 0x%02X | key: %s]%s",
             pre,
             request_to_string(&payload->base),
             payload->client_representation.session_id,
@@ -345,7 +360,7 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload)
             sprintf(content, "UNKNOWN");
     }
 
-    printf("%s[CREATE | %s | %s]%s\n",
+    printf("%s[CREATE | %s | %s]%s",
             pre,
             request_to_string(&payload->base),
             content,
@@ -360,7 +375,7 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload)
 
 void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
 {
-    printf("%s[DELETE | %s]%s\n",
+    printf("%s[DELETE | %s]%s",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
@@ -368,7 +383,7 @@ void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
 
 void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload)
 {
-    printf("%s[STATUS AGENT | %s]%s\n",
+    printf("%s[STATUS AGENT | %s]%s",
             pre,
             reply_to_string(&payload->base),
             RESTORE_COLOR);
@@ -376,7 +391,7 @@ void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* 
 
 void print_status_submessage(const char* pre, const STATUS_Payload* payload)
 {
-    printf("%s[STATUS | %s]%s\n",
+    printf("%s[STATUS | %s]%s",
             pre,
             reply_to_string(&payload->base),
             RESTORE_COLOR);
@@ -412,17 +427,17 @@ void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payloa
             sprintf(format, "FORMAT_DATA_UNKNOWN");
     }
 
-    printf("%s[READ DATA | %s | %s | dc: %s]%s\n",
+    printf("%s[READ DATA | %s | %s | dc: %s]%s",
             pre,
             request_to_string(&payload->base),
             format,
-            (payload->read_specification.optional_delivery_control) ? "true" : "false",
+            (payload->read_specification.optional_delivery_control) ? "yes" : "no",
             RESTORE_COLOR);
 }
 
 void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload)
 {
-    printf("%s[WRITE DATA | FORMAT_DATA | %s]%s\n",
+    printf("%s[WRITE DATA | FORMAT_DATA | %s]%s",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
@@ -430,7 +445,7 @@ void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_
 
 void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload)
 {
-    printf("%s[DATA | FORMAT_DATA | %s]%s\n",
+    printf("%s[DATA | FORMAT_DATA | %s]%s",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
@@ -445,7 +460,7 @@ void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
         bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
     }
 
-    printf("%s[ACKNACK | seq_num: %hu | bitmap: %s]%s\n",
+    printf("%s[ACKNACK | seq_num: %hu | bitmap: %s]%s",
             pre,
             payload->first_unacked_seq_num,
             bitmask,
@@ -454,15 +469,17 @@ void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
 
 void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload)
 {
-    printf("%s[HEARTBEAT | first: %hu | last: %hu]%s\n",
+    printf("%s[HEARTBEAT | first: %hu | last: %hu]%s",
             pre,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,
             RESTORE_COLOR);
 }
 
-void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_num, bool printable)
+void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, bool printable)
 {
+    const char* arrow = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
+    const char* color = (direction == SEND) ? YELLOW : PURPLE;
     if(printable)
     {
         char stream_representation;
@@ -474,7 +491,7 @@ void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_
         {
             stream_representation = 'r';
         }
-        else // if(1 <= stream_id)
+        else // if(1 <= stream_id && 80 > stream_id)
         {
             stream_representation = 'b';
         }
@@ -484,12 +501,22 @@ void print_header(size_t size, const char* dir, uint8_t stream_id, uint16_t seq_
         {
             seq_num_to_print = seq_num;
         }
+        else
+        {
+            stream_id = seq_num;
+        }
 
-        printf("%s%s%3zu: [%c:%2X | %2hu] %s", dir, GREY_LIGHT, size, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
+        printf("%s%s%3zu: %s(%c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
     }
     else
     {
         printf("                     ");
     }
+}
+
+void print_tail()
+{
+    int64_t ms = get_milli_time() - initial_log_time;
+    printf(" %s=> %lims%s", BLUE, ms, RESTORE_COLOR);
 }
 

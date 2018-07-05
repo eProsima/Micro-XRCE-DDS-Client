@@ -21,50 +21,8 @@
 
 #define BUFFER_SIZE     UDP_TRANSPORT_MTU * 8
 
-/*typedef struct UserEntityRequest
-{
-    uint16_t participant_request;
-    bool participant;
-    uint16_t topic_request;
-    bool topic;
-    uint16_t publisher_request;
-    bool publisher;
-    uint16_t datawriter_request;
-    bool datawriter;
-
-} UserEntityRequest;*/
-
-
-void on_status(Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
-{
-
-    (void) session; (void) args;
-    if(status == MR_STATUS_OK)
-    {
-        /*UserEntityRequest* entities = (UserEntityRequest*) args;
-        if(request_id == entities->participant_request)
-        {
-            entities->participant_request = true;
-        }
-        else if(request_id == entities->topic_request)
-        {
-            entities->topic = true;
-        }
-        else if(request_id == entities->publisher_request)
-        {
-            entities->publisher = true;
-        }
-        else if(request_id == entities->datawriter_request)
-        {
-            entities->datawriter = true;
-        }*/
-    }
-    else
-    {
-        printf("%sStatus error (%i)", "\x1B[1;31m", status);
-        printf(" at entity %04X with request: %04X%s\n", (object_id.id << 4) || object_id.type, request_id, "\x1B[0m");
-    }
-}
+//printf("%sStatus error (%i)", "\x1B[1;31m", status);
+//printf(" at entity %04X with request: %04X%s\n", (object_id.id << 4) || object_id.type, request_id, "\x1B[0m");
 
 int main(int args, char** argv)
 {
@@ -78,7 +36,6 @@ int main(int args, char** argv)
     // Session
     Session session;
     create_session(&session, 129, 0xAABBCCDD, &udp.comm);
-    set_status_callback(&session, on_status, NULL);
 
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
     StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, 8);
@@ -116,7 +73,7 @@ int main(int args, char** argv)
     }
 
     // Send and receive messages
-    while(run_session(&session, 100) /* || things not created yet */);
+    //while(run_session(&session, 100) /* || things not created yet */);
 
     if(/* All things created */true)
     {
@@ -126,7 +83,7 @@ int main(int args, char** argv)
             topic.index = i;
             topic.message = "Hello DDS world!";
             write_HelloWorld(&my_session, datawriter_id, STREAMID_BUILTIN_RELIABLE, &topic);*/
-            while(run_session(&session, 5));
+            //while(run_session(&session, 5));
         }
     }
 

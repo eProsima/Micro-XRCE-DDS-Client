@@ -11,8 +11,8 @@
 #define CREATE_SESSION_MAX_MSG_SIZE 38
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 
-#define MIN_STATUS_WAITING         1 //ms
-#define MAX_CONNECTION_ATTEMPS    10
+#define MIN_SESSION_STATUS_WAITING         1 //ms
+#define MAX_CONNECTION_ATTEMPS            10
 
 #define INITIAL_REQUEST_ID 0x0010
 
@@ -26,9 +26,11 @@ const uint8_t MR_STATUS_ERR_UNKNOWN_REFERENCE = STATUS_ERR_UNKNOWN_REFERENCE;
 const uint8_t MR_STATUS_ERR_INVALID_DATA = STATUS_ERR_INVALID_DATA;
 const uint8_t MR_STATUS_ERR_INCOMPATIBLE = STATUS_ERR_INCOMPATIBLE;
 const uint8_t MR_STATUS_ERR_RESOURCES = STATUS_ERR_RESOURCES;
+const uint8_t MR_STATUS_NONE = 255;
 
 static uint16_t generate_request_id(Session* session);
 
+static void flash_streams_session(Session* session);
 static bool listen_message(Session* session, int poll_ms);
 static bool listen_message_reliably(Session* session, int poll_ms);
 
@@ -56,11 +58,14 @@ static void read_submessage_acknack(Session* session, MicroBuffer* submessage, S
 
 bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
 {
+    DEBUG_INIT_LOG();
+
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
 
-    session->on_status = NULL;
-    session->on_status_args = NULL;
+    session->request_list = NULL;
+    session->status_list = NULL;
+    session->request_status_list_size = 0;
 
     init_session_info(&session->info, session_id, key);
     init_stream_storage(&session->streams);
@@ -87,12 +92,6 @@ bool delete_session(Session* session)
     set_session_info_request(&session->info, STATE_LOGOUT);
 
     return wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
-}
-
-void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)
-{
-    session->on_status = on_status_func;
-    session->on_status_args = args;
 }
 
 #ifdef PROFILE_READ_ACCESS
@@ -136,7 +135,66 @@ uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseOb
     return request_id;
 }
 
-bool flash_streams_session(Session* session)
+void run_session(Session* session, int poll_ms)
+{
+    flash_streams_session(session);
+    while(listen_message_reliably(session, poll_ms));
+}
+
+bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
+{
+    flash_streams_session(session);
+
+    for(unsigned i = 0; i < list_size; ++i)
+    {
+        status_list[i] = MR_STATUS_NONE;
+    }
+
+    session->request_list = request_list;
+    session->status_list = status_list;
+    session->request_status_list_size = list_size;
+
+    bool timeout = false;
+    bool status_confirmed = false;
+    while(!timeout && !status_confirmed)
+    {
+        timeout = !listen_message_reliably(session, timeout_ms);
+        status_confirmed = true;
+        for(unsigned i = 0; i < list_size && status_confirmed; ++i)
+        {
+            status_confirmed = status_list[i] != MR_STATUS_NONE;
+        }
+    }
+
+    session->request_status_list_size = 0;
+    return status_confirmed;
+}
+
+bool check_status_list_ok(uint8_t* status_list, size_t size)
+{
+    bool all_status_ok = true;
+    for(unsigned i = 0; i < size && all_status_ok; ++i)
+    {
+        all_status_ok = status_list[i] == MR_STATUS_OK;
+    }
+
+    return all_status_ok;
+}
+
+//==================================================================
+//                             PRIVATE
+//==================================================================
+inline uint16_t generate_request_id(Session* session)
+{
+    uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
+        ? INITIAL_REQUEST_ID
+        : session->last_request_id;
+
+    session->last_request_id = last_request_id + 1;
+    return last_request_id;
+}
+
+void flash_streams_session(Session* session)
 {
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -163,49 +221,6 @@ bool flash_streams_session(Session* session)
             send_message(session, buffer, length);
         }
     }
-}
-
-
-bool run_session(Session* session, int poll_ms)
-{
-    flash_streams_session(session);
-    while(listen_message_reliably(session, poll_ms));
-}
-
-bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request, uint8_t* status, size_t size)
-{
-    flash_streams_session(session);
-
-    //session->request_list = request;
-    //session->status_list = status;
-
-    bool timeout = false;
-    bool status_confirmed = false;
-    do
-    {
-        bool timeout = !listen_message_reliably(session, timeout_ms);
-        status_confirmed = true;
-        for(unsigned i = 0; i < size && status_confirmed; i++)
-        {
-            status_confirmed = status[i];
-        }
-    }
-    while(!timeout && !status_confirmed);
-
-    return status_confirmed;
-}
-
-//==================================================================
-//                             PRIVATE
-//==================================================================
-inline uint16_t generate_request_id(Session* session)
-{
-    uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
-        ? INITIAL_REQUEST_ID
-        : session->last_request_id;
-
-    session->last_request_id = last_request_id + 1;
-    return last_request_id;
 }
 
 bool listen_message(Session* session, int poll_ms)
@@ -247,7 +262,7 @@ bool listen_message_reliably(Session* session, int poll_ms)
             }
         }
 
-        int32_t poll_to_next_heartbeat = (int32_t)(next_heartbeat_timestamp - timestamp);
+        int32_t poll_to_next_heartbeat = (next_heartbeat_timestamp != INT64_MAX) ? (int32_t)(next_heartbeat_timestamp - timestamp) : poll_ms;
         if(0 == poll_to_next_heartbeat)
         {
             poll_to_next_heartbeat = 1;
@@ -271,7 +286,7 @@ bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_
     for(size_t i = 0; i < attempts && session_info_pending_request(&session->info); ++i)
     {
         send_message(session, buffer, length);
-        poll_ms = listen_message(session, poll_ms) ? MIN_STATUS_WAITING : poll_ms * 2;
+        poll_ms = listen_message(session, poll_ms) ? MIN_SESSION_STATUS_WAITING : poll_ms * 2;
     }
 
     bool received = !session_info_pending_request(&session->info);
@@ -341,6 +356,7 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
     {
         case NONE_STREAM:
         {
+            stream_id = create_stream_id_from_raw(seq_num, INPUT_STREAM); // The real stream_id is into seq_num
             read_submessage_list(session, mb, stream_id);
             break;
         }
@@ -437,14 +453,17 @@ void read_submessage_status(Session* session, MicroBuffer* submessage)
     STATUS_Payload payload;
     deserialize_STATUS_Payload(submessage, &payload);
 
-    if(session->on_status != NULL)
-    {
-        mrObjectId object_id = create_object_id_from_raw(payload.base.related_request.object_id.data);
-        uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
+    uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
                             + payload.base.related_request.request_id.data[1];
-        uint8_t status = payload.base.result.status;
+    uint8_t status = payload.base.result.status;
 
-        session->on_status(session, object_id, request_id, status, session->on_status_args);
+    for(unsigned i = 0; i < session->request_status_list_size; ++i)
+    {
+        if(request_id == session->request_list[i])
+        {
+            session->status_list[i] = status;
+            break;
+        }
     }
 }
 
@@ -455,6 +474,7 @@ void read_submessage_heartbeat(Session* session, MicroBuffer* submessage, Stream
     {
         read_heartbeat(stream, submessage);
         write_submessage_acknack(session, stream_id);
+
     }
 }
 

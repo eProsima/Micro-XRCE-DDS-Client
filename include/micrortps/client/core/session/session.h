@@ -36,13 +36,11 @@ extern const uint8_t MR_STATUS_ERR_UNKNOWN_REFERENCE;
 extern const uint8_t MR_STATUS_ERR_INVALID_DATA;
 extern const uint8_t MR_STATUS_ERR_INCOMPATIBLE;
 extern const uint8_t MR_STATUS_ERR_RESOURCES;
+extern const uint8_t MR_STATUS_NONE;
 
 typedef struct Communication Communication;
 typedef struct Session Session;
 typedef struct BaseObjectRequest BaseObjectRequest;
-
-typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
-                              uint8_t status, void* args);
 
 #ifdef PROFILE_READ_ACCESS
 typedef void (*OnTopicFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
@@ -56,8 +54,9 @@ struct Session
     Communication* comm;
     uint16_t last_request_id;
 
-    OnStatusFunc on_status;
-    void* on_status_args;
+    const uint16_t* request_list;
+    uint8_t* status_list;
+    size_t request_status_list_size;
 
 #ifdef PROFILE_READ_ACCESS
     OnTopicFunc on_topic;
@@ -69,14 +68,15 @@ struct Session
 bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
 bool delete_session(Session* session);
 
-void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
-
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
 StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
 StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
 
-bool run_session(Session* session, int poll_ms);
+void run_session(Session* session, int poll_ms);
+bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
+
+bool check_status_list_ok(uint8_t* status_list, size_t size);
 
 uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base);
 

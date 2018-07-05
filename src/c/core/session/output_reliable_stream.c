@@ -6,7 +6,8 @@
 // Remove when Microcdr supports size_of functions
 #define HEARTBEAT_PAYLOAD_SIZE 4
 
-#define MIN_HEARTBEAT_TIME_INTERVAL_MS ((int64_t)1) // 1ms
+#define MIN_HEARTBEAT_TIME_INTERVAL_MS ((int64_t) 1) // 1ms
+
 #define MAX_HEARTBEAT_TRIES (sizeof(int64_t) * 8 - 1)
 
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
@@ -220,10 +221,7 @@ void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t fir
     }
 
     /* reset heartbeat interval */
-    if(stream->last_acknown == stream->last_sent)
-    {
-        stream->next_heartbeat_tries = 0;
-    }
+    stream->next_heartbeat_tries = 0;
 }
 
 inline size_t get_output_buffer_length(uint8_t* buffer)

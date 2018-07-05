@@ -42,7 +42,6 @@ typedef struct StreamBuffers
 static void help(void);
 static void list_commands(void);
 static int check_input(void);
-static void on_status(Session* session, mrObjectId id, uint16_t request_id, uint8_t status, void* args);
 static void on_topic(Session* session, mrObjectId object_id, uint16_t request_id, StreamId stream_id, MicroBuffer* serialization, void* args);
 static bool compute_command(const char* command, Session* session, Communication* comm, StreamBuffers* stream_buffers);
 
@@ -146,7 +145,6 @@ bool compute_command(const char* command, Session* session, Communication* comm,
             return true;
         }
 
-        set_status_callback(session, on_status, NULL);
         set_topic_callback(session, on_topic, NULL);
 
         (void) create_output_best_effort_stream(session, stream_buffers->output_best_effort_stream_buffer, BUFFER_SIZE);

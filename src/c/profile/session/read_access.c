@@ -69,6 +69,15 @@ void read_submessage_data(Session* session, MicroBuffer* submessage, StreamId st
         mrObjectId object_id = create_object_id_from_raw(base.object_id.data);
         uint16_t request_id = (((uint16_t) base.request_id.data[0]) << 8) + base.request_id.data[1];
 
+        for(unsigned i = 0; i < session->request_status_list_size; ++i)
+        {
+            if(request_id == session->request_list[i])
+            {
+                session->status_list[i] = MR_STATUS_OK;
+                break;
+            }
+        }
+
         switch(format_flags)
         {
             case FORMAT_DATA:
