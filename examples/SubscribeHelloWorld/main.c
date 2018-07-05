@@ -18,33 +18,28 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#define BUFFER_SIZE     UDP_TRANSPORT_MTU * 8
+
 void on_status(Session* session, mrObjectId id, uint16_t request_id, uint8_t status, void* args)
 {
     (void) session; (void) id; (void) request_id; (void) status; (void) args;
     //printf("Status received!\n");
 }
 
-void on_topic(Session* session, mrObjectId id, uint16_t request_id, MicroBuffer* mb, StreamId stream_id, void* args)
+void on_topic(Session* session, mrObjectId id, uint16_t request_id, StreamId stream_id, MicroBuffer* mb, void* args)
 {
     (void) session; (void) id; (void) request_id; (void) mb; (void) stream_id; (void) args;
     //printf("Topic received!\n");
 }
 
-#define BUFFER_SIZE     UDP_TRANSPORT_MTU * 8
 int main(int args, char** argv)
 {
     (void) args; (void) argv;
 
-    // Transport
-    //UARTTransport transport;
-    //int fd = open("/dev/pts/8", O_RDWR | O_NOCTTY | O_NONBLOCK);
-    //init_uart_transport_fd(&transport, fd, 0x00, 0x01);
+    uint64_t init_timestamp = get_milli_time();
 
     UDPTransport transport;
     init_udp_transport(&transport, "127.0.0.1", 2019);
-
-    //TCPTransport transport;
-    //init_tcp_transport(&transport, "127.0.0.1", 2019);
 
     // Session
     Session session;
@@ -52,15 +47,11 @@ int main(int args, char** argv)
     set_status_callback(&session, on_status, NULL);
     set_topic_callback(&session, on_topic, NULL);
 
-    // Streams
-    //uint8_t output_best_effort_stream_buffer[256];
-    //StreamId best_effort_out = create_output_best_effort_stream(&session, output_best_effort_stream_buffer, 256);
-
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
     StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, 8);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, 8);
+    StreamId reliable_in = create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, 8);
 
     // Create entities
     mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
@@ -85,10 +76,13 @@ int main(int args, char** argv)
     delivery_control.max_elapsed_time = 100;
     delivery_control.max_samples = 50;
     delivery_control.min_pace_period = 1;
-    write_read_data(&session, reliable_out, datareader_id, MR_FORMAT_DATA, NULL);
+    write_read_data(&session, reliable_out, datareader_id, reliable_in, MR_FORMAT_DATA, &delivery_control);
 
     // Send and receive messages
-    run_session(&session, 20, 50);
+    run_session(&session, 50);
+
+    uint64_t last_timestamp = get_milli_time();
+    printf("Total run time: %li   %li      %li\n", (last_timestamp - init_timestamp), init_timestamp, last_timestamp);
 
     // Delete resources
     delete_session(&session);

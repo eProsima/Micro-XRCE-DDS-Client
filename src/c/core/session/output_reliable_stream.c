@@ -6,7 +6,9 @@
 // Remove when Microcdr supports size_of functions
 #define HEARTBEAT_PAYLOAD_SIZE 4
 
-#define MIN_HEARTBEAT_TIME_INTERVAL_NS 1000000 // 1ms
+#define MIN_HEARTBEAT_TIME_INTERVAL_MS ((int64_t)1) // 1ms
+#define MAX_HEARTBEAT_TRIES (sizeof(int64_t) * 8 - 1)
+
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
 static void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
@@ -40,7 +42,7 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
     stream->last_sent = UINT16_MAX;
     stream->last_acknown = UINT16_MAX;
 
-    stream->next_heartbeat_time_stamp = UINT64_MAX;
+    stream->next_heartbeat_timestamp = INT64_MAX;
     stream->next_heartbeat_tries = 0;
     stream->send_lost = false;
 }
@@ -106,25 +108,30 @@ bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t*
     return data_to_send;
 }
 
-bool output_reliable_stream_must_notify(OutputReliableStream* stream, uint64_t current_timestamp)
+bool update_output_stream_heartbeat_timestamp(OutputReliableStream* stream, int64_t current_timestamp)
 {
+    bool must_confirm = false;
     if(0 > seq_num_cmp(stream->last_acknown, stream->last_sent))
     {
-        if(UINT64_MAX == stream->next_heartbeat_time_stamp) //comprobar si es menor
+        if(0 == stream->next_heartbeat_tries)
         {
-            stream->next_heartbeat_time_stamp = current_timestamp;
+            stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL_MS;
+            stream->next_heartbeat_tries = 1;
         }
-
-        stream->next_heartbeat_time_stamp += MIN_HEARTBEAT_TIME_INTERVAL_NS * ++stream->next_heartbeat_tries;
-        //printf("%lu      %lu    %li\n", stream->next_heartbeat_time_stamp, current_timestamp, ((int64_t)stream->next_heartbeat_time_stamp) - ((int64_t)current_timestamp));
+        else if(current_timestamp >= stream->next_heartbeat_timestamp)
+        {
+            int64_t increment = MIN_HEARTBEAT_TIME_INTERVAL_MS << (++stream->next_heartbeat_tries % MAX_HEARTBEAT_TRIES);
+            int64_t difference = current_timestamp - stream->next_heartbeat_timestamp;
+            stream->next_heartbeat_timestamp += (difference > increment) ? difference : increment;
+            must_confirm = true;
+        }
     }
     else
     {
-        stream->next_heartbeat_tries = 0;
-        stream->next_heartbeat_time_stamp = UINT64_MAX; // eliminar
+        stream->next_heartbeat_timestamp = INT64_MAX;
     }
 
-    return stream->next_heartbeat_time_stamp <= current_timestamp;
+    return must_confirm;
 }
 
 SeqNum begin_output_nack_buffer_it(const OutputReliableStream* stream)
@@ -169,7 +176,7 @@ void write_heartbeat(const OutputReliableStream* stream, MicroBuffer* mb)
     (void) serialize_HEARTBEAT_Payload(mb, &payload);
 }
 
-void read_submessage_acknack(OutputReliableStream* stream, MicroBuffer* payload)
+void read_acknack(OutputReliableStream* stream, MicroBuffer* payload)
 {
     ACKNACK_Payload acknack;
     deserialize_ACKNACK_Payload(payload, &acknack);
@@ -210,6 +217,12 @@ void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t fir
             uint8_t* internal_buffer = get_output_buffer(stream, seq_num % stream->history);
             set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
         }
+    }
+
+    /* reset heartbeat interval */
+    if(stream->last_acknown == stream->last_sent)
+    {
+        stream->next_heartbeat_tries = 0;
     }
 }
 

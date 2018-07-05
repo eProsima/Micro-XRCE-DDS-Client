@@ -22,7 +22,7 @@ extern "C"
 
 #include <stdint.h>
 
-uint64_t get_nano_time(void);
+int64_t get_milli_time(void);
 
 #ifdef __cplusplus
 }

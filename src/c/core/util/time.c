@@ -4,7 +4,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uint64_t get_nano_time(void)
+int64_t get_milli_time(void)
 {
 #ifdef WIN32
     SYSTEMTIME epoch_tm = {1970, 1, 4, 1, 0, 0, 0, 0};
@@ -18,11 +18,10 @@ uint64_t get_nano_time(void)
     SystemTimeToFileTime(&tm, &ft);
     uint64_t current_time = (((uint64_t) ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
 
-    return (current_time - epoch_time) * 100;
+    return (current_time - epoch_time) / 10000;
 #else
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    return (ts.tv_sec * 1000000000) + ts.tv_nsec;
+    return (((int64_t)ts.tv_sec) * 1000) + (ts.tv_nsec / 1000000);
 #endif
-    return 0;
 }

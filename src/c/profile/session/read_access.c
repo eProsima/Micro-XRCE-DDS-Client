@@ -22,11 +22,13 @@ static void read_format_packed_samples(Session* session, MicroBuffer* payload,
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id, uint8_t format, DeliveryControl* control)
+uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id,
+                         StreamId data_stream_id, uint8_t format, DeliveryControl* control)
 {
     uint16_t request_id = INVALID_REQUEST_ID;
 
     READ_DATA_Payload payload;
+    (void) data_stream_id; //payload.read_specification.stream_id = data_stream_id.raw;
     payload.read_specification.data_format = format;
     payload.read_specification.optional_content_filter_expression = false; //not supported yet
     payload.read_specification.optional_delivery_control = (control != NULL);
@@ -103,7 +105,7 @@ inline void read_format_data(Session* session, MicroBuffer* payload,
 {
     uint32_t offset;
     deserialize_uint32_t(payload, &offset); //Remove this when data serialization will be according to the XRCE spec.
-    session->on_topic(session, object_id, request_id, payload, stream_id, session->on_topic_args);
+    session->on_topic(session, object_id, request_id, stream_id, payload, session->on_topic_args);
 }
 
 void read_format_sample(Session* session, MicroBuffer* payload,

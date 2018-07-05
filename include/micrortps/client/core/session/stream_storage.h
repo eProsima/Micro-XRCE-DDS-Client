@@ -62,6 +62,11 @@ StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, siz
 StreamId add_input_best_effort_buffer(StreamStorage* storage);
 StreamId add_input_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history);
 
+OutputBestEffortStream* get_output_best_effort_stream_id(StreamStorage* storage, uint8_t index);
+OutputReliableStream* get_output_reliable_stream_id(StreamStorage* storage, uint8_t index);
+InputBestEffortStream* get_input_best_effort_stream_id(StreamStorage* storage, uint8_t index);
+InputReliableStream* get_input_reliable_stream_id(StreamStorage* storage, uint8_t index);
+
 OutputBestEffortStream* get_output_best_effort_stream(StreamStorage* storage, uint8_t index);
 OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t index);
 InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint8_t index);

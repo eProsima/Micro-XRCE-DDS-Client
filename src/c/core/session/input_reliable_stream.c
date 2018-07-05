@@ -34,7 +34,6 @@ void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, si
 
     stream->last_handled = UINT16_MAX;
     stream->last_announced = UINT16_MAX;
-    stream->must_confirm = false;
 }
 
 bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length)
@@ -53,6 +52,10 @@ bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uin
             if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
             {
                 stream->last_handled = next;
+                if(0 > seq_num_cmp(stream->last_announced, stream->last_handled))
+                {
+                    stream->last_announced = next;
+                }
                 result = true;
             }
             else
@@ -73,25 +76,14 @@ bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuff
     size_t length = get_input_buffer_length(internal_buffer);
     bool available_to_read = 0 != length;
     if(available_to_read)
-    {
-        stream->last_handled = next;
-        init_micro_buffer(mb, internal_buffer, length);
+    { stream->last_handled = next; init_micro_buffer(mb, internal_buffer, length);
         set_input_buffer_length(internal_buffer, 0);
     }
 
     return available_to_read;
 }
 
-
-bool input_reliable_stream_must_confirm(InputReliableStream* stream)
-{
-    bool result = stream->must_confirm;
-    stream->must_confirm = false;
-    return result;
-}
-
-void write_acknack(const InputReliableStream* stream, MicroBuffer* mb)
-{
+void write_acknack(const InputReliableStream* stream, MicroBuffer* mb) {
     uint16_t nack_bitmap = compute_nack_bitmap(stream);
 
     ACKNACK_Payload payload;
@@ -104,7 +96,7 @@ void write_acknack(const InputReliableStream* stream, MicroBuffer* mb)
     (void) stream; (void) mb;
 }
 
-void read_submessage_heartbeat(InputReliableStream* stream, MicroBuffer* payload)
+void read_heartbeat(InputReliableStream* stream, MicroBuffer* payload)
 {
     HEARTBEAT_Payload heartbeat;
     deserialize_HEARTBEAT_Payload(payload, &heartbeat);
@@ -114,8 +106,9 @@ void read_submessage_heartbeat(InputReliableStream* stream, MicroBuffer* payload
 
 bool is_input_reliable_stream_busy(InputReliableStream* stream)
 {
-    return stream->must_confirm;
+    return stream->last_announced != stream->last_handled;
 }
+
 //==================================================================
 //                             PRIVATE
 //==================================================================
@@ -130,8 +123,6 @@ void process_heartbeat(InputReliableStream* stream, uint16_t first_seq_num, uint
     {
         stream->last_announced = last_seq_num;
     }
-
-    stream->must_confirm = true;
 }
 
 uint16_t compute_nack_bitmap(const InputReliableStream* stream)

@@ -26,6 +26,17 @@ extern "C"
 
 #define INVALID_REQUEST_ID 0
 
+extern const uint8_t MR_STATUS_OK;
+extern const uint8_t MR_STATUS_OK_MATCHED;
+extern const uint8_t MR_STATUS_ERR_DDS_ERROR;
+extern const uint8_t MR_STATUS_ERR_MISMATCH;
+extern const uint8_t MR_STATUS_ERR_ALREADY_EXISTS;
+extern const uint8_t MR_STATUS_ERR_DENIED;
+extern const uint8_t MR_STATUS_ERR_UNKNOWN_REFERENCE;
+extern const uint8_t MR_STATUS_ERR_INVALID_DATA;
+extern const uint8_t MR_STATUS_ERR_INCOMPATIBLE;
+extern const uint8_t MR_STATUS_ERR_RESOURCES;
+
 typedef struct Communication Communication;
 typedef struct Session Session;
 typedef struct BaseObjectRequest BaseObjectRequest;
@@ -35,7 +46,7 @@ typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t r
 
 #ifdef PROFILE_READ_ACCESS
 typedef void (*OnTopicFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
-                             MicroBuffer* mb, StreamId stream_id, void* args);
+                             StreamId stream_id, MicroBuffer* mb, void* args);
 #endif
 
 struct Session
@@ -55,8 +66,8 @@ struct Session
 
 };
 
-int create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
-int delete_session(Session* session);
+bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
+bool delete_session(Session* session);
 
 void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
 
@@ -65,7 +76,7 @@ StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t
 StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
 
-size_t run_session(Session* session, size_t max_attempts, int poll_ms);
+bool run_session(Session* session, int poll_ms);
 
 uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base);
 

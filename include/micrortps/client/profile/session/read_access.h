@@ -37,7 +37,8 @@ typedef struct DeliveryControl
 
 } DeliveryControl;
 
-uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id, uint8_t format, DeliveryControl* control);
+uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id,
+                         StreamId data_stream_id, uint8_t format, DeliveryControl* control);
 
 #ifdef __cplusplus
 }
