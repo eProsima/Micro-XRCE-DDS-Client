@@ -22,6 +22,7 @@ extern "C"
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct UARTProperties UARTProperties;
 
@@ -33,7 +34,7 @@ struct UARTTransport
     UARTProperties* properties;
 };
 
-int init_uart_transport(UARTTransport* transport, const char* device);
+bool init_uart_transport(UARTTransport* transport, const char* device);
 
 #ifdef __cplusplus
 }

@@ -43,7 +43,7 @@ struct UDPTransport
     Communication comm;
 };
 
-int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
+bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
 
 #ifdef __cplusplus
 }

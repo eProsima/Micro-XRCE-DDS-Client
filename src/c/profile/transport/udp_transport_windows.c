@@ -62,16 +62,11 @@ static int get_udp_error()
  *******************************************************************************/
 int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
 {
-    int result = 0;
+    bool rv = false;
 
     /* Socket initialization. */
     transport->socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (INVALID_SOCKET == transport->socket_fd)
-    {
-        result = WSAGetLastError();
-    }
-
-    if (0 < result)
+    if (INVALID_SOCKET != transport->socket_fd)
     {
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
@@ -89,17 +84,14 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
         int connected = connect(transport->socket_fd,
                                 &transport->remote_addr,
                                 sizeof(transport->remote_addr));
-        if (-1 == connected)
-        {
-            result = WSAGetLastError();
-        }
-        else
-        {
+        if (0 == connected)
             /* Interface setup. */
             transport->comm.instance = (void*)transport;
             transport->comm.send_msg = send_udp_msg;
             transport->comm.recv_msg = recv_udp_msg;
             transport->comm.comm_error = get_udp_error;
+            transport->comm.mtu = UDP_TRANSPORT_MTU;
+            rv = true;
         }
     }
 

@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/communication/communication.h>
+#include <micrortps/client/core/communication/communication.h>
 #include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -37,7 +37,7 @@ struct UDPTransport
     Communication comm;
 };
 
-int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
+bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
 
 
 #ifdef __cplusplus

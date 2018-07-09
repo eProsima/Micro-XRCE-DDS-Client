@@ -34,7 +34,7 @@ struct UDPTransport
     struct freertos_sockaddr remote_addr;
 };
 
-int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
+bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
 intmax_t send_udp_msg(UDPTransport* transport, const uint8_t* buf, size_t len);
 intmax_t recv_udp_msg(UDPTransport* transport, uint8_t** buf, size_t* len, int timeout);
 

@@ -135,10 +135,28 @@ uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseOb
     return request_id;
 }
 
-void run_session(Session* session, int poll_ms)
+void run_session_until_timeout(Session* session, int timeout_ms)
 {
     flash_streams_session(session);
-    while(listen_message_reliably(session, poll_ms));
+
+    bool received = false;
+    while(received)
+    {
+         received = listen_message_reliably(session, timeout_ms);
+    }
+}
+
+bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
+{
+    flash_streams_session(session);
+
+    bool received = false;
+    while(received && busy_streams(&session->streams))
+    {
+        received = listen_message_reliably(session, timeout_ms);
+    }
+
+    return !received;
 }
 
 bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
@@ -162,7 +180,8 @@ bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* 
         status_confirmed = true;
         for(unsigned i = 0; i < list_size && status_confirmed; ++i)
         {
-            status_confirmed = status_list[i] != MR_STATUS_NONE;
+            status_confirmed = status_list[i] != MR_STATUS_NONE
+                            || request_list[i] == INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
         }
     }
 
@@ -262,7 +281,7 @@ bool listen_message_reliably(Session* session, int poll_ms)
             }
         }
 
-        int32_t poll_to_next_heartbeat = (next_heartbeat_timestamp != INT64_MAX) ? (int32_t)(next_heartbeat_timestamp - timestamp) : poll_ms;
+        int32_t poll_to_next_heartbeat = (next_heartbeat_timestamp != INT64_MAX) ? (int32_t)(next_heartbeat_timestamp - timestamp) : poll;
         if(0 == poll_to_next_heartbeat)
         {
             poll_to_next_heartbeat = 1;

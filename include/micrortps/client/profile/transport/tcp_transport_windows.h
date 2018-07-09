@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <micrortps/client/communication/communication.h>
+#include <micrortps/client/core/communication/communication.h>
 #include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -37,7 +37,7 @@ struct TCPTransport
     Communication comm;
 };
 
-int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
+bool init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
 
 #ifdef __cplusplus
 }

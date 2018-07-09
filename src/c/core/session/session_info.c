@@ -26,6 +26,7 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
     info->key[2] = (key << 16) >> 24;
     info->key[3] = (key << 24) >> 24;
     info->state = STATE_LOGOUT;
+    info->request = STATE_LOGOUT;
 }
 
 void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds)

@@ -35,7 +35,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
             disconnect_tcp(transport);
             rv = false;
         }
-    } 
+    }
     while (rv && bytes_sent != 2);
 
     /* Send message payload. */
@@ -175,8 +175,8 @@ uint16_t read_tcp_data(TCPTransport* transport)
             }
             case TCP_SIZE_READ:
             {
-                ssize_t bytes_received = recv(transport->poll_fd.fd, 
-                                              transport->input_buffer.buffer, 
+                ssize_t bytes_received = recv(transport->poll_fd.fd,
+                                              transport->input_buffer.buffer,
                                               transport->input_buffer.msg_size, 0);
                 if (0 < bytes_received)
                 {
@@ -187,7 +187,7 @@ uint16_t read_tcp_data(TCPTransport* transport)
                     else
                     {
                         transport->input_buffer.position = (uint16_t)bytes_received;
-                        transport->input_buffer.state = TCP_MESSAGE_INCOMPLETE;        
+                        transport->input_buffer.state = TCP_MESSAGE_INCOMPLETE;
                         exit_flag = true;
                     }
                 }
@@ -204,8 +204,8 @@ uint16_t read_tcp_data(TCPTransport* transport)
             }
             case TCP_MESSAGE_INCOMPLETE:
             {
-                ssize_t bytes_received = recv(transport->poll_fd.fd, 
-                                              transport->input_buffer.buffer + transport->input_buffer.position, 
+                ssize_t bytes_received = recv(transport->poll_fd.fd,
+                                              transport->input_buffer.buffer + transport->input_buffer.position,
                                               transport->input_buffer.msg_size - transport->input_buffer.position, 0);
                 if (0 < bytes_received)
                 {
@@ -256,18 +256,13 @@ void disconnect_tcp(TCPTransport* transport)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port)
+bool init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port)
 {
-    int rv = 0;
+    bool rv = false;
 
     /* Socket initialization. */
     transport->poll_fd.fd = socket(PF_INET, SOCK_STREAM, 0);
-    if (-1 == transport->poll_fd.fd)
-    {
-        rv = errno;
-    }
-
-    if (0 == rv)
+    if (-1 != transport->poll_fd.fd)
     {
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
@@ -284,17 +279,15 @@ int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port)
         int connected = connect(transport->poll_fd.fd,
                                 &transport->remote_addr,
                                 sizeof(transport->remote_addr));
-        if (-1 == connected)
-        {
-            rv = errno;
-        }
-        else
+        if(0 == connected)
         {
             /* Interface setup. */
             transport->comm.instance = (void*)transport;
             transport->comm.send_msg = send_tcp_msg;
             transport->comm.recv_msg = recv_tcp_msg;
             transport->comm.comm_error = get_tcp_error;
+            transport->comm.mtu = TCP_TRANSPORT_MTU;
+            rv = true;
         }
     }
 

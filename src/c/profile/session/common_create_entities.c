@@ -19,8 +19,7 @@ uint16_t write_delete_entity(Session* session, StreamId stream_id, mrObjectId ob
     payload_length += 4; // delete payload (request id + object_id), no padding.
 
     MicroBuffer mb;
-    bool available = prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb);
-    if(available)
+    if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))
     {
         request_id = init_base_object_request(session, object_id, &payload.base);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
@@ -49,8 +48,7 @@ uint16_t common_create_entity(Session* session, StreamId stream_id,
                        object_id.type  == DOMAIN_ID || object_id.type == QOS_PROFILE_ID) ? 0 : 2; //object id ref
 
     MicroBuffer mb;
-    bool available = prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb);
-    if(available)
+    if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))
     {
         request_id = init_base_object_request(session, object_id, &payload->base);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, flags);

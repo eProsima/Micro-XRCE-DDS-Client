@@ -13,14 +13,10 @@
 // limitations under the License.
 
 #include <micrortps/client/client.h>
-#include <micrortps/client/core/util/time.h>
-
 #include <stdio.h>
 
-#include <unistd.h>
-#include <fcntl.h>
-
-#define BUFFER_SIZE     UDP_TRANSPORT_MTU * 8
+#define STREAM_HISTORY  8
+#define BUFFER_SIZE     UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 void on_topic(Session* session, mrObjectId id, uint16_t request_id, StreamId stream_id, MicroBuffer* mb, void* args)
 {
@@ -38,8 +34,7 @@ int main(int args, char** argv)
 
     // Transport
     UDPTransport transport;
-    int transport_error = init_udp_transport(&transport, "127.0.0.1", 2019);
-    if(transport_error)
+    if(!init_udp_transport(&transport, "127.0.0.1", 2019))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -47,20 +42,19 @@ int main(int args, char** argv)
 
     // Session
     Session session;
-    set_topic_callback(&session, on_topic, NULL);
-    bool login = create_session(&session, 129, 0xAABBCCDD, &transport.comm);
-    if(!login)
+    if(!create_session(&session, 0x81, 0xAABBCCDD, &transport.comm))
     {
         printf("Error at create session.\n");
         return 1;
     }
+    set_topic_callback(&session, on_topic, NULL);
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, 8);
+    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    StreamId reliable_in = create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, 8);
+    StreamId reliable_in = create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Create entities
     mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
@@ -85,12 +79,12 @@ int main(int args, char** argv)
     run_session_until_status(&session, 1000, requests, status, 4);
     if(!check_status_list_ok(status, 4))
     {
-        printf("Error at create entities.\n");
+        printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
         return 1;
     }
 
     // Read 10 topics
-    for(unsigned i = 0; i < 10; ++i)
+    for(unsigned i = 0; i < 100; ++i)
     {
         uint8_t read_data_status;
         uint16_t read_data_req = write_read_data(&session, reliable_out, datareader_id, reliable_in, MR_FORMAT_DATA, NULL);
@@ -102,6 +96,15 @@ int main(int args, char** argv)
 
     return 0;
 }
+
+
+
+
+
+
+
+
+
 
 /*
 printf("Usage: program <command>\n");

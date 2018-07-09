@@ -14,7 +14,7 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
         result = -1;
     }
 
-    if (0 < result)
+    if (0 < result) //WARNING (Luis): Never compute this
     {
         // Remote IP setup.
         transport->remote_addr.sin_port = port;

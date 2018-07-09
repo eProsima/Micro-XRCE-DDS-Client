@@ -85,9 +85,9 @@ static int get_uart_error()
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-int init_uart_transport(UARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
+bool init_uart_transport(UARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
 {
-    int rv = -1;
+    bool rv = false;
 
     /* Open device */
     transport->remote_addr = remote_addr;
@@ -111,16 +111,17 @@ int init_uart_transport(UARTTransport* transport, const char* device, uint8_t re
             transport->comm.send_msg = send_uart_msg;
             transport->comm.recv_msg = recv_uart_msg;
             transport->comm.comm_error = get_uart_error;
-            rv = 0;
+            transport->comm.mtu = UART_TRANSPORT_MTU;
+            rv = true;
         }
     }
 
     return rv ;
 }
 
-int init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
+bool init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
-    int rv = -1;
+    bool rv = false;
 
     /* Open device */
     transport->remote_addr = remote_addr;
@@ -143,7 +144,8 @@ int init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_addr
         transport->comm.send_msg = send_uart_msg;
         transport->comm.recv_msg = recv_uart_msg;
         transport->comm.comm_error = get_uart_error;
-        rv = 0;
+        transport->comm.mtu = UART_TRANSPORT_MTU;
+        rv = true;
     }
 
     return rv;

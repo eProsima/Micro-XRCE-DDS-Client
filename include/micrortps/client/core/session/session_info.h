@@ -24,8 +24,8 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-#define STATE_LOGOUT   0x00
 #define STATE_LOGIN    0x01
+#define STATE_LOGOUT   0x02
 
 typedef struct MicroBuffer MicroBuffer;
 typedef struct SessionInfo

@@ -49,8 +49,7 @@ uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datare
     payload_length += (control != NULL) ? 8 : 0; // delivery control
 
     MicroBuffer mb;
-    bool available = prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb);
-    if(available)
+    if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))
     {
         request_id = init_base_object_request(session, datareader_id, &payload.base);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);

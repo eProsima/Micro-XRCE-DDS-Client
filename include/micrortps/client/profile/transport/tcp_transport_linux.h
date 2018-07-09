@@ -61,7 +61,7 @@ struct TCPTransport
     Communication comm;
 };
 
-int init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
+bool init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
 
 #ifdef __cplusplus
 }

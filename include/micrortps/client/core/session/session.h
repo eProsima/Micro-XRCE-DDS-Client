@@ -73,7 +73,8 @@ StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t
 StreamId create_input_best_effort_stream(Session* session);
 StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
 
-void run_session(Session* session, int poll_ms);
+void run_session_until_timeout(Session* session, int poll_ms);
+bool run_session_until_confirm_delivery(Session* session, int poll_ms);
 bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
 
 bool check_status_list_ok(uint8_t* status_list, size_t size);

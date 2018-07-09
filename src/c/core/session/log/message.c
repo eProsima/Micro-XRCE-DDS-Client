@@ -517,6 +517,6 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
 void print_tail()
 {
     int64_t ms = get_milli_time() - initial_log_time;
-    printf(" %s=> %lims%s", BLUE, ms, RESTORE_COLOR);
+    printf(" %st: %lims%s", BLUE, ms, RESTORE_COLOR);
 }
 
