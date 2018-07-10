@@ -107,17 +107,12 @@ bool prepare_stream_to_write(StreamStorage* storage, StreamId stream_id, size_t 
     return available;
 }
 
-bool busy_streams(StreamStorage* storage)
+bool output_streams_confirmed(const StreamStorage* storage)
 {
     bool busy = false;
     for(unsigned i = 0; i < storage->output_reliable_size && !busy; ++i)
     {
         busy = is_output_reliable_stream_busy(&storage->output_reliable[i]);
-    }
-
-    for(unsigned i = 0; i < storage->input_reliable_size && !busy; ++i)
-    {
-        busy = is_input_reliable_stream_busy(&storage->input_reliable[i]);
     }
 
     return busy;

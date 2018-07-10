@@ -70,12 +70,12 @@ inline uint16_t create_entity_ref(Session* session, StreamId stream_id,
                                   mrObjectId object_id, char* ref, uint8_t flags,
                                   CREATE_Payload* payload)
 {
-    size_t ref_size = strlen(ref) + 1;
+    uint32_t ref_size = strlen(ref) + 1;
 
     // Use participant access to access to the ref base of any object variant. //Future elegant change?
     payload->object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
-    payload->object_representation._.participant.base.representation._.object_reference.data = ref;
     payload->object_representation._.participant.base.representation._.object_reference.size = ref_size;
+    memcpy(payload->object_representation._.participant.base.representation._.object_reference.data, ref, ref_size);
 
     return common_create_entity(session, stream_id, object_id, ref_size, flags, payload);
 }

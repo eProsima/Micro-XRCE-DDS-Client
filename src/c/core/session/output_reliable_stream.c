@@ -187,7 +187,7 @@ void read_acknack(OutputReliableStream* stream, MicroBuffer* payload)
     process_acknack(stream, nack_bitmap, acknack.first_unacked_seq_num - 1);
 }
 
-bool is_output_reliable_stream_busy(OutputReliableStream* stream)
+bool is_output_reliable_stream_busy(const OutputReliableStream* stream)
 {
     return 0 > seq_num_cmp(stream->last_acknown, stream->last_sent);
 }

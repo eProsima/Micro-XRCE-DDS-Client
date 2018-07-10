@@ -27,6 +27,10 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+#define GREEN_CONSOLE_COLOR "\x1B[1;32m"
+#define RED_CONSOLE_COLOR   "\x1B[1;31m"
+#define RESTORE_COLOR       "\x1B[0m"
+
 #define XML_BUFFER_SIZE 1024
 #define SHAPE_TOPIC 0x01
 
@@ -34,11 +38,6 @@
 #define MAX_TRANSPORT_MTU 512
 #define MAX_HISTORY 16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
-
-typedef struct StreamBuffers
-{
-
-} StreamBuffers;
 
 static bool compute_command(const char* command, Session* session);
 static void on_topic(Session* session, mrObjectId object_id, uint16_t request_id, StreamId stream_id, MicroBuffer* serialization, void* args);
@@ -49,7 +48,7 @@ static int check_input(void);
 
 int main(int args, char** argv)
 {
-    printf("<< SHAPES DEMO XRCE CLIENT >>\n");
+    printf("SHAPES DEMO XRCE CLIENT\n");
 
     Session session;
     UARTTransport uart;
@@ -59,7 +58,7 @@ int main(int args, char** argv)
     Communication* comm;
 
     int args_index = 0;
-    if(args == 3 && strcmp(argv[1], "serial") == 0)
+    if(args >= 3 && strcmp(argv[1], "serial") == 0)
     {
         char* device = argv[2];
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -69,10 +68,10 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &uart.comm;
-        printf("<< Serial mode => dev: %s >>\n", device);
+        printf("Serial mode => dev: %s\n", device);
         args_index = 3;
     }
-    else if(args == 4 && strcmp(argv[1], "udp") == 0)
+    else if(args >= 4 && strcmp(argv[1], "udp") == 0)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
@@ -82,10 +81,10 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &udp.comm;
-        printf("<< UDP mode => ip: %s - port: %hu >>\n", argv[2], port);
+        printf("UDP mode => ip: %s - port: %hu\n", argv[2], port);
         args_index = 4;
     }
-    else if(args == 4 && strcmp(argv[1], "tcp") == 0)
+    else if(args >= 4 && strcmp(argv[1], "tcp") == 0)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
@@ -104,6 +103,7 @@ int main(int args, char** argv)
         return 1;
     }
 
+    // Session
     uint32_t key = 0xAABBCCDD;
     uint8_t session_id = 0x81;
     if(args_index < args)
@@ -111,13 +111,6 @@ int main(int args, char** argv)
         session_id = (uint8_t) atoi(argv[args_index++]);
     }
 
-    size_t history = 8;
-    if(args_index < args)
-    {
-        history = atoi(argv[args_index++]);
-    }
-
-    // Init session
     if(!create_session(&session, session_id, key, comm))
     {
         printf("%sCan not create session with the agent%s\n", "\x1B[1;31m", "\x1B[0m");
@@ -125,6 +118,13 @@ int main(int args, char** argv)
     }
 
     set_topic_callback(&session, on_topic, NULL);
+
+    // Streams
+    size_t history = 8;
+    if(args_index < args)
+    {
+        history = atoi(argv[args_index++]);
+    }
 
     uint8_t output_best_effort_stream_buffer[MAX_BUFFER_SIZE];
     uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE];
@@ -150,7 +150,7 @@ int main(int args, char** argv)
     }
 
     delete_session(&session);
-    //TODO: add the close transport function
+    //TODO: add the close transport functions
 
     return 0;
 }
@@ -292,30 +292,64 @@ bool compute_command(const char* command, Session* session)
 
 void on_topic(Session* session, mrObjectId object_id, uint16_t request_id, StreamId stream_id, MicroBuffer* serialization, void* args)
 {
-    (void) session; (void) request_id; (void) stream_id; (void) serialization; (void) args;
-    if(SHAPE_TOPIC ==  object_id.id)
-    {
-        /*ShapeType topic;
-        deserialize_ShapeType_topic(serialization, &topic);
-        printf("Receiving... ");
-        printl_ShapeType_topic(&topic);*/
-    }
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args;
+    // Only can be ShapeType type
+    /*ShapeType topic;
+    deserialize_ShapeType_topic(serialization, &topic);
+    printf("Receiving... ");
+    printl_ShapeType_topic(&topic);*/
 }
 
 void print_status(uint8_t status)
 {
-    if (MR_STATUS_NONE == status)
+    char status_name[128];
+    if(MR_STATUS_OK == status)
     {
-        printf("%s[Status: NONE]%s\n", "\x1B[1;31m", "\x1B[0m");
+        strcpy(status_name, "OK");
     }
-    else if(MR_STATUS_OK == status)
+    else if(MR_STATUS_OK_MATCHED == status)
     {
-        printf("%s[Status: OK]%s\n", "\x1B[1;32m", "\x1B[0m");
+        strcpy(status_name, "OK_MATCHED");
     }
-    else
+    else if(MR_STATUS_ERR_DDS_ERROR == status)
     {
-        printf("%s[Status: %i]%s\n", "\x1B[1;31m", status, "\x1B[0m");
+        strcpy(status_name, "ERR_DDS_ERROR");
     }
+    else if(MR_STATUS_ERR_MISMATCH == status)
+    {
+        strcpy(status_name, "ERR_MISMATCH");
+    }
+    else if(MR_STATUS_ERR_ALREADY_EXISTS == status)
+    {
+        strcpy(status_name, "ERR_ALREADY_EXISTS");
+    }
+    else if(MR_STATUS_ERR_DENIED == status)
+    {
+        strcpy(status_name, "ERR_DDS_DENIED");
+    }
+    else if(MR_STATUS_ERR_UNKNOWN_REFERENCE == status)
+    {
+        strcpy(status_name, "UNKNOWN_REFERENCE");
+    }
+    else if(MR_STATUS_ERR_INVALID_DATA == status)
+    {
+        strcpy(status_name, "ERR_INVALID_DATA");
+    }
+    else if(MR_STATUS_ERR_INCOMPATIBLE == status)
+    {
+        strcpy(status_name, "ERR_INCOMPATIBLE");
+    }
+    else if(MR_STATUS_ERR_RESOURCES == status)
+    {
+        strcpy(status_name, "ERR_RESOURCES");
+    }
+    else if(MR_STATUS_NONE == status)
+    {
+        strcpy(status_name, "NONE");
+    }
+
+    const char* color = (MR_STATUS_OK == status || MR_STATUS_OK_MATCHED == status) ? GREEN_CONSOLE_COLOR : RED_CONSOLE_COLOR;
+    printf("%sStatus: %s%s\n", color, status_name, RESTORE_COLOR);
 }
 
 void help(void)

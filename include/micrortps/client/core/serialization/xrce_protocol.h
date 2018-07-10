@@ -24,14 +24,16 @@ extern "C"
 #include <stdbool.h>
 #include <microcdr/microcdr.h>
 
-#define STRING_SEQUENCE_MAX 10
-#define SAMPLE_SEQUENCE_MAX 10
-#define SAMPLE_DATA_SEQUENCE_MAX 10
-#define SAMPLE_DELTA_SEQUENCE_MAX 10
-#define PACKED_SAMPLES_SEQUENCE_MAX 10
-#define TRANSPORT_LOCATOR_SEQUENCE_MAX 10
-#define PROPERTY_SEQUENCE_MAX 10
-
+#define STRING_SIZE_MAX                512
+#define SAMPLE_DATA_SIZE_MAX           512
+#define STRING_SEQUENCE_MAX            8
+#define BINARY_SEQUENCE_MAX            8
+#define SAMPLE_SEQUENCE_MAX            8
+#define SAMPLE_DATA_SEQUENCE_MAX       8
+#define SAMPLE_DELTA_SEQUENCE_MAX      8
+#define PACKED_SAMPLES_SEQUENCE_MAX    8
+#define TRANSPORT_LOCATOR_SEQUENCE_MAX 8
+#define PROPERTY_SEQUENCE_MAX          8
 
 typedef struct Time_t
 {
@@ -44,7 +46,7 @@ typedef struct Time_t
 typedef struct String_t
 {
     uint32_t size;
-    char* data;
+    char data[STRING_SIZE_MAX];
 
 } String_t;
 
@@ -52,7 +54,7 @@ typedef struct String_t
 typedef struct BinarySequence_t
 {
     uint32_t size;
-    uint8_t* data;
+    uint8_t data[BINARY_SEQUENCE_MAX];
 
 } BinarySequence_t;
 
@@ -689,6 +691,7 @@ typedef struct DataDeliveryControl
 
 typedef struct ReadSpecification
 {
+    uint8_t input_stream_id;
     uint8_t data_format;
     bool optional_content_filter_expression;
     String_t content_filter_expression;
@@ -765,7 +768,7 @@ typedef struct SampleInfoDelta
 typedef struct SampleData
 {
     uint32_t size;
-    uint8_t* data;
+    uint8_t data[SAMPLE_DATA_SIZE_MAX];
 
 } SampleData;
 

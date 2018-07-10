@@ -3,7 +3,7 @@
 #include <string.h>
 
 static uint16_t create_entity_xml(Session* session, StreamId stream_id,
-                                  mrObjectId object_id, char* xml, uint8_t flags,
+                                  mrObjectId object_id, const char* xml, uint8_t flags,
                                   CREATE_Payload* payload);
 
 //==================================================================
@@ -127,15 +127,15 @@ uint16_t write_configure_datareader_xml(Session* session, StreamId stream_id,
 //==================================================================
 
 inline uint16_t create_entity_xml(Session* session, StreamId stream_id,
-                                  mrObjectId object_id, char* xml, uint8_t flags,
+                                  mrObjectId object_id, const char* xml, uint8_t flags,
                                   CREATE_Payload* payload)
 {
-    size_t xml_size = strlen(xml) + 1;
+    uint32_t xml_size = strlen(xml) + 1;
 
     // Use participant access to access to the xml base of any object variant. //Future elegant change?
     payload->object_representation._.participant.base.representation.format = REPRESENTATION_AS_XML_STRING;
-    payload->object_representation._.participant.base.representation._.xml_string_represenatation.data = xml;
     payload->object_representation._.participant.base.representation._.xml_string_represenatation.size = xml_size;
+    memcpy(payload->object_representation._.participant.base.representation._.xml_string_represenatation.data, xml, xml_size);
 
     return common_create_entity(session, stream_id, object_id, xml_size, flags, payload);
 }

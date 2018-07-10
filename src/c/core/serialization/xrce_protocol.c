@@ -26,7 +26,7 @@ bool serialize_String_t(MicroBuffer* buffer, const String_t* input)
 
 bool deserialize_String_t(MicroBuffer* buffer, String_t* output)
 {
-    return deserialize_sequence_char(buffer, &output->data, &output->size);
+    return deserialize_sequence_char(buffer, output->data, &output->size);
 }
 
 bool serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* input)
@@ -36,7 +36,7 @@ bool serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* inp
 
 bool deserialize_BinarySequence_t(MicroBuffer* buffer, BinarySequence_t* output)
 {
-    return deserialize_sequence_uint8_t(buffer, &output->data, &output->size);
+    return deserialize_sequence_uint8_t(buffer, output->data, &output->size);
 }
 
 bool serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* input)
@@ -1432,6 +1432,7 @@ bool deserialize_DataDeliveryControl(MicroBuffer* buffer, DataDeliveryControl* o
 bool serialize_ReadSpecification(MicroBuffer* buffer, const ReadSpecification* input)
 {
     bool ret = true;
+    //ret &= serialize_uint8_t(buffer, input->input_stream_id);
     ret &= serialize_uint8_t(buffer, input->data_format);
     ret &= serialize_bool(buffer, input->optional_content_filter_expression);
     if(input->optional_content_filter_expression == true)
@@ -1451,6 +1452,7 @@ bool serialize_ReadSpecification(MicroBuffer* buffer, const ReadSpecification* i
 bool deserialize_ReadSpecification(MicroBuffer* buffer, ReadSpecification* output)
 {
     bool ret = true;
+    //ret &= deserialize_uint8_t(buffer, &output->input_stream_id);
     ret &= deserialize_uint8_t(buffer, &output->data_format);
     ret &= deserialize_bool(buffer, &output->optional_content_filter_expression);
     if(output->optional_content_filter_expression == true)
@@ -1572,7 +1574,7 @@ bool serialize_SampleData(MicroBuffer* buffer, const SampleData* input)
 
 bool deserialize_SampleData(MicroBuffer* buffer, SampleData* output)
 {
-    return deserialize_sequence_uint8_t(buffer, &output->data, &output->size);
+    return deserialize_sequence_uint8_t(buffer, output->data, &output->size);
 }
 
 bool serialize_SampleDataSeq(MicroBuffer* buffer, const SampleDataSeq* input)

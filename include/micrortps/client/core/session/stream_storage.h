@@ -73,7 +73,7 @@ InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint
 InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t index);
 
 bool prepare_stream_to_write(StreamStorage* storage, StreamId stream_id, size_t size, MicroBuffer* mb);
-bool busy_streams(StreamStorage* storage);
+bool output_streams_confirmed(const StreamStorage* storage);
 
 #ifdef __cplusplus
 }

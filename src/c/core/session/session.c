@@ -140,10 +140,11 @@ void run_session_until_timeout(Session* session, int timeout_ms)
     flash_streams_session(session);
 
     bool received = false;
-    while(received)
+    do
     {
          received = listen_message_reliably(session, timeout_ms);
     }
+    while(received);
 }
 
 bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
@@ -151,12 +152,12 @@ bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
     flash_streams_session(session);
 
     bool received = false;
-    while(received && busy_streams(&session->streams))
+    while(received && output_streams_confirmed(&session->streams))
     {
         received = listen_message_reliably(session, timeout_ms);
     }
 
-    return !received;
+    return output_streams_confirmed(&session->streams);
 }
 
 bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
@@ -399,6 +400,7 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
                 {
                     read_submessage_list(session, &next_mb, stream_id);
                 }
+                write_submessage_acknack(session, stream_id);
             }
             break;
         }
@@ -461,12 +463,6 @@ void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessa
     }
 }
 
-void read_submessage_fragment(Session* session, MicroBuffer* submessage, StreamId stream_id, bool last_fragment)
-{
-    (void) session; (void) submessage; (void) stream_id; (void) last_fragment;
-    //TODO
-}
-
 void read_submessage_status(Session* session, MicroBuffer* submessage)
 {
     STATUS_Payload payload;
@@ -486,6 +482,12 @@ void read_submessage_status(Session* session, MicroBuffer* submessage)
     }
 }
 
+void read_submessage_fragment(Session* session, MicroBuffer* submessage, StreamId stream_id, bool last_fragment)
+{
+    (void) session; (void) submessage; (void) stream_id; (void) last_fragment;
+    //TODO
+}
+
 void read_submessage_heartbeat(Session* session, MicroBuffer* submessage, StreamId stream_id)
 {
     InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
@@ -493,7 +495,6 @@ void read_submessage_heartbeat(Session* session, MicroBuffer* submessage, Stream
     {
         read_heartbeat(stream, submessage);
         write_submessage_acknack(session, stream_id);
-
     }
 }
 
