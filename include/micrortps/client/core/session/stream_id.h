@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <microcdr/microcdr.h>
+#include <stdint.h>
 
 typedef enum StreamType
 {

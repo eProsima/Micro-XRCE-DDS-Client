@@ -1893,7 +1893,6 @@ bool serialize_WRITE_DATA_Payload_Data(MicroBuffer* buffer, const WRITE_DATA_Pay
 {
     bool ret = true;
     ret &= serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= serialize_SampleData(buffer, &input->data);
     return ret;
 }
 
@@ -1901,7 +1900,6 @@ bool deserialize_WRITE_DATA_Payload_Data(MicroBuffer* buffer, WRITE_DATA_Payload
 {
     bool ret = true;
     ret &= deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= deserialize_SampleData(buffer, &output->data);
     return ret;
 }
 

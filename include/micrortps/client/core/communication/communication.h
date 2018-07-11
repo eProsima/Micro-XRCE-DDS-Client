@@ -24,9 +24,6 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-#define RECV_DATA_OK 0
-#define RECV_DATA_TIMEOUT 1
-
 typedef bool (*send_msg_func)(void* instance, const uint8_t* buf, size_t len);
 typedef bool (*recv_msg_func)(void* instance, uint8_t** buf, size_t* len, int timeout);
 typedef int (*comm_error_func)();

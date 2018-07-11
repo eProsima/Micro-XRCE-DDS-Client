@@ -1,4 +1,9 @@
 #include <micrortps/client/profile/transport/udp_transport_linux.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <errno.h>
 
 /*******************************************************************************
  * Private function declarations.

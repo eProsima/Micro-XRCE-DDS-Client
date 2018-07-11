@@ -913,7 +913,6 @@ typedef struct READ_DATA_Payload
 typedef struct WRITE_DATA_Payload_Data
 {
     BaseObjectRequest base;
-    SampleData data;
 
 } WRITE_DATA_Payload_Data;
 

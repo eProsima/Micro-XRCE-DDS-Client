@@ -21,16 +21,8 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/communication/communication.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/poll.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
 
 #define TCP_TRANSPORT_MTU 512
 
@@ -43,23 +35,21 @@ typedef enum TCPInputBufferState
     TCP_MESSAGE_AVAILABLE
 } TCPInputBufferState;
 
-typedef struct TCPInputBuffer TCPInputBuffer;
-struct TCPInputBuffer
+typedef struct TCPInputBuffer
 {
     uint8_t buffer[TCP_TRANSPORT_MTU];
     uint16_t position;
     TCPInputBufferState state;
     uint16_t msg_size;
-};
+} TCPInputBuffer;
 
-typedef struct TCPTransport TCPTransport;
-struct TCPTransport
+typedef struct TCPTransport
 {
     TCPInputBuffer input_buffer;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
     Communication comm;
-};
+} TCPTransport;
 
 bool init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
 

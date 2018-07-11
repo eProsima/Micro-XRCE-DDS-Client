@@ -23,7 +23,6 @@ extern "C"
 #include <micrortps/client/core/session/seq_num.h>
 
 #include <stddef.h>
-#include <stdint.h>
 #include <stdbool.h>
 
 

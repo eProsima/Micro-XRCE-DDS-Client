@@ -21,15 +21,8 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/communication/communication.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <sys/poll.h>
-#include <string.h>
-#include <errno.h>
 
 #define UDP_TRANSPORT_MTU 512
 

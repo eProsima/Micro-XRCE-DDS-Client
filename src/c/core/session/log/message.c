@@ -82,8 +82,8 @@ void print_message(int direction, uint8_t* buffer, size_t size)
     (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
     size_t submessage_counter = 0;
-    uint8_t submessage_id; uint16_t length; uint8_t flags;
-    while(read_submessage_header(&mb, &submessage_id, &length, &flags))
+    uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
+    while(read_submessage_header(&mb, &submessage_id, &length, &flags, &payload_it))
     {
         if(submessage_counter != 0)
         {
@@ -195,6 +195,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
             } break;
         }
 
+        //avanzar hasta length.
         submessage_counter++;
     }
     print_tail();
@@ -409,25 +410,25 @@ void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payloa
     switch(payload->read_specification.data_format)
     {
         case FORMAT_DATA:
-            sprintf(format, "FORMAT_DATA");
+            sprintf(format, "DATA");
         break;
         case FORMAT_DATA_SEQ:
-            sprintf(format, "FORMAT_DATA_SEQ");
+            sprintf(format, "DATA_SEQ");
         break;
         case FORMAT_SAMPLE:
-            sprintf(format, "FORMAT_SAMPLE");
+            sprintf(format, "SAMPLE");
         break;
         case FORMAT_SAMPLE_SEQ:
-            sprintf(format, "FORMAT_SAMPLE_SEQ");
+            sprintf(format, "SAMPLE_SEQ");
         break;
         case FORMAT_PACKED_SAMPLES:
-            sprintf(format, "FORMAT_PACKED_SAMPLES");
+            sprintf(format, "PACKED_SAMPLES");
         break;
         default:
-            sprintf(format, "FORMAT_DATA_UNKNOWN");
+            sprintf(format, "UNKNOWN");
     }
 
-    printf("%s[READ DATA | %s | %s | dc: %s]%s",
+    printf("%s[READ DATA | format: %s | %s | dc: %s]%s",
             pre,
             request_to_string(&payload->base),
             format,
@@ -437,7 +438,7 @@ void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payloa
 
 void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload)
 {
-    printf("%s[WRITE DATA | FORMAT_DATA | %s]%s",
+    printf("%s[WRITE DATA | format: DATA | %s]%s",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);
@@ -445,7 +446,7 @@ void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_
 
 void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload)
 {
-    printf("%s[DATA | FORMAT_DATA | %s]%s",
+    printf("%s[DATA | format: DATA | %s]%s",
             pre,
             request_to_string(&payload->base),
             RESTORE_COLOR);

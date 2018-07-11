@@ -106,11 +106,3 @@ int main(int args, char** argv)
 
 
 
-/*
-printf("Usage: program <command>\n");
-printf("List of commands:\n");
-printf("    serial device\n");
-printf("    udp agent_ip agent_port\n");
-printf("    help\n");
-return 1;
-*/

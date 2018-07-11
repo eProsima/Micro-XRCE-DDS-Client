@@ -139,22 +139,21 @@ void run_session_until_timeout(Session* session, int timeout_ms)
 {
     flash_streams_session(session);
 
-    bool received = false;
-    do
+    bool timeout = false;
+    while(!timeout)
     {
-         received = listen_message_reliably(session, timeout_ms);
+         timeout = !listen_message_reliably(session, timeout_ms);
     }
-    while(received);
 }
 
 bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
 {
     flash_streams_session(session);
 
-    bool received = false;
-    while(received && output_streams_confirmed(&session->streams))
+    bool timeout = false;
+    while(!output_streams_confirmed(&session->streams) && !timeout)
     {
-        received = listen_message_reliably(session, timeout_ms);
+        timeout = !listen_message_reliably(session, timeout_ms);
     }
 
     return output_streams_confirmed(&session->streams);
@@ -411,8 +410,8 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
 
 void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id)
 {
-    uint8_t id; uint16_t length; uint8_t flags;
-    while(read_submessage_header(submessages, &id, &length, &flags))
+    uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
+    while(read_submessage_header(submessages, &id, &length, &flags, &payload_it))
     {
         read_submessage(session, submessages, id, stream_id, flags);
     }

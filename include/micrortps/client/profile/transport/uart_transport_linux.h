@@ -22,8 +22,6 @@ extern "C"
 
 #include <micrortps/client/core/communication/communication.h>
 #include <micrortps/client/core/communication/serial_protocol.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <sys/poll.h>
 
 #define UART_TRANSPORT_MTU 256

@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "HelloWorld.h"
+
 #include <micrortps/client/client.h>
 #include <stdio.h>
+#include <unistd.h> //for sleep function in linux
 
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UDP_TRANSPORT_MTU * STREAM_HISTORY
@@ -72,14 +75,24 @@ int main(int args, char** argv)
         return 1;
     }
 
-    // Read 10 topics
+    // Write 10 topics
     for(unsigned i = 0; i < 10; ++i)
     {
-        /*HelloWorld topic;
+        HelloWorld topic;
         topic.index = i;
         topic.message = "Hello DDS world!";
-        write_HelloWorld(&my_session, datawriter_id, STREAMID_BUILTIN_RELIABLE, &topic);*/
-        //run_session_until_confirm_delivery(&session, 1000)
+
+        if(!write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic))
+        {
+            printf("Error at write topic, stream is full\n");
+        }
+
+        if(run_session_until_confirm_delivery(&session, 10))
+        {
+            printf("Sent topic: %s, count: %i\n", topic.message, topic.index);
+        }
+
+        sleep(1);
     }
 
     // Delete resources
@@ -87,6 +100,3 @@ int main(int args, char** argv)
 
     return 0;
 }
-
-//printf("%sStatus error (%i)", "\x1B[1;31m", status);
-//printf(" at entity %04X with request: %04X%s\n", (object_id.id << 4) || object_id.type, request_id, "\x1B[0m");

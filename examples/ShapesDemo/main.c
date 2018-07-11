@@ -20,19 +20,17 @@
 #ifdef _WIN32
 #include <Winsock2.h>
 #else
-#include <sys/select.h>
+//#include <sys/select.h>
 #endif
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
+#include <fcntl.h>  // O_RDWR, O_NOCTTY, O_NONBLOCK
+#include <stdlib.h> // atoi
+#include <string.h> // strcpy
 
+// Colors for highlight the print
 #define GREEN_CONSOLE_COLOR "\x1B[1;32m"
 #define RED_CONSOLE_COLOR   "\x1B[1;31m"
 #define RESTORE_COLOR       "\x1B[0m"
-
-#define XML_BUFFER_SIZE 1024
-#define SHAPE_TOPIC 0x01
 
 // Stream buffers
 #define MAX_TRANSPORT_MTU 512

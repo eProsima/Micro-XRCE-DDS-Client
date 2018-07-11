@@ -22,7 +22,6 @@ extern "C"
 
 #include <micrortps/client/core/session/seq_num.h>
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 

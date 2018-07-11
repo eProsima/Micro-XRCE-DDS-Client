@@ -114,6 +114,5 @@ bool output_streams_confirmed(const StreamStorage* storage)
     {
         busy = is_output_reliable_stream_busy(&storage->output_reliable[i]);
     }
-
-    return busy;
+    return !busy;
 }

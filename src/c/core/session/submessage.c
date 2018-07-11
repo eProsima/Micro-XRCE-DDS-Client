@@ -16,8 +16,13 @@ bool write_submessage_header(MicroBuffer* mb, uint8_t submessage_id, uint16_t le
     return micro_buffer_remaining(mb) >= length;
 }
 
-bool read_submessage_header(MicroBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags)
+bool read_submessage_header(MicroBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it)
 {
+    if(*payload_it != NULL)
+    {
+        mb->iterator = *payload_it + *length;
+    }
+
     align_to(mb, 4);
     bool ready_to_read = micro_buffer_remaining(mb) >= SUBHEADER_SIZE;
     if(ready_to_read)
@@ -29,6 +34,7 @@ bool read_submessage_header(MicroBuffer* mb, uint8_t* submessage_id, uint16_t* l
         mb->endianness = endiannes_flag ? LITTLE_ENDIANNESS : BIG_ENDIANNESS;
 
         ready_to_read = micro_buffer_remaining(mb) >= *length;
+        *payload_it = mb->iterator;
     }
     return ready_to_read;
 }
