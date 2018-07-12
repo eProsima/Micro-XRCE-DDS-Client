@@ -346,13 +346,13 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload)
                     payload->object_representation._.subscriber.base.representation._.string_represenatation.size);
             break;
         case OBJK_DATAWRITER:
-            sprintf(content, "DATA_WRITER | obj: 0x%s | %s: %u",
+            sprintf(content, "DATAWRITER | obj: 0x%s | %s: %u",
                     print_array_2(payload->object_representation._.data_writer.publisher_id.data),
                     type,
                     payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
              break;
         case OBJK_DATAREADER:
-            sprintf(content, "DATA_READER | obj: 0x%s | %s: %u",
+            sprintf(content, "DATAREADER | obj: 0x%s | %s: %u",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     type,
                     payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
@@ -411,27 +411,28 @@ void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payloa
     {
         case FORMAT_DATA:
             sprintf(format, "DATA");
-        break;
+            break;
         case FORMAT_DATA_SEQ:
             sprintf(format, "DATA_SEQ");
-        break;
+            break;
         case FORMAT_SAMPLE:
             sprintf(format, "SAMPLE");
-        break;
+            break;
         case FORMAT_SAMPLE_SEQ:
             sprintf(format, "SAMPLE_SEQ");
-        break;
+            break;
         case FORMAT_PACKED_SAMPLES:
             sprintf(format, "PACKED_SAMPLES");
-        break;
+            break;
         default:
             sprintf(format, "UNKNOWN");
+            break;
     }
 
     printf("%s[READ DATA | format: %s | %s | dc: %s]%s",
             pre,
-            request_to_string(&payload->base),
             format,
+            request_to_string(&payload->base),
             (payload->read_specification.optional_delivery_control) ? "yes" : "no",
             RESTORE_COLOR);
 }

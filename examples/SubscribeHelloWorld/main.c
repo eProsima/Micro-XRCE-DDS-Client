@@ -70,11 +70,11 @@ int main(int args, char** argv)
     uint16_t topic_req = write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, 0);
 
     mrObjectId subscriber_id = create_object_id(0x01, SUBSCRIBER_ID);
-    char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
+    char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
     uint16_t subscriber_req = write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, 0);
 
     mrObjectId datareader_id = create_object_id(0x01, DATAREADER_ID);
-    char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
+    char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
     uint16_t datareader_req = write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, 0);
 
     // Send create entities message and wait its status
@@ -87,21 +87,23 @@ int main(int args, char** argv)
     }
 
     // Read 10 topics
-    for(unsigned i = 0; i < 10; ++i)
+    for(unsigned i = 0; i < 1; ++i)
     {
         uint8_t read_data_status;
         uint16_t read_data_req = write_read_data(&session, reliable_out, datareader_id, reliable_in, NULL);
         if(INVALID_REQUEST_ID == read_data_req)
         {
-            printf("Error writing the submessage 'read data', stream is full\n");
+            printf("Error at writing message: the stream history is full\n");
             i -= 1; //try again
         }
 
-        if(!run_session_until_status(&session, 3000, &read_data_req, &read_data_status, 1) && MR_STATUS_NONE != read_data_status)
+        if(!run_session_until_status(&session, 60000, &read_data_req, &read_data_status, 1))
         {
             printf("Error at read topic. Status code: %02X\n", read_data_status);
         }
     }
+
+    run_session_until_timeout(&session, 2000);
 
     // Delete resources
     delete_session(&session);

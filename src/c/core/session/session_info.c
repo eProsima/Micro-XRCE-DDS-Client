@@ -105,7 +105,7 @@ bool read_session_header(const SessionInfo* info, MicroBuffer* mb, uint8_t* stre
         {
             if (SESSION_ID_WITHOUT_CLIENT_KEY > info->id)
             {
-                must_be_read &= (0 == memcmp(key, info->key, CLIENT_KEY_SIZE));
+                must_be_read = (0 == memcmp(key, info->key, CLIENT_KEY_SIZE));
             }
         }
     }

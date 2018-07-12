@@ -85,7 +85,6 @@ void read_submessage_format(Session* session, MicroBuffer* data, uint16_t length
             break;
 
         default:
-            read_format_data(session, data, length, stream_id, object_id, request_id); //REMOVE
             break;
     }
 }

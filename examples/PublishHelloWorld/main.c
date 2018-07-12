@@ -82,7 +82,7 @@ int main(int args, char** argv)
 
         if(!write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic))
         {
-            printf("Error writing the submessage 'write data topic', stream is full\n");
+            printf("Error at writing message: the stream history is full\n");
             i -= 1; //try again
         }
 

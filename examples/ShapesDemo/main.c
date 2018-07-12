@@ -41,6 +41,8 @@
 static bool run_command(const char* command, Session* session, StreamId* stream_id);
 static bool compute_command(Session* session, StreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
                      const char* color, uint32_t x, uint32_t y, uint32_t shapesize);
+static bool compute_print_command(Session* session, StreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
+                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize);
 static void on_topic(Session* session, mrObjectId object_id, uint16_t request_id, StreamId stream_id, MicroBuffer* serialization, void* args);
 static void on_status(Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
 static void print_ShapeType_topic(const ShapeType* topic);
@@ -230,7 +232,8 @@ bool compute_command(Session* session, StreamId* stream_id, int length, const ch
         strncpy(topic.color, color, sizeof(topic.color));
 
         mrObjectId datawriter_id = create_object_id(arg1, DATAWRITER_ID);
-        (void) write_ShapeType_topic(session, *stream_id, datawriter_id, &topic);
+        StreamId output_stream_id = create_stream_id_from_raw(arg2, INPUT_STREAM);
+        (void) write_ShapeType_topic(session, output_stream_id, datawriter_id, &topic);
 
         printf("Sending... ");
         print_ShapeType_topic(&topic);
@@ -238,15 +241,15 @@ bool compute_command(Session* session, StreamId* stream_id, int length, const ch
     else if(strcmp(name, "read_data") == 0 && length == 3)
     {
         mrObjectId datareader_id = create_object_id(arg1, DATAREADER_ID);
-        StreamId answer_stream_id = create_stream_id_from_raw(arg2, INPUT_STREAM);
-        (void) write_read_data(session, *stream_id, datareader_id, answer_stream_id, NULL);
+        StreamId input_stream_id = create_stream_id_from_raw(arg2, INPUT_STREAM);
+        (void) write_read_data(session, *stream_id, datareader_id, input_stream_id, NULL);
     }
     else if(strcmp(name, "delete") == 0 && length == 3)
     {
         mrObjectId entity_id = create_object_id((arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
         (void) write_delete_entity(session, *stream_id, entity_id);
     }
-    else if(strcmp(name, "default_output_stream") == 0 && length == 2)
+    else if((strcmp(name, "default_output_stream") == 0 || strcmp(name, "stream") == 0) && length == 2)
     {
         *stream_id = create_stream_id_from_raw(arg1, OUTPUT_STREAM);
     }
@@ -257,25 +260,25 @@ bool compute_command(Session* session, StreamId* stream_id, int length, const ch
     }
     else if(strcmp(name, "exit") == 0 && length == 1)
     {
-        (void) compute_command(session, stream_id, 2, "delete_session", 0, 0, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 1, "delete_session", 0, 0, "", 0, 0, 0);
         return false;
     }
     else if(strcmp(name, "example") == 0 && length == 2)
     {
-        (void) compute_command(session, stream_id, 2, "create_participant", arg1, 0, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 2, "create_participant", arg1, 0, "", 0, 0, 0);
         (void) run_session_until_confirm_delivery(session, 100);
-        (void) compute_command(session, stream_id, 3, "create_topic"      , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_topic"      , arg1, arg1, "", 0, 0, 0);
         (void) run_session_until_confirm_delivery(session, 100);
-        (void) compute_command(session, stream_id, 3, "create_publisher"  , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_publisher"  , arg1, arg1, "", 0, 0, 0);
         (void) run_session_until_confirm_delivery(session, 100);
-        (void) compute_command(session, stream_id, 3, "create_subscriber" , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_subscriber" , arg1, arg1, "", 0, 0, 0);
         (void) run_session_until_confirm_delivery(session, 100);
-        (void) compute_command(session, stream_id, 3, "create_datawriter" , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_datawriter" , arg1, arg1, "", 0, 0, 0);
         (void) run_session_until_confirm_delivery(session, 100);
-        (void) compute_command(session, stream_id, 3, "create_datareader" , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_datareader" , arg1, arg1, "", 0, 0, 0);
         (void) run_session_until_confirm_delivery(session, 100);
     }
-    else if(strcmp(name, "l") == 0 || strcmp(name, "list") == 0)
+    else if(0 == strcmp(name, "list") || 0 == strcmp(name, "l"))
     {
         print_commands();
     }
@@ -285,6 +288,14 @@ bool compute_command(Session* session, StreamId* stream_id, int length, const ch
     }
 
     return true;
+}
+
+
+bool compute_print_command(Session* session, StreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
+                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize)
+{
+    printf("%s\n", name);
+    return compute_command(session, stream_id, length, name, arg1, arg2, color, x, y, shapesize);
 }
 
 void on_status(Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
@@ -398,15 +409,19 @@ void print_commands(void)
     printf("        Write data into a <stream id> using <data writer id> DataWriter\n");
     printf("    read_data          <datareader id> <stream id>:\n");
     printf("        Read data from a <stream id> using <data reader id> DataReader\n");
-    printf("    delete             <id>:\n");
-    printf("        Removes object with <id> identifier\n");
-    printf("    exit:\n");
+    printf("    delete             <id_prefix> <type>:\n");
+    printf("        Removes object with <id prefix> and <type>\n");
+    printf("    stream, default_output_stream <stream_id>:\n");
+    printf("        Change the default output stream for all messages that create entities and 'read_data'.\n");
+    printf("        <stream_id> can be 1-127 for best effort and 128-255 for reliable.\n");
+    printf("        The streams must be initially configured.\n");
+    printf("    (macro) exit:\n");
     printf("        Close session and exit\n");
+    printf("    (macro) example            <id>:\n");
+    printf("        Create the necessary entities for a complete publisher and subscriber.\n");
+    printf("        All entities will have the same <id> as id.\n");
     printf("    h, help:\n");
     printf("        Shows this message\n");
-    printf("    example            <entities id>:\n");
-    printf("        Create the necessary entities for a complete publisher and subscriber.\n");
-    printf("        All entities will have <entities id> as id.\n");
 }
 
 int check_input(void)
