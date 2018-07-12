@@ -30,7 +30,7 @@ const uint8_t MR_STATUS_NONE = 255;
 
 static uint16_t generate_request_id(Session* session);
 
-static void flash_streams_session(Session* session);
+static void flash_output_streams(Session* session);
 static bool listen_message(Session* session, int poll_ms);
 static bool listen_message_reliably(Session* session, int poll_ms);
 
@@ -45,12 +45,16 @@ static void write_submessage_acknack(const Session* session, StreamId stream);
 static void read_message(Session* session, MicroBuffer* message);
 static void read_stream(Session* session, MicroBuffer* message, StreamId id, uint16_t seq_num);
 static void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id);
-static void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags);
+static void read_submessage(Session* session, MicroBuffer* submessage,
+                            uint8_t submessage_id, StreamId stream_id, uint16_t length, uint8_t flags);
 
 static void read_submessage_fragment(Session* session, MicroBuffer* submessage, StreamId stream_id, bool last_fragment);
 static void read_submessage_status(Session* session, MicroBuffer* submessage);
+static void read_submessage_data(Session* session, MicroBuffer* submessage, uint16_t length, StreamId stream_id, uint8_t format);
 static void read_submessage_heartbeat(Session* session, MicroBuffer* submessage, StreamId stream_id);
 static void read_submessage_acknack(Session* session, MicroBuffer* submessage, StreamId stream_id);
+
+static void process_status(Session* session, mrObjectId object_id, int16_t request_id, uint8_t status);
 
 //==================================================================
 //                             PUBLIC
@@ -66,6 +70,11 @@ bool create_session(Session* session, uint8_t session_id, uint32_t key, Communic
     session->request_list = NULL;
     session->status_list = NULL;
     session->request_status_list_size = 0;
+
+    session->on_status = NULL;
+    session->on_status_args = NULL;
+    session->on_topic = NULL;
+    session->on_topic_args = NULL;
 
     init_session_info(&session->info, session_id, key);
     init_stream_storage(&session->streams);
@@ -94,13 +103,17 @@ bool delete_session(Session* session)
     return wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
 }
 
-#ifdef PROFILE_READ_ACCESS
+void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)
+{
+    session->on_status = on_status_func;
+    session->on_status_args = args;
+}
+
 void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args)
 {
     session->on_topic = on_topic_func;
     session->on_topic_args = args;
 }
-#endif
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size)
 {
@@ -137,7 +150,7 @@ uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseOb
 
 void run_session_until_timeout(Session* session, int timeout_ms)
 {
-    flash_streams_session(session);
+    flash_output_streams(session);
 
     bool timeout = false;
     while(!timeout)
@@ -148,7 +161,7 @@ void run_session_until_timeout(Session* session, int timeout_ms)
 
 bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
 {
-    flash_streams_session(session);
+    flash_output_streams(session);
 
     bool timeout = false;
     while(!output_streams_confirmed(&session->streams) && !timeout)
@@ -161,7 +174,7 @@ bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
 
 bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
 {
-    flash_streams_session(session);
+    flash_output_streams(session);
 
     for(unsigned i = 0; i < list_size; ++i)
     {
@@ -186,7 +199,8 @@ bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* 
     }
 
     session->request_status_list_size = 0;
-    return status_confirmed;
+
+    return check_status_list_ok(status_list, list_size);
 }
 
 bool check_status_list_ok(uint8_t* status_list, size_t size)
@@ -213,7 +227,7 @@ inline uint16_t generate_request_id(Session* session)
     return last_request_id;
 }
 
-void flash_streams_session(Session* session)
+void flash_output_streams(Session* session)
 {
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -244,7 +258,6 @@ void flash_streams_session(Session* session)
 
 bool listen_message(Session* session, int poll_ms)
 {
-    //NOTE: Assuming that recv_message return always a message if it can mount it in 'poll_ms' milliseconds.
     uint8_t* data; size_t length;
     bool must_be_read = recv_message(session, &data, &length, poll_ms);
     if(must_be_read)
@@ -301,7 +314,7 @@ bool listen_message_reliably(Session* session, int poll_ms)
 
 bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_t attempts)
 {
-    int poll_ms = 1;
+    int poll_ms = MIN_SESSION_STATUS_WAITING;
     for(size_t i = 0; i < attempts && session_info_pending_request(&session->info); ++i)
     {
         send_message(session, buffer, length);
@@ -413,11 +426,11 @@ void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId s
     uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
     while(read_submessage_header(submessages, &id, &length, &flags, &payload_it))
     {
-        read_submessage(session, submessages, id, stream_id, flags);
+        read_submessage(session, submessages, id, stream_id, length, flags);
     }
 }
 
-void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint8_t flags)
+void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint16_t length, uint8_t flags)
 {
     switch(submessage_id)
     {
@@ -440,9 +453,7 @@ void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessa
             break;
 
         case SUBMESSAGE_ID_DATA:
-            #ifdef PROFILE_READ_ACCESS
-            read_submessage_data(session, submessage, stream_id, flags & FORMAT_MASK);
-            #endif
+            read_submessage_data(session, submessage, length, stream_id, flags & FORMAT_MASK);
             break;
 
         case SUBMESSAGE_ID_FRAGMENT:
@@ -467,18 +478,35 @@ void read_submessage_status(Session* session, MicroBuffer* submessage)
     STATUS_Payload payload;
     deserialize_STATUS_Payload(submessage, &payload);
 
+    mrObjectId object_id = create_object_id_from_raw(payload.base.related_request.object_id.data);
     uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
                             + payload.base.related_request.request_id.data[1];
-    uint8_t status = payload.base.result.status;
 
-    for(unsigned i = 0; i < session->request_status_list_size; ++i)
+    uint8_t status = payload.base.result.status;
+    process_status(session, object_id, request_id, status);
+}
+
+
+extern void read_submessage_format(Session* session, MicroBuffer* data, uint16_t length, uint8_t format,
+                                   StreamId stream_id, mrObjectId object_id, uint16_t request_id);
+
+void read_submessage_data(Session* session, MicroBuffer* submessage, uint16_t length, StreamId stream_id, uint8_t format)
+{
+#ifdef PROFILE_READ_ACCESS
+    BaseObjectRequest base;
+    deserialize_BaseObjectRequest(submessage, &base);
+    length -= 4; //CHANGE: by a future size_of_BaseObjectRequest
+
+    mrObjectId object_id = create_object_id_from_raw(base.object_id.data);
+    uint16_t request_id = (((uint16_t) base.request_id.data[0]) << 8) + base.request_id.data[1];
+
+    process_status(session, object_id, request_id, STATUS_OK);
+
+    if(session->on_topic != NULL)
     {
-        if(request_id == session->request_list[i])
-        {
-            session->status_list[i] = status;
-            break;
-        }
+        read_submessage_format(session, submessage, length, format, stream_id, object_id, request_id);
     }
+#endif
 }
 
 void read_submessage_fragment(Session* session, MicroBuffer* submessage, StreamId stream_id, bool last_fragment)
@@ -509,6 +537,23 @@ void read_submessage_acknack(Session* session, MicroBuffer* submessage, StreamId
         if(next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
         {
             send_message(session, buffer, length);
+        }
+    }
+}
+
+void process_status(Session* session, mrObjectId object_id, int16_t request_id, uint8_t status)
+{
+    if(session->on_status != NULL)
+    {
+        session->on_status(session, object_id, request_id, status, session->on_status_args);
+    }
+
+    for(unsigned i = 0; i < session->request_status_list_size; ++i)
+    {
+        if(request_id == session->request_list[i])
+        {
+            session->status_list[i] = status;
+            break;
         }
     }
 }

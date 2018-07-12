@@ -8,17 +8,19 @@ const uint8_t MR_FORMAT_DATA_SEQ = FORMAT_DATA_SEQ;
 const uint8_t MR_FORMAT_SAMPLE_SEQ = FORMAT_SAMPLE_SEQ;
 const uint8_t MR_FORMAT_PACKED_SAMPLES = FORMAT_PACKED_SAMPLES;
 
-static void read_format_data(Session* session, MicroBuffer* payload,
-                      StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_sample(Session* session, MicroBuffer* payload,
-                        StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_data_seq(Session* session, MicroBuffer* payload,
-                          StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_sample_seq(Session* session, MicroBuffer* payload,
-                            StreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_packed_samples(Session* session, MicroBuffer* payload,
-                                StreamId stream_id, mrObjectId object_id, uint16_t request_id);
+extern void read_submessage_format(Session* session, MicroBuffer* data, uint16_t length, uint8_t format,
+                                   StreamId stream_id, mrObjectId object_id, uint16_t request_id);
 
+static void read_format_data(Session* session, MicroBuffer* payload, uint16_t length,
+                      StreamId stream_id, mrObjectId object_id, uint16_t request_id);
+static void read_format_sample(Session* session, MicroBuffer* payload, uint16_t length,
+                        StreamId stream_id, mrObjectId object_id, uint16_t request_id);
+static void read_format_data_seq(Session* session, MicroBuffer* payload, uint16_t length,
+                          StreamId stream_id, mrObjectId object_id, uint16_t request_id);
+static void read_format_sample_seq(Session* session, MicroBuffer* payload, uint16_t length,
+                            StreamId stream_id, mrObjectId object_id, uint16_t request_id);
+static void read_format_packed_samples(Session* session, MicroBuffer* payload, uint16_t length,
+                                StreamId stream_id, mrObjectId object_id, uint16_t request_id);
 //==================================================================
 //                             PUBLIC
 //==================================================================
@@ -60,87 +62,75 @@ uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datare
     return request_id;
 }
 
-void read_submessage_data(Session* session, MicroBuffer* submessage, StreamId stream_id, uint8_t format_flags)
-{
-    if(session->on_topic != NULL)
-    {
-        BaseObjectRequest base;
-        deserialize_BaseObjectRequest(submessage, &base);
-        mrObjectId object_id = create_object_id_from_raw(base.object_id.data);
-        uint16_t request_id = (((uint16_t) base.request_id.data[0]) << 8) + base.request_id.data[1];
-
-        for(unsigned i = 0; i < session->request_status_list_size; ++i)
-        {
-            if(request_id == session->request_list[i])
-            {
-                session->status_list[i] = MR_STATUS_OK;
-                break;
-            }
-        }
-
-        switch(format_flags)
-        {
-            case FORMAT_DATA:
-                read_format_data(session, submessage, stream_id, object_id, request_id);
-                break;
-
-            case FORMAT_SAMPLE:
-                read_format_sample(session, submessage, stream_id, object_id, request_id);
-                break;
-
-            case FORMAT_DATA_SEQ:
-                read_format_data_seq(session, submessage, stream_id, object_id, request_id);
-                break;
-
-            case FORMAT_SAMPLE_SEQ:
-                read_format_sample_seq(session, submessage, stream_id, object_id, request_id);
-                break;
-
-            case FORMAT_PACKED_SAMPLES:
-                read_format_packed_samples(session, submessage, stream_id, object_id, request_id);
-                break;
-
-            default:
-                break;
-        }
-    }
-}
-
 //==================================================================
 //                            PRIVATE
 //==================================================================
-inline void read_format_data(Session* session, MicroBuffer* payload,
+void read_submessage_format(Session* session, MicroBuffer* data, uint16_t length, uint8_t format,
+                      StreamId stream_id, mrObjectId object_id, uint16_t request_id)
+{
+    switch(format)
+    {
+        case FORMAT_DATA:
+            read_format_data(session, data, length, stream_id, object_id, request_id);
+            break;
+
+        case FORMAT_SAMPLE:
+            read_format_sample(session, data, length, stream_id, object_id, request_id);
+            break;
+
+        case FORMAT_DATA_SEQ:
+            read_format_data_seq(session, data, length, stream_id, object_id, request_id);
+            break;
+
+        case FORMAT_SAMPLE_SEQ:
+            read_format_sample_seq(session, data, length, stream_id, object_id, request_id);
+            break;
+
+        case FORMAT_PACKED_SAMPLES:
+            read_format_packed_samples(session, data, length, stream_id, object_id, request_id);
+            break;
+
+        default:
+            break;
+    }
+}
+
+inline void read_format_data(Session* session, MicroBuffer* payload, uint16_t length,
                       StreamId stream_id, mrObjectId object_id, uint16_t request_id)
 {
     uint32_t offset;
     deserialize_uint32_t(payload, &offset); //Remove this when data serialization will be according to the XRCE spec.
-    session->on_topic(session, object_id, request_id, stream_id, payload, session->on_topic_args);
+    length -= 4; //by the offset. Remove too with the future serialization according to XRCE
+
+    MicroBuffer mb_topic;
+    init_micro_buffer(&mb_topic, payload->iterator, length);
+    session->on_topic(session, object_id, request_id, stream_id, &mb_topic, session->on_topic_args);
 }
 
-void read_format_sample(Session* session, MicroBuffer* payload,
+void read_format_sample(Session* session, MicroBuffer* payload, uint16_t length,
                         StreamId stream_id, mrObjectId object_id, uint16_t request_id)
 {
-    (void) session; (void) payload; (void) stream_id; (void) object_id; (void) request_id;
+    (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
 }
 
-void read_format_data_seq(Session* session, MicroBuffer* payload,
+void read_format_data_seq(Session* session, MicroBuffer* payload, uint16_t length,
                           StreamId stream_id, mrObjectId object_id, uint16_t request_id)
 {
-    (void) session; (void) payload; (void) stream_id; (void) object_id; (void) request_id;
+    (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
 }
 
-void read_format_sample_seq(Session* session, MicroBuffer* payload,
+void read_format_sample_seq(Session* session, MicroBuffer* payload, uint16_t length,
                             StreamId stream_id, mrObjectId object_id, uint16_t request_id)
 {
-    (void) session; (void) payload; (void) stream_id; (void) object_id; (void) request_id;
+    (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
 }
 
-void read_format_packed_samples(Session* session, MicroBuffer* payload,
+void read_format_packed_samples(Session* session, MicroBuffer* payload, uint16_t length,
                                 StreamId stream_id, mrObjectId object_id, uint16_t request_id)
 {
-    (void) session; (void) payload; (void) stream_id; (void) object_id; (void) request_id;
+    (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
 }

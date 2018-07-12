@@ -35,7 +35,7 @@ int main(int args, char** argv)
 
     // Session
     Session session;
-    if(!create_session(&session, 0x81, 0xAABBCCDD, &transport.comm))
+    if(!create_session(&session, 0x01, 0xAAAABBBB, &transport.comm))
     {
         printf("Error at create session.\n");
         return 1;
@@ -68,8 +68,7 @@ int main(int args, char** argv)
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
-    run_session_until_status(&session, 1000, requests, status, 4);
-    if(!check_status_list_ok(status, 4))
+    if(!run_session_until_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i publisher: %i darawriter: %i\n", status[0], status[1], status[2], status[3]);
         return 1;
@@ -78,13 +77,12 @@ int main(int args, char** argv)
     // Write 10 topics
     for(unsigned i = 0; i < 10; ++i)
     {
-        HelloWorld topic;
-        topic.index = i;
-        topic.message = "Hello DDS world!";
+        HelloWorld topic = {i, "Hello DDS world!"};
 
         if(!write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic))
         {
-            printf("Error at write topic, stream is full\n");
+            printf("Error writing the submessage 'write data topic', stream is full\n");
+            i -= 1; //try again
         }
 
         if(run_session_until_confirm_delivery(&session, 10))
@@ -97,6 +95,7 @@ int main(int args, char** argv)
 
     // Delete resources
     delete_session(&session);
+    //TODO: add the close transport functions
 
     return 0;
 }

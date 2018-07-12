@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "HelloWorld.h"
+
 #include <micrortps/client/client.h>
+#include <microcdr/microcdr.h>
 #include <stdio.h>
 
 #define STREAM_HISTORY  8
@@ -20,12 +23,12 @@
 
 void on_topic(Session* session, mrObjectId id, uint16_t request_id, StreamId stream_id, MicroBuffer* mb, void* args)
 {
-    (void) session; (void) id; (void) request_id; (void) mb; (void) stream_id; (void) args;
-    //printf("Topic received!\n");
-    /* HelloWorld topic;
-    deserialize_HelloWorld_topic(serialized_topic, &topic);
+    (void) session; (void) id; (void) request_id; (void) stream_id; (void) args;
 
-    printf("Receive topic: %s, count: %i\n", topic.message, topic.index); */
+    HelloWorld topic;
+    deserialize_HelloWorld_topic(mb, &topic);
+
+    printf("Received topic: %s, count: %i\n", topic.message, topic.index);
 }
 
 int main(int args, char** argv)
@@ -42,7 +45,7 @@ int main(int args, char** argv)
 
     // Session
     Session session;
-    if(!create_session(&session, 0x81, 0xAABBCCDD, &transport.comm))
+    if(!create_session(&session, 0x02, 0xCCCCDDDD, &transport.comm))
     {
         printf("Error at create session.\n");
         return 1;
@@ -76,33 +79,32 @@ int main(int args, char** argv)
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
-    run_session_until_status(&session, 1000, requests, status, 4);
-    if(!check_status_list_ok(status, 4))
+    if(!run_session_until_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
         return 1;
     }
 
     // Read 10 topics
-    for(unsigned i = 0; i < 100; ++i)
+    for(unsigned i = 0; i < 10; ++i)
     {
         uint8_t read_data_status;
         uint16_t read_data_req = write_read_data(&session, reliable_out, datareader_id, reliable_in, MR_FORMAT_DATA, NULL);
-        run_session_until_status(&session, 3000, &read_data_req, &read_data_status, 1);
+        if(INVALID_REQUEST_ID == read_data_req)
+        {
+            printf("Error writing the submessage 'read data', stream is full\n");
+            i -= 1; //try again
+        }
+
+        if(!run_session_until_status(&session, 3000, &read_data_req, &read_data_status, 1) && MR_STATUS_NONE != read_data_status)
+        {
+            printf("Error at read topic. Status code: %02X\n", read_data_status);
+        }
     }
 
     // Delete resources
     delete_session(&session);
+    //TODO: add the close transport functions
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-

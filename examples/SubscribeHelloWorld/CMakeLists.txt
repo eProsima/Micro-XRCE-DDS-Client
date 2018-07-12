@@ -19,7 +19,7 @@ endif()
 
 project(SubscribeHelloWorldClient)
 
-add_executable(${PROJECT_NAME} main.c)
+add_executable(${PROJECT_NAME} main.c HelloWorld.c)
 target_link_libraries(${PROJECT_NAME} micrortps_client)
 
 install(TARGETS ${PROJECT_NAME}

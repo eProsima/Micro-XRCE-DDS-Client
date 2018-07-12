@@ -17,9 +17,9 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
     cmake_policy(SET CMP0048 NEW)
 endif()
 
-project(ShapeDemoClient C)
+project(ShapeDemoClient)
 
-add_executable(${PROJECT_NAME} main.c)
+add_executable(${PROJECT_NAME} main.c ShapeType.c)
 if(MSVC OR MSVC_IDE)
     target_link_libraries(${PROJECT_NAME}
         PRIVATE

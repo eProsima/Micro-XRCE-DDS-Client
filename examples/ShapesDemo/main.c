@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
+#include "ShapeType.h"
+
 #include <micrortps/client/client.h>
 #include <stdio.h>
+#include <fcntl.h>  // O_RDWR, O_NOCTTY, O_NONBLOCK
+#include <stdlib.h> // atoi
+#include <string.h> // strcpy
 
 #ifdef _WIN32
 #include <Winsock2.h>
 #else
-//#include <sys/select.h>
+#include <sys/select.h>
 #endif
-
-#include <fcntl.h>  // O_RDWR, O_NOCTTY, O_NONBLOCK
-#include <stdlib.h> // atoi
-#include <string.h> // strcpy
 
 // Colors for highlight the print
 #define GREEN_CONSOLE_COLOR "\x1B[1;32m"
@@ -33,21 +34,21 @@
 #define RESTORE_COLOR       "\x1B[0m"
 
 // Stream buffers
-#define MAX_TRANSPORT_MTU 512
+#define MAX_TRANSPORT_MTU  512
 #define MAX_HISTORY 16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
 
 static bool compute_command(const char* command, Session* session);
 static void on_topic(Session* session, mrObjectId object_id, uint16_t request_id, StreamId stream_id, MicroBuffer* serialization, void* args);
+static void on_status(Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
+static void print_ShapeType_topic(const ShapeType* topic);
 static void print_status(uint8_t status);
-static void help(void);
-static void list_commands(void);
+static void print_help(void);
+static void print_commands(void);
 static int check_input(void);
 
 int main(int args, char** argv)
 {
-    printf("SHAPES DEMO XRCE CLIENT\n");
-
     Session session;
     UARTTransport uart;
     UDPTransport udp;
@@ -55,6 +56,7 @@ int main(int args, char** argv)
 
     Communication* comm;
 
+    printf("SHAPES DEMO XRCE CLIENT\n");
     int args_index = 0;
     if(args >= 3 && strcmp(argv[1], "serial") == 0)
     {
@@ -62,7 +64,7 @@ int main(int args, char** argv)
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
         if(!init_uart_transport_fd(&uart, fd, 0x00, 0x01))
         {
-            printf("%sCan not create serial connection%s\n", "\x1B[1;31m", "\x1B[0m");
+            printf("%sCan not create a serial connection%s\n", "\x1B[1;31m", "\x1B[0m");
             return 1;
         }
         comm = &uart.comm;
@@ -97,7 +99,7 @@ int main(int args, char** argv)
     }
     else
     {
-        help();
+        print_help();
         return 1;
     }
 
@@ -111,17 +113,21 @@ int main(int args, char** argv)
 
     if(!create_session(&session, session_id, key, comm))
     {
-        printf("%sCan not create session with the agent%s\n", "\x1B[1;31m", "\x1B[0m");
+        printf("%sCan not init session with the agent%s\n", "\x1B[1;31m", "\x1B[0m");
         return 1;
     }
-
     set_topic_callback(&session, on_topic, NULL);
+    set_status_callback(&session, on_status, NULL);
 
     // Streams
     size_t history = 8;
     if(args_index < args)
     {
-        history = atoi(argv[args_index++]);
+        size_t request_history = atoi(argv[args_index++]);
+        if(MAX_HISTORY >= request_history)
+        {
+            history = request_history;
+        }
     }
 
     uint8_t output_best_effort_stream_buffer[MAX_BUFFER_SIZE];
@@ -173,23 +179,15 @@ bool compute_command(const char* command, Session* session)
         mrObjectId participant_id = create_object_id(arg1, PARTICIPANT_ID);
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* participant_ref = "default participant";
-        uint16_t request = write_create_participant_ref(session, stream_id, participant_id, participant_ref, 0);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        (void) write_create_participant_ref(session, stream_id, participant_id, participant_ref, 0);
     }
     else if(strcmp(name, "create_topic") == 0 && length == 3)
     {
         mrObjectId topic_id = create_object_id(arg1, TOPIC_ID);
         mrObjectId participant_id = create_object_id(arg2, PARTICIPANT_ID);
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
-        char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-        uint16_t request = write_configure_topic_xml(session, stream_id, topic_id, participant_id, topic_xml, 0);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        char* topic_xml = "<dds><topic><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
+        (void) write_configure_topic_xml(session, stream_id, topic_id, participant_id, topic_xml, 0);
     }
     else if(strcmp(name, "create_publisher") == 0 && length == 3)
     {
@@ -197,11 +195,7 @@ bool compute_command(const char* command, Session* session)
         mrObjectId participant_id = create_object_id(arg2, PARTICIPANT_ID);
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* publisher_xml = "<publisher name=\"MyPublisher\"";
-        uint16_t request = write_configure_publisher_xml(session, stream_id, publisher_id, participant_id, publisher_xml, 0);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        (void) write_configure_publisher_xml(session, stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
     else if(strcmp(name, "create_subscriber") == 0 && length == 3)
     {
@@ -209,67 +203,54 @@ bool compute_command(const char* command, Session* session)
         mrObjectId participant_id = create_object_id(arg2, PARTICIPANT_ID);
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
-        uint16_t request = write_configure_subscriber_xml(session, stream_id, subscriber_id, participant_id, subscriber_xml, 0);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        (void) write_configure_subscriber_xml(session, stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
     else if(strcmp(name, "create_datawriter") == 0 && length == 3)
     {
         mrObjectId datawriter_id = create_object_id(arg1, DATAWRITER_ID);
         mrObjectId publisher_id = create_object_id(arg2, PUBLISHER_ID);
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
-        char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-        uint16_t request = write_configure_datawriter_xml(session, stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
+        (void) write_configure_datawriter_xml(session, stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
     }
     else if(strcmp(name, "create_datareader") == 0 && length == 3)
     {
         mrObjectId datareader_id = create_object_id(arg1, DATAREADER_ID);
         mrObjectId subscriber_id = create_object_id(arg2, SUBSCRIBER_ID);
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
-        char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
-        uint16_t request = write_configure_datareader_xml(session, stream_id, datareader_id, subscriber_id, datareader_xml, 0);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
+        (void) write_configure_datareader_xml(session, stream_id, datareader_id, subscriber_id, datareader_xml, 0);
     }
     else if(strcmp(name, "write_data") == 0 && length >= 3)
     {
-        /*ShapeType topic = {"GREEN", 100 , 100, 50};
+        ShapeType topic = {"GREEN", 100 , 100, 50};
         if (length == 7)
         {
             topic.color = color;
             topic.x = x;
             topic.y = y;
             topic.shapesize = shapesize;
-        }*/
+        }
+
+        mrObjectId datawriter_id = create_object_id(arg1, DATAWRITER_ID);
+        StreamId data_stream_id = create_stream_id_from_raw(arg2, OUTPUT_STREAM);
+        (void) write_ShapeType_topic(session, data_stream_id, datawriter_id, &topic);
+
+        printf("Sending... ");
+        print_ShapeType_topic(&topic);
     }
     else if(strcmp(name, "read_data") == 0 && length == 3)
     {
         mrObjectId datareader_id = create_object_id(arg1, DATAREADER_ID);
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
-        StreamId data_stream_id = create_stream_id(0, (arg2) ? RELIABLE_STREAM : BEST_EFFORT_STREAM, INPUT_STREAM);
-        uint16_t request = write_read_data(session, stream_id, datareader_id, data_stream_id, MR_FORMAT_DATA, NULL);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        StreamId data_stream_id = create_stream_id_from_raw(arg2, INPUT_STREAM);
+        (void) write_read_data(session, stream_id, datareader_id, data_stream_id, MR_FORMAT_DATA, NULL);
     }
     else if(strcmp(name, "delete") == 0 && length == 3)
     {
         StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         mrObjectId entity_id = create_object_id((arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
-        uint16_t request = write_delete_entity(session, stream_id, entity_id);
-
-        uint8_t status;
-        (void) run_session_until_status(session, 1000, &request, &status, 1);
-        print_status(status);
+        (void) write_delete_entity(session, stream_id, entity_id);
     }
     else if(strcmp(name, "exit") == 0)
     {
@@ -277,25 +258,43 @@ bool compute_command(const char* command, Session* session)
     }
     else if(strcmp(name, "h") == 0 || strcmp(name, "help") == 0)
     {
-        list_commands();
+        print_commands();
     }
     else
     {
         printf("%sUnknown command error%s\n", "\x1B[1;31m", "\x1B[0m");
-        list_commands();
+        print_commands();
     }
 
     return true;
 }
 
+void on_status(Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
+{
+    (void) session; (void) object_id; (void) request_id; (void) args;
+    print_status(status);
+}
+
 void on_topic(Session* session, mrObjectId object_id, uint16_t request_id, StreamId stream_id, MicroBuffer* serialization, void* args)
 {
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args;
-    // Only can be ShapeType type
-    /*ShapeType topic;
+
+    ShapeType topic;
     deserialize_ShapeType_topic(serialization, &topic);
+
     printf("Receiving... ");
-    printl_ShapeType_topic(&topic);*/
+    print_ShapeType_topic(&topic);
+}
+
+void print_ShapeType_topic(const ShapeType* shape_topic)
+{
+    printf("%s[SHAPE_TYPE | color: %s | x: %u | y: %u | size: %u]%s\n",
+           "\x1B[1;34m",
+           shape_topic->color,
+           shape_topic->x,
+           shape_topic->y,
+           shape_topic->shapesize,
+           "\x1B[0m");
 }
 
 void print_status(uint8_t status)
@@ -350,7 +349,7 @@ void print_status(uint8_t status)
     printf("%sStatus: %s%s\n", color, status_name, RESTORE_COLOR);
 }
 
-void help(void)
+void print_help(void)
 {
     printf("Usage: program <command>\n");
     printf("List of commands:\n");
@@ -360,23 +359,33 @@ void help(void)
     printf("    help\n");
 }
 
-void list_commands(void)
+void print_commands(void)
 {
     printf("usage: <command> [<args>]\n");
-    printf("    - create_session [<reliable stream history>]\n");
-    printf("        Creates a Session. The reliable stream history can be set optionally\n\n");
-    printf("    create_participant <participant id>:                             Creates a new Participant on the current session\n");
-    printf("    create_topic       <topic id> <participant id>:                  Register new Topic using <participant id> participant\n");
-    printf("    create_publisher   <publisher id> <participant id>:              Creates a Publisher on <participant id> participant\n");
-    printf("    create_subscriber  <subscriber id> <participant id>:             Creates a Subscriber on <participant id> participant\n");
-    printf("    create_datawriter  <datawriter id> <publisher id>:               Creates a DataWriter on the publisher <publisher id>\n");
-    printf("    create_datareader  <datareader id> <subscriber id>:              Creates a DataReader on the subscriber <subscriber id>\n");
-    printf("    write_data <datawriter id> <stream id> [<color> <x> <y> <size>]: Write data into a <stream id> using <data writer id> DataWriter\n");
-    printf("    read_data          <datareader id> <stream id>:                  Read data from a <stream id> using <data reader id> DataReader\n");
-    printf("    delete             <id>:                                         Removes object with <id> identifier\n");
-    printf("    delete_session:                                                  Deletes a session\n");
-    printf("    exit:                                                            Close program\n");
-    printf("    h, help:                                                         Shows this message\n");
+    printf("    create_session [<reliable stream history>]\n");
+    printf("        Creates a Session. The reliable stream history can be set optionally\n");
+    printf("    create_participant <participant id>:\n");
+    printf("        Creates a new Participant on the current session\n");
+    printf("    create_topic       <topic id> <participant id>:\n");
+    printf("        Register new Topic using <participant id> participant\n");
+    printf("    create_publisher   <publisher id> <participant id>:\n");
+    printf("        Creates a Publisher on <participant id> participant\n");
+    printf("    create_subscriber  <subscriber id> <participant id>:\n");
+    printf("        Creates a Subscriber on <participant id> participant\n");
+    printf("    create_datawriter  <datawriter id> <publisher id>:\n");
+    printf("        Creates a DataWriter on the publisher <publisher id>\n");
+    printf("    create_datareader  <datareader id> <subscriber id>:\n");
+    printf("        Creates a DataReader on the subscriber <subscriber id>\n");
+    printf("    write_data <datawriter id> <stream id> [<color> <x> <y> <size>]:\n");
+    printf("        Write data into a <stream id> using <data writer id> DataWriter\n");
+    printf("    read_data          <datareader id> <stream id>:\n");
+    printf("        Read data from a <stream id> using <data reader id> DataReader\n");
+    printf("    delete             <id>:\n");
+    printf("        Removes object with <id> identifier\n");
+    printf("    exit:\n");
+    printf("        Close session and exit\n");
+    printf("    h, help:\n");
+    printf("        Shows this message\n");
 }
 
 int check_input(void)
@@ -388,15 +397,3 @@ int check_input(void)
     select(1, &fds, NULL, NULL, &tv);
     return FD_ISSET(0, &fds);
 }
-
-/*void printl_ShapeType_topic(const ShapeType* shape_topic)
-{
-    printf("%s[<SHAPE> | %s | x: %u | y: %u | size: %u]%s\n",
-            "\x1B[1;34m",
-            shape_topic->color,
-            shape_topic->x,
-            shape_topic->y,
-            shape_topic->shapesize,
-            "\x1B[0m");
-}*/
-

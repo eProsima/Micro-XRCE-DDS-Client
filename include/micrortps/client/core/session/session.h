@@ -42,10 +42,10 @@ typedef struct Communication Communication;
 typedef struct Session Session;
 typedef struct BaseObjectRequest BaseObjectRequest;
 
-#ifdef PROFILE_READ_ACCESS
+typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
+                             uint8_t status, void* args);
 typedef void (*OnTopicFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
                              StreamId stream_id, MicroBuffer* mb, void* args);
-#endif
 
 struct Session
 {
@@ -58,15 +58,21 @@ struct Session
     uint8_t* status_list;
     size_t request_status_list_size;
 
-#ifdef PROFILE_READ_ACCESS
+    OnStatusFunc on_status;
+    void* on_status_args;
+
     OnTopicFunc on_topic;
     void* on_topic_args;
-#endif
-
 };
 
+//==================================================================
+//                         PUBLIC FUNCTIONS
+//==================================================================
 bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
 bool delete_session(Session* session);
+
+void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
+void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args);
 
 StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
 StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
@@ -79,12 +85,10 @@ bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* 
 
 bool check_status_list_ok(uint8_t* status_list, size_t size);
 
+//==================================================================
+//                        INTERNAL FUNCTIONS
+//==================================================================
 uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base);
-
-#ifdef PROFILE_READ_ACCESS
-void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args);
-void read_submessage_data(Session* session, MicroBuffer* submessage, StreamId id, uint8_t format);
-#endif
 
 #ifdef __cplusplus
 }
