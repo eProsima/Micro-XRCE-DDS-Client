@@ -22,7 +22,6 @@
 #ifndef _ShapeType_H_
 #define _ShapeType_H_
 
-#include <micrortps/client/client.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -44,7 +43,5 @@ typedef struct MicroBuffer MicroBuffer;
 bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic);
 bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic);
 uint32_t size_of_ShapeType_topic(const ShapeType* topic, uint32_t size);
-
-bool write_ShapeType_topic(Session* session, StreamId stream_id, mrObjectId datawriter_id, ShapeType* topic);
 
 #endif // _ShapeType_H_

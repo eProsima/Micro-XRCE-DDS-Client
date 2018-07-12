@@ -21,8 +21,7 @@
 
 #include "ShapeType.h"
 
-#include <micrortps/client/core/serialization/xrce_protocol.h>
-#include <micrortps/client/core/session/submessage.h>
+#include <microcdr/microcdr.h>
 #include <string.h>
 
 bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
@@ -54,33 +53,4 @@ uint32_t size_of_ShapeType_topic(const ShapeType* topic, uint32_t size)
     size += 4 + get_alignment(size, 4);
 
     return size;
-}
-
-bool write_ShapeType_topic(Session* session, StreamId stream_id, mrObjectId datawriter_id, ShapeType* topic)
-{
-    bool written = false;
-
-    uint32_t topic_length = size_of_ShapeType_topic(topic, 0);
-    uint32_t payload_length = 0;
-    payload_length += 4; //request_id + object_id
-    payload_length += 4; //topic_length (remove in future version to be compliant)
-
-    MicroBuffer mb;
-    if(prepare_stream_to_write(&session->streams, stream_id, payload_length + topic_length + SUBHEADER_SIZE, &mb))
-    {
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, payload_length + topic_length, FORMAT_DATA);
-
-        WRITE_DATA_Payload_Data payload;
-        init_base_object_request(session, datawriter_id, &payload.base);
-        (void) serialize_WRITE_DATA_Payload_Data(&mb, &payload);
-        (void) serialize_uint32_t(&mb, topic_length); //REMOVE: when topics have not a previous size in the agent.
-
-        MicroBuffer mb_topic;
-        init_micro_buffer(&mb_topic, mb.iterator, topic_length);
-        (void) serialize_ShapeType_topic(&mb_topic, topic);
-
-        written = true;
-    }
-
-    return written;
 }

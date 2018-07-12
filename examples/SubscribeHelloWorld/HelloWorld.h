@@ -22,7 +22,6 @@
 #ifndef _HelloWorld_H_
 #define _HelloWorld_H_
 
-#include <micrortps/client/client.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -42,7 +41,5 @@ typedef struct MicroBuffer MicroBuffer;
 bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic);
 bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic);
 uint32_t size_of_HelloWorld_topic(const HelloWorld* topic, uint32_t size);
-
-bool write_HelloWorld_topic(Session* session, StreamId stream_id, mrObjectId datawriter_id, HelloWorld* topic);
 
 #endif // _HelloWorld_H_

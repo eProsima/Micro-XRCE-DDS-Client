@@ -19,7 +19,7 @@ endif()
 
 project(ShapeDemoClient)
 
-add_executable(${PROJECT_NAME} main.c ShapeType.c)
+add_executable(${PROJECT_NAME} main.c ShapeType.c WriteShapeType.c)
 if(MSVC OR MSVC_IDE)
     target_link_libraries(${PROJECT_NAME}
         PRIVATE

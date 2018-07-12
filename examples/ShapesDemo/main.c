@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "ShapeType.h"
+#include "WriteShapeType.h"
 
 #include <micrortps/client/client.h>
 #include <stdio.h>
