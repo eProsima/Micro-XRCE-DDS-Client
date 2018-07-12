@@ -571,7 +571,8 @@ typedef enum StatusValue
     STATUS_ERR_UNKNOWN_REFERENCE = 0x84,
     STATUS_ERR_INVALID_DATA = 0x85,
     STATUS_ERR_INCOMPATIBLE = 0x86,
-    STATUS_ERR_RESOURCES = 0x87
+    STATUS_ERR_RESOURCES = 0x87,
+    STATUS_NONE = 255 //For internal management, never sent. It is correspond as an unknown status
 
 } StatusValue;
 

@@ -2,12 +2,6 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <micrortps/client/core/session/submessage.h>
 
-const uint8_t MR_FORMAT_DATA = FORMAT_DATA;
-const uint8_t MR_FORMAT_SAMPLE = FORMAT_SAMPLE;
-const uint8_t MR_FORMAT_DATA_SEQ = FORMAT_DATA_SEQ;
-const uint8_t MR_FORMAT_SAMPLE_SEQ = FORMAT_SAMPLE_SEQ;
-const uint8_t MR_FORMAT_PACKED_SAMPLES = FORMAT_PACKED_SAMPLES;
-
 extern void read_submessage_format(Session* session, MicroBuffer* data, uint16_t length, uint8_t format,
                                    StreamId stream_id, mrObjectId object_id, uint16_t request_id);
 
@@ -25,13 +19,13 @@ static void read_format_packed_samples(Session* session, MicroBuffer* payload, u
 //                             PUBLIC
 //==================================================================
 uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id,
-                         StreamId data_stream_id, uint8_t format, DeliveryControl* control)
+                         StreamId data_stream_id, DeliveryControl* control)
 {
     uint16_t request_id = INVALID_REQUEST_ID;
 
     READ_DATA_Payload payload;
     (void) data_stream_id; //payload.read_specification.stream_id = data_stream_id.raw;
-    payload.read_specification.data_format = format;
+    payload.read_specification.data_format = FORMAT_DATA;
     payload.read_specification.optional_content_filter_expression = false; //not supported yet
     payload.read_specification.optional_delivery_control = (control != NULL);
 
@@ -91,6 +85,7 @@ void read_submessage_format(Session* session, MicroBuffer* data, uint16_t length
             break;
 
         default:
+            read_format_data(session, data, length, stream_id, object_id, request_id); //REMOVE
             break;
     }
 }

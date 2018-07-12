@@ -32,7 +32,7 @@
 typedef struct HelloWorld
 {
     uint32_t index;
-    char* message;
+    char message[32];
 
 } HelloWorld;
 

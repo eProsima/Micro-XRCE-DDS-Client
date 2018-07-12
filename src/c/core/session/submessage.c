@@ -41,5 +41,5 @@ bool read_submessage_header(MicroBuffer* mb, uint8_t* submessage_id, uint16_t* l
 
 size_t submessage_padding(size_t length)
 {
-    return (length % 4 != 0) ? 4 - (length % 4) : 0;
+    return (length % SUBHEADER_SIZE != 0) ? SUBHEADER_SIZE - (length % SUBHEADER_SIZE) : 0;
 }

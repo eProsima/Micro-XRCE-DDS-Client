@@ -38,7 +38,9 @@
 #define MAX_HISTORY 16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
 
-static bool compute_command(const char* command, Session* session);
+static bool run_command(const char* command, Session* session, StreamId* stream_id);
+static bool compute_command(Session* session, StreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
+                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize);
 static void on_topic(Session* session, mrObjectId object_id, uint16_t request_id, StreamId stream_id, MicroBuffer* serialization, void* args);
 static void on_status(Session* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
 static void print_ShapeType_topic(const ShapeType* topic);
@@ -64,7 +66,7 @@ int main(int args, char** argv)
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
         if(!init_uart_transport_fd(&uart, fd, 0x00, 0x01))
         {
-            printf("%sCan not create a serial connection%s\n", "\x1B[1;31m", "\x1B[0m");
+            printf("%sCan not create a serial connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
         comm = &uart.comm;
@@ -77,7 +79,7 @@ int main(int args, char** argv)
         uint16_t port = (uint16_t)atoi(argv[3]);
         if(!init_udp_transport(&udp, ip, port))
         {
-            printf("%sCan not create an udp connection%s\n", "\x1B[1;31m", "\x1B[0m");
+            printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
         comm = &udp.comm;
@@ -90,7 +92,7 @@ int main(int args, char** argv)
         uint16_t port = (uint16_t)atoi(argv[3]);
         if(!init_tcp_transport(&tcp, ip, port))
         {
-            printf("%sCan not create a tcp connection%s\n", "\x1B[1;31m", "\x1B[0m");
+            printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
         comm = &tcp.comm;
@@ -111,11 +113,7 @@ int main(int args, char** argv)
         session_id = (uint8_t) atoi(argv[args_index++]);
     }
 
-    if(!create_session(&session, session_id, key, comm))
-    {
-        printf("%sCan not init session with the agent%s\n", "\x1B[1;31m", "\x1B[0m");
-        return 1;
-    }
+    init_session(&session, session_id, key, comm);
     set_topic_callback(&session, on_topic, NULL);
     set_status_callback(&session, on_status, NULL);
 
@@ -130,13 +128,14 @@ int main(int args, char** argv)
         }
     }
 
+    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE];
     uint8_t output_best_effort_stream_buffer[MAX_BUFFER_SIZE];
     uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE];
-    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE];
-    (void) create_output_best_effort_stream(&session, output_best_effort_stream_buffer, comm->mtu);
-    (void) create_output_reliable_stream(&session, output_reliable_stream_buffer, comm->mtu * history, history);
+
     (void) create_input_best_effort_stream(&session);
     (void) create_input_reliable_stream(&session, input_reliable_stream_buffer, comm->mtu * history, history);
+    (void) create_output_best_effort_stream(&session, output_best_effort_stream_buffer, comm->mtu);
+    StreamId reliable_output = create_output_reliable_stream(&session, output_reliable_stream_buffer, comm->mtu * history, history);
 
     // Waiting user commands
     char command_stdin_line[256];
@@ -149,92 +148,89 @@ int main(int args, char** argv)
         }
         else if (fgets(command_stdin_line, 256, stdin))
         {
-            running = compute_command(command_stdin_line, &session);
+            running = run_command(command_stdin_line, &session, &reliable_output);
         }
     }
 
-    delete_session(&session);
     //TODO: add the close transport functions
 
     return 0;
 }
 
-bool compute_command(const char* command, Session* session)
+bool run_command(const char* command, Session* session, StreamId* stream_id)
 {
     char name[128];
     uint8_t arg1 = 0;
     uint8_t arg2 = 0;
-    char color[128];
-    uint32_t x;
-    uint32_t y;
-    uint32_t shapesize;
+    char color[128] = "GREEN";
+    uint32_t x = 100;
+    uint32_t y = 100;
+    uint32_t shapesize = 50;
     int length = sscanf(command, "%s %hhu %hhu %s %u %u %u", name, &arg1, &arg2, color, &x, &y, &shapesize);
     if(length == 4 && color[0] == '\0')
     {
         length = 3; //some implementations of sscanfs add 1 to length if color is empty.
     }
 
+    return compute_command(session, stream_id, length, name, arg1, arg2, color, x, y, shapesize);
+}
+
+bool compute_command(Session* session, StreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
+                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize)
+{
+    if(strcmp(name, "create_session") == 0 && length == 1)
+    {
+        (void) create_session(session);
+        print_status(session->info.last_requested_status);
+    }
     else if(strcmp(name, "create_participant") == 0 && length == 2)
     {
         mrObjectId participant_id = create_object_id(arg1, PARTICIPANT_ID);
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* participant_ref = "default participant";
-        (void) write_create_participant_ref(session, stream_id, participant_id, participant_ref, 0);
+        (void) write_create_participant_ref(session, *stream_id, participant_id, participant_ref, 0);
     }
     else if(strcmp(name, "create_topic") == 0 && length == 3)
     {
         mrObjectId topic_id = create_object_id(arg1, TOPIC_ID);
         mrObjectId participant_id = create_object_id(arg2, PARTICIPANT_ID);
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* topic_xml = "<dds><topic><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
-        (void) write_configure_topic_xml(session, stream_id, topic_id, participant_id, topic_xml, 0);
+        (void) write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
     }
     else if(strcmp(name, "create_publisher") == 0 && length == 3)
     {
         mrObjectId publisher_id = create_object_id(arg1, PUBLISHER_ID);
         mrObjectId participant_id = create_object_id(arg2, PARTICIPANT_ID);
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* publisher_xml = "<publisher name=\"MyPublisher\"";
-        (void) write_configure_publisher_xml(session, stream_id, publisher_id, participant_id, publisher_xml, 0);
+        (void) write_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
     else if(strcmp(name, "create_subscriber") == 0 && length == 3)
     {
         mrObjectId subscriber_id = create_object_id(arg1, SUBSCRIBER_ID);
         mrObjectId participant_id = create_object_id(arg2, PARTICIPANT_ID);
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
-        (void) write_configure_subscriber_xml(session, stream_id, subscriber_id, participant_id, subscriber_xml, 0);
+        (void) write_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
     else if(strcmp(name, "create_datawriter") == 0 && length == 3)
     {
         mrObjectId datawriter_id = create_object_id(arg1, DATAWRITER_ID);
         mrObjectId publisher_id = create_object_id(arg2, PUBLISHER_ID);
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-        (void) write_configure_datawriter_xml(session, stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
+        (void) write_configure_datawriter_xml(session, *stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
     }
     else if(strcmp(name, "create_datareader") == 0 && length == 3)
     {
         mrObjectId datareader_id = create_object_id(arg1, DATAREADER_ID);
         mrObjectId subscriber_id = create_object_id(arg2, SUBSCRIBER_ID);
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
-        (void) write_configure_datareader_xml(session, stream_id, datareader_id, subscriber_id, datareader_xml, 0);
+        (void) write_configure_datareader_xml(session, *stream_id, datareader_id, subscriber_id, datareader_xml, 0);
     }
     else if(strcmp(name, "write_data") == 0 && length >= 3)
     {
-        ShapeType topic = {"GREEN", 100 , 100, 50};
-        if (length == 7)
-        {
-            topic.color = color;
-            topic.x = x;
-            topic.y = y;
-            topic.shapesize = shapesize;
-        }
+        ShapeType topic = {"", x , y, shapesize};
+        strncpy(topic.color, color, sizeof(topic.color));
 
         mrObjectId datawriter_id = create_object_id(arg1, DATAWRITER_ID);
-        StreamId data_stream_id = create_stream_id_from_raw(arg2, OUTPUT_STREAM);
-        (void) write_ShapeType_topic(session, data_stream_id, datawriter_id, &topic);
+        (void) write_ShapeType_topic(session, *stream_id, datawriter_id, &topic);
 
         printf("Sending... ");
         print_ShapeType_topic(&topic);
@@ -242,28 +238,50 @@ bool compute_command(const char* command, Session* session)
     else if(strcmp(name, "read_data") == 0 && length == 3)
     {
         mrObjectId datareader_id = create_object_id(arg1, DATAREADER_ID);
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
-        StreamId data_stream_id = create_stream_id_from_raw(arg2, INPUT_STREAM);
-        (void) write_read_data(session, stream_id, datareader_id, data_stream_id, MR_FORMAT_DATA, NULL);
+        StreamId answer_stream_id = create_stream_id_from_raw(arg2, INPUT_STREAM);
+        (void) write_read_data(session, *stream_id, datareader_id, answer_stream_id, NULL);
     }
     else if(strcmp(name, "delete") == 0 && length == 3)
     {
-        StreamId stream_id = create_stream_id(0, RELIABLE_STREAM, OUTPUT_STREAM);
         mrObjectId entity_id = create_object_id((arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
-        (void) write_delete_entity(session, stream_id, entity_id);
+        (void) write_delete_entity(session, *stream_id, entity_id);
     }
-    else if(strcmp(name, "exit") == 0)
+    else if(strcmp(name, "default_output_stream") == 0 && length == 2)
     {
+        *stream_id = create_stream_id_from_raw(arg1, OUTPUT_STREAM);
+    }
+    else if(strcmp(name, "delete_session") == 0 && length == 1)
+    {
+        (void) delete_session(session);
+        print_status(session->info.last_requested_status);
+    }
+    else if(strcmp(name, "exit") == 0 && length == 1)
+    {
+        (void) compute_command(session, stream_id, 2, "delete_session", 0, 0, "", 0, 0, 0);
         return false;
     }
-    else if(strcmp(name, "h") == 0 || strcmp(name, "help") == 0)
+    else if(strcmp(name, "example") == 0 && length == 2)
+    {
+        (void) compute_command(session, stream_id, 2, "create_participant", arg1, 0, "", 0, 0, 0);
+        (void) run_session_until_confirm_delivery(session, 100);
+        (void) compute_command(session, stream_id, 3, "create_topic"      , arg1, arg1, "", 0, 0, 0);
+        (void) run_session_until_confirm_delivery(session, 100);
+        (void) compute_command(session, stream_id, 3, "create_publisher"  , arg1, arg1, "", 0, 0, 0);
+        (void) run_session_until_confirm_delivery(session, 100);
+        (void) compute_command(session, stream_id, 3, "create_subscriber" , arg1, arg1, "", 0, 0, 0);
+        (void) run_session_until_confirm_delivery(session, 100);
+        (void) compute_command(session, stream_id, 3, "create_datawriter" , arg1, arg1, "", 0, 0, 0);
+        (void) run_session_until_confirm_delivery(session, 100);
+        (void) compute_command(session, stream_id, 3, "create_datareader" , arg1, arg1, "", 0, 0, 0);
+        (void) run_session_until_confirm_delivery(session, 100);
+    }
+    else if(strcmp(name, "l") == 0 || strcmp(name, "list") == 0)
     {
         print_commands();
     }
     else
     {
-        printf("%sUnknown command error%s\n", "\x1B[1;31m", "\x1B[0m");
-        print_commands();
+        printf("%sUnknown command error, write 'l' or 'list' to show the command list.%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
     }
 
     return true;
@@ -386,6 +404,9 @@ void print_commands(void)
     printf("        Close session and exit\n");
     printf("    h, help:\n");
     printf("        Shows this message\n");
+    printf("    example            <entities id>:\n");
+    printf("        Create the necessary entities for a complete publisher and subscriber.\n");
+    printf("        All entities will have <entities id> as id.\n");
 }
 
 int check_input(void)

@@ -31,7 +31,7 @@
  */
 typedef struct ShapeType
 {
-    char* color;
+    char color[255];
     int32_t x;
     int32_t y;
     int32_t shapesize;

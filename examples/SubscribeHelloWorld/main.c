@@ -45,12 +45,13 @@ int main(int args, char** argv)
 
     // Session
     Session session;
-    if(!create_session(&session, 0x02, 0xCCCCDDDD, &transport.comm))
+    init_session(&session, 0x02, 0xCCCCDDDD, &transport.comm);
+    set_topic_callback(&session, on_topic, NULL);
+    if(!create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
     }
-    set_topic_callback(&session, on_topic, NULL);
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
@@ -89,7 +90,7 @@ int main(int args, char** argv)
     for(unsigned i = 0; i < 10; ++i)
     {
         uint8_t read_data_status;
-        uint16_t read_data_req = write_read_data(&session, reliable_out, datareader_id, reliable_in, MR_FORMAT_DATA, NULL);
+        uint16_t read_data_req = write_read_data(&session, reliable_out, datareader_id, reliable_in, NULL);
         if(INVALID_REQUEST_ID == read_data_req)
         {
             printf("Error writing the submessage 'read data', stream is full\n");

@@ -38,15 +38,8 @@ extern "C"
 #define SERIALIZATION_LOGS_AVAILABLE 0
 #endif
 
-void init_log_timer();
 void print_message(int direction, uint8_t* buffer, size_t size);
 void print_serialization(int direction, const uint8_t* buffer, size_t size);
-
-
-#define DEBUG_INIT_LOG() \
-    do { \
-        if (MESSAGE_LOGS_AVAILABLE || SERIALIZATION_LOGS_AVAILABLE) init_log_timer(); \
-    } while (0);
 
 #define DEBUG_PRINT_MESSAGE(direction, buffer, size) \
     do { \

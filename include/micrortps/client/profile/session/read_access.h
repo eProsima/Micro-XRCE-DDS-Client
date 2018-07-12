@@ -22,12 +22,6 @@ extern "C"
 
 #include <micrortps/client/core/session/session.h>
 
-extern const uint8_t MR_FORMAT_DATA;
-extern const uint8_t MR_FORMAT_SAMPLE;
-extern const uint8_t MR_FORMAT_DATA_SEQ;
-extern const uint8_t MR_FORMAT_SAMPLE_SEQ;
-extern const uint8_t MR_FORMAT_PACKED_SAMPLEs;
-
 typedef struct DeliveryControl
 {
     uint16_t max_samples;
@@ -38,7 +32,7 @@ typedef struct DeliveryControl
 } DeliveryControl;
 
 uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id,
-                         StreamId data_stream_id, uint8_t format, DeliveryControl* control);
+                         StreamId data_stream_id, DeliveryControl* control);
 
 #ifdef __cplusplus
 }

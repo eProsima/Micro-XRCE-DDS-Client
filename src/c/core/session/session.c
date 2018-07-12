@@ -26,7 +26,7 @@ const uint8_t MR_STATUS_ERR_UNKNOWN_REFERENCE = STATUS_ERR_UNKNOWN_REFERENCE;
 const uint8_t MR_STATUS_ERR_INVALID_DATA = STATUS_ERR_INVALID_DATA;
 const uint8_t MR_STATUS_ERR_INCOMPATIBLE = STATUS_ERR_INCOMPATIBLE;
 const uint8_t MR_STATUS_ERR_RESOURCES = STATUS_ERR_RESOURCES;
-const uint8_t MR_STATUS_NONE = 255;
+const uint8_t MR_STATUS_NONE = STATUS_NONE;
 
 static uint16_t generate_request_id(Session* session);
 
@@ -60,10 +60,8 @@ static void process_status(Session* session, mrObjectId object_id, int16_t reque
 //                             PUBLIC
 //==================================================================
 
-bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
+void init_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
 {
-    DEBUG_INIT_LOG();
-
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
 
@@ -78,16 +76,20 @@ bool create_session(Session* session, uint8_t session_id, uint32_t key, Communic
 
     init_session_info(&session->info, session_id, key);
     init_stream_storage(&session->streams);
+}
 
+bool create_session(Session* session)
+{
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_create_session(&session->info, &mb, get_milli_time());
     stamp_create_session_header(&session->info, mb.init);
-    set_session_info_request(&session->info, STATE_LOGIN);
+    set_session_info_request(&session->info, REQUEST_LOGIN);
 
-    return wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    return received && STATUS_OK == session->info.last_requested_status;
 }
 
 bool delete_session(Session* session)
@@ -98,9 +100,10 @@ bool delete_session(Session* session)
 
     write_delete_session(&session->info, &mb);
     stamp_session_header(&session->info, 0, 0, mb.init);
-    set_session_info_request(&session->info, STATE_LOGOUT);
+    set_session_info_request(&session->info, REQUEST_LOGOUT);
 
-    return wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    return received && STATUS_OK == session->info.last_requested_status;
 }
 
 void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)
@@ -321,13 +324,7 @@ bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_
         poll_ms = listen_message(session, poll_ms) ? MIN_SESSION_STATUS_WAITING : poll_ms * 2;
     }
 
-    bool received = !session_info_pending_request(&session->info);
-    if(!received)
-    {
-        reset_session_info_request(&session->info);
-    }
-
-    return received;
+    return !session_info_pending_request(&session->info);
 }
 
 inline void send_message(const Session* session, uint8_t* buffer, size_t length)

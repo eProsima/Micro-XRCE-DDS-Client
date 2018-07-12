@@ -24,16 +24,17 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-#define STATE_LOGIN    0x01
-#define STATE_LOGOUT   0x02
+#define REQUEST_NONE     0x00
+#define REQUEST_LOGIN    0x01
+#define REQUEST_LOGOUT   0x02
 
 typedef struct MicroBuffer MicroBuffer;
 typedef struct SessionInfo
 {
     uint8_t id;
     uint8_t key[4];
-    uint8_t state;
     uint8_t request;
+    uint8_t last_requested_status;
 
 } SessionInfo;
 

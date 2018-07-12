@@ -35,7 +35,8 @@ int main(int args, char** argv)
 
     // Session
     Session session;
-    if(!create_session(&session, 0x01, 0xAAAABBBB, &transport.comm))
+    init_session(&session, 0x01, 0xAAAABBBB, &transport.comm);
+    if(!create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;

@@ -59,20 +59,20 @@ static void print_data_data_submessage(const char* pre, const DATA_Payload_Data*
 static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload);
 static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload);
 static void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, bool printable);
-static void print_tail();
+static void print_tail(int64_t initial_log_time);
 
-static int64_t initial_log_time = 0;
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_log_timer()
-{
-    initial_log_time = get_milli_time();
-}
-
 void print_message(int direction, uint8_t* buffer, size_t size)
 {
+    static int64_t initial_log_time = 0;
+    if(0 == initial_log_time)
+    {
+        initial_log_time = get_milli_time();
+    }
+
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
 
     MicroBuffer mb;
@@ -198,7 +198,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
         //avanzar hasta length.
         submessage_counter++;
     }
-    print_tail();
+    print_tail(initial_log_time);
     printf("\n");
 }
 
@@ -515,7 +515,7 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
     }
 }
 
-void print_tail()
+void print_tail(int64_t initial_log_time)
 {
     int64_t ms = get_milli_time() - initial_log_time;
     printf(" %st: %lims%s", BLUE, ms, RESTORE_COLOR);

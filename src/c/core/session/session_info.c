@@ -25,14 +25,14 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
     info->key[1] = (key << 8) >> 24;
     info->key[2] = (key << 16) >> 24;
     info->key[3] = (key << 24) >> 24;
-    info->state = STATE_LOGOUT;
-    info->request = STATE_LOGOUT;
+    info->last_requested_status = STATUS_NONE;
+    info->request = REQUEST_NONE;
 }
 
 void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds)
 {
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, STATE_LOGIN}};
+    payload.base.request_id = (RequestId){{0x00, REQUEST_LOGIN}};
     payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
@@ -51,7 +51,7 @@ void write_delete_session(const SessionInfo* info, MicroBuffer* mb)
 {
     (void) info;
     DELETE_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, STATE_LOGOUT}};
+    payload.base.request_id = (RequestId){{0x00, REQUEST_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
@@ -63,11 +63,7 @@ void read_create_session_status(SessionInfo* info, MicroBuffer* mb)
     STATUS_AGENT_Payload payload;
     if(deserialize_STATUS_AGENT_Payload(mb, &payload))
     {
-        //TODO: check objectid too
-        if(STATE_LOGIN == payload.base.related_request.request_id.data[1])
-        {
-            process_create_session_status(info, payload.base.result.status, &payload.agent_info);
-        }
+        process_create_session_status(info, payload.base.result.status, &payload.agent_info);
     }
 }
 
@@ -76,11 +72,7 @@ void read_delete_session_status(SessionInfo* info, MicroBuffer* mb)
     STATUS_Payload payload;
     if(deserialize_STATUS_Payload(mb, &payload))
     {
-        //TODO: check objectid too
-        if(STATE_LOGOUT == payload.base.related_request.request_id.data[1])
-        {
-            process_delete_session_status(info, payload.base.result.status);
-        }
+        process_delete_session_status(info, payload.base.result.status);
     }
 }
 
@@ -129,16 +121,12 @@ uint8_t session_header_offset(const SessionInfo* info)
 void set_session_info_request(SessionInfo* info, uint8_t request)
 {
     info->request = request;
-}
-
-void reset_session_info_request(SessionInfo* info)
-{
-    info->request = info->state;
+    info->last_requested_status = STATUS_NONE;
 }
 
 bool session_info_pending_request(const SessionInfo* info)
 {
-    return info->request != info->state;
+    return info->request != REQUEST_NONE;
 }
 
 //==================================================================
@@ -147,16 +135,18 @@ bool session_info_pending_request(const SessionInfo* info)
 inline void process_create_session_status(SessionInfo* info, uint8_t status, AGENT_Representation* agent)
 {
     (void) agent;
-    if(STATE_LOGIN == info->request && status == STATUS_OK)
+    if(REQUEST_LOGIN == info->request)
     {
-        info->state = STATE_LOGIN;
+        info->request = REQUEST_NONE;
+        info->last_requested_status = status;
     }
 }
 
 inline void process_delete_session_status(SessionInfo* info, uint8_t status)
 {
-    if(STATE_LOGOUT == info->request && status == STATUS_OK)
+    if(REQUEST_LOGOUT == info->request)
     {
-        info->state = STATE_LOGOUT;
+        info->request = REQUEST_NONE;
+        info->last_requested_status = status;
     }
 }

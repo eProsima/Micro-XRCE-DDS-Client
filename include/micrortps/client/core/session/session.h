@@ -68,7 +68,8 @@ struct Session
 //==================================================================
 //                         PUBLIC FUNCTIONS
 //==================================================================
-bool create_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
+void init_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
+bool create_session(Session* session);
 bool delete_session(Session* session);
 
 void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
