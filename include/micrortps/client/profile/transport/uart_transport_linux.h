@@ -34,7 +34,7 @@ struct UARTTransport
     uint8_t local_addr;
     struct pollfd poll_fd;
     SerialIO serial_io;
-    Communication comm;
+    mrCommunication comm;
 };
 
 bool init_uart_transport(UARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);

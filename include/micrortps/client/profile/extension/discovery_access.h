@@ -22,13 +22,13 @@ extern "C"
 
 #include <micrortps/client/core/communication/communication.h>
 
-typedef struct DiscoveryAccess
+typedef struct mrDiscoveryAccess
 {
-    Communication* communication;
+    mrCommunication* communication;
 
-} DiscoveryAccess;
+} mrDiscoveryAccess;
 
-int get_info(Communication* communication);
+int mr_get_info(mrCommunication* communication);
 
 #ifdef __cplusplus
 }

@@ -27,26 +27,27 @@ extern "C"
 
 typedef struct MicroBuffer MicroBuffer;
 
-typedef struct InputReliableStream
+typedef struct mrInputReliableStream
 {
     uint8_t* buffer;
     size_t size;
     size_t history;
 
-    SeqNum last_handled;
-    SeqNum last_announced;
+    mrSeqNum last_handled;
+    mrSeqNum last_announced;
 
-} InputReliableStream;
+} mrInputReliableStream;
 
-void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, size_t size, size_t history);
-void reset_input_reliable_stream(InputReliableStream* stream);
-bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
-bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb);
+void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, size_t history);
+void reset_input_reliable_stream(mrInputReliableStream* stream);
+bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
+bool next_input_reliable_buffer_available(mrInputReliableStream* stream, MicroBuffer* mb);
 
-void write_acknack(const InputReliableStream* stream, MicroBuffer* mb);
-void read_heartbeat(InputReliableStream* stream, MicroBuffer* payload);
+void write_acknack(const mrInputReliableStream* stream, MicroBuffer* mb);
+void read_heartbeat(mrInputReliableStream* stream, MicroBuffer* payload);
 
-bool is_input_reliable_stream_busy(InputReliableStream* stream);
+bool is_input_reliable_stream_busy(mrInputReliableStream* stream);
+
 #ifdef __cplusplus
 }
 #endif

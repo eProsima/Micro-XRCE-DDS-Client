@@ -25,38 +25,37 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-
 typedef struct MicroBuffer MicroBuffer;
 
-typedef struct OutputReliableStream
+typedef struct mrOutputReliableStream
 {
     uint8_t* buffer;
     size_t size;
     size_t history;
     uint8_t offset;
 
-    SeqNum last_written;
-    SeqNum last_sent;
-    SeqNum last_acknown;
+    mrSeqNum last_written;
+    mrSeqNum last_sent;
+    mrSeqNum last_acknown;
 
     int64_t next_heartbeat_timestamp;
     uint8_t next_heartbeat_tries;
     bool send_lost;
 
-} OutputReliableStream;
+} mrOutputReliableStream;
 
-void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset);
-void reset_output_reliable_stream(OutputReliableStream* stream);
-bool prepare_reliable_buffer_to_write(OutputReliableStream* stream, size_t size, MicroBuffer* mb);
-bool prepare_next_reliable_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
+void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset);
+void reset_output_reliable_stream(mrOutputReliableStream* stream);
+bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, MicroBuffer* mb);
+bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
 
-bool update_output_stream_heartbeat_timestamp(OutputReliableStream* stream, int64_t current_timestamp);
-SeqNum begin_output_nack_buffer_it(const OutputReliableStream* stream);
-bool next_reliable_nack_buffer_to_send(OutputReliableStream* stream, uint8_t** buffer, size_t *length, SeqNum* seq_num_it);
-void write_heartbeat(const OutputReliableStream* stream, MicroBuffer* mb);
-void read_acknack(OutputReliableStream* stream, MicroBuffer* payload);
+bool update_output_stream_heartbeat_timestamp(mrOutputReliableStream* stream, int64_t current_timestamp);
+mrSeqNum begin_output_nack_buffer_it(const mrOutputReliableStream* stream);
+bool next_reliable_nack_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t *length, mrSeqNum* seq_num_it);
+void write_heartbeat(const mrOutputReliableStream* stream, MicroBuffer* mb);
+void read_acknack(mrOutputReliableStream* stream, MicroBuffer* payload);
 
-bool is_output_reliable_stream_busy(const OutputReliableStream* stream);
+bool is_output_reliable_stream_busy(const mrOutputReliableStream* stream);
 
 #ifdef __cplusplus
 }

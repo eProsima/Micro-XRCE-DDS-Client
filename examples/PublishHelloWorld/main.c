@@ -34,9 +34,9 @@ int main(int args, char** argv)
     }
 
     // Session
-    Session session;
-    init_session(&session, 0x01, 0xAAAABBBB, &transport.comm);
-    if(!create_session(&session))
+    mrSession session;
+    mr_init_session(&session, 0x01, 0xAAAABBBB, &transport.comm);
+    if(!mr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -44,32 +44,32 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Create entities
-    mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
+    mrObjectId participant_id = mr_object_id(0x01, MR_PARTICIPANT_ID);
     char* participant_ref = "default participant";
-    uint16_t participant_req = write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, 0);
+    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, 0);
 
-    mrObjectId topic_id = create_object_id(0x01, TOPIC_ID);
+    mrObjectId topic_id = mr_object_id(0x01, MR_TOPIC_ID);
     char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, 0);
+    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, 0);
 
-    mrObjectId publisher_id = create_object_id(0x01, PUBLISHER_ID);
+    mrObjectId publisher_id = mr_object_id(0x01, MR_PUBLISHER_ID);
     char* publisher_xml = "<publisher name=\"MyPublisher\"";
-    uint16_t publisher_req = write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, 0);
+    uint16_t publisher_req = mr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, 0);
 
-    mrObjectId datawriter_id = create_object_id(0x01, DATAWRITER_ID);
+    mrObjectId datawriter_id = mr_object_id(0x01, MR_DATAWRITER_ID);
     char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-    uint16_t datawriter_req = write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, 0);
+    uint16_t datawriter_req = mr_write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, 0);
 
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
-    if(!run_session_until_status(&session, 1000, requests, status, 4))
+    if(!mr_run_session_until_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i publisher: %i darawriter: %i\n", status[0], status[1], status[2], status[3]);
         return 1;
@@ -86,7 +86,7 @@ int main(int args, char** argv)
             i -= 1; //try again
         }
 
-        if(run_session_until_confirm_delivery(&session, 10))
+        if(mr_run_session_until_confirm_delivery(&session, 10))
         {
             printf("Sent topic: %s, count: %i\n", topic.message, topic.index);
         }
@@ -95,7 +95,7 @@ int main(int args, char** argv)
     }
 
     // Delete resources
-    delete_session(&session);
+    mr_delete_session(&session);
     //TODO: add the close transport functions
 
     return 0;

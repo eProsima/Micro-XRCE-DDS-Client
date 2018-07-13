@@ -3,7 +3,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_stream_storage(StreamStorage* storage)
+void init_stream_storage(mrStreamStorage* storage)
 {
     storage->output_best_effort_size = 0;
     storage->output_reliable_size = 0;
@@ -11,7 +11,7 @@ void init_stream_storage(StreamStorage* storage)
     storage->input_reliable_size = 0;
 }
 
-void reset_stream_storage(StreamStorage* storage)
+void reset_stream_storage(mrStreamStorage* storage)
 {
     for(unsigned i = 0; i < storage->output_best_effort_size; ++i)
     {
@@ -34,43 +34,43 @@ void reset_stream_storage(StreamStorage* storage)
     }
 }
 
-StreamId add_output_best_effort_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset)
+mrStreamId add_output_best_effort_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset)
 {
     uint8_t index = storage->output_best_effort_size++;
     // assert for index
-    OutputBestEffortStream* stream = &storage->output_best_effort[index];
+    mrOutputBestEffortStream* stream = &storage->output_best_effort[index];
     init_output_best_effort_stream(stream, buffer, size, header_offset);
-    return create_stream_id(index, BEST_EFFORT_STREAM, OUTPUT_STREAM);
+    return mr_stream_id(index, MR_BEST_EFFORT_STREAM, MR_OUTPUT_STREAM);
 }
 
-StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset)
+mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset)
 {
     uint8_t index = storage->output_reliable_size++;
     // assert for index
-    OutputReliableStream* stream = &storage->output_reliable[index];
+    mrOutputReliableStream* stream = &storage->output_reliable[index];
     init_output_reliable_stream(stream, buffer, size, history, header_offset);
-    return create_stream_id(index, RELIABLE_STREAM, OUTPUT_STREAM);
+    return mr_stream_id(index, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
 }
 
-StreamId add_input_best_effort_buffer(StreamStorage* storage)
+mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage)
 {
     uint8_t index = storage->input_best_effort_size++;
     // assert for index
-    InputBestEffortStream* stream = &storage->input_best_effort[index];
+    mrInputBestEffortStream* stream = &storage->input_best_effort[index];
     init_input_best_effort_stream(stream);
-    return create_stream_id(index, BEST_EFFORT_STREAM, INPUT_STREAM);
+    return mr_stream_id(index, MR_BEST_EFFORT_STREAM, MR_INPUT_STREAM);
 }
 
-StreamId add_input_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history)
+mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history)
 {
     uint8_t index = storage->input_reliable_size++;
     // assert for index
-    InputReliableStream* stream = &storage->input_reliable[index];
+    mrInputReliableStream* stream = &storage->input_reliable[index];
     init_input_reliable_stream(stream, buffer, size, history);
-    return create_stream_id(index, RELIABLE_STREAM, INPUT_STREAM);
+    return mr_stream_id(index, MR_RELIABLE_STREAM, MR_INPUT_STREAM);
 }
 
-OutputBestEffortStream* get_output_best_effort_stream(StreamStorage* storage, uint8_t index)
+mrOutputBestEffortStream* get_output_best_effort_stream(mrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->output_best_effort_size)
     {
@@ -79,7 +79,7 @@ OutputBestEffortStream* get_output_best_effort_stream(StreamStorage* storage, ui
     return NULL;
 }
 
-OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t index)
+mrOutputReliableStream* get_output_reliable_stream(mrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->output_reliable_size)
     {
@@ -88,7 +88,7 @@ OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t
     return NULL;
 }
 
-InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint8_t index)
+mrInputBestEffortStream* get_input_best_effort_stream(mrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->input_best_effort_size)
     {
@@ -97,7 +97,7 @@ InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint
     return NULL;
 }
 
-InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t index)
+mrInputReliableStream* get_input_reliable_stream(mrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->input_reliable_size)
     {
@@ -106,20 +106,20 @@ InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t i
     return NULL;
 }
 
-bool prepare_stream_to_write(StreamStorage* storage, StreamId stream_id, size_t size, MicroBuffer* mb)
+bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, MicroBuffer* mb)
 {
     bool available = false;
     switch(stream_id.type)
     {
-        case BEST_EFFORT_STREAM:
+        case MR_BEST_EFFORT_STREAM:
         {
-            OutputBestEffortStream* stream = get_output_best_effort_stream(storage, stream_id.index);
+            mrOutputBestEffortStream* stream = get_output_best_effort_stream(storage, stream_id.index);
             available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
             break;
         }
-        case RELIABLE_STREAM:
+        case MR_RELIABLE_STREAM:
         {
-            OutputReliableStream* stream = get_output_reliable_stream(storage, stream_id.index);
+            mrOutputReliableStream* stream = get_output_reliable_stream(storage, stream_id.index);
             available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
             break;
         }
@@ -130,7 +130,7 @@ bool prepare_stream_to_write(StreamStorage* storage, StreamId stream_id, size_t 
     return available;
 }
 
-bool output_streams_confirmed(const StreamStorage* storage)
+bool output_streams_confirmed(const mrStreamStorage* storage)
 {
     bool busy = false;
     for(unsigned i = 0; i < storage->output_reliable_size && !busy; ++i)

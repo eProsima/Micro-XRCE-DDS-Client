@@ -22,17 +22,17 @@ extern "C"
 
 #include <micrortps/client/core/session/session.h>
 
-typedef struct DeliveryControl
+typedef struct mrDeliveryControl
 {
     uint16_t max_samples;
     uint16_t max_elapsed_time;
     uint16_t max_bytes_per_second;
     uint16_t min_pace_period;
 
-} DeliveryControl;
+} mrDeliveryControl;
 
-uint16_t write_read_data(Session* session, StreamId stream_id, mrObjectId datareader_id,
-                         StreamId data_stream_id, DeliveryControl* control);
+uint16_t mr_write_read_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
+                         mrStreamId data_stream_id, mrDeliveryControl* control);
 
 #ifdef __cplusplus
 }

@@ -26,21 +26,21 @@ extern "C"
 #include <stdbool.h>
 
 typedef struct MicroBuffer MicroBuffer;
-typedef struct OutputBestEffortStream
+typedef struct mrOutputBestEffortStream
 {
     uint8_t* buffer;
     size_t writer;
     size_t size;
     uint8_t offset;
 
-    SeqNum last_send;
+    mrSeqNum last_send;
 
-} OutputBestEffortStream;
+} mrOutputBestEffortStream;
 
-void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
-void reset_output_best_effort_stream(OutputBestEffortStream* stream);
-bool prepare_best_effort_buffer_to_send(OutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
-bool prepare_best_effort_buffer_to_write(OutputBestEffortStream* stream, size_t size, MicroBuffer* mb);
+void init_output_best_effort_stream(mrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
+void reset_output_best_effort_stream(mrOutputBestEffortStream* stream);
+bool prepare_best_effort_buffer_to_send(mrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
+bool prepare_best_effort_buffer_to_write(mrOutputBestEffortStream* stream, size_t size, MicroBuffer* mb);
 
 #ifdef __cplusplus
 }

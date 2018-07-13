@@ -24,37 +24,37 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-#define REQUEST_NONE     0x00
-#define REQUEST_LOGIN    0x01
-#define REQUEST_LOGOUT   0x02
+#define MR_REQUEST_NONE     0x00
+#define MR_REQUEST_LOGIN    0x01
+#define MR_REQUEST_LOGOUT   0x02
 
 typedef struct MicroBuffer MicroBuffer;
-typedef struct SessionInfo
+typedef struct mrSessionInfo
 {
     uint8_t id;
     uint8_t key[4];
     uint8_t request;
     uint8_t last_requested_status;
 
-} SessionInfo;
+} mrSessionInfo;
 
 
-void init_session_info(SessionInfo* info, uint8_t id, uint32_t key);
+void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key);
 
-void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds, bool reset_streams);
-void write_delete_session(const SessionInfo* info, MicroBuffer* mb);
-void read_create_session_status(SessionInfo* info, MicroBuffer* mb);
-void read_delete_session_status(SessionInfo* info, MicroBuffer* mb);
+void write_create_session(const mrSessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds, bool reset_streams);
+void write_delete_session(const mrSessionInfo* info, MicroBuffer* mb);
+void read_create_session_status(mrSessionInfo* info, MicroBuffer* mb);
+void read_delete_session_status(mrSessionInfo* info, MicroBuffer* mb);
 
-void stamp_create_session_header(const SessionInfo* info, uint8_t* buffer);
-void stamp_session_header(const SessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);
-bool read_session_header(const SessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num);
+void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer);
+void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);
+bool read_session_header(const mrSessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num);
 
-uint8_t session_header_offset(const SessionInfo* info);
+uint8_t session_header_offset(const mrSessionInfo* info);
 
-void set_session_info_request(SessionInfo* info, uint8_t request);
-void reset_session_info_request(SessionInfo* info);
-bool session_info_pending_request(const SessionInfo* info);
+void set_session_info_request(mrSessionInfo* info, uint8_t request);
+void reset_session_info_request(mrSessionInfo* info);
+bool session_info_pending_request(const mrSessionInfo* info);
 
 #ifdef __cplusplus
 }

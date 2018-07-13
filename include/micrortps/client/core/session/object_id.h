@@ -22,16 +22,16 @@ extern "C"
 
 #include <stdint.h>
 
-extern const uint8_t APPLICATION_ID;
-extern const uint8_t QOS_PROFILE_ID;
-extern const uint8_t TYPE_ID;
-extern const uint8_t DOMAIN_ID;
-extern const uint8_t PARTICIPANT_ID;
-extern const uint8_t TOPIC_ID;
-extern const uint8_t PUBLISHER_ID;
-extern const uint8_t SUBSCRIBER_ID;
-extern const uint8_t DATAWRITER_ID;
-extern const uint8_t DATAREADER_ID;
+extern const uint8_t MR_APPLICATION_ID;
+extern const uint8_t MR_QOS_PROFILE_ID;
+extern const uint8_t MR_TYPE_ID;
+extern const uint8_t MR_DOMAIN_ID;
+extern const uint8_t MR_PARTICIPANT_ID;
+extern const uint8_t MR_TOPIC_ID;
+extern const uint8_t MR_PUBLISHER_ID;
+extern const uint8_t MR_SUBSCRIBER_ID;
+extern const uint8_t MR_DATAWRITER_ID;
+extern const uint8_t MR_DATAREADER_ID;
 
 typedef struct mrObjectId
 {
@@ -40,8 +40,8 @@ typedef struct mrObjectId
 
 } mrObjectId;
 
-mrObjectId create_object_id(uint16_t id, uint8_t type);
-mrObjectId create_object_id_from_raw(uint8_t* raw);
+mrObjectId mr_object_id(uint16_t id, uint8_t type);
+mrObjectId mr_object_id_from_raw(uint8_t* raw);
 
 void object_id_to_raw(mrObjectId object_id, uint8_t* raw);
 

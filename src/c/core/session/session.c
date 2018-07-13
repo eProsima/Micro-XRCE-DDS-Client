@@ -28,39 +28,39 @@ const uint8_t MR_STATUS_ERR_INCOMPATIBLE = STATUS_ERR_INCOMPATIBLE;
 const uint8_t MR_STATUS_ERR_RESOURCES = STATUS_ERR_RESOURCES;
 const uint8_t MR_STATUS_NONE = STATUS_NONE;
 
-static uint16_t generate_request_id(Session* session);
+static uint16_t generate_request_id(mrSession* session);
 
-static void flash_output_streams(Session* session);
-static bool listen_message(Session* session, int poll_ms);
-static bool listen_message_reliably(Session* session, int poll_ms);
+static void flash_output_streams(mrSession* session);
+static bool listen_message(mrSession* session, int poll_ms);
+static bool listen_message_reliably(mrSession* session, int poll_ms);
 
-static bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_t attempts);
+static bool wait_session_status(mrSession* session, uint8_t* buffer, size_t length, size_t attempts);
 
-static void send_message(const Session* session, uint8_t* buffer, size_t length);
-static bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms);
+static void send_message(const mrSession* session, uint8_t* buffer, size_t length);
+static bool recv_message(const mrSession* session, uint8_t**buffer, size_t* length, int poll_ms);
 
-static void write_submessage_heartbeat(const Session* session, StreamId stream);
-static void write_submessage_acknack(const Session* session, StreamId stream);
+static void write_submessage_heartbeat(const mrSession* session, mrStreamId stream);
+static void write_submessage_acknack(const mrSession* session, mrStreamId stream);
 
-static void read_message(Session* session, MicroBuffer* message);
-static void read_stream(Session* session, MicroBuffer* message, StreamId id, uint16_t seq_num);
-static void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id);
-static void read_submessage(Session* session, MicroBuffer* submessage,
-                            uint8_t submessage_id, StreamId stream_id, uint16_t length, uint8_t flags);
+static void read_message(mrSession* session, MicroBuffer* message);
+static void read_stream(mrSession* session, MicroBuffer* message, mrStreamId id, uint16_t seq_num);
+static void read_submessage_list(mrSession* session, MicroBuffer* submessages, mrStreamId stream_id);
+static void read_submessage(mrSession* session, MicroBuffer* submessage,
+                            uint8_t submessage_id, mrStreamId stream_id, uint16_t length, uint8_t flags);
 
-static void read_submessage_fragment(Session* session, MicroBuffer* submessage, StreamId stream_id, bool last_fragment);
-static void read_submessage_status(Session* session, MicroBuffer* submessage);
-static void read_submessage_data(Session* session, MicroBuffer* submessage, uint16_t length, StreamId stream_id, uint8_t format);
-static void read_submessage_heartbeat(Session* session, MicroBuffer* submessage, StreamId stream_id);
-static void read_submessage_acknack(Session* session, MicroBuffer* submessage, StreamId stream_id);
+static void read_submessage_fragment(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id, bool last_fragment);
+static void read_submessage_status(mrSession* session, MicroBuffer* submessage);
+static void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t length, mrStreamId stream_id, uint8_t format);
+static void read_submessage_heartbeat(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id);
+static void read_submessage_acknack(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id);
 
-static void process_status(Session* session, mrObjectId object_id, int16_t request_id, uint8_t status);
+static void process_status(mrSession* session, mrObjectId object_id, int16_t request_id, uint8_t status);
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
 
-void init_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm)
+void mr_init_session(mrSession* session, uint8_t session_id, uint32_t key, mrCommunication* comm)
 {
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
@@ -79,7 +79,7 @@ void init_session(Session* session, uint8_t session_id, uint32_t key, Communicat
     init_stream_storage(&session->streams);
 }
 
-bool create_session(Session* session)
+bool mr_create_session(mrSession* session)
 {
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     MicroBuffer mb;
@@ -87,7 +87,7 @@ bool create_session(Session* session)
 
     write_create_session(&session->info, &mb, get_milli_time(), session->reset_streams);
     stamp_create_session_header(&session->info, mb.init);
-    set_session_info_request(&session->info, REQUEST_LOGIN);
+    set_session_info_request(&session->info, MR_REQUEST_LOGIN);
 
     bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
     bool created = received && STATUS_OK == session->info.last_requested_status;
@@ -95,7 +95,7 @@ bool create_session(Session* session)
     return created;
 }
 
-bool delete_session(Session* session)
+bool mr_delete_session(mrSession* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     MicroBuffer mb;
@@ -103,7 +103,7 @@ bool delete_session(Session* session)
 
     write_delete_session(&session->info, &mb);
     stamp_session_header(&session->info, 0, 0, mb.init);
-    set_session_info_request(&session->info, REQUEST_LOGOUT);
+    set_session_info_request(&session->info, MR_REQUEST_LOGOUT);
 
     bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
     bool deleted = received && STATUS_OK == session->info.last_requested_status;
@@ -114,41 +114,41 @@ bool delete_session(Session* session)
     return deleted;
 }
 
-void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)
+void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args)
 {
     session->on_status = on_status_func;
     session->on_status_args = args;
 }
 
-void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args)
+void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args)
 {
     session->on_topic = on_topic_func;
     session->on_topic_args = args;
 }
 
-StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size)
+mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size)
 {
     uint8_t header_offset = session_header_offset(&session->info);
     return add_output_best_effort_buffer(&session->streams, buffer, size, header_offset);
 }
 
-StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history)
+mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history)
 {
     uint8_t header_offset = session_header_offset(&session->info);
     return add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
 }
 
-StreamId create_input_best_effort_stream(Session* session)
+mrStreamId mr_create_input_best_effort_stream(mrSession* session)
 {
     return add_input_best_effort_buffer(&session->streams);
 }
 
-StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history)
+mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history)
 {
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
-uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base)
+uint16_t mr_init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base)
 {
     uint16_t request_id = generate_request_id(session);
 
@@ -159,7 +159,7 @@ uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseOb
     return request_id;
 }
 
-void run_session_until_timeout(Session* session, int timeout_ms)
+void mr_run_session_until_timeout(mrSession* session, int timeout_ms)
 {
     flash_output_streams(session);
 
@@ -170,7 +170,7 @@ void run_session_until_timeout(Session* session, int timeout_ms)
     }
 }
 
-bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
+bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout_ms)
 {
     flash_output_streams(session);
 
@@ -183,7 +183,7 @@ bool run_session_until_confirm_delivery(Session* session, int timeout_ms)
     return output_streams_confirmed(&session->streams);
 }
 
-bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
+bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
 {
     flash_output_streams(session);
 
@@ -205,16 +205,16 @@ bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* 
         for(unsigned i = 0; i < list_size && status_confirmed; ++i)
         {
             status_confirmed = status_list[i] != MR_STATUS_NONE
-                            || request_list[i] == INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
+                            || request_list[i] == MR_INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
         }
     }
 
     session->request_status_list_size = 0;
 
-    return check_status_list_ok(status_list, list_size);
+    return mr_check_status_list_ok(status_list, list_size);
 }
 
-bool check_status_list_ok(uint8_t* status_list, size_t size)
+bool mr_check_status_list_ok(uint8_t* status_list, size_t size)
 {
     bool all_status_ok = true;
     for(unsigned i = 0; i < size && all_status_ok; ++i)
@@ -228,7 +228,7 @@ bool check_status_list_ok(uint8_t* status_list, size_t size)
 //==================================================================
 //                             PRIVATE
 //==================================================================
-inline uint16_t generate_request_id(Session* session)
+inline uint16_t generate_request_id(mrSession* session)
 {
     uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
         ? INITIAL_REQUEST_ID
@@ -238,14 +238,14 @@ inline uint16_t generate_request_id(Session* session)
     return last_request_id;
 }
 
-void flash_output_streams(Session* session)
+void flash_output_streams(mrSession* session)
 {
     for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
     {
-        OutputBestEffortStream* stream = &session->streams.output_best_effort[i];
-        StreamId id = create_stream_id(i, BEST_EFFORT_STREAM, OUTPUT_STREAM);
+        mrOutputBestEffortStream* stream = &session->streams.output_best_effort[i];
+        mrStreamId id = mr_stream_id(i, MR_BEST_EFFORT_STREAM, MR_OUTPUT_STREAM);
 
-        uint8_t* buffer; size_t length; SeqNum seq_num;
+        uint8_t* buffer; size_t length; mrSeqNum seq_num;
         if(prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
             stamp_session_header(&session->info, id.raw, seq_num, buffer);
@@ -255,10 +255,10 @@ void flash_output_streams(Session* session)
 
     for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
     {
-        OutputReliableStream* stream = &session->streams.output_reliable[i];
-        StreamId id = create_stream_id(i, RELIABLE_STREAM, OUTPUT_STREAM);
+        mrOutputReliableStream* stream = &session->streams.output_reliable[i];
+        mrStreamId id = mr_stream_id(i, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
 
-        uint8_t* buffer; size_t length; SeqNum seq_num;
+        uint8_t* buffer; size_t length; mrSeqNum seq_num;
         while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
             stamp_session_header(&session->info, id.raw, seq_num, buffer);
@@ -267,7 +267,7 @@ void flash_output_streams(Session* session)
     }
 }
 
-bool listen_message(Session* session, int poll_ms)
+bool listen_message(mrSession* session, int poll_ms)
 {
     uint8_t* data; size_t length;
     bool must_be_read = recv_message(session, &data, &length, poll_ms);
@@ -281,7 +281,7 @@ bool listen_message(Session* session, int poll_ms)
     return must_be_read;
 }
 
-bool listen_message_reliably(Session* session, int poll_ms)
+bool listen_message_reliably(mrSession* session, int poll_ms)
 {
     bool received = false;
     int32_t poll = (poll_ms >= 0) ? poll_ms : INT32_MAX;
@@ -291,8 +291,8 @@ bool listen_message_reliably(Session* session, int poll_ms)
         int64_t timestamp = get_milli_time();
         for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
         {
-            OutputReliableStream* stream = &session->streams.output_reliable[i];
-            StreamId id = create_stream_id(i, RELIABLE_STREAM, OUTPUT_STREAM);
+            mrOutputReliableStream* stream = &session->streams.output_reliable[i];
+            mrStreamId id = mr_stream_id(i, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
 
             if(update_output_stream_heartbeat_timestamp(stream, timestamp))
             {
@@ -323,7 +323,7 @@ bool listen_message_reliably(Session* session, int poll_ms)
     return received;
 }
 
-bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_t attempts)
+bool wait_session_status(mrSession* session, uint8_t* buffer, size_t length, size_t attempts)
 {
     int poll_ms = MIN_SESSION_STATUS_WAITING;
     for(size_t i = 0; i < attempts && session_info_pending_request(&session->info); ++i)
@@ -335,13 +335,13 @@ bool wait_session_status(Session* session, uint8_t* buffer, size_t length, size_
     return !session_info_pending_request(&session->info);
 }
 
-inline void send_message(const Session* session, uint8_t* buffer, size_t length)
+inline void send_message(const mrSession* session, uint8_t* buffer, size_t length)
 {
     (void) session->comm->send_msg(session->comm->instance, buffer, length);
     DEBUG_PRINT_MESSAGE(SEND, buffer, length);
 }
 
-inline bool recv_message(const Session* session, uint8_t**buffer, size_t* length, int poll_ms)
+inline bool recv_message(const mrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
 {
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
     if(received)
@@ -351,64 +351,64 @@ inline bool recv_message(const Session* session, uint8_t**buffer, size_t* length
     return received;
 }
 
-void write_submessage_heartbeat(const Session* session, StreamId id)
+void write_submessage_heartbeat(const mrSession* session, mrStreamId id)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
 
-    const OutputReliableStream* stream = &session->streams.output_reliable[id.index];
+    const mrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
     write_heartbeat(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, heartbeat_buffer, micro_buffer_length(&mb));
 }
 
-void write_submessage_acknack(const Session* session, StreamId id)
+void write_submessage_acknack(const mrSession* session, mrStreamId id)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
 
-    const InputReliableStream* stream = &session->streams.input_reliable[id.index];
+    const mrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
     write_acknack(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, acknack_buffer, micro_buffer_length(&mb));
 }
 
-void read_message(Session* session, MicroBuffer* mb)
+void read_message(mrSession* session, MicroBuffer* mb)
 {
     uint8_t stream_id_raw; uint16_t seq_num;
     if(read_session_header(&session->info, mb, &stream_id_raw, &seq_num))
     {
-        StreamId id = create_stream_id_from_raw(stream_id_raw, INPUT_STREAM);
+        mrStreamId id = mr_stream_id_from_raw(stream_id_raw, MR_INPUT_STREAM);
         read_stream(session, mb, id, seq_num);
     }
 }
 
-void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t seq_num)
+void read_stream(mrSession* session, MicroBuffer* mb, mrStreamId stream_id, uint16_t seq_num)
 {
     switch(stream_id.type)
     {
-        case NONE_STREAM:
+        case MR_NONE_STREAM:
         {
-            stream_id = create_stream_id_from_raw(seq_num, INPUT_STREAM); // The real stream_id is into seq_num
+            stream_id = mr_stream_id_from_raw(seq_num, MR_INPUT_STREAM); // The real stream_id is into seq_num
             read_submessage_list(session, mb, stream_id);
             break;
         }
-        case BEST_EFFORT_STREAM:
+        case MR_BEST_EFFORT_STREAM:
         {
-            InputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
+            mrInputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
             if(stream && receive_best_effort_message(stream, seq_num))
             {
                 read_submessage_list(session, mb, stream_id);
             }
             break;
         }
-        case RELIABLE_STREAM:
+        case MR_RELIABLE_STREAM:
         {
-            InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
+            mrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
             if(stream && receive_reliable_message(stream, seq_num, mb->iterator, micro_buffer_length(mb)))
             {
                 read_submessage_list(session, mb, stream_id);
@@ -426,7 +426,7 @@ void read_stream(Session* session, MicroBuffer* mb, StreamId stream_id, uint16_t
     }
 }
 
-void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId stream_id)
+void read_submessage_list(mrSession* session, MicroBuffer* submessages, mrStreamId stream_id)
 {
     uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
     while(read_submessage_header(submessages, &id, &length, &flags, &payload_it))
@@ -435,19 +435,19 @@ void read_submessage_list(Session* session, MicroBuffer* submessages, StreamId s
     }
 }
 
-void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessage_id, StreamId stream_id, uint16_t length, uint8_t flags)
+void read_submessage(mrSession* session, MicroBuffer* submessage, uint8_t submessage_id, mrStreamId stream_id, uint16_t length, uint8_t flags)
 {
     switch(submessage_id)
     {
         case SUBMESSAGE_ID_STATUS_AGENT:
-            if(stream_id.type == NONE_STREAM)
+            if(stream_id.type == MR_NONE_STREAM)
             {
                 read_create_session_status(&session->info, submessage);
             }
             break;
 
         case SUBMESSAGE_ID_STATUS:
-            if(stream_id.type == NONE_STREAM)
+            if(stream_id.type == MR_NONE_STREAM)
             {
                 read_delete_session_status(&session->info, submessage);
             }
@@ -478,12 +478,12 @@ void read_submessage(Session* session, MicroBuffer* submessage, uint8_t submessa
     }
 }
 
-void read_submessage_status(Session* session, MicroBuffer* submessage)
+void read_submessage_status(mrSession* session, MicroBuffer* submessage)
 {
     STATUS_Payload payload;
     deserialize_STATUS_Payload(submessage, &payload);
 
-    mrObjectId object_id = create_object_id_from_raw(payload.base.related_request.object_id.data);
+    mrObjectId object_id = mr_object_id_from_raw(payload.base.related_request.object_id.data);
     uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
                             + payload.base.related_request.request_id.data[1];
 
@@ -492,17 +492,17 @@ void read_submessage_status(Session* session, MicroBuffer* submessage)
 }
 
 
-extern void read_submessage_format(Session* session, MicroBuffer* data, uint16_t length, uint8_t format,
-                                   StreamId stream_id, mrObjectId object_id, uint16_t request_id);
+extern void read_submessage_format(mrSession* session, MicroBuffer* data, uint16_t length, uint8_t format,
+                                   mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
 
-void read_submessage_data(Session* session, MicroBuffer* submessage, uint16_t length, StreamId stream_id, uint8_t format)
+void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t length, mrStreamId stream_id, uint8_t format)
 {
 #ifdef PROFILE_READ_ACCESS
     BaseObjectRequest base;
     deserialize_BaseObjectRequest(submessage, &base);
     length -= 4; //CHANGE: by a future size_of_BaseObjectRequest
 
-    mrObjectId object_id = create_object_id_from_raw(base.object_id.data);
+    mrObjectId object_id = mr_object_id_from_raw(base.object_id.data);
     uint16_t request_id = (((uint16_t) base.request_id.data[0]) << 8) + base.request_id.data[1];
 
     process_status(session, object_id, request_id, STATUS_OK);
@@ -514,15 +514,15 @@ void read_submessage_data(Session* session, MicroBuffer* submessage, uint16_t le
 #endif
 }
 
-void read_submessage_fragment(Session* session, MicroBuffer* submessage, StreamId stream_id, bool last_fragment)
+void read_submessage_fragment(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id, bool last_fragment)
 {
     (void) session; (void) submessage; (void) stream_id; (void) last_fragment;
     //TODO
 }
 
-void read_submessage_heartbeat(Session* session, MicroBuffer* submessage, StreamId stream_id)
+void read_submessage_heartbeat(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id)
 {
-    InputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
+    mrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
     if(stream)
     {
         read_heartbeat(stream, submessage);
@@ -530,15 +530,15 @@ void read_submessage_heartbeat(Session* session, MicroBuffer* submessage, Stream
     }
 }
 
-void read_submessage_acknack(Session* session, MicroBuffer* submessage, StreamId stream_id)
+void read_submessage_acknack(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id)
 {
-    OutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
+    mrOutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
     if(stream)
     {
         read_acknack(stream, submessage);
 
         uint8_t* buffer; size_t length;
-        SeqNum seq_num_it = begin_output_nack_buffer_it(stream);
+        mrSeqNum seq_num_it = begin_output_nack_buffer_it(stream);
         if(next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
         {
             send_message(session, buffer, length);
@@ -546,7 +546,7 @@ void read_submessage_acknack(Session* session, MicroBuffer* submessage, StreamId
     }
 }
 
-void process_status(Session* session, mrObjectId object_id, int16_t request_id, uint8_t status)
+void process_status(mrSession* session, mrObjectId object_id, int16_t request_id, uint8_t status)
 {
     if(session->on_status != NULL)
     {

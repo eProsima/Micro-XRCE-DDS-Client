@@ -25,15 +25,15 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct InputBestEffortStream
+typedef struct mrInputBestEffortStream
 {
-    SeqNum last_handled;
+    mrSeqNum last_handled;
 
-} InputBestEffortStream;
+} mrInputBestEffortStream;
 
-void init_input_best_effort_stream(InputBestEffortStream* stream);
-void reset_input_best_effort_stream(InputBestEffortStream* stream);
-bool receive_best_effort_message(InputBestEffortStream* stream, SeqNum seq_num);
+void init_input_best_effort_stream(mrInputBestEffortStream* stream);
+void reset_input_best_effort_stream(mrInputBestEffortStream* stream);
+bool receive_best_effort_message(mrInputBestEffortStream* stream, mrSeqNum seq_num);
 
 #ifdef __cplusplus
 }

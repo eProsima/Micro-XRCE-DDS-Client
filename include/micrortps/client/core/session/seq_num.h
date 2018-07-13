@@ -22,11 +22,11 @@ extern "C"
 
 #include <stdint.h>
 
-typedef uint16_t SeqNum;
+typedef uint16_t mrSeqNum;
 
-SeqNum seq_num_add(SeqNum seq_num, SeqNum increment);
-SeqNum seq_num_sub(SeqNum seq_num, SeqNum decrement);
-int seq_num_cmp(SeqNum seq_num_1, SeqNum seq_num_2);
+mrSeqNum seq_num_add(mrSeqNum seq_num, mrSeqNum increment);
+mrSeqNum seq_num_sub(mrSeqNum seq_num, mrSeqNum decrement);
+int seq_num_cmp(mrSeqNum seq_num_1, mrSeqNum seq_num_2);
 
 #ifdef __cplusplus
 }

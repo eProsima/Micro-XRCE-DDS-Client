@@ -8,9 +8,9 @@ const uint8_t ENTITY_REUSE = (uint8_t)FLAG_REUSE;
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t write_delete_entity(Session* session, StreamId stream_id, mrObjectId object_id)
+uint16_t write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id)
 {
-    uint16_t request_id = INVALID_REQUEST_ID;
+    uint16_t request_id = MR_INVALID_REQUEST_ID;
 
     DELETE_Payload payload;
 
@@ -30,11 +30,11 @@ uint16_t write_delete_entity(Session* session, StreamId stream_id, mrObjectId ob
     return request_id;
 }
 
-uint16_t common_create_entity(Session* session, StreamId stream_id,
+uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
                                   mrObjectId object_id, size_t xml_ref_size, uint8_t flags,
                                   CREATE_Payload* payload)
 {
-    uint16_t request_id = INVALID_REQUEST_ID;
+    uint16_t request_id = MR_INVALID_REQUEST_ID;
 
     // Change this when microcdr supports size_of function. Currently, DOMAIN_ID is not supported.
     size_t payload_length = 0; //CREATE_Payload_size(&payload);
@@ -45,8 +45,8 @@ uint16_t common_create_entity(Session* session, StreamId stream_id,
     payload_length += 4; // xml length
     payload_length += xml_ref_size; // xml data (note: compiler executes strlen one time this function)
     payload_length += (object_id.type == OBJK_PARTICIPANT && payload_length % 2 != 0) ? 1 : 0; // necessary padding
-    payload_length += (object_id.type == APPLICATION_ID || object_id.type == TYPE_ID ||
-                       object_id.type  == DOMAIN_ID || object_id.type == QOS_PROFILE_ID) ? 0 : 2; //object id ref
+    payload_length += (object_id.type == MR_APPLICATION_ID || object_id.type == MR_TYPE_ID ||
+                       object_id.type  == MR_DOMAIN_ID || object_id.type == MR_QOS_PROFILE_ID) ? 0 : 2; //object id ref
 
     MicroBuffer mb;
     if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))

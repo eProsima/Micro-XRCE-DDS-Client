@@ -33,7 +33,7 @@ struct UDPTransport
     int socket_fd;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
-    Communication comm;
+    mrCommunication comm;
 };
 
 bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);

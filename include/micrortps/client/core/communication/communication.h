@@ -28,7 +28,7 @@ typedef bool (*send_msg_func)(void* instance, const uint8_t* buf, size_t len);
 typedef bool (*recv_msg_func)(void* instance, uint8_t** buf, size_t* len, int timeout);
 typedef int (*comm_error_func)();
 
-typedef struct Communication
+typedef struct mrCommunication
 {
     void* instance;
     send_msg_func send_msg;
@@ -36,7 +36,7 @@ typedef struct Communication
     comm_error_func comm_error;
     uint16_t mtu;
 
-} Communication;
+} mrCommunication;
 
 #ifdef __cplusplus
 }

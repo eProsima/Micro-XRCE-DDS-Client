@@ -24,7 +24,7 @@ extern "C"
 #include <micrortps/client/core/session/stream_storage.h>
 #include <micrortps/client/core/session/object_id.h>
 
-#define INVALID_REQUEST_ID 0
+#define MR_INVALID_REQUEST_ID 0
 
 extern const uint8_t MR_STATUS_OK;
 extern const uint8_t MR_STATUS_OK_MATCHED;
@@ -38,20 +38,21 @@ extern const uint8_t MR_STATUS_ERR_INCOMPATIBLE;
 extern const uint8_t MR_STATUS_ERR_RESOURCES;
 extern const uint8_t MR_STATUS_NONE;
 
-typedef struct Communication Communication;
-typedef struct Session Session;
+typedef struct mrSession mrSession;
+typedef struct mrCommunication mrCommunication;
 typedef struct BaseObjectRequest BaseObjectRequest;
 
-typedef void (*OnStatusFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
+typedef void (*mrOnStatusFunc) (mrSession* session, mrObjectId object_id, uint16_t request_id,
                              uint8_t status, void* args);
-typedef void (*OnTopicFunc) (Session* session, mrObjectId object_id, uint16_t request_id,
-                             StreamId stream_id, MicroBuffer* mb, void* args);
+typedef void (*mrOnTopicFunc) (mrSession* session, mrObjectId object_id, uint16_t request_id,
+                             mrStreamId stream_id, MicroBuffer* mb, void* args);
 
-struct Session
+typedef struct mrSession
 {
-    SessionInfo info;
-    StreamStorage streams;
-    Communication* comm;
+    mrSessionInfo info;
+    mrStreamStorage streams;
+    mrCommunication* comm;
+
     uint16_t last_request_id;
     bool reset_streams;
 
@@ -59,38 +60,38 @@ struct Session
     uint8_t* status_list;
     size_t request_status_list_size;
 
-    OnStatusFunc on_status;
+    mrOnStatusFunc on_status;
     void* on_status_args;
 
-    OnTopicFunc on_topic;
+    mrOnTopicFunc on_topic;
     void* on_topic_args;
-};
+} mrSession;
 
 //==================================================================
 //                         PUBLIC FUNCTIONS
 //==================================================================
-void init_session(Session* session, uint8_t session_id, uint32_t key, Communication* comm);
-bool create_session(Session* session);
-bool delete_session(Session* session);
+void mr_init_session(mrSession* session, uint8_t session_id, uint32_t key, mrCommunication* comm);
+bool mr_create_session(mrSession* session);
+bool mr_delete_session(mrSession* session);
 
-void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args);
-void set_topic_callback(Session* session, OnTopicFunc on_topic_func, void* args);
+void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args);
+void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args);
 
-StreamId create_output_best_effort_stream(Session* session, uint8_t* buffer, size_t size);
-StreamId create_output_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
-StreamId create_input_best_effort_stream(Session* session);
-StreamId create_input_reliable_stream(Session* session, uint8_t* buffer, size_t size, size_t history);
+mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size);
+mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history);
+mrStreamId mr_create_input_best_effort_stream(mrSession* session);
+mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history);
 
-void run_session_until_timeout(Session* session, int poll_ms);
-bool run_session_until_confirm_delivery(Session* session, int poll_ms);
-bool run_session_until_status(Session* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
+void mr_run_session_until_timeout(mrSession* session, int poll_ms);
+bool mr_run_session_until_confirm_delivery(mrSession* session, int poll_ms);
+bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
 
-bool check_status_list_ok(uint8_t* status_list, size_t size);
+bool mr_check_status_list_ok(uint8_t* status_list, size_t size);
 
 //==================================================================
 //                        INTERNAL FUNCTIONS
 //==================================================================
-uint16_t init_base_object_request(Session* session, mrObjectId object_id, BaseObjectRequest* base);
+uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base);
 
 #ifdef __cplusplus
 }

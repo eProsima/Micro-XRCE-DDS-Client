@@ -2,14 +2,14 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <string.h>
 
-static uint16_t create_entity_xml(Session* session, StreamId stream_id,
+static uint16_t create_entity_xml(mrSession* session, mrStreamId stream_id,
                                   mrObjectId object_id, const char* xml, uint8_t flags,
                                   CREATE_Payload* payload);
 
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t write_configure_qos_profile_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_qos_profile_xml(mrSession* session, mrStreamId stream_id,
                                          mrObjectId object_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -20,7 +20,7 @@ uint16_t write_configure_qos_profile_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_type_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_type_xml(mrSession* session, mrStreamId stream_id,
                                   mrObjectId object_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -31,7 +31,7 @@ uint16_t write_configure_type_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_application_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_application_xml(mrSession* session, mrStreamId stream_id,
                                          mrObjectId object_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -42,7 +42,7 @@ uint16_t write_configure_application_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_domain_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_domain_xml(mrSession* session, mrStreamId stream_id,
                                     mrObjectId object_id, char* xml, uint8_t flags)
 {
     (void) session; (void) stream_id; (void) object_id; (void) xml; (void) flags;
@@ -50,7 +50,7 @@ uint16_t write_configure_domain_xml(Session* session, StreamId stream_id,
     return false;
 }
 
-uint16_t write_configure_participant_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_participant_xml(mrSession* session, mrStreamId stream_id,
                                          mrObjectId object_id, uint16_t domain, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -62,7 +62,7 @@ uint16_t write_configure_participant_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_topic_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_topic_xml(mrSession* session, mrStreamId stream_id,
                                    mrObjectId object_id, mrObjectId participant_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -74,7 +74,7 @@ uint16_t write_configure_topic_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_publisher_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_publisher_xml(mrSession* session, mrStreamId stream_id,
                                        mrObjectId object_id, mrObjectId participant_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -86,7 +86,7 @@ uint16_t write_configure_publisher_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_subscriber_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_subscriber_xml(mrSession* session, mrStreamId stream_id,
                                         mrObjectId object_id, mrObjectId participant_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -98,7 +98,7 @@ uint16_t write_configure_subscriber_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_datawriter_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_datawriter_xml(mrSession* session, mrStreamId stream_id,
                                         mrObjectId object_id, mrObjectId publisher_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -110,7 +110,7 @@ uint16_t write_configure_datawriter_xml(Session* session, StreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, flags, &payload);
 }
 
-uint16_t write_configure_datareader_xml(Session* session, StreamId stream_id,
+uint16_t write_configure_datareader_xml(mrSession* session, mrStreamId stream_id,
                                         mrObjectId object_id, mrObjectId subscriber_id, char* xml, uint8_t flags)
 {
     //assert with the object_id type
@@ -126,7 +126,7 @@ uint16_t write_configure_datareader_xml(Session* session, StreamId stream_id,
 //                             PRIVATE
 //==================================================================
 
-inline uint16_t create_entity_xml(Session* session, StreamId stream_id,
+inline uint16_t create_entity_xml(mrSession* session, mrStreamId stream_id,
                                   mrObjectId object_id, const char* xml, uint8_t flags,
                                   CREATE_Payload* payload)
 {

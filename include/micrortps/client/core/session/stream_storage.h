@@ -26,55 +26,55 @@ extern "C"
 #include <micrortps/client/core/session/input_reliable_stream.h>
 #include <micrortps/client/core/session/stream_id.h>
 
-#ifndef MAX_OUTPUT_BEST_EFFORT_STREAMS
-#define MAX_OUTPUT_BEST_EFFORT_STREAMS 1
+#ifndef MR_MAX_OUTPUT_BEST_EFFORT_STREAMS
+#define MR_MAX_OUTPUT_BEST_EFFORT_STREAMS 1
 #endif
 
-#ifndef MAX_OUTPUT_RELIABLE_STREAMS
-#define MAX_OUTPUT_RELIABLE_STREAMS 1
+#ifndef MR_MAX_OUTPUT_RELIABLE_STREAMS
+#define MR_MAX_OUTPUT_RELIABLE_STREAMS 1
 #endif
 
-#ifndef MAX_INPUT_BEST_EFFORT_STREAMS
-#define MAX_INPUT_BEST_EFFORT_STREAMS 1
+#ifndef MR_MAX_INPUT_BEST_EFFORT_STREAMS
+#define MR_MAX_INPUT_BEST_EFFORT_STREAMS 1
 #endif
 
-#ifndef MAX_INPUT_RELIABLE_STREAMS
-#define MAX_INPUT_RELIABLE_STREAMS 1
+#ifndef MR_MAX_INPUT_RELIABLE_STREAMS
+#define MR_MAX_INPUT_RELIABLE_STREAMS 1
 #endif
 
-typedef struct StreamStorage
+typedef struct mrStreamStorage
 {
-    OutputBestEffortStream output_best_effort[MAX_OUTPUT_BEST_EFFORT_STREAMS];
+    mrOutputBestEffortStream output_best_effort[MR_MAX_OUTPUT_BEST_EFFORT_STREAMS];
     uint8_t output_best_effort_size;
-    OutputReliableStream output_reliable[MAX_OUTPUT_RELIABLE_STREAMS];
+    mrOutputReliableStream output_reliable[MR_MAX_OUTPUT_RELIABLE_STREAMS];
     uint8_t output_reliable_size;
-    InputBestEffortStream input_best_effort[MAX_INPUT_BEST_EFFORT_STREAMS];
+    mrInputBestEffortStream input_best_effort[MR_MAX_INPUT_BEST_EFFORT_STREAMS];
     uint8_t input_best_effort_size;
-    InputReliableStream input_reliable[MAX_INPUT_RELIABLE_STREAMS];
+    mrInputReliableStream input_reliable[MR_MAX_INPUT_RELIABLE_STREAMS];
     uint8_t input_reliable_size;
 
-} StreamStorage;
+} mrStreamStorage;
 
-void init_stream_storage(StreamStorage* storage);
-void reset_stream_storage(StreamStorage* storage);
+void init_stream_storage(mrStreamStorage* storage);
+void reset_stream_storage(mrStreamStorage* storage);
 
-StreamId add_output_best_effort_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset);
-StreamId add_output_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset);
-StreamId add_input_best_effort_buffer(StreamStorage* storage);
-StreamId add_input_reliable_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, size_t history);
+mrStreamId add_output_best_effort_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset);
+mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset);
+mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage);
+mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history);
 
-OutputBestEffortStream* get_output_best_effort_stream_id(StreamStorage* storage, uint8_t index);
-OutputReliableStream* get_output_reliable_stream_id(StreamStorage* storage, uint8_t index);
-InputBestEffortStream* get_input_best_effort_stream_id(StreamStorage* storage, uint8_t index);
-InputReliableStream* get_input_reliable_stream_id(StreamStorage* storage, uint8_t index);
+mrOutputBestEffortStream* get_output_best_effort_stream_id(mrStreamStorage* storage, uint8_t index);
+mrOutputReliableStream* get_output_reliable_stream_id(mrStreamStorage* storage, uint8_t index);
+mrInputBestEffortStream* get_input_best_effort_stream_id(mrStreamStorage* storage, uint8_t index);
+mrInputReliableStream* get_input_reliable_stream_id(mrStreamStorage* storage, uint8_t index);
 
-OutputBestEffortStream* get_output_best_effort_stream(StreamStorage* storage, uint8_t index);
-OutputReliableStream* get_output_reliable_stream(StreamStorage* storage, uint8_t index);
-InputBestEffortStream* get_input_best_effort_stream(StreamStorage* storage, uint8_t index);
-InputReliableStream* get_input_reliable_stream(StreamStorage* storage, uint8_t index);
+mrOutputBestEffortStream* get_output_best_effort_stream(mrStreamStorage* storage, uint8_t index);
+mrOutputReliableStream* get_output_reliable_stream(mrStreamStorage* storage, uint8_t index);
+mrInputBestEffortStream* get_input_best_effort_stream(mrStreamStorage* storage, uint8_t index);
+mrInputReliableStream* get_input_reliable_stream(mrStreamStorage* storage, uint8_t index);
 
-bool prepare_stream_to_write(StreamStorage* storage, StreamId stream_id, size_t size, MicroBuffer* mb);
-bool output_streams_confirmed(const StreamStorage* storage);
+bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, MicroBuffer* mb);
+bool output_streams_confirmed(const mrStreamStorage* storage);
 
 #ifdef __cplusplus
 }

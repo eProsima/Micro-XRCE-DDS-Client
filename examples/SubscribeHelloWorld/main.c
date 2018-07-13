@@ -21,7 +21,7 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(Session* session, mrObjectId id, uint16_t request_id, StreamId stream_id, MicroBuffer* mb, void* args)
+void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId stream_id, MicroBuffer* mb, void* args)
 {
     (void) session; (void) id; (void) request_id; (void) stream_id; (void) args;
 
@@ -44,10 +44,10 @@ int main(int args, char** argv)
     }
 
     // Session
-    Session session;
-    init_session(&session, 0x02, 0xCCCCDDDD, &transport.comm);
-    set_topic_callback(&session, on_topic, NULL);
-    if(!create_session(&session))
+    mrSession session;
+    mr_init_session(&session, 0x02, 0xCCCCDDDD, &transport.comm);
+    mr_set_topic_callback(&session, on_topic, NULL);
+    if(!mr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -55,32 +55,32 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    StreamId reliable_out = create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    StreamId reliable_in = create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_in = mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Create entities
-    mrObjectId participant_id = create_object_id(0x01, PARTICIPANT_ID);
+    mrObjectId participant_id = mr_object_id(0x01, MR_PARTICIPANT_ID);
     char* participant_ref = "default participant";
-    uint16_t participant_req = write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, 0);
+    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, 0);
 
-    mrObjectId topic_id = create_object_id(0x01, TOPIC_ID);
+    mrObjectId topic_id = mr_object_id(0x01, MR_TOPIC_ID);
     char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, 0);
+    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, 0);
 
-    mrObjectId subscriber_id = create_object_id(0x01, SUBSCRIBER_ID);
+    mrObjectId subscriber_id = mr_object_id(0x01, MR_SUBSCRIBER_ID);
     char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
-    uint16_t subscriber_req = write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, 0);
+    uint16_t subscriber_req = mr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, 0);
 
-    mrObjectId datareader_id = create_object_id(0x01, DATAREADER_ID);
+    mrObjectId datareader_id = mr_object_id(0x01, MR_DATAREADER_ID);
     char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
-    uint16_t datareader_req = write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, 0);
+    uint16_t datareader_req = mr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, 0);
 
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
-    if(!run_session_until_status(&session, 1000, requests, status, 4))
+    if(!mr_run_session_until_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
         return 1;
@@ -90,21 +90,21 @@ int main(int args, char** argv)
     for(unsigned i = 0; i < 10; ++i)
     {
         uint8_t read_data_status;
-        uint16_t read_data_req = write_read_data(&session, reliable_out, datareader_id, reliable_in, NULL);
-        if(INVALID_REQUEST_ID == read_data_req)
+        uint16_t read_data_req = mr_write_read_data(&session, reliable_out, datareader_id, reliable_in, NULL);
+        if(MR_INVALID_REQUEST_ID == read_data_req)
         {
             printf("Error at writing message: the stream history is full\n");
             i -= 1; //try again
         }
 
-        if(!run_session_until_status(&session, 60000, &read_data_req, &read_data_status, 1))
+        if(!mr_run_session_until_status(&session, 60000, &read_data_req, &read_data_status, 1))
         {
             printf("Error at read topic. Status code: %02X\n", read_data_status);
         }
     }
 
     // Delete resources
-    delete_session(&session);
+    mr_delete_session(&session);
     //TODO: add the close transport functions
 
     return 0;

@@ -6,19 +6,19 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-SeqNum seq_num_add(SeqNum seq_num, SeqNum increment)
+mrSeqNum seq_num_add(mrSeqNum seq_num, mrSeqNum increment)
 {
     return (seq_num + increment) % UINT16_SIZE;
 }
 
-SeqNum seq_num_sub(SeqNum seq_num, SeqNum decrement)
+mrSeqNum seq_num_sub(mrSeqNum seq_num, mrSeqNum decrement)
 {
     return (decrement > seq_num)
         ? (seq_num + (UINT16_SIZE - decrement)) % UINT16_SIZE
         : seq_num - decrement;
 }
 
-int seq_num_cmp(SeqNum seq_num_1, SeqNum seq_num_2)
+int seq_num_cmp(mrSeqNum seq_num_1, mrSeqNum seq_num_2)
 {
     int result;
     if(seq_num_1 == seq_num_2)

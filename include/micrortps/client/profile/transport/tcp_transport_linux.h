@@ -48,7 +48,7 @@ typedef struct TCPTransport
     TCPInputBuffer input_buffer;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
-    Communication comm;
+    mrCommunication comm;
 } TCPTransport;
 
 bool init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);

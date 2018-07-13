@@ -22,32 +22,32 @@ extern "C"
 
 #include <stdint.h>
 
-typedef enum StreamType
+typedef enum mrStreamType
 {
-    NONE_STREAM,
-    BEST_EFFORT_STREAM,
-    RELIABLE_STREAM
+    MR_NONE_STREAM,
+    MR_BEST_EFFORT_STREAM,
+    MR_RELIABLE_STREAM
 
-} StreamType;
+} mrStreamType;
 
-typedef enum StreamDirection
+typedef enum mrStreamDirection
 {
-    INPUT_STREAM,
-    OUTPUT_STREAM
+    MR_INPUT_STREAM,
+    MR_OUTPUT_STREAM
 
-} StreamDirection;
+} mrStreamDirection;
 
-typedef struct StreamId
+typedef struct mrStreamId
 {
     uint8_t raw;
     uint8_t index;
-    StreamType type;
-    StreamDirection direction;
+    mrStreamType type;
+    mrStreamDirection direction;
 
-} StreamId;
+} mrStreamId;
 
-StreamId create_stream_id(uint8_t index, StreamType type, StreamDirection direction);
-StreamId create_stream_id_from_raw(uint8_t stream_id_raw, StreamDirection direction);
+mrStreamId mr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction);
+mrStreamId mr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction);
 
 #ifdef __cplusplus
 }
