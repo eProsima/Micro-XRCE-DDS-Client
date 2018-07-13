@@ -62,28 +62,24 @@ if(EPROSIMA_BUILD)
 endif()
 
 # Profiles options
-option(COMPLETE_PROFILE "Activate all profiles" OFF)
-option(PROFILE_CREATE_ENTITIES_BIN "Activate CreateEntitiesBIN profile" OFF)
+option(COMPLETE_PROFILE "Activate all profiles" ON)
 option(PROFILE_CREATE_ENTITIES_REF "Activate CreateEntitiesREF profile" OFF)
 option(PROFILE_CREATE_ENTITIES_XML "Activate CreateEntitiesXML profile" OFF)
 option(PROFILE_READ_ACCESS "Activate ReadAccess profile" OFF)
-option(PROFILE_DISCOVERY_ACCESS "Activate DiscoveryAccess profile" OFF)
 option(PROFILE_UDP_TRANSPORT "Activate UDPTransport profile" OFF)
 option(PROFILE_TCP_TRANSPORT "Activate TCPTransport profile" OFF)
 option(PROFILE_UART_TRANSPORT "Activate UARTTransport profile" OFF)
 
 if(COMPLETE_PROFILE)
-    set(PROFILE_CREATE_ENTITIES_BIN CACHE BOOL ON)
-    set(PROFILE_CREATE_ENTITIES_REF CACHE BOOL ON)
-    set(PROFILE_CREATE_ENTITIES_XML CACHE BOOL ON)
-    set(PROFILE_READ_ACCESS CACHE BOOL ON)
-    set(PROFILE_DISCOVERY_ACCESS CACHE BOOL ON)
-    set(PROFILE_UDP_TRANSPORT CACHE BOOL ON)
-    set(PROFILE_TCP_TRANSPORT CACHE BOOL ON)
-    set(PROFILE_UART_TRANSPORT CACHE BOOL ON)
+    set(PROFILE_CREATE_ENTITIES_REF ON)
+    set(PROFILE_CREATE_ENTITIES_XML ON)
+    set(PROFILE_READ_ACCESS ON)
+    set(PROFILE_UDP_TRANSPORT ON)
+    set(PROFILE_TCP_TRANSPORT ON)
+    set(PROFILE_UART_TRANSPORT ON)
 endif()
 
-if(PROFILE_CREATE_ENTITIES_BIN OR PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
+if(PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
     set(PROFILE_COMMON_CREATE_ENTITIES ON)
 else()
     set(PROFILE_COMMON_CREATE_ENTITIES OFF)
@@ -139,11 +135,9 @@ endforeach()
 # Other sources
 set(SRCS
     $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
-    #$<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:src/c/profile/session/create_entities_bin.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
-    #$<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:src/c/profile/extension/discovery_access.c>
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${UART_SRCS}
@@ -201,9 +195,6 @@ else()
     set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
 endif()
 
-# Project options
-#set(_MICRORTPS_HEARTBEAT_MIN_PERIOD_MS_ 200 CACHE STRING "Define maximum transmission unit size to be used")
-
 # Create source files with the define
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
@@ -221,11 +212,9 @@ target_compile_definitions(${PROJECT_NAME}
     PRIVATE
         -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:SERIALIZATION_LOGS>
         -D$<$<BOOL:${VERBOSE_MESSAGE}>:MESSAGE_LOGS>
-        -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_BIN}>:PROFILE_CREATE_ENTITIES_BIN>
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:PROFILE_CREATE_ENTITIES_REF>
         -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:PROFILE_CREATE_ENTITIES_XML>
         -D$<$<BOOL:${PROFILE_READ_ACCESS}>:PROFILE_READ_ACCESS>
-        -D$<$<BOOL:${PROFILE_DISCOVERY_ACCESS}>:PROFILE_DISCOVERY_ACCESS>
         -D$<$<BOOL:${PROFILE_UDP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
         -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_TCP_TRANSPORT>
         -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UART_TRANSPORT>
@@ -246,6 +235,15 @@ else()
 endif()
 
 ###############################################################################
+# Examples
+###############################################################################
+if(EPROSIMA_BUILD_EXAMPLES)
+    add_subdirectory(examples/PublishHelloWorld)
+    add_subdirectory(examples/SubscribeHelloWorld)
+    add_subdirectory(examples/ShapesDemo)
+endif()
+
+###############################################################################
 # Test
 ###############################################################################
 if(EPROSIMA_BUILD_TESTS)
@@ -254,15 +252,6 @@ if(EPROSIMA_BUILD_TESTS)
     #add_subdirectory(test/integration/xrce_serialization)
     add_subdirectory(test/transport/serial_comm)
     add_subdirectory(test/unitary/streams/output_best_effort)
-endif()
-
-###############################################################################
-# Examples
-###############################################################################
-if(EPROSIMA_BUILD_EXAMPLES)
-    add_subdirectory(examples/ShapesDemo)
-    add_subdirectory(examples/PublishHelloWorld)
-    add_subdirectory(examples/SubscribeHelloWorld)
 endif()
 
 ###############################################################################

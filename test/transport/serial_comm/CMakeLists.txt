@@ -20,32 +20,36 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 # New project because of the CXX GTest dependency.
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(microcdr_tests C CXX)
+    project(serial-comm-transport-test C CXX)
 else()
     cmake_policy(SET CMP0048 NEW)
     project(serial-comm-transport-test LANGUAGES C CXX)
 endif()
 
-check_gtest()
-if(GTEST_FOUND)
-    include(CTest)
-    set(SRCS SerialComm.cpp)
-    add_executable(${PROJECT_NAME} ${SRCS})
-    add_gtest(${PROJECT_NAME}
-        SOURCES
-            ${SRCS}
-        DEPENDENCIES
-            micrortps_client
-        )
-    target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
-    target_include_directories(${PROJECT_NAME}
-        PUBLIC
-            ${PROJECT_SOURCE_DIR}
-        PRIVATE
-            ${GTEST_INCLUDE_DIRS}
-        )
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        CXX_STANDARD 11
-        CXX_STANDARD_REQUIRED YES
-        )
+if(NOT PROFILE_UART_TRANSPORT)
+    message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML and PROFILE_UDP_TRANSPORT must be enabled.")
+else()
+    check_gtest()
+    if(GTEST_FOUND)
+        include(CTest)
+        set(SRCS SerialComm.cpp)
+        add_executable(${PROJECT_NAME} ${SRCS})
+        add_gtest(${PROJECT_NAME}
+            SOURCES
+                ${SRCS}
+            DEPENDENCIES
+                micrortps_client
+            )
+        target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
+        target_include_directories(${PROJECT_NAME}
+            PUBLIC
+                ${PROJECT_SOURCE_DIR}
+            PRIVATE
+                ${GTEST_INCLUDE_DIRS}
+            )
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            CXX_STANDARD 11
+            CXX_STANDARD_REQUIRED YES
+            )
+    endif()
 endif()

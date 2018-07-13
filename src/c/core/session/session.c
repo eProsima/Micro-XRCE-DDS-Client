@@ -511,6 +511,8 @@ void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t 
     {
         read_submessage_format(session, submessage, length, format, stream_id, object_id, request_id);
     }
+#else
+    (void) session; (void) submessage; (void) length; (void) stream_id; (void) format;
 #endif
 }
 

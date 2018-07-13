@@ -19,27 +19,31 @@ endif()
 
 project(ShapeDemoClient)
 
-add_executable(${PROJECT_NAME} main.c ShapeType.c WriteShapeType.c)
-if(MSVC OR MSVC_IDE)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-            micrortps_client
-            Ws2_32
-        )
+if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PROFILE_READ_ACCESS OR NOT PROFILE_UDP_TRANSPORT OR NOT PROFILE_TCP_TRANSPORT OR NOT PROFILE_UART_TRANSPORT)
+    message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, PROFILE_UDP_TRANSPORT, PROFILE_TCP_PROFILE and PROFILE_UART_TRANSPORT must be enabled.")
 else()
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-            micrortps_client
+    add_executable(${PROJECT_NAME} main.c ShapeType.c WriteShapeType.c)
+    if(MSVC OR MSVC_IDE)
+        target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+                micrortps_client
+                Ws2_32
+            )
+    else()
+        target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+                micrortps_client
+            )
+    endif()
+
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION examples/micrortps/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        )
+
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/
+        DESTINATION  examples/micrortps/${PROJECT_NAME}
+        FILES_MATCHING PATTERN "*.h"
+                       PATTERN "*.c"
+                       PATTERN "*.idl"
         )
 endif()
-
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION examples/micrortps/${PROJECT_NAME}/${BIN_INSTALL_DIR}
-    )
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-    DESTINATION  examples/micrortps/${PROJECT_NAME}
-    FILES_MATCHING PATTERN "*.h"
-                   PATTERN "*.c"
-                   PATTERN "*.idl"
-    )
