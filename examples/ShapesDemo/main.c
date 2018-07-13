@@ -60,9 +60,8 @@ int main(int args, char** argv)
 
     Communication* comm;
 
-    printf("SHAPES DEMO XRCE CLIENT\n");
     int args_index = 0;
-    if(args >= 3 && strcmp(argv[1], "serial") == 0)
+    if(args >= 3 && strcmp(argv[1], "--serial") == 0)
     {
         char* device = argv[2];
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -75,7 +74,7 @@ int main(int args, char** argv)
         printf("Serial mode => dev: %s\n", device);
         args_index = 3;
     }
-    else if(args >= 4 && strcmp(argv[1], "udp") == 0)
+    else if(args >= 4 && strcmp(argv[1], "--udp") == 0)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
@@ -88,7 +87,7 @@ int main(int args, char** argv)
         printf("UDP mode => ip: %s - port: %hu\n", argv[2], port);
         args_index = 4;
     }
-    else if(args >= 4 && strcmp(argv[1], "tcp") == 0)
+    else if(args >= 4 && strcmp(argv[1], "--tcp") == 0)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
@@ -107,28 +106,43 @@ int main(int args, char** argv)
         return 1;
     }
 
-    // Session
+    printf("Running Shapes Demo XRCE Client...\n");
+
     uint32_t key = 0xAABBCCDD;
     uint8_t session_id = 0x81;
-    if(args_index < args)
+    if(args_index < args && 0 == strcmp(argv[args_index++], "--session-id"))
     {
-        session_id = (uint8_t) atoi(argv[args_index++]);
+        if(args_index < args)
+        {
+            session_id = (uint8_t) atoi(argv[args_index++]);
+        }
+        else
+        {
+            print_help();
+        }
     }
 
+    size_t history = 8;
+    if(args_index < args && 0 == strcmp(argv[args_index++], "--history"))
+    {
+        if(args_index < args)
+        {
+            size_t request_history = atoi(argv[args_index++]);
+            if(MAX_HISTORY >= request_history)
+            {
+                history = request_history;
+            }
+        }
+        else
+        {
+            print_help();
+        }
+    }
+
+    // Init session and streams
     init_session(&session, session_id, key, comm);
     set_topic_callback(&session, on_topic, NULL);
     set_status_callback(&session, on_status, NULL);
-
-    // Streams
-    size_t history = 8;
-    if(args_index < args)
-    {
-        size_t request_history = atoi(argv[args_index++]);
-        if(MAX_HISTORY >= request_history)
-        {
-            history = request_history;
-        }
-    }
 
     uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE];
     uint8_t output_best_effort_stream_buffer[MAX_BUFFER_SIZE];
@@ -180,7 +194,7 @@ bool run_command(const char* command, Session* session, StreamId* stream_id)
 bool compute_command(Session* session, StreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
                      const char* color, uint32_t x, uint32_t y, uint32_t shapesize)
 {
-    if(strcmp(name, "create_session") == 0 && length == 1)
+    if(strcmp(name, "create_session") == 0 && length >= 1)
     {
         (void) create_session(session);
         print_status(session->info.last_requested_status);
@@ -380,19 +394,19 @@ void print_status(uint8_t status)
 
 void print_help(void)
 {
-    printf("Usage: program <command>\n");
-    printf("List of commands:\n");
-    printf("    serial device\n");
-    printf("    udp agent-ip agent-port\n");
-    printf("    tcp agent-ip agent-port\n");
-    printf("    help\n");
+    printf("Usage: program --help\n");
+    printf("       program <transport> [--session-id <session_id>] [--history <history>]\n");
+    printf("List of available transports:\n");
+    printf("    --serial <device>\n");
+    printf("    --udp <agent-ip> <agent-port>\n");
+    printf("    --tcp <agent-ip> <agent-port>\n");
 }
 
 void print_commands(void)
 {
     printf("usage: <command> [<args>]\n");
-    printf("    create_session [<reliable stream history>]\n");
-    printf("        Creates a Session. The reliable stream history can be set optionally\n");
+    printf("    create_session\n");
+    printf("        Creates a Session, if exists, reuse it.\n");
     printf("    create_participant <participant id>:\n");
     printf("        Creates a new Participant on the current session\n");
     printf("    create_topic       <topic id> <participant id>:\n");

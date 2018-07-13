@@ -26,6 +26,11 @@ void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, si
     stream->size = size;
     stream->history = history;
 
+    reset_input_reliable_stream(stream);
+}
+
+void reset_input_reliable_stream(InputReliableStream* stream)
+{
     for(size_t i = 0; i < stream->history; i++)
     {
         uint8_t* internal_buffer = get_input_buffer(stream, i);

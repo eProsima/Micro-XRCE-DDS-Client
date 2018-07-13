@@ -10,7 +10,12 @@ void init_output_best_effort_stream(OutputBestEffortStream* stream, uint8_t* buf
     stream->writer = offset;
     stream->size = size;
     stream->offset = offset;
+    stream->last_send = UINT16_MAX;
+}
 
+void reset_output_best_effort_stream(OutputBestEffortStream* stream)
+{
+    stream->writer = stream->offset;
     stream->last_send = UINT16_MAX;
 }
 

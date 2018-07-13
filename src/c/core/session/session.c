@@ -64,6 +64,7 @@ void init_session(Session* session, uint8_t session_id, uint32_t key, Communicat
 {
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
+    session->reset_streams = true;
 
     session->request_list = NULL;
     session->status_list = NULL;
@@ -84,12 +85,14 @@ bool create_session(Session* session)
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
-    write_create_session(&session->info, &mb, get_milli_time());
+    write_create_session(&session->info, &mb, get_milli_time(), session->reset_streams);
     stamp_create_session_header(&session->info, mb.init);
     set_session_info_request(&session->info, REQUEST_LOGIN);
 
     bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
-    return received && STATUS_OK == session->info.last_requested_status;
+    bool created = received && STATUS_OK == session->info.last_requested_status;
+    session->reset_streams = !created;
+    return created;
 }
 
 bool delete_session(Session* session)
@@ -103,7 +106,12 @@ bool delete_session(Session* session)
     set_session_info_request(&session->info, REQUEST_LOGOUT);
 
     bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
-    return received && STATUS_OK == session->info.last_requested_status;
+    bool deleted = received && STATUS_OK == session->info.last_requested_status;
+    if(deleted)
+    {
+        reset_stream_storage(&session->streams);
+    }
+    return deleted;
 }
 
 void set_status_callback(Session* session, OnStatusFunc on_status_func, void* args)

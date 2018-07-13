@@ -33,6 +33,11 @@ void init_output_reliable_stream(OutputReliableStream* stream, uint8_t* buffer, 
     stream->offset = header_offset;
     stream->history = history;
 
+    reset_output_reliable_stream(stream);
+}
+
+void reset_output_reliable_stream(OutputReliableStream* stream)
+{
     for(size_t i = 0; i < stream->history; i++)
     {
         uint8_t* internal_buffer = get_output_buffer(stream, i);

@@ -11,6 +11,29 @@ void init_stream_storage(StreamStorage* storage)
     storage->input_reliable_size = 0;
 }
 
+void reset_stream_storage(StreamStorage* storage)
+{
+    for(unsigned i = 0; i < storage->output_best_effort_size; ++i)
+    {
+        reset_output_best_effort_stream(&storage->output_best_effort[i]);
+    }
+
+    for(unsigned i = 0; i < storage->input_best_effort_size; ++i)
+    {
+        reset_input_best_effort_stream(&storage->input_best_effort[i]);
+    }
+
+    for(unsigned i = 0; i < storage->output_reliable_size; ++i)
+    {
+        reset_output_reliable_stream(&storage->output_reliable[i]);
+    }
+
+    for(unsigned i = 0; i < storage->input_reliable_size; ++i)
+    {
+        reset_input_reliable_stream(&storage->input_reliable[i]);
+    }
+}
+
 StreamId add_output_best_effort_buffer(StreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset)
 {
     uint8_t index = storage->output_best_effort_size++;

@@ -41,7 +41,7 @@ typedef struct SessionInfo
 
 void init_session_info(SessionInfo* info, uint8_t id, uint32_t key);
 
-void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds);
+void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds, bool reset_streams);
 void write_delete_session(const SessionInfo* info, MicroBuffer* mb);
 void read_create_session_status(SessionInfo* info, MicroBuffer* mb);
 void read_delete_session_status(SessionInfo* info, MicroBuffer* mb);

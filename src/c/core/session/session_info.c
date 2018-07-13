@@ -29,7 +29,7 @@ void init_session_info(SessionInfo* info, uint8_t id, uint32_t key)
     info->request = REQUEST_NONE;
 }
 
-void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds)
+void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds, bool reset_streams)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, REQUEST_LOGIN}};
@@ -43,7 +43,7 @@ void write_create_session(const SessionInfo* info, MicroBuffer* mb, uint64_t nan
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
 
-    (void) write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, FLAG_REPLACE & reset_streams);
     (void) serialize_CREATE_CLIENT_Payload(mb, &payload);
 }
 

@@ -32,6 +32,7 @@ typedef struct InputBestEffortStream
 } InputBestEffortStream;
 
 void init_input_best_effort_stream(InputBestEffortStream* stream);
+void reset_input_best_effort_stream(InputBestEffortStream* stream);
 bool receive_best_effort_message(InputBestEffortStream* stream, SeqNum seq_num);
 
 #ifdef __cplusplus

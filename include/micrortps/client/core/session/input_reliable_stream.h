@@ -39,6 +39,7 @@ typedef struct InputReliableStream
 } InputReliableStream;
 
 void init_input_reliable_stream(InputReliableStream* stream, uint8_t* buffer, size_t size, size_t history);
+void reset_input_reliable_stream(InputReliableStream* stream);
 bool receive_reliable_message(InputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
 bool next_input_reliable_buffer_available(InputReliableStream* stream, MicroBuffer* mb);
 

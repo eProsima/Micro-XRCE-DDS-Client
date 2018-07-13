@@ -53,6 +53,7 @@ struct Session
     StreamStorage streams;
     Communication* comm;
     uint16_t last_request_id;
+    bool reset_streams;
 
     const uint16_t* request_list;
     uint8_t* status_list;
