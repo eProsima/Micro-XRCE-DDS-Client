@@ -26,17 +26,17 @@
 
 bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
 {
-    serialize_uint32_t(writer, topic->index);
-    serialize_sequence_char(writer, topic->message, (uint32_t)strlen(topic->message) + 1);
+    (void) serialize_uint32_t(writer, topic->index);
+    (void) serialize_sequence_char(writer, topic->message, (uint32_t)strlen(topic->message) + 1);
 
     return writer->error == BUFFER_OK;
 }
 
 bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
 {
-    deserialize_uint32_t(reader, &topic->index);
+    (void) deserialize_uint32_t(reader, &topic->index);
     uint32_t size_message;
-    deserialize_sequence_char(reader, topic->message, &size_message);
+    (void) deserialize_sequence_char(reader, topic->message, &size_message);
 
     return reader->error == BUFFER_OK;
 }

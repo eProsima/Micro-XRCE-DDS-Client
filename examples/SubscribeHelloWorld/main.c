@@ -15,7 +15,7 @@
 #include "HelloWorld.h"
 
 #include <micrortps/client/client.h>
-#include <microcdr/microcdr.h>
+//#include <microcdr/microcdr.h>
 #include <stdio.h>
 
 #define STREAM_HISTORY  8

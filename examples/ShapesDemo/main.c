@@ -247,7 +247,7 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
 
         mrObjectId datawriter_id = mr_object_id(arg1, MR_DATAWRITER_ID);
         mrStreamId output_stream_id = mr_stream_id_from_raw(arg2, MR_INPUT_STREAM);
-        (void) write_ShapeType_topic(session, output_stream_id, datawriter_id, &topic);
+        (void) mr_write_ShapeType_topic(session, output_stream_id, datawriter_id, &topic);
 
         printf("Sending... ");
         print_ShapeType_topic(&topic);

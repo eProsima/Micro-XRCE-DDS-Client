@@ -80,7 +80,7 @@ int main(int args, char** argv)
     {
         HelloWorld topic = {i, "Hello DDS world!"};
 
-        if(!write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic))
+        if(!mr_write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic))
         {
             printf("Error at writing message: the stream history is full\n");
             i -= 1; //try again

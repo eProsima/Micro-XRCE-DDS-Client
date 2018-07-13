@@ -148,7 +148,7 @@ mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, 
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
-uint16_t mr_init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base)
+uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base)
 {
     uint16_t request_id = generate_request_id(session);
 

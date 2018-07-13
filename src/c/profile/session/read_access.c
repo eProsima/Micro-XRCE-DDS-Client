@@ -18,7 +18,7 @@ static void read_format_packed_samples(mrSession* session, MicroBuffer* payload,
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uint16_t write_read_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
+uint16_t mr_write_read_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
                          mrStreamId data_stream_id, mrDeliveryControl* control)
 {
     uint16_t request_id = MR_INVALID_REQUEST_ID;

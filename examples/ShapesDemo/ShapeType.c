@@ -26,10 +26,10 @@
 
 bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
 {
-    serialize_sequence_char(writer, topic->color, (uint32_t)strlen(topic->color) + 1);
-    serialize_int32_t(writer, topic->x);
-    serialize_int32_t(writer, topic->y);
-    serialize_int32_t(writer, topic->shapesize);
+    (void) serialize_sequence_char(writer, topic->color, (uint32_t)strlen(topic->color) + 1);
+    (void) serialize_int32_t(writer, topic->x);
+    (void) serialize_int32_t(writer, topic->y);
+    (void) serialize_int32_t(writer, topic->shapesize);
 
     return writer->error == BUFFER_OK;
 }
@@ -37,10 +37,10 @@ bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
 bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
 {
     uint32_t size_color;
-    deserialize_sequence_char(reader, topic->color, &size_color);
-    deserialize_int32_t(reader, &topic->x);
-    deserialize_int32_t(reader, &topic->y);
-    deserialize_int32_t(reader, &topic->shapesize);
+    (void) deserialize_sequence_char(reader, topic->color, &size_color);
+    (void) deserialize_int32_t(reader, &topic->x);
+    (void) deserialize_int32_t(reader, &topic->y);
+    (void) deserialize_int32_t(reader, &topic->shapesize);
 
     return reader->error == BUFFER_OK;
 }

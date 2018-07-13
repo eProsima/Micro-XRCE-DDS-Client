@@ -24,7 +24,7 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <micrortps/client/core/session/submessage.h>
 
-bool write_ShapeType_topic(Session* session, StreamId stream_id, mrObjectId datawriter_id, ShapeType* topic)
+bool mr_write_ShapeType_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, ShapeType* topic)
 {
     bool written = false;
 

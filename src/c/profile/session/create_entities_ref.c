@@ -9,7 +9,7 @@ static uint16_t create_entity_ref(mrSession* session, mrStreamId stream_id,
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t write_create_qos_profile_ref(mrSession* session, mrStreamId stream_id,
+uint16_t mr_write_create_qos_profile_ref(mrSession* session, mrStreamId stream_id,
                                          mrObjectId object_id, char* ref, uint8_t flags)
 {
     //assert with the object_id type
@@ -20,7 +20,7 @@ uint16_t write_create_qos_profile_ref(mrSession* session, mrStreamId stream_id,
     return create_entity_ref(session, stream_id, object_id, ref, flags, &payload);
 }
 
-uint16_t write_create_type_ref(mrSession* session, mrStreamId stream_id,
+uint16_t mr_write_create_type_ref(mrSession* session, mrStreamId stream_id,
                                   mrObjectId object_id, char* ref, uint8_t flags)
 {
     //assert with the object_id type
@@ -31,7 +31,7 @@ uint16_t write_create_type_ref(mrSession* session, mrStreamId stream_id,
     return create_entity_ref(session, stream_id, object_id, ref, flags, &payload);
 }
 
-uint16_t write_create_domain_ref(mrSession* session, mrStreamId stream_id,
+uint16_t mr_write_create_domain_ref(mrSession* session, mrStreamId stream_id,
                                     mrObjectId object_id, char* ref, uint8_t flags)
 {
     (void) session; (void) stream_id; (void) object_id; (void) ref; (void) flags;
@@ -39,7 +39,7 @@ uint16_t write_create_domain_ref(mrSession* session, mrStreamId stream_id,
     return false;
 }
 
-uint16_t write_create_participant_ref(mrSession* session, mrStreamId stream_id,
+uint16_t mr_write_create_participant_ref(mrSession* session, mrStreamId stream_id,
                                          mrObjectId object_id, char* ref, uint8_t flags)
 {
     //assert with the object_id type
@@ -50,7 +50,7 @@ uint16_t write_create_participant_ref(mrSession* session, mrStreamId stream_id,
     return create_entity_ref(session, stream_id, object_id, ref, flags, &payload);
 }
 
-uint16_t write_create_topic_ref(mrSession* session, mrStreamId stream_id,
+uint16_t mr_write_create_topic_ref(mrSession* session, mrStreamId stream_id,
                                    mrObjectId object_id, mrObjectId participant_id, char* ref, uint8_t flags)
 {
     //assert with the object_id type

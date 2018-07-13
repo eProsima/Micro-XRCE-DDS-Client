@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file WriteHelloWorld.h
  * This header file contains the write function of the described types in the IDL file.
  *
@@ -26,6 +26,6 @@
 
 #include <micrortps/client/client.h>
 
-bool write_HelloWorld_topic(Session* session, StreamId stream_id, mrObjectId datawriter_id, HelloWorld* topic);
+bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, HelloWorld* topic);
 
 #endif // _WRITE_HelloWorld_H_
