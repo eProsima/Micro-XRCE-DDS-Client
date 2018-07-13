@@ -280,17 +280,17 @@ bool compute_command(Session* session, StreamId* stream_id, int length, const ch
     else if(strcmp(name, "example") == 0 && length == 2)
     {
         (void) compute_print_command(session, stream_id, 2, "create_participant", arg1, 0, "", 0, 0, 0);
-        (void) run_session_until_confirm_delivery(session, 100);
+        (void) run_session_until_timeout(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_topic"      , arg1, arg1, "", 0, 0, 0);
-        (void) run_session_until_confirm_delivery(session, 100);
+        (void) run_session_until_timeout(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_publisher"  , arg1, arg1, "", 0, 0, 0);
-        (void) run_session_until_confirm_delivery(session, 100);
+        (void) run_session_until_timeout(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_subscriber" , arg1, arg1, "", 0, 0, 0);
-        (void) run_session_until_confirm_delivery(session, 100);
+        (void) run_session_until_timeout(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_datawriter" , arg1, arg1, "", 0, 0, 0);
-        (void) run_session_until_confirm_delivery(session, 100);
+        (void) run_session_until_timeout(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_datareader" , arg1, arg1, "", 0, 0, 0);
-        (void) run_session_until_confirm_delivery(session, 100);
+        (void) run_session_until_timeout(session, 20);
     }
     else if(0 == strcmp(name, "list") || 0 == strcmp(name, "l"))
     {

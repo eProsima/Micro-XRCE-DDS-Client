@@ -87,7 +87,7 @@ int main(int args, char** argv)
     }
 
     // Read 10 topics
-    for(unsigned i = 0; i < 1; ++i)
+    for(unsigned i = 0; i < 10; ++i)
     {
         uint8_t read_data_status;
         uint16_t read_data_req = write_read_data(&session, reliable_out, datareader_id, reliable_in, NULL);
@@ -102,8 +102,6 @@ int main(int args, char** argv)
             printf("Error at read topic. Status code: %02X\n", read_data_status);
         }
     }
-
-    run_session_until_timeout(&session, 2000);
 
     // Delete resources
     delete_session(&session);

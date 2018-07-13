@@ -12,7 +12,7 @@
 
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
-static void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
+static void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num);
 
 static size_t get_output_buffer_length(uint8_t* buffer);
 static void set_output_buffer_length(uint8_t* buffer, size_t length);
@@ -200,9 +200,9 @@ bool is_output_reliable_stream_busy(const OutputReliableStream* stream)
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num)
+void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num)
 {
-    size_t buffers_to_clean = seq_num_sub(first_unacked_seq_num, stream->last_acknown);
+    size_t buffers_to_clean = seq_num_sub(last_acked_seq_num, stream->last_acknown);
     for(size_t i = 0; i < buffers_to_clean; i++)
     {
         stream->last_acknown = seq_num_add(stream->last_acknown, 1);
@@ -210,7 +210,7 @@ void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t fir
         set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
     }
 
-    size_t buffers_to_check_clean = seq_num_sub(stream->last_sent, first_unacked_seq_num);
+    size_t buffers_to_check_clean = seq_num_sub(stream->last_sent, last_acked_seq_num);
     for(size_t i = 0; i < buffers_to_check_clean; i++)
     {
         if(i & bitmap) /* message lost */
@@ -219,7 +219,7 @@ void process_acknack(OutputReliableStream* stream, uint16_t bitmap, uint16_t fir
         }
         else
         {
-            SeqNum seq_num = seq_num_add(first_unacked_seq_num, i);
+            SeqNum seq_num = seq_num_add(last_acked_seq_num, i);
             uint8_t* internal_buffer = get_output_buffer(stream, seq_num % stream->history);
             set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
         }
