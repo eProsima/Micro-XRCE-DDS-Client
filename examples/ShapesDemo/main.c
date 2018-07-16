@@ -39,10 +39,10 @@
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
 
 static bool run_command(const char* command, mrSession* session, mrStreamId* stream_id);
-static bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
-                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize);
-static bool compute_print_command(mrSession* session, mrStreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
-                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize);
+static bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+                            uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
+static bool compute_print_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+                            uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
 static void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, MicroBuffer* serialization, void* args);
 static void on_status(mrSession* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
 static void print_ShapeType_topic(const ShapeType* topic);
@@ -176,23 +176,23 @@ int main(int args, char** argv)
 bool run_command(const char* command, mrSession* session, mrStreamId* stream_id)
 {
     char name[128];
-    uint8_t arg1 = 0;
-    uint8_t arg2 = 0;
-    char color[128] = "GREEN";
-    uint32_t x = 100;
-    uint32_t y = 100;
-    uint32_t shapesize = 50;
-    int length = sscanf(command, "%s %hhu %hhu %s %u %u %u", name, &arg1, &arg2, color, &x, &y, &shapesize);
-    if(length == 4 && color[0] == '\0')
+    uint32_t arg1 = 0;
+    uint32_t arg2 = 0;
+    uint32_t arg3 = 0;
+    uint32_t arg4 = 0;
+    uint32_t arg5 = 0;
+    char topic_color[128] = "";
+    int length = sscanf(command, "%s %u %u %u %u %u %s", name, &arg1, &arg2, &arg3, &arg4, &arg5, topic_color);
+    if(length == 7 && topic_color[0] == '\0')
     {
-        length = 3; //some implementations of sscanfs add 1 to length if color is empty.
+        length = length - 1; //some implementations of sscanfs add 1 to length if color is empty.
     }
 
-    return compute_command(session, stream_id, length, name, arg1, arg2, color, x, y, shapesize);
+    return compute_command(session, stream_id, length, name, arg1, arg2, arg3, arg4, arg5, topic_color);
 }
 
-bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
-                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize)
+bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+                     uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color)
 {
     if(strcmp(name, "create_session") == 0 && length >= 1)
     {
@@ -242,8 +242,14 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     }
     else if(strcmp(name, "write_data") == 0 && length >= 3)
     {
-        ShapeType topic = {"", x , y, shapesize};
-        strncpy(topic.color, color, sizeof(topic.color));
+        ShapeType topic = {"GREEN", 100 , 100, 50};
+        if(length > 3)
+        {
+            strncpy(topic.color, topic_color, sizeof(topic.color));
+            topic.x = arg3;
+            topic.y = arg4;
+            topic.shapesize = arg5;
+        }
 
         mrObjectId datawriter_id = mr_object_id(arg1, MR_DATAWRITER_ID);
         mrStreamId output_stream_id = mr_stream_id_from_raw(arg2, MR_INPUT_STREAM);
@@ -252,11 +258,22 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
         printf("Sending... ");
         print_ShapeType_topic(&topic);
     }
-    else if(strcmp(name, "read_data") == 0 && length == 3)
+    else if(strcmp(name, "request_data") == 0 && length == 4)
     {
+        mrDeliveryControl delivery_control;
+        delivery_control.max_samples = arg3;
+        delivery_control.max_elapsed_time = MR_MAX_ELAPSED_TIME_UNLIMITED;
+        delivery_control.max_bytes_per_second = MR_MAX_BYTES_PER_SECOND_UNLIMITED;
+        delivery_control.min_pace_period = 0;
+
         mrObjectId datareader_id = mr_object_id(arg1, MR_DATAREADER_ID);
         mrStreamId input_stream_id = mr_stream_id_from_raw(arg2, MR_INPUT_STREAM);
-        (void) mr_write_read_data(session, *stream_id, datareader_id, input_stream_id, NULL);
+        (void) mr_write_request_data(session, *stream_id, datareader_id, input_stream_id, &delivery_control);
+    }
+    else if(strcmp(name, "cancel_data") == 0 && length == 2)
+    {
+        mrObjectId datareader_id = mr_object_id(arg1, MR_DATAREADER_ID);
+        (void) mr_write_cancel_data(session, *stream_id, datareader_id);
     }
     else if(strcmp(name, "delete") == 0 && length == 3)
     {
@@ -274,22 +291,22 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     }
     else if(strcmp(name, "exit") == 0 && length == 1)
     {
-        (void) compute_print_command(session, stream_id, 1, "delete_session", 0, 0, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 1, "delete_session", 0, 0, 0, 0, 0, "");
         return false;
     }
     else if(strcmp(name, "example") == 0 && length == 2)
     {
-        (void) compute_print_command(session, stream_id, 2, "create_participant", arg1, 0, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 2, "create_participant", arg1, 0, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
-        (void) compute_print_command(session, stream_id, 3, "create_topic"      , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_topic"      , arg1, arg1, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
-        (void) compute_print_command(session, stream_id, 3, "create_publisher"  , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_publisher"  , arg1, arg1, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
-        (void) compute_print_command(session, stream_id, 3, "create_subscriber" , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_subscriber" , arg1, arg1, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
-        (void) compute_print_command(session, stream_id, 3, "create_datawriter" , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_datawriter" , arg1, arg1, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
-        (void) compute_print_command(session, stream_id, 3, "create_datareader" , arg1, arg1, "", 0, 0, 0);
+        (void) compute_print_command(session, stream_id, 3, "create_datareader" , arg1, arg1, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
     }
     else if(0 == strcmp(name, "list") || 0 == strcmp(name, "l"))
@@ -305,11 +322,11 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
 }
 
 
-bool compute_print_command(mrSession* session, mrStreamId* stream_id, int length, const char* name, uint8_t arg1, uint8_t arg2,
-                     const char* color, uint32_t x, uint32_t y, uint32_t shapesize)
+static bool compute_print_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+                            uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color)
 {
     printf("%s\n", name);
-    return compute_command(session, stream_id, length, name, arg1, arg2, color, x, y, shapesize);
+    return compute_command(session, stream_id, length, name, arg1, arg2, arg3, arg4, arg5, topic_color);
 }
 
 void on_status(mrSession* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
@@ -421,12 +438,14 @@ void print_commands(void)
     printf("        Creates a DataReader on the subscriber <subscriber id>\n");
     printf("    write_data <datawriter id> <stream id> [<color> <x> <y> <size>]:\n");
     printf("        Write data into a <stream id> using <data writer id> DataWriter\n");
-    printf("    read_data          <datareader id> <stream id>:\n");
-    printf("        Read data from a <stream id> using <data reader id> DataReader\n");
+    printf("    request_data       <datareader id> <stream id> <samples>:\n");
+    printf("        Read <sample> topics from a <stream id> using <data reader id> DataReader\n");
+    printf("    cancel_data        <datareader id>:\n");
+    printf("        Cancel any previous request data of <data reader id> DataReader\n");
     printf("    delete             <id_prefix> <type>:\n");
     printf("        Removes object with <id prefix> and <type>\n");
     printf("    stream, default_output_stream <stream_id>:\n");
-    printf("        Change the default output stream for all messages that create entities and 'read_data'.\n");
+    printf("        Change the default output stream for all messages except of write data.\n");
     printf("        <stream_id> can be 1-127 for best effort and 128-255 for reliable.\n");
     printf("        The streams must be initially configured.\n");
     printf("    (macro) exit:\n");

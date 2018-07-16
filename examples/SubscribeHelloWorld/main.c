@@ -90,7 +90,7 @@ int main(int args, char** argv)
     for(unsigned i = 0; i < 10; ++i)
     {
         uint8_t read_data_status;
-        uint16_t read_data_req = mr_write_read_data(&session, reliable_out, datareader_id, reliable_in, NULL);
+        uint16_t read_data_req = mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, NULL);
         if(MR_INVALID_REQUEST_ID == read_data_req)
         {
             printf("Error at writing message: the stream history is full\n");

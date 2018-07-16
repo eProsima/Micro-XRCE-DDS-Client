@@ -22,6 +22,10 @@ extern "C"
 
 #include <micrortps/client/core/session/session.h>
 
+#define MR_MAX_SAMPLES_UNLIMITED        0xFFFF
+#define MR_MAX_ELAPSED_TIME_UNLIMITED   0x0000
+#define MR_MAX_BYTES_PER_SECOND_UNLIMITED   0x0000
+
 typedef struct mrDeliveryControl
 {
     uint16_t max_samples;
@@ -31,8 +35,10 @@ typedef struct mrDeliveryControl
 
 } mrDeliveryControl;
 
-uint16_t mr_write_read_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
+uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
                          mrStreamId data_stream_id, mrDeliveryControl* control);
+
+uint16_t mr_write_cancel_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id);
 
 #ifdef __cplusplus
 }
