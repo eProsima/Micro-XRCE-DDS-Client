@@ -12,21 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_H_
-#define _MICRORTPS_CLIENT_H_
+#ifndef _MICRORTPS_CLIENT_CLIENT_H_
+#define _MICRORTPS_CLIENT_CLIENT_H_
 
-#cmakedefine PROFILE_CREATE_ENTITIES_BIN
 #cmakedefine PROFILE_CREATE_ENTITIES_REF
 #cmakedefine PROFILE_CREATE_ENTITIES_XML
 #cmakedefine PROFILE_READ_ACCESS
-#cmakedefine PROFILE_DISCOVERY_ACCESS
 #cmakedefine PROFILE_UDP_TRANSPORT
 #cmakedefine PROFILE_TCP_TRANSPORT
 #cmakedefine PROFILE_UART_TRANSPORT
-
-#ifdef PROFILE_CREATE_ENTITIES_BIN
-#include <micrortps/client/profile/session/create_entities_bin.h>
-#endif //PROFILE_CREATE_ENTITIES_BIN
 
 #ifdef PROFILE_CREATE_ENTITIES_REF
 #include <micrortps/client/profile/session/create_entities_ref.h>
@@ -36,21 +30,9 @@
 #include <micrortps/client/profile/session/create_entities_xml.h>
 #endif //PROFILE_CREATE_ENTITIES_XML
 
-#ifdef PROFILE_DELETE_ENTITIES
-#include <micrortps/client/profile/session/delete_entities.h>
-#endif //PROFILE_DELETE_ENTITIES
-
 #ifdef PROFILE_READ_ACCESS
 #include <micrortps/client/profile/session/read_access.h>
 #endif //PROFILE_READ_ACCESS
-
-#ifdef PROFILE_STATUS_ANSWER
-#include <micrortps/client/profile/session/status_answer.h>
-#endif //PROFILE_STATUS_ANSWER
-
-#ifdef PROFILE_DISCOVERY_ACCESS
-#include <micrortps/client/profile/extension/discovery_access.h>
-#endif //PROFILE_DISCOVERY_ACCESS
 
 #ifdef PROFILE_UDP_TRANSPORT
 #include <micrortps/client/profile/transport/udp_transport_@PLATFORM_NAME@.h>
@@ -66,4 +48,4 @@
 
 #include <micrortps/client/core/session/session.h>
 
-#endif // _MICRORTPS_CLIENT_H_
+#endif // _MICRORTPS_CLIENT_CLIENT_H_

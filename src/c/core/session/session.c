@@ -3,6 +3,7 @@
 #include <micrortps/client/core/util/time.h>
 #include <micrortps/client/core/communication/communication.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <micrortps/client/config.h>
 #include "log/message.h"
 
 // Autogenerate these defines by the protocol generator tool?
@@ -10,11 +11,10 @@
 #define ACKNACK_MAX_MSG_SIZE 16
 #define CREATE_SESSION_MAX_MSG_SIZE 38
 #define DELETE_SESSION_MAX_MSG_SIZE 16
+//---
 
 #define MIN_SESSION_STATUS_WAITING         1 //ms
-#define MAX_CONNECTION_ATTEMPS            10
-
-#define INITIAL_REQUEST_ID 0x0010
+#define INITIAL_REQUEST_ID            0x0010
 
 const uint8_t MR_STATUS_OK = STATUS_OK;
 const uint8_t MR_STATUS_OK_MATCHED = STATUS_OK_MATCHED;
@@ -89,7 +89,7 @@ bool mr_create_session(mrSession* session)
     stamp_create_session_header(&session->info, mb.init);
     set_session_info_request(&session->info, MR_REQUEST_LOGIN);
 
-    bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     bool created = received && STATUS_OK == session->info.last_requested_status;
     session->reset_streams = !created;
     return created;
@@ -105,7 +105,7 @@ bool mr_delete_session(mrSession* session)
     stamp_session_header(&session->info, 0, 0, mb.init);
     set_session_info_request(&session->info, MR_REQUEST_LOGOUT);
 
-    bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MAX_CONNECTION_ATTEMPS);
+    bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     bool deleted = received && STATUS_OK == session->info.last_requested_status;
     if(deleted)
     {

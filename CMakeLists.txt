@@ -61,28 +61,25 @@ if(EPROSIMA_BUILD)
     set(THIRDPARTY ON)
 endif()
 
-# Profiles options
-option(COMPLETE_PROFILE "Activate all profiles" ON)
-option(PROFILE_CREATE_ENTITIES_REF "Activate CreateEntitiesREF profile" OFF)
-option(PROFILE_CREATE_ENTITIES_XML "Activate CreateEntitiesXML profile" OFF)
-option(PROFILE_READ_ACCESS "Activate ReadAccess profile" OFF)
-option(PROFILE_UDP_TRANSPORT "Activate UDPTransport profile" OFF)
-option(PROFILE_TCP_TRANSPORT "Activate TCPTransport profile" OFF)
-option(PROFILE_UART_TRANSPORT "Activate UARTTransport profile" OFF)
-
-if(COMPLETE_PROFILE)
-    set(PROFILE_CREATE_ENTITIES_REF ON)
-    set(PROFILE_CREATE_ENTITIES_XML ON)
-    set(PROFILE_READ_ACCESS ON)
-    set(PROFILE_UDP_TRANSPORT ON)
-    set(PROFILE_TCP_TRANSPORT ON)
-    set(PROFILE_UART_TRANSPORT ON)
-endif()
+###############################################################################
+# Client configuration options
+###############################################################################
+file(STRINGS ${PROJECT_SOURCE_DIR}/client.config ConfigContents)
+foreach(NameAndValue ${ConfigContents})
+  string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
+  string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
+  string(REPLACE "${Name}=" "" Value ${NameAndValue})
+  set(${Name} "${Value}")
+endforeach()
 
 if(PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
     set(PROFILE_COMMON_CREATE_ENTITIES ON)
 else()
     set(PROFILE_COMMON_CREATE_ENTITIES OFF)
+endif()
+
+if(CONFIG_SERIALIZATION_ENDIANNESS)
+    set(__BIG_ENDIAN__ CONFIG_SERIALIZATION_ENDIANNESS)
 endif()
 
 ###############################################################################
@@ -173,6 +170,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_link_libraries(${PROJECT_NAME} PUBLIC microcdr)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/.>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>

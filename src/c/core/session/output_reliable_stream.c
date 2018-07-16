@@ -1,15 +1,16 @@
 #include <micrortps/client/core/session/output_reliable_stream.h>
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <micrortps/client/config.h>
 #include <string.h>
 
 // Remove when Microcdr supports size_of functions
 #define HEARTBEAT_PAYLOAD_SIZE 4
+//---
 
-#define MIN_HEARTBEAT_TIME_INTERVAL_MS ((int64_t) 1) // 1ms
+#define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) MR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
 
 #define MAX_HEARTBEAT_TRIES (sizeof(int64_t) * 8 - 1)
-
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
 static void process_acknack(mrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num);
@@ -121,12 +122,12 @@ bool update_output_stream_heartbeat_timestamp(mrOutputReliableStream* stream, in
     {
         if(0 == stream->next_heartbeat_tries)
         {
-            stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL_MS;
+            stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL;
             stream->next_heartbeat_tries = 1;
         }
         else if(current_timestamp >= stream->next_heartbeat_timestamp)
         {
-            int64_t increment = MIN_HEARTBEAT_TIME_INTERVAL_MS << (++stream->next_heartbeat_tries % MAX_HEARTBEAT_TRIES);
+            int64_t increment = MIN_HEARTBEAT_TIME_INTERVAL << (++stream->next_heartbeat_tries % MAX_HEARTBEAT_TRIES);
             int64_t difference = current_timestamp - stream->next_heartbeat_timestamp;
             stream->next_heartbeat_timestamp += (difference > increment) ? difference : increment;
             must_confirm = true;

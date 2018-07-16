@@ -5,6 +5,7 @@
 
 // Remove when Microcdr supports size_of functions
 #define ACKNACK_PAYLOAD_SIZE     4
+//---
 
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
