@@ -18,7 +18,7 @@ static int get_udp_error();
 static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
-    UDPTransport* transport = (UDPTransport*)instance;
+    mrUDPTransport* transport = (mrUDPTransport*)instance;
 
     ssize_t bytes_sent = send(transport->socket_fd, (void*)buf, len, 0);
     if (0 > bytes_sent)
@@ -32,7 +32,7 @@ static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = true;
-    UDPTransport* transport = (UDPTransport*)instance;
+    mrUDPTransport* transport = (mrUDPTransport*)instance;
 
     int poll_rv = poll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -69,7 +69,7 @@ static int get_udp_error()
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
+bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -98,7 +98,7 @@ bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
             transport->comm.send_msg = send_udp_msg;
             transport->comm.recv_msg = recv_udp_msg;
             transport->comm.comm_error = get_udp_error;
-            transport->comm.mtu = UDP_TRANSPORT_MTU;
+            transport->comm.mtu = MR_UDP_TRANSPORT_MTU;
             rv = true;
         }
     }

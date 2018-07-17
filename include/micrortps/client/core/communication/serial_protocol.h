@@ -24,42 +24,42 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-#define MICRORTPS_FRAMING_END_FLAG 0x7E
-#define MICRORTPS_FRAMING_ESC_FLAG 0x7D
-#define MICRORTPS_FRAMING_XOR_FLAG 0x20
+#define MR_FRAMING_END_FLAG 0x7E
+#define MR_FRAMING_ESC_FLAG 0x7D
+#define MR_FRAMING_XOR_FLAG 0x20
 
-#define MICRORTPS_SERIAL_MTU 255
-#define MICRORTPS_SERIAL_OVERHEAD 5
-#define MICRORTPS_SERIAL_BUFFER_SIZE 2 * (MICRORTPS_SERIAL_MTU + MICRORTPS_SERIAL_OVERHEAD)
+#define MR_SERIAL_MTU 255
+#define MR_SERIAL_OVERHEAD 5
+#define MR_SERIAL_BUFFER_SIZE 2 * (MR_SERIAL_MTU + MR_SERIAL_OVERHEAD)
 
-typedef struct SerialInputBuffer SerialInputBuffer;
-struct SerialInputBuffer
+typedef struct mrSerialInputBuffer
 {
-    uint8_t buffer[MICRORTPS_SERIAL_BUFFER_SIZE];
+    uint8_t buffer[MR_SERIAL_BUFFER_SIZE];
     uint16_t head;
     uint16_t marker;
     uint16_t tail;
     bool stream_init;
-};
 
-typedef struct SerialOutputBuffer SerialOutputBuffer;
-struct SerialOutputBuffer
+} mrSerialInputBuffer;
+
+typedef struct mrSerialOutputBuffer
 {
-    uint8_t buffer[MICRORTPS_SERIAL_BUFFER_SIZE];
-};
+    uint8_t buffer[MR_SERIAL_BUFFER_SIZE];
 
-typedef struct SerialIO SerialIO;
-struct SerialIO
+} mrSerialOutputBuffer;
+
+typedef struct mrSerialIO
 {
-    SerialInputBuffer input;
-    SerialOutputBuffer output;
-};
+    mrSerialInputBuffer input;
+    mrSerialOutputBuffer output;
 
-typedef uint16_t (*read_cb)(void*, uint8_t*, size_t, int);
+} mrSerialIO;
 
-void init_serial_io(SerialIO* serial_io);
-uint16_t write_serial_msg(SerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t addr);
-uint8_t read_serial_msg(SerialIO* serial_io, read_cb cb, void* cb_arg,
+typedef uint16_t (*mr_read_cb)(void*, uint8_t*, size_t, int);
+
+void init_serial_io(mrSerialIO* serial_io);
+uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t addr);
+uint8_t read_serial_msg(mrSerialIO* serial_io, mr_read_cb cb, void* cb_arg,
                         uint8_t* buf, size_t len, uint8_t* addr, int timeout);
 
 #ifdef __cplusplus

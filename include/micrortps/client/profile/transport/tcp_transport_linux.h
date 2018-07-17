@@ -24,34 +24,37 @@ extern "C"
 #include <arpa/inet.h>
 #include <sys/poll.h>
 
-#define TCP_TRANSPORT_MTU 512
+#define MR_TCP_TRANSPORT_MTU 512
 
-typedef enum TCPInputBufferState
+typedef enum mrTCPInputBufferState
 {
-    TCP_BUFFER_EMPTY,
-    TCP_SIZE_INCOMPLETE,
-    TCP_SIZE_READ,
-    TCP_MESSAGE_INCOMPLETE,
-    TCP_MESSAGE_AVAILABLE
-} TCPInputBufferState;
+    MR_TCP_BUFFER_EMPTY,
+    MR_TCP_SIZE_INCOMPLETE,
+    MR_TCP_SIZE_READ,
+    MR_TCP_MESSAGE_INCOMPLETE,
+    MR_TCP_MESSAGE_AVAILABLE
 
-typedef struct TCPInputBuffer
+} mrTCPInputBufferState;
+
+typedef struct mrTCPInputBuffer
 {
-    uint8_t buffer[TCP_TRANSPORT_MTU];
+    uint8_t buffer[MR_TCP_TRANSPORT_MTU];
     uint16_t position;
-    TCPInputBufferState state;
+    mrTCPInputBufferState state;
     uint16_t msg_size;
-} TCPInputBuffer;
 
-typedef struct TCPTransport
+} mrTCPInputBuffer;
+
+typedef struct mrTCPTransport
 {
-    TCPInputBuffer input_buffer;
+    mrTCPInputBuffer input_buffer;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
     mrCommunication comm;
-} TCPTransport;
 
-bool init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
+} mrTCPTransport;
+
+bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
 
 #ifdef __cplusplus
 }

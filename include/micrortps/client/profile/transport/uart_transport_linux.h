@@ -24,21 +24,20 @@ extern "C"
 #include <micrortps/client/core/communication/serial_protocol.h>
 #include <sys/poll.h>
 
-#define UART_TRANSPORT_MTU 256
+#define MR_UART_TRANSPORT_MTU 256
 
-typedef struct UARTTransport UARTTransport;
-struct UARTTransport
+typedef struct mrUARTTransport
 {
-    uint8_t buffer[UART_TRANSPORT_MTU];
+    uint8_t buffer[MR_UART_TRANSPORT_MTU];
     uint8_t remote_addr;
     uint8_t local_addr;
     struct pollfd poll_fd;
-    SerialIO serial_io;
+    mrSerialIO serial_io;
     mrCommunication comm;
-};
+} mrUARTTransport;
 
-bool init_uart_transport(UARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
-bool init_uart_transport_fd(UARTTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
+bool mr_init_uart_transport(mrUARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
+bool mr_init_uart_transport_fd(mrUARTTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
 
 #ifdef __cplusplus
 }

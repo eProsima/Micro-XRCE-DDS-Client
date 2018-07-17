@@ -24,19 +24,18 @@ extern "C"
 #include <sys/socket.h>
 #include <sys/poll.h>
 
-#define UDP_TRANSPORT_MTU 512
+#define MR_UDP_TRANSPORT_MTU 512
 
-typedef struct UDPTransport UDPTransport;
-struct UDPTransport
+typedef struct mrUDPTransport
 {
-    uint8_t buffer[UDP_TRANSPORT_MTU];
+    uint8_t buffer[MR_UDP_TRANSPORT_MTU];
     int socket_fd;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
     mrCommunication comm;
-};
+} mrUDPTransport;
 
-bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
+bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
 
 #ifdef __cplusplus
 }

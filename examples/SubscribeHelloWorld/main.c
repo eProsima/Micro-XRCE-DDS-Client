@@ -15,11 +15,11 @@
 #include "HelloWorld.h"
 
 #include <micrortps/client/client.h>
-//#include <microcdr/microcdr.h>
+#include <stdlib.h> //atoi
 #include <stdio.h>
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     MR_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId stream_id, MicroBuffer* mb, void* args)
 {
@@ -28,16 +28,20 @@ void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId
     HelloWorld topic;
     deserialize_HelloWorld_topic(mb, &topic);
 
-    printf("Received topic: %s, count: %i\n", topic.message, topic.index);
+    printf("Received topic: %s, id: %i\n", topic.message, topic.index);
+
+    uint32_t* count_ptr = (uint32_t*) args;
+    (*count_ptr)++;
 }
 
 int main(int args, char** argv)
 {
-    (void) args; (void) argv;
+    uint32_t count = 0;
+    uint32_t max_topics = (args == 2) ? (uint32_t)atoi(argv[1]) : UINT32_MAX;
 
     // Transport
-    UDPTransport transport;
-    if(!init_udp_transport(&transport, "127.0.0.1", 2019))
+    mrUDPTransport transport;
+    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2019))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -45,8 +49,8 @@ int main(int args, char** argv)
 
     // Session
     mrSession session;
-    mr_init_session(&session, 0x02, 0xCCCCDDDD, &transport.comm);
-    mr_set_topic_callback(&session, on_topic, NULL);
+    mr_init_session(&session, &transport.comm, 0xCCCCDDDD);
+    mr_set_topic_callback(&session, on_topic, &count);
     if(!mr_create_session(&session))
     {
         printf("Error at create session.\n");
@@ -86,21 +90,17 @@ int main(int args, char** argv)
         return 1;
     }
 
-    // Read 10 topics
-    for(unsigned i = 0; i < 10; ++i)
+    // Request topics
+    mrDeliveryControl delivery_control = {0};
+    delivery_control.max_samples = MR_MAX_SAMPLES_UNLIMITED;
+    uint16_t read_data_req = mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+
+    // Read topics
+    bool connected = true;
+    while(connected && count < max_topics)
     {
         uint8_t read_data_status;
-        uint16_t read_data_req = mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, NULL);
-        if(MR_INVALID_REQUEST_ID == read_data_req)
-        {
-            printf("Error at writing message: the stream history is full\n");
-            i -= 1; //try again
-        }
-
-        if(!mr_run_session_until_status(&session, 60000, &read_data_req, &read_data_status, 1))
-        {
-            printf("Error at read topic. Status code: %02X\n", read_data_status);
-        }
+        connected = mr_run_session_until_status(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
     }
 
     // Delete resources

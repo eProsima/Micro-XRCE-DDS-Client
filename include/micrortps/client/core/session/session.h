@@ -25,6 +25,7 @@ extern "C"
 #include <micrortps/client/core/session/object_id.h>
 
 #define MR_INVALID_REQUEST_ID 0
+#define MR_TIMEOUT_INF       -1
 
 extern const uint8_t MR_STATUS_OK;
 extern const uint8_t MR_STATUS_OK_MATCHED;
@@ -70,23 +71,21 @@ typedef struct mrSession
 //==================================================================
 //                         PUBLIC FUNCTIONS
 //==================================================================
-void mr_init_session(mrSession* session, uint8_t session_id, uint32_t key, mrCommunication* comm);
-bool mr_create_session(mrSession* session);
-bool mr_delete_session(mrSession* session);
-
+void mr_init_session(mrSession* session,  mrCommunication* comm, uint32_t key);
 void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args);
 void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args);
+
+bool mr_create_session(mrSession* session);
+bool mr_delete_session(mrSession* session);
 
 mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size);
 mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history);
 mrStreamId mr_create_input_best_effort_stream(mrSession* session);
 mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history);
 
-void mr_run_session_until_timeout(mrSession* session, int poll_ms);
-bool mr_run_session_until_confirm_delivery(mrSession* session, int poll_ms);
-bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
-
-bool mr_check_status_list_ok(uint8_t* status_list, size_t size);
+bool mr_run_session_until_timeout(mrSession* session, int tiemout);
+bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout);
+bool mr_run_session_until_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
 
 //==================================================================
 //                        INTERNAL FUNCTIONS

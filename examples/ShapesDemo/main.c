@@ -54,9 +54,9 @@ static int check_input(void);
 int main(int args, char** argv)
 {
     mrSession session;
-    UARTTransport uart;
-    UDPTransport udp;
-    TCPTransport tcp;
+    mrUARTTransport uart;
+    mrUDPTransport udp;
+    mrTCPTransport tcp;
 
     mrCommunication* comm;
 
@@ -65,7 +65,7 @@ int main(int args, char** argv)
     {
         char* device = argv[2];
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
-        if(!init_uart_transport_fd(&uart, fd, 0x00, 0x01))
+        if(!mr_init_uart_transport_fd(&uart, fd, 0, 1))
         {
             printf("%sCan not create a serial connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -78,7 +78,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!init_udp_transport(&udp, ip, port))
+        if(!mr_init_udp_transport(&udp, ip, port))
         {
             printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -91,7 +91,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!init_tcp_transport(&tcp, ip, port))
+        if(!mr_init_tcp_transport(&tcp, ip, port))
         {
             printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -109,19 +109,6 @@ int main(int args, char** argv)
     printf("Running Shapes Demo XRCE Client...\n");
 
     uint32_t key = 0xAABBCCDD;
-    uint8_t session_id = 0x81;
-    if(args_index < args && 0 == strcmp(argv[args_index++], "--session-id"))
-    {
-        if(args_index < args)
-        {
-            session_id = (uint8_t) atoi(argv[args_index++]);
-        }
-        else
-        {
-            print_help();
-        }
-    }
-
     size_t history = 8;
     if(args_index < args && 0 == strcmp(argv[args_index++], "--history"))
     {
@@ -140,7 +127,7 @@ int main(int args, char** argv)
     }
 
     // Init session and streams
-    mr_init_session(&session, session_id, key, comm);
+    mr_init_session(&session, comm, key);
     mr_set_topic_callback(&session, on_topic, NULL);
     mr_set_status_callback(&session, on_status, NULL);
 
@@ -169,7 +156,6 @@ int main(int args, char** argv)
     }
 
     //TODO: add the close transport functions
-
     return 0;
 }
 
@@ -412,7 +398,7 @@ void print_status(uint8_t status)
 void print_help(void)
 {
     printf("Usage: program --help\n");
-    printf("       program <transport> [--session-id <session_id>] [--history <history>]\n");
+    printf("       program <transport> [--history <history>]\n");
     printf("List of available transports:\n");
     printf("    --serial <device>\n");
     printf("    --udp <agent-ip> <agent-port>\n");

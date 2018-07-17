@@ -21,7 +21,7 @@ static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeou
 static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int timeout)
 {
     uint16_t rv = 0;
-    UARTTransport* transport = (UARTTransport*)instance;
+    mrUARTTransport* transport = (mrUARTTransport*)instance;
 
     int poll_rv = poll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -39,7 +39,7 @@ static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int tim
 static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = false;
-    UARTTransport* transport = (UARTTransport*)instance;
+    mrUARTTransport* transport = (mrUARTTransport*)instance;
 
     uint16_t bytes_written = write_serial_msg(&transport->serial_io, buf, len, transport->local_addr);
     if (0 < bytes_written)
@@ -58,7 +58,7 @@ static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
 static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = true;
-    UARTTransport* transport = (UARTTransport*)instance;
+    mrUARTTransport* transport = (mrUARTTransport*)instance;
     uint8_t addr;
 
     uint8_t bytes_read = read_serial_msg(&transport->serial_io, read_uart_data, instance,
@@ -85,45 +85,24 @@ static int get_uart_error()
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool init_uart_transport(UARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
+bool mr_init_uart_transport(mrUARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
     /* Open device */
-    transport->remote_addr = remote_addr;
-    transport->local_addr = local_addr;
-    transport->poll_fd.fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if (transport->poll_fd.fd != -1)
+    int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if (fd != -1)
     {
-        /* Init SerialIO. */
-        init_serial_io(&transport->serial_io);
-
-        /* Send init flag. */
-        uint8_t flag = MICRORTPS_FRAMING_END_FLAG;
-        ssize_t bytes_written = write(transport->poll_fd.fd, &flag, 1);
-        if (0 < bytes_written && 1 == bytes_written)
-        {
-            /* Poll setup. */
-            transport->poll_fd.events = POLLIN;
-
-            /* Interface setup. */
-            transport->comm.instance = (void*)transport;
-            transport->comm.send_msg = send_uart_msg;
-            transport->comm.recv_msg = recv_uart_msg;
-            transport->comm.comm_error = get_uart_error;
-            transport->comm.mtu = UART_TRANSPORT_MTU;
-            rv = true;
-        }
+        rv = mr_init_uart_transport_fd(transport, fd, remote_addr, local_addr);
     }
 
-    return rv ;
+    return rv;
 }
 
-bool init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
+bool mr_init_uart_transport_fd(mrUARTTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
-    /* Open device */
     transport->remote_addr = remote_addr;
     transport->local_addr = local_addr;
     transport->poll_fd.fd = fd;
@@ -132,7 +111,7 @@ bool init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_add
     init_serial_io(&transport->serial_io);
 
     /* Send init flag. */
-    uint8_t flag = MICRORTPS_FRAMING_END_FLAG;
+    uint8_t flag = MR_FRAMING_END_FLAG;
     ssize_t bytes_written = write(transport->poll_fd.fd, &flag, 1);
     if (0 < bytes_written && 1 == bytes_written)
     {
@@ -144,7 +123,7 @@ bool init_uart_transport_fd(UARTTransport* transport, int fd, uint8_t remote_add
         transport->comm.send_msg = send_uart_msg;
         transport->comm.recv_msg = recv_uart_msg;
         transport->comm.comm_error = get_uart_error;
-        transport->comm.mtu = UART_TRANSPORT_MTU;
+        transport->comm.mtu = MR_UART_TRANSPORT_MTU;
         rv = true;
     }
 

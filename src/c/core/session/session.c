@@ -60,7 +60,7 @@ static void process_status(mrSession* session, mrObjectId object_id, int16_t req
 //                             PUBLIC
 //==================================================================
 
-void mr_init_session(mrSession* session, uint8_t session_id, uint32_t key, mrCommunication* comm)
+void mr_init_session(mrSession* session, mrCommunication* comm, uint32_t key)
 {
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
@@ -75,12 +75,26 @@ void mr_init_session(mrSession* session, uint8_t session_id, uint32_t key, mrCom
     session->on_topic = NULL;
     session->on_topic_args = NULL;
 
-    init_session_info(&session->info, session_id, key);
+    init_session_info(&session->info, 0x81, key);
     init_stream_storage(&session->streams);
+}
+
+void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args)
+{
+    session->on_status = on_status_func;
+    session->on_status_args = args;
+}
+
+void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args)
+{
+    session->on_topic = on_topic_func;
+    session->on_topic_args = args;
 }
 
 bool mr_create_session(mrSession* session)
 {
+    reset_stream_storage(&session->streams);
+
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
@@ -91,7 +105,6 @@ bool mr_create_session(mrSession* session)
 
     bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     bool created = received && STATUS_OK == session->info.last_requested_status;
-    session->reset_streams = !created;
     return created;
 }
 
@@ -106,24 +119,7 @@ bool mr_delete_session(mrSession* session)
     set_session_info_request(&session->info, MR_REQUEST_LOGOUT);
 
     bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
-    bool deleted = received && STATUS_OK == session->info.last_requested_status;
-    if(deleted)
-    {
-        reset_stream_storage(&session->streams);
-    }
-    return deleted;
-}
-
-void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args)
-{
-    session->on_status = on_status_func;
-    session->on_status_args = args;
-}
-
-void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args)
-{
-    session->on_topic = on_topic_func;
-    session->on_topic_args = args;
+    return received && STATUS_OK == session->info.last_requested_status;
 }
 
 mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size)
@@ -148,18 +144,7 @@ mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, 
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
-uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base)
-{
-    uint16_t request_id = generate_request_id(session);
-
-    base->request_id.data[0] = (uint8_t) (request_id >> 8);
-    base->request_id.data[1] = (uint8_t) request_id;
-    object_id_to_raw(object_id, base->object_id.data);
-
-    return request_id;
-}
-
-void mr_run_session_until_timeout(mrSession* session, int timeout_ms)
+bool mr_run_session_until_timeout(mrSession* session, int timeout_ms)
 {
     flash_output_streams(session);
 
@@ -168,6 +153,8 @@ void mr_run_session_until_timeout(mrSession* session, int timeout_ms)
     {
          timeout = !listen_message_reliably(session, timeout_ms);
     }
+
+    return output_streams_confirmed(&session->streams);
 }
 
 bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout_ms)
@@ -211,18 +198,24 @@ bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint1
 
     session->request_status_list_size = 0;
 
-    return mr_check_status_list_ok(status_list, list_size);
-}
-
-bool mr_check_status_list_ok(uint8_t* status_list, size_t size)
-{
     bool all_status_ok = true;
-    for(unsigned i = 0; i < size && all_status_ok; ++i)
+    for(unsigned i = 0; i < list_size && all_status_ok; ++i)
     {
         all_status_ok = status_list[i] == MR_STATUS_OK;
     }
 
     return all_status_ok;
+}
+
+uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base)
+{
+    uint16_t request_id = generate_request_id(session);
+
+    base->request_id.data[0] = (uint8_t) (request_id >> 8);
+    base->request_id.data[1] = (uint8_t) request_id;
+    object_id_to_raw(object_id, base->object_id.data);
+
+    return request_id;
 }
 
 //==================================================================

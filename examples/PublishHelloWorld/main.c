@@ -16,18 +16,19 @@
 
 #include <micrortps/client/client.h>
 #include <stdio.h>
+#include <stdlib.h> //atoi
 #include <unistd.h> //for sleep function in linux
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     MR_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 int main(int args, char** argv)
 {
-    (void) args; (void) argv;
+    uint32_t max_topics = (args == 2) ? (uint32_t)atoi(argv[1]) : UINT32_MAX;
 
     // Transport
-    UDPTransport transport;
-    if(!init_udp_transport(&transport, "127.0.0.1", 2019))
+    mrUDPTransport transport;
+    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2019))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -35,7 +36,7 @@ int main(int args, char** argv)
 
     // Session
     mrSession session;
-    mr_init_session(&session, 0x01, 0xAAAABBBB, &transport.comm);
+    mr_init_session(&session, &transport.comm, 0xAAAABBBB);
     if(!mr_create_session(&session))
     {
         printf("Error at create session.\n");
@@ -75,23 +76,19 @@ int main(int args, char** argv)
         return 1;
     }
 
-    // Write 10 topics
-    for(unsigned i = 0; i < 10; ++i)
+    // Write topics
+    bool connected = true;
+    uint32_t count = 0;
+    while(connected && count < max_topics)
     {
-        HelloWorld topic = {i, "Hello DDS world!"};
+        HelloWorld topic = {count++, "Hello DDS world!"};
+        (void) mr_write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic);
 
-        if(!mr_write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic))
+        connected = mr_run_session_until_timeout(&session, 1000);
+        if(connected)
         {
-            printf("Error at writing message: the stream history is full\n");
-            i -= 1; //try again
+            printf("Sent topic: %s, id: %i\n", topic.message, topic.index);
         }
-
-        if(mr_run_session_until_confirm_delivery(&session, 10))
-        {
-            printf("Sent topic: %s, count: %i\n", topic.message, topic.index);
-        }
-
-        sleep(1);
     }
 
     // Delete resources

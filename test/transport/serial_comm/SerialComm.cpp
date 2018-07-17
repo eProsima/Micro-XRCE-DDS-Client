@@ -1,4 +1,5 @@
-#include <SerialComm.hpp>
+#include "SerialComm.hpp"
+
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -26,8 +27,8 @@ int SerialComm::init()
         {
             fcntl(fd_, F_SETFL, O_NONBLOCK);
             fcntl(fd_, F_SETPIPE_SZ, 4096);
-            if (init_uart_transport_fd(&master_, fd_, 0x01, 0x00) != 0 ||
-                init_uart_transport_fd(&slave_, fd_, 0x00, 0x01 != 0))
+            if (!mr_init_uart_transport_fd(&master_, fd_, 1, 0) ||
+                !mr_init_uart_transport_fd(&slave_, fd_, 0, 1))
             {
                 rv = -1;
             }
@@ -44,11 +45,11 @@ int SerialComm::init()
 TEST_F(SerialComm, WorstStuffingTest)
 {
     ASSERT_EQ(init(), 0);
-    uint8_t output_msg[MICRORTPS_SERIAL_MTU];
+    uint8_t output_msg[MR_SERIAL_MTU];
     uint8_t* input_msg;
     size_t input_msg_len;
 
-    memset(output_msg, MICRORTPS_FRAMING_END_FLAG, sizeof(output_msg));
+    memset(output_msg, MR_FRAMING_END_FLAG, sizeof(output_msg));
     ASSERT_TRUE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
@@ -58,7 +59,7 @@ TEST_F(SerialComm, WorstStuffingTest)
 TEST_F(SerialComm, MessageOverflowTest)
 {
     ASSERT_EQ(init(), 0);
-    uint8_t output_msg[MICRORTPS_SERIAL_MTU + 1] = {0};
+    uint8_t output_msg[MR_SERIAL_MTU + 1] = {0};
     ASSERT_FALSE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 }
 
@@ -69,7 +70,7 @@ TEST_F(SerialComm, FatigueTest)
     unsigned int sent_counter = 0;
     unsigned int recv_counter = 0;
     uint8_t receiver_ratio = 8;
-    uint8_t output_msg[MICRORTPS_SERIAL_MTU];
+    uint8_t output_msg[MR_SERIAL_MTU];
     uint8_t* input_msg;
     size_t input_msg_len;
 

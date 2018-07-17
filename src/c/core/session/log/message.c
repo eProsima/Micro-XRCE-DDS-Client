@@ -58,7 +58,7 @@ static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_P
 static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload);
 static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload);
 static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload);
-static void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, bool printable);
+static void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num);
 static void print_tail(int64_t initial_log_time);
 
 
@@ -81,16 +81,16 @@ void print_message(int direction, uint8_t* buffer, size_t size)
     uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
     (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
+    print_header(size, direction, stream_id_raw, seq_num);
+
     size_t submessage_counter = 0;
     uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
     while(read_submessage_header(&mb, &submessage_id, &length, &flags, &payload_it))
     {
         if(submessage_counter != 0)
         {
-            printf("\n");
+            printf("\n                     ");
         }
-
-        print_header(size, direction, stream_id_raw, seq_num, 0 == submessage_counter);
 
         switch(submessage_id)
         {
@@ -478,42 +478,36 @@ void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payloa
             RESTORE_COLOR);
 }
 
-void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, bool printable)
+void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num)
 {
     const char* arrow = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
-    if(printable)
+
+    char stream_representation;
+    if(0 == stream_id)
     {
-        char stream_representation;
-        if(0 == stream_id)
-        {
-            stream_representation = 'n';
-        }
-        else if(0x80 <= stream_id)
-        {
-            stream_representation = 'r';
-        }
-        else // if(1 <= stream_id && 80 > stream_id)
-        {
-            stream_representation = 'b';
-        }
+        stream_representation = 'n';
+    }
+    else if(0x80 <= stream_id)
+    {
+        stream_representation = 'r';
+    }
+    else // if(1 <= stream_id && 80 > stream_id)
+    {
+        stream_representation = 'b';
+    }
 
-        uint16_t seq_num_to_print = 0;
-        if(stream_id != 0)
-        {
-            seq_num_to_print = seq_num;
-        }
-        else
-        {
-            stream_id = seq_num;
-        }
-
-        printf("%s%s%3zu: %s(%c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
+    uint16_t seq_num_to_print = 0;
+    if(stream_id != 0)
+    {
+        seq_num_to_print = seq_num;
     }
     else
     {
-        printf("                     ");
+        stream_id = seq_num;
     }
+
+    printf("%s%s%3zu: %s(%c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
 }
 
 void print_tail(int64_t initial_log_time)

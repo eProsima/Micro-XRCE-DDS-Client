@@ -27,8 +27,8 @@ public:
 
 protected:
     int fd_;
-    UARTTransport master_;
-    UARTTransport slave_;
+    mrUARTTransport master_;
+    mrUARTTransport slave_;
 };
 
 #endif //_MICRORTPS_TEST_TRANSPORT_SERIALCOMM_HPP_
