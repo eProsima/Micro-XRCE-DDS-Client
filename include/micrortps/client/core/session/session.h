@@ -39,20 +39,20 @@ extern const uint8_t MR_STATUS_ERR_INCOMPATIBLE;
 extern const uint8_t MR_STATUS_ERR_RESOURCES;
 extern const uint8_t MR_STATUS_NONE;
 
-typedef struct mrSession mrSession;
-typedef struct mrCommunication mrCommunication;
-typedef struct BaseObjectRequest BaseObjectRequest;
+struct mrSession;
+struct mrCommunication;
+struct BaseObjectRequest;
 
-typedef void (*mrOnStatusFunc) (mrSession* session, mrObjectId object_id, uint16_t request_id,
+typedef void (*mrOnStatusFunc) (struct mrSession* session, mrObjectId object_id, uint16_t request_id,
                              uint8_t status, void* args);
-typedef void (*mrOnTopicFunc) (mrSession* session, mrObjectId object_id, uint16_t request_id,
-                             mrStreamId stream_id, MicroBuffer* mb, void* args);
+typedef void (*mrOnTopicFunc) (struct mrSession* session, mrObjectId object_id, uint16_t request_id,
+                             mrStreamId stream_id, struct MicroBuffer* mb, void* args);
 
 typedef struct mrSession
 {
     mrSessionInfo info;
     mrStreamStorage streams;
-    mrCommunication* comm;
+    struct mrCommunication* comm;
 
     uint16_t last_request_id;
     bool reset_streams;
@@ -71,7 +71,7 @@ typedef struct mrSession
 //==================================================================
 //                         PUBLIC FUNCTIONS
 //==================================================================
-void mr_init_session(mrSession* session,  mrCommunication* comm, uint32_t key);
+void mr_init_session(mrSession* session, struct mrCommunication* comm, uint32_t key);
 void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args);
 void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args);
 
@@ -90,7 +90,7 @@ bool mr_run_session_until_status(mrSession* session, int timeout, const uint16_t
 //==================================================================
 //                        INTERNAL FUNCTIONS
 //==================================================================
-uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base);
+uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, struct BaseObjectRequest* base);
 
 #ifdef __cplusplus
 }

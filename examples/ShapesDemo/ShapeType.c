@@ -24,7 +24,7 @@
 #include <microcdr/microcdr.h>
 #include <string.h>
 
-bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
+bool mr_serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
 {
     (void) serialize_sequence_char(writer, topic->color, (uint32_t)strlen(topic->color) + 1);
     (void) serialize_int32_t(writer, topic->x);
@@ -34,7 +34,7 @@ bool serialize_ShapeType_topic(MicroBuffer* writer, const ShapeType* topic)
     return writer->error == BUFFER_OK;
 }
 
-bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
+bool mr_deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
 {
     uint32_t size_color;
     (void) deserialize_sequence_char(reader, topic->color, &size_color);
@@ -45,7 +45,7 @@ bool deserialize_ShapeType_topic(MicroBuffer* reader, ShapeType* topic)
     return reader->error == BUFFER_OK;
 }
 
-uint32_t size_of_ShapeType_topic(const ShapeType* topic, uint32_t size)
+uint32_t mr_size_of_ShapeType_topic(const ShapeType* topic, uint32_t size)
 {
     size += 4 + get_alignment(size, 4) + (uint32_t)strlen(topic->color) + 1;
     size += 4 + get_alignment(size, 4);

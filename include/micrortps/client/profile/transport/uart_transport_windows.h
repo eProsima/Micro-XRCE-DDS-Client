@@ -24,15 +24,14 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct UARTProperties UARTProperties;
+struct UARTProperties;
 
-typedef struct UARTTransport UARTTransport;
-struct UARTTransport
+typedef struct UARTTransport
 {
-    intmax_t (*send_data)(UARTTransport* transport, char* buf, size_t len);
-    intmax_t (*recv_data)(UARTTransport* transport, char** buf, size_t* len);
-    UARTProperties* properties;
-};
+    intmax_t (*send_data)(struct UARTTransport* transport, char* buf, size_t len);
+    intmax_t (*recv_data)(struct UARTTransport* transport, char** buf, size_t* len);
+    struct UARTProperties* properties;
+} UARTTransport;
 
 bool init_uart_transport(UARTTransport* transport, const char* device);
 

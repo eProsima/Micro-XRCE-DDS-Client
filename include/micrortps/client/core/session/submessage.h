@@ -26,7 +26,7 @@ extern "C"
 
 #define SUBHEADER_SIZE 4
 
-typedef struct MicroBuffer MicroBuffer;
+struct MicroBuffer;
 
 typedef enum SubmessageId
 {
@@ -60,8 +60,8 @@ typedef enum SubmessageFlags
 
 } SubmessageFlags;
 
-bool write_submessage_header(MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
-bool read_submessage_header(MicroBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it);
+bool write_submessage_header(struct MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
+bool read_submessage_header(struct MicroBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it);
 size_t submessage_padding(size_t length);
 
 #ifdef __cplusplus

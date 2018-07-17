@@ -21,12 +21,12 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     MR_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId stream_id, MicroBuffer* mb, void* args)
+void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* mb, void* args)
 {
     (void) session; (void) id; (void) request_id; (void) stream_id; (void) args;
 
     HelloWorld topic;
-    deserialize_HelloWorld_topic(mb, &topic);
+    mr_deserialize_HelloWorld_topic(mb, &topic);
 
     printf("Received topic: %s, id: %i\n", topic.message, topic.index);
 

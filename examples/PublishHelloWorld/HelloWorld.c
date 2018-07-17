@@ -24,7 +24,7 @@
 #include <microcdr/microcdr.h>
 #include <string.h>
 
-bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
+bool mr_serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
 {
     (void) serialize_uint32_t(writer, topic->index);
     (void) serialize_sequence_char(writer, topic->message, (uint32_t)strlen(topic->message) + 1);
@@ -32,7 +32,7 @@ bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
     return writer->error == BUFFER_OK;
 }
 
-bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
+bool mr_deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
 {
     (void) deserialize_uint32_t(reader, &topic->index);
     uint32_t size_message;
@@ -41,7 +41,7 @@ bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
     return reader->error == BUFFER_OK;
 }
 
-uint32_t size_of_HelloWorld_topic(const HelloWorld* topic, uint32_t size)
+uint32_t mr_size_of_HelloWorld_topic(const HelloWorld* topic, uint32_t size)
 {
     size += 4 + get_alignment(size, 4);
     size += 4 + get_alignment(size, 4) + (uint32_t)strlen(topic->message) + 1;
