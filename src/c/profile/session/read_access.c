@@ -24,7 +24,7 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
     uint16_t request_id = MR_INVALID_REQUEST_ID;
 
     READ_DATA_Payload payload;
-    (void) data_stream_id; //payload.read_specification.stream_id = data_stream_id.raw;
+    payload.read_specification.input_stream_id = data_stream_id.raw;
     payload.read_specification.data_format = FORMAT_DATA;
     payload.read_specification.optional_content_filter_expression = false; //not supported yet
     payload.read_specification.optional_delivery_control = (control != NULL);
@@ -40,7 +40,7 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
     // Change this when microcdr supports size_of function.
     size_t payload_length = 0; //READ_DATA_Payload_size(&payload);
     payload_length += 4; // (request id + object_id), no padding.
-    payload_length += 3; // format and two optionals. //PONER 4
+    payload_length += 4; // stream, format, and two optionals.
     payload_length += (control != NULL) ? 1 : 0; // padding //BORRAR
     payload_length += (control != NULL) ? 8 : 0; // delivery control
 
