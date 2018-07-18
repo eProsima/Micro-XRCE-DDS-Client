@@ -476,7 +476,7 @@ void read_submessage_status(mrSession* session, MicroBuffer* submessage)
     STATUS_Payload payload;
     deserialize_STATUS_Payload(submessage, &payload);
 
-    mrObjectId object_id = mr_object_id_from_raw(payload.base.related_request.object_id.data);
+    mrObjectId object_id = object_id_from_raw(payload.base.related_request.object_id.data);
     uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
                             + payload.base.related_request.request_id.data[1];
 
@@ -495,7 +495,7 @@ void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t 
     deserialize_BaseObjectRequest(submessage, &base);
     length -= 4; //CHANGE: by a future size_of_BaseObjectRequest
 
-    mrObjectId object_id = mr_object_id_from_raw(base.object_id.data);
+    mrObjectId object_id = object_id_from_raw(base.object_id.data);
     uint16_t request_id = (((uint16_t) base.request_id.data[0]) << 8) + base.request_id.data[1];
 
     process_status(session, object_id, request_id, STATUS_OK);

@@ -67,19 +67,19 @@ int main(int args, char** argv)
     // Create entities
     mrObjectId participant_id = mr_object_id(0x01, MR_PARTICIPANT_ID);
     char* participant_ref = "default participant";
-    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, MR_REUSE);
+    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, MR_REPLACE);
 
     mrObjectId topic_id = mr_object_id(0x01, MR_TOPIC_ID);
     char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, MR_REUSE);
+    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, MR_REPLACE);
 
     mrObjectId subscriber_id = mr_object_id(0x01, MR_SUBSCRIBER_ID);
     char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
-    uint16_t subscriber_req = mr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, MR_REUSE);
+    uint16_t subscriber_req = mr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, MR_REPLACE);
 
     mrObjectId datareader_id = mr_object_id(0x01, MR_DATAREADER_ID);
     char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
-    uint16_t datareader_req = mr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, MR_REUSE);
+    uint16_t datareader_req = mr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, MR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[4];

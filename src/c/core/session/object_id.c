@@ -23,7 +23,7 @@ mrObjectId mr_object_id(uint16_t id, uint8_t type)
     return object_id;
 }
 
-mrObjectId mr_object_id_from_raw(uint8_t* raw)
+mrObjectId object_id_from_raw(uint8_t* raw)
 {
     mrObjectId object_id;
     object_id.id = (((uint16_t)raw[0]) << 4) + (raw[1] >> 4);

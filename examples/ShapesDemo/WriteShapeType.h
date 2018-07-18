@@ -26,6 +26,6 @@
 
 #include <micrortps/client/client.h>
 
-bool mr_write_ShapeType_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, ShapeType* topic);
+bool mr_write_ShapeType_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const ShapeType* topic);
 
 #endif // _WRITE_ShapeType_H_
