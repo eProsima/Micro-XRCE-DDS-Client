@@ -47,7 +47,7 @@ static const char* data_to_string(const uint8_t* data, uint32_t size);
 static const char* request_to_string(const BaseObjectRequest* request);
 static const char* reply_to_string(const BaseObjectReply* reply);
 static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload);
-static void print_create_submessage(const char* pre, const CREATE_Payload* payload);
+static void print_create_submessage(const char* pre, const CREATE_Payload* payload, uint8_t flags);
 //static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload);
 static void print_delete_submessage(const char* pre, const DELETE_Payload* payload);
 static void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload);
@@ -106,7 +106,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
             {
                 CREATE_Payload payload;
                 deserialize_CREATE_Payload(&mb, &payload);
-                print_create_submessage(color, &payload);
+                print_create_submessage(color, &payload, flags);
 
             } break;
 
@@ -300,7 +300,7 @@ void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload
             RESTORE_COLOR);
 }
 
-void print_create_submessage(const char* pre, const CREATE_Payload* payload)
+void print_create_submessage(const char* pre, const CREATE_Payload* payload, uint8_t flags)
 {
     char type[4];
     switch(payload->object_representation._.participant.base.representation.format)
@@ -361,8 +361,15 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload)
             sprintf(content, "UNKNOWN");
     }
 
-    printf("%s[CREATE | %s | %s]%s",
+    const char* reuse_flag = (flags & FLAG_REUSE) ? "REUSE" : "";
+    const char* replace_flag = (flags & FLAG_REPLACE) ? "REPLACE" : "";
+    const char* separator = (flags & FLAG_REUSE && flags & FLAG_REPLACE) ? " " : "";
+
+    printf("%s[CREATE | %s%s%s | %s | %s]%s",
             pre,
+            reuse_flag,
+            separator,
+            replace_flag,
             request_to_string(&payload->base),
             content,
             RESTORE_COLOR);
@@ -429,9 +436,10 @@ void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payloa
             break;
     }
 
-    printf("%s[READ DATA | format: %s | %s | dc: %s]%s",
+    printf("%s[READ DATA | format: %s | istream: 0x%02X | %s | dc: %s]%s",
             pre,
             format,
+            payload->read_specification.input_stream_id,
             request_to_string(&payload->base),
             (payload->read_specification.optional_delivery_control) ? "yes" : "no",
             RESTORE_COLOR);

@@ -41,7 +41,6 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
     size_t payload_length = 0; //READ_DATA_Payload_size(&payload);
     payload_length += 4; // (request id + object_id), no padding.
     payload_length += 4; // stream, format, and two optionals.
-    payload_length += (control != NULL) ? 1 : 0; // padding //BORRAR
     payload_length += (control != NULL) ? 8 : 0; // delivery control
 
     MicroBuffer mb;

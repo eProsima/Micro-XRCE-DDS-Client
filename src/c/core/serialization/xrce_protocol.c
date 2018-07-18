@@ -1457,13 +1457,13 @@ bool deserialize_ReadSpecification(MicroBuffer* buffer, ReadSpecification* outpu
     ret &= deserialize_bool(buffer, &output->optional_content_filter_expression);
     if(output->optional_content_filter_expression == true)
     {
-            ret &= deserialize_String_t(buffer, &output->content_filter_expression);
+        ret &= deserialize_String_t(buffer, &output->content_filter_expression);
     }
 
     ret &= deserialize_bool(buffer, &output->optional_delivery_control);
     if(output->optional_delivery_control == true)
     {
-            ret &= deserialize_DataDeliveryControl(buffer, &output->delivery_control);
+        ret &= deserialize_DataDeliveryControl(buffer, &output->delivery_control);
     }
 
     return ret;

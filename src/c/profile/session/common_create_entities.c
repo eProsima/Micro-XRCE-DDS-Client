@@ -2,8 +2,8 @@
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 
-const uint8_t ENTITY_REPLACE = (uint8_t)FLAG_REPLACE;
-const uint8_t ENTITY_REUSE = (uint8_t)FLAG_REUSE;
+const uint8_t MR_REPLACE = (uint8_t)FLAG_REPLACE;
+const uint8_t MR_REUSE = (uint8_t)FLAG_REUSE;
 
 //==================================================================
 //                              PUBLIC

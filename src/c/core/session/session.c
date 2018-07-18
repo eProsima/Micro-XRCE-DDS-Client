@@ -198,13 +198,13 @@ bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint1
 
     session->request_status_list_size = 0;
 
-    bool all_status_ok = true;
-    for(unsigned i = 0; i < list_size && all_status_ok; ++i)
+    bool status_ok = true;
+    for(unsigned i = 0; i < list_size && status_ok; ++i)
     {
-        all_status_ok = status_list[i] == MR_STATUS_OK;
+        status_ok = status_list[i] == MR_STATUS_OK || status_list[i] == MR_STATUS_OK_MATCHED;
     }
 
-    return all_status_ok;
+    return status_ok;
 }
 
 uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base)

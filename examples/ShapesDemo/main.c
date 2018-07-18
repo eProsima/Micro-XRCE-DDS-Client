@@ -37,6 +37,7 @@
 #define MAX_TRANSPORT_MTU  512
 #define MAX_HISTORY 16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
+#define STREAMS 5
 
 static bool run_command(const char* command, mrSession* session, mrStreamId* stream_id);
 static bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
@@ -131,14 +132,19 @@ int main(int args, char** argv)
     mr_set_topic_callback(&session, on_topic, NULL);
     mr_set_status_callback(&session, on_status, NULL);
 
-    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE];
-    uint8_t output_best_effort_stream_buffer[MAX_BUFFER_SIZE];
-    uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE];
+    uint8_t output_best_effort_stream_buffer[MAX_TRANSPORT_MTU * STREAMS];
+    uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE * STREAMS];
+    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE * STREAMS];
 
-    (void) mr_create_input_best_effort_stream(&session);
-    (void) mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, comm->mtu * history, history);
-    (void) mr_create_output_best_effort_stream(&session, output_best_effort_stream_buffer, comm->mtu);
-    mrStreamId reliable_output = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, comm->mtu * history, history);
+    for(int i = 0; i < STREAMS; ++i)
+    {
+        (void) mr_create_output_best_effort_stream(&session, output_best_effort_stream_buffer + MAX_TRANSPORT_MTU * i, comm->mtu);
+        (void) mr_create_input_best_effort_stream(&session);
+        (void) mr_create_output_reliable_stream(&session, output_reliable_stream_buffer + MAX_BUFFER_SIZE * i, comm->mtu * history, history);
+        (void) mr_create_input_reliable_stream(&session, input_reliable_stream_buffer + MAX_BUFFER_SIZE * i, comm->mtu * history, history);
+    }
+
+    mrStreamId default_output = mr_stream_id(0, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
 
     // Waiting user commands
     char command_stdin_line[256];
@@ -151,7 +157,7 @@ int main(int args, char** argv)
         }
         else if (fgets(command_stdin_line, 256, stdin))
         {
-            running = run_command(command_stdin_line, &session, &reliable_output);
+            running = run_command(command_stdin_line, &session, &default_output);
         }
     }
 
