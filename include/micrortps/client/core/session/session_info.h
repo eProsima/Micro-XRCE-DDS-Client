@@ -42,7 +42,7 @@ typedef struct mrSessionInfo
 
 void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key);
 
-void write_create_session(const mrSessionInfo* info, struct MicroBuffer* mb, uint64_t nanoseconds, bool reset_streams);
+void write_create_session(const mrSessionInfo* info, struct MicroBuffer* mb, uint64_t nanoseconds);
 void write_delete_session(const mrSessionInfo* info, struct MicroBuffer* mb);
 void read_create_session_status(mrSessionInfo* info, struct MicroBuffer* mb);
 void read_delete_session_status(mrSessionInfo* info, struct MicroBuffer* mb);

@@ -53,9 +53,7 @@ typedef struct mrSession
     mrSessionInfo info;
     mrStreamStorage streams;
     struct mrCommunication* comm;
-
     uint16_t last_request_id;
-    bool reset_streams;
 
     const uint16_t* request_list;
     uint8_t* status_list;
@@ -66,6 +64,7 @@ typedef struct mrSession
 
     mrOnTopicFunc on_topic;
     void* on_topic_args;
+
 } mrSession;
 
 //==================================================================

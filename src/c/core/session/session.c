@@ -64,7 +64,6 @@ void mr_init_session(mrSession* session, mrCommunication* comm, uint32_t key)
 {
     session->comm = comm;
     session->last_request_id = INITIAL_REQUEST_ID;
-    session->reset_streams = true;
 
     session->request_list = NULL;
     session->status_list = NULL;
@@ -99,7 +98,7 @@ bool mr_create_session(mrSession* session)
     MicroBuffer mb;
     init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
-    write_create_session(&session->info, &mb, get_milli_time(), session->reset_streams);
+    write_create_session(&session->info, &mb, get_milli_time());
     stamp_create_session_header(&session->info, mb.init);
     set_session_info_request(&session->info, MR_REQUEST_LOGIN);
 
