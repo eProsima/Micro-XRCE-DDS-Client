@@ -59,9 +59,15 @@ typedef struct mrSerialIO
 typedef uint16_t (*mr_read_cb)(void*, uint8_t*, size_t, int);
 
 void init_serial_io(mrSerialIO* serial_io);
-uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t addr);
-uint8_t read_serial_msg(mrSerialIO* serial_io, mr_read_cb cb, void* cb_arg,
-                        uint8_t* buf, size_t len, uint8_t* addr, int timeout);
+uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr);
+uint16_t read_serial_msg(mrSerialIO* serial_io,
+                        mr_read_cb cb,
+                        void* cb_arg,
+                        uint8_t* buf,
+                        size_t len,
+                        uint8_t* src_addr,
+                        uint8_t* rmt_addr,
+                        int timeout);
 
 #ifdef __cplusplus
 }

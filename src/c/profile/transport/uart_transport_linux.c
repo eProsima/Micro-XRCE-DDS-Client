@@ -41,7 +41,11 @@ static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
     bool rv = false;
     mrUARTTransport* transport = (mrUARTTransport*)instance;
 
-    uint16_t bytes_written = write_serial_msg(&transport->serial_io, buf, len, transport->local_addr);
+    uint16_t bytes_written = write_serial_msg(&transport->serial_io,
+                                              buf,
+                                              len,
+                                              transport->local_addr,
+                                              transport->remote_addr);
     if (0 < bytes_written)
     {
         ssize_t bytes_sent = write(transport->poll_fd.fd, transport->serial_io.output.buffer, (size_t)bytes_written);
@@ -59,11 +63,17 @@ static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeou
 {
     bool rv = true;
     mrUARTTransport* transport = (mrUARTTransport*)instance;
-    uint8_t addr;
-
-    uint8_t bytes_read = read_serial_msg(&transport->serial_io, read_uart_data, instance,
-                                         transport->buffer, sizeof(transport->buffer), &addr, timeout);
-    if (0 < bytes_read && addr == transport->remote_addr)
+    uint8_t src_addr;
+    uint8_t rmt_addr;
+    uint8_t bytes_read = read_serial_msg(&transport->serial_io,
+                                         read_uart_data,
+                                         instance,
+                                         transport->buffer,
+                                         sizeof(transport->buffer),
+                                         &src_addr,
+                                         &rmt_addr,
+                                         timeout);
+    if (0 < bytes_read && src_addr == transport->remote_addr)
     {
         *len = bytes_read;
         *buf = transport->buffer;

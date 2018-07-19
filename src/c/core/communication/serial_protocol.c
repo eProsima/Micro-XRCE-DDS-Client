@@ -44,7 +44,11 @@ static const uint16_t crc16_table[256] = {
  * Private function declarations.
  *******************************************************************************/
 static void update_crc(uint16_t* crc, const uint8_t data);
-static uint8_t process_serial_message(mrSerialInputBuffer* input, uint8_t* buf, size_t len, uint8_t* addr);
+static uint8_t process_serial_message(mrSerialInputBuffer* input,
+                                      uint8_t* buf,
+                                      size_t len,
+                                      uint8_t* src_addr,
+                                      uint8_t* rmt_addr);
 static bool init_serial_stream(mrSerialInputBuffer* input);
 static bool find_serial_message(mrSerialInputBuffer* input);
 static inline uint8_t get_next_octet(mrSerialInputBuffer* input, uint16_t* relative_position);
@@ -58,13 +62,17 @@ void update_crc(uint16_t* crc, const uint8_t data)
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-uint8_t process_serial_message(mrSerialInputBuffer* input, uint8_t* buf, size_t len, uint8_t* addr)
+uint8_t process_serial_message(mrSerialInputBuffer* input,
+                               uint8_t* buf,
+                               size_t len,
+                               uint8_t* src_addr,
+                               uint8_t* rmt_addr)
 {
     bool cond = true;
     uint16_t msg_len = 0;
     uint16_t msg_marker = 0;
-    uint8_t payload_len = 0;
-    uint8_t payload_marker = 0;
+    uint16_t payload_len = 0;
+    uint16_t payload_marker = 0;
     uint16_t crc = 0;
 
     /* Check raw message length. */
@@ -77,8 +85,10 @@ uint8_t process_serial_message(mrSerialInputBuffer* input, uint8_t* buf, size_t 
     else
     {
         /* Read address and payload length. */
-        *addr = get_next_octet(input, &msg_marker); // TODO (julian): implement simple routing method.
+        *src_addr = get_next_octet(input, &msg_marker);
+        *rmt_addr = get_next_octet(input, &msg_marker);
         payload_len = get_next_octet(input, &msg_marker);
+        payload_len += get_next_octet(input, &msg_marker) << 8;
 
         /* Check message length. */
         if (payload_len > len || payload_len > msg_len - MR_SERIAL_OVERHEAD)
@@ -217,7 +227,7 @@ void init_serial_io(mrSerialIO* serial_io)
     serial_io->input.stream_init = false;
 }
 
-uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t addr)
+uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr)
 {
     bool cond = true;
     uint16_t crc = 0;
@@ -233,8 +243,10 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
     if (cond)
     {
         /* Write header. */
-        cond = add_next_octet(&serial_io->output, addr, &position) &&
-               add_next_octet(&serial_io->output, (uint8_t)len, &position);
+        cond = add_next_octet(&serial_io->output, src_addr, &position) &&
+               add_next_octet(&serial_io->output, rmt_addr, &position) &&
+               add_next_octet(&serial_io->output, len & 0x00FF, &position) &&
+               add_next_octet(&serial_io->output, (len & 0xFF00) >> 8, &position);
 
         /* Write payload. */
         uint8_t octet = 0;
@@ -263,8 +275,14 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
     return cond ? (position + 1) : 0;
 }
 
-uint8_t read_serial_msg(mrSerialIO* serial_io, mr_read_cb cb, void* cb_arg,
-                        uint8_t* buf, size_t len, uint8_t* addr, int timeout)
+uint16_t read_serial_msg(mrSerialIO* serial_io,
+                        mr_read_cb cb,
+                        void* cb_arg,
+                        uint8_t* buf,
+                        size_t len,
+                        uint8_t* src_addr,
+                        uint8_t* rmt_addr,
+                        int timeout)
 {
     uint8_t rv = 0;
     bool data_available = false;
@@ -319,7 +337,7 @@ uint8_t read_serial_msg(mrSerialIO* serial_io, mr_read_cb cb, void* cb_arg,
         while (message_found)
         {
             /* Process available message from head to marker and update head. */
-            rv = process_serial_message(&serial_io->input, buf, len, addr);
+            rv = process_serial_message(&serial_io->input, buf, len, src_addr, rmt_addr);
             if (0 < rv)
             {
                 break;
