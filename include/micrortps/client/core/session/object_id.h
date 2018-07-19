@@ -22,10 +22,6 @@ extern "C"
 
 #include <stdint.h>
 
-extern const uint8_t MR_APPLICATION_ID;
-extern const uint8_t MR_QOS_PROFILE_ID;
-extern const uint8_t MR_TYPE_ID;
-extern const uint8_t MR_DOMAIN_ID;
 extern const uint8_t MR_PARTICIPANT_ID;
 extern const uint8_t MR_TOPIC_ID;
 extern const uint8_t MR_PUBLISHER_ID;

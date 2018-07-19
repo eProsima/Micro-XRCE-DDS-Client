@@ -24,11 +24,9 @@ extern "C"
 #include <micrortps/client/core/communication/serial_protocol.h>
 #include <sys/poll.h>
 
-#define MR_UART_TRANSPORT_MTU   MR_SERIAL_MTU
-
 typedef struct mrUARTTransport
 {
-    uint8_t buffer[MR_UART_TRANSPORT_MTU];
+    uint8_t buffer[MR_CONFIG_UART_TRANSPORT_MTU];
     uint8_t remote_addr;
     uint8_t local_addr;
     struct pollfd poll_fd;

@@ -15,11 +15,12 @@
 #include "HelloWorld.h"
 
 #include <micrortps/client/client.h>
+#include <string.h> //strcmp
 #include <stdlib.h> //atoi
 #include <stdio.h>
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     MR_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* mb, void* args)
 {
@@ -36,6 +37,12 @@ void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId
 
 int main(int args, char** argv)
 {
+    if(args >= 2 && (0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1]) || 0 == atoi(argv[1])))
+    {
+        printf("usage: program [-h | --help | <topics>]\n");
+        return 0;
+    }
+
     uint32_t count = 0;
     uint32_t max_topics = (args == 2) ? (uint32_t)atoi(argv[1]) : UINT32_MAX;
 

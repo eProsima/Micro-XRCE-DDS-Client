@@ -21,14 +21,14 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/communication/communication.h>
+#include <micrortps/client/config.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
 
-#define MR_UDP_TRANSPORT_MTU 512
 
 typedef struct mrUDPTransport
 {
-    uint8_t buffer[MR_UDP_TRANSPORT_MTU];
+    uint8_t buffer[MR_CONFIG_UDP_TRANSPORT_MTU];
     int socket_fd;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;

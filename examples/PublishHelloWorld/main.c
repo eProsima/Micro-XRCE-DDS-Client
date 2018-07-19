@@ -16,14 +16,21 @@
 
 #include <micrortps/client/client.h>
 #include <stdio.h>
+#include <string.h> //strcmp
 #include <stdlib.h> //atoi
 #include <unistd.h> //for sleep function in linux
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     MR_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 int main(int args, char** argv)
 {
+    if(args >= 2 && (0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1]) || 0 == atoi(argv[1])))
+    {
+        printf("usage: program [-h | --help | <topics>]\n");
+        return 0;
+    }
+
     uint32_t max_topics = (args == 2) ? (uint32_t)atoi(argv[1]) : UINT32_MAX;
 
     // Transport

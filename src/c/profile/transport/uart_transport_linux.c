@@ -123,7 +123,7 @@ bool mr_init_uart_transport_fd(mrUARTTransport* transport, int fd, uint8_t remot
         transport->comm.send_msg = send_uart_msg;
         transport->comm.recv_msg = recv_uart_msg;
         transport->comm.comm_error = get_uart_error;
-        transport->comm.mtu = MR_UART_TRANSPORT_MTU;
+        transport->comm.mtu = MR_CONFIG_UART_TRANSPORT_MTU;
         rv = true;
     }
 

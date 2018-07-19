@@ -45,8 +45,7 @@ uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
     payload_length += 4; // xml length
     payload_length += xml_ref_size; // xml data (note: compiler executes strlen one time this function)
     payload_length += (object_id.type == OBJK_PARTICIPANT && payload_length % 2 != 0) ? 1 : 0; // necessary padding
-    payload_length += (object_id.type == MR_APPLICATION_ID || object_id.type == MR_TYPE_ID ||
-                       object_id.type  == MR_DOMAIN_ID || object_id.type == MR_QOS_PROFILE_ID) ? 0 : 2; //object id ref
+    payload_length += 2; //object id ref
 
     MicroBuffer mb;
     if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))

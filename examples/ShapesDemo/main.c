@@ -33,11 +33,13 @@
 #define RED_CONSOLE_COLOR   "\x1B[1;31m"
 #define RESTORE_COLOR       "\x1B[0m"
 
+// Getting the max MTU at compile time.
+#define MAX_UDP_TCP_MTU ((MR_CONFIG_UDP_TRANSPORT_MTU > MR_CONFIG_TCP_TRANSPORT_MTU) ? MR_CONFIG_UDP_TRANSPORT_MTU : MR_CONFIG_UDP_TRANSPORT_MTU)
+#define MAX_TRANSPORT_MTU ((MR_CONFIG_UART_TRANSPORT_MTU > MAX_UDP_TCP_MTU) ? MR_CONFIG_UART_TRANSPORT_MTU : MAX_UDP_TCP_MTU)
+
 // Stream buffers
-#define MAX_TRANSPORT_MTU  512
-#define MAX_HISTORY 16
+#define MAX_HISTORY        16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
-#define STREAMS 5
 
 static bool run_command(const char* command, mrSession* session, mrStreamId* stream_id);
 static bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
@@ -132,15 +134,24 @@ int main(int args, char** argv)
     mr_set_topic_callback(&session, on_topic, NULL);
     mr_set_status_callback(&session, on_status, NULL);
 
-    uint8_t output_best_effort_stream_buffer[MAX_TRANSPORT_MTU * STREAMS];
-    uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE * STREAMS];
-    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE * STREAMS];
+    uint8_t output_best_effort_stream_buffer[MAX_TRANSPORT_MTU * MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
+    uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE * MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
+    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE * MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
 
-    for(int i = 0; i < STREAMS; ++i)
+    for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
     {
         (void) mr_create_output_best_effort_stream(&session, output_best_effort_stream_buffer + MAX_TRANSPORT_MTU * i, comm->mtu);
+    }
+    for(int i = 0; i < MR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
+    {
         (void) mr_create_input_best_effort_stream(&session);
+    }
+    for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
+    {
         (void) mr_create_output_reliable_stream(&session, output_reliable_stream_buffer + MAX_BUFFER_SIZE * i, comm->mtu * history, history);
+    }
+    for(int i = 0; i < MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
+    {
         (void) mr_create_input_reliable_stream(&session, input_reliable_stream_buffer + MAX_BUFFER_SIZE * i, comm->mtu * history, history);
     }
 

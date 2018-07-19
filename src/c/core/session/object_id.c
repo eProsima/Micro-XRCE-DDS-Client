@@ -1,10 +1,6 @@
 #include <micrortps/client/core/session/object_id.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 
-const uint8_t MR_APPLICATION_ID = OBJK_APPLICATION;
-const uint8_t MR_QOS_PROFILE_ID =  OBJK_QOSPROFILE;
-const uint8_t MR_TYPE_ID = OBJK_TYPE;
-const uint8_t MR_DOMAIN_ID = 0x07; //xrce especification undefined
 const uint8_t MR_PARTICIPANT_ID = OBJK_PARTICIPANT;
 const uint8_t MR_TOPIC_ID = OBJK_TOPIC;
 const uint8_t MR_PUBLISHER_ID = OBJK_PUBLISHER;

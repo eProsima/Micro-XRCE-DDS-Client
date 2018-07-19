@@ -292,7 +292,7 @@ bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t p
             transport->comm.send_msg = send_tcp_msg;
             transport->comm.recv_msg = recv_tcp_msg;
             transport->comm.comm_error = get_tcp_error;
-            transport->comm.mtu = MR_TCP_TRANSPORT_MTU;
+            transport->comm.mtu = MR_CONFIG_TCP_TRANSPORT_MTU;
             rv = true;
         }
     }

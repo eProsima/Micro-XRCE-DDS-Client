@@ -21,10 +21,9 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/communication/communication.h>
+#include <micrortps/client/config.h>
 #include <arpa/inet.h>
 #include <sys/poll.h>
-
-#define MR_TCP_TRANSPORT_MTU 512
 
 typedef enum mrTCPInputBufferState
 {
@@ -38,7 +37,7 @@ typedef enum mrTCPInputBufferState
 
 typedef struct mrTCPInputBuffer
 {
-    uint8_t buffer[MR_TCP_TRANSPORT_MTU];
+    uint8_t buffer[MR_CONFIG_TCP_TRANSPORT_MTU];
     uint16_t position;
     mrTCPInputBufferState state;
     uint16_t msg_size;
