@@ -30,7 +30,7 @@ struct CREATE_Payload;
 uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id);
 
 uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
-                              mrObjectId object_id, size_t xml_ref_size, uint8_t flags,
+                              mrObjectId object_id, size_t xml_ref_size, uint8_t mode,
                               struct CREATE_Payload* payload);
 
 #ifdef __cplusplus

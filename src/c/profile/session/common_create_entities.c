@@ -31,7 +31,7 @@ uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObje
 }
 
 uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, size_t xml_ref_size, uint8_t flags,
+                                  mrObjectId object_id, size_t xml_ref_size, uint8_t mode,
                                   CREATE_Payload* payload)
 {
     uint16_t request_id = MR_INVALID_REQUEST_ID;
@@ -52,7 +52,7 @@ uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
     if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))
     {
         request_id = init_base_object_request(session, object_id, &payload->base);
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, flags);
+        (void) write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
         (void) serialize_CREATE_Payload(&mb, payload);
     }
 

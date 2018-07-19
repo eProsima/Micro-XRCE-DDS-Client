@@ -22,35 +22,23 @@ extern "C"
 
 #include <micrortps/client/profile/session/common_create_entities.h>
 
-uint16_t mr_write_configure_qos_profile_xml(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, char* xml, uint8_t flags);
-
-uint16_t mr_write_configure_type_xml(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, char* xml, uint8_t flags);
-
-uint16_t mr_write_configure_application_xml(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, char* xml, uint8_t flags);
-
-uint16_t mr_write_configure_domain_xml(mrSession* session, mrStreamId stream_id,
-                                    mrObjectId object_id, char* xml, uint8_t flags);
-
 uint16_t mr_write_configure_participant_xml(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, uint16_t domain, char* xml, uint8_t flags);
+                                         mrObjectId object_id, uint16_t domain, const char* xml, uint8_t mode);
 
 uint16_t mr_write_configure_topic_xml(mrSession* session, mrStreamId stream_id,
-                                   mrObjectId object_id, mrObjectId participant_id, char* xml, uint8_t flags);
+                                   mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode);
 
 uint16_t mr_write_configure_publisher_xml(mrSession* session, mrStreamId stream_id,
-                                       mrObjectId object_id, mrObjectId participant_id, char* xml, uint8_t flags);
+                                       mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode);
 
 uint16_t mr_write_configure_subscriber_xml(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId participant_id, char* xml, uint8_t flags);
+                                        mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode);
 
 uint16_t mr_write_configure_datawriter_xml(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId publisher_id, char* xml, uint8_t flags);
+                                        mrObjectId object_id, mrObjectId publisher_id, const char* xml, uint8_t mode);
 
 uint16_t mr_write_configure_datareader_xml(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId subscriber_id, char* xml, uint8_t flags);
+                                        mrObjectId object_id, mrObjectId subscriber_id, const char* xml, uint8_t mode);
 
 #ifdef __cplusplus
 }

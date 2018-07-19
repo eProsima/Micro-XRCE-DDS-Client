@@ -23,7 +23,7 @@ project(PublishHelloWorldClient)
 if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PROFILE_UDP_TRANSPORT)
     message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
-    add_executable(${PROJECT_NAME} main.c HelloWorld.c WriteHelloWorld.c)
+    add_executable(${PROJECT_NAME} main.c HelloWorld.c HelloWorldWriter.c)
     target_link_libraries(${PROJECT_NAME} micrortps_client)
 
     install(TARGETS ${PROJECT_NAME}

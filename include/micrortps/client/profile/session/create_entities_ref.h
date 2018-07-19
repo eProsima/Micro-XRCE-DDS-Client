@@ -23,20 +23,8 @@ extern "C"
 
 #include <micrortps/client/profile/session/common_create_entities.h>
 
-uint16_t mr_write_create_qos_profile_ref(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, char* ref, uint8_t flags);
-
-uint16_t mr_write_create_type_ref(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, char* ref, uint8_t flags);
-
-uint16_t mr_write_create_domain_ref(mrSession* session, mrStreamId stream_id,
-                                    mrObjectId object_id, char* ref, uint8_t flags);
-
 uint16_t mr_write_create_participant_ref(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, char* ref, uint8_t flags);
-
-uint16_t mr_write_create_topic_ref(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, mrObjectId participant_id, char* ref, uint8_t flags);
+                                         mrObjectId object_id, const char* ref, uint8_t mode);
 
 #ifdef __cplusplus
 }

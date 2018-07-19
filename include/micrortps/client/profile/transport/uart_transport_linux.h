@@ -24,7 +24,7 @@ extern "C"
 #include <micrortps/client/core/communication/serial_protocol.h>
 #include <sys/poll.h>
 
-#define MR_UART_TRANSPORT_MTU 256
+#define MR_UART_TRANSPORT_MTU   MR_SERIAL_MTU
 
 typedef struct mrUARTTransport
 {
