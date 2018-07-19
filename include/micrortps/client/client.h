@@ -15,12 +15,7 @@
 #ifndef _MICRORTPS_CLIENT_CLIENT_H_
 #define _MICRORTPS_CLIENT_CLIENT_H_
 
-#cmakedefine PROFILE_CREATE_ENTITIES_REF
-#cmakedefine PROFILE_CREATE_ENTITIES_XML
-#cmakedefine PROFILE_READ_ACCESS
-#cmakedefine PROFILE_UDP_TRANSPORT
-#cmakedefine PROFILE_TCP_TRANSPORT
-#cmakedefine PROFILE_UART_TRANSPORT
+#include <micrortps/client/config.h>
 
 #ifdef PROFILE_CREATE_ENTITIES_REF
 #include <micrortps/client/profile/session/create_entities_ref.h>
@@ -35,15 +30,27 @@
 #endif //PROFILE_READ_ACCESS
 
 #ifdef PROFILE_UDP_TRANSPORT
-#include <micrortps/client/profile/transport/udp_transport_@PLATFORM_NAME@.h>
+#ifdef PLATFORM_NAME_LINUX
+#include <micrortps/client/profile/transport/udp_transport_linux.h>
+#elif PLATFORM_NAME_WINDOWS
+#include <micrortps/client/profile/transport/udp_transport_windows.h>
+#endif
 #endif //PROFILE_UDP_TRANSPORT
 
 #ifdef PROFILE_TCP_TRANSPORT
-#include <micrortps/client/profile/transport/tcp_transport_@PLATFORM_NAME@.h>
+#ifdef PLATFORM_NAME_LINUX
+#include <micrortps/client/profile/transport/tcp_transport_linux.h>
+#elif PLATFORM_NAME_WINDOWS
+#include <micrortps/client/profile/transport/tcp_transport_windows.h>
+#endif
 #endif //PROFILE_TCP_TRANSPORT
 
 #ifdef PROFILE_UART_TRANSPORT
-#include <micrortps/client/profile/transport/uart_transport_@PLATFORM_NAME@.h>
+#ifdef PLATFORM_NAME_LINUX
+#include <micrortps/client/profile/transport/uart_transport_linux.h>
+#elif PLATFORM_NAME_WINDOWS
+#include <micrortps/client/profile/transport/uart_transport_windows.h>
+#endif
 #endif //PROFILE_UART_TRANSPORT
 
 #include <micrortps/client/core/session/session.h>

@@ -108,21 +108,18 @@ foreach(TRANSPORT_TYPE UDP TCP UART)
             set(${TRANSPORT_TYPE}_SRCS
                 src/c/profile/transport/${TT}_transport_linux.c
                 )
-
             set(PLATFORM_NAME linux)
+            set(PLATFORM_NAME_LINUX ON)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             set(${TRANSPORT_TYPE}_SRCS
                 src/c/profile/transport/${TT}_transport_windows.c
                 )
             set(PLATFORM_NAME windows)
+            set(PLATFORM_NAME_WINDOWS ON)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "nuttx")
                 set(${TRANSPORT_TYPE}_SRCS
                     src/c/profile/transport/${TT}_transport_linux.c
-                    )
-            elseif(${PLATFORM_NAME} STREQUAL "freertos")
-                set(${TRANSPORT_TYPE}_SRCS
-                    src/c/profile/transport/${TT}_transport_freertos.c
                     )
             endif()
         endif()
@@ -197,26 +194,19 @@ endif()
 configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
     ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
     )
-configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/client.h.in
-    ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
-    )
 
 ###############################################################################
 # Compile setting
 ###############################################################################
+
 
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
         -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:SERIALIZATION_LOGS>
         -D$<$<BOOL:${VERBOSE_MESSAGE}>:MESSAGE_LOGS>
-        -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:PROFILE_CREATE_ENTITIES_REF>
-        -D$<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:PROFILE_CREATE_ENTITIES_XML>
-        -D$<$<BOOL:${PROFILE_READ_ACCESS}>:PROFILE_READ_ACCESS>
-        -D$<$<BOOL:${PROFILE_UDP_TRANSPORT}>:PROFILE_UDP_TRANSPORT>
-        -D$<$<BOOL:${PROFILE_TCP_TRANSPORT}>:PROFILE_TCP_TRANSPORT>
-        -D$<$<BOOL:${PROFILE_UART_TRANSPORT}>:PROFILE_UART_TRANSPORT>
     )
+
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
 if((MSVC OR MSVC_IDE) AND (TARGET_TYPE STREQUAL "SHARED_LIBRARY"))
     target_compile_definitions(${PROJECT_NAME}
@@ -273,11 +263,6 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/micrortps/client/
 
 # Install config.h
 install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
-    )
-
-# Install client.h
-install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/client.h
     DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
     )
 
