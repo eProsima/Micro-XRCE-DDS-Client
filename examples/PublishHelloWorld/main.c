@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
-#include <unistd.h> //for sleep function in linux
 
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
