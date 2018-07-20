@@ -139,3 +139,8 @@ bool mr_init_uart_transport_fd(mrUARTTransport* transport, int fd, uint8_t remot
 
     return rv;
 }
+
+bool mr_close_uart_transport(mrUARTTransport* transport)
+{
+    return (0 == transport->poll_fd.fd);
+}

@@ -1,4 +1,5 @@
 #include <micrortps/client/profile/transport/udp_transport_linux.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -104,4 +105,9 @@ bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t p
     }
 
     return rv;
+}
+
+bool mr_close_udp_transport(mrUDPTransport* transport)
+{
+    return (0 == close(transport->poll_fd.fd));
 }

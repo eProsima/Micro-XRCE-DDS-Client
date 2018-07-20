@@ -36,6 +36,7 @@ typedef struct mrUDPTransport
 } mrUDPTransport;
 
 bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
+bool mr_close_udp_transport(mrUDPTransport* transport);
 
 #ifdef __cplusplus
 }

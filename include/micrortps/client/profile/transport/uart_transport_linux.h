@@ -36,6 +36,7 @@ typedef struct mrUARTTransport
 
 bool mr_init_uart_transport(mrUARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
 bool mr_init_uart_transport_fd(mrUARTTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
+bool mr_close_uart_transport(mrUARTTransport* transport);
 
 #ifdef __cplusplus
 }

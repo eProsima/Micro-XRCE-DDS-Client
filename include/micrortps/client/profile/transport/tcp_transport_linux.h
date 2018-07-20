@@ -54,6 +54,7 @@ typedef struct mrTCPTransport
 } mrTCPTransport;
 
 bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
+bool mr_close_tcp_transport(mrTCPTransport* transport);
 
 #ifdef __cplusplus
 }

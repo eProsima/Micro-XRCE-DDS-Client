@@ -299,3 +299,8 @@ bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t p
 
     return rv;
 }
+
+bool mr_close_tcp_transport(mrTCPTransport* transport)
+{
+    return (0 == close(transport->poll_fd.fd));
+}
