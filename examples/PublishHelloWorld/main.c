@@ -66,7 +66,7 @@ int main(int args, char** argv)
     uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, MR_REPLACE);
 
     mrObjectId publisher_id = mr_object_id(0x01, MR_PUBLISHER_ID);
-    const char* publisher_xml = "<publisher name=\"MyPublisher\"";
+    const char* publisher_xml = "<publisher name=\"MyPublisher\">";
     uint16_t publisher_req = mr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, MR_REPLACE);
 
     mrObjectId datawriter_id = mr_object_id(0x01, MR_DATAWRITER_ID);

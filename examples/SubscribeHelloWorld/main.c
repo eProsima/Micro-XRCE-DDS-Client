@@ -81,7 +81,7 @@ int main(int args, char** argv)
     uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, MR_REPLACE);
 
     mrObjectId subscriber_id = mr_object_id(0x01, MR_SUBSCRIBER_ID);
-    const char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
+    const char* subscriber_xml = "<subscriber name=\"MySubscriber\">";
     uint16_t subscriber_req = mr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, MR_REPLACE);
 
     mrObjectId datareader_id = mr_object_id(0x01, MR_DATAREADER_ID);

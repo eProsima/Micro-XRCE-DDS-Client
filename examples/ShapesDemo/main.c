@@ -231,14 +231,14 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     {
         mrObjectId publisher_id = mr_object_id(arg1, MR_PUBLISHER_ID);
         mrObjectId participant_id = mr_object_id(arg2, MR_PARTICIPANT_ID);
-        const char* publisher_xml = "<publisher name=\"MyPublisher\"";
+        const char* publisher_xml = "<publisher name=\"MyPublisher\">";
         (void) mr_write_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
     else if(strcmp(name, "create_subscriber") == 0 && length == 3)
     {
         mrObjectId subscriber_id = mr_object_id(arg1, MR_SUBSCRIBER_ID);
         mrObjectId participant_id = mr_object_id(arg2, MR_PARTICIPANT_ID);
-        const char* subscriber_xml = {"<subscriber name=\"MySubscriber\""};
+        const char* subscriber_xml = {"<subscriber name=\"MySubscriber\">"};
         (void) mr_write_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
     else if(strcmp(name, "create_datawriter") == 0 && length == 3)
