@@ -13,7 +13,7 @@ static int get_udp_error();
 static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
-    UDPTransport* transport = (UDPTransport*)instance;
+    mrUDPTransport* transport = (mrUDPTransport*)instance;
 
     int bytes_sent = send(transport->socket_fd, (void*)buf, len, 0);
     if (0 > bytes_sent)
@@ -27,7 +27,7 @@ static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = true;
-    UDPTransport* transport = (UDPTransport*)instance;
+    mrUDPTransport* transport = (mrUDPTransport*)instance;
 
     int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -60,7 +60,7 @@ static int get_udp_error()
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
+bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -85,6 +85,7 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
                                 &transport->remote_addr,
                                 sizeof(transport->remote_addr));
         if (0 == connected)
+        {
             /* Interface setup. */
             transport->comm.instance = (void*)transport;
             transport->comm.send_msg = send_udp_msg;
@@ -95,5 +96,11 @@ int init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port)
         }
     }
 
-    return result;
+    return rv;
+}
+
+bool mr_close_udp_transport(mrUDPTransport* transport)
+{
+    (void)transport;
+    return 1;
 }

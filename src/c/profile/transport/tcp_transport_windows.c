@@ -13,7 +13,7 @@ static int get_tcp_error();
 static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
-    TCPTransport* transport = (TCPTransport*)instance;
+    mrTCPTransport* transport = (mrTCPTransport*)instance;
     size_t bytes_sent = 0;
     int send_rv = 0;
 
@@ -36,7 +36,7 @@ static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = true;
-    TCPTransport* transport = (TCPTransport*)instance;
+    mrTCPTransport* transport = (mrTCPTransport*)instance;
 
     int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -69,7 +69,7 @@ static int get_tcp_error()
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-int init_udp_transport(TCPTransport* transport, const char* ip, uint16_t port)
+bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -87,13 +87,14 @@ int init_udp_transport(TCPTransport* transport, const char* ip, uint16_t port)
 
         /* Poll setup. */
         transport->poll_fd.fd = transport->socket_fd;
-        transport->buffer.events = POLLIN;
+        transport->poll_fd.events = POLLIN;
 
         /* Server connection. */
         int connected = connect(transport->socket_fd,
                                 &transport->remote_addr,
                                 sizeof(transport->remote_addr));
         if (SOCKET_ERROR != connected)
+        {
             /* Interface setup. */
             transport->comm.instance = (void*)transport;
             transport->comm.send_msg = send_tcp_msg;
@@ -105,4 +106,10 @@ int init_udp_transport(TCPTransport* transport, const char* ip, uint16_t port)
     }
 
     return rv;
+}
+
+bool mr_close_tcp_transport(mrTCPTransport* transport)
+{
+    (void)transport;
+    return 1;
 }

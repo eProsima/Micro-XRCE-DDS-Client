@@ -20,7 +20,7 @@ static size_t get_input_buffer_size(const mrInputReliableStream* stream);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, size_t history)
+void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history)
 {
     // assert for history (must be 2^)
     stream->buffer = buffer;
@@ -134,9 +134,9 @@ void process_heartbeat(mrInputReliableStream* stream, uint16_t first_seq_num, ui
 uint16_t compute_nack_bitmap(const mrInputReliableStream* stream)
 {
     uint16_t nack_bitmap = 0;
-    size_t buffers_to_ack = seq_num_sub(stream->last_announced, stream->last_handled);
+    uint16_t buffers_to_ack = seq_num_sub(stream->last_announced, stream->last_handled);
 
-    for(size_t i = 0; i < buffers_to_ack; i++)
+    for(uint16_t i = 0; i < buffers_to_ack; i++)
     {
         mrSeqNum seq_num = seq_num_add(stream->last_handled, i + 1);
         uint8_t* internal_buffer = get_input_buffer(stream, seq_num % stream->history);

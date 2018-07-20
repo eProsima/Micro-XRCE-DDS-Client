@@ -27,17 +27,18 @@ extern "C"
 
 #define UDP_TRANSPORT_MTU 512
 
-typedef struct UDPTransport
+typedef struct mrUDPTransport
 {
     uint8_t buffer[UDP_TRANSPORT_MTU];
     SOCKET socket_fd;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
     mrCommunication comm;
-} UDPTransport;
+} mrUDPTransport;
 
-bool init_udp_transport(UDPTransport* transport, const char* ip, uint16_t port);
+bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
 
+bool mr_close_udp_transport(mrUDPTransport* transport);
 
 #ifdef __cplusplus
 }

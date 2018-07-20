@@ -29,8 +29,8 @@ bool mr_write_ShapeType_topic(mrSession* session, mrStreamId stream_id, mrObject
 {
     bool written = false;
 
-    uint32_t topic_length = ShapeType_size_of_topic(topic, 0);
-    uint32_t payload_length = 0;
+    uint16_t topic_length = (uint16_t)ShapeType_size_of_topic(topic, 0);
+    uint16_t payload_length = 0;
     payload_length += 4; //request_id + object_id
     payload_length += 4; //topic_length (remove in future version to be compliant)
 

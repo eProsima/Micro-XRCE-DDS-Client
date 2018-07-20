@@ -44,9 +44,9 @@ void init_stream_storage(mrStreamStorage* storage);
 void reset_stream_storage(mrStreamStorage* storage);
 
 mrStreamId add_output_best_effort_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset);
-mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset);
+mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
 mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage);
-mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history);
+mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history);
 
 mrOutputBestEffortStream* get_output_best_effort_stream_id(mrStreamStorage* storage, uint8_t index);
 mrOutputReliableStream* get_output_reliable_stream_id(mrStreamStorage* storage, uint8_t index);

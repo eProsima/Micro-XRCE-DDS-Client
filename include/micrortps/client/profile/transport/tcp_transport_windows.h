@@ -27,17 +27,18 @@ extern "C"
 
 #define TCP_TRANSPORT_MTU 512
 
-typedef struct TCPTransport TCPTransport;
-struct TCPTransport
+typedef struct mrTCPTransport
 {
     uint8_t buffer[TCP_TRANSPORT_MTU];
     SOCKET socket_fd;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
     mrCommunication comm;
-};
+} mrTCPTransport;
 
-bool init_tcp_transport(TCPTransport* transport, const char* ip, uint16_t port);
+bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
+
+bool mr_close_tcp_transport(mrTCPTransport* transport);
 
 #ifdef __cplusplus
 }

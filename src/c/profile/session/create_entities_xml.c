@@ -89,12 +89,17 @@ inline uint16_t create_entity_xml(mrSession* session, mrStreamId stream_id,
                                   mrObjectId object_id, const char* xml, uint8_t mode,
                                   CREATE_Payload* payload)
 {
+    uint16_t returned_value = MR_INVALID_REQUEST_ID;
     uint32_t xml_size = strlen(xml) + 1;
+    if(xml_size <= UINT16_MAX)
+    {
+        // Use participant access to access to the xml base of any object variant. //Future elegant change?
+        payload->object_representation._.participant.base.representation.format = REPRESENTATION_AS_XML_STRING;
+        payload->object_representation._.participant.base.representation._.xml_string_represenatation.size = xml_size;
+        memcpy(payload->object_representation._.participant.base.representation._.xml_string_represenatation.data, xml, xml_size);
 
-    // Use participant access to access to the xml base of any object variant. //Future elegant change?
-    payload->object_representation._.participant.base.representation.format = REPRESENTATION_AS_XML_STRING;
-    payload->object_representation._.participant.base.representation._.xml_string_represenatation.size = xml_size;
-    memcpy(payload->object_representation._.participant.base.representation._.xml_string_represenatation.data, xml, xml_size);
+        returned_value = common_create_entity(session, stream_id, object_id, (uint16_t)xml_size, mode, payload);
+    }
 
-    return common_create_entity(session, stream_id, object_id, xml_size, mode, payload);
+    return returned_value;
 }

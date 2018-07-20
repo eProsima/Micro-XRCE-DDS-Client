@@ -512,7 +512,7 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
     }
     else
     {
-        stream_id = seq_num;
+        stream_id = (uint8_t)seq_num;
     }
 
     printf("%s%s%3zu: %s(%c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
@@ -521,6 +521,10 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
 void print_tail(int64_t initial_log_time)
 {
     int64_t ms = get_milli_time() - initial_log_time;
+#ifdef WIN32
+    printf(" %st: %I64ims%s", BLUE, ms, RESTORE_COLOR);
+#else
     printf(" %st: %lims%s", BLUE, ms, RESTORE_COLOR);
+#endif
 }
 

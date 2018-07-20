@@ -78,9 +78,9 @@ bool mr_create_session(mrSession* session);
 bool mr_delete_session(mrSession* session);
 
 mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size);
-mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history);
+mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
 mrStreamId mr_create_input_best_effort_stream(mrSession* session);
-mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history);
+mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
 
 bool mr_run_session_until_timeout(mrSession* session, int tiemout);
 bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout);

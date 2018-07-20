@@ -15,7 +15,7 @@ uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObje
     DELETE_Payload payload;
 
     // Change this when microcdr supports size_of function.
-    int payload_length = 0; //DELETE_Payload_size(&payload);
+    uint16_t payload_length = 0; //DELETE_Payload_size(&payload);
     payload_length += 4; // delete payload (request id + object_id), no padding.
 
     MicroBuffer mb;
@@ -31,13 +31,13 @@ uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObje
 }
 
 uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, size_t xml_ref_size, uint8_t mode,
+                                  mrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
                                   CREATE_Payload* payload)
 {
     uint16_t request_id = MR_INVALID_REQUEST_ID;
 
     // Change this when microcdr supports size_of function. Currently, DOMAIN_ID is not supported.
-    size_t payload_length = 0; //CREATE_Payload_size(&payload);
+    uint16_t payload_length = 0; //CREATE_Payload_size(&payload);
     payload_length += 4; // base
     payload_length += 1; // objk type
     payload_length += 1; // base3 type => xml

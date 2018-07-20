@@ -30,25 +30,25 @@
 #endif //PROFILE_READ_ACCESS
 
 #ifdef PROFILE_UDP_TRANSPORT
-#ifdef PLATFORM_NAME_LINUX
+#if defined(PLATFORM_NAME_LINUX)
 #include <micrortps/client/profile/transport/udp_transport_linux.h>
-#elif PLATFORM_NAME_WINDOWS
+#elif defined(PLATFORM_NAME_WINDOWS)
 #include <micrortps/client/profile/transport/udp_transport_windows.h>
 #endif
 #endif //PROFILE_UDP_TRANSPORT
 
 #ifdef PROFILE_TCP_TRANSPORT
-#ifdef PLATFORM_NAME_LINUX
+#if defined(PLATFORM_NAME_LINUX)
 #include <micrortps/client/profile/transport/tcp_transport_linux.h>
-#elif PLATFORM_NAME_WINDOWS
+#elif defined(PLATFORM_NAME_WINDOWS)
 #include <micrortps/client/profile/transport/tcp_transport_windows.h>
 #endif
 #endif //PROFILE_TCP_TRANSPORT
 
 #ifdef PROFILE_UART_TRANSPORT
-#ifdef PLATFORM_NAME_LINUX
+#if defined(PLATFORM_NAME_LINUX)
 #include <micrortps/client/profile/transport/uart_transport_linux.h>
-#elif PLATFORM_NAME_WINDOWS
+#elif defined(PLATFORM_NAME_WINDOWS)
 #include <micrortps/client/profile/transport/uart_transport_windows.h>
 #endif
 #endif //PROFILE_UART_TRANSPORT

@@ -25,7 +25,7 @@ static size_t get_output_buffer_size(const mrOutputReliableStream* stream);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset)
+void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
 {
     // assert for history (must be 2^)
 
@@ -211,8 +211,8 @@ void process_acknack(mrOutputReliableStream* stream, uint16_t bitmap, uint16_t l
         set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
     }
 
-    size_t buffers_to_check_clean = seq_num_sub(stream->last_sent, last_acked_seq_num);
-    for(size_t i = 0; i < buffers_to_check_clean; i++)
+    uint16_t buffers_to_check_clean = seq_num_sub(stream->last_sent, last_acked_seq_num);
+    for(uint16_t i = 0; i < buffers_to_check_clean; i++)
     {
         if(i & bitmap) /* message lost */
         {

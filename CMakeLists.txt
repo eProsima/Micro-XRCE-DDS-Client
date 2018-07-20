@@ -164,7 +164,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     C_STANDARD 99
     C_STANDARD_REQUIRED YES
     )
-target_link_libraries(${PROJECT_NAME} PUBLIC microcdr)
+target_link_libraries(${PROJECT_NAME} PUBLIC microcdr
+    $<$<BOOL:${WIN32}>:ws2_32>
+    )
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/.>

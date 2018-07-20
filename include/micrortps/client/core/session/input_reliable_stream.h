@@ -31,14 +31,14 @@ typedef struct mrInputReliableStream
 {
     uint8_t* buffer;
     size_t size;
-    size_t history;
+    uint16_t history;
 
     mrSeqNum last_handled;
     mrSeqNum last_announced;
 
 } mrInputReliableStream;
 
-void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, size_t history);
+void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);
 void reset_input_reliable_stream(mrInputReliableStream* stream);
 bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
 bool next_input_reliable_buffer_available(mrInputReliableStream* stream, struct MicroBuffer* mb);

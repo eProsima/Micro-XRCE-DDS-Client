@@ -44,7 +44,7 @@ static const uint16_t crc16_table[256] = {
  * Private function declarations.
  *******************************************************************************/
 static void update_crc(uint16_t* crc, const uint8_t data);
-static uint8_t process_serial_message(mrSerialInputBuffer* input,
+static uint16_t process_serial_message(mrSerialInputBuffer* input,
                                       uint8_t* buf,
                                       size_t len,
                                       uint8_t* src_addr,
@@ -62,7 +62,7 @@ void update_crc(uint16_t* crc, const uint8_t data)
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-uint8_t process_serial_message(mrSerialInputBuffer* input,
+uint16_t process_serial_message(mrSerialInputBuffer* input,
                                uint8_t* buf,
                                size_t len,
                                uint8_t* src_addr,
@@ -284,7 +284,7 @@ uint16_t read_serial_msg(mrSerialIO* serial_io,
                         uint8_t* rmt_addr,
                         int timeout)
 {
-    uint8_t rv = 0;
+    uint16_t rv = 0;
     bool data_available = false;
 
     if (!serial_io->input.stream_init)

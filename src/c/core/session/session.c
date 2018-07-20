@@ -127,7 +127,7 @@ mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buff
     return add_output_best_effort_buffer(&session->streams, buffer, size, header_offset);
 }
 
-mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history)
+mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
     uint8_t header_offset = session_header_offset(&session->info);
     return add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
@@ -138,7 +138,7 @@ mrStreamId mr_create_input_best_effort_stream(mrSession* session)
     return add_input_best_effort_buffer(&session->streams);
 }
 
-mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, size_t history)
+mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
@@ -232,7 +232,7 @@ inline uint16_t generate_request_id(mrSession* session)
 
 void flash_output_streams(mrSession* session)
 {
-    for(unsigned i = 0; i < session->streams.output_best_effort_size; ++i)
+    for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
         mrOutputBestEffortStream* stream = &session->streams.output_best_effort[i];
         mrStreamId id = mr_stream_id(i, MR_BEST_EFFORT_STREAM, MR_OUTPUT_STREAM);
@@ -245,7 +245,7 @@ void flash_output_streams(mrSession* session)
         }
     }
 
-    for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
+    for(uint8_t i = 0; i < session->streams.output_reliable_size; ++i)
     {
         mrOutputReliableStream* stream = &session->streams.output_reliable[i];
         mrStreamId id = mr_stream_id(i, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
@@ -281,7 +281,7 @@ bool listen_message_reliably(mrSession* session, int poll_ms)
     {
         int64_t next_heartbeat_timestamp = INT64_MAX;
         int64_t timestamp = get_milli_time();
-        for(unsigned i = 0; i < session->streams.output_reliable_size; ++i)
+        for(uint8_t i = 0; i < session->streams.output_reliable_size; ++i)
         {
             mrOutputReliableStream* stream = &session->streams.output_reliable[i];
             mrStreamId id = mr_stream_id(i, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
@@ -379,13 +379,13 @@ void read_message(mrSession* session, MicroBuffer* mb)
     }
 }
 
-void read_stream(mrSession* session, MicroBuffer* mb, mrStreamId stream_id, uint16_t seq_num)
+void read_stream(mrSession* session, MicroBuffer* mb, mrStreamId stream_id, mrSeqNum seq_num)
 {
     switch(stream_id.type)
     {
         case MR_NONE_STREAM:
         {
-            stream_id = mr_stream_id_from_raw(seq_num, MR_INPUT_STREAM); // The real stream_id is into seq_num
+            stream_id = mr_stream_id_from_raw((uint8_t)seq_num, MR_INPUT_STREAM); // The real stream_id is into seq_num
             read_submessage_list(session, mb, stream_id);
             break;
         }

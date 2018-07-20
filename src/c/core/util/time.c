@@ -1,6 +1,10 @@
 #include <micrortps/client/core/util/time.h>
 #include <time.h>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 //==================================================================
 //                             PUBLIC
 //==================================================================

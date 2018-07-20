@@ -43,7 +43,7 @@ mrStreamId add_output_best_effort_buffer(mrStreamStorage* storage, uint8_t* buff
     return mr_stream_id(index, MR_BEST_EFFORT_STREAM, MR_OUTPUT_STREAM);
 }
 
-mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history, uint8_t header_offset)
+mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
 {
     uint8_t index = storage->output_reliable_size++;
     // assert for index
@@ -61,7 +61,7 @@ mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage)
     return mr_stream_id(index, MR_BEST_EFFORT_STREAM, MR_INPUT_STREAM);
 }
 
-mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, size_t history)
+mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history)
 {
     uint8_t index = storage->input_reliable_size++;
     // assert for index
