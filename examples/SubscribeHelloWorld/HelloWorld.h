@@ -38,8 +38,8 @@ typedef struct HelloWorld
 
 struct MicroBuffer;
 
-bool mr_serialize_HelloWorld_topic(struct MicroBuffer* writer, const HelloWorld* topic);
-bool mr_deserialize_HelloWorld_topic(struct MicroBuffer* reader, HelloWorld* topic);
-uint32_t mr_size_of_HelloWorld_topic(const HelloWorld* topic, uint32_t size);
+bool HelloWorld_serialize_topic(struct MicroBuffer* writer, const HelloWorld* topic);
+bool HelloWorld_deserialize_topic(struct MicroBuffer* reader, HelloWorld* topic);
+uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size);
 
 #endif // _HelloWorld_H_

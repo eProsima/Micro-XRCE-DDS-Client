@@ -172,7 +172,19 @@ int main(int args, char** argv)
         }
     }
 
-    //TODO: add the close transport functions
+
+    if(&uart.comm == comm)
+    {
+        mr_close_uart_transport(&uart);
+    }
+    else if(&udp.comm == comm)
+    {
+        mr_close_udp_transport(&udp);
+    }
+    else if(&tcp.comm == comm)
+    {
+        mr_close_tcp_transport(&tcp);
+    }
     return 0;
 }
 
@@ -294,10 +306,9 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     }
     else if(strcmp(name, "exit") == 0 && length == 1)
     {
-        (void) compute_print_command(session, stream_id, 1, "delete_session", 0, 0, 0, 0, 0, "");
         return false;
     }
-    else if(strcmp(name, "example") == 0 && length == 2)
+    else if(strcmp(name, "entity_tree") == 0 && length == 2)
     {
         (void) compute_print_command(session, stream_id, 2, "create_participant", arg1, 0, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
@@ -343,7 +354,7 @@ void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrS
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args;
 
     ShapeType topic;
-    mr_deserialize_ShapeType_topic(serialization, &topic);
+    ShapeType_deserialize_topic(serialization, &topic);
 
     printf("Receiving... ");
     print_ShapeType_topic(&topic);
@@ -453,7 +464,7 @@ void print_commands(void)
     printf("        The streams must be initially configured.\n");
     printf("    (macro) exit:\n");
     printf("        Close session and exit\n");
-    printf("    (macro) example            <id>:\n");
+    printf("    (macro) entity_tree        <id>:\n");
     printf("        Create the necessary entities for a complete publisher and subscriber.\n");
     printf("        All entities will have the same <id> as id.\n");
     printf("    h, help:\n");

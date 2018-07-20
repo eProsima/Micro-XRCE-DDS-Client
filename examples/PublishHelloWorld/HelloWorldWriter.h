@@ -26,6 +26,7 @@
 
 #include <micrortps/client/client.h>
 
-bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const HelloWorld* topic);
+bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
+        const HelloWorld* topic);
 
 #endif // _HelloWorld_WRITER_H_

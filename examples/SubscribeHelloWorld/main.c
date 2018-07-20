@@ -22,12 +22,12 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(mrSession* session, mrObjectId id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* mb, void* args)
+void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* mb, void* args)
 {
-    (void) session; (void) id; (void) request_id; (void) stream_id; (void) args;
+    (void) session; (void) object_id; (void) request_id; (void) stream_id;
 
     HelloWorld topic;
-    mr_deserialize_HelloWorld_topic(mb, &topic);
+    HelloWorld_deserialize_topic(mb, &topic);
 
     printf("Received topic: %s, id: %i\n", topic.message, topic.index);
 
@@ -48,7 +48,7 @@ int main(int args, char** argv)
 
     // Transport
     mrUDPTransport transport;
-    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2019))
+    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -112,7 +112,7 @@ int main(int args, char** argv)
 
     // Delete resources
     mr_delete_session(&session);
-    //TODO: add the close transport functions
+    mr_close_udp_transport(&transport);
 
     return 0;
 }

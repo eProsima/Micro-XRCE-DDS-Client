@@ -24,11 +24,12 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <micrortps/client/core/session/submessage.h>
 
-bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const HelloWorld* topic)
+bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const
+        HelloWorld* topic)
 {
     bool written = false;
 
-    uint32_t topic_length = mr_size_of_HelloWorld_topic(topic, 0);
+    uint32_t topic_length = HelloWorld_size_of_topic(topic, 0);
     uint32_t payload_length = 0;
     payload_length += 4; //request_id + object_id
     payload_length += 4; //topic_length (remove in future version to be compliant)
@@ -45,7 +46,7 @@ bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjec
 
         MicroBuffer mb_topic;
         init_micro_buffer(&mb_topic, mb.iterator, topic_length);
-        (void) mr_serialize_HelloWorld_topic(&mb_topic, topic);
+        (void) HelloWorld_serialize_topic(&mb_topic, topic);
 
         written = true;
     }

@@ -34,7 +34,7 @@ int main(int args, char** argv)
 
     // Transport
     mrUDPTransport transport;
-    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2019))
+    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -99,7 +99,7 @@ int main(int args, char** argv)
 
     // Delete resources
     mr_delete_session(&session);
-    //TODO: add the close transport functions
+    mr_close_udp_transport(&transport);
 
     return 0;
 }
