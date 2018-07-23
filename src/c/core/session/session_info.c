@@ -84,7 +84,7 @@ void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer)
     (void) serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
-void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer)
+void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSeqNum seq_num, uint8_t* buffer)
 {
     MicroBuffer mb;
     init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
@@ -92,7 +92,7 @@ void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, uint
     (void) serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }
 
-bool read_session_header(const mrSessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num)
+bool read_session_header(const mrSessionInfo* info, MicroBuffer* mb, uint8_t* stream_id_raw, mrSeqNum* seq_num)
 {
     bool must_be_read = micro_buffer_remaining(mb) > MAX_HEADER_SIZE;
     if(must_be_read)

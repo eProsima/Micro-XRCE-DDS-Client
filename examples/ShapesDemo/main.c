@@ -216,56 +216,56 @@ bool run_command(const char* command, mrSession* session, mrStreamId* stream_id)
 bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
                      uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color)
 {
-    if(strcmp(name, "create_session") == 0 && length >= 1)
+    if(0 == strcmp(name, "create_session") && 1 == length)
     {
         (void) mr_create_session(session);
         print_status(session->info.last_requested_status);
     }
-    else if(strcmp(name, "create_participant") == 0 && length == 2)
+    else if(0 == strcmp(name, "create_participant") && 2 == length)
     {
         mrObjectId participant_id = mr_object_id((uint16_t)arg1, MR_PARTICIPANT_ID);
         const char* participant_ref = "default participant";
         (void) mr_write_create_participant_ref(session, *stream_id, participant_id, participant_ref, 0);
     }
-    else if(strcmp(name, "create_topic") == 0 && length == 3)
+    else if(0 == strcmp(name, "create_topic") && 3 == length)
     {
         mrObjectId topic_id = mr_object_id((uint16_t)arg1, MR_TOPIC_ID);
         mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
         const char* topic_xml = "<dds><topic><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
         (void) mr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
     }
-    else if(strcmp(name, "create_publisher") == 0 && length == 3)
+    else if(0 == strcmp(name, "create_publisher") && 3 == length)
     {
         mrObjectId publisher_id = mr_object_id((uint16_t)arg1, MR_PUBLISHER_ID);
         mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
         const char* publisher_xml = "<publisher name=\"MyPublisher\">";
         (void) mr_write_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
-    else if(strcmp(name, "create_subscriber") == 0 && length == 3)
+    else if(0 == strcmp(name, "create_subscriber") && 3 == length)
     {
         mrObjectId subscriber_id = mr_object_id((uint16_t)arg1, MR_SUBSCRIBER_ID);
         mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
         const char* subscriber_xml = { "<subscriber name=\"MySubscriber\">" };
         (void) mr_write_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
-    else if(strcmp(name, "create_datawriter") == 0 && length == 3)
+    else if(0 == strcmp(name, "create_datawriter") && 3 == length)
     {
         mrObjectId datawriter_id = mr_object_id((uint16_t)arg1, MR_DATAWRITER_ID);
         mrObjectId publisher_id = mr_object_id((uint16_t)arg2, MR_PUBLISHER_ID);
         const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
         (void) mr_write_configure_datawriter_xml(session, *stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
     }
-    else if(strcmp(name, "create_datareader") == 0 && length == 3)
+    else if(0 == strcmp(name, "create_datareader") && 3 == length)
     {
         mrObjectId datareader_id = mr_object_id((uint16_t)arg1, MR_DATAREADER_ID);
         mrObjectId subscriber_id = mr_object_id((uint16_t)arg2, MR_SUBSCRIBER_ID);
         const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
         (void) mr_write_configure_datareader_xml(session, *stream_id, datareader_id, subscriber_id, datareader_xml, 0);
     }
-    else if(strcmp(name, "write_data") == 0 && length >= 3)
+    else if(0 == strcmp(name, "write_data") && 3 <= length)
     {
         ShapeType topic = {"GREEN", 100 , 100, 50};
-        if(length > 3)
+        if(3 < length)
         {
             strncpy(topic.color, topic_color, sizeof(topic.color));
             topic.x = arg3;
@@ -280,7 +280,7 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
         printf("Sending... ");
         print_ShapeType_topic(&topic);
     }
-    else if(strcmp(name, "request_data") == 0 && length == 4)
+    else if(0 == strcmp(name, "request_data") && 4 == length)
     {
         mrDeliveryControl delivery_control;
         delivery_control.max_samples = (uint16_t)arg3;
@@ -292,30 +292,30 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
         mrStreamId input_stream_id = mr_stream_id_from_raw((uint8_t)arg2, MR_INPUT_STREAM);
         (void) mr_write_request_data(session, *stream_id, datareader_id, input_stream_id, &delivery_control);
     }
-    else if(strcmp(name, "cancel_data") == 0 && length == 2)
+    else if(0 == strcmp(name, "cancel_data") && 2 == length)
     {
         mrObjectId datareader_id = mr_object_id((uint16_t)arg1, MR_DATAREADER_ID);
         (void) mr_write_cancel_data(session, *stream_id, datareader_id);
     }
-    else if(strcmp(name, "delete") == 0 && length == 3)
+    else if(0 == strcmp(name, "delete") && 3 == length)
     {
         mrObjectId entity_id = mr_object_id((uint16_t)(arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
         (void) mr_write_delete_entity(session, *stream_id, entity_id);
     }
-    else if((strcmp(name, "default_output_stream") == 0 || strcmp(name, "stream") == 0) && length == 2)
+    else if((0 == strcmp(name, "default_output_stream") || 0 == strcmp(name, "stream")) && 2 == length)
     {
         *stream_id = mr_stream_id_from_raw((uint8_t)arg1, MR_OUTPUT_STREAM);
     }
-    else if(strcmp(name, "delete_session") == 0 && length == 1)
+    else if(0 == strcmp(name, "delete_session") && 1 == length)
     {
         (void) mr_delete_session(session);
         print_status(session->info.last_requested_status);
     }
-    else if(strcmp(name, "exit") == 0 && length == 1)
+    else if(0 == strcmp(name, "exit") && 1 == length)
     {
         return false;
     }
-    else if(strcmp(name, "entity_tree") == 0 && length == 2)
+    else if((0 == strcmp(name, "entity_tree") || 0 == strcmp(name, "tree")) && 2 == length)
     {
         (void) compute_print_command(session, stream_id, 2, "create_participant", arg1, 0, 0, 0, 0, "");
         (void) mr_run_session_until_timeout(session, 20);
@@ -444,38 +444,38 @@ void print_commands(void)
 {
     printf("usage: <command> [<args>]\n");
     printf("    create_session\n");
-    printf("        Creates a mrSession, if exists, reuse it.\n");
+    printf("        Creates a Session, if exists, reuse it.\n");
     printf("    create_participant <participant id>:\n");
-    printf("        Creates a new Participant on the current session\n");
+    printf("        Creates a new Participant on the current session.\n");
     printf("    create_topic       <topic id> <participant id>:\n");
-    printf("        Register new Topic using <participant id> participant\n");
+    printf("        Register new Topic using <participant id> participant.\n");
     printf("    create_publisher   <publisher id> <participant id>:\n");
-    printf("        Creates a Publisher on <participant id> participant\n");
+    printf("        Creates a Publisher on <participant id> participant.\n");
     printf("    create_subscriber  <subscriber id> <participant id>:\n");
-    printf("        Creates a Subscriber on <participant id> participant\n");
+    printf("        Creates a Subscriber on <participant id> participant.\n");
     printf("    create_datawriter  <datawriter id> <publisher id>:\n");
-    printf("        Creates a DataWriter on the publisher <publisher id>\n");
+    printf("        Creates a DataWriter on the publisher <publisher id>.\n");
     printf("    create_datareader  <datareader id> <subscriber id>:\n");
-    printf("        Creates a DataReader on the subscriber <subscriber id>\n");
-    printf("    write_data <datawriter id> <stream id> [<color> <x> <y> <size>]:\n");
-    printf("        Write data into a <stream id> using <data writer id> DataWriter\n");
+    printf("        Creates a DataReader on the subscriber <subscriber id>.\n");
+    printf("    write_data <datawriter id> <stream id> [<x> <y> <size> <color>]:\n");
+    printf("        Write data into a <stream id> using <data writer id> DataWriter.\n");
     printf("    request_data       <datareader id> <stream id> <samples>:\n");
-    printf("        Read <sample> topics from a <stream id> using <data reader id> DataReader\n");
+    printf("        Read <sample> topics from a <stream id> using <data reader id> DataReader.\n");
     printf("    cancel_data        <datareader id>:\n");
-    printf("        Cancel any previous request data of <data reader id> DataReader\n");
+    printf("        Cancel any previous request data of <data reader id> DataReader.\n");
     printf("    delete             <id_prefix> <type>:\n");
-    printf("        Removes object with <id prefix> and <type>\n");
+    printf("        Removes object with <id prefix> and <type>.\n");
     printf("    stream, default_output_stream <stream_id>:\n");
     printf("        Change the default output stream for all messages except of write data.\n");
     printf("        <stream_id> can be 1-127 for best effort and 128-255 for reliable.\n");
     printf("        The streams must be initially configured.\n");
-    printf("    (macro) exit:\n");
-    printf("        Close session and exit\n");
-    printf("    (macro) entity_tree        <id>:\n");
+    printf("    exit:\n");
+    printf("        Close session and exit.\n");
+    printf("    tree, entity_tree        <id>:\n");
     printf("        Create the necessary entities for a complete publisher and subscriber.\n");
     printf("        All entities will have the same <id> as id.\n");
     printf("    h, help:\n");
-    printf("        Shows this message\n");
+    printf("        Shows this message.\n");
 }
 
 int check_input(void)

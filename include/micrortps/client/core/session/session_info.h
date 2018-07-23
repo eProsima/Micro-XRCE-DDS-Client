@@ -23,6 +23,7 @@ extern "C"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <micrortps/client/core/session/seq_num.h>
 
 #define MR_REQUEST_NONE     0x00
 #define MR_REQUEST_LOGIN    0x01
@@ -48,8 +49,8 @@ void read_create_session_status(mrSessionInfo* info, struct MicroBuffer* mb);
 void read_delete_session_status(mrSessionInfo* info, struct MicroBuffer* mb);
 
 void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer);
-void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, uint16_t seq_num, uint8_t* buffer);
-bool read_session_header(const mrSessionInfo* info, struct MicroBuffer* mb, uint8_t* stream_id_raw, uint16_t* seq_num);
+void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSeqNum seq_num, uint8_t* buffer);
+bool read_session_header(const mrSessionInfo* info, struct MicroBuffer* mb, uint8_t* stream_id_raw, mrSeqNum* seq_num);
 
 uint8_t session_header_offset(const mrSessionInfo* info);
 

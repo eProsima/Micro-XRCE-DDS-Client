@@ -371,7 +371,7 @@ void write_submessage_acknack(const mrSession* session, mrStreamId id)
 
 void read_message(mrSession* session, MicroBuffer* mb)
 {
-    uint8_t stream_id_raw; uint16_t seq_num;
+    uint8_t stream_id_raw; mrSeqNum seq_num;
     if(read_session_header(&session->info, mb, &stream_id_raw, &seq_num))
     {
         mrStreamId id = mr_stream_id_from_raw(stream_id_raw, MR_INPUT_STREAM);
