@@ -105,22 +105,15 @@ foreach(TRANSPORT_TYPE UDP TCP UART)
     if(PROFILE_${TRANSPORT_TYPE}_TRANSPORT)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-            set(${TRANSPORT_TYPE}_SRCS
-                src/c/profile/transport/${TT}_transport_linux.c
-                )
-            set(PLATFORM_NAME linux)
             set(PLATFORM_NAME_LINUX ON)
+            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-            set(${TRANSPORT_TYPE}_SRCS
-                src/c/profile/transport/${TT}_transport_windows.c
-                )
-            set(PLATFORM_NAME windows)
             set(PLATFORM_NAME_WINDOWS ON)
+            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_windows.c)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "nuttx")
-                set(${TRANSPORT_TYPE}_SRCS
-                    src/c/profile/transport/${TT}_transport_linux.c
-                    )
+                set(PLATFORM_NAME_NUTTX ON)
+                set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
             endif()
         endif()
     endif()
@@ -169,7 +162,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC microcdr
     )
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/.>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -220,8 +212,10 @@ endif()
 # Warnings
 if(MSVC OR MSVC_IDE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668")
 else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -fstrict-aliasing -Wall -Wextra -Wcast-align -Wshadow")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -fstrict-aliasing -Wall -Wextra -Wcast-align")
 endif()
 
 ###############################################################################
@@ -237,9 +231,8 @@ endif()
 # Test
 ###############################################################################
 if(EPROSIMA_BUILD_TESTS)
-    #add_subdirectory(test/integration/interaction)
-    #add_subdirectory(test/integration/cross_serialization)
-    #add_subdirectory(test/integration/xrce_serialization)
+    add_subdirectory(test/integration/interaction)
+    add_subdirectory(test/integration/cross_serialization)
     add_subdirectory(test/transport/serial_comm)
     add_subdirectory(test/unitary/streams/output_best_effort)
 endif()

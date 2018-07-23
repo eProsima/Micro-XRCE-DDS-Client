@@ -55,7 +55,6 @@ bool read_session_header(const mrSessionInfo* info, struct MicroBuffer* mb, uint
 uint8_t session_header_offset(const mrSessionInfo* info);
 
 void set_session_info_request(mrSessionInfo* info, uint8_t request);
-void reset_session_info_request(mrSessionInfo* info);
 bool session_info_pending_request(const mrSessionInfo* info);
 
 #ifdef __cplusplus

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file HelloWorldWriter.c
  * This source file contains the write function of the described types in the IDL file.
  *
@@ -29,15 +29,15 @@ bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjec
 {
     bool written = false;
 
-    uint16_t topic_length = (uint16_t)HelloWorld_size_of_topic(topic, 0);
-    uint16_t payload_length = 0;
+    uint32_t topic_length = HelloWorld_size_of_topic(topic, 0);
+    uint32_t payload_length = 0;
     payload_length += 4; //request_id + object_id
     payload_length += 4; //topic_length (remove in future version to be compliant)
 
     MicroBuffer mb;
     if(prepare_stream_to_write(&session->streams, stream_id, payload_length + topic_length + SUBHEADER_SIZE, &mb))
     {
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, payload_length + topic_length, FORMAT_DATA);
+        (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, (uint16_t)(payload_length + topic_length), FORMAT_DATA);
 
         WRITE_DATA_Payload_Data payload;
         init_base_object_request(session, datawriter_id, &payload.base);

@@ -4,7 +4,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-SerialComm::SerialComm() : fd_(-1), master_{0}, slave_{0} { }
+SerialComm::SerialComm() : fd_(-1)
+{
+}
 
 SerialComm::~SerialComm()
 {

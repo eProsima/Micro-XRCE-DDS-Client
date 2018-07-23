@@ -17,19 +17,23 @@
 ###############################################################################
 
 if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-
     project(interaction-intest-client CXX)
-    set(SRCS ClientInteraction.cpp)
+
+    set(SRCS
+        ClientInteraction.cpp
+        Gateway.cpp
+        HelloWorld.c
+        HelloWorldWriter.c
+        )
+
     add_library(${PROJECT_NAME} STATIC ${SRCS})
 
     target_link_libraries(${PROJECT_NAME} micrortps_client)
-    get_target_property(MICRORTPS_CLIENT_DIR micrortps_client SOURCE_DIR)
     target_include_directories(${PROJECT_NAME}
         PUBLIC
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
         PRIVATE
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-            $<BUILD_INTERFACE:${MICRORTPS_CLIENT_DIR}/src/c>
+            ${ASIO_INCLUDE_DIR}
         )
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -38,3 +42,4 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
         )
 
 endif()
+

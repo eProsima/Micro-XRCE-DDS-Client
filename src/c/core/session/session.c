@@ -330,7 +330,7 @@ bool wait_session_status(mrSession* session, uint8_t* buffer, size_t length, siz
 inline void send_message(const mrSession* session, uint8_t* buffer, size_t length)
 {
     (void) session->comm->send_msg(session->comm->instance, buffer, length);
-    DEBUG_PRINT_MESSAGE(SEND, buffer, length);
+    DEBUG_PRINT_MESSAGE(SEND, buffer, length, session->info.key);
 }
 
 inline bool recv_message(const mrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
@@ -338,7 +338,7 @@ inline bool recv_message(const mrSession* session, uint8_t**buffer, size_t* leng
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
     if(received)
     {
-        DEBUG_PRINT_MESSAGE(RECV, *buffer, *length);
+        DEBUG_PRINT_MESSAGE(RECV, *buffer, *length, session->info.key);
     }
     return received;
 }
@@ -401,7 +401,7 @@ void read_stream(mrSession* session, MicroBuffer* mb, mrStreamId stream_id, mrSe
         case MR_RELIABLE_STREAM:
         {
             mrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
-            if(stream && receive_reliable_message(stream, seq_num, mb->iterator, micro_buffer_length(mb)))
+            if(stream && receive_reliable_message(stream, seq_num, mb->iterator, micro_buffer_size(mb)))
             {
                 read_submessage_list(session, mb, stream_id);
                 MicroBuffer next_mb;

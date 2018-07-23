@@ -45,30 +45,37 @@ void reset_input_reliable_stream(mrInputReliableStream* stream)
 bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length)
 {
     bool result = false;
-    /* Check if the seq_num is valid for the stream state */
-    mrSeqNum last_history = seq_num_add(stream->last_handled, stream->history);
-    if(0 > seq_num_cmp(stream->last_handled, seq_num) || 0 <= seq_num_cmp(last_history, seq_num))
+
+    /* Process the message */
+    mrSeqNum next = seq_num_add(stream->last_handled, 1);
+    if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
     {
-        /* Check if the message received is not already received */
-        uint8_t* internal_buffer = get_input_buffer(stream, stream->last_handled % stream->history);
-        if(0 == get_input_buffer_length(internal_buffer))
+        stream->last_handled = next;
+        if(0 > seq_num_cmp(stream->last_announced, stream->last_handled))
         {
-            /* Process the message */
-            mrSeqNum next = seq_num_add(stream->last_handled, 1);
-            if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
-            {
-                stream->last_handled = next;
-                if(0 > seq_num_cmp(stream->last_announced, stream->last_handled))
-                {
-                    stream->last_announced = next;
-                }
-                result = true;
-            }
-            else
+            stream->last_announced = stream->last_handled;
+        }
+        result = true;
+    }
+    else
+    {
+        /* Check if the seq_num is valid for the stream state */
+        mrSeqNum last_history = seq_num_add(stream->last_handled, stream->history);
+        if(0 > seq_num_cmp(stream->last_handled, seq_num) || 0 <= seq_num_cmp(last_history, seq_num))
+        {
+            /* Check if the message received is not already received */
+            uint8_t* internal_buffer = get_input_buffer(stream, seq_num % stream->history);
+            if(0 == get_input_buffer_length(internal_buffer))
             {
                 memcpy(internal_buffer, buffer, length);
+                set_input_buffer_length(internal_buffer, length);
             }
         }
+    }
+
+    if(0 > seq_num_cmp(stream->last_announced, seq_num))
+    {
+        stream->last_announced = seq_num;
     }
 
     return result;
@@ -82,7 +89,9 @@ bool next_input_reliable_buffer_available(mrInputReliableStream* stream, MicroBu
     size_t length = get_input_buffer_length(internal_buffer);
     bool available_to_read = 0 != length;
     if(available_to_read)
-    { stream->last_handled = next; init_micro_buffer(mb, internal_buffer, length);
+    {
+        stream->last_handled = next;
+        init_micro_buffer(mb, internal_buffer, length);
         set_input_buffer_length(internal_buffer, 0);
     }
 
@@ -133,8 +142,8 @@ void process_heartbeat(mrInputReliableStream* stream, uint16_t first_seq_num, ui
 
 uint16_t compute_nack_bitmap(const mrInputReliableStream* stream)
 {
-    uint16_t nack_bitmap = 0;
     uint16_t buffers_to_ack = seq_num_sub(stream->last_announced, stream->last_handled);
+    uint16_t nack_bitmap = (buffers_to_ack > 0) ? 1 : 0;
 
     for(uint16_t i = 0; i < buffers_to_ack; i++)
     {

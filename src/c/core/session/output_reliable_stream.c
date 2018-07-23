@@ -214,7 +214,7 @@ void process_acknack(mrOutputReliableStream* stream, uint16_t bitmap, uint16_t l
     uint16_t buffers_to_check_clean = seq_num_sub(stream->last_sent, last_acked_seq_num);
     for(uint16_t i = 0; i < buffers_to_check_clean; i++)
     {
-        if(i & bitmap) /* message lost */
+        if(bitmap & (1 << i)) /* message lost */
         {
             stream->send_lost = true;
         }

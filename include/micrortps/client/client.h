@@ -34,6 +34,8 @@
 #include <micrortps/client/profile/transport/udp_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
 #include <micrortps/client/profile/transport/udp_transport_windows.h>
+#elif defined(PLATFORM_NAME_NUTTX)
+#include <micrortps/client/profile/transport/udp_transport_linux.h>
 #endif
 #endif //PROFILE_UDP_TRANSPORT
 
@@ -42,6 +44,8 @@
 #include <micrortps/client/profile/transport/tcp_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
 #include <micrortps/client/profile/transport/tcp_transport_windows.h>
+#elif defined(PLATFORM_NAME_NUTTX)
+#include <micrortps/client/profile/transport/tcp_transport_linux.h>
 #endif
 #endif //PROFILE_TCP_TRANSPORT
 
@@ -50,6 +54,8 @@
 #include <micrortps/client/profile/transport/uart_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
 #include <micrortps/client/profile/transport/uart_transport_windows.h>
+#elif defined(PLATFORM_NAME_NUTTX)
+#include <micrortps/client/profile/transport/uart_transport_linux.h>
 #endif
 #endif //PROFILE_UART_TRANSPORT
 

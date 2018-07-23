@@ -38,12 +38,12 @@ extern "C"
 #define SERIALIZATION_LOGS_AVAILABLE 0
 #endif
 
-void print_message(int direction, uint8_t* buffer, size_t size);
+void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* client_key);
 void print_serialization(int direction, const uint8_t* buffer, size_t size);
 
-#define DEBUG_PRINT_MESSAGE(direction, buffer, size) \
+#define DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) \
     do { \
-        if (MESSAGE_LOGS_AVAILABLE) print_message(direction, buffer, size); \
+        if (MESSAGE_LOGS_AVAILABLE) print_message(direction, buffer, size, client_key); \
         if (SERIALIZATION_LOGS_AVAILABLE) print_serialization(direction, buffer, size); \
     } while (0);
 

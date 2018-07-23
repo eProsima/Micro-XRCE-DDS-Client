@@ -17,19 +17,15 @@
 ###############################################################################
 
 if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-
     project(cross-serialization-intest-client CXX)
+
     set(SRCS ClientSerialization.cpp)
     add_library(${PROJECT_NAME} STATIC ${SRCS})
 
-    target_link_libraries(${PROJECT_NAME} micrortps_client_static)
-    get_target_property(MICRORTPS_CLIENT_DIR micrortps_client_static SOURCE_DIR)
+    target_link_libraries(${PROJECT_NAME} micrortps_client)
     target_include_directories(${PROJECT_NAME}
         PUBLIC
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-        PRIVATE
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-            $<BUILD_INTERFACE:${MICRORTPS_CLIENT_DIR}/src/c>
         )
 
     set_target_properties(${PROJECT_NAME} PROPERTIES

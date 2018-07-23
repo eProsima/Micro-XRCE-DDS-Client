@@ -22,11 +22,19 @@
 #ifndef _ShapeType_WRITER_H_
 #define _ShapeType_WRITER_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include "ShapeType.h"
 
 #include <micrortps/client/client.h>
 
 bool mr_write_ShapeType_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
         const ShapeType* topic);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _ShapeType_WRITER_H_

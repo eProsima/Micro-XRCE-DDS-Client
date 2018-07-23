@@ -58,20 +58,16 @@ static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_P
 static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload);
 static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload);
 static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload);
-static void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num);
+static void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, const uint8_t* client_key);
 static void print_tail(int64_t initial_log_time);
 
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void print_message(int direction, uint8_t* buffer, size_t size)
+void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* client_key)
 {
     static int64_t initial_log_time = 0;
-    if(0 == initial_log_time)
-    {
-        initial_log_time = get_milli_time();
-    }
 
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
 
@@ -81,7 +77,7 @@ void print_message(int direction, uint8_t* buffer, size_t size)
     uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
     (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
-    print_header(size, direction, stream_id_raw, seq_num);
+    print_header(size, direction, stream_id_raw, seq_num, client_key);
 
     size_t submessage_counter = 0;
     uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
@@ -89,13 +85,14 @@ void print_message(int direction, uint8_t* buffer, size_t size)
     {
         if(submessage_counter != 0)
         {
-            printf("\n                     ");
+            printf("\n                                        ");
         }
 
         switch(submessage_id)
         {
             case SUBMESSAGE_ID_CREATE_CLIENT:
             {
+                initial_log_time = get_milli_time();
                 CREATE_CLIENT_Payload payload;
                 deserialize_CREATE_CLIENT_Payload(&mb, &payload);
                 print_create_client_submessage(color, &payload);
@@ -361,7 +358,7 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
             sprintf(content, "UNKNOWN");
     }
 
-    const char* reuse_flag = (flags & FLAG_REUSE) ? "REUSE" : "";
+    const char* reuse_flag = (flags & FLAG_REUSE) ? "REUSE" : "-";
     const char* replace_flag = (flags & FLAG_REPLACE) ? "REPLACE" : "";
     const char* separator = (flags & FLAG_REUSE && flags & FLAG_REPLACE) ? " " : "";
 
@@ -486,7 +483,7 @@ void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payloa
             RESTORE_COLOR);
 }
 
-void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num)
+void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, const uint8_t* client_key)
 {
     const char* arrow = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
@@ -515,7 +512,8 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
         stream_id = (uint8_t)seq_num;
     }
 
-    printf("%s%s%3zu: %s(%c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
+    const char* client_key_str = data_to_string(client_key, 4);
+    printf("%s%s%3zu: %s(key: %s| %c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, client_key_str, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
 }
 
 void print_tail(int64_t initial_log_time)

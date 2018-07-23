@@ -22,11 +22,19 @@
 #ifndef _HelloWorld_WRITER_H_
 #define _HelloWorld_WRITER_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include "HelloWorld.h"
 
 #include <micrortps/client/client.h>
 
 bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
         const HelloWorld* topic);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _HelloWorld_WRITER_H_

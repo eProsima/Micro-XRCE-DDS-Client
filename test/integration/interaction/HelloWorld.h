@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file HelloWorld.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -22,75 +22,33 @@
 #ifndef _HelloWorld_H_
 #define _HelloWorld_H_
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <micrortps/client/xrce_client.h>
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <stdint.h>
+#include <stdbool.h>
 
 /*!
- * @brief This class represents the structure HelloWorld defined by the user in the IDL file.
+ * @brief This struct represents the structure HelloWorld defined by the user in the IDL file.
  * @ingroup HELLOWORLD
  */
 typedef struct HelloWorld
 {
     uint32_t index;
-    char* message;
+    char message[255];
 
 } HelloWorld;
 
-static bool serialize_HelloWorld_topic(MicroBuffer* writer, const HelloWorld* topic)
-{
-    serialize_uint32_t(writer, topic->index);
-    serialize_sequence_char(writer, topic->message, (uint32_t)(strlen(topic->message) + 1));
+struct MicroBuffer;
 
-    return writer->error == BUFFER_OK;
+bool HelloWorld_serialize_topic(struct MicroBuffer* writer, const HelloWorld* topic);
+bool HelloWorld_deserialize_topic(struct MicroBuffer* reader, HelloWorld* topic);
+uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size);
+
+#ifdef __cplusplus
 }
-
-static bool deserialize_HelloWorld_topic(MicroBuffer* reader, HelloWorld* topic)
-{
-    deserialize_uint32_t(reader, &topic->index);
-    uint32_t size_message = 0;
-    deserialize_sequence_char(reader, &topic->message, &size_message);
-
-    return reader->error == BUFFER_OK;
-}
-
-static uint32_t size_of_HelloWorld_topic(const HelloWorld* topic)
-{
-    uint32_t size = 0;
-
-    size += 4 + get_alignment(size, 4);
-    size += 4 + get_alignment(size, 4) + (uint32_t)(strlen(topic->message) + 1);
-
-    return size;
-}
-
-static bool write_HelloWorld(Session* session, ObjectId datawriter_id, StreamId stream_id, const HelloWorld* topic)
-{
-    if (session == NULL)
-    {
-        return false;
-    }
-
-    bool result = false;
-    uint32_t topic_size = size_of_HelloWorld_topic(topic);
-    MicroBuffer* topic_buffer = NULL;
-
-    if (128 > stream_id)
-    {
-        topic_buffer = prepare_best_effort_stream_for_topic(&session->output_best_effort_stream, datawriter_id, topic_size);
-    }
-    else
-    {
-        topic_buffer = prepare_reliable_stream_for_topic(&session->output_reliable_stream, datawriter_id, topic_size);
-    }
-
-    if (topic_buffer != NULL)
-    {
-        result = serialize_HelloWorld_topic(topic_buffer, topic);
-    }
-
-    return result;
-}
+#endif
 
 #endif // _HelloWorld_H_

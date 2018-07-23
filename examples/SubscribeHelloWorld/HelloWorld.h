@@ -22,6 +22,11 @@
 #ifndef _HelloWorld_H_
 #define _HelloWorld_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -41,5 +46,8 @@ struct MicroBuffer;
 bool HelloWorld_serialize_topic(struct MicroBuffer* writer, const HelloWorld* topic);
 bool HelloWorld_deserialize_topic(struct MicroBuffer* reader, HelloWorld* topic);
 uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _HelloWorld_H_

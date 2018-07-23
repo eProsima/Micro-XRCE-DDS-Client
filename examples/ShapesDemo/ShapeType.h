@@ -22,6 +22,11 @@
 #ifndef _ShapeType_H_
 #define _ShapeType_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -43,5 +48,8 @@ struct MicroBuffer;
 bool ShapeType_serialize_topic(struct MicroBuffer* writer, const ShapeType* topic);
 bool ShapeType_deserialize_topic(struct MicroBuffer* reader, ShapeType* topic);
 uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _ShapeType_H_

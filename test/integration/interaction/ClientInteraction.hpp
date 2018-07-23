@@ -1,217 +1,210 @@
 #ifndef IN_TEST_CLIENT_INTERACTION_HPP
 #define IN_TEST_CLIENT_INTERACTION_HPP
 
-#include <micrortps/client/xrce_protocol_spec.h>
-#include "HelloWorld.h"
-#include <chrono>
-#include <atomic>
-#include <thread>
+#include "HelloWorldWriter.h"
+#include "Gateway.hpp"
+
+#include <micrortps/client/client.h>
+#include <gtest/gtest.h>
 #include <iostream>
-#include <cstring>
-
-#define CLIENT_MAX_NUM_ATTEMPTS    100
-#define CLIENT_MAX_TIME_WAIT        10
-#define TOPIC_PREFIX              0x01
-
 
 class Client
 {
 public:
-    Client(const ClientKey& client_key, const uint8_t ip[4], const uint16_t port)
-        : session_(),
-          client_key_(client_key),
-          ip_{ip[0], ip[1], ip[2], ip[3]},
-          port_(port)
+    Client(uint16_t port, float lost, size_t history)
+    : gateway_(lost)
+    , port_(port)
+    , client_key_(++next_client_key_)
+    , history_(history)
     {
+        output_best_effort_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
+        output_reliable_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * history_ * MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
+        input_reliable_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * history_ * MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
+
+        init();
     }
 
-    bool init_session()
+    virtual ~Client()
     {
-        return new_udp_session(&session_, 0x01, client_key_, ip_, port_, NULL, NULL)
-                && init_session_sync(&session_);
+        close();
+
+        delete output_best_effort_stream_buffer_;
+        delete output_reliable_stream_buffer_;
+        delete input_reliable_stream_buffer_;
     }
 
-    bool close_session()
+    void create_entities(uint8_t id, uint16_t stream_id_raw, uint8_t expected_status, uint8_t flags)
     {
-        bool result = close_session_sync(&session_);
-        if(result)
+        mrStreamId output_stream_id = mr_stream_id_from_raw(stream_id_raw, MR_OUTPUT_STREAM);
+        uint16_t request_id; uint8_t status;
+
+        mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
+        request_id = mr_write_create_participant_ref(&session_, output_stream_id, participant_id, "default participant", flags);
+        ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
+        mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
+        ASSERT_EQ(expected_status, status);
+
+        mrObjectId topic_id = mr_object_id(id, MR_TOPIC_ID);
+        request_id = mr_write_configure_topic_xml(&session_, output_stream_id, topic_id, participant_id, topic_xml_, flags);
+        ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
+        mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
+        ASSERT_EQ(expected_status, status);
+
+        mrObjectId publisher_id = mr_object_id(id, MR_PUBLISHER_ID);
+        request_id = mr_write_configure_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, publisher_xml_, flags);
+        ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
+        mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
+        ASSERT_EQ(expected_status, status);
+
+        mrObjectId datawriter_id = mr_object_id(id, MR_DATAWRITER_ID);
+        request_id = mr_write_configure_datawriter_xml(&session_, output_stream_id, datawriter_id, publisher_id, datawriter_xml_, flags);
+        ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
+        mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
+        ASSERT_EQ(expected_status, status);
+
+        mrObjectId subscriber_id = mr_object_id(id, MR_SUBSCRIBER_ID);
+        request_id = mr_write_configure_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, subscriber_xml_, flags);
+        ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
+        mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
+        ASSERT_EQ(expected_status, status);
+
+        mrObjectId datareader_id = mr_object_id(id, MR_DATAREADER_ID);
+        request_id = mr_write_configure_datareader_xml(&session_, output_stream_id, datareader_id, subscriber_id, datareader_xml_, flags);
+        ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
+        mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
+        ASSERT_EQ(expected_status, status);
+    }
+
+    void publish(uint8_t id, uint16_t stream_id_raw, size_t number)
+    {
+        //Used only for waiting the RTPS subscriber matching
+        (void) mr_run_session_until_timeout(&session_, 50);
+
+        mrStreamId output_stream_id = mr_stream_id_from_raw(stream_id_raw, MR_OUTPUT_STREAM);
+        mrObjectId datawriter_id = mr_object_id(id, MR_DATAWRITER_ID);
+
+        for(size_t i = 0; i < number; ++i)
         {
-            free_session(&session_);
-        }
-        return result;
-    }
-
-    bool create_participant()
-    {
-        return create_participant_sync_by_ref(&session_, participant_id_, "default_participant", false, false);
-    }
-
-    bool create_topic()
-    {
-        return create_topic_sync_by_xml(&session_, topic_id_, topic_xml_, participant_id_, false, false);
-    }
-
-    bool create_publisher()
-    {
-        return create_publisher_sync_by_xml(&session_, publisher_id_, publisher_xml_, participant_id_, false, false);
-    }
-
-    bool create_subscriber()
-    {
-        return create_subscriber_sync_by_xml(&session_, subscriber_id_, subscriber_xml_, participant_id_, false, false);
-    }
-
-    bool create_datawriter()
-    {
-        return create_datawriter_sync_by_xml(&session_, datawriter_id_, datawriter_xml_, publisher_id_, false, false);
-    }
-
-    bool create_datareader()
-    {
-        return create_datareader_sync_by_xml(&session_, datareader_id_, datareader_xml_, subscriber_id_, false, false);
-    }
-
-    bool delete_object(ObjectId id)
-    {
-        return delete_object_sync(&session_, id);
-    }
-
-    const ClientKey& get_client_key() const { return client_key_; }
-
-    const ObjectId& get_participant_id()   const { return participant_id_; }
-    const ObjectId& get_topic_id()         const { return topic_id_; }
-    const ObjectId& get_publisher_id()     const { return publisher_id_; }
-    const ObjectId& get_datawriter_id()    const { return datawriter_id_; }
-    const ObjectId& get_subscriber_id()    const { return subscriber_id_; }
-    const ObjectId& get_datareader_id()    const { return datareader_id_; }
-
-protected:
-    /* Session config. */
-    Session session_;
-    const ClientKey client_key_;
-    const uint8_t ip_[4];
-    const uint16_t port_;
-
-    /* Object IDs. */
-    static const ObjectId participant_id_;
-    static const ObjectId topic_id_;
-    static const ObjectId publisher_id_;
-    static const ObjectId datawriter_id_;
-    static const ObjectId subscriber_id_;
-    static const ObjectId datareader_id_;
-
-    /* XMLs. */
-    static const char* topic_xml_;
-    static const char* publisher_xml_;
-    static const char* datawriter_xml_;
-    static const char* subscriber_xml_;
-    static const char* datareader_xml_;
-
-    /* Utils. */
-    static std::atomic<bool> running_cond_;
-};
-
-/****************************************************************************************
- * Publisher
- ****************************************************************************************/
-class Publisher : public Client
-{
-public:
-    Publisher(const ClientKey& client_key, const uint8_t ip[4], const uint16_t port)
-        : Client(client_key, ip, port) {}
-
-    bool init()
-    {
-        //TODO(Luis): use the Client parent functions instead.
-        bool result = true;
-        result &= new_udp_session(&session_, 0x01, client_key_, ip_, port_, NULL, NULL);
-        result &= init_session_sync(&session_);
-        result &= create_participant_sync_by_ref(&session_, participant_id_, "default_participant", false, false);
-        result &= create_topic_sync_by_xml(&session_, topic_id_, topic_xml_, participant_id_, false, false);
-        result &= create_publisher_sync_by_xml(&session_, publisher_id_, publisher_xml_, participant_id_, false, false);
-        result &= create_datawriter_sync_by_xml(&session_, datawriter_id_, datawriter_xml_, publisher_id_, false, false);
-        return result;
-    }
-
-    void launch()
-    {
-        for (uint32_t i = 0; i < CLIENT_MAX_NUM_ATTEMPTS && running_cond_; ++i)
-        {
-            write_HelloWorld(&session_, datawriter_id_, STREAMID_BUILTIN_RELIABLE, &topic_);
-            run_communication(&session_);
-            std::this_thread::sleep_for(std::chrono::milliseconds(CLIENT_MAX_TIME_WAIT));
+            HelloWorld topic = {(uint32_t)i, "Hello DDS world!"};
+            bool written = mr_write_HelloWorld_topic(&session_, output_stream_id, datawriter_id, &topic);
+            ASSERT_EQ(true, written);
+            bool sent = mr_run_session_until_confirm_delivery(&session_, 1000);
+            ASSERT_EQ(true, sent);
+            std::cout << "topic sent: " << i << std::endl;
         }
     }
 
-    bool close()
+    void subscribe(uint8_t id, uint16_t stream_id_raw, size_t number)
     {
-        return close_session();
-    }
+        expected_topic_index_ = 0;
+        last_topic_stream_id_ = mr_stream_id_from_raw(0, MR_OUTPUT_STREAM);
+        last_topic_object_id_ = mr_object_id(255, 15);
 
-    const HelloWorld& get_topic() const { return topic_; }
+        mrStreamId output_stream_id = mr_stream_id(0, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
+        mrStreamId input_stream_id = mr_stream_id_from_raw(stream_id_raw, MR_INPUT_STREAM);
+        mrObjectId datareader_id = mr_object_id(id, MR_DATAREADER_ID);
+
+        mrDeliveryControl delivery_control = {};
+        delivery_control.max_samples = MR_MAX_SAMPLES_UNLIMITED;
+        uint16_t request_id = mr_write_request_data(&session_, output_stream_id, datareader_id, input_stream_id, &delivery_control);
+        ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
+
+        while(expected_topic_index_ < number)
+        {
+            uint8_t status;
+            bool received_ok = mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
+            ASSERT_EQ(MR_STATUS_OK, status);
+            ASSERT_EQ(true, received_ok);
+            //ASSERT_EQ(last_topic_object_id_, datareader_id);
+            //ASSERT_EQ(last_topic_stream_id_, input_stream_id);
+        }
+    }
 
 private:
-    char topic_msg_[32] = "Hello DDS World";
-    const HelloWorld topic_ = {11, topic_msg_};
-};
-
-/****************************************************************************************
- * Subscriber
- ****************************************************************************************/
-class Subscriber : public Client
-{
-public:
-    Subscriber(const ClientKey& client_key, const uint8_t ip[4], uint16_t port)
-        : Client(client_key, ip, port) {}
-
-    bool init()
+    static void on_topic_dispatcher(mrSession* session_, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* serialization, void* args)
     {
-        //TODO(Luis): use the Client parent functions instead.
-        bool result = true;
-        result &= new_udp_session(&session_, 0x01, client_key_, ip_, port_, on_topic, NULL);
-        result &= init_session_sync(&session_);
-        result &= create_participant_sync_by_ref(&session_, participant_id_, "default_participant", false, false);
-        result &= create_topic_sync_by_xml(&session_, topic_id_, topic_xml_, participant_id_, false, false);
-        result &= create_subscriber_sync_by_xml(&session_, subscriber_id_, subscriber_xml_, participant_id_, false, false);
-        result &= create_datareader_sync_by_xml(&session_, datareader_id_, datareader_xml_, subscriber_id_, false, false);
-        return result;
+        ((Client*)args)->on_topic(session_, object_id, request_id, stream_id, serialization);
     }
 
-    void launch()
+    void init()
     {
-        for (uint32_t i = 0; i < CLIENT_MAX_NUM_ATTEMPTS && running_cond_; ++i)
+        ASSERT_EQ(true, mr_init_udp_transport(&transport_, "127.0.0.1", port_));
+
+        mr_init_session(&session_, gateway_.monitorize(&transport_.comm), client_key_);
+        mr_set_topic_callback(&session_, on_topic_dispatcher, this);
+
+        ASSERT_EQ(true, mr_create_session(&session_));
+        ASSERT_EQ(MR_STATUS_OK, session_.info.last_requested_status);
+
+        for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
         {
-            read_data_sync(&session_, datareader_id_, STREAMID_BUILTIN_RELIABLE);
-            run_communication(&session_);
-            std::this_thread::sleep_for(std::chrono::milliseconds(CLIENT_MAX_TIME_WAIT));
+            uint8_t* buffer = output_best_effort_stream_buffer_ + MR_CONFIG_UDP_TRANSPORT_MTU * i;
+            (void) mr_create_output_best_effort_stream(&session_, buffer, transport_.comm.mtu);
         }
-        running_cond_ = false;
+        for(int i = 0; i < MR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
+        {
+            (void) mr_create_input_best_effort_stream(&session_);
+        }
+        for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
+        {
+            uint8_t* buffer = output_reliable_stream_buffer_ + MR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
+            (void) mr_create_output_reliable_stream(&session_, buffer , transport_.comm.mtu * history_, history_);
+        }
+        for(int i = 0; i < MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
+        {
+            uint8_t* buffer = input_reliable_stream_buffer_ + MR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
+            (void) mr_create_input_reliable_stream(&session_, buffer, transport_.comm.mtu * history_, history_);
+        }
     }
 
-    bool close()
+    void close()
     {
-        return close_session();
+        bool deleted = mr_delete_session(&session_);
+        if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
+        {
+            ASSERT_EQ(true, deleted);
+            ASSERT_EQ(MR_STATUS_OK, session_.info.last_requested_status);
+        }
+        ASSERT_EQ(true, mr_close_udp_transport(&transport_));
     }
 
-    const HelloWorld& get_topic() const { return topic_; }
 
-private:
-    static void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* /*args*/)
+    void on_topic(mrSession* /*session_*/, mrObjectId object_id, uint16_t /*request_id*/, mrStreamId stream_id, struct MicroBuffer* serialization)
     {
         HelloWorld topic;
-        if (TOPIC_PREFIX == id.data[0])
-        {
-            deserialize_HelloWorld_topic(serialized_topic, &topic);
-            running_cond_ = false;
-        }
-        topic_.index = topic.index;
-        memcpy(topic_.message, topic.message, strlen(topic.message));
-        return;
+        HelloWorld_deserialize_topic(serialization, &topic);
+        ASSERT_EQ(topic.index, expected_topic_index_);
+        ASSERT_STREQ(topic.message, "Hello DDS world!");
+        last_topic_object_id_ = object_id;
+        last_topic_stream_id_ = stream_id;
+        expected_topic_index_++;
+        std::cout << "topic received: " << topic.index << std::endl;
     }
 
-private:
-    static char topic_msg_[32];
-    static HelloWorld topic_;
+    static uint32_t next_client_key_;
+    static const char* topic_xml_;
+    static const char* publisher_xml_;
+    static const char* subscriber_xml_;
+    static const char* datawriter_xml_;
+    static const char* datareader_xml_;
+
+    Gateway gateway_;
+    uint16_t port_;
+
+    uint32_t client_key_;
+    size_t history_;
+
+    mrUDPTransport transport_;
+    mrSession session_;
+
+    uint8_t* output_best_effort_stream_buffer_;
+    uint8_t* output_reliable_stream_buffer_;
+    uint8_t* input_reliable_stream_buffer_;
+
+    mrObjectId last_topic_object_id_;
+    mrStreamId last_topic_stream_id_;
+    size_t expected_topic_index_;
+
 };
 
 #endif //IN_TEST_CLIENT_INTERACTION_HPP
