@@ -243,7 +243,7 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     {
         mrObjectId topic_id = mr_object_id((uint16_t)arg1, MR_TOPIC_ID);
         mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
-        const char* topic_xml = "<dds><topic><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
+        const char* topic_xml = "<dds><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
         (void) mr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
     }
     else if(0 == strcmp(name, "create_publisher") && 3 == length)
@@ -264,14 +264,14 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     {
         mrObjectId datawriter_id = mr_object_id((uint16_t)arg1, MR_DATAWRITER_ID);
         mrObjectId publisher_id = mr_object_id((uint16_t)arg2, MR_PUBLISHER_ID);
-        const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
+        const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
         (void) mr_write_configure_datawriter_xml(session, *stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
     }
     else if(0 == strcmp(name, "create_datareader") && 3 == length)
     {
         mrObjectId datareader_id = mr_object_id((uint16_t)arg1, MR_DATAREADER_ID);
         mrObjectId subscriber_id = mr_object_id((uint16_t)arg2, MR_SUBSCRIBER_ID);
-        const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
+        const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
         (void) mr_write_configure_datareader_xml(session, *stream_id, datareader_id, subscriber_id, datareader_xml, 0);
     }
     else if(0 == strcmp(name, "write_data") && 3 <= length)
