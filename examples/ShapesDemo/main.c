@@ -117,6 +117,18 @@ int main(int args, char** argv)
     printf("Running Shapes Demo XRCE Client...\n");
 
     uint32_t key = 0xAABBCCDD;
+    if(args_index < args && 0 == strcmp(argv[args_index++], "--key"))
+    {
+        if(args_index < args)
+        {
+            key = atoi(argv[args_index++]);
+        }
+        else
+        {
+            print_help();
+        }
+    }
+
     uint16_t history = 8;
     if(args_index < args && 0 == strcmp(argv[args_index++], "--history"))
     {
@@ -433,7 +445,7 @@ void print_status(uint8_t status)
 void print_help(void)
 {
     printf("Usage: program --help\n");
-    printf("       program <transport> [--history <history>]\n");
+    printf("       program <transport> [--key <key:number>] [--history <history:number>]\n");
     printf("List of available transports:\n");
     printf("    --serial <device>\n");
     printf("    --udp <agent-ip> <agent-port>\n");
