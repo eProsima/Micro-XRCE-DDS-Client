@@ -48,7 +48,7 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
     {
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
-        request_id = init_base_object_request(session, datareader_id, &payload.base);
+        request_id = init_base_object_request(&session->info, datareader_id, &payload.base);
         (void) serialize_READ_DATA_Payload(&mb, &payload);
     }
 

@@ -11,6 +11,10 @@
 
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
 
+#define INITIAL_REQUEST_ID 1
+
+static uint16_t generate_request_id(mrSessionInfo* info);
+
 static void process_create_session_status(mrSessionInfo* info, uint8_t status, AGENT_Representation* agent);
 static void process_delete_session_status(mrSessionInfo* info, uint8_t status);
 
@@ -25,8 +29,8 @@ void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key)
     info->key[1] = (key << 8) >> 24;
     info->key[2] = (key << 16) >> 24;
     info->key[3] = (key << 24) >> 24;
+    info->last_request_id = INITIAL_REQUEST_ID;
     info->last_requested_status = STATUS_NONE;
-    info->request = MR_REQUEST_NONE;
 }
 
 void write_create_session(const mrSessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds)
@@ -118,35 +122,37 @@ uint8_t session_header_offset(const mrSessionInfo* info)
     return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MIN_HEADER_SIZE;
 }
 
-void set_session_info_request(mrSessionInfo* info, uint8_t request)
+uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, BaseObjectRequest* base)
 {
-    info->request = request;
-    info->last_requested_status = STATUS_NONE;
-}
+    uint16_t request_id = generate_request_id(info);
 
-bool session_info_pending_request(const mrSessionInfo* info)
-{
-    return info->request != MR_REQUEST_NONE;
+    base->request_id.data[0] = (uint8_t) (request_id >> 8);
+    base->request_id.data[1] = (uint8_t) request_id;
+    object_id_to_raw(object_id, base->object_id.data);
+
+    return request_id;
 }
 
 //==================================================================
 //                            PRIVATE
 //==================================================================
+inline uint16_t generate_request_id(mrSessionInfo* session)
+{
+    uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
+        ? INITIAL_REQUEST_ID
+        : session->last_request_id;
+
+    session->last_request_id = last_request_id + 1;
+    return last_request_id;
+}
+
 inline void process_create_session_status(mrSessionInfo* info, uint8_t status, AGENT_Representation* agent)
 {
     (void) agent;
-    if(MR_REQUEST_LOGIN == info->request)
-    {
-        info->request = MR_REQUEST_NONE;
-        info->last_requested_status = status;
-    }
+    info->last_requested_status = status;
 }
 
 inline void process_delete_session_status(mrSessionInfo* info, uint8_t status)
 {
-    if(MR_REQUEST_LOGOUT == info->request)
-    {
-        info->request = MR_REQUEST_NONE;
-        info->last_requested_status = status;
-    }
+    info->last_requested_status = status;
 }

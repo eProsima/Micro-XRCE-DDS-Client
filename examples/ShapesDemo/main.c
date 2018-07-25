@@ -445,7 +445,7 @@ void print_status(uint8_t status)
 void print_help(void)
 {
     printf("Usage: program --help\n");
-    printf("       program <transport> [--key <key:number>] [--history <history:number>]\n");
+    printf("       program <transport> [--key <number>] [--history <number>]\n");
     printf("List of available transports:\n");
     printf("    --serial <device>\n");
     printf("    --udp <agent-ip> <agent-port>\n");

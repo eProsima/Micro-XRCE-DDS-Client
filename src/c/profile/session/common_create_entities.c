@@ -23,7 +23,7 @@ uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObje
     {
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
 
-        request_id = init_base_object_request(session, object_id, &payload.base);
+        request_id = init_base_object_request(&session->info, object_id, &payload.base);
         (void) serialize_DELETE_Payload(&mb, &payload);
     }
 
@@ -50,7 +50,7 @@ uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
     MicroBuffer mb;
     if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))
     {
-        request_id = init_base_object_request(session, object_id, &payload->base);
+        request_id = init_base_object_request(&session->info, object_id, &payload->base);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
         (void) serialize_CREATE_Payload(&mb, payload);
     }

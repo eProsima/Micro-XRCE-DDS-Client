@@ -13,8 +13,6 @@
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
 
-#define INITIAL_REQUEST_ID                          0x0010
-
 const uint8_t MR_STATUS_OK = STATUS_OK;
 const uint8_t MR_STATUS_OK_MATCHED = STATUS_OK_MATCHED;
 const uint8_t MR_STATUS_ERR_DDS_ERROR = STATUS_ERR_DDS_ERROR;
@@ -27,7 +25,6 @@ const uint8_t MR_STATUS_ERR_INCOMPATIBLE = STATUS_ERR_INCOMPATIBLE;
 const uint8_t MR_STATUS_ERR_RESOURCES = STATUS_ERR_RESOURCES;
 const uint8_t MR_STATUS_NONE = STATUS_NONE;
 
-static uint16_t generate_request_id(mrSession* session);
 
 static void flash_output_streams(mrSession* session);
 static bool listen_message(mrSession* session, int poll_ms);
@@ -62,7 +59,6 @@ static void process_status(mrSession* session, mrObjectId object_id, int16_t req
 void mr_init_session(mrSession* session, mrCommunication* comm, uint32_t key)
 {
     session->comm = comm;
-    session->last_request_id = INITIAL_REQUEST_ID;
 
     session->request_list = NULL;
     session->status_list = NULL;
@@ -99,7 +95,6 @@ bool mr_create_session(mrSession* session)
 
     write_create_session(&session->info, &mb, get_milli_time());
     stamp_create_session_header(&session->info, mb.init);
-    set_session_info_request(&session->info, MR_REQUEST_LOGIN);
 
     bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     bool created = received && STATUS_OK == session->info.last_requested_status;
@@ -114,7 +109,6 @@ bool mr_delete_session(mrSession* session)
 
     write_delete_session(&session->info, &mb);
     stamp_session_header(&session->info, 0, 0, mb.init);
-    set_session_info_request(&session->info, MR_REQUEST_LOGOUT);
 
     bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     return received && STATUS_OK == session->info.last_requested_status;
@@ -205,30 +199,9 @@ bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint1
     return status_ok;
 }
 
-uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, BaseObjectRequest* base)
-{
-    uint16_t request_id = generate_request_id(session);
-
-    base->request_id.data[0] = (uint8_t) (request_id >> 8);
-    base->request_id.data[1] = (uint8_t) request_id;
-    object_id_to_raw(object_id, base->object_id.data);
-
-    return request_id;
-}
-
 //==================================================================
 //                             PRIVATE
 //==================================================================
-inline uint16_t generate_request_id(mrSession* session)
-{
-    uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
-        ? INITIAL_REQUEST_ID
-        : session->last_request_id;
-
-    session->last_request_id = last_request_id + 1;
-    return last_request_id;
-}
-
 void flash_output_streams(mrSession* session)
 {
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
@@ -316,14 +289,16 @@ bool listen_message_reliably(mrSession* session, int poll_ms)
 
 bool wait_session_status(mrSession* session, uint8_t* buffer, size_t length, size_t attempts)
 {
+    session->info.last_requested_status = MR_STATUS_NONE;
+
     int poll_ms = MR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
-    for(size_t i = 0; i < attempts && session_info_pending_request(&session->info); ++i)
+    for(size_t i = 0; i < attempts && session->info.last_requested_status == MR_STATUS_NONE; ++i)
     {
         send_message(session, buffer, length);
         poll_ms = listen_message(session, poll_ms) ? MR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL : poll_ms * 2;
     }
 
-    return !session_info_pending_request(&session->info);
+    return session->info.last_requested_status != MR_STATUS_NONE;
 }
 
 inline void send_message(const mrSession* session, uint8_t* buffer, size_t length)

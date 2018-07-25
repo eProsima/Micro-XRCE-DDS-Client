@@ -22,9 +22,7 @@ extern "C"
 
 #include <micrortps/client/core/session/session_info.h>
 #include <micrortps/client/core/session/stream_storage.h>
-#include <micrortps/client/core/session/object_id.h>
 
-#define MR_INVALID_REQUEST_ID 0
 #define MR_TIMEOUT_INF       -1
 
 extern const uint8_t MR_STATUS_OK;
@@ -41,7 +39,6 @@ extern const uint8_t MR_STATUS_NONE;
 
 struct mrSession;
 struct mrCommunication;
-struct BaseObjectRequest;
 
 typedef void (*mrOnStatusFunc) (struct mrSession* session, mrObjectId object_id, uint16_t request_id,
                              uint8_t status, void* args);
@@ -53,7 +50,6 @@ typedef struct mrSession
     mrSessionInfo info;
     mrStreamStorage streams;
     struct mrCommunication* comm;
-    uint16_t last_request_id;
 
     const uint16_t* request_list;
     uint8_t* status_list;
@@ -85,11 +81,6 @@ mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, 
 bool mr_run_session_until_timeout(mrSession* session, int tiemout);
 bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout);
 bool mr_run_session_until_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
-
-//==================================================================
-//                        INTERNAL FUNCTIONS
-//==================================================================
-uint16_t init_base_object_request(mrSession* session, mrObjectId object_id, struct BaseObjectRequest* base);
 
 #ifdef __cplusplus
 }

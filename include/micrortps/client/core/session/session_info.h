@@ -20,23 +20,25 @@ extern "C"
 {
 #endif
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <micrortps/client/core/session/seq_num.h>
+#include <micrortps/client/core/session/object_id.h>
+#include <stdbool.h>
+
+#define MR_INVALID_REQUEST_ID 0
 
 #define MR_REQUEST_NONE     0x00
 #define MR_REQUEST_LOGIN    0x01
 #define MR_REQUEST_LOGOUT   0x02
 
 struct MicroBuffer;
+struct BaseObjectRequest;
 
 typedef struct mrSessionInfo
 {
     uint8_t id;
     uint8_t key[4];
-    uint8_t request;
     uint8_t last_requested_status;
+    uint16_t last_request_id;
 
 } mrSessionInfo;
 
@@ -54,8 +56,7 @@ bool read_session_header(const mrSessionInfo* info, struct MicroBuffer* mb, uint
 
 uint8_t session_header_offset(const mrSessionInfo* info);
 
-void set_session_info_request(mrSessionInfo* info, uint8_t request);
-bool session_info_pending_request(const mrSessionInfo* info);
+uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, struct BaseObjectRequest* base);
 
 #ifdef __cplusplus
 }

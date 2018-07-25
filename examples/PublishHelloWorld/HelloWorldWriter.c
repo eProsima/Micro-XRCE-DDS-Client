@@ -40,7 +40,7 @@ bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjec
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, (uint16_t)(payload_length + topic_length), FORMAT_DATA);
 
         WRITE_DATA_Payload_Data payload;
-        init_base_object_request(session, datawriter_id, &payload.base);
+        init_base_object_request(&session->info, datawriter_id, &payload.base);
         (void) serialize_WRITE_DATA_Payload_Data(&mb, &payload);
         (void) serialize_uint32_t(&mb, topic_length); //REMOVE: when topics have not a previous size in the agent.
 

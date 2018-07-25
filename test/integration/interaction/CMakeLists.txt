@@ -33,8 +33,6 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
     target_include_directories(${PROJECT_NAME}
         PUBLIC
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-        PRIVATE
-            ${ASIO_INCLUDE_DIR}
         )
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
