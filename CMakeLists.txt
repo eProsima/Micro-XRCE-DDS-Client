@@ -230,7 +230,11 @@ endif()
 ###############################################################################
 # Test
 ###############################################################################
-if(EPROSIMA_BUILD_TESTS)
+if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
+    include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
+    enable_testing()
+    include(CTest)
+
     add_subdirectory(test/integration/interaction)
     add_subdirectory(test/integration/cross_serialization)
     add_subdirectory(test/transport/serial_comm)
