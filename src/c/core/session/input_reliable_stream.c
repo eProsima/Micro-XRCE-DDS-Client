@@ -46,22 +46,22 @@ bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, u
 {
     bool result = false;
 
-    /* Process the message */
-    mrSeqNum next = seq_num_add(stream->last_handled, 1);
-    if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
+    /* Check if the seq_num is valid for the stream state */
+    mrSeqNum last_history = seq_num_add(stream->last_handled, stream->history);
+    if(0 > seq_num_cmp(stream->last_handled, seq_num) && 0 <= seq_num_cmp(last_history, seq_num))
     {
-        stream->last_handled = next;
-        if(0 > seq_num_cmp(stream->last_announced, stream->last_handled))
+        /* Process the message */
+        mrSeqNum next = seq_num_add(stream->last_handled, 1);
+        if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
         {
-            stream->last_announced = stream->last_handled;
+            stream->last_handled = next;
+            if(0 > seq_num_cmp(stream->last_announced, stream->last_handled))
+            {
+                stream->last_announced = stream->last_handled;
+            }
+            result = true;
         }
-        result = true;
-    }
-    else
-    {
-        /* Check if the seq_num is valid for the stream state */
-        mrSeqNum last_history = seq_num_add(stream->last_handled, stream->history);
-        if(0 > seq_num_cmp(stream->last_handled, seq_num) || 0 <= seq_num_cmp(last_history, seq_num))
+        else
         {
             /* Check if the message received is not already received */
             uint8_t* internal_buffer = get_input_buffer(stream, seq_num % stream->history);
