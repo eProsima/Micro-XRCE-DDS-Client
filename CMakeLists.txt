@@ -232,13 +232,17 @@ endif()
 ###############################################################################
 if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
+    check_gtest()
     enable_testing()
     include(CTest)
 
     add_subdirectory(test/integration/interaction)
     add_subdirectory(test/integration/cross_serialization)
-    add_subdirectory(test/transport/serial_comm)
     add_subdirectory(test/unitary/streams/output_best_effort)
+
+    if(NOT WIN32)
+        add_subdirectory(test/transport/serial_comm)
+    endif()
 endif()
 
 ###############################################################################

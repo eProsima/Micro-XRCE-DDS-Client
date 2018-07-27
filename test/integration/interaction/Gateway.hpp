@@ -71,7 +71,7 @@ private:
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
             bool result = user_comm_->recv_msg(user_comm_->instance, buf, len, timeout);
             std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-            poll -= std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+            poll -= static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count());
 
             if(result)
             {

@@ -11,7 +11,7 @@
 class Client
 {
 public:
-    Client(uint16_t port, float lost, size_t history)
+    Client(uint16_t port, float lost, uint16_t history)
     : gateway_(lost)
     , port_(port)
     , client_key_(++next_client_key_)
@@ -33,7 +33,7 @@ public:
         delete input_reliable_stream_buffer_;
     }
 
-    void create_entities(uint8_t id, uint16_t stream_id_raw, uint8_t expected_status, uint8_t flags)
+    void create_entities(uint8_t id, uint8_t stream_id_raw, uint8_t expected_status, uint8_t flags)
     {
         mrStreamId output_stream_id = mr_stream_id_from_raw(stream_id_raw, MR_OUTPUT_STREAM);
         uint16_t request_id; uint8_t status;
@@ -75,7 +75,7 @@ public:
         ASSERT_EQ(expected_status, status);
     }
 
-    void publish(uint8_t id, uint16_t stream_id_raw, size_t number)
+    void publish(uint8_t id, uint8_t stream_id_raw, size_t number)
     {
         //Used only for waiting the RTPS subscriber matching
         (void) mr_run_session_until_timeout(&session_, 50);
@@ -94,7 +94,7 @@ public:
         }
     }
 
-    void subscribe(uint8_t id, uint16_t stream_id_raw, size_t number)
+    void subscribe(uint8_t id, uint8_t stream_id_raw, size_t number)
     {
         expected_topic_index_ = 0;
         last_topic_stream_id_ = mr_stream_id_from_raw(0, MR_OUTPUT_STREAM);
@@ -192,7 +192,7 @@ private:
     uint16_t port_;
 
     uint32_t client_key_;
-    size_t history_;
+    uint16_t history_;
 
     mrUDPTransport transport_;
     mrSession session_;

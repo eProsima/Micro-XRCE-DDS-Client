@@ -33,8 +33,8 @@ TEST_F(OutputBestEffortStreamTest, WriteSubmessage)
 
     // Send
     mrSeqNum init_seq_num = stream.last_send;
-    uint8_t* buffer; size_t length; mrSeqNum seq_num;
-    bool available_to_send = prepare_best_effort_buffer_to_send(&stream, &buffer, &length, &seq_num);
+    uint8_t* output_buffer; size_t length; mrSeqNum seq_num;
+    bool available_to_send = prepare_best_effort_buffer_to_send(&stream, &output_buffer, &length, &seq_num);
 
     // Check
     ASSERT_EQ(available_to_write, true);
@@ -43,7 +43,7 @@ TEST_F(OutputBestEffortStreamTest, WriteSubmessage)
     ASSERT_EQ(init_seq_num, seq_num_sub(seq_num, 1));
     for(size_t i = 0; i < submessage.size(); i++)
     {
-        ASSERT_EQ(submessage[i], buffer[OFFSET + i]);
+        ASSERT_EQ(submessage[i], output_buffer[OFFSET + i]);
     }
 }
 
