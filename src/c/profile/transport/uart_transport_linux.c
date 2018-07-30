@@ -65,7 +65,7 @@ static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeou
     mrUARTTransport* transport = (mrUARTTransport*)instance;
     uint8_t src_addr;
     uint8_t rmt_addr;
-    uint8_t bytes_read = read_serial_msg(&transport->serial_io,
+    uint16_t bytes_read = read_serial_msg(&transport->serial_io,
                                          read_uart_data,
                                          instance,
                                          transport->buffer,
