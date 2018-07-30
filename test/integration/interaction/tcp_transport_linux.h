@@ -23,7 +23,7 @@ extern "C"
 #include <micrortps/client/core/communication/communication.h>
 #include <micrortps/client/config.h>
 #include <arpa/inet.h>
-#include <sys/poll.h>
+#include <poll.h>
 
 typedef enum mrTCPInputBufferState
 {

@@ -22,7 +22,7 @@ extern "C"
 
 #include <micrortps/client/core/communication/communication.h>
 #include <micrortps/client/core/communication/serial_protocol.h>
-#include <sys/poll.h>
+#include <poll.h>
 
 typedef struct mrUARTTransport
 {
