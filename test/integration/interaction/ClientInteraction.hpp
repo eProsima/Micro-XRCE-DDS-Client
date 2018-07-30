@@ -87,9 +87,9 @@ public:
         {
             HelloWorld topic = {static_cast<uint32_t>(i), "Hello DDS world!"};
             bool written = mr_write_HelloWorld_topic(&session_, output_stream_id, datawriter_id, &topic);
-            ASSERT_EQ(true, written);
+            ASSERT_TRUE(written);
             bool sent = mr_run_session_until_confirm_delivery(&session_, 1000);
-            ASSERT_EQ(true, sent);
+            ASSERT_TRUE(sent);
             std::cout << "topic sent: " << i << std::endl;
         }
     }
@@ -114,7 +114,7 @@ public:
             uint8_t status;
             bool received_ok = mr_run_session_until_status(&session_, 1000, &request_id, &status, 1);
             ASSERT_EQ(MR_STATUS_OK, status);
-            ASSERT_EQ(true, received_ok);
+            ASSERT_TRUE(received_ok);
             //ASSERT_EQ(last_topic_object_id_, datareader_id);
             //ASSERT_EQ(last_topic_stream_id_, input_stream_id);
         }
@@ -128,12 +128,12 @@ private:
 
     void init()
     {
-        ASSERT_EQ(true, mr_init_udp_transport(&transport_, "127.0.0.1", port_));
+        ASSERT_TRUE(mr_init_udp_transport(&transport_, "127.0.0.1", port_));
 
         mr_init_session(&session_, gateway_.monitorize(&transport_.comm), client_key_);
         mr_set_topic_callback(&session_, on_topic_dispatcher, this);
 
-        ASSERT_EQ(true, mr_create_session(&session_));
+        ASSERT_TRUE(mr_create_session(&session_));
         ASSERT_EQ(MR_STATUS_OK, session_.info.last_requested_status);
 
         for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
@@ -162,10 +162,10 @@ private:
         bool deleted = mr_delete_session(&session_);
         if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
         {
-            ASSERT_EQ(true, deleted);
+            ASSERT_TRUE(deleted);
             ASSERT_EQ(MR_STATUS_OK, session_.info.last_requested_status);
         }
-        ASSERT_EQ(true, mr_close_udp_transport(&transport_));
+        ASSERT_TRUE(mr_close_udp_transport(&transport_));
     }
 
 
