@@ -197,7 +197,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
         submessage_counter++;
     }
     print_tail(initial_log_time);
-    printf("\n");
+    printf(" \n");
 }
 
 void print_serialization(int direction, const uint8_t* buffer, size_t size)
