@@ -25,7 +25,6 @@ extern "C"
 #include <sys/socket.h>
 #include <poll.h>
 
-
 typedef struct mrUDPTransport
 {
     uint8_t buffer[MR_CONFIG_UDP_TRANSPORT_MTU];
