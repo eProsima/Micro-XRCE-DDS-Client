@@ -13,8 +13,7 @@
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
 
-#define MIN_SESSION_STATUS_WAITING         1 //ms
-#define INITIAL_REQUEST_ID            0x0010
+#define INITIAL_REQUEST_ID                          0x0010
 
 const uint8_t MR_STATUS_OK = STATUS_OK;
 const uint8_t MR_STATUS_OK_MATCHED = STATUS_OK_MATCHED;
@@ -317,11 +316,11 @@ bool listen_message_reliably(mrSession* session, int poll_ms)
 
 bool wait_session_status(mrSession* session, uint8_t* buffer, size_t length, size_t attempts)
 {
-    int poll_ms = MIN_SESSION_STATUS_WAITING;
+    int poll_ms = MR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
     for(size_t i = 0; i < attempts && session_info_pending_request(&session->info); ++i)
     {
         send_message(session, buffer, length);
-        poll_ms = listen_message(session, poll_ms) ? MIN_SESSION_STATUS_WAITING : poll_ms * 2;
+        poll_ms = listen_message(session, poll_ms) ? MR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL : poll_ms * 2;
     }
 
     return !session_info_pending_request(&session->info);
