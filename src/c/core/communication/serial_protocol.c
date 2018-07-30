@@ -338,14 +338,14 @@ uint16_t read_serial_msg(mrSerialIO* serial_io,
         {
             /* Process available message from head to marker and update head. */
             rv = process_serial_message(&serial_io->input, buf, len, src_addr, rmt_addr);
-            if (0 < rv)
+            if (0 < rv || serial_io->input.head == serial_io->input.tail)
             {
                 break;
             }
             message_found = find_serial_message(&serial_io->input);
         }
 
-        if (serial_io->input.marker == serial_io->input.tail)
+        if (serial_io->input.head == serial_io->input.tail)
         {
             if (0 == rv)
             {

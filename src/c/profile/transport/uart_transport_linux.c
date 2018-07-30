@@ -66,13 +66,13 @@ static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeou
     uint8_t src_addr;
     uint8_t rmt_addr;
     uint16_t bytes_read = read_serial_msg(&transport->serial_io,
-                                         read_uart_data,
-                                         instance,
-                                         transport->buffer,
-                                         sizeof(transport->buffer),
-                                         &src_addr,
-                                         &rmt_addr,
-                                         timeout);
+                                          read_uart_data,
+                                          instance,
+                                          transport->buffer,
+                                          sizeof(transport->buffer),
+                                          &src_addr,
+                                          &rmt_addr,
+                                          timeout);
     if (0 < bytes_read && src_addr == transport->remote_addr)
     {
         *len = bytes_read;
