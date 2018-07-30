@@ -217,6 +217,7 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/PublishHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
+    add_subdirectory(examples/Deployment)
 endif()
 
 ###############################################################################
