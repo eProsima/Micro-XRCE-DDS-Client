@@ -83,7 +83,6 @@ bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t p
         temp_addr.sin_family = AF_INET;
         temp_addr.sin_port = htons(port);
         temp_addr.sin_addr.s_addr = inet_addr(ip);
-        memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
         transport->remote_addr = *((struct sockaddr *) &temp_addr);
 
         /* Poll setup. */
