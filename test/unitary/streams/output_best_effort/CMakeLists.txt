@@ -26,7 +26,6 @@ else()
     project(output_best_effort_stream_test LANGUAGES C CXX)
 endif()
 
-check_gtest()
 if(GTEST_FOUND)
     include(CTest)
     set(SRCS OutputBestEffortStream.cpp)

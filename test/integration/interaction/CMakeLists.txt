@@ -26,19 +26,20 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
         HelloWorldWriter.c
         )
 
-    add_library(${PROJECT_NAME} STATIC ${SRCS})
+    if(GTEST_FOUND)
+        add_library(${PROJECT_NAME} STATIC ${SRCS})
 
-    target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
-    target_include_directories(${PROJECT_NAME}
-        PUBLIC
+        target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
+        target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
+        target_include_directories(${PROJECT_NAME}
+            PUBLIC
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-        )
+            )
 
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        CXX_STANDARD 11
-        CXX_STANDARD_REQUIRED YES
-        )
-
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            CXX_STANDARD 11
+            CXX_STANDARD_REQUIRED YES
+            )
+    endif()
 endif()
 
