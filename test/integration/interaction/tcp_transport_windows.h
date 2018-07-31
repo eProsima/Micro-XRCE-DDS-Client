@@ -21,6 +21,7 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/communication/communication.h>
+#include <micrortps/client/dll.h>
 #include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -36,9 +37,9 @@ typedef struct mrTCPTransport
     mrCommunication comm;
 } mrTCPTransport;
 
-bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
 
-bool mr_close_tcp_transport(mrTCPTransport* transport);
+MRDLLAPI bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
+MRDLLAPI bool mr_close_tcp_transport(mrTCPTransport* transport);
 
 #ifdef __cplusplus
 }

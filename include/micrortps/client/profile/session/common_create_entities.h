@@ -22,12 +22,9 @@ extern "C"
 
 #include <micrortps/client/core/session/session.h>
 
-extern const uint8_t MR_REPLACE;
-extern const uint8_t MR_REUSE; //Not supported yet
-
 struct CREATE_Payload;
 
-uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id);
+MRDLLAPI uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id);
 
 uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
                               mrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,

@@ -13,19 +13,6 @@
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
 
-const uint8_t MR_STATUS_OK = STATUS_OK;
-const uint8_t MR_STATUS_OK_MATCHED = STATUS_OK_MATCHED;
-const uint8_t MR_STATUS_ERR_DDS_ERROR = STATUS_ERR_DDS_ERROR;
-const uint8_t MR_STATUS_ERR_MISMATCH = STATUS_ERR_MISMATCH;
-const uint8_t MR_STATUS_ERR_ALREADY_EXISTS = STATUS_ERR_ALREADY_EXISTS;
-const uint8_t MR_STATUS_ERR_DENIED = STATUS_ERR_DENIED;
-const uint8_t MR_STATUS_ERR_UNKNOWN_REFERENCE = STATUS_ERR_UNKNOWN_REFERENCE;
-const uint8_t MR_STATUS_ERR_INVALID_DATA = STATUS_ERR_INVALID_DATA;
-const uint8_t MR_STATUS_ERR_INCOMPATIBLE = STATUS_ERR_INCOMPATIBLE;
-const uint8_t MR_STATUS_ERR_RESOURCES = STATUS_ERR_RESOURCES;
-const uint8_t MR_STATUS_NONE = STATUS_NONE;
-
-
 static void flash_output_streams(mrSession* session);
 static bool listen_message(mrSession* session, int poll_ms);
 static bool listen_message_reliably(mrSession* session, int poll_ms);
@@ -97,7 +84,7 @@ bool mr_create_session(mrSession* session)
     stamp_create_session_header(&session->info, mb.init);
 
     bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
-    bool created = received && STATUS_OK == session->info.last_requested_status;
+    bool created = received && MR_STATUS_OK == session->info.last_requested_status;
     return created;
 }
 
@@ -111,7 +98,7 @@ bool mr_delete_session(mrSession* session)
     stamp_session_header(&session->info, 0, 0, mb.init);
 
     bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
-    return received && STATUS_OK == session->info.last_requested_status;
+    return received && MR_STATUS_OK == session->info.last_requested_status;
 }
 
 mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size)
@@ -471,7 +458,7 @@ void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t 
     mrObjectId object_id = object_id_from_raw(base.object_id.data);
     uint16_t request_id = (((uint16_t) base.request_id.data[0]) << 8) + base.request_id.data[1];
 
-    process_status(session, object_id, request_id, STATUS_OK);
+    process_status(session, object_id, request_id, MR_STATUS_OK);
 
     if(session->on_topic != NULL)
     {

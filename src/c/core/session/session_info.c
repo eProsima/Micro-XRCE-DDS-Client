@@ -30,7 +30,7 @@ void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key)
     info->key[2] = (key << 16) >> 24;
     info->key[3] = (key << 24) >> 24;
     info->last_request_id = INITIAL_REQUEST_ID;
-    info->last_requested_status = STATUS_NONE;
+    info->last_requested_status = MR_STATUS_NONE;
 }
 
 void write_create_session(const mrSessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds)

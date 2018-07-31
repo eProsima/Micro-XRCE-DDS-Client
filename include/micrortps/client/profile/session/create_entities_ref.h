@@ -23,7 +23,7 @@ extern "C"
 
 #include <micrortps/client/profile/session/common_create_entities.h>
 
-uint16_t mr_write_create_participant_ref(mrSession* session, mrStreamId stream_id,
+MRDLLAPI uint16_t mr_write_create_participant_ref(mrSession* session, mrStreamId stream_id,
                                          mrObjectId object_id, const char* ref, uint8_t mode);
 
 #ifdef __cplusplus

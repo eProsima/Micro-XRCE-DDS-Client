@@ -25,18 +25,6 @@ extern "C"
 
 #define MR_TIMEOUT_INF       -1
 
-extern const uint8_t MR_STATUS_OK;
-extern const uint8_t MR_STATUS_OK_MATCHED;
-extern const uint8_t MR_STATUS_ERR_DDS_ERROR;
-extern const uint8_t MR_STATUS_ERR_MISMATCH;
-extern const uint8_t MR_STATUS_ERR_ALREADY_EXISTS;
-extern const uint8_t MR_STATUS_ERR_DENIED;
-extern const uint8_t MR_STATUS_ERR_UNKNOWN_REFERENCE;
-extern const uint8_t MR_STATUS_ERR_INVALID_DATA;
-extern const uint8_t MR_STATUS_ERR_INCOMPATIBLE;
-extern const uint8_t MR_STATUS_ERR_RESOURCES;
-extern const uint8_t MR_STATUS_NONE;
-
 struct mrSession;
 struct mrCommunication;
 
@@ -66,21 +54,21 @@ typedef struct mrSession
 //==================================================================
 //                         PUBLIC FUNCTIONS
 //==================================================================
-void mr_init_session(mrSession* session, struct mrCommunication* comm, uint32_t key);
-void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args);
-void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args);
+MRDLLAPI void mr_init_session(mrSession* session, struct mrCommunication* comm, uint32_t key);
+MRDLLAPI void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args);
+MRDLLAPI void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args);
 
-bool mr_create_session(mrSession* session);
-bool mr_delete_session(mrSession* session);
+MRDLLAPI bool mr_create_session(mrSession* session);
+MRDLLAPI bool mr_delete_session(mrSession* session);
 
-mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size);
-mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
-mrStreamId mr_create_input_best_effort_stream(mrSession* session);
-mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
+MRDLLAPI mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size);
+MRDLLAPI mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
+MRDLLAPI mrStreamId mr_create_input_best_effort_stream(mrSession* session);
+MRDLLAPI mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
 
-bool mr_run_session_until_timeout(mrSession* session, int tiemout);
-bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout);
-bool mr_run_session_until_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
+MRDLLAPI bool mr_run_session_until_timeout(mrSession* session, int tiemout);
+MRDLLAPI bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout);
+MRDLLAPI bool mr_run_session_until_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
 
 #ifdef __cplusplus
 }

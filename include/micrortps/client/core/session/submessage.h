@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/dll.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -49,8 +50,6 @@ typedef enum SubmessageId
 
 typedef enum SubmessageFlags
 {
-    FLAG_REUSE = 0x01 << 1,
-    FLAG_REPLACE = 0x01 << 2,
     FLAG_LAST_FRAGMENT = 0x01 << 1,
     FLAG_FORMAT_DATA = 0x00,
     FLAG_FORMAT_SAMPLE = 0x02,
@@ -60,7 +59,7 @@ typedef enum SubmessageFlags
 
 } SubmessageFlags;
 
-bool write_submessage_header(struct MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
+MRDLLAPI bool write_submessage_header(struct MicroBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
 bool read_submessage_header(struct MicroBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it);
 size_t submessage_padding(size_t length);
 

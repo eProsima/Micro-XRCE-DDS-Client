@@ -21,6 +21,7 @@ extern "C"
 #endif
 
 #include <micrortps/client/core/communication/communication.h>
+#include <micrortps/client/dll.h>
 #include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -36,9 +37,9 @@ typedef struct mrUDPTransport
     mrCommunication comm;
 } mrUDPTransport;
 
-bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
 
-bool mr_close_udp_transport(mrUDPTransport* transport);
+MRDLLAPI bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
+MRDLLAPI bool mr_close_udp_transport(mrUDPTransport* transport);
 
 #ifdef __cplusplus
 }

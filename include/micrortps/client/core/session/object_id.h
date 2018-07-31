@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/dll.h>
 #include <stdint.h>
 
 extern const uint8_t MR_PARTICIPANT_ID;
@@ -36,7 +37,7 @@ typedef struct mrObjectId
 
 } mrObjectId;
 
-mrObjectId mr_object_id(uint16_t id, uint8_t type);
+MRDLLAPI mrObjectId mr_object_id(uint16_t id, uint8_t type);
 
 mrObjectId object_id_from_raw(uint8_t* raw);
 void object_id_to_raw(mrObjectId object_id, uint8_t* raw);

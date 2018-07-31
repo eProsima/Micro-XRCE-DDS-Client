@@ -20,9 +20,9 @@ extern "C"
 {
 #endif
 
+#include <microcdr/microcdr.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <microcdr/microcdr.h>
 
 #define STRING_SIZE_MAX                512
 #define SAMPLE_DATA_SIZE_MAX           512
@@ -558,23 +558,6 @@ typedef struct RequestId
     uint8_t data[2];
 
 } RequestId;
-
-
-typedef enum StatusValue
-{
-    STATUS_OK = 0x00,
-    STATUS_OK_MATCHED = 0x01,
-    STATUS_ERR_DDS_ERROR = 0x80,
-    STATUS_ERR_MISMATCH = 0x81,
-    STATUS_ERR_ALREADY_EXISTS = 0x82,
-    STATUS_ERR_DENIED = 0x83,
-    STATUS_ERR_UNKNOWN_REFERENCE = 0x84,
-    STATUS_ERR_INVALID_DATA = 0x85,
-    STATUS_ERR_INCOMPATIBLE = 0x86,
-    STATUS_ERR_RESOURCES = 0x87,
-    STATUS_NONE = 255 //For internal management, never sent. It is correspond as an unknown status
-
-} StatusValue;
 
 
 typedef struct ResultStatus

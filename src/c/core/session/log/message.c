@@ -14,6 +14,7 @@
 
 #include "message.h"
 
+#include <micrortps/client/core/session/session_info.h>
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/util/time.h>
 #include <micrortps/client/core/serialization/xrce_header.h>
@@ -246,34 +247,34 @@ const char* reply_to_string(const BaseObjectReply* reply)
     char status[64];
     switch(reply->result.status)
     {
-        case STATUS_OK:
+        case MR_STATUS_OK:
             sprintf(status, "OK");
             break;
-        case STATUS_OK_MATCHED:
+        case MR_STATUS_OK_MATCHED:
             sprintf(status, "OK_MATCHED");
             break;
-        case STATUS_ERR_DDS_ERROR:
+        case MR_STATUS_ERR_DDS_ERROR:
             sprintf(status, "ERR_DDS_ERROR");
             break;
-        case STATUS_ERR_MISMATCH:
+        case MR_STATUS_ERR_MISMATCH:
             sprintf(status, "ERR_MISMATCH");
             break;
-        case STATUS_ERR_ALREADY_EXISTS:
+        case MR_STATUS_ERR_ALREADY_EXISTS:
             sprintf(status, "ERR_ALREADY_EXISTS");
             break;
-        case STATUS_ERR_DENIED:
+        case MR_STATUS_ERR_DENIED:
             sprintf(status, "ERR_DENIED");
             break;
-        case STATUS_ERR_UNKNOWN_REFERENCE:
+        case MR_STATUS_ERR_UNKNOWN_REFERENCE:
             sprintf(status, "ERR_UNKNOWN_REFERENCE");
             break;
-        case STATUS_ERR_INVALID_DATA:
+        case MR_STATUS_ERR_INVALID_DATA:
             sprintf(status, "ERR_INVALID_DATA");
             break;
-        case STATUS_ERR_INCOMPATIBLE:
+        case MR_STATUS_ERR_INCOMPATIBLE:
             sprintf(status, "ERR_INCOMPATIBLE");
             break;
-        case STATUS_ERR_RESOURCES:
+        case MR_STATUS_ERR_RESOURCES:
             sprintf(status, "ERR_RESOURCES");
             break;
         default:
@@ -358,9 +359,9 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
             sprintf(content, "UNKNOWN");
     }
 
-    const char* reuse_flag = (flags & FLAG_REUSE) ? "REUSE" : "-";
-    const char* replace_flag = (flags & FLAG_REPLACE) ? "REPLACE" : "";
-    const char* separator = (flags & FLAG_REUSE && flags & FLAG_REPLACE) ? " " : "";
+    const char* reuse_flag = (flags & MR_REUSE) ? "REUSE" : "-";
+    const char* replace_flag = (flags & MR_REPLACE) ? "REPLACE" : "";
+    const char* separator = (flags & MR_REUSE && flags & MR_REPLACE) ? " " : "";
 
     printf("%s[CREATE | %s%s%s | %s | %s]%s",
             pre,

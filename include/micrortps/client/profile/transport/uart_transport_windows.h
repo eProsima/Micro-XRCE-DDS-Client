@@ -33,7 +33,7 @@ typedef struct UARTTransport
     struct UARTProperties* properties;
 } UARTTransport;
 
-bool init_uart_transport(UARTTransport* transport, const char* device);
+bool mr_init_uart_transport(UARTTransport* transport, const char* device);
 
 #ifdef __cplusplus
 }

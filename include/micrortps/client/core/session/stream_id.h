@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+#include <micrortps/client/dll.h>
 #include <stdint.h>
 
 typedef enum mrStreamType
@@ -46,8 +47,8 @@ typedef struct mrStreamId
 
 } mrStreamId;
 
-mrStreamId mr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction);
-mrStreamId mr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction);
+MRDLLAPI mrStreamId mr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction);
+MRDLLAPI mrStreamId mr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction);
 
 #ifdef __cplusplus
 }

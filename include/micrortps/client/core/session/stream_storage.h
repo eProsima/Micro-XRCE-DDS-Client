@@ -58,7 +58,7 @@ mrOutputReliableStream* get_output_reliable_stream(mrStreamStorage* storage, uin
 mrInputBestEffortStream* get_input_best_effort_stream(mrStreamStorage* storage, uint8_t index);
 mrInputReliableStream* get_input_reliable_stream(mrStreamStorage* storage, uint8_t index);
 
-bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, struct MicroBuffer* mb);
+MRDLLAPI bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, struct MicroBuffer* mb);
 bool output_streams_confirmed(const mrStreamStorage* storage);
 
 #ifdef __cplusplus

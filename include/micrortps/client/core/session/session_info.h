@@ -24,6 +24,21 @@ extern "C"
 #include <micrortps/client/core/session/object_id.h>
 #include <stdbool.h>
 
+#define MR_STATUS_OK                     0x00
+#define MR_STATUS_OK_MATCHED             0x01
+#define MR_STATUS_ERR_DDS_ERROR          0x80
+#define MR_STATUS_ERR_MISMATCH           0x81
+#define MR_STATUS_ERR_ALREADY_EXISTS     0x82
+#define MR_STATUS_ERR_DENIED             0x83
+#define MR_STATUS_ERR_UNKNOWN_REFERENCE  0x84
+#define MR_STATUS_ERR_INVALID_DATA       0x85
+#define MR_STATUS_ERR_INCOMPATIBLE       0x86
+#define MR_STATUS_ERR_RESOURCES          0x87
+#define MR_STATUS_NONE                   0xFF //Never sent. It corresponds as an unknown status
+
+#define MR_REUSE            0x01 << 1 //Not supported yet
+#define MR_REPLACE          0x01 << 2
+
 #define MR_INVALID_REQUEST_ID 0
 
 #define MR_REQUEST_NONE     0x00
@@ -56,7 +71,7 @@ bool read_session_header(const mrSessionInfo* info, struct MicroBuffer* mb, uint
 
 uint8_t session_header_offset(const mrSessionInfo* info);
 
-uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, struct BaseObjectRequest* base);
+MRDLLAPI uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, struct BaseObjectRequest* base);
 
 #ifdef __cplusplus
 }
