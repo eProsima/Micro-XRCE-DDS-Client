@@ -150,7 +150,6 @@ set(SRCS
 ###############################################################################
 # Target
 ###############################################################################
-set(BUILD_SHARED_LIBS OFF)
 add_library(${PROJECT_NAME} ${SRCS})
 
 set_common_compile_options(${PROJECT_NAME})
