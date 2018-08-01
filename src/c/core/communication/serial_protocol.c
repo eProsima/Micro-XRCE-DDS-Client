@@ -183,7 +183,7 @@ uint8_t get_next_octet(mrSerialInputBuffer* input, uint16_t* relative_position)
     uint8_t rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)];
 
     *relative_position = (uint16_t)(*relative_position + 1);
-    if (MR_FRAMING_END_FLAG == rv || MR_FRAMING_ESC_FLAG == rv)
+    if (MR_FRAMING_ESC_FLAG == rv)
     {
         rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)] ^ MR_FRAMING_XOR_FLAG;
         *relative_position = (uint16_t)(*relative_position + 1);
@@ -330,34 +330,31 @@ uint16_t read_serial_msg(mrSerialIO* serial_io,
     }
 
     /* Process data in case. */
-    if (data_available)
+    while (data_available && 0 == rv)
     {
         /* Look for available messages. */
-        bool message_found = find_serial_message(&serial_io->input);
-        while (message_found)
+        if (find_serial_message(&serial_io->input))
         {
             /* Process available message from head to marker and update head. */
             rv = process_serial_message(&serial_io->input, buf, len, src_addr, rmt_addr);
-            if (0 < rv || serial_io->input.head == serial_io->input.tail)
-            {
-                break;
-            }
-            message_found = find_serial_message(&serial_io->input);
-        }
 
-        if (serial_io->input.head == serial_io->input.tail)
-        {
-            if (0 == rv)
+            /* Reset buffer to gain continuous free space. */
+            if (serial_io->input.head == serial_io->input.tail)
             {
-                /* Buffer full, reset stream. */
-                serial_io->input.stream_init = false;
-            }
-            else
-            {
-                /* Reset buffer to gain continuous free space. */
+                data_available = false;
                 serial_io->input.head = 0;
                 serial_io->input.marker = 0;
                 serial_io->input.tail = 0;
+            }
+        }
+        else
+        {
+            data_available = false;
+
+            /* Reset stream in case of buffer full and message not found. */
+            if (serial_io->input.head == serial_io->input.tail)
+            {
+                serial_io->input.stream_init = false;
             }
         }
     }
