@@ -65,6 +65,38 @@ TEST_F(SerialComm, MessageOverflowTest)
     ASSERT_FALSE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 }
 
+TEST_F(SerialComm, BufferOverflowTest)
+{
+    ASSERT_EQ(init(), 0);
+
+    uint8_t* input_msg;
+    size_t input_msg_len;
+    uint8_t overflow_msg[MR_SERIAL_BUFFER_SIZE + 1] = {0};
+    uint8_t output_msg[] = {0, 0, 1, 0, 0, 0, 0};
+    uint8_t flag = MR_FRAMING_END_FLAG;
+
+    /* Send BEGIN flag. */
+    write(slave_.poll_fd.fd, (void*)&flag, 1);
+
+    /* Send overflow PAYLOAD. */
+    write(slave_.poll_fd.fd, (void*)&overflow_msg, sizeof(overflow_msg));
+    ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+
+    /* Send BEGIN flag. */
+    write(slave_.poll_fd.fd, (void*)&flag, 1);
+
+    /* Send PAYLOAD. */
+    write(slave_.poll_fd.fd, (void*)&output_msg, sizeof(output_msg));
+    ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+
+    /* Send END flag. */
+    write(slave_.poll_fd.fd, (void*)&flag, 1);
+
+    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    ASSERT_EQ(*input_msg, 0);
+    ASSERT_EQ(input_msg_len, 1);
+}
+
 TEST_F(SerialComm, FatigueTest)
 {
     ASSERT_EQ(init(), 0);
@@ -104,3 +136,31 @@ TEST_F(SerialComm, FatigueTest)
 
     ASSERT_EQ(recv_counter, sent_counter);
 }
+
+TEST_F(SerialComm, SplitMessageTest)
+{
+    ASSERT_EQ(init(), 0);
+
+    uint8_t* input_msg;
+    size_t input_msg_len;
+    uint8_t output_msg[] = {0, 0, 1, 0, 0, 0, 0};
+    uint8_t flag = MR_FRAMING_END_FLAG;
+
+    /* Send BEGIN flag. */
+    write(slave_.poll_fd.fd, (void*)&flag, 1);
+
+    /* Send PAYLOAD. */
+    for (unsigned int i = 0; i < sizeof(output_msg); ++i)
+    {
+        write(slave_.poll_fd.fd, (void*)&output_msg[i], 1);
+        ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    }
+
+    /* Send END flag. */
+    write(slave_.poll_fd.fd, (void*)&flag, 1);
+
+    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    ASSERT_EQ(*input_msg, 0);
+    ASSERT_EQ(input_msg_len, 1);
+}
+
