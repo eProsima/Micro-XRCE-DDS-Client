@@ -49,15 +49,15 @@
 #endif
 #endif //PROFILE_TCP_TRANSPORT
 
-#ifdef PROFILE_UART_TRANSPORT
+#ifdef PROFILE_SERIAL_TRANSPORT
 #if defined(PLATFORM_NAME_LINUX)
-#include <micrortps/client/profile/transport/uart_transport_linux.h>
+#include <micrortps/client/profile/transport/serial_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <micrortps/client/profile/transport/uart_transport_windows.h>
+#include <micrortps/client/profile/transport/serial_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
-#include <micrortps/client/profile/transport/uart_transport_linux.h>
+#include <micrortps/client/profile/transport/serial_transport_linux.h>
 #endif
-#endif //PROFILE_UART_TRANSPORT
+#endif //PROFILE_SERIAL_TRANSPORT
 
 #include <micrortps/client/core/session/session.h>
 

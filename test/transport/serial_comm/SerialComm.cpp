@@ -10,27 +10,27 @@ SerialComm::SerialComm() : fd_(-1)
 
 SerialComm::~SerialComm()
 {
-    (void) unlink("/tmp/uart_fifo");
+    (void) unlink("/tmp/serial_fifo");
 }
 
 int SerialComm::init()
 {
     int rv = 0;
 
-    (void) unlink("/tmp/uart_fifo");
-    if (0 < mkfifo("/tmp/uart_fifo", S_IRWXU | S_IRWXG | S_IRWXO))
+    (void) unlink("/tmp/serial_fifo");
+    if (0 < mkfifo("/tmp/serial_fifo", S_IRWXU | S_IRWXG | S_IRWXO))
     {
         rv = -1;
     }
     else
     {
-        fd_ = open("/tmp/uart_fifo", O_RDWR | O_NONBLOCK);
+        fd_ = open("/tmp/serial_fifo", O_RDWR | O_NONBLOCK);
         if (0 < fd_)
         {
             fcntl(fd_, F_SETFL, O_NONBLOCK);
             fcntl(fd_, F_SETPIPE_SZ, 4096);
-            if (!mr_init_uart_transport_fd(&master_, fd_, 1, 0) ||
-                !mr_init_uart_transport_fd(&slave_, fd_, 0, 1))
+            if (!mr_init_serial_transport_fd(&master_, fd_, 1, 0) ||
+                !mr_init_serial_transport_fd(&slave_, fd_, 0, 1))
             {
                 rv = -1;
             }
@@ -76,21 +76,21 @@ TEST_F(SerialComm, BufferOverflowTest)
     uint8_t flag = MR_FRAMING_END_FLAG;
 
     /* Send BEGIN flag. */
-    write(slave_.poll_fd.fd, (void*)&flag, 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
 
     /* Send overflow PAYLOAD. */
-    write(slave_.poll_fd.fd, (void*)&overflow_msg, sizeof(overflow_msg));
+    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&overflow_msg, sizeof(overflow_msg)), sizeof(overflow_msg));
     ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
 
     /* Send BEGIN flag. */
-    write(slave_.poll_fd.fd, (void*)&flag, 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
 
     /* Send PAYLOAD. */
-    write(slave_.poll_fd.fd, (void*)&output_msg, sizeof(output_msg));
+    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&output_msg, sizeof(output_msg)), sizeof(output_msg));
     ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
 
     /* Send END flag. */
-    write(slave_.poll_fd.fd, (void*)&flag, 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     ASSERT_EQ(*input_msg, 0);
@@ -147,17 +147,17 @@ TEST_F(SerialComm, SplitMessageTest)
     uint8_t flag = MR_FRAMING_END_FLAG;
 
     /* Send BEGIN flag. */
-    write(slave_.poll_fd.fd, (void*)&flag, 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
 
     /* Send PAYLOAD. */
     for (unsigned int i = 0; i < sizeof(output_msg); ++i)
     {
-        write(slave_.poll_fd.fd, (void*)&output_msg[i], 1);
+        ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&output_msg[i], 1), 1);
         ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     }
 
     /* Send END flag. */
-    write(slave_.poll_fd.fd, (void*)&flag, 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     ASSERT_EQ(*input_msg, 0);

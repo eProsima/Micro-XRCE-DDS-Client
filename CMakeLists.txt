@@ -101,7 +101,7 @@ eprosima_find_package(microcdr)
 ###############################################################################
 
 # Transport source
-foreach(TRANSPORT_TYPE UDP TCP UART)
+foreach(TRANSPORT_TYPE UDP TCP SERIAL)
     if(PROFILE_${TRANSPORT_TYPE}_TRANSPORT)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -127,7 +127,7 @@ set(SRCS
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
     ${UDP_SRCS}
     ${TCP_SRCS}
-    ${UART_SRCS}
+    ${SERIAL_SRCS}
     src/c/core/communication/serial_protocol.c
     src/c/core/session/input_best_effort_stream.c
     src/c/core/session/input_reliable_stream.c

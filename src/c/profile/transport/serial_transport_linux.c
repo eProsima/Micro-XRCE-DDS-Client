@@ -1,4 +1,4 @@
-#include <micrortps/client/profile/transport/uart_transport_linux.h>
+#include <micrortps/client/profile/transport/serial_transport_linux.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -6,22 +6,22 @@
 /*******************************************************************************
  * Static members.
  *******************************************************************************/
-static int uart_errno = 0;
+static int serial_errno = 0;
 
 /*******************************************************************************
  * Private function declarations.
  *******************************************************************************/
-static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int timeout);
-static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len);
-static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
+static uint16_t read_serial_data(void* instance, uint8_t* buf, size_t len, int timeout);
+static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len);
+static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
 
 /*******************************************************************************
  * Private function definitions.
  *******************************************************************************/
-static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int timeout)
+static uint16_t read_serial_data(void* instance, uint8_t* buf, size_t len, int timeout)
 {
     uint16_t rv = 0;
-    mrUARTTransport* transport = (mrUARTTransport*)instance;
+    mrSerialTransport* transport = (mrSerialTransport*)instance;
 
     int poll_rv = poll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -36,10 +36,10 @@ static uint16_t read_uart_data(void* instance, uint8_t* buf, size_t len, int tim
     return rv;
 }
 
-static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
+static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = false;
-    mrUARTTransport* transport = (mrUARTTransport*)instance;
+    mrSerialTransport* transport = (mrSerialTransport*)instance;
 
     uint16_t bytes_written = write_serial_msg(&transport->serial_io,
                                               buf,
@@ -54,19 +54,19 @@ static bool send_uart_msg(void* instance, const uint8_t* buf, size_t len)
             rv = true;
         }
     }
-    uart_errno = rv ? 0 : -1;
+    serial_errno = rv ? 0 : -1;
 
     return rv;
 }
 
-static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
+static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = true;
-    mrUARTTransport* transport = (mrUARTTransport*)instance;
+    mrSerialTransport* transport = (mrSerialTransport*)instance;
     uint8_t src_addr;
     uint8_t rmt_addr;
     uint16_t bytes_read = read_serial_msg(&transport->serial_io,
-                                          read_uart_data,
+                                          read_serial_data,
                                           instance,
                                           transport->buffer,
                                           sizeof(transport->buffer),
@@ -80,22 +80,22 @@ static bool recv_uart_msg(void* instance, uint8_t** buf, size_t* len, int timeou
     }
     else
     {
-        uart_errno = -1;
+        serial_errno = -1;
         rv = false;
     }
 
     return rv;
 }
 
-static int get_uart_error()
+static int get_serial_error()
 {
-    return uart_errno;
+    return serial_errno;
 }
 
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool mr_init_uart_transport(mrUARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
+bool mr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
@@ -103,13 +103,13 @@ bool mr_init_uart_transport(mrUARTTransport* transport, const char* device, uint
     int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd != -1)
     {
-        rv = mr_init_uart_transport_fd(transport, fd, remote_addr, local_addr);
+        rv = mr_init_serial_transport_fd(transport, fd, remote_addr, local_addr);
     }
 
     return rv;
 }
 
-bool mr_init_uart_transport_fd(mrUARTTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
+bool mr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
@@ -130,17 +130,17 @@ bool mr_init_uart_transport_fd(mrUARTTransport* transport, int fd, uint8_t remot
 
         /* Interface setup. */
         transport->comm.instance = (void*)transport;
-        transport->comm.send_msg = send_uart_msg;
-        transport->comm.recv_msg = recv_uart_msg;
-        transport->comm.comm_error = get_uart_error;
-        transport->comm.mtu = MR_CONFIG_UART_TRANSPORT_MTU;
+        transport->comm.send_msg = send_serial_msg;
+        transport->comm.recv_msg = recv_serial_msg;
+        transport->comm.comm_error = get_serial_error;
+        transport->comm.mtu = MR_CONFIG_SERIAL_TRANSPORT_MTU;
         rv = true;
     }
 
     return rv;
 }
 
-bool mr_close_uart_transport(mrUARTTransport* transport)
+bool mr_close_serial_transport(mrSerialTransport* transport)
 {
     return (0 == transport->poll_fd.fd);
 }

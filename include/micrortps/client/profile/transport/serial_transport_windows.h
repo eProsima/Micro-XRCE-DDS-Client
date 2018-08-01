@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_UART_TRANSPORT_H_
-#define _MICRORTPS_CLIENT_UART_TRANSPORT_H_
+#ifndef _MICRORTPS_CLIENT_SERIAL_TRANSPORT_H_
+#define _MICRORTPS_CLIENT_SERIAL_TRANSPORT_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -24,20 +24,20 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-struct UARTProperties;
+struct SerialProperties;
 
-typedef struct UARTTransport
+typedef struct SerialTransport
 {
-    intmax_t (*send_data)(struct UARTTransport* transport, char* buf, size_t len);
-    intmax_t (*recv_data)(struct UARTTransport* transport, char** buf, size_t* len);
-    struct UARTProperties* properties;
-} UARTTransport;
+    intmax_t (*send_data)(struct SerialTransport* transport, char* buf, size_t len);
+    intmax_t (*recv_data)(struct SerialTransport* transport, char** buf, size_t* len);
+    struct SerialProperties* properties;
+} SerialTransport;
 
-bool mr_init_uart_transport(UARTTransport* transport, const char* device);
+bool mr_init_uart_transport(SerialTransport* transport, const char* device);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_UDP_TRANSPORT_H_
+#endif //_MICRORTPS_CLIENT_SERIAL_TRANSPORT_H_
 

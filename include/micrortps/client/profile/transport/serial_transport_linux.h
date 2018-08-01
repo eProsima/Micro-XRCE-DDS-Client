@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_UART_TRANSPORT_LINUX_H_
-#define _MICRORTPS_CLIENT_UART_TRANSPORT_LINUX_H_
+#ifndef _MICRORTPS_CLIENT_SERIAL_TRANSPORT_LINUX_H_
+#define _MICRORTPS_CLIENT_SERIAL_TRANSPORT_LINUX_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -24,22 +24,22 @@ extern "C"
 #include <micrortps/client/core/communication/serial_protocol.h>
 #include <poll.h>
 
-typedef struct mrUARTTransport
+typedef struct mrSerialTransport
 {
-    uint8_t buffer[MR_CONFIG_UART_TRANSPORT_MTU];
+    uint8_t buffer[MR_CONFIG_SERIAL_TRANSPORT_MTU];
     uint8_t remote_addr;
     uint8_t local_addr;
     struct pollfd poll_fd;
     mrSerialIO serial_io;
     mrCommunication comm;
-} mrUARTTransport;
+} mrSerialTransport;
 
-bool mr_init_uart_transport(mrUARTTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
-bool mr_init_uart_transport_fd(mrUARTTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
-bool mr_close_uart_transport(mrUARTTransport* transport);
+bool mr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
+bool mr_init_serial_transport_fd(mrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
+bool mr_close_serial_transport(mrSerialTransport* transport);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_UART_TRANSPORT_LINUX_H_
+#endif //_MICRORTPS_CLIENT_SERIAL_TRANSPORT_LINUX_H_

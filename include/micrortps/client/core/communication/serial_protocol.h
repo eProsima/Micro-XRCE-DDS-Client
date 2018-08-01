@@ -29,7 +29,7 @@ extern "C"
 #define MR_FRAMING_ESC_FLAG 0x7D
 #define MR_FRAMING_XOR_FLAG 0x20
 
-#define MR_SERIAL_MTU          MR_CONFIG_UART_TRANSPORT_MTU //TODO: Change the name for a generic serial mtu.
+#define MR_SERIAL_MTU          MR_CONFIG_SERIAL_TRANSPORT_MTU //TODO: Change the name for a generic serial mtu.
 #define MR_SERIAL_OVERHEAD     5
 #define MR_SERIAL_BUFFER_SIZE  (2 * (MR_SERIAL_MTU + MR_SERIAL_OVERHEAD))
 

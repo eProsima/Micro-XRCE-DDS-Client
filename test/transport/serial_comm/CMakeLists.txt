@@ -26,7 +26,7 @@ else()
     project(serial-comm-transport-test LANGUAGES C CXX)
 endif()
 
-if(NOT PROFILE_UART_TRANSPORT)
+if(NOT PROFILE_SERIAL_TRANSPORT)
     message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
     check_gtest()

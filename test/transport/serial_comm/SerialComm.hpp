@@ -27,8 +27,8 @@ public:
 
 protected:
     int fd_;
-    mrUARTTransport master_;
-    mrUARTTransport slave_;
+    mrSerialTransport master_;
+    mrSerialTransport slave_;
 };
 
 #endif //_MICRORTPS_TEST_TRANSPORT_SERIALCOMM_HPP_

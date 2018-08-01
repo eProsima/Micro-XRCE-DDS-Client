@@ -35,7 +35,7 @@
 
 // Getting the max MTU at compile time.
 #define MAX_UDP_TCP_MTU ((MR_CONFIG_UDP_TRANSPORT_MTU > MR_CONFIG_TCP_TRANSPORT_MTU) ? MR_CONFIG_UDP_TRANSPORT_MTU : MR_CONFIG_UDP_TRANSPORT_MTU)
-#define MAX_TRANSPORT_MTU ((MR_CONFIG_UART_TRANSPORT_MTU > MAX_UDP_TCP_MTU) ? MR_CONFIG_UART_TRANSPORT_MTU : MAX_UDP_TCP_MTU)
+#define MAX_TRANSPORT_MTU ((MR_CONFIG_SERIAL_TRANSPORT_MTU > MAX_UDP_TCP_MTU) ? MR_CONFIG_SERIAL_TRANSPORT_MTU : MAX_UDP_TCP_MTU)
 
 // Stream buffers
 #define MAX_HISTORY        16
@@ -58,7 +58,7 @@ int main(int args, char** argv)
 {
     mrSession session;
 #if !defined(WIN32)
-    mrUARTTransport uart;
+    mrSerialTransport serial;
 #endif
     mrUDPTransport udp;
     mrTCPTransport tcp;
@@ -98,12 +98,12 @@ int main(int args, char** argv)
     {
         char* device = argv[2];
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
-        if(!mr_init_uart_transport_fd(&uart, fd, 0, 1))
+        if(!mr_init_serial_transport_fd(&serial, fd, 0, 1))
         {
             printf("%sCan not create a serial connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
-        comm = &uart.comm;
+        comm = &serial.comm;
         printf("Serial mode => dev: %s\n", device);
         args_index = 3;
     }
@@ -198,9 +198,9 @@ int main(int args, char** argv)
         mr_close_tcp_transport(&tcp);
     }
 #if !defined(WIN32)
-    else if(&uart.comm == comm)
+    else if(&serial.comm == comm)
     {
-        mr_close_uart_transport(&uart);
+        mr_close_serial_transport(&serial);
     }
 #endif
 
