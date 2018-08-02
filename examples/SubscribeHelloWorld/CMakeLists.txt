@@ -23,6 +23,12 @@ if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PRO
     message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
     add_executable(${PROJECT_NAME} main.c HelloWorld.c)
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        C_STANDARD 99
+        C_STANDARD_REQUIRED YES
+        )
+
     target_link_libraries(${PROJECT_NAME} micrortps_client)
 
     install(TARGETS ${PROJECT_NAME}

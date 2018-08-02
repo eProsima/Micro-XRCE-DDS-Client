@@ -34,6 +34,7 @@ else()
         include(CTest)
         set(SRCS SerialComm.cpp)
         add_executable(${PROJECT_NAME} ${SRCS})
+        set_common_compile_options(${PROJECT_NAME})
         add_gtest(${PROJECT_NAME}
             SOURCES
                 ${SRCS}

@@ -30,6 +30,7 @@ if(GTEST_FOUND)
     include(CTest)
     set(SRCS OutputBestEffortStream.cpp)
     add_executable(${PROJECT_NAME} ${SRCS})
+    set_common_compile_options(${PROJECT_NAME})
     add_gtest(${PROJECT_NAME}
         SOURCES
             ${SRCS}

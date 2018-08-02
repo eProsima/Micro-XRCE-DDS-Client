@@ -28,6 +28,7 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
 
     if(GTEST_FOUND)
         add_library(${PROJECT_NAME} STATIC ${SRCS})
+        set_common_compile_options(${PROJECT_NAME})
 
         target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
         target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})

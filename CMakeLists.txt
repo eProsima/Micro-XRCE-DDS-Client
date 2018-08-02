@@ -152,6 +152,7 @@ set(SRCS
 ###############################################################################
 set(BUILD_SHARED_LIBS OFF)
 add_library(${PROJECT_NAME} ${SRCS})
+set_common_compile_options(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
     C_STANDARD 99

@@ -21,6 +21,7 @@ if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
 
     set(SRCS ClientSerialization.cpp)
     add_library(${PROJECT_NAME} STATIC ${SRCS})
+    set_common_compile_options(${PROJECT_NAME})
 
     target_link_libraries(${PROJECT_NAME} micrortps_client)
     target_include_directories(${PROJECT_NAME}

@@ -23,18 +23,17 @@ if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PRO
     message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, PROFILE_UDP_TRANSPORT, PROFILE_TCP_PROFILE and PROFILE_UART_TRANSPORT must be enabled.")
 else()
     add_executable(${PROJECT_NAME} main.c ShapeType.c ShapeTypeWriter.c)
-    if(MSVC OR MSVC_IDE)
-        target_link_libraries(${PROJECT_NAME}
-            PRIVATE
-                micrortps_client
-                Ws2_32
-            )
-    else()
-        target_link_libraries(${PROJECT_NAME}
-            PRIVATE
-                micrortps_client
-            )
-    endif()
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        C_STANDARD 99
+        C_STANDARD_REQUIRED YES
+        )
+
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        micrortps_client
+        $<$<BOOL:${WIN32}>:ws2_32>
+        )
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
