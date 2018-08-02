@@ -16,7 +16,7 @@ uint16_t mr_write_configure_participant_xml(mrSession* session, mrStreamId strea
 
     CREATE_Payload payload;
     payload.object_representation.kind = OBJK_PARTICIPANT;
-    payload.object_representation._.participant.domain_id = domain;
+    payload.object_representation._.participant.domain_id = (int16_t)domain;
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
@@ -90,7 +90,7 @@ inline uint16_t create_entity_xml(mrSession* session, mrStreamId stream_id,
                                   CREATE_Payload* payload)
 {
     uint16_t returned_value = MR_INVALID_REQUEST_ID;
-    uint32_t xml_size = strlen(xml) + 1;
+    uint32_t xml_size = (uint32_t)strlen(xml) + 1;
     if(xml_size <= UINT16_MAX)
     {
         // Use participant access to access to the xml base of any object variant. //Future elegant change?

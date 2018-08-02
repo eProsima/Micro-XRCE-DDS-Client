@@ -60,7 +60,7 @@ typedef struct mrSessionInfo
 
 void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key);
 
-void write_create_session(const mrSessionInfo* info, struct MicroBuffer* mb, uint64_t nanoseconds);
+void write_create_session(const mrSessionInfo* info, struct MicroBuffer* mb, int64_t nanoseconds);
 void write_delete_session(const mrSessionInfo* info, struct MicroBuffer* mb);
 void read_create_session_status(mrSessionInfo* info, struct MicroBuffer* mb);
 void read_delete_session_status(mrSessionInfo* info, struct MicroBuffer* mb);
@@ -72,6 +72,7 @@ bool read_session_header(const mrSessionInfo* info, struct MicroBuffer* mb, uint
 uint8_t session_header_offset(const mrSessionInfo* info);
 
 MRDLLAPI uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, struct BaseObjectRequest* base);
+void parse_base_object_request(const struct BaseObjectRequest* base, mrObjectId* object_id, uint16_t* request_id);
 
 #ifdef __cplusplus
 }

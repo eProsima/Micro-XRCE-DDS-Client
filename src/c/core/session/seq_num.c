@@ -8,14 +8,14 @@
 //==================================================================
 mrSeqNum seq_num_add(mrSeqNum seq_num, mrSeqNum increment)
 {
-    return (seq_num + increment) % UINT16_SIZE;
+    return (mrSeqNum)((seq_num + increment) % UINT16_SIZE);
 }
 
 mrSeqNum seq_num_sub(mrSeqNum seq_num, mrSeqNum decrement)
 {
-    return (decrement > seq_num)
+    return (mrSeqNum)((decrement > seq_num)
         ? (seq_num + (UINT16_SIZE - decrement)) % UINT16_SIZE
-        : seq_num - decrement;
+        : seq_num - decrement);
 }
 
 int seq_num_cmp(mrSeqNum seq_num_1, mrSeqNum seq_num_2)

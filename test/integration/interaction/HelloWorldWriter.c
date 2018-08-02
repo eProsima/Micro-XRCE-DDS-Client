@@ -31,11 +31,11 @@ bool mr_write_HelloWorld_topic(mrSession* session, mrStreamId stream_id, mrObjec
 
     uint16_t topic_length = (uint16_t)HelloWorld_size_of_topic(topic, 0);
     uint16_t payload_length = 0;
-    payload_length += 4; //request_id + object_id
-    payload_length += 4; //topic_length (remove in future version to be compliant)
+    payload_length = (uint16_t)(payload_length + 4); //request_id + object_id
+    payload_length = (uint16_t)(payload_length + 4); //topic_length (remove in future version to be compliant)
 
     MicroBuffer mb;
-    if(prepare_stream_to_write(&session->streams, stream_id, payload_length + topic_length + SUBHEADER_SIZE, &mb))
+    if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + topic_length + SUBHEADER_SIZE), &mb))
     {
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, (uint16_t)(payload_length + topic_length), FORMAT_DATA);
 

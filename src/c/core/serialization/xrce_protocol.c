@@ -2050,7 +2050,7 @@ bool deserialize_DATA_Payload_PackedSamples(MicroBuffer* buffer, DATA_Payload_Pa
 bool serialize_ACKNACK_Payload(MicroBuffer* buffer, const ACKNACK_Payload* input)
 {
     bool ret = true;
-    ret &= serialize_int16_t(buffer, input->first_unacked_seq_num);
+    ret &= serialize_uint16_t(buffer, input->first_unacked_seq_num);
     ret &= serialize_array_uint8_t(buffer, input->nack_bitmap, 2);
     return ret;
 }
@@ -2058,7 +2058,7 @@ bool serialize_ACKNACK_Payload(MicroBuffer* buffer, const ACKNACK_Payload* input
 bool deserialize_ACKNACK_Payload(MicroBuffer* buffer, ACKNACK_Payload* output)
 {
     bool ret = true;
-    ret &= deserialize_int16_t(buffer, &output->first_unacked_seq_num);
+    ret &= deserialize_uint16_t(buffer, &output->first_unacked_seq_num);
     ret &= deserialize_array_uint8_t(buffer, output->nack_bitmap, 2);
     return ret;
 }
@@ -2066,16 +2066,16 @@ bool deserialize_ACKNACK_Payload(MicroBuffer* buffer, ACKNACK_Payload* output)
 bool serialize_HEARTBEAT_Payload(MicroBuffer* buffer, const HEARTBEAT_Payload* input)
 {
     bool ret = true;
-    ret &= serialize_int16_t(buffer, input->first_unacked_seq_nr);
-    ret &= serialize_int16_t(buffer, input->last_unacked_seq_nr);
+    ret &= serialize_uint16_t(buffer, input->first_unacked_seq_nr);
+    ret &= serialize_uint16_t(buffer, input->last_unacked_seq_nr);
     return ret;
 }
 
 bool deserialize_HEARTBEAT_Payload(MicroBuffer* buffer, HEARTBEAT_Payload* output)
 {
     bool ret = true;
-    ret &= deserialize_int16_t(buffer, &output->first_unacked_seq_nr);
-    ret &= deserialize_int16_t(buffer, &output->last_unacked_seq_nr);
+    ret &= deserialize_uint16_t(buffer, &output->first_unacked_seq_nr);
+    ret &= deserialize_uint16_t(buffer, &output->last_unacked_seq_nr);
     return ret;
 }
 

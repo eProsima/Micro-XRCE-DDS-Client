@@ -39,7 +39,7 @@ typedef struct mrObjectId
 
 MRDLLAPI mrObjectId mr_object_id(uint16_t id, uint8_t type);
 
-mrObjectId object_id_from_raw(uint8_t* raw);
+mrObjectId object_id_from_raw(const uint8_t* raw);
 void object_id_to_raw(mrObjectId object_id, uint8_t* raw);
 
 #ifdef __cplusplus

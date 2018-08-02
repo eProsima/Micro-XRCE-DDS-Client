@@ -975,15 +975,15 @@ typedef struct DATA_Payload_PackedSamples
 
 typedef struct ACKNACK_Payload
 {
-    int16_t first_unacked_seq_num;
+    uint16_t first_unacked_seq_num;
     uint8_t nack_bitmap[2];
 
 } ACKNACK_Payload;
 
 typedef struct HEARTBEAT_Payload
 {
-    int16_t first_unacked_seq_nr;
-    int16_t last_unacked_seq_nr;
+    uint16_t first_unacked_seq_nr;
+    uint16_t last_unacked_seq_nr;
 
 } HEARTBEAT_Payload;
 

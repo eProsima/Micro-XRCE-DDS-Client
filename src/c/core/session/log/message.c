@@ -73,7 +73,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
     const char* color = (direction == SEND) ? YELLOW : PURPLE;
 
     MicroBuffer mb;
-    init_micro_buffer(&mb, buffer, size);
+    init_micro_buffer(&mb, buffer, (uint32_t)size);
 
     uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
     (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
@@ -208,7 +208,7 @@ void print_serialization(int direction, const uint8_t* buffer, size_t size)
             dir,
             GREY_DARK,
             size,
-            data_to_string(buffer, size),
+            data_to_string(buffer, (uint32_t)size),
             RESTORE_COLOR);
 }
 

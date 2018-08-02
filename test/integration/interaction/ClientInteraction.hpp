@@ -85,7 +85,7 @@ public:
 
         for(size_t i = 0; i < number; ++i)
         {
-            HelloWorld topic = {(uint32_t)i, "Hello DDS world!"};
+            HelloWorld topic = {static_cast<uint32_t>(i), "Hello DDS world!"};
             bool written = mr_write_HelloWorld_topic(&session_, output_stream_id, datawriter_id, &topic);
             ASSERT_EQ(true, written);
             bool sent = mr_run_session_until_confirm_delivery(&session_, 1000);
@@ -123,7 +123,7 @@ public:
 private:
     static void on_topic_dispatcher(mrSession* session_, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* serialization, void* args)
     {
-        ((Client*)args)->on_topic(session_, object_id, request_id, stream_id, serialization);
+        static_cast<Client*>(args)->on_topic(session_, object_id, request_id, stream_id, serialization);
     }
 
     void init()
@@ -148,12 +148,12 @@ private:
         for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
         {
             uint8_t* buffer = output_reliable_stream_buffer_ + MR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
-            (void) mr_create_output_reliable_stream(&session_, buffer , transport_.comm.mtu * history_, history_);
+            (void) mr_create_output_reliable_stream(&session_, buffer , static_cast<size_t>(transport_.comm.mtu * history_), history_);
         }
         for(int i = 0; i < MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
         {
             uint8_t* buffer = input_reliable_stream_buffer_ + MR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
-            (void) mr_create_input_reliable_stream(&session_, buffer, transport_.comm.mtu * history_, history_);
+            (void) mr_create_input_reliable_stream(&session_, buffer, static_cast<size_t>(transport_.comm.mtu * history_), history_);
         }
     }
 

@@ -91,7 +91,7 @@ bool next_input_reliable_buffer_available(mrInputReliableStream* stream, MicroBu
     if(available_to_read)
     {
         stream->last_handled = next;
-        init_micro_buffer(mb, internal_buffer, length);
+        init_micro_buffer(mb, internal_buffer, (uint32_t)length);
         set_input_buffer_length(internal_buffer, 0);
     }
 
@@ -103,8 +103,8 @@ void write_acknack(const mrInputReliableStream* stream, MicroBuffer* mb) {
 
     ACKNACK_Payload payload;
     payload.first_unacked_seq_num = seq_num_add(stream->last_handled, 1);
-    payload.nack_bitmap[0] = nack_bitmap >> 8;
-    payload.nack_bitmap[1] = (nack_bitmap << 8) >> 8;
+    payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
+    payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
     (void) serialize_ACKNACK_Payload(mb, &payload);
@@ -145,13 +145,13 @@ uint16_t compute_nack_bitmap(const mrInputReliableStream* stream)
     uint16_t buffers_to_ack = seq_num_sub(stream->last_announced, stream->last_handled);
     uint16_t nack_bitmap = (buffers_to_ack > 0) ? 1 : 0;
 
-    for(uint16_t i = 0; i < buffers_to_ack; i++)
+    for(unsigned i = 0; i < (unsigned)buffers_to_ack; i++)
     {
-        mrSeqNum seq_num = seq_num_add(stream->last_handled, i + 1);
+        mrSeqNum seq_num = seq_num_add(stream->last_handled, (uint16_t)(i + 1));
         uint8_t* internal_buffer = get_input_buffer(stream, seq_num % stream->history);
         if(0 == get_input_buffer_length(internal_buffer))
         {
-            nack_bitmap |= 1 << i;
+            nack_bitmap = (uint16_t)(nack_bitmap | (1 << i));
         }
     }
 

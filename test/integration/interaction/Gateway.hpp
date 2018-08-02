@@ -44,12 +44,12 @@ private:
 
     static bool send_dispatcher(void* instance, const uint8_t* buf, size_t len)
     {
-        return ((Gateway*) instance)->send(buf, len);
+        return static_cast<Gateway*>(instance)->send(buf, len);
     }
 
     static bool recv_dispatcher(void* instance, uint8_t** buf, size_t* len, int timeout)
     {
-        return ((Gateway*) instance)->recv(buf, len, timeout);
+        return static_cast<Gateway*>(instance)->recv(buf, len, timeout);
     }
 
     bool send(const uint8_t* buf, size_t len)

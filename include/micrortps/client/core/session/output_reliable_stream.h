@@ -47,7 +47,7 @@ typedef struct mrOutputReliableStream
 void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
 void reset_output_reliable_stream(mrOutputReliableStream* stream);
 bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, struct MicroBuffer* mb);
-bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
+bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, mrSeqNum* seq_num);
 
 bool update_output_stream_heartbeat_timestamp(mrOutputReliableStream* stream, int64_t current_timestamp);
 mrSeqNum begin_output_nack_buffer_it(const mrOutputReliableStream* stream);

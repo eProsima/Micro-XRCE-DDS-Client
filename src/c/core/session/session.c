@@ -26,7 +26,7 @@ static void write_submessage_heartbeat(const mrSession* session, mrStreamId stre
 static void write_submessage_acknack(const mrSession* session, mrStreamId stream);
 
 static void read_message(mrSession* session, MicroBuffer* message);
-static void read_stream(mrSession* session, MicroBuffer* message, mrStreamId id, uint16_t seq_num);
+static void read_stream(mrSession* session, MicroBuffer* message, mrStreamId id, mrSeqNum seq_num);
 static void read_submessage_list(mrSession* session, MicroBuffer* submessages, mrStreamId stream_id);
 static void read_submessage(mrSession* session, MicroBuffer* submessage,
                             uint8_t submessage_id, mrStreamId stream_id, uint16_t length, uint8_t flags);
@@ -37,7 +37,7 @@ static void read_submessage_data(mrSession* session, MicroBuffer* submessage, ui
 static void read_submessage_heartbeat(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id);
 static void read_submessage_acknack(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id);
 
-static void process_status(mrSession* session, mrObjectId object_id, int16_t request_id, uint8_t status);
+static void process_status(mrSession* session, mrObjectId object_id, uint16_t request_id, uint8_t status);
 
 //==================================================================
 //                             PUBLIC
@@ -225,7 +225,7 @@ bool listen_message(mrSession* session, int poll_ms)
     if(must_be_read)
     {
         MicroBuffer mb;
-        init_micro_buffer(&mb, data, length);
+        init_micro_buffer(&mb, data, (uint32_t)length);
         read_message(session, &mb);
     }
 
@@ -436,9 +436,9 @@ void read_submessage_status(mrSession* session, MicroBuffer* submessage)
     STATUS_Payload payload;
     deserialize_STATUS_Payload(submessage, &payload);
 
-    mrObjectId object_id = object_id_from_raw(payload.base.related_request.object_id.data);
-    uint16_t request_id = (((uint16_t) payload.base.related_request.request_id.data[0]) << 8)
-                            + payload.base.related_request.request_id.data[1];
+
+    mrObjectId object_id; uint16_t request_id;
+    parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
 
     uint8_t status = payload.base.result.status;
     process_status(session, object_id, request_id, status);
@@ -453,10 +453,10 @@ void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t 
 #ifdef PROFILE_READ_ACCESS
     BaseObjectRequest base;
     deserialize_BaseObjectRequest(submessage, &base);
-    length -= 4; //CHANGE: by a future size_of_BaseObjectRequest
+    length = (uint16_t)(length - 4); //CHANGE: by a future size_of_BaseObjectRequest
 
-    mrObjectId object_id = object_id_from_raw(base.object_id.data);
-    uint16_t request_id = (((uint16_t) base.request_id.data[0]) << 8) + base.request_id.data[1];
+    mrObjectId object_id; uint16_t request_id;
+    parse_base_object_request(&base, &object_id, &request_id);
 
     process_status(session, object_id, request_id, MR_STATUS_OK);
 
@@ -501,7 +501,7 @@ void read_submessage_acknack(mrSession* session, MicroBuffer* submessage, mrStre
     }
 }
 
-void process_status(mrSession* session, mrObjectId object_id, int16_t request_id, uint8_t status)
+void process_status(mrSession* session, mrObjectId object_id, uint16_t request_id, uint8_t status)
 {
     if(session->on_status != NULL)
     {

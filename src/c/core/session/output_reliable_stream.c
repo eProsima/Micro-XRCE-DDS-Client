@@ -88,13 +88,13 @@ bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t siz
         size_t current_padding = (current_length % 4 != 0) ? 4 - (current_length % 4) : 0;
         size_t future_length = current_length + current_padding + size;
         set_output_buffer_length(internal_buffer, future_length);
-        init_micro_buffer_offset(mb, internal_buffer, future_length, current_length);
+        init_micro_buffer_offset(mb, internal_buffer, (uint32_t)future_length, (uint32_t)current_length);
     }
 
     return available_to_write;
 }
 
-bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num)
+bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, mrSeqNum* seq_num)
 {
     *seq_num = seq_num_add(stream->last_sent, 1);
     *buffer = get_output_buffer(stream, *seq_num % stream->history);
@@ -188,9 +188,9 @@ void read_acknack(mrOutputReliableStream* stream, MicroBuffer* payload)
     ACKNACK_Payload acknack;
     deserialize_ACKNACK_Payload(payload, &acknack);
 
-    uint16_t nack_bitmap = ((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1];
+    uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]);
 
-    process_acknack(stream, nack_bitmap, acknack.first_unacked_seq_num - 1);
+    process_acknack(stream, nack_bitmap, (uint16_t)seq_num_sub(acknack.first_unacked_seq_num, 1));
 }
 
 bool is_output_reliable_stream_busy(const mrOutputReliableStream* stream)

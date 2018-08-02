@@ -25,15 +25,15 @@ static void process_delete_session_status(mrSessionInfo* info, uint8_t status);
 void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key)
 {
     info->id = id;
-    info->key[0] = key >> 24;
-    info->key[1] = (key << 8) >> 24;
-    info->key[2] = (key << 16) >> 24;
-    info->key[3] = (key << 24) >> 24;
+    info->key[0] = (uint8_t)(key >> 24);
+    info->key[1] = (uint8_t)((key << 8) >> 24);
+    info->key[2] = (uint8_t)((key << 16) >> 24);
+    info->key[3] = (uint8_t)((key << 24) >> 24);
     info->last_request_id = INITIAL_REQUEST_ID;
     info->last_requested_status = MR_STATUS_NONE;
 }
 
-void write_create_session(const mrSessionInfo* info, MicroBuffer* mb, uint64_t nanoseconds)
+void write_create_session(const mrSessionInfo* info, MicroBuffer* mb, int64_t nanoseconds)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, MR_REQUEST_LOGIN}};
@@ -42,7 +42,7 @@ void write_create_session(const mrSessionInfo* info, MicroBuffer* mb, uint64_t n
     payload.client_representation.xrce_version = XRCE_VERSION;
     payload.client_representation.xrce_vendor_id = VENDOR_ID_EPROSIMA;
     payload.client_representation.client_timestamp.seconds = (int32_t)(nanoseconds / 1000000000);
-    payload.client_representation.client_timestamp.nanoseconds = nanoseconds % 1000000000;
+    payload.client_representation.client_timestamp.nanoseconds = (uint32_t)nanoseconds % 1000000000;
     payload.client_representation.client_key = (ClientKey){{info->key[0], info->key[1], info->key[2], info->key[3]}};
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
@@ -133,6 +133,13 @@ uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, Bas
     return request_id;
 }
 
+void parse_base_object_request(const BaseObjectRequest* base, mrObjectId* object_id, uint16_t* request_id)
+{
+    *object_id = object_id_from_raw(base->object_id.data);
+    *request_id = (uint16_t)((((uint16_t) base->request_id.data[0]) << 8)
+                            + base->request_id.data[1]);
+}
+
 //==================================================================
 //                            PRIVATE
 //==================================================================
@@ -142,7 +149,7 @@ inline uint16_t generate_request_id(mrSessionInfo* session)
         ? INITIAL_REQUEST_ID
         : session->last_request_id;
 
-    session->last_request_id = last_request_id + 1;
+    session->last_request_id = (uint16_t)(last_request_id + 1);
     return last_request_id;
 }
 

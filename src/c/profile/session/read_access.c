@@ -39,12 +39,12 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
 
     // Change this when microcdr supports size_of function.
     uint16_t payload_length = 0; //READ_DATA_Payload_size(&payload);
-    payload_length += 4; // (request id + object_id), no padding.
-    payload_length += 4; // stream, format, and two optionals.
-    payload_length += (control != NULL) ? 8 : 0; // delivery control
+    payload_length = (uint16_t)(payload_length + 4); // (request id + object_id), no padding.
+    payload_length = (uint16_t)(payload_length + 4); // stream, format, and two optionals.
+    payload_length = (uint16_t)(payload_length + ((control != NULL) ? 8 : 0)); // delivery control
 
     MicroBuffer mb;
-    if(prepare_stream_to_write(&session->streams, stream_id, payload_length + SUBHEADER_SIZE, &mb))
+    if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
@@ -99,7 +99,7 @@ inline void read_format_data(mrSession* session, MicroBuffer* payload, uint16_t 
 {
     uint32_t offset;
     deserialize_uint32_t(payload, &offset); //Remove this when data serialization will be according to the XRCE spec.
-    length -= 4; //by the offset. Remove too with the future serialization according to XRCE
+    length = (uint16_t)(length - 4); //by the offset. Remove too with the future serialization according to XRCE
 
     MicroBuffer mb_topic;
     init_micro_buffer(&mb_topic, payload->iterator, length);
