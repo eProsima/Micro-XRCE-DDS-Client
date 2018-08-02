@@ -78,7 +78,7 @@ TEST_F(SerialComm, FatigueTest)
 
     for (size_t i = 0; i < sizeof(output_msg); ++i)
     {
-        output_msg[i] = i % sizeof(char);
+        output_msg[i] = uint8_t(i % (std::numeric_limits<uint8_t>::max() + 1));
     }
 
     for (unsigned int i = 0; i < msgs_size; ++i)

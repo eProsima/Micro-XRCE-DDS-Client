@@ -76,8 +76,8 @@ uint16_t process_serial_message(mrSerialInputBuffer* input,
     uint16_t crc = 0;
 
     /* Check raw message length. */
-    msg_len = (input->head < input->marker) ? (input->marker - input->head) :
-                                              (MR_SERIAL_BUFFER_SIZE - input->marker + input->head);
+    msg_len = (input->head < input->marker) ? (uint16_t)(input->marker - input->head) :
+                                              (uint16_t)(MR_SERIAL_BUFFER_SIZE - input->marker + input->head);
     if (MR_SERIAL_OVERHEAD > msg_len)
     {
         cond = false;
@@ -88,7 +88,7 @@ uint16_t process_serial_message(mrSerialInputBuffer* input,
         *src_addr = get_next_octet(input, &msg_marker);
         *rmt_addr = get_next_octet(input, &msg_marker);
         payload_len = get_next_octet(input, &msg_marker);
-        payload_len += get_next_octet(input, &msg_marker) << 8;
+        payload_len = (uint16_t)(payload_len + (get_next_octet(input, &msg_marker) << 8));
 
         /* Check message length. */
         if (payload_len > len || payload_len > msg_len - MR_SERIAL_OVERHEAD)
@@ -113,9 +113,9 @@ uint16_t process_serial_message(mrSerialInputBuffer* input,
                 /* Check CRC. */
                 uint16_t msg_crc;
                 octet = get_next_octet(input, &msg_marker);
-                msg_crc = (uint16_t)octet << 8;
+                msg_crc = (uint16_t)(octet << 8);
                 octet = get_next_octet(input, &msg_marker);
-                msg_crc = msg_crc | (uint16_t)octet;
+                msg_crc = (uint16_t)(msg_crc | (uint16_t)octet);
 
                 if (msg_crc != crc)
                 {
@@ -136,7 +136,7 @@ bool init_serial_stream(mrSerialInputBuffer* input)
     /* Find BEGIN_FLAG. */
     while (MR_FRAMING_END_FLAG != input->buffer[input->head])
     {
-        input->head = (input->head + 1) % sizeof(input->buffer);
+        input->head = (uint16_t)((size_t)(input->head + 1) % sizeof(input->buffer));
         if (input->head == input->tail)
         {
             rv = false;
@@ -147,7 +147,7 @@ bool init_serial_stream(mrSerialInputBuffer* input)
     /* If BEGIN_FLAG was found, move ahead. */
     if (rv)
     {
-        input->head = (input->head + 1) % sizeof(input->buffer);
+        input->head = (uint16_t)((size_t)(input->head + 1) % sizeof(input->buffer));
         input->marker = input->head;
     }
 
@@ -161,7 +161,7 @@ bool find_serial_message(mrSerialInputBuffer* input)
     /* Find END_FLAG. */
     while (MR_FRAMING_END_FLAG != input->buffer[input->marker])
     {
-        input->marker = (input->marker + 1) % sizeof(input->buffer);
+        input->marker = (uint16_t)((size_t)(input->marker + 1) % sizeof(input->buffer));
         if (input->marker == input->tail)
         {
             rv = false;
@@ -172,7 +172,7 @@ bool find_serial_message(mrSerialInputBuffer* input)
     /* If END_FLAG was found, move ahead. */
     if (rv)
     {
-        input->marker = (input->marker + 1) % sizeof(input->buffer);
+        input->marker = (uint16_t)((size_t)(input->marker + 1) % sizeof(input->buffer));
     }
 
     return rv;
@@ -180,13 +180,13 @@ bool find_serial_message(mrSerialInputBuffer* input)
 
 uint8_t get_next_octet(mrSerialInputBuffer* input, uint16_t* relative_position)
 {
-    uint8_t rv = input->buffer[(input->head + *relative_position) % sizeof(input->buffer)];
+    uint8_t rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)];
 
-    *relative_position += 1;
+    *relative_position = (uint16_t)(*relative_position + 1);
     if (MR_FRAMING_END_FLAG == rv || MR_FRAMING_ESC_FLAG == rv)
     {
-        rv = input->buffer[(input->head + *relative_position) % sizeof(input->buffer)] ^ MR_FRAMING_XOR_FLAG;
-        *relative_position += 1;
+        rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)] ^ MR_FRAMING_XOR_FLAG;
+        *relative_position = (uint16_t)(*relative_position + 1);
     }
 
     return rv;
@@ -202,7 +202,7 @@ bool add_next_octet(mrSerialOutputBuffer* output, uint8_t octet, uint16_t* posit
         {
             output->buffer[*position] = MR_FRAMING_ESC_FLAG;
             output->buffer[*position + 1] = octet ^ MR_FRAMING_XOR_FLAG;
-            *position += 2;
+            *position = (uint16_t)(*position + 2);
             rv = true;
         }
     }
@@ -211,7 +211,7 @@ bool add_next_octet(mrSerialOutputBuffer* output, uint8_t octet, uint16_t* posit
         if (*position <= sizeof(output->buffer))
         {
             output->buffer[*position] = octet;
-            *position += 1;
+            *position = (uint16_t)(*position + 1);
             rv = true;
         }
     }
@@ -245,8 +245,8 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
         /* Write header. */
         cond = add_next_octet(&serial_io->output, src_addr, &position) &&
                add_next_octet(&serial_io->output, rmt_addr, &position) &&
-               add_next_octet(&serial_io->output, len & 0x00FF, &position) &&
-               add_next_octet(&serial_io->output, (len & 0xFF00) >> 8, &position);
+               add_next_octet(&serial_io->output, (uint8_t)(len & 0x00FF), &position) &&
+               add_next_octet(&serial_io->output, (uint8_t)((len & 0xFF00) >> 8), &position);
 
         /* Write payload. */
         uint8_t octet = 0;
@@ -272,7 +272,7 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
         }
     }
 
-    return cond ? (position + 1) : 0;
+    return cond ? (uint16_t)(position + 1) : 0;
 }
 
 uint16_t read_serial_msg(mrSerialIO* serial_io,
@@ -296,7 +296,7 @@ uint16_t read_serial_msg(mrSerialIO* serial_io,
 
         /* Read from callback. */
         uint16_t bytes_read = cb(cb_arg, serial_io->input.buffer, sizeof(serial_io->input.buffer), timeout);
-        serial_io->input.tail = (serial_io->input.tail + bytes_read) % sizeof(serial_io->input.buffer);
+        serial_io->input.tail = (uint16_t)((size_t)(serial_io->input.tail + bytes_read) % sizeof(serial_io->input.buffer));
         if (0 < bytes_read)
         {
             /* Init stream. */
@@ -318,12 +318,12 @@ uint16_t read_serial_msg(mrSerialIO* serial_io,
         }
         else
         {
-            av_len = serial_io->input.head - serial_io->input.tail;
+            av_len = (size_t)(serial_io->input.head - serial_io->input.tail);
         }
 
         /* Read data from callback and update tail. */
         uint16_t bytes_read = cb(cb_arg, &serial_io->input.buffer[serial_io->input.tail], av_len, timeout);
-        serial_io->input.tail = (serial_io->input.tail + bytes_read) % sizeof(serial_io->input.buffer);
+        serial_io->input.tail = (uint16_t)((size_t)(serial_io->input.tail + bytes_read) % sizeof(serial_io->input.buffer));
 
         /* Check if data available. */
         data_available = (0 < bytes_read || serial_io->input.head != serial_io->input.tail);

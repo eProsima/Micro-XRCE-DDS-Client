@@ -34,7 +34,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
         send_rv = send(transport->poll_fd.fd, msg_size_buf, 2, 0);
         if (0 <= send_rv)
         {
-            bytes_sent += send_rv;
+            bytes_sent = (uint16_t)(bytes_sent + send_rv);
         }
         else
         {
@@ -53,7 +53,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
             send_rv = send(transport->poll_fd.fd, buf + bytes_sent, len - bytes_sent, 0);
             if (0 <= send_rv)
             {
-                bytes_sent += send_rv;
+                bytes_sent = (uint16_t)(bytes_sent + send_rv);
             }
             else
             {
@@ -123,7 +123,7 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                     transport->input_buffer.msg_size = 0;
                     if (2 == bytes_received)
                     {
-                        transport->input_buffer.msg_size = (uint16_t)(size_buf[1] << 8) | (uint16_t)size_buf[0];
+                        transport->input_buffer.msg_size = (uint16_t)(((uint16_t)size_buf[1] << 8) | size_buf[0]);
                         if (transport->input_buffer.msg_size != 0)
                         {
                             transport->input_buffer.state = MR_TCP_SIZE_READ;
@@ -212,10 +212,11 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
             {
                 ssize_t bytes_received = recv(transport->poll_fd.fd,
                                               transport->input_buffer.buffer + transport->input_buffer.position,
-                                              transport->input_buffer.msg_size - transport->input_buffer.position, 0);
+                                              (size_t)(transport->input_buffer.msg_size - transport->input_buffer.position),
+                                              0);
                 if (0 < bytes_received)
                 {
-                    transport->input_buffer.position += (uint16_t)bytes_received;
+                    transport->input_buffer.position = (uint16_t)(transport->input_buffer.position +  bytes_received);
                     if (transport->input_buffer.position == transport->input_buffer.msg_size)
                     {
                         transport->input_buffer.state = MR_TCP_MESSAGE_AVAILABLE;
