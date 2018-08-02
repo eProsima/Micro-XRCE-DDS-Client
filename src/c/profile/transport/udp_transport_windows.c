@@ -15,7 +15,7 @@ static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
     bool rv = true;
     mrUDPTransport* transport = (mrUDPTransport*)instance;
 
-    int bytes_sent = send(transport->socket_fd, (void*)buf, len, 0);
+    int bytes_sent = send(transport->socket_fd, (void*)buf, (int)len, 0);
     if (0 > bytes_sent)
     {
         rv = false;
