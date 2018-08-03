@@ -23,6 +23,10 @@ project(PublishHelloWorldClient)
 if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PROFILE_UDP_TRANSPORT)
     message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
+    if(MSVC OR MSVC_IDE)
+        target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
+    endif()
+
     add_executable(${PROJECT_NAME} main.c HelloWorld.c HelloWorldWriter.c)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES

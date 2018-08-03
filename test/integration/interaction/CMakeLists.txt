@@ -16,31 +16,30 @@
 #
 ###############################################################################
 
-if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-    project(interaction-intest-client CXX)
+project(interaction-intest-client CXX)
 
-    set(SRCS
-        ClientInteraction.cpp
-        Gateway.cpp
-        HelloWorld.c
-        HelloWorldWriter.c
-        )
+set(SRCS
+    ClientInteraction.cpp
+    Gateway.cpp
+    HelloWorld.c
+    HelloWorldWriter.c
+    )
 
-    if(GTEST_FOUND)
-        add_library(${PROJECT_NAME} STATIC ${SRCS})
-        set_common_compile_options(${PROJECT_NAME})
-
-        target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
-        target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
-        target_include_directories(${PROJECT_NAME}
-            PUBLIC
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-            )
-
-        set_target_properties(${PROJECT_NAME} PROPERTIES
-            CXX_STANDARD 11
-            CXX_STANDARD_REQUIRED YES
-            )
-    endif()
+add_library(${PROJECT_NAME} STATIC ${SRCS})
+set_common_compile_options(${PROJECT_NAME})
+if(MSVC OR MSVC_IDE)
+    target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
 endif()
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+    )
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    )
 

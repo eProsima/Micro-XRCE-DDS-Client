@@ -22,15 +22,55 @@ if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PRO
     message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
 
+    #############################################################
+    ###                     CONFIGURATOR
+    #############################################################
     project(ConfiguratorClient)
+    if(MSVC OR MSVC_IDE)
+        target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
+    endif()
     add_executable(ConfiguratorClient configurator_client.c HelloWorld.c HelloWorldWriter.c)
     target_link_libraries(ConfiguratorClient micrortps_client)
 
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        )
+
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/
+        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        FILES_MATCHING PATTERN "*.h"
+                       PATTERN "*.c"
+                       PATTERN "*.idl"
+        )
+
+    #############################################################
+    ###                      PUBLISHER
+    #############################################################
     project(PublisherClient)
+    if(MSVC OR MSVC_IDE)
+        target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
+    endif()
     add_executable(PublisherClient publisher.c HelloWorld.c HelloWorldWriter.c)
     target_link_libraries(PublisherClient micrortps_client)
 
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        )
+
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/
+        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        FILES_MATCHING PATTERN "*.h"
+                       PATTERN "*.c"
+                       PATTERN "*.idl"
+        )
+
+    #############################################################
+    ###                      SUBSCRIBER
+    #############################################################
     project(SubscriberClient)
+    if(MSVC OR MSVC_IDE)
+        target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
+    endif()
     add_executable(SubscriberClient subscriber.c HelloWorld.c)
     target_link_libraries(SubscriberClient micrortps_client)
 

@@ -152,12 +152,14 @@ set(SRCS
 ###############################################################################
 set(BUILD_SHARED_LIBS OFF)
 add_library(${PROJECT_NAME} ${SRCS})
+
 set_common_compile_options(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
     C_STANDARD 99
     C_STANDARD_REQUIRED YES
     )
+
 target_link_libraries(${PROJECT_NAME} PUBLIC microcdr
     $<$<BOOL:${WIN32}>:ws2_32>
     )
@@ -203,11 +205,14 @@ target_compile_definitions(${PROJECT_NAME}
     )
 
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
-if((MSVC OR MSVC_IDE) AND (TARGET_TYPE STREQUAL "SHARED_LIBRARY"))
-    target_compile_definitions(${PROJECT_NAME}
+if(MSVC OR MSVC_IDE)
+    target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
+    if(TARGET_TYPE STREQUAL "SHARED_LIBRARY")
+        target_compile_definitions(${PROJECT_NAME}
         PUBLIC
             -D${PROJECT_NAME}_SHARED
         )
+    endif()
 endif()
 
 ###############################################################################
@@ -229,12 +234,14 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     enable_testing()
     include(CTest)
 
-    add_subdirectory(test/integration/interaction)
-    add_subdirectory(test/integration/cross_serialization)
-    add_subdirectory(test/unitary/streams/output_best_effort)
+    if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
+        add_subdirectory(test/integration/interaction)
+        add_subdirectory(test/integration/cross_serialization)
+        add_subdirectory(test/unitary/streams/output_best_effort)
 
-    if(NOT WIN32)
-        add_subdirectory(test/transport/serial_comm)
+        if(NOT WIN32)
+            add_subdirectory(test/transport/serial_comm)
+        endif()
     endif()
 endif()
 
