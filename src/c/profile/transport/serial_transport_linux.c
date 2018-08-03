@@ -142,5 +142,5 @@ bool mr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t r
 
 bool mr_close_serial_transport(mrSerialTransport* transport)
 {
-    return (0 == transport->poll_fd.fd);
+    return (0 == close(transport->poll_fd.fd));
 }
