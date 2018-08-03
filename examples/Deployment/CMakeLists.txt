@@ -26,13 +26,13 @@ else()
     add_executable(ConfiguratorClient configurator_client.c HelloWorld.c HelloWorldWriter.c)
     target_link_libraries(ConfiguratorClient micrortps_client)
 
-    project(Publisher)
-    add_executable(Publisher publisher.c HelloWorld.c HelloWorldWriter.c)
-    target_link_libraries(Publisher micrortps_client)
+    project(PublisherClient)
+    add_executable(PublisherClient publisher.c HelloWorld.c HelloWorldWriter.c)
+    target_link_libraries(PublisherClient micrortps_client)
 
-    project(Subscriber)
-    add_executable(Subscriber subscriber.c HelloWorld.c)
-    target_link_libraries(Subscriber micrortps_client)
+    project(SubscriberClient)
+    add_executable(SubscriberClient subscriber.c HelloWorld.c)
+    target_link_libraries(SubscriberClient micrortps_client)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
