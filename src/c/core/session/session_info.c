@@ -43,7 +43,10 @@ void write_create_session(const mrSessionInfo* info, MicroBuffer* mb, int64_t na
     payload.client_representation.xrce_vendor_id = VENDOR_ID_EPROSIMA;
     payload.client_representation.client_timestamp.seconds = (int32_t)(nanoseconds / 1000000000);
     payload.client_representation.client_timestamp.nanoseconds = (uint32_t)nanoseconds % 1000000000;
-    payload.client_representation.client_key = (ClientKey){{info->key[0], info->key[1], info->key[2], info->key[3]}};
+    payload.client_representation.client_key.data[0] = info->key[0];
+    payload.client_representation.client_key.data[1] = info->key[1];
+    payload.client_representation.client_key.data[2] = info->key[2];
+    payload.client_representation.client_key.data[3] = info->key[3];
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
 

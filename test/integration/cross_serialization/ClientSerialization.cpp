@@ -45,7 +45,7 @@ std::vector<uint8_t> ClientSerialization::create_payload()
     payload.object_representation.kind = OBJK_PARTICIPANT;
     payload.object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
     payload.object_representation._.participant.base.representation._.object_reference.size = 6;
-    payload.object_representation._.participant.domain_id = static_cast<int16_t>(0x89AB);
+    payload.object_representation._.participant.domain_id = static_cast<int16_t>(0x09AB);
     std::strcpy(payload.object_representation._.participant.base.representation._.object_reference.data, "ABCDE");
 
     serialize_CREATE_Payload(&mb, &payload);
