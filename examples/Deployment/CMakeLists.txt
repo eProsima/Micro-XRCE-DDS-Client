@@ -26,10 +26,10 @@ else()
     ###                     CONFIGURATOR
     #############################################################
     project(ConfiguratorClient)
+    add_executable(ConfiguratorClient configurator_client.c HelloWorld.c HelloWorldWriter.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    add_executable(ConfiguratorClient configurator_client.c HelloWorld.c HelloWorldWriter.c)
     target_link_libraries(ConfiguratorClient micrortps_client)
 
     install(TARGETS ${PROJECT_NAME}
@@ -47,10 +47,10 @@ else()
     ###                      PUBLISHER
     #############################################################
     project(PublisherClient)
+    add_executable(PublisherClient publisher.c HelloWorld.c HelloWorldWriter.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    add_executable(PublisherClient publisher.c HelloWorld.c HelloWorldWriter.c)
     target_link_libraries(PublisherClient micrortps_client)
 
     install(TARGETS ${PROJECT_NAME}
@@ -68,10 +68,10 @@ else()
     ###                      SUBSCRIBER
     #############################################################
     project(SubscriberClient)
+    add_executable(SubscriberClient subscriber.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    add_executable(SubscriberClient subscriber.c HelloWorld.c)
     target_link_libraries(SubscriberClient micrortps_client)
 
     install(TARGETS ${PROJECT_NAME}

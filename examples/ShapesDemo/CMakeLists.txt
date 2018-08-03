@@ -22,11 +22,10 @@ project(ShapeDemoClient)
 if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PROFILE_READ_ACCESS OR NOT PROFILE_UDP_TRANSPORT OR NOT PROFILE_TCP_TRANSPORT OR NOT PROFILE_SERIAL_TRANSPORT)
     message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, PROFILE_UDP_TRANSPORT, PROFILE_TCP_PROFILE and PROFILE_SERIAL_TRANSPORT must be enabled.")
 else()
+    add_executable(${PROJECT_NAME} main.c ShapeType.c ShapeTypeWriter.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-
-    add_executable(${PROJECT_NAME} main.c ShapeType.c ShapeTypeWriter.c)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 99
