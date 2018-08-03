@@ -113,6 +113,8 @@ macro(check_msvc_arch)
 endmacro()
 
 function(set_common_compile_options target)
+    enable_language(C)
+    enable_language(CXX)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${target} PRIVATE /W4)
     else()
