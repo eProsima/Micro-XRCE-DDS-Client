@@ -458,9 +458,9 @@ void print_commands(void)
     printf("    create_session\n");
     printf("        Creates a Session, if exists, reuse it.\n");
     printf("    create_participant <participant id>:\n");
-    printf("        Creates a new Participant on the current session.\n");
+    printf("        Creates a Participant on the current session.\n");
     printf("    create_topic       <topic id> <participant id>:\n");
-    printf("        Register new Topic using <participant id> participant.\n");
+    printf("        Register a Topic using <participant id> participant.\n");
     printf("    create_publisher   <publisher id> <participant id>:\n");
     printf("        Creates a Publisher on <participant id> participant.\n");
     printf("    create_subscriber  <subscriber id> <participant id>:\n");
@@ -472,9 +472,9 @@ void print_commands(void)
     printf("    write_data <datawriter id> <stream id> [<x> <y> <size> <color>]:\n");
     printf("        Write data into a <stream id> using <data writer id> DataWriter.\n");
     printf("    request_data       <datareader id> <stream id> <samples>:\n");
-    printf("        Read <sample> topics from a <stream id> using <data reader id> DataReader.\n");
+    printf("        Read <sample> topics from a <stream id> using <datareader id> DataReader.\n");
     printf("    cancel_data        <datareader id>:\n");
-    printf("        Cancel any previous request data of <data reader id> DataReader.\n");
+    printf("        Cancel any previous request data of <datareader id> DataReader.\n");
     printf("    delete             <id_prefix> <type>:\n");
     printf("        Removes object with <id prefix> and <type>.\n");
     printf("    stream, default_output_stream <stream_id>:\n");
