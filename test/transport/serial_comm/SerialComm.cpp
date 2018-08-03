@@ -76,21 +76,21 @@ TEST_F(SerialComm, BufferOverflowTest)
     uint8_t flag = MR_FRAMING_END_FLAG;
 
     /* Send BEGIN flag. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     /* Send overflow PAYLOAD. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&overflow_msg, sizeof(overflow_msg)), sizeof(overflow_msg));
+    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&overflow_msg), sizeof(overflow_msg)), sizeof(overflow_msg));
     ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
 
     /* Send BEGIN flag. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     /* Send PAYLOAD. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&output_msg, sizeof(output_msg)), sizeof(output_msg));
+    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&output_msg), sizeof(output_msg)), sizeof(output_msg));
     ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
 
     /* Send END flag. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     ASSERT_EQ(*input_msg, 0);
@@ -147,17 +147,17 @@ TEST_F(SerialComm, SplitMessageTest)
     uint8_t flag = MR_FRAMING_END_FLAG;
 
     /* Send BEGIN flag. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     /* Send PAYLOAD. */
     for (unsigned int i = 0; i < sizeof(output_msg); ++i)
     {
-        ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&output_msg[i], 1), 1);
+        ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&output_msg[i]), 1), 1);
         ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     }
 
     /* Send END flag. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, (void*)&flag, 1), 1);
+    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     ASSERT_EQ(*input_msg, 0);
