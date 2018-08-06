@@ -10,12 +10,13 @@ static uint16_t create_entity_ref(mrSession* session, mrStreamId stream_id,
 //                              PUBLIC
 //==================================================================
 uint16_t mr_write_create_participant_ref(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, const char* ref, uint8_t mode)
+                                         mrObjectId object_id, int16_t domain_id, const char* ref, uint8_t mode)
 {
     //assert with the object_id type
 
     CREATE_Payload payload;
     payload.object_representation.kind = OBJK_PARTICIPANT;
+    payload.object_representation._.participant.domain_id = domain_id;
 
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }

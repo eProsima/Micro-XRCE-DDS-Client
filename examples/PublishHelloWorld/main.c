@@ -59,7 +59,7 @@ int main(int args, char** argv)
     // Create entities
     mrObjectId participant_id = mr_object_id(0x01, MR_PARTICIPANT_ID);
     const char* participant_ref = "default participant";
-    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, participant_ref, MR_REPLACE);
+    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, MR_REPLACE);
 
     mrObjectId topic_id = mr_object_id(0x01, MR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";

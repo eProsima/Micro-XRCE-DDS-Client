@@ -132,7 +132,7 @@ void create_publisher(mrSession* session, uint16_t id)
 
     mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
     const char* participant_ref = "default participant";
-    uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, participant_ref, 0);
+    uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
 
     mrObjectId topic_id = mr_object_id(id, MR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
@@ -156,7 +156,7 @@ void create_subscriber(mrSession* session, uint16_t id)
 
     mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
     const char* participant_ref = "default participant";
-    uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, participant_ref, 0);
+    uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
 
     mrObjectId topic_id = mr_object_id(id, MR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";

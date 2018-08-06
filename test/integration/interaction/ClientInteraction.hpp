@@ -17,9 +17,9 @@ public:
     , client_key_(++next_client_key_)
     , history_(history)
     {
-        output_best_effort_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
-        output_reliable_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * history_ * MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
-        input_reliable_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * history_ * MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
+        output_best_effort_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS]{0};
+        output_reliable_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * history_ * MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS]{0};
+        input_reliable_stream_buffer_ = new uint8_t[MR_CONFIG_UDP_TRANSPORT_MTU * history_ * MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS]{0};
 
         init();
     }
@@ -28,9 +28,9 @@ public:
     {
         close();
 
-        delete output_best_effort_stream_buffer_;
-        delete output_reliable_stream_buffer_;
-        delete input_reliable_stream_buffer_;
+        delete[] output_best_effort_stream_buffer_;
+        delete[] output_reliable_stream_buffer_;
+        delete[] input_reliable_stream_buffer_;
     }
 
     void create_entities(uint8_t id, uint8_t stream_id_raw, uint8_t expected_status, uint8_t flags)
@@ -39,7 +39,7 @@ public:
         uint16_t request_id; uint8_t status;
 
         mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
-        request_id = mr_write_create_participant_ref(&session_, output_stream_id, participant_id, "default participant", flags);
+        request_id = mr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default participant", flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
         mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
