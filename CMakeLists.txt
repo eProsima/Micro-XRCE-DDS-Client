@@ -64,13 +64,15 @@ endif()
 ###############################################################################
 # Client configuration options
 ###############################################################################
-file(STRINGS ${PROJECT_SOURCE_DIR}/client.config ConfigContents)
-foreach(NameAndValue ${ConfigContents})
-  string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
-  string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
-  string(REPLACE "${Name}=" "" Value ${NameAndValue})
-  set(${Name} "${Value}")
-endforeach()
+
+# Load client.config.
+if(EXISTS ${PROJECT_SOURCE_DIR}/client.config)
+    configure_file(${PROJECT_SOURCE_DIR}/client.config ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
+    load_cache(${PROJECT_SOURCE_DIR})
+    file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
+else()
+    message(FATAL_ERROR "No client.config found.")
+endif()
 
 if(PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
     set(PROFILE_COMMON_CREATE_ENTITIES ON)
