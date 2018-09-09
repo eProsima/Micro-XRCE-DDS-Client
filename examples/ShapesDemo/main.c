@@ -236,7 +236,7 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     else if(0 == strcmp(name, "create_participant") && 2 == length)
     {
         mrObjectId participant_id = mr_object_id((uint16_t)arg1, MR_PARTICIPANT_ID);
-        const char* participant_ref = "default participant";
+        const char* participant_ref = "default_xrce_participant_profile";
         (void) mr_write_create_participant_ref(session, *stream_id, participant_id, 0, participant_ref, 0);
     }
     else if(0 == strcmp(name, "create_topic") && 3 == length)

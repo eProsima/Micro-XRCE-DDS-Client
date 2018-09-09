@@ -347,13 +347,13 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
             sprintf(content, "DATAWRITER | obj: 0x%s | %s: %u",
                     print_array_2(payload->object_representation._.data_writer.publisher_id.data),
                     type,
-                    payload->object_representation._.data_writer.base.representation._.string_represenatation.size);
+                    payload->object_representation._.data_writer.base.representation._.xml_string_represenatation.size);
              break;
         case OBJK_DATAREADER:
             sprintf(content, "DATAREADER | obj: 0x%s | %s: %u",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     type,
-                    payload->object_representation._.data_reader.base.representation._.string_represenatation.size);
+                    payload->object_representation._.data_reader.base.representation._.xml_string_represenatation.size);
             break;
         default:
             sprintf(content, "UNKNOWN");
