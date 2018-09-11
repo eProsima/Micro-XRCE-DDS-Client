@@ -39,7 +39,7 @@ public:
         uint16_t request_id; uint8_t status;
 
         mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
-        request_id = mr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default participant", flags);
+        request_id = mr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant_profile", flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
         mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);

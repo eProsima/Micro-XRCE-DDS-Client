@@ -131,7 +131,7 @@ void create_publisher(mrSession* session, uint16_t id)
     mrStreamId output = mr_stream_id(0, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
 
     mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
-    const char* participant_ref = "default participant";
+    const char* participant_ref = "default_xrce_participant_profile";
     uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
 
     mrObjectId topic_id = mr_object_id(id, MR_TOPIC_ID);
@@ -155,7 +155,7 @@ void create_subscriber(mrSession* session, uint16_t id)
     mrStreamId output = mr_stream_id(0, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
 
     mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
-    const char* participant_ref = "default participant";
+    const char* participant_ref = "default_xrce_participant_profile";
     uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
 
     mrObjectId topic_id = mr_object_id(id, MR_TOPIC_ID);

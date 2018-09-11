@@ -244,7 +244,8 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
         mrObjectId topic_id = mr_object_id((uint16_t)arg1, MR_TOPIC_ID);
         mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
         const char* topic_xml = "<dds><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
-        (void) mr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
+//        (void) mr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
+        (void) mr_write_create_topic_ref(session, *stream_id, topic_id, participant_id, "shapetype_topic", 0);
     }
     else if(0 == strcmp(name, "create_publisher") && 3 == length)
     {
