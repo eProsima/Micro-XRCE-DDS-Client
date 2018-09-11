@@ -103,6 +103,7 @@ inline void read_format_data(mrSession* session, MicroBuffer* payload, uint16_t 
 
     MicroBuffer mb_topic;
     init_micro_buffer(&mb_topic, payload->iterator, length);
+    mb_topic.endianness = payload->endianness;
     session->on_topic(session, object_id, request_id, stream_id, &mb_topic, session->on_topic_args);
 }
 
