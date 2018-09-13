@@ -1,4 +1,5 @@
 #include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <string.h>
 
 //==================================================================
 //                             PUBLIC
@@ -282,16 +283,17 @@ bool deserialize_TransportLocatorSeq(MicroBuffer* buffer, TransportLocatorSeq* o
 bool serialize_Property(MicroBuffer* buffer, const Property* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->name);
-    ret &= serialize_String_t(buffer, &input->value);
+    ret &= serialize_sequence_char(buffer, input->name, (uint32_t)(strlen(input->name) + 1));
+    ret &= serialize_sequence_char(buffer, input->value, (uint32_t)(strlen(input->value) + 1));
     return ret;
 }
 
 bool deserialize_Property(MicroBuffer* buffer, Property* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->name);
-    ret &= deserialize_String_t(buffer, &output->value);
+    uint32_t temp_size;
+    ret &= deserialize_sequence_char(buffer, output->name, &temp_size);
+    ret &= deserialize_sequence_char(buffer, output->value, &temp_size);
     return ret;
 }
 
@@ -300,7 +302,7 @@ bool serialize_PropertySeq(MicroBuffer* buffer, const PropertySeq* input)
     bool ret = serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = serialize_Property(buffer, &input->data[i]);
+        ret = serialize_Property(buffer, input->data + i);
     }
     return ret;
 }
@@ -375,10 +377,11 @@ bool deserialize_AGENT_Representation(MicroBuffer* buffer, AGENT_Representation*
     ret &= deserialize_XrceVendorId(buffer, &output->xrce_vendor_id);
     ret &= deserialize_Time_t(buffer, &output->agent_timestamp);
     ret &= deserialize_bool(buffer, &output->optional_properties);
-    if(output->optional_properties == true)
-    {
-            ret &= deserialize_PropertySeq(buffer, &output->properties);
-    }
+    // TODO (julian): modified with the new Micro ROS API.
+//    if(output->optional_properties == true)
+//    {
+//            ret &= deserialize_PropertySeq(buffer, &output->properties);
+//    }
 
     return ret;
 }
