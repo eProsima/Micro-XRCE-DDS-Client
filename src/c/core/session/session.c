@@ -13,7 +13,6 @@
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
 
-static void flash_output_streams(mrSession* session);
 static bool listen_message(mrSession* session, int poll_ms);
 static bool listen_message_reliably(mrSession* session, int poll_ms);
 
@@ -123,7 +122,7 @@ mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, 
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
-bool mr_run_session_until_timeout(mrSession* session, int timeout_ms)
+bool mr_run_session_time(mrSession* session, int timeout_ms)
 {
     flash_output_streams(session);
 
@@ -134,6 +133,13 @@ bool mr_run_session_until_timeout(mrSession* session, int timeout_ms)
     }
 
     return output_streams_confirmed(&session->streams);
+}
+
+bool mr_run_session_until_timeout(mrSession* session, int timeout_ms)
+{
+    flash_output_streams(session);
+
+    return listen_message_reliably(session, timeout_ms);
 }
 
 bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout_ms)
