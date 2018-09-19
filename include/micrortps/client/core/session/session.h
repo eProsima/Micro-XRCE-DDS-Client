@@ -66,7 +66,7 @@ MRDLLAPI mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t
 MRDLLAPI mrStreamId mr_create_input_best_effort_stream(mrSession* session);
 MRDLLAPI mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
 
-MRDLLAPI void flash_output_streams(mrSession* session);
+MRDLLAPI void mr_flash_output_streams(mrSession* session);
 MRDLLAPI bool mr_run_session_time(mrSession* session, int time);
 MRDLLAPI bool mr_run_session_until_timeout(mrSession* session, int timeout);
 MRDLLAPI bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout);
