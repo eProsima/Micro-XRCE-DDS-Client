@@ -20,10 +20,10 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 # New project because of the CXX GTest dependency.
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(serial-comm-transport-test C CXX)
+    project(serial_comm_transport_test C CXX)
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(serial-comm-transport-test LANGUAGES C CXX)
+    project(serial_comm_transport_test LANGUAGES C CXX)
 endif()
 
 if(NOT PROFILE_SERIAL_TRANSPORT)

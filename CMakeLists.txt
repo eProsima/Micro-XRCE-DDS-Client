@@ -54,6 +54,9 @@ option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
 option(VERBOSE_SERIALIZATION "Use verbose output" OFF)
 option(VERBOSE_MESSAGE "Use verbose output" OFF)
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Generic"))
+    option(MEMORY_PERFORMANCE "Memory performace test." OFF)
+endif()
 
 if(EPROSIMA_BUILD)
     set(EPROSIMA_BUILD_EXAMPLES ON)
@@ -65,9 +68,11 @@ endif()
 # Client configuration options
 ###############################################################################
 
-# Load client.config.
-if(EXISTS ${PROJECT_SOURCE_DIR}/client.config)
-    configure_file(${PROJECT_SOURCE_DIR}/client.config ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
+# Load configuration file.
+set(CLIENT_CONFIG "${PROJECT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
+
+if(EXISTS ${CLIENT_CONFIG})
+    configure_file(${CLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
     load_cache(${PROJECT_SOURCE_DIR})
     file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
 else()
@@ -197,7 +202,6 @@ configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
 # Compile setting
 ###############################################################################
 
-
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
@@ -243,6 +247,12 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
         if(NOT WIN32)
             add_subdirectory(test/transport/serial_comm)
         endif()
+    endif()
+endif()
+
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Generic"))
+    if(MEMORY_PERFORMANCE)
+        add_subdirectory(test/memory/consumption)
     endif()
 endif()
 
