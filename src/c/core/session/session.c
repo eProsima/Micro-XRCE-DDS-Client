@@ -13,7 +13,6 @@
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
 
-static void flash_output_streams(mrSession* session);
 static bool listen_message(mrSession* session, int poll_ms);
 static bool listen_message_reliably(mrSession* session, int poll_ms);
 
@@ -123,9 +122,9 @@ mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, 
     return add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
-bool mr_run_session_until_timeout(mrSession* session, int timeout_ms)
+bool mr_run_session_time(mrSession* session, int timeout_ms)
 {
-    flash_output_streams(session);
+    mr_flash_output_streams(session);
 
     bool timeout = false;
     while(!timeout)
@@ -136,9 +135,16 @@ bool mr_run_session_until_timeout(mrSession* session, int timeout_ms)
     return output_streams_confirmed(&session->streams);
 }
 
+bool mr_run_session_until_timeout(mrSession* session, int timeout_ms)
+{
+    mr_flash_output_streams(session);
+
+    return listen_message_reliably(session, timeout_ms);
+}
+
 bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout_ms)
 {
-    flash_output_streams(session);
+    mr_flash_output_streams(session);
 
     bool timeout = false;
     while(!output_streams_confirmed(&session->streams) && !timeout)
@@ -151,7 +157,7 @@ bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout_ms)
 
 bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
 {
-    flash_output_streams(session);
+    mr_flash_output_streams(session);
 
     for(unsigned i = 0; i < list_size; ++i)
     {
@@ -186,10 +192,7 @@ bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint1
     return status_ok;
 }
 
-//==================================================================
-//                             PRIVATE
-//==================================================================
-void flash_output_streams(mrSession* session)
+void mr_flash_output_streams(mrSession* session)
 {
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -218,6 +221,9 @@ void flash_output_streams(mrSession* session)
     }
 }
 
+//==================================================================
+//                             PRIVATE
+//==================================================================
 bool listen_message(mrSession* session, int poll_ms)
 {
     uint8_t* data; size_t length;
