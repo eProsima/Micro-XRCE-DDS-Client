@@ -22,19 +22,8 @@ extern "C"
 
 #include <micrortps/client/core/session/session.h>
 
-typedef struct mrTopicId
-{
-    mrStreamId stream_id;
-    uint8_t* writing_position;
-    uint32_t size;
-
-} mrTopicId;
-
-MRDLLAPI mrTopicId mr_init_topic_micro_buffer(mrSession* session, mrStreamId stream_id,
-                                              struct MicroBuffer* mb, uint32_t topic_size);
-
-MRDLLAPI bool mr_write_data(mrSession* session, mrObjectId datawriter_id, mrTopicId topic_id);
-
+MRDLLAPI bool mr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
+                                       struct MicroBuffer* mb_topic, uint32_t topic_size);
 
 #ifdef __cplusplus
 }

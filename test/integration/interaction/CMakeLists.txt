@@ -22,7 +22,6 @@ set(SRCS
     ClientInteraction.cpp
     Gateway.cpp
     HelloWorld.c
-    HelloWorldWriter.c
     )
 
 add_library(${PROJECT_NAME} STATIC ${SRCS})

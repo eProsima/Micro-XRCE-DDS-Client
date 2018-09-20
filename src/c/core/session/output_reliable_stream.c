@@ -61,7 +61,7 @@ bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t siz
     uint8_t* internal_buffer = get_output_buffer(stream, stream->last_written % stream->history);
     size_t length = get_output_buffer_length(internal_buffer);
 
-    /* Check if the message fit it the current buffer */
+    /* Check if the message fit in the current buffer */
     if(length + submessage_padding(length) + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */

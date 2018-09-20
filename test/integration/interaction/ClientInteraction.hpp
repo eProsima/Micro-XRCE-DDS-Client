@@ -1,10 +1,12 @@
 #ifndef IN_TEST_CLIENT_INTERACTION_HPP
 #define IN_TEST_CLIENT_INTERACTION_HPP
 
-#include "HelloWorldWriter.h"
+#include "HelloWorld.h"
 #include "Gateway.hpp"
 
 #include <micrortps/client/client.h>
+#include <microcdr/microcdr.h>
+
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -78,7 +80,7 @@ public:
     void publish(uint8_t id, uint8_t stream_id_raw, size_t number)
     {
         //Used only for waiting the RTPS subscriber matching
-        (void) mr_run_session_until_timeout(&session_, 50);
+        (void) mr_run_session_time(&session_, 50);
 
         mrStreamId output_stream_id = mr_stream_id_from_raw(stream_id_raw, MR_OUTPUT_STREAM);
         mrObjectId datawriter_id = mr_object_id(id, MR_DATAWRITER_ID);
@@ -86,7 +88,12 @@ public:
         for(size_t i = 0; i < number; ++i)
         {
             HelloWorld topic = {static_cast<uint32_t>(i), "Hello DDS world!"};
-            bool written = mr_write_HelloWorld_topic(&session_, output_stream_id, datawriter_id, &topic);
+
+            MicroBuffer mb;
+            uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
+            bool prepared = mr_prepare_output_stream(&session_, output_stream_id, datawriter_id, &mb, topic_size);
+            ASSERT_TRUE(prepared);
+            bool written = HelloWorld_serialize_topic(&mb, &topic);
             ASSERT_TRUE(written);
             bool sent = mr_run_session_until_confirm_delivery(&session_, 60000);
             ASSERT_TRUE(sent);
