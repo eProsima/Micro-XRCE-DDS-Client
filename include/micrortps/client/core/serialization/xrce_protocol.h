@@ -202,8 +202,8 @@ typedef struct TransportLocatorSeq
 
 typedef struct Property
 {
-    String_t name;
-    String_t value;
+    char* name;
+    char* value;
 
 } Property;
 
@@ -211,7 +211,7 @@ typedef struct Property
 typedef struct PropertySeq
 {
     uint32_t size;
-    Property data[PROPERTY_SEQUENCE_MAX];
+    Property* data;
 
 } PropertySeq;
 
