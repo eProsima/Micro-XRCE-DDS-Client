@@ -151,7 +151,7 @@ set(SRCS
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/core/util/time.c
-    src/c/core/session/log/message.c
+    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/session/log/message.c>
     )
 
 ###############################################################################
