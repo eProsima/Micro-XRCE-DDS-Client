@@ -50,11 +50,11 @@ typedef enum SubmessageId
 
 typedef enum SubmessageFlags
 {
-    FLAG_LAST_FRAGMENT = 0x01 << 1,
-    FLAG_FORMAT_DATA = 0x00,
-    FLAG_FORMAT_SAMPLE = 0x02,
-    FLAG_FORMAT_DATA_SEQ = 0x08,
-    FLAG_FORMAT_SAMPLE_SEQ = 0x0A,
+    FLAG_LAST_FRAGMENT =         0x01 << 1,
+    FLAG_FORMAT_DATA =           0x00,
+    FLAG_FORMAT_SAMPLE =         0x02,
+    FLAG_FORMAT_DATA_SEQ =       0x08,
+    FLAG_FORMAT_SAMPLE_SEQ =     0x0A,
     FLAG_FORMAT_PACKED_SAMPLES = 0x0E
 
 } SubmessageFlags;

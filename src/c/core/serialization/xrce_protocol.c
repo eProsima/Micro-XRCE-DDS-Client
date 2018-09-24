@@ -27,7 +27,7 @@ bool serialize_String_t(MicroBuffer* buffer, const String_t* input)
 
 bool deserialize_String_t(MicroBuffer* buffer, String_t* output)
 {
-    return deserialize_sequence_char(buffer, output->data, &output->size);
+    return deserialize_sequence_char(buffer, output->data, STRING_SIZE_MAX, &output->size);
 }
 
 bool serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* input)
@@ -37,7 +37,7 @@ bool serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* inp
 
 bool deserialize_BinarySequence_t(MicroBuffer* buffer, BinarySequence_t* output)
 {
-    return deserialize_sequence_uint8_t(buffer, output->data, &output->size);
+    return deserialize_sequence_uint8_t(buffer, output->data, BINARY_SEQUENCE_MAX, &output->size);
 }
 
 bool serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* input)
@@ -1577,7 +1577,7 @@ bool serialize_SampleData(MicroBuffer* buffer, const SampleData* input)
 
 bool deserialize_SampleData(MicroBuffer* buffer, SampleData* output)
 {
-    return deserialize_sequence_uint8_t(buffer, output->data, &output->size);
+    return deserialize_sequence_uint8_t(buffer, output->data, SAMPLE_DATA_SIZE_MAX, &output->size);
 }
 
 bool serialize_SampleDataSeq(MicroBuffer* buffer, const SampleDataSeq* input)
