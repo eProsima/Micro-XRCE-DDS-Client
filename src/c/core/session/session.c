@@ -155,7 +155,7 @@ bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout_ms)
     return output_streams_confirmed(&session->streams);
 }
 
-bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
+bool mr_run_session_until_status_and(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
 {
     mr_flash_output_streams(session);
 
@@ -190,6 +190,36 @@ bool mr_run_session_until_status(mrSession* session, int timeout_ms, const uint1
     }
 
     return status_ok;
+}
+
+bool mr_run_session_until_status_or(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
+{
+    mr_flash_output_streams(session);
+
+    for(unsigned i = 0; i < list_size; ++i)
+    {
+        status_list[i] = MR_STATUS_NONE;
+    }
+
+    session->request_list = request_list;
+    session->status_list = status_list;
+    session->request_status_list_size = list_size;
+
+    bool timeout = false;
+    bool status_confirmed = false;
+    while(!timeout && !status_confirmed)
+    {
+        timeout = !listen_message_reliably(session, timeout_ms);
+        for(unsigned i = 0; i < list_size && !status_confirmed; ++i)
+        {
+            status_confirmed = status_list[i] != MR_STATUS_NONE
+                            || request_list[i] == MR_INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
+        }
+    }
+
+    session->request_status_list_size = 0;
+
+    return status_confirmed;
 }
 
 void mr_flash_output_streams(mrSession* session)

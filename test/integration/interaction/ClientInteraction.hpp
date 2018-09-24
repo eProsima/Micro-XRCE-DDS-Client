@@ -43,37 +43,37 @@ public:
         mrObjectId participant_id = mr_object_id(id, MR_PARTICIPANT_ID);
         request_id = mr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant_profile", flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
+        mr_run_session_until_status_and(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         mrObjectId topic_id = mr_object_id(id, MR_TOPIC_ID);
         request_id = mr_write_configure_topic_xml(&session_, output_stream_id, topic_id, participant_id, topic_xml_, flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
+        mr_run_session_until_status_and(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         mrObjectId publisher_id = mr_object_id(id, MR_PUBLISHER_ID);
         request_id = mr_write_configure_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, publisher_xml_, flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
+        mr_run_session_until_status_and(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         mrObjectId datawriter_id = mr_object_id(id, MR_DATAWRITER_ID);
         request_id = mr_write_configure_datawriter_xml(&session_, output_stream_id, datawriter_id, publisher_id, datawriter_xml_, flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
+        mr_run_session_until_status_and(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         mrObjectId subscriber_id = mr_object_id(id, MR_SUBSCRIBER_ID);
         request_id = mr_write_configure_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, subscriber_xml_, flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
+        mr_run_session_until_status_and(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         mrObjectId datareader_id = mr_object_id(id, MR_DATAREADER_ID);
         request_id = mr_write_configure_datareader_xml(&session_, output_stream_id, datareader_id, subscriber_id, datareader_xml_, flags);
         ASSERT_NE(MR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
+        mr_run_session_until_status_and(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
     }
 
@@ -119,7 +119,7 @@ public:
         while(expected_topic_index_ < number)
         {
             uint8_t status;
-            bool received_ok = mr_run_session_until_status(&session_, 60000, &request_id, &status, 1);
+            bool received_ok = mr_run_session_until_status_and(&session_, 60000, &request_id, &status, 1);
             ASSERT_EQ(MR_STATUS_OK, status);
             ASSERT_TRUE(received_ok);
             //ASSERT_EQ(last_topic_object_id_, datareader_id);

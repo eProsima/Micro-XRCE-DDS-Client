@@ -91,7 +91,7 @@ int main(int args, char** argv)
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
-    if(!mr_run_session_until_status(&session, 1000, requests, status, 4))
+    if(!mr_run_session_until_status_and(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
         return 1;
@@ -107,7 +107,7 @@ int main(int args, char** argv)
     while(connected && count < max_topics)
     {
         uint8_t read_data_status;
-        connected = mr_run_session_until_status(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        connected = mr_run_session_until_status_and(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
     }
 
     // Delete resources
