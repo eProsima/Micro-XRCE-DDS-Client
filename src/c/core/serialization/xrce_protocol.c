@@ -290,11 +290,9 @@ bool serialize_Property(MicroBuffer* buffer, const Property* input)
 
 bool deserialize_Property(MicroBuffer* buffer, Property* output)
 {
-    bool ret = true;
-    uint32_t temp_size;
-    ret &= deserialize_sequence_char(buffer, output->name, &temp_size);
-    ret &= deserialize_sequence_char(buffer, output->value, &temp_size);
-    return ret;
+    (void) buffer; (void) output;
+    // not used
+    return false;
 }
 
 bool serialize_PropertySeq(MicroBuffer* buffer, const PropertySeq* input)
