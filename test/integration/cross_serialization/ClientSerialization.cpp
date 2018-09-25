@@ -44,9 +44,8 @@ std::vector<uint8_t> ClientSerialization::create_payload()
     payload.base.object_id = ObjectId{0x45, 0x67};
     payload.object_representation.kind = OBJK_PARTICIPANT;
     payload.object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
-    payload.object_representation._.participant.base.representation._.object_reference.size = 6;
     payload.object_representation._.participant.domain_id = static_cast<int16_t>(0x09AB);
-    std::strcpy(payload.object_representation._.participant.base.representation._.object_reference.data, "ABCDE");
+    payload.object_representation._.participant.base.representation._.object_reference = const_cast<char*>("ABCDE");
 
     serialize_CREATE_Payload(&mb, &payload);
 
@@ -152,13 +151,12 @@ std::vector<uint8_t> ClientSerialization::read_data_payload()
     payload.read_specification.input_stream_id = 0x80;
     payload.read_specification.data_format = 0x89;
     payload.read_specification.optional_content_filter_expression = 0x00;
-    payload.read_specification.content_filter_expression.size = 6;
     payload.read_specification.optional_delivery_control = 0x00;
     payload.read_specification.delivery_control.max_bytes_per_seconds = 0xABCD;
     payload.read_specification.delivery_control.max_elapsed_time = 0x2345;
     payload.read_specification.delivery_control.max_samples = 0xABCD;
     payload.read_specification.delivery_control.min_pace_period = 0xEF01;
-    std::strcpy(payload.read_specification.content_filter_expression.data, "ABCDE");
+    payload.read_specification.content_filter_expression = const_cast<char*>("ABCDE");
 
     serialize_READ_DATA_Payload(&mb, &payload);
 

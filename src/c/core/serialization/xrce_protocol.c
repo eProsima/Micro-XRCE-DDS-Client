@@ -20,16 +20,6 @@ bool deserialize_Time_t(MicroBuffer* buffer, Time_t* output)
     return ret;
 }
 
-bool serialize_String_t(MicroBuffer* buffer, const String_t* input)
-{
-    return serialize_sequence_char(buffer, input->data, input->size);
-}
-
-bool deserialize_String_t(MicroBuffer* buffer, String_t* output)
-{
-    return deserialize_sequence_char(buffer, output->data, STRING_SIZE_MAX, &output->size);
-}
-
 bool serialize_BinarySequence_t(MicroBuffer* buffer, const BinarySequence_t* input)
 {
     return serialize_sequence_uint8_t(buffer, input->data, input->size);
@@ -45,7 +35,7 @@ bool serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* inp
     bool ret = serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = serialize_String_t(buffer, &input->data[i]);
+        ret = serialize_string(buffer, input->data[i]);
     }
     return ret;
 }
@@ -53,9 +43,17 @@ bool serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* inp
 bool deserialize_StringSequence_t(MicroBuffer* buffer, StringSequence_t* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    for(uint32_t i = 0; i < output->size && ret; i++)
+    if(output->size < STRING_SEQUENCE_MAX)
     {
-        ret = deserialize_String_t(buffer, &output->data[i]);
+        buffer->error = true;
+        ret = false;
+    }
+    else
+    {
+        for(uint32_t i = 0; i < output->size && ret; i++)
+        {
+            ret = deserialize_string(buffer, output->data[i], STRING_SIZE_MAX);
+        }
     }
     return ret;
 }
@@ -195,14 +193,14 @@ bool deserialize_TransportLocatorLarge(MicroBuffer* buffer, TransportLocatorLarg
 bool serialize_TransportLocatorString(MicroBuffer* buffer, const TransportLocatorString* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->value);
+    ret &= serialize_string(buffer, input->value);
     return ret;
 }
 
 bool deserialize_TransportLocatorString(MicroBuffer* buffer, TransportLocatorString* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->value);
+    ret &= deserialize_string(buffer, output->value, STRING_SIZE_MAX);
     return ret;
 }
 
@@ -283,16 +281,17 @@ bool deserialize_TransportLocatorSeq(MicroBuffer* buffer, TransportLocatorSeq* o
 bool serialize_Property(MicroBuffer* buffer, const Property* input)
 {
     bool ret = true;
-    ret &= serialize_sequence_char(buffer, input->name, (uint32_t)(strlen(input->name) + 1));
-    ret &= serialize_sequence_char(buffer, input->value, (uint32_t)(strlen(input->value) + 1));
+    ret &= serialize_string(buffer, input->name);
+    ret &= serialize_string(buffer, input->value);
     return ret;
 }
 
 bool deserialize_Property(MicroBuffer* buffer, Property* output)
 {
-    (void) buffer; (void) output;
-    // not used
-    return false;
+    bool ret = true;
+    ret &= deserialize_string(buffer, output->name, STRING_SIZE_MAX);
+    ret &= deserialize_string(buffer, output->value, STRING_SIZE_MAX);
+    return ret;
 }
 
 bool serialize_PropertySeq(MicroBuffer* buffer, const PropertySeq* input)
@@ -393,10 +392,10 @@ bool serialize_OBJK_Representation3Formats(MicroBuffer* buffer, const OBJK_Repre
         switch(input->format)
         {
             case REPRESENTATION_BY_REFERENCE:
-                ret &= serialize_String_t(buffer, &input->_.object_reference);
+                ret &= serialize_string(buffer, input->_.object_reference);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= serialize_String_t(buffer, &input->_.xml_string_represenatation);
+                ret &= serialize_string(buffer, input->_.xml_string_represenatation);
                 break;
             case REPRESENTATION_IN_BINARY:
                 ret &= serialize_BinarySequence_t(buffer, &input->_.binary_representation);
@@ -417,10 +416,10 @@ bool deserialize_OBJK_Representation3Formats(MicroBuffer* buffer, OBJK_Represent
         switch(output->format)
         {
             case REPRESENTATION_BY_REFERENCE:
-                ret &= deserialize_String_t(buffer, &output->_.object_reference);
+                ret &= deserialize_string(buffer, output->_.object_reference, STRING_SIZE_MAX);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= deserialize_String_t(buffer, &output->_.xml_string_represenatation);
+                ret &= deserialize_string(buffer, output->_.xml_string_represenatation, STRING_SIZE_MAX);
                 break;
             case REPRESENTATION_IN_BINARY:
                 ret &= deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
@@ -441,10 +440,10 @@ bool serialize_OBJK_RepresentationRefAndXMLFormats(MicroBuffer* buffer, const OB
         switch(input->format)
         {
             case REPRESENTATION_BY_REFERENCE:
-                ret &= serialize_String_t(buffer, &input->_.object_name);
+                ret &= serialize_string(buffer, input->_.object_name);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= serialize_String_t(buffer, &input->_.xml_string_represenatation);
+                ret &= serialize_string(buffer, input->_.xml_string_represenatation);
                 break;
             default:
                 break;
@@ -462,10 +461,10 @@ bool deserialize_OBJK_RepresentationRefAndXMLFormats(MicroBuffer* buffer, OBJK_R
         switch(output->format)
         {
             case REPRESENTATION_BY_REFERENCE:
-                ret &= deserialize_String_t(buffer, &output->_.object_name);
+                ret &= deserialize_string(buffer, output->_.object_name, STRING_SIZE_MAX);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= deserialize_String_t(buffer, &output->_.xml_string_represenatation);
+                ret &= deserialize_string(buffer, output->_.xml_string_represenatation, STRING_SIZE_MAX);
                 break;
             default:
                 break;
@@ -486,7 +485,7 @@ bool serialize_OBJK_RepresentationBinAndXMLFormats(MicroBuffer* buffer, const OB
                 ret &= serialize_BinarySequence_t(buffer, &input->_.binary_representation);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= serialize_String_t(buffer, &input->_.string_represenatation);
+                ret &= serialize_string(buffer, input->_.string_represenatation);
                 break;
             default:
                 break;
@@ -507,7 +506,7 @@ bool deserialize_OBJK_RepresentationBinAndXMLFormats(MicroBuffer* buffer, OBJK_R
                 ret &= deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= deserialize_String_t(buffer, &output->_.string_represenatation);
+                ret &= deserialize_string(buffer, output->_.string_represenatation, STRING_SIZE_MAX);
                 break;
             default:
                 break;
@@ -716,13 +715,13 @@ bool serialize_OBJK_DomainParticipant_Binary(MicroBuffer* buffer, const OBJK_Dom
     ret &= serialize_bool(buffer, input->optional_domain_reference);
     if(input->optional_domain_reference == true)
     {
-        ret &= serialize_String_t(buffer, &input->domain_reference);
+        ret &= serialize_string(buffer, input->domain_reference);
     }
 
     ret &= serialize_bool(buffer, input->optional_qos_profile_reference);
     if(input->optional_qos_profile_reference == true)
     {
-        ret &= serialize_String_t(buffer, &input->qos_profile_reference);
+        ret &= serialize_string(buffer, input->qos_profile_reference);
     }
 
     return ret;
@@ -734,13 +733,13 @@ bool deserialize_OBJK_DomainParticipant_Binary(MicroBuffer* buffer, OBJK_DomainP
     ret &= deserialize_bool(buffer, &output->optional_domain_reference);
     if(output->optional_domain_reference == true)
     {
-            ret &= deserialize_String_t(buffer, &output->domain_reference);
+            ret &= deserialize_string(buffer, output->domain_reference, STRING_SIZE_MAX);
     }
 
     ret &= deserialize_bool(buffer, &output->optional_qos_profile_reference);
     if(output->optional_qos_profile_reference == true)
     {
-            ret &= deserialize_String_t(buffer, &output->qos_profile_reference);
+            ret &= deserialize_string(buffer, output->qos_profile_reference, STRING_SIZE_MAX);
     }
 
     return ret;
@@ -749,17 +748,17 @@ bool deserialize_OBJK_DomainParticipant_Binary(MicroBuffer* buffer, OBJK_DomainP
 bool serialize_OBJK_Topic_Binary(MicroBuffer* buffer, const OBJK_Topic_Binary* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->topic_name);
+    ret &= serialize_string(buffer, input->topic_name);
     ret &= serialize_bool(buffer, input->optional_type_reference);
     if(input->optional_type_reference == true)
     {
-        ret &= serialize_String_t(buffer, &input->type_reference);
+        ret &= serialize_string(buffer, input->type_reference);
     }
 
     ret &= serialize_bool(buffer, input->optional_type_name);
     if(input->optional_type_name == true)
     {
-        ret &= serialize_String_t(buffer, &input->type_name);
+        ret &= serialize_string(buffer, input->type_name);
     }
 
     return ret;
@@ -768,17 +767,17 @@ bool serialize_OBJK_Topic_Binary(MicroBuffer* buffer, const OBJK_Topic_Binary* i
 bool deserialize_OBJK_Topic_Binary(MicroBuffer* buffer, OBJK_Topic_Binary* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->topic_name);
+    ret &= deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
     ret &= deserialize_bool(buffer, &output->optional_type_reference);
     if(output->optional_type_reference == true)
     {
-            ret &= deserialize_String_t(buffer, &output->type_reference);
+            ret &= deserialize_string(buffer, output->type_reference, STRING_SIZE_MAX);
     }
 
     ret &= deserialize_bool(buffer, &output->optional_type_name);
     if(output->optional_type_name == true)
     {
-            ret &= deserialize_String_t(buffer, &output->type_name);
+            ret &= deserialize_string(buffer, output->type_name, STRING_SIZE_MAX);
     }
 
     return ret;
@@ -826,7 +825,7 @@ bool serialize_OBJK_Publisher_Binary(MicroBuffer* buffer, const OBJK_Publisher_B
     ret &= serialize_bool(buffer, input->optional_publisher_name);
     if(input->optional_publisher_name == true)
     {
-        ret &= serialize_String_t(buffer, &input->publisher_name);
+        ret &= serialize_string(buffer, input->publisher_name);
     }
 
     ret &= serialize_bool(buffer, input->optional_qos);
@@ -844,7 +843,7 @@ bool deserialize_OBJK_Publisher_Binary(MicroBuffer* buffer, OBJK_Publisher_Binar
     ret &= deserialize_bool(buffer, &output->optional_publisher_name);
     if(output->optional_publisher_name == true)
     {
-            ret &= deserialize_String_t(buffer, &output->publisher_name);
+            ret &= deserialize_string(buffer, output->publisher_name, STRING_SIZE_MAX);
     }
 
     ret &= deserialize_bool(buffer, &output->optional_qos);
@@ -898,7 +897,7 @@ bool serialize_OBJK_Subscriber_Binary(MicroBuffer* buffer, const OBJK_Subscriber
     ret &= serialize_bool(buffer, input->optional_subscriber_name);
     if(input->optional_subscriber_name == true)
     {
-        ret &= serialize_String_t(buffer, &input->subscriber_name);
+        ret &= serialize_string(buffer, input->subscriber_name);
     }
 
     ret &= serialize_bool(buffer, input->optional_qos);
@@ -916,7 +915,7 @@ bool deserialize_OBJK_Subscriber_Binary(MicroBuffer* buffer, OBJK_Subscriber_Bin
     ret &= deserialize_bool(buffer, &output->optional_subscriber_name);
     if(output->optional_subscriber_name == true)
     {
-            ret &= deserialize_String_t(buffer, &output->subscriber_name);
+            ret &= deserialize_string(buffer, output->subscriber_name, STRING_SIZE_MAX);
     }
 
     ret &= deserialize_bool(buffer, &output->optional_qos);
@@ -1029,7 +1028,7 @@ bool serialize_OBJK_DataReader_Binary_Qos(MicroBuffer* buffer, const OBJK_DataRe
     ret &= serialize_bool(buffer, input->optional_contentbased_filter);
     if(input->optional_contentbased_filter == true)
     {
-        ret &= serialize_String_t(buffer, &input->contentbased_filter);
+        ret &= serialize_string(buffer, input->contentbased_filter);
     }
 
     return ret;
@@ -1048,7 +1047,7 @@ bool deserialize_OBJK_DataReader_Binary_Qos(MicroBuffer* buffer, OBJK_DataReader
     ret &= deserialize_bool(buffer, &output->optional_contentbased_filter);
     if(output->optional_contentbased_filter == true)
     {
-            ret &= deserialize_String_t(buffer, &output->contentbased_filter);
+            ret &= deserialize_string(buffer, output->contentbased_filter, STRING_SIZE_MAX);
     }
 
     return ret;
@@ -1057,7 +1056,7 @@ bool deserialize_OBJK_DataReader_Binary_Qos(MicroBuffer* buffer, OBJK_DataReader
 bool serialize_OBJK_DataReader_Binary(MicroBuffer* buffer, const OBJK_DataReader_Binary* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->topic_name);
+    ret &= serialize_string(buffer, input->topic_name);
     ret &= serialize_bool(buffer, input->optional_qos);
     if(input->optional_qos == true)
     {
@@ -1070,7 +1069,7 @@ bool serialize_OBJK_DataReader_Binary(MicroBuffer* buffer, const OBJK_DataReader
 bool deserialize_OBJK_DataReader_Binary(MicroBuffer* buffer, OBJK_DataReader_Binary* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->topic_name);
+    ret &= deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
     ret &= deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
@@ -1083,7 +1082,7 @@ bool deserialize_OBJK_DataReader_Binary(MicroBuffer* buffer, OBJK_DataReader_Bin
 bool serialize_OBJK_DataWriter_Binary(MicroBuffer* buffer, const OBJK_DataWriter_Binary* input)
 {
     bool ret = true;
-    ret &= serialize_String_t(buffer, &input->topic_name);
+    ret &= serialize_string(buffer, input->topic_name);
     ret &= serialize_bool(buffer, input->optional_qos);
     if(input->optional_qos == true)
     {
@@ -1096,7 +1095,7 @@ bool serialize_OBJK_DataWriter_Binary(MicroBuffer* buffer, const OBJK_DataWriter
 bool deserialize_OBJK_DataWriter_Binary(MicroBuffer* buffer, OBJK_DataWriter_Binary* output)
 {
     bool ret = true;
-    ret &= deserialize_String_t(buffer, &output->topic_name);
+    ret &= deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
     ret &= deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
@@ -1438,7 +1437,7 @@ bool serialize_ReadSpecification(MicroBuffer* buffer, const ReadSpecification* i
     ret &= serialize_bool(buffer, input->optional_content_filter_expression);
     if(input->optional_content_filter_expression == true)
     {
-        ret &= serialize_String_t(buffer, &input->content_filter_expression);
+        ret &= serialize_string(buffer, input->content_filter_expression);
     }
 
     ret &= serialize_bool(buffer, input->optional_delivery_control);
@@ -1458,7 +1457,7 @@ bool deserialize_ReadSpecification(MicroBuffer* buffer, ReadSpecification* outpu
     ret &= deserialize_bool(buffer, &output->optional_content_filter_expression);
     if(output->optional_content_filter_expression == true)
     {
-        ret &= deserialize_String_t(buffer, &output->content_filter_expression);
+        ret &= deserialize_string(buffer, output->content_filter_expression, STRING_SIZE_MAX);
     }
 
     ret &= deserialize_bool(buffer, &output->optional_delivery_control);

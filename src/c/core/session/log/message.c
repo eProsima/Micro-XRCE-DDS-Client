@@ -41,6 +41,7 @@
 #define SEND_ARROW       "=>> "
 #define RECV_ARROW       "<<= "
 
+
 #define DATA_TO_STRING_BUFFER     4096
 
 static char* print_array_2(const uint8_t* array_2);
@@ -102,7 +103,11 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
 
             case SUBMESSAGE_ID_CREATE:
             {
+                char string_buffer[STRING_SIZE_MAX];
                 CREATE_Payload payload;
+                payload.object_representation._.participant.base.representation._.xml_string_represenatation = string_buffer;
+                payload.object_representation._.publisher.base.representation._.string_represenatation = string_buffer;
+
                 deserialize_CREATE_Payload(&mb, &payload);
                 print_create_submessage(color, &payload, flags);
 
@@ -152,7 +157,10 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
 
             case SUBMESSAGE_ID_READ_DATA:
             {
+                char string_buffer[STRING_SIZE_MAX];
                 READ_DATA_Payload payload;
+                payload.read_specification.content_filter_expression = string_buffer;
+
                 deserialize_READ_DATA_Payload(&mb, &payload);
                 print_read_data_submessage(color, &payload);
 
@@ -321,47 +329,47 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
     switch(payload->object_representation.kind)
     {
         case OBJK_PARTICIPANT:
-            sprintf(content, "PARTICIPANT | %s: %u",
+            sprintf(content, "PARTICIPANT | %s: %zu",
                     type,
-                    payload->object_representation._.participant.base.representation._.xml_string_represenatation.size);
+                    strlen(payload->object_representation._.participant.base.representation._.xml_string_represenatation) + 1);
             break;
         case OBJK_TOPIC:
-            sprintf(content, "TOPIC | obj: 0x%s | %s: %u",
+            sprintf(content, "TOPIC | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     type,
-                    payload->object_representation._.topic.base.representation._.xml_string_represenatation.size);
+                    strlen(payload->object_representation._.topic.base.representation._.xml_string_represenatation) + 1);
             break;
         case OBJK_PUBLISHER:
-            sprintf(content, "PUBLISHER | obj: 0x%s | %s: %u",
+            sprintf(content, "PUBLISHER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.publisher.participant_id.data),
                     type,
-                    payload->object_representation._.publisher.base.representation._.string_represenatation.size);
+                    strlen(payload->object_representation._.publisher.base.representation._.string_represenatation) + 1);
             break;
         case OBJK_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | obj: 0x%s | %s: %u",
+            sprintf(content, "SUBSCRIBER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.subscriber.participant_id.data),
                     type,
-                    payload->object_representation._.subscriber.base.representation._.string_represenatation.size);
+                    strlen(payload->object_representation._.subscriber.base.representation._.string_represenatation) + 1);
             break;
         case OBJK_DATAWRITER:
-            sprintf(content, "DATAWRITER | obj: 0x%s | %s: %u",
+            sprintf(content, "DATAWRITER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.data_writer.publisher_id.data),
                     type,
-                    payload->object_representation._.data_writer.base.representation._.xml_string_represenatation.size);
+                    strlen(payload->object_representation._.data_writer.base.representation._.xml_string_represenatation) + 1);
              break;
         case OBJK_DATAREADER:
-            sprintf(content, "DATAREADER | obj: 0x%s | %s: %u",
+            sprintf(content, "DATAREADER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     type,
-                    payload->object_representation._.data_reader.base.representation._.xml_string_represenatation.size);
+                    strlen(payload->object_representation._.data_reader.base.representation._.xml_string_represenatation) + 1);
             break;
         default:
             sprintf(content, "UNKNOWN");
     }
 
-    const char* reuse_flag = (flags & MR_REUSE) ? "REUSE" : "-";
+    const char* reuse_flag = (flags & MR_REUSE) ? "REUSE" : "";
     const char* replace_flag = (flags & MR_REPLACE) ? "REPLACE" : "";
-    const char* separator = (flags & MR_REUSE && flags & MR_REPLACE) ? " " : "";
+    const char* separator = ((flags & MR_REUSE && flags & MR_REPLACE) || (!(flags & MR_REUSE) && !(flags & MR_REPLACE))) ? " " : "";
 
     printf("%s[CREATE | %s%s%s | %s | %s]%s",
             pre,
