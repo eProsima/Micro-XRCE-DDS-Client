@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file HelloWorld.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -46,6 +46,8 @@ struct MicroBuffer;
 bool HelloWorld_serialize_topic(struct MicroBuffer* writer, const HelloWorld* topic);
 bool HelloWorld_deserialize_topic(struct MicroBuffer* reader, HelloWorld* topic);
 uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size);
+
+
 #ifdef __cplusplus
 }
 #endif

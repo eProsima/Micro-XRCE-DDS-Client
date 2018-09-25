@@ -29,6 +29,10 @@
 #include <micrortps/client/profile/session/read_access.h>
 #endif //PROFILE_READ_ACCESS
 
+#ifdef PROFILE_WRITE_ACCESS
+#include <micrortps/client/profile/session/write_access.h>
+#endif //PROFILE_WRITE_ACCESS
+
 #ifdef PROFILE_UDP_TRANSPORT
 #if defined(PLATFORM_NAME_LINUX)
 #include <micrortps/client/profile/transport/udp_transport_linux.h>

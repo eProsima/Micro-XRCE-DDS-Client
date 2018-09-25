@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#include "ShapeTypeWriter.h"
+#include "ShapeType.h"
 
 #include <micrortps/client/client.h>
+#include <microcdr/microcdr.h>
+
 #include <stdio.h>
 #include <fcntl.h>  // O_RDWR, O_NOCTTY, O_NONBLOCK
 #include <stdlib.h> // atoi
@@ -181,7 +183,7 @@ int main(int args, char** argv)
     {
         if (!check_input())
         {
-            (void) mr_run_session_until_timeout(&session, 100);
+            (void) mr_run_session_time(&session, 100);
         }
         else if (fgets(command_stdin_line, 256, stdin))
         {
@@ -244,8 +246,7 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
         mrObjectId topic_id = mr_object_id((uint16_t)arg1, MR_TOPIC_ID);
         mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
         const char* topic_xml = "<dds><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
-//        (void) mr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
-        (void) mr_write_create_topic_ref(session, *stream_id, topic_id, participant_id, "shapetype_topic", 0);
+        (void) mr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
     }
     else if(0 == strcmp(name, "create_publisher") && 3 == length)
     {
@@ -288,7 +289,11 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
 
         mrObjectId datawriter_id = mr_object_id((uint16_t)arg1, MR_DATAWRITER_ID);
         mrStreamId output_stream_id = mr_stream_id_from_raw((uint8_t)arg2, MR_INPUT_STREAM);
-        (void) mr_write_ShapeType_topic(session, output_stream_id, datawriter_id, &topic);
+
+        MicroBuffer mb;
+        uint32_t topic_size = ShapeType_size_of_topic(&topic, 0);
+        mr_prepare_output_stream(session, output_stream_id, datawriter_id, &mb, topic_size);
+        ShapeType_serialize_topic(&mb, &topic);
 
         printf("Sending... ");
         print_ShapeType_topic(&topic);
@@ -331,17 +336,17 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     else if((0 == strcmp(name, "entity_tree") || 0 == strcmp(name, "tree")) && 2 == length)
     {
         (void) compute_print_command(session, stream_id, 2, "create_participant", arg1, 0, 0, 0, 0, "");
-        (void) mr_run_session_until_timeout(session, 20);
+        (void) mr_run_session_time(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_topic"      , arg1, arg1, 0, 0, 0, "");
-        (void) mr_run_session_until_timeout(session, 20);
+        (void) mr_run_session_time(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_publisher"  , arg1, arg1, 0, 0, 0, "");
-        (void) mr_run_session_until_timeout(session, 20);
+        (void) mr_run_session_time(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_subscriber" , arg1, arg1, 0, 0, 0, "");
-        (void) mr_run_session_until_timeout(session, 20);
+        (void) mr_run_session_time(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_datawriter" , arg1, arg1, 0, 0, 0, "");
-        (void) mr_run_session_until_timeout(session, 20);
+        (void) mr_run_session_time(session, 20);
         (void) compute_print_command(session, stream_id, 3, "create_datareader" , arg1, arg1, 0, 0, 0, "");
-        (void) mr_run_session_until_timeout(session, 20);
+        (void) mr_run_session_time(session, 20);
     }
     else if(0 == strcmp(name, "list") || 0 == strcmp(name, "l"))
     {

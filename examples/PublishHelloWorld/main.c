@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "HelloWorldWriter.h"
+#include "HelloWorld.h"
 
 #include <micrortps/client/client.h>
+#include <microcdr/microcdr.h>
+
 #include <stdio.h>
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
@@ -88,9 +90,13 @@ int main(int args, char** argv)
     while(connected && count < max_topics)
     {
         HelloWorld topic = {count++, "Hello DDS world!"};
-        (void) mr_write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic);
 
-        connected = mr_run_session_until_timeout(&session, 1000);
+        MicroBuffer mb;
+        uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
+        mr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
+        HelloWorld_serialize_topic(&mb, &topic);
+
+        connected = mr_run_session_time(&session, 1000);
         if(connected)
         {
             printf("Sent topic: %s, id: %i\n", topic.message, topic.index);

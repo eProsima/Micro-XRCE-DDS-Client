@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file HelloWorld.c
  * This source file contains the definition of the described types in the IDL file.
  *
@@ -27,24 +27,27 @@
 bool HelloWorld_serialize_topic(MicroBuffer* writer, const HelloWorld* topic)
 {
     (void) serialize_uint32_t(writer, topic->index);
-    (void) serialize_sequence_char(writer, topic->message, (uint32_t)strlen(topic->message) + 1);
 
-    return writer->error == BUFFER_OK;
+    (void) serialize_string(writer, topic->message);
+
+    return writer->error;
 }
 
 bool HelloWorld_deserialize_topic(MicroBuffer* reader, HelloWorld* topic)
 {
     (void) deserialize_uint32_t(reader, &topic->index);
-    uint32_t size_message;
-    (void) deserialize_sequence_char(reader, topic->message, &size_message);
 
-    return reader->error == BUFFER_OK;
+    (void) deserialize_string(reader, topic->message, 255);
+
+    return reader->error;
 }
 
 uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size)
 {
-    size += 4 + get_alignment(size, 4);
-    size += 4 + get_alignment(size, 4) + (uint32_t)strlen(topic->message) + 1;
+    uint32_t previousSize = size;
+    size += get_alignment(size, 4) + 4;
 
-    return size;
+    size += get_alignment(size, 4) + 4 + (uint32_t)strlen(topic->message) + 1;
+
+    return size - previousSize;
 }

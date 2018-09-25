@@ -26,7 +26,7 @@ else()
     ###                     CONFIGURATOR
     #############################################################
     project(ConfiguratorClient)
-    add_executable(ConfiguratorClient configurator_client.c HelloWorld.c HelloWorldWriter.c)
+    add_executable(ConfiguratorClient configurator_client.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
@@ -47,7 +47,7 @@ else()
     ###                      PUBLISHER
     #############################################################
     project(PublisherClient)
-    add_executable(PublisherClient publisher.c HelloWorld.c HelloWorldWriter.c)
+    add_executable(PublisherClient publisher.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()

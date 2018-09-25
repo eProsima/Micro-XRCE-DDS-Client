@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file ShapeType.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -37,10 +37,10 @@ extern "C"
 typedef struct ShapeType
 {
     char color[255];
+
     int32_t x;
     int32_t y;
     int32_t shapesize;
-
 } ShapeType;
 
 struct MicroBuffer;
@@ -48,6 +48,8 @@ struct MicroBuffer;
 bool ShapeType_serialize_topic(struct MicroBuffer* writer, const ShapeType* topic);
 bool ShapeType_deserialize_topic(struct MicroBuffer* reader, ShapeType* topic);
 uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size);
+
+
 #ifdef __cplusplus
 }
 #endif
