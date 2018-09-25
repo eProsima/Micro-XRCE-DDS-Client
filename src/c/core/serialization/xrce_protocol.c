@@ -271,9 +271,17 @@ bool serialize_TransportLocatorSeq(MicroBuffer* buffer, const TransportLocatorSe
 bool deserialize_TransportLocatorSeq(MicroBuffer* buffer, TransportLocatorSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    for(uint32_t i = 0; i < output->size && ret; i++)
+    if(output->size > TRANSPORT_LOCATOR_SEQUENCE_MAX)
     {
-        ret = deserialize_TransportLocator(buffer, &output->data[i]);
+        buffer->error = true;
+        ret = false;
+    }
+    else
+    {
+        for(uint32_t i = 0; i < output->size && ret; i++)
+        {
+            ret = deserialize_TransportLocator(buffer, &output->data[i]);
+        }
     }
     return ret;
 }
@@ -307,9 +315,18 @@ bool serialize_PropertySeq(MicroBuffer* buffer, const PropertySeq* input)
 bool deserialize_PropertySeq(MicroBuffer* buffer, PropertySeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    for(uint32_t i = 0; i < output->size && ret; i++)
+
+    if(output->size > PROPERTY_SEQUENCE_MAX)
     {
-        ret = deserialize_Property(buffer, &output->data[i]);
+        buffer->error = true;
+        ret = false;
+    }
+    else
+    {
+        for(uint32_t i = 0; i < output->size && ret; i++)
+        {
+            ret = deserialize_Property(buffer, &output->data[i]);
+        }
     }
     return ret;
 }
@@ -1590,9 +1607,17 @@ bool serialize_SampleDataSeq(MicroBuffer* buffer, const SampleDataSeq* input)
 bool deserialize_SampleDataSeq(MicroBuffer* buffer, SampleDataSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    for(uint32_t i = 0; i < output->size && ret; i++)
+    if(output->size > SAMPLE_DATA_SEQUENCE_MAX)
     {
-        ret = deserialize_SampleData(buffer, &output->data[i]);
+        buffer->error = true;
+        ret = false;
+    }
+    else
+    {
+        for(uint32_t i = 0; i < output->size && ret; i++)
+        {
+            ret = deserialize_SampleData(buffer, &output->data[i]);
+        }
     }
     return ret;
 }
@@ -1626,9 +1651,17 @@ bool serialize_SampleSeq(MicroBuffer* buffer, const SampleSeq* input)
 bool deserialize_SampleSeq(MicroBuffer* buffer, SampleSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    for(uint32_t i = 0; i < output->size && ret; i++)
+    if(output->size > SAMPLE_SEQUENCE_MAX)
     {
-        ret = deserialize_Sample(buffer, &output->data[i]);
+        buffer->error = true;
+        ret = false;
+    }
+    else
+    {
+        for(uint32_t i = 0; i < output->size && ret; i++)
+        {
+            ret = deserialize_Sample(buffer, &output->data[i]);
+        }
     }
     return ret;
 }
@@ -1662,9 +1695,17 @@ bool serialize_SampleDeltaSequence(MicroBuffer* buffer, const SampleDeltaSequenc
 bool deserialize_SampleDeltaSequence(MicroBuffer* buffer, SampleDeltaSequence* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    for(uint32_t i = 0; i < output->size && ret; i++)
+    if(output->size > SAMPLE_DELTA_SEQUENCE_MAX)
     {
-        ret = deserialize_SampleDelta(buffer, &output->data[i]);
+        buffer->error = true;
+        ret = false;
+    }
+    else
+    {
+        for(uint32_t i = 0; i < output->size && ret; i++)
+        {
+            ret = deserialize_SampleDelta(buffer, &output->data[i]);
+        }
     }
     return ret;
 }
@@ -1698,9 +1739,17 @@ bool serialize_SamplePackedSeq(MicroBuffer* buffer, const SamplePackedSeq* input
 bool deserialize_SamplePackedSeq(MicroBuffer* buffer, SamplePackedSeq* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    for(uint32_t i = 0; i < output->size && ret; i++)
+    if(output->size > PACKED_SAMPLES_SEQUENCE_MAX)
     {
-        ret = deserialize_PackedSamples(buffer, &output->data[i]);
+        buffer->error = true;
+        ret = false;
+    }
+    else
+    {
+        for(uint32_t i = 0; i < output->size && ret; i++)
+        {
+            ret = deserialize_PackedSamples(buffer, &output->data[i]);
+        }
     }
     return ret;
 }
