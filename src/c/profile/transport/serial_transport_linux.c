@@ -87,7 +87,7 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
     return rv;
 }
 
-static int get_serial_error()
+static int get_serial_error(void)
 {
     return serial_errno;
 }

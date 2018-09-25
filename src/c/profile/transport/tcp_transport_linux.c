@@ -11,7 +11,7 @@
  *******************************************************************************/
 static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static int get_tcp_error();
+static int get_tcp_error(void);
 static uint16_t read_tcp_data(mrTCPTransport* transport);
 static inline void disconnect_tcp(mrTCPTransport* transport);
 
@@ -98,7 +98,7 @@ bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
     return rv;
 }
 
-int get_tcp_error()
+int get_tcp_error(void)
 {
     return errno;
 }

@@ -5,7 +5,7 @@
  *******************************************************************************/
 static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static int get_tcp_error();
+static int get_tcp_error(void);
 
 /*******************************************************************************
  * Private function definitions.
@@ -61,7 +61,7 @@ static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
     return rv;
 }
 
-static int get_tcp_error()
+static int get_tcp_error(void)
 {
     return WSAGetLastError();
 }
