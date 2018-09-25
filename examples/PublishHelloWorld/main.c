@@ -78,7 +78,7 @@ int main(int args, char** argv)
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
-    if(!mr_run_session_until_status(&session, 1000, requests, status, 4))
+    if(!mr_run_session_until_all_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i publisher: %i darawriter: %i\n", status[0], status[1], status[2], status[3]);
         return 1;

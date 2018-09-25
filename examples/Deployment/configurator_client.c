@@ -201,7 +201,7 @@ void delete_subscriber(mrSession* session, uint16_t id)
 void wait_status(mrSession* session, uint16_t* requests)
 {
     uint8_t status[4];
-    if(mr_run_session_until_status(session, 3000, requests, status, 4))
+    if(mr_run_session_until_all_status(session, 3000, requests, status, 4))
     {
         printf("Ok\n");
     }
