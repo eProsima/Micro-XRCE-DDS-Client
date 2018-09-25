@@ -80,7 +80,7 @@ int main(int args, char** argv)
     while(connected)
     {
         uint8_t read_data_status;
-        connected = mr_run_session_until_status_and(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        connected = mr_run_session_until_all_status(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
     }
 
     // Delete resources

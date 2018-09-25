@@ -155,7 +155,7 @@ bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout_ms)
     return output_streams_confirmed(&session->streams);
 }
 
-bool mr_run_session_until_status_and(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
+bool mr_run_session_until_all_status(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
 {
     mr_flash_output_streams(session);
 
@@ -192,7 +192,7 @@ bool mr_run_session_until_status_and(mrSession* session, int timeout_ms, const u
     return status_ok;
 }
 
-bool mr_run_session_until_status_or(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
+bool mr_run_session_until_one_status(mrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
 {
     mr_flash_output_streams(session);
 
