@@ -43,7 +43,7 @@ bool serialize_StringSequence_t(MicroBuffer* buffer, const StringSequence_t* inp
 bool deserialize_StringSequence_t(MicroBuffer* buffer, StringSequence_t* output)
 {
     bool ret = deserialize_uint32_t(buffer, &output->size);
-    if(output->size < STRING_SEQUENCE_MAX)
+    if(output->size > STRING_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
