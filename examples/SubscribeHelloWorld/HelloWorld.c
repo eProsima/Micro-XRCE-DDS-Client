@@ -45,9 +45,9 @@ bool HelloWorld_deserialize_topic(mcMicroBuffer* reader, HelloWorld* topic)
 uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size)
 {
     uint32_t previousSize = size;
-    size += get_alignment(size, 4) + 4;
+    size += mc_alignment(size, 4) + 4;
 
-    size += get_alignment(size, 4) + 4 + (uint32_t)strlen(topic->message) + 1;
+    size += mc_alignment(size, 4) + 4 + (uint32_t)strlen(topic->message) + 1;
 
     return size - previousSize;
 }

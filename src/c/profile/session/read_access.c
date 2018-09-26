@@ -49,7 +49,7 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
         request_id = init_base_object_request(&session->info, datareader_id, &payload.base);
-        (void) mc_serialize_READ_DATA_Payload(&mb, &payload);
+        (void) serialize_READ_DATA_Payload(&mb, &payload);
     }
 
     return request_id;
@@ -102,7 +102,7 @@ inline void read_format_data(mrSession* session, mcMicroBuffer* payload, uint16_
     length = (uint16_t)(length - 4); //by the offset. Remove too with the future serialization according to XRCE
 
     mcMicroBuffer mb_topic;
-    init_micro_buffer(&mb_topic, payload->iterator, length);
+    mc_init_micro_buffer(&mb_topic, payload->iterator, length);
     mb_topic.endianness = payload->endianness;
     session->on_topic(session, object_id, request_id, stream_id, &mb_topic, session->on_topic_args);
 }

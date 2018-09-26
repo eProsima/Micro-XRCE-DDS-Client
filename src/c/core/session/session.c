@@ -77,12 +77,12 @@ bool mr_create_session(mrSession* session)
 
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     mcMicroBuffer mb;
-    init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
+    mc_init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_create_session(&session->info, &mb, get_milli_time());
     stamp_create_session_header(&session->info, mb.init);
 
-    bool received = wait_session_status(session, create_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
+    bool received = wait_session_status(session, create_session_buffer, mc_micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     bool created = received && MR_STATUS_OK == session->info.last_requested_status;
     return created;
 }
@@ -91,12 +91,12 @@ bool mr_delete_session(mrSession* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     mcMicroBuffer mb;
-    init_micro_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
+    mc_init_micro_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_delete_session(&session->info, &mb);
     stamp_session_header(&session->info, 0, 0, mb.init);
 
-    bool received = wait_session_status(session, delete_session_buffer, micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
+    bool received = wait_session_status(session, delete_session_buffer, mc_micro_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     return received && MR_STATUS_OK == session->info.last_requested_status;
 }
 
@@ -261,7 +261,7 @@ bool listen_message(mrSession* session, int poll_ms)
     if(must_be_read)
     {
         mcMicroBuffer mb;
-        init_micro_buffer(&mb, data, (uint32_t)length);
+        mc_init_micro_buffer(&mb, data, (uint32_t)length);
         read_message(session, &mb);
     }
 
@@ -344,26 +344,26 @@ void write_submessage_heartbeat(const mrSession* session, mrStreamId id)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
     mcMicroBuffer mb;
-    init_micro_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
+    mc_init_micro_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     const mrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
     write_heartbeat(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
-    send_message(session, heartbeat_buffer, micro_buffer_length(&mb));
+    send_message(session, heartbeat_buffer, mc_micro_buffer_length(&mb));
 }
 
 void write_submessage_acknack(const mrSession* session, mrStreamId id)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
     mcMicroBuffer mb;
-    init_micro_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
+    mc_init_micro_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     const mrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
     write_acknack(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
-    send_message(session, acknack_buffer, micro_buffer_length(&mb));
+    send_message(session, acknack_buffer, mc_micro_buffer_length(&mb));
 }
 
 void read_message(mrSession* session, mcMicroBuffer* mb)
@@ -398,7 +398,7 @@ void read_stream(mrSession* session, mcMicroBuffer* mb, mrStreamId stream_id, mr
         case MR_RELIABLE_STREAM:
         {
             mrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
-            if(stream && receive_reliable_message(stream, seq_num, mb->iterator, micro_buffer_size(mb)))
+            if(stream && receive_reliable_message(stream, seq_num, mb->iterator, mc_micro_buffer_size(mb)))
             {
                 read_submessage_list(session, mb, stream_id);
                 mcMicroBuffer next_mb;
@@ -470,7 +470,7 @@ void read_submessage(mrSession* session, mcMicroBuffer* submessage, uint8_t subm
 void read_submessage_status(mrSession* session, mcMicroBuffer* submessage)
 {
     STATUS_Payload payload;
-    mc_deserialize_STATUS_Payload(submessage, &payload);
+    deserialize_STATUS_Payload(submessage, &payload);
 
 
     mrObjectId object_id; uint16_t request_id;
@@ -488,7 +488,7 @@ void read_submessage_data(mrSession* session, mcMicroBuffer* submessage, uint16_
 {
 #ifdef PROFILE_READ_ACCESS
     BaseObjectRequest base;
-    mc_deserialize_BaseObjectRequest(submessage, &base);
+    deserialize_BaseObjectRequest(submessage, &base);
     length = (uint16_t)(length - 4); //CHANGE: by a future size_of_BaseObjectRequest
 
     mrObjectId object_id; uint16_t request_id;

@@ -12,7 +12,7 @@ std::vector<uint8_t> ClientSerialization::create_client_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = RequestId{0x01, 0x23};
@@ -25,7 +25,7 @@ std::vector<uint8_t> ClientSerialization::create_client_payload()
     payload.client_representation.client_key = ClientKey{0x89, 0xAB, 0xCD, 0xEF};
     payload.client_representation.session_id = 0x01;
     payload.client_representation.optional_properties = 0x00;
-    mc_serialize_CREATE_CLIENT_Payload(&mb, &payload);
+    serialize_CREATE_CLIENT_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -37,7 +37,7 @@ std::vector<uint8_t> ClientSerialization::create_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     CREATE_Payload payload;
     payload.base.request_id = RequestId{0x01, 0x23};
@@ -47,7 +47,7 @@ std::vector<uint8_t> ClientSerialization::create_payload()
     payload.object_representation._.participant.domain_id = static_cast<int16_t>(0x09AB);
     payload.object_representation._.participant.base.representation._.object_reference = const_cast<char*>("ABCDE");
 
-    mc_serialize_CREATE_Payload(&mb, &payload);
+    serialize_CREATE_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -59,13 +59,13 @@ std::vector<uint8_t> ClientSerialization::get_info_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     GET_INFO_Payload payload;
     payload.base.request_id = RequestId{0x01, 0x23};
     payload.base.object_id = ObjectId{0x45, 0x67};
     payload.info_mask = 0x89ABCDEF;
-    mc_serialize_GET_INFO_Payload(&mb, &payload);
+    serialize_GET_INFO_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -77,12 +77,12 @@ std::vector<uint8_t> ClientSerialization::delete_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     DELETE_Payload payload;
     payload.base.request_id = RequestId{0x01, 0x23};
     payload.base.object_id = ObjectId{0x45, 0x67};
-    mc_serialize_DELETE_Payload(&mb, &payload);
+    serialize_DELETE_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -94,7 +94,7 @@ std::vector<uint8_t> ClientSerialization::status_agent_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     STATUS_AGENT_Payload payload;
     payload.base.related_request.request_id = RequestId{0x01, 0x23};
@@ -106,7 +106,7 @@ std::vector<uint8_t> ClientSerialization::status_agent_payload()
     payload.agent_info.agent_timestamp.nanoseconds = 0x01234567;
     payload.agent_info.optional_properties = 0x00;
 
-    mc_serialize_STATUS_AGENT_Payload(&mb, &payload);
+    serialize_STATUS_AGENT_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -118,14 +118,14 @@ std::vector<uint8_t> ClientSerialization::status_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     STATUS_Payload payload;
     payload.base.related_request.request_id = RequestId{0x01, 0x23};
     payload.base.related_request.object_id = ObjectId{0x45, 0x67};
     payload.base.result.implementation_status = 0x89;
     payload.base.result.status = 0xAB;
-    mc_serialize_STATUS_Payload(&mb, &payload);
+    serialize_STATUS_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -143,7 +143,7 @@ std::vector<uint8_t> ClientSerialization::read_data_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     READ_DATA_Payload payload;
     payload.base.request_id = RequestId{0x01, 0x23};
@@ -158,7 +158,7 @@ std::vector<uint8_t> ClientSerialization::read_data_payload()
     payload.read_specification.delivery_control.min_pace_period = 0xEF01;
     payload.read_specification.content_filter_expression = const_cast<char*>("ABCDE");
 
-    mc_serialize_READ_DATA_Payload(&mb, &payload);
+    serialize_READ_DATA_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -170,13 +170,13 @@ std::vector<uint8_t> ClientSerialization::write_data_payload_data()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     WRITE_DATA_Payload_Data payload;
     payload.base.request_id = RequestId{0x01, 0x23};
     payload.base.object_id = ObjectId{0x45, 0x67};
 
-    mc_serialize_WRITE_DATA_Payload_Data(&mb, &payload);
+    serialize_WRITE_DATA_Payload_Data(&mb, &payload);
     mc_serialize_sequence_char(&mb, "BYTES", 5);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
@@ -213,13 +213,13 @@ std::vector<uint8_t> ClientSerialization::data_payload_data()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     BaseObjectRequest base;
     base.request_id = RequestId{0x01, 0x23};
     base.object_id = ObjectId{0x45, 0x67};
 
-    mc_serialize_BaseObjectRequest(&mb, &base);
+    serialize_BaseObjectRequest(&mb, &base);
     mc_serialize_sequence_char(&mb, "BYTES", 5);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
@@ -256,13 +256,13 @@ std::vector<uint8_t> ClientSerialization::acknack_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     ACKNACK_Payload payload;
     payload.first_unacked_seq_num = static_cast<uint16_t>(0x0123);
     payload.nack_bitmap[0] = 0x45;
     payload.nack_bitmap[1] = 0x67;
-    mc_serialize_ACKNACK_Payload(&mb, &payload);
+    serialize_ACKNACK_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 
@@ -274,12 +274,12 @@ std::vector<uint8_t> ClientSerialization::heartbeat_payload()
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
     mcMicroBuffer mb;
-    init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+    mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     HEARTBEAT_Payload payload;
     payload.first_unacked_seq_nr = static_cast<uint16_t>(0x0123);
     payload.last_unacked_seq_nr = static_cast<uint16_t>(0x4567);
-    mc_serialize_HEARTBEAT_Payload(&mb, &payload);
+    serialize_HEARTBEAT_Payload(&mb, &payload);
 
     buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
 

@@ -4,7 +4,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-bool mc_serialize_Time_t(mcMicroBuffer* buffer, const Time_t* input)
+bool serialize_Time_t(mcMicroBuffer* buffer, const Time_t* input)
 {
     bool ret = true;
     ret &= mc_serialize_int32_t(buffer, input->seconds);
@@ -12,7 +12,7 @@ bool mc_serialize_Time_t(mcMicroBuffer* buffer, const Time_t* input)
     return ret;
 }
 
-bool mc_deserialize_Time_t(mcMicroBuffer* buffer, Time_t* output)
+bool deserialize_Time_t(mcMicroBuffer* buffer, Time_t* output)
 {
     bool ret = true;
     ret &= mc_deserialize_int32_t(buffer, &output->seconds);
@@ -20,17 +20,17 @@ bool mc_deserialize_Time_t(mcMicroBuffer* buffer, Time_t* output)
     return ret;
 }
 
-bool mc_serialize_BinarySequence_t(mcMicroBuffer* buffer, const BinarySequence_t* input)
+bool serialize_BinarySequence_t(mcMicroBuffer* buffer, const BinarySequence_t* input)
 {
     return mc_serialize_sequence_uint8_t(buffer, input->data, input->size);
 }
 
-bool mc_deserialize_BinarySequence_t(mcMicroBuffer* buffer, BinarySequence_t* output)
+bool deserialize_BinarySequence_t(mcMicroBuffer* buffer, BinarySequence_t* output)
 {
     return mc_deserialize_sequence_uint8_t(buffer, output->data, BINARY_SEQUENCE_MAX, &output->size);
 }
 
-bool mc_serialize_StringSequence_t(mcMicroBuffer* buffer, const StringSequence_t* input)
+bool serialize_StringSequence_t(mcMicroBuffer* buffer, const StringSequence_t* input)
 {
     bool ret = mc_serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
@@ -40,7 +40,7 @@ bool mc_serialize_StringSequence_t(mcMicroBuffer* buffer, const StringSequence_t
     return ret;
 }
 
-bool mc_deserialize_StringSequence_t(mcMicroBuffer* buffer, StringSequence_t* output)
+bool deserialize_StringSequence_t(mcMicroBuffer* buffer, StringSequence_t* output)
 {
     bool ret = mc_deserialize_uint32_t(buffer, &output->size);
     if(output->size > STRING_SEQUENCE_MAX)
@@ -58,91 +58,91 @@ bool mc_deserialize_StringSequence_t(mcMicroBuffer* buffer, StringSequence_t* ou
     return ret;
 }
 
-bool mc_serialize_ClientKey(mcMicroBuffer* buffer, const ClientKey* input)
+bool serialize_ClientKey(mcMicroBuffer* buffer, const ClientKey* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->data, 4);
     return ret;
 }
 
-bool mc_deserialize_ClientKey(mcMicroBuffer* buffer, ClientKey* output)
+bool deserialize_ClientKey(mcMicroBuffer* buffer, ClientKey* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->data, 4);
     return ret;
 }
 
-bool mc_serialize_ObjectId(mcMicroBuffer* buffer, const ObjectId* input)
+bool serialize_ObjectId(mcMicroBuffer* buffer, const ObjectId* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool mc_deserialize_ObjectId(mcMicroBuffer* buffer, ObjectId* output)
+bool deserialize_ObjectId(mcMicroBuffer* buffer, ObjectId* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool mc_serialize_ObjectPrefix(mcMicroBuffer* buffer, const ObjectPrefix* input)
+bool serialize_ObjectPrefix(mcMicroBuffer* buffer, const ObjectPrefix* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool mc_deserialize_ObjectPrefix(mcMicroBuffer* buffer, ObjectPrefix* output)
+bool deserialize_ObjectPrefix(mcMicroBuffer* buffer, ObjectPrefix* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool mc_serialize_XrceCookie(mcMicroBuffer* buffer, const XrceCookie* input)
+bool serialize_XrceCookie(mcMicroBuffer* buffer, const XrceCookie* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->data, 4);
     return ret;
 }
 
-bool mc_deserialize_XrceCookie(mcMicroBuffer* buffer, XrceCookie* output)
+bool deserialize_XrceCookie(mcMicroBuffer* buffer, XrceCookie* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->data, 4);
     return ret;
 }
 
-bool mc_serialize_XrceVersion(mcMicroBuffer* buffer, const XrceVersion* input)
+bool serialize_XrceVersion(mcMicroBuffer* buffer, const XrceVersion* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool mc_deserialize_XrceVersion(mcMicroBuffer* buffer, XrceVersion* output)
+bool deserialize_XrceVersion(mcMicroBuffer* buffer, XrceVersion* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool mc_serialize_XrceVendorId(mcMicroBuffer* buffer, const XrceVendorId* input)
+bool serialize_XrceVendorId(mcMicroBuffer* buffer, const XrceVendorId* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool mc_deserialize_XrceVendorId(mcMicroBuffer* buffer, XrceVendorId* output)
+bool deserialize_XrceVendorId(mcMicroBuffer* buffer, XrceVendorId* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool mc_serialize_TransportLocatorSmall(mcMicroBuffer* buffer, const TransportLocatorSmall* input)
+bool serialize_TransportLocatorSmall(mcMicroBuffer* buffer, const TransportLocatorSmall* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->address, 2);
@@ -150,7 +150,7 @@ bool mc_serialize_TransportLocatorSmall(mcMicroBuffer* buffer, const TransportLo
     return ret;
 }
 
-bool mc_deserialize_TransportLocatorSmall(mcMicroBuffer* buffer, TransportLocatorSmall* output)
+bool deserialize_TransportLocatorSmall(mcMicroBuffer* buffer, TransportLocatorSmall* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->address, 2);
@@ -158,7 +158,7 @@ bool mc_deserialize_TransportLocatorSmall(mcMicroBuffer* buffer, TransportLocato
     return ret;
 }
 
-bool mc_serialize_TransportLocatorMedium(mcMicroBuffer* buffer, const TransportLocatorMedium* input)
+bool serialize_TransportLocatorMedium(mcMicroBuffer* buffer, const TransportLocatorMedium* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->address, 4);
@@ -166,7 +166,7 @@ bool mc_serialize_TransportLocatorMedium(mcMicroBuffer* buffer, const TransportL
     return ret;
 }
 
-bool mc_deserialize_TransportLocatorMedium(mcMicroBuffer* buffer, TransportLocatorMedium* output)
+bool deserialize_TransportLocatorMedium(mcMicroBuffer* buffer, TransportLocatorMedium* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->address, 4);
@@ -174,7 +174,7 @@ bool mc_deserialize_TransportLocatorMedium(mcMicroBuffer* buffer, TransportLocat
     return ret;
 }
 
-bool mc_serialize_TransportLocatorLarge(mcMicroBuffer* buffer, const TransportLocatorLarge* input)
+bool serialize_TransportLocatorLarge(mcMicroBuffer* buffer, const TransportLocatorLarge* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->address, 16);
@@ -182,7 +182,7 @@ bool mc_serialize_TransportLocatorLarge(mcMicroBuffer* buffer, const TransportLo
     return ret;
 }
 
-bool mc_deserialize_TransportLocatorLarge(mcMicroBuffer* buffer, TransportLocatorLarge* output)
+bool deserialize_TransportLocatorLarge(mcMicroBuffer* buffer, TransportLocatorLarge* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->address, 16);
@@ -190,21 +190,21 @@ bool mc_deserialize_TransportLocatorLarge(mcMicroBuffer* buffer, TransportLocato
     return ret;
 }
 
-bool mc_serialize_TransportLocatorString(mcMicroBuffer* buffer, const TransportLocatorString* input)
+bool serialize_TransportLocatorString(mcMicroBuffer* buffer, const TransportLocatorString* input)
 {
     bool ret = true;
     ret &= mc_serialize_string(buffer, input->value);
     return ret;
 }
 
-bool mc_deserialize_TransportLocatorString(mcMicroBuffer* buffer, TransportLocatorString* output)
+bool deserialize_TransportLocatorString(mcMicroBuffer* buffer, TransportLocatorString* output)
 {
     bool ret = true;
     ret &= mc_deserialize_string(buffer, output->value, STRING_SIZE_MAX);
     return ret;
 }
 
-bool mc_serialize_TransportLocator(mcMicroBuffer* buffer, const TransportLocator* input)
+bool serialize_TransportLocator(mcMicroBuffer* buffer, const TransportLocator* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->format);
@@ -213,16 +213,16 @@ bool mc_serialize_TransportLocator(mcMicroBuffer* buffer, const TransportLocator
         switch(input->format)
         {
             case ADDRESS_FORMAT_SMALL:
-                ret &= mc_serialize_TransportLocatorSmall(buffer, &input->_.small_locator);
+                ret &= serialize_TransportLocatorSmall(buffer, &input->_.small_locator);
                 break;
             case ADDRESS_FORMAT_MEDIUM:
-                ret &= mc_serialize_TransportLocatorMedium(buffer, &input->_.medium_locator);
+                ret &= serialize_TransportLocatorMedium(buffer, &input->_.medium_locator);
                 break;
             case ADDRESS_FORMAT_LARGE:
-                ret &= mc_serialize_TransportLocatorLarge(buffer, &input->_.large_locator);
+                ret &= serialize_TransportLocatorLarge(buffer, &input->_.large_locator);
                 break;
             case ADDRESS_FORMAT_STRING:
-                ret &= mc_serialize_TransportLocatorString(buffer, &input->_.string_locator);
+                ret &= serialize_TransportLocatorString(buffer, &input->_.string_locator);
                 break;
             default:
                 break;
@@ -231,7 +231,7 @@ bool mc_serialize_TransportLocator(mcMicroBuffer* buffer, const TransportLocator
     return ret;
 }
 
-bool mc_deserialize_TransportLocator(mcMicroBuffer* buffer, TransportLocator* output)
+bool deserialize_TransportLocator(mcMicroBuffer* buffer, TransportLocator* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->format);
@@ -240,16 +240,16 @@ bool mc_deserialize_TransportLocator(mcMicroBuffer* buffer, TransportLocator* ou
         switch(output->format)
         {
             case ADDRESS_FORMAT_SMALL:
-                ret &= mc_deserialize_TransportLocatorSmall(buffer, &output->_.small_locator);
+                ret &= deserialize_TransportLocatorSmall(buffer, &output->_.small_locator);
                 break;
             case ADDRESS_FORMAT_MEDIUM:
-                ret &= mc_deserialize_TransportLocatorMedium(buffer, &output->_.medium_locator);
+                ret &= deserialize_TransportLocatorMedium(buffer, &output->_.medium_locator);
                 break;
             case ADDRESS_FORMAT_LARGE:
-                ret &= mc_deserialize_TransportLocatorLarge(buffer, &output->_.large_locator);
+                ret &= deserialize_TransportLocatorLarge(buffer, &output->_.large_locator);
                 break;
             case ADDRESS_FORMAT_STRING:
-                ret &= mc_deserialize_TransportLocatorString(buffer, &output->_.string_locator);
+                ret &= deserialize_TransportLocatorString(buffer, &output->_.string_locator);
                 break;
             default:
                 break;
@@ -258,17 +258,17 @@ bool mc_deserialize_TransportLocator(mcMicroBuffer* buffer, TransportLocator* ou
     return ret;
 }
 
-bool mc_serialize_TransportLocatorSeq(mcMicroBuffer* buffer, const TransportLocatorSeq* input)
+bool serialize_TransportLocatorSeq(mcMicroBuffer* buffer, const TransportLocatorSeq* input)
 {
     bool ret = mc_serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = mc_serialize_TransportLocator(buffer, &input->data[i]);
+        ret = serialize_TransportLocator(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool mc_deserialize_TransportLocatorSeq(mcMicroBuffer* buffer, TransportLocatorSeq* output)
+bool deserialize_TransportLocatorSeq(mcMicroBuffer* buffer, TransportLocatorSeq* output)
 {
     bool ret = mc_deserialize_uint32_t(buffer, &output->size);
     if(output->size > TRANSPORT_LOCATOR_SEQUENCE_MAX)
@@ -280,13 +280,13 @@ bool mc_deserialize_TransportLocatorSeq(mcMicroBuffer* buffer, TransportLocatorS
     {
         for(uint32_t i = 0; i < output->size && ret; i++)
         {
-            ret = mc_deserialize_TransportLocator(buffer, &output->data[i]);
+            ret = deserialize_TransportLocator(buffer, &output->data[i]);
         }
     }
     return ret;
 }
 
-bool mc_serialize_Property(mcMicroBuffer* buffer, const Property* input)
+bool serialize_Property(mcMicroBuffer* buffer, const Property* input)
 {
     bool ret = true;
     ret &= mc_serialize_string(buffer, input->name);
@@ -294,7 +294,7 @@ bool mc_serialize_Property(mcMicroBuffer* buffer, const Property* input)
     return ret;
 }
 
-bool mc_deserialize_Property(mcMicroBuffer* buffer, Property* output)
+bool deserialize_Property(mcMicroBuffer* buffer, Property* output)
 {
     bool ret = true;
     ret &= mc_deserialize_string(buffer, output->name, STRING_SIZE_MAX);
@@ -302,17 +302,17 @@ bool mc_deserialize_Property(mcMicroBuffer* buffer, Property* output)
     return ret;
 }
 
-bool mc_serialize_PropertySeq(mcMicroBuffer* buffer, const PropertySeq* input)
+bool serialize_PropertySeq(mcMicroBuffer* buffer, const PropertySeq* input)
 {
     bool ret = mc_serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = mc_serialize_Property(buffer, input->data + i);
+        ret = serialize_Property(buffer, input->data + i);
     }
     return ret;
 }
 
-bool mc_deserialize_PropertySeq(mcMicroBuffer* buffer, PropertySeq* output)
+bool deserialize_PropertySeq(mcMicroBuffer* buffer, PropertySeq* output)
 {
     bool ret = mc_deserialize_uint32_t(buffer, &output->size);
 
@@ -325,82 +325,82 @@ bool mc_deserialize_PropertySeq(mcMicroBuffer* buffer, PropertySeq* output)
     {
         for(uint32_t i = 0; i < output->size && ret; i++)
         {
-            ret = mc_deserialize_Property(buffer, &output->data[i]);
+            ret = deserialize_Property(buffer, &output->data[i]);
         }
     }
     return ret;
 }
 
-bool mc_serialize_CLIENT_Representation(mcMicroBuffer* buffer, const CLIENT_Representation* input)
+bool serialize_CLIENT_Representation(mcMicroBuffer* buffer, const CLIENT_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_XrceCookie(buffer, &input->xrce_cookie);
-    ret &= mc_serialize_XrceVersion(buffer, &input->xrce_version);
-    ret &= mc_serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
-    ret &= mc_serialize_Time_t(buffer, &input->client_timestamp);
-    ret &= mc_serialize_ClientKey(buffer, &input->client_key);
+    ret &= serialize_XrceCookie(buffer, &input->xrce_cookie);
+    ret &= serialize_XrceVersion(buffer, &input->xrce_version);
+    ret &= serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
+    ret &= serialize_Time_t(buffer, &input->client_timestamp);
+    ret &= serialize_ClientKey(buffer, &input->client_key);
     ret &= mc_serialize_uint8_t(buffer, input->session_id);
     ret &= mc_serialize_bool(buffer, input->optional_properties);
     if(input->optional_properties == true)
     {
-        ret &= mc_serialize_PropertySeq(buffer, &input->properties);
+        ret &= serialize_PropertySeq(buffer, &input->properties);
     }
 
     return ret;
 }
 
-bool mc_deserialize_CLIENT_Representation(mcMicroBuffer* buffer, CLIENT_Representation* output)
+bool deserialize_CLIENT_Representation(mcMicroBuffer* buffer, CLIENT_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_XrceCookie(buffer, &output->xrce_cookie);
-    ret &= mc_deserialize_XrceVersion(buffer, &output->xrce_version);
-    ret &= mc_deserialize_XrceVendorId(buffer, &output->xrce_vendor_id);
-    ret &= mc_deserialize_Time_t(buffer, &output->client_timestamp);
-    ret &= mc_deserialize_ClientKey(buffer, &output->client_key);
+    ret &= deserialize_XrceCookie(buffer, &output->xrce_cookie);
+    ret &= deserialize_XrceVersion(buffer, &output->xrce_version);
+    ret &= deserialize_XrceVendorId(buffer, &output->xrce_vendor_id);
+    ret &= deserialize_Time_t(buffer, &output->client_timestamp);
+    ret &= deserialize_ClientKey(buffer, &output->client_key);
     ret &= mc_deserialize_uint8_t(buffer, &output->session_id);
     ret &= mc_deserialize_bool(buffer, &output->optional_properties);
     if(output->optional_properties == true)
     {
-            ret &= mc_deserialize_PropertySeq(buffer, &output->properties);
+            ret &= deserialize_PropertySeq(buffer, &output->properties);
     }
 
     return ret;
 }
 
-bool mc_serialize_AGENT_Representation(mcMicroBuffer* buffer, const AGENT_Representation* input)
+bool serialize_AGENT_Representation(mcMicroBuffer* buffer, const AGENT_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_XrceCookie(buffer, &input->xrce_cookie);
-    ret &= mc_serialize_XrceVersion(buffer, &input->xrce_version);
-    ret &= mc_serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
-    ret &= mc_serialize_Time_t(buffer, &input->agent_timestamp);
+    ret &= serialize_XrceCookie(buffer, &input->xrce_cookie);
+    ret &= serialize_XrceVersion(buffer, &input->xrce_version);
+    ret &= serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
+    ret &= serialize_Time_t(buffer, &input->agent_timestamp);
     ret &= mc_serialize_bool(buffer, input->optional_properties);
     if(input->optional_properties == true)
     {
-        ret &= mc_serialize_PropertySeq(buffer, &input->properties);
+        ret &= serialize_PropertySeq(buffer, &input->properties);
     }
 
     return ret;
 }
 
-bool mc_deserialize_AGENT_Representation(mcMicroBuffer* buffer, AGENT_Representation* output)
+bool deserialize_AGENT_Representation(mcMicroBuffer* buffer, AGENT_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_XrceCookie(buffer, &output->xrce_cookie);
-    ret &= mc_deserialize_XrceVersion(buffer, &output->xrce_version);
-    ret &= mc_deserialize_XrceVendorId(buffer, &output->xrce_vendor_id);
-    ret &= mc_deserialize_Time_t(buffer, &output->agent_timestamp);
+    ret &= deserialize_XrceCookie(buffer, &output->xrce_cookie);
+    ret &= deserialize_XrceVersion(buffer, &output->xrce_version);
+    ret &= deserialize_XrceVendorId(buffer, &output->xrce_vendor_id);
+    ret &= deserialize_Time_t(buffer, &output->agent_timestamp);
     ret &= mc_deserialize_bool(buffer, &output->optional_properties);
     // TODO (julian): modified with the new Micro ROS API.
 //    if(output->optional_properties == true)
 //    {
-//            ret &= mc_deserialize_PropertySeq(buffer, &output->properties);
+//            ret &= deserialize_PropertySeq(buffer, &output->properties);
 //    }
 
     return ret;
 }
 
-bool mc_serialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, const OBJK_Representation3Formats* input)
+bool serialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, const OBJK_Representation3Formats* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->format);
@@ -415,7 +415,7 @@ bool mc_serialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, const OBJK_
                 ret &= mc_serialize_string(buffer, input->_.xml_string_represenatation);
                 break;
             case REPRESENTATION_IN_BINARY:
-                ret &= mc_serialize_BinarySequence_t(buffer, &input->_.binary_representation);
+                ret &= serialize_BinarySequence_t(buffer, &input->_.binary_representation);
                 break;
             default:
                 break;
@@ -424,7 +424,7 @@ bool mc_serialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, const OBJK_
     return ret;
 }
 
-bool mc_deserialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, OBJK_Representation3Formats* output)
+bool deserialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, OBJK_Representation3Formats* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->format);
@@ -439,7 +439,7 @@ bool mc_deserialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, OBJK_Repr
                 ret &= mc_deserialize_string(buffer, output->_.xml_string_represenatation, STRING_SIZE_MAX);
                 break;
             case REPRESENTATION_IN_BINARY:
-                ret &= mc_deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
+                ret &= deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
                 break;
             default:
                 break;
@@ -448,7 +448,7 @@ bool mc_deserialize_OBJK_Representation3Formats(mcMicroBuffer* buffer, OBJK_Repr
     return ret;
 }
 
-bool mc_serialize_OBJK_RepresentationRefAndXMLFormats(mcMicroBuffer* buffer, const OBJK_RepresentationRefAndXMLFormats* input)
+bool serialize_OBJK_RepresentationRefAndXMLFormats(mcMicroBuffer* buffer, const OBJK_RepresentationRefAndXMLFormats* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->format);
@@ -469,7 +469,7 @@ bool mc_serialize_OBJK_RepresentationRefAndXMLFormats(mcMicroBuffer* buffer, con
     return ret;
 }
 
-bool mc_deserialize_OBJK_RepresentationRefAndXMLFormats(mcMicroBuffer* buffer, OBJK_RepresentationRefAndXMLFormats* output)
+bool deserialize_OBJK_RepresentationRefAndXMLFormats(mcMicroBuffer* buffer, OBJK_RepresentationRefAndXMLFormats* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->format);
@@ -490,7 +490,7 @@ bool mc_deserialize_OBJK_RepresentationRefAndXMLFormats(mcMicroBuffer* buffer, O
     return ret;
 }
 
-bool mc_serialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, const OBJK_RepresentationBinAndXMLFormats* input)
+bool serialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, const OBJK_RepresentationBinAndXMLFormats* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->format);
@@ -499,7 +499,7 @@ bool mc_serialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, con
         switch(input->format)
         {
             case REPRESENTATION_IN_BINARY:
-                ret &= mc_serialize_BinarySequence_t(buffer, &input->_.binary_representation);
+                ret &= serialize_BinarySequence_t(buffer, &input->_.binary_representation);
                 break;
             case REPRESENTATION_AS_XML_STRING:
                 ret &= mc_serialize_string(buffer, input->_.string_represenatation);
@@ -511,7 +511,7 @@ bool mc_serialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, con
     return ret;
 }
 
-bool mc_deserialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, OBJK_RepresentationBinAndXMLFormats* output)
+bool deserialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, OBJK_RepresentationBinAndXMLFormats* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->format);
@@ -520,7 +520,7 @@ bool mc_deserialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, O
         switch(output->format)
         {
             case REPRESENTATION_IN_BINARY:
-                ret &= mc_deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
+                ret &= deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
                 break;
             case REPRESENTATION_AS_XML_STRING:
                 ret &= mc_deserialize_string(buffer, output->_.string_represenatation, STRING_SIZE_MAX);
@@ -532,201 +532,201 @@ bool mc_deserialize_OBJK_RepresentationBinAndXMLFormats(mcMicroBuffer* buffer, O
     return ret;
 }
 
-bool mc_serialize_OBJK_RepresentationRefAndXML_Base(mcMicroBuffer* buffer, const OBJK_RepresentationRefAndXML_Base* input)
+bool serialize_OBJK_RepresentationRefAndXML_Base(mcMicroBuffer* buffer, const OBJK_RepresentationRefAndXML_Base* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationRefAndXMLFormats(buffer, &input->representation);
+    ret &= serialize_OBJK_RepresentationRefAndXMLFormats(buffer, &input->representation);
     return ret;
 }
 
-bool mc_deserialize_OBJK_RepresentationRefAndXML_Base(mcMicroBuffer* buffer, OBJK_RepresentationRefAndXML_Base* output)
+bool deserialize_OBJK_RepresentationRefAndXML_Base(mcMicroBuffer* buffer, OBJK_RepresentationRefAndXML_Base* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationRefAndXMLFormats(buffer, &output->representation);
+    ret &= deserialize_OBJK_RepresentationRefAndXMLFormats(buffer, &output->representation);
     return ret;
 }
 
-bool mc_serialize_OBJK_RepresentationBinAndXML_Base(mcMicroBuffer* buffer, const OBJK_RepresentationBinAndXML_Base* input)
+bool serialize_OBJK_RepresentationBinAndXML_Base(mcMicroBuffer* buffer, const OBJK_RepresentationBinAndXML_Base* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationBinAndXMLFormats(buffer, &input->representation);
+    ret &= serialize_OBJK_RepresentationBinAndXMLFormats(buffer, &input->representation);
     return ret;
 }
 
-bool mc_deserialize_OBJK_RepresentationBinAndXML_Base(mcMicroBuffer* buffer, OBJK_RepresentationBinAndXML_Base* output)
+bool deserialize_OBJK_RepresentationBinAndXML_Base(mcMicroBuffer* buffer, OBJK_RepresentationBinAndXML_Base* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationBinAndXMLFormats(buffer, &output->representation);
+    ret &= deserialize_OBJK_RepresentationBinAndXMLFormats(buffer, &output->representation);
     return ret;
 }
 
-bool mc_serialize_OBJK_Representation3_Base(mcMicroBuffer* buffer, const OBJK_Representation3_Base* input)
+bool serialize_OBJK_Representation3_Base(mcMicroBuffer* buffer, const OBJK_Representation3_Base* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_Representation3Formats(buffer, &input->representation);
+    ret &= serialize_OBJK_Representation3Formats(buffer, &input->representation);
     return ret;
 }
 
-bool mc_deserialize_OBJK_Representation3_Base(mcMicroBuffer* buffer, OBJK_Representation3_Base* output)
+bool deserialize_OBJK_Representation3_Base(mcMicroBuffer* buffer, OBJK_Representation3_Base* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_Representation3Formats(buffer, &output->representation);
+    ret &= deserialize_OBJK_Representation3Formats(buffer, &output->representation);
     return ret;
 }
 
-bool mc_serialize_OBJK_QOSPROFILE_Representation(mcMicroBuffer* buffer, const OBJK_QOSPROFILE_Representation* input)
+bool serialize_OBJK_QOSPROFILE_Representation(mcMicroBuffer* buffer, const OBJK_QOSPROFILE_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
+    ret &= serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool mc_deserialize_OBJK_QOSPROFILE_Representation(mcMicroBuffer* buffer, OBJK_QOSPROFILE_Representation* output)
+bool deserialize_OBJK_QOSPROFILE_Representation(mcMicroBuffer* buffer, OBJK_QOSPROFILE_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
+    ret &= deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool mc_serialize_OBJK_TYPE_Representation(mcMicroBuffer* buffer, const OBJK_TYPE_Representation* input)
+bool serialize_OBJK_TYPE_Representation(mcMicroBuffer* buffer, const OBJK_TYPE_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
+    ret &= serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool mc_deserialize_OBJK_TYPE_Representation(mcMicroBuffer* buffer, OBJK_TYPE_Representation* output)
+bool deserialize_OBJK_TYPE_Representation(mcMicroBuffer* buffer, OBJK_TYPE_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
+    ret &= deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool mc_serialize_OBJK_DOMAIN_Representation(mcMicroBuffer* buffer, const OBJK_DOMAIN_Representation* input)
+bool serialize_OBJK_DOMAIN_Representation(mcMicroBuffer* buffer, const OBJK_DOMAIN_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
+    ret &= serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool mc_deserialize_OBJK_DOMAIN_Representation(mcMicroBuffer* buffer, OBJK_DOMAIN_Representation* output)
+bool deserialize_OBJK_DOMAIN_Representation(mcMicroBuffer* buffer, OBJK_DOMAIN_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
+    ret &= deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool mc_serialize_OBJK_APPLICATION_Representation(mcMicroBuffer* buffer, const OBJK_APPLICATION_Representation* input)
+bool serialize_OBJK_APPLICATION_Representation(mcMicroBuffer* buffer, const OBJK_APPLICATION_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
+    ret &= serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool mc_deserialize_OBJK_APPLICATION_Representation(mcMicroBuffer* buffer, OBJK_APPLICATION_Representation* output)
+bool deserialize_OBJK_APPLICATION_Representation(mcMicroBuffer* buffer, OBJK_APPLICATION_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
+    ret &= deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool mc_serialize_OBJK_PUBLISHER_Representation(mcMicroBuffer* buffer, const OBJK_PUBLISHER_Representation* input)
+bool serialize_OBJK_PUBLISHER_Representation(mcMicroBuffer* buffer, const OBJK_PUBLISHER_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
-    ret &= mc_serialize_ObjectId(buffer, &input->participant_id);
+    ret &= serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
+    ret &= serialize_ObjectId(buffer, &input->participant_id);
     return ret;
 }
 
-bool mc_deserialize_OBJK_PUBLISHER_Representation(mcMicroBuffer* buffer, OBJK_PUBLISHER_Representation* output)
+bool deserialize_OBJK_PUBLISHER_Representation(mcMicroBuffer* buffer, OBJK_PUBLISHER_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
-    ret &= mc_deserialize_ObjectId(buffer, &output->participant_id);
+    ret &= deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
+    ret &= deserialize_ObjectId(buffer, &output->participant_id);
     return ret;
 }
 
-bool mc_serialize_OBJK_SUBSCRIBER_Representation(mcMicroBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input)
+bool serialize_OBJK_SUBSCRIBER_Representation(mcMicroBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
-    ret &= mc_serialize_ObjectId(buffer, &input->participant_id);
+    ret &= serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
+    ret &= serialize_ObjectId(buffer, &input->participant_id);
     return ret;
 }
 
-bool mc_deserialize_OBJK_SUBSCRIBER_Representation(mcMicroBuffer* buffer, OBJK_SUBSCRIBER_Representation* output)
+bool deserialize_OBJK_SUBSCRIBER_Representation(mcMicroBuffer* buffer, OBJK_SUBSCRIBER_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
-    ret &= mc_deserialize_ObjectId(buffer, &output->participant_id);
+    ret &= deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
+    ret &= deserialize_ObjectId(buffer, &output->participant_id);
     return ret;
 }
 
-bool mc_serialize_DATAWRITER_Representation(mcMicroBuffer* buffer, const DATAWRITER_Representation* input)
+bool serialize_DATAWRITER_Representation(mcMicroBuffer* buffer, const DATAWRITER_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_Representation3_Base(buffer, &input->base);
-    ret &= mc_serialize_ObjectId(buffer, &input->publisher_id);
+    ret &= serialize_OBJK_Representation3_Base(buffer, &input->base);
+    ret &= serialize_ObjectId(buffer, &input->publisher_id);
     return ret;
 }
 
-bool mc_deserialize_DATAWRITER_Representation(mcMicroBuffer* buffer, DATAWRITER_Representation* output)
+bool deserialize_DATAWRITER_Representation(mcMicroBuffer* buffer, DATAWRITER_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_Representation3_Base(buffer, &output->base);
-    ret &= mc_deserialize_ObjectId(buffer, &output->publisher_id);
+    ret &= deserialize_OBJK_Representation3_Base(buffer, &output->base);
+    ret &= deserialize_ObjectId(buffer, &output->publisher_id);
     return ret;
 }
 
-bool mc_serialize_DATAREADER_Representation(mcMicroBuffer* buffer, const DATAREADER_Representation* input)
+bool serialize_DATAREADER_Representation(mcMicroBuffer* buffer, const DATAREADER_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_Representation3_Base(buffer, &input->base);
-    ret &= mc_serialize_ObjectId(buffer, &input->subscriber_id);
+    ret &= serialize_OBJK_Representation3_Base(buffer, &input->base);
+    ret &= serialize_ObjectId(buffer, &input->subscriber_id);
     return ret;
 }
 
-bool mc_deserialize_DATAREADER_Representation(mcMicroBuffer* buffer, DATAREADER_Representation* output)
+bool deserialize_DATAREADER_Representation(mcMicroBuffer* buffer, DATAREADER_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_Representation3_Base(buffer, &output->base);
-    ret &= mc_deserialize_ObjectId(buffer, &output->subscriber_id);
+    ret &= deserialize_OBJK_Representation3_Base(buffer, &output->base);
+    ret &= deserialize_ObjectId(buffer, &output->subscriber_id);
     return ret;
 }
 
-bool mc_serialize_OBJK_PARTICIPANT_Representation(mcMicroBuffer* buffer, const OBJK_PARTICIPANT_Representation* input)
+bool serialize_OBJK_PARTICIPANT_Representation(mcMicroBuffer* buffer, const OBJK_PARTICIPANT_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_Representation3_Base(buffer, &input->base);
+    ret &= serialize_OBJK_Representation3_Base(buffer, &input->base);
     ret &= mc_serialize_int16_t(buffer, input->domain_id);
     return ret;
 }
 
-bool mc_deserialize_OBJK_PARTICIPANT_Representation(mcMicroBuffer* buffer, OBJK_PARTICIPANT_Representation* output)
+bool deserialize_OBJK_PARTICIPANT_Representation(mcMicroBuffer* buffer, OBJK_PARTICIPANT_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_Representation3_Base(buffer, &output->base);
+    ret &= deserialize_OBJK_Representation3_Base(buffer, &output->base);
     ret &= mc_deserialize_int16_t(buffer, &output->domain_id);
     return ret;
 }
 
-bool mc_serialize_OBJK_TOPIC_Representation(mcMicroBuffer* buffer, const OBJK_TOPIC_Representation* input)
+bool serialize_OBJK_TOPIC_Representation(mcMicroBuffer* buffer, const OBJK_TOPIC_Representation* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_Representation3_Base(buffer, &input->base);
-    ret &= mc_serialize_ObjectId(buffer, &input->participant_id);
+    ret &= serialize_OBJK_Representation3_Base(buffer, &input->base);
+    ret &= serialize_ObjectId(buffer, &input->participant_id);
     return ret;
 }
 
-bool mc_deserialize_OBJK_TOPIC_Representation(mcMicroBuffer* buffer, OBJK_TOPIC_Representation* output)
+bool deserialize_OBJK_TOPIC_Representation(mcMicroBuffer* buffer, OBJK_TOPIC_Representation* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_Representation3_Base(buffer, &output->base);
-    ret &= mc_deserialize_ObjectId(buffer, &output->participant_id);
+    ret &= deserialize_OBJK_Representation3_Base(buffer, &output->base);
+    ret &= deserialize_ObjectId(buffer, &output->participant_id);
     return ret;
 }
 
-bool mc_serialize_OBJK_DomainParticipant_Binary(mcMicroBuffer* buffer, const OBJK_DomainParticipant_Binary* input)
+bool serialize_OBJK_DomainParticipant_Binary(mcMicroBuffer* buffer, const OBJK_DomainParticipant_Binary* input)
 {
     bool ret = true;
     ret &= mc_serialize_bool(buffer, input->optional_domain_reference);
@@ -744,7 +744,7 @@ bool mc_serialize_OBJK_DomainParticipant_Binary(mcMicroBuffer* buffer, const OBJ
     return ret;
 }
 
-bool mc_deserialize_OBJK_DomainParticipant_Binary(mcMicroBuffer* buffer, OBJK_DomainParticipant_Binary* output)
+bool deserialize_OBJK_DomainParticipant_Binary(mcMicroBuffer* buffer, OBJK_DomainParticipant_Binary* output)
 {
     bool ret = true;
     ret &= mc_deserialize_bool(buffer, &output->optional_domain_reference);
@@ -762,7 +762,7 @@ bool mc_deserialize_OBJK_DomainParticipant_Binary(mcMicroBuffer* buffer, OBJK_Do
     return ret;
 }
 
-bool mc_serialize_OBJK_Topic_Binary(mcMicroBuffer* buffer, const OBJK_Topic_Binary* input)
+bool serialize_OBJK_Topic_Binary(mcMicroBuffer* buffer, const OBJK_Topic_Binary* input)
 {
     bool ret = true;
     ret &= mc_serialize_string(buffer, input->topic_name);
@@ -781,7 +781,7 @@ bool mc_serialize_OBJK_Topic_Binary(mcMicroBuffer* buffer, const OBJK_Topic_Bina
     return ret;
 }
 
-bool mc_deserialize_OBJK_Topic_Binary(mcMicroBuffer* buffer, OBJK_Topic_Binary* output)
+bool deserialize_OBJK_Topic_Binary(mcMicroBuffer* buffer, OBJK_Topic_Binary* output)
 {
     bool ret = true;
     ret &= mc_deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
@@ -800,43 +800,43 @@ bool mc_deserialize_OBJK_Topic_Binary(mcMicroBuffer* buffer, OBJK_Topic_Binary* 
     return ret;
 }
 
-bool mc_serialize_OBJK_Publisher_Binary_Qos(mcMicroBuffer* buffer, const OBJK_Publisher_Binary_Qos* input)
+bool serialize_OBJK_Publisher_Binary_Qos(mcMicroBuffer* buffer, const OBJK_Publisher_Binary_Qos* input)
 {
     bool ret = true;
     ret &= mc_serialize_bool(buffer, input->optional_partitions);
     if(input->optional_partitions == true)
     {
-        ret &= mc_serialize_StringSequence_t(buffer, &input->partitions);
+        ret &= serialize_StringSequence_t(buffer, &input->partitions);
     }
 
     ret &= mc_serialize_bool(buffer, input->optional_group_data);
     if(input->optional_group_data == true)
     {
-        ret &= mc_serialize_BinarySequence_t(buffer, &input->group_data);
+        ret &= serialize_BinarySequence_t(buffer, &input->group_data);
     }
 
     return ret;
 }
 
-bool mc_deserialize_OBJK_Publisher_Binary_Qos(mcMicroBuffer* buffer, OBJK_Publisher_Binary_Qos* output)
+bool deserialize_OBJK_Publisher_Binary_Qos(mcMicroBuffer* buffer, OBJK_Publisher_Binary_Qos* output)
 {
     bool ret = true;
     ret &= mc_deserialize_bool(buffer, &output->optional_partitions);
     if(output->optional_partitions == true)
     {
-            ret &= mc_deserialize_StringSequence_t(buffer, &output->partitions);
+            ret &= deserialize_StringSequence_t(buffer, &output->partitions);
     }
 
     ret &= mc_deserialize_bool(buffer, &output->optional_group_data);
     if(output->optional_group_data == true)
     {
-            ret &= mc_deserialize_BinarySequence_t(buffer, &output->group_data);
+            ret &= deserialize_BinarySequence_t(buffer, &output->group_data);
     }
 
     return ret;
 }
 
-bool mc_serialize_OBJK_Publisher_Binary(mcMicroBuffer* buffer, const OBJK_Publisher_Binary* input)
+bool serialize_OBJK_Publisher_Binary(mcMicroBuffer* buffer, const OBJK_Publisher_Binary* input)
 {
     bool ret = true;
     ret &= mc_serialize_bool(buffer, input->optional_publisher_name);
@@ -848,13 +848,13 @@ bool mc_serialize_OBJK_Publisher_Binary(mcMicroBuffer* buffer, const OBJK_Publis
     ret &= mc_serialize_bool(buffer, input->optional_qos);
     if(input->optional_qos == true)
     {
-        ret &= mc_serialize_OBJK_Publisher_Binary_Qos(buffer, &input->qos);
+        ret &= serialize_OBJK_Publisher_Binary_Qos(buffer, &input->qos);
     }
 
     return ret;
 }
 
-bool mc_deserialize_OBJK_Publisher_Binary(mcMicroBuffer* buffer, OBJK_Publisher_Binary* output)
+bool deserialize_OBJK_Publisher_Binary(mcMicroBuffer* buffer, OBJK_Publisher_Binary* output)
 {
     bool ret = true;
     ret &= mc_deserialize_bool(buffer, &output->optional_publisher_name);
@@ -866,49 +866,49 @@ bool mc_deserialize_OBJK_Publisher_Binary(mcMicroBuffer* buffer, OBJK_Publisher_
     ret &= mc_deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
-            ret &= mc_deserialize_OBJK_Publisher_Binary_Qos(buffer, &output->qos);
+            ret &= deserialize_OBJK_Publisher_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool mc_serialize_OBJK_Subscriber_Binary_Qos(mcMicroBuffer* buffer, const OBJK_Subscriber_Binary_Qos* input)
+bool serialize_OBJK_Subscriber_Binary_Qos(mcMicroBuffer* buffer, const OBJK_Subscriber_Binary_Qos* input)
 {
     bool ret = true;
     ret &= mc_serialize_bool(buffer, input->optional_partitions);
     if(input->optional_partitions == true)
     {
-        ret &= mc_serialize_StringSequence_t(buffer, &input->partitions);
+        ret &= serialize_StringSequence_t(buffer, &input->partitions);
     }
 
     ret &= mc_serialize_bool(buffer, input->optional_group_data);
     if(input->optional_group_data == true)
     {
-        ret &= mc_serialize_BinarySequence_t(buffer, &input->group_data);
+        ret &= serialize_BinarySequence_t(buffer, &input->group_data);
     }
 
     return ret;
 }
 
-bool mc_deserialize_OBJK_Subscriber_Binary_Qos(mcMicroBuffer* buffer, OBJK_Subscriber_Binary_Qos* output)
+bool deserialize_OBJK_Subscriber_Binary_Qos(mcMicroBuffer* buffer, OBJK_Subscriber_Binary_Qos* output)
 {
     bool ret = true;
     ret &= mc_deserialize_bool(buffer, &output->optional_partitions);
     if(output->optional_partitions == true)
     {
-            ret &= mc_deserialize_StringSequence_t(buffer, &output->partitions);
+            ret &= deserialize_StringSequence_t(buffer, &output->partitions);
     }
 
     ret &= mc_deserialize_bool(buffer, &output->optional_group_data);
     if(output->optional_group_data == true)
     {
-            ret &= mc_deserialize_BinarySequence_t(buffer, &output->group_data);
+            ret &= deserialize_BinarySequence_t(buffer, &output->group_data);
     }
 
     return ret;
 }
 
-bool mc_serialize_OBJK_Subscriber_Binary(mcMicroBuffer* buffer, const OBJK_Subscriber_Binary* input)
+bool serialize_OBJK_Subscriber_Binary(mcMicroBuffer* buffer, const OBJK_Subscriber_Binary* input)
 {
     bool ret = true;
     ret &= mc_serialize_bool(buffer, input->optional_subscriber_name);
@@ -920,13 +920,13 @@ bool mc_serialize_OBJK_Subscriber_Binary(mcMicroBuffer* buffer, const OBJK_Subsc
     ret &= mc_serialize_bool(buffer, input->optional_qos);
     if(input->optional_qos == true)
     {
-        ret &= mc_serialize_OBJK_Subscriber_Binary_Qos(buffer, &input->qos);
+        ret &= serialize_OBJK_Subscriber_Binary_Qos(buffer, &input->qos);
     }
 
     return ret;
 }
 
-bool mc_deserialize_OBJK_Subscriber_Binary(mcMicroBuffer* buffer, OBJK_Subscriber_Binary* output)
+bool deserialize_OBJK_Subscriber_Binary(mcMicroBuffer* buffer, OBJK_Subscriber_Binary* output)
 {
     bool ret = true;
     ret &= mc_deserialize_bool(buffer, &output->optional_subscriber_name);
@@ -938,13 +938,13 @@ bool mc_deserialize_OBJK_Subscriber_Binary(mcMicroBuffer* buffer, OBJK_Subscribe
     ret &= mc_deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
-            ret &= mc_deserialize_OBJK_Subscriber_Binary_Qos(buffer, &output->qos);
+            ret &= deserialize_OBJK_Subscriber_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool mc_serialize_OBJK_Endpoint_QosBinary(mcMicroBuffer* buffer, const OBJK_Endpoint_QosBinary* input)
+bool serialize_OBJK_Endpoint_QosBinary(mcMicroBuffer* buffer, const OBJK_Endpoint_QosBinary* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint16_t(buffer, input->qos_flags);
@@ -969,13 +969,13 @@ bool mc_serialize_OBJK_Endpoint_QosBinary(mcMicroBuffer* buffer, const OBJK_Endp
     ret &= mc_serialize_bool(buffer, input->optional_user_data);
     if(input->optional_user_data == true)
     {
-        ret &= mc_serialize_BinarySequence_t(buffer, &input->user_data);
+        ret &= serialize_BinarySequence_t(buffer, &input->user_data);
     }
 
     return ret;
 }
 
-bool mc_deserialize_OBJK_Endpoint_QosBinary(mcMicroBuffer* buffer, OBJK_Endpoint_QosBinary* output)
+bool deserialize_OBJK_Endpoint_QosBinary(mcMicroBuffer* buffer, OBJK_Endpoint_QosBinary* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint16_t(buffer, &output->qos_flags);
@@ -1000,16 +1000,16 @@ bool mc_deserialize_OBJK_Endpoint_QosBinary(mcMicroBuffer* buffer, OBJK_Endpoint
     ret &= mc_deserialize_bool(buffer, &output->optional_user_data);
     if(output->optional_user_data == true)
     {
-            ret &= mc_deserialize_BinarySequence_t(buffer, &output->user_data);
+            ret &= deserialize_BinarySequence_t(buffer, &output->user_data);
     }
 
     return ret;
 }
 
-bool mc_serialize_OBJK_DataWriter_Binary_Qos(mcMicroBuffer* buffer, const OBJK_DataWriter_Binary_Qos* input)
+bool serialize_OBJK_DataWriter_Binary_Qos(mcMicroBuffer* buffer, const OBJK_DataWriter_Binary_Qos* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
+    ret &= serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
     ret &= mc_serialize_bool(buffer, input->optional_ownership_strength);
     if(input->optional_ownership_strength == true)
     {
@@ -1019,10 +1019,10 @@ bool mc_serialize_OBJK_DataWriter_Binary_Qos(mcMicroBuffer* buffer, const OBJK_D
     return ret;
 }
 
-bool mc_deserialize_OBJK_DataWriter_Binary_Qos(mcMicroBuffer* buffer, OBJK_DataWriter_Binary_Qos* output)
+bool deserialize_OBJK_DataWriter_Binary_Qos(mcMicroBuffer* buffer, OBJK_DataWriter_Binary_Qos* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
+    ret &= deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
     ret &= mc_deserialize_bool(buffer, &output->optional_ownership_strength);
     if(output->optional_ownership_strength == true)
     {
@@ -1032,10 +1032,10 @@ bool mc_deserialize_OBJK_DataWriter_Binary_Qos(mcMicroBuffer* buffer, OBJK_DataW
     return ret;
 }
 
-bool mc_serialize_OBJK_DataReader_Binary_Qos(mcMicroBuffer* buffer, const OBJK_DataReader_Binary_Qos* input)
+bool serialize_OBJK_DataReader_Binary_Qos(mcMicroBuffer* buffer, const OBJK_DataReader_Binary_Qos* input)
 {
     bool ret = true;
-    ret &= mc_serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
+    ret &= serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
     ret &= mc_serialize_bool(buffer, input->optional_timebasedfilter_msec);
     if(input->optional_timebasedfilter_msec == true)
     {
@@ -1051,10 +1051,10 @@ bool mc_serialize_OBJK_DataReader_Binary_Qos(mcMicroBuffer* buffer, const OBJK_D
     return ret;
 }
 
-bool mc_deserialize_OBJK_DataReader_Binary_Qos(mcMicroBuffer* buffer, OBJK_DataReader_Binary_Qos* output)
+bool deserialize_OBJK_DataReader_Binary_Qos(mcMicroBuffer* buffer, OBJK_DataReader_Binary_Qos* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
+    ret &= deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
     ret &= mc_deserialize_bool(buffer, &output->optional_timebasedfilter_msec);
     if(output->optional_timebasedfilter_msec == true)
     {
@@ -1070,59 +1070,59 @@ bool mc_deserialize_OBJK_DataReader_Binary_Qos(mcMicroBuffer* buffer, OBJK_DataR
     return ret;
 }
 
-bool mc_serialize_OBJK_DataReader_Binary(mcMicroBuffer* buffer, const OBJK_DataReader_Binary* input)
+bool serialize_OBJK_DataReader_Binary(mcMicroBuffer* buffer, const OBJK_DataReader_Binary* input)
 {
     bool ret = true;
     ret &= mc_serialize_string(buffer, input->topic_name);
     ret &= mc_serialize_bool(buffer, input->optional_qos);
     if(input->optional_qos == true)
     {
-        ret &= mc_serialize_OBJK_DataReader_Binary_Qos(buffer, &input->qos);
+        ret &= serialize_OBJK_DataReader_Binary_Qos(buffer, &input->qos);
     }
 
     return ret;
 }
 
-bool mc_deserialize_OBJK_DataReader_Binary(mcMicroBuffer* buffer, OBJK_DataReader_Binary* output)
+bool deserialize_OBJK_DataReader_Binary(mcMicroBuffer* buffer, OBJK_DataReader_Binary* output)
 {
     bool ret = true;
     ret &= mc_deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
     ret &= mc_deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
-            ret &= mc_deserialize_OBJK_DataReader_Binary_Qos(buffer, &output->qos);
+            ret &= deserialize_OBJK_DataReader_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool mc_serialize_OBJK_DataWriter_Binary(mcMicroBuffer* buffer, const OBJK_DataWriter_Binary* input)
+bool serialize_OBJK_DataWriter_Binary(mcMicroBuffer* buffer, const OBJK_DataWriter_Binary* input)
 {
     bool ret = true;
     ret &= mc_serialize_string(buffer, input->topic_name);
     ret &= mc_serialize_bool(buffer, input->optional_qos);
     if(input->optional_qos == true)
     {
-        ret &= mc_serialize_OBJK_DataWriter_Binary_Qos(buffer, &input->qos);
+        ret &= serialize_OBJK_DataWriter_Binary_Qos(buffer, &input->qos);
     }
 
     return ret;
 }
 
-bool mc_deserialize_OBJK_DataWriter_Binary(mcMicroBuffer* buffer, OBJK_DataWriter_Binary* output)
+bool deserialize_OBJK_DataWriter_Binary(mcMicroBuffer* buffer, OBJK_DataWriter_Binary* output)
 {
     bool ret = true;
     ret &= mc_deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
     ret &= mc_deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
-            ret &= mc_deserialize_OBJK_DataWriter_Binary_Qos(buffer, &output->qos);
+            ret &= deserialize_OBJK_DataWriter_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool mc_serialize_ObjectVariant(mcMicroBuffer* buffer, const ObjectVariant* input)
+bool serialize_ObjectVariant(mcMicroBuffer* buffer, const ObjectVariant* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->kind);
@@ -1131,37 +1131,37 @@ bool mc_serialize_ObjectVariant(mcMicroBuffer* buffer, const ObjectVariant* inpu
         switch(input->kind)
         {
             case OBJK_AGENT:
-                ret &= mc_serialize_AGENT_Representation(buffer, &input->_.agent);
+                ret &= serialize_AGENT_Representation(buffer, &input->_.agent);
                 break;
             case OBJK_CLIENT:
-                ret &= mc_serialize_CLIENT_Representation(buffer, &input->_.client);
+                ret &= serialize_CLIENT_Representation(buffer, &input->_.client);
                 break;
             case OBJK_APPLICATION:
-                ret &= mc_serialize_OBJK_APPLICATION_Representation(buffer, &input->_.application);
+                ret &= serialize_OBJK_APPLICATION_Representation(buffer, &input->_.application);
                 break;
             case OBJK_PARTICIPANT:
-                ret &= mc_serialize_OBJK_PARTICIPANT_Representation(buffer, &input->_.participant);
+                ret &= serialize_OBJK_PARTICIPANT_Representation(buffer, &input->_.participant);
                 break;
             case OBJK_QOSPROFILE:
-                ret &= mc_serialize_OBJK_QOSPROFILE_Representation(buffer, &input->_.qos_profile);
+                ret &= serialize_OBJK_QOSPROFILE_Representation(buffer, &input->_.qos_profile);
                 break;
             case OBJK_TYPE:
-                ret &= mc_serialize_OBJK_TYPE_Representation(buffer, &input->_.type);
+                ret &= serialize_OBJK_TYPE_Representation(buffer, &input->_.type);
                 break;
             case OBJK_TOPIC:
-                ret &= mc_serialize_OBJK_TOPIC_Representation(buffer, &input->_.topic);
+                ret &= serialize_OBJK_TOPIC_Representation(buffer, &input->_.topic);
                 break;
             case OBJK_PUBLISHER:
-                ret &= mc_serialize_OBJK_PUBLISHER_Representation(buffer, &input->_.publisher);
+                ret &= serialize_OBJK_PUBLISHER_Representation(buffer, &input->_.publisher);
                 break;
             case OBJK_SUBSCRIBER:
-                ret &= mc_serialize_OBJK_SUBSCRIBER_Representation(buffer, &input->_.subscriber);
+                ret &= serialize_OBJK_SUBSCRIBER_Representation(buffer, &input->_.subscriber);
                 break;
             case OBJK_DATAWRITER:
-                ret &= mc_serialize_DATAWRITER_Representation(buffer, &input->_.data_writer);
+                ret &= serialize_DATAWRITER_Representation(buffer, &input->_.data_writer);
                 break;
             case OBJK_DATAREADER:
-                ret &= mc_serialize_DATAREADER_Representation(buffer, &input->_.data_reader);
+                ret &= serialize_DATAREADER_Representation(buffer, &input->_.data_reader);
                 break;
             default:
                 break;
@@ -1170,7 +1170,7 @@ bool mc_serialize_ObjectVariant(mcMicroBuffer* buffer, const ObjectVariant* inpu
     return ret;
 }
 
-bool mc_deserialize_ObjectVariant(mcMicroBuffer* buffer, ObjectVariant* output)
+bool deserialize_ObjectVariant(mcMicroBuffer* buffer, ObjectVariant* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->kind);
@@ -1179,37 +1179,37 @@ bool mc_deserialize_ObjectVariant(mcMicroBuffer* buffer, ObjectVariant* output)
         switch(output->kind)
         {
             case OBJK_AGENT:
-                ret &= mc_deserialize_AGENT_Representation(buffer, &output->_.agent);
+                ret &= deserialize_AGENT_Representation(buffer, &output->_.agent);
                 break;
             case OBJK_CLIENT:
-                ret &= mc_deserialize_CLIENT_Representation(buffer, &output->_.client);
+                ret &= deserialize_CLIENT_Representation(buffer, &output->_.client);
                 break;
             case OBJK_APPLICATION:
-                ret &= mc_deserialize_OBJK_APPLICATION_Representation(buffer, &output->_.application);
+                ret &= deserialize_OBJK_APPLICATION_Representation(buffer, &output->_.application);
                 break;
             case OBJK_PARTICIPANT:
-                ret &= mc_deserialize_OBJK_PARTICIPANT_Representation(buffer, &output->_.participant);
+                ret &= deserialize_OBJK_PARTICIPANT_Representation(buffer, &output->_.participant);
                 break;
             case OBJK_QOSPROFILE:
-                ret &= mc_deserialize_OBJK_QOSPROFILE_Representation(buffer, &output->_.qos_profile);
+                ret &= deserialize_OBJK_QOSPROFILE_Representation(buffer, &output->_.qos_profile);
                 break;
             case OBJK_TYPE:
-                ret &= mc_deserialize_OBJK_TYPE_Representation(buffer, &output->_.type);
+                ret &= deserialize_OBJK_TYPE_Representation(buffer, &output->_.type);
                 break;
             case OBJK_TOPIC:
-                ret &= mc_deserialize_OBJK_TOPIC_Representation(buffer, &output->_.topic);
+                ret &= deserialize_OBJK_TOPIC_Representation(buffer, &output->_.topic);
                 break;
             case OBJK_PUBLISHER:
-                ret &= mc_deserialize_OBJK_PUBLISHER_Representation(buffer, &output->_.publisher);
+                ret &= deserialize_OBJK_PUBLISHER_Representation(buffer, &output->_.publisher);
                 break;
             case OBJK_SUBSCRIBER:
-                ret &= mc_deserialize_OBJK_SUBSCRIBER_Representation(buffer, &output->_.subscriber);
+                ret &= deserialize_OBJK_SUBSCRIBER_Representation(buffer, &output->_.subscriber);
                 break;
             case OBJK_DATAWRITER:
-                ret &= mc_deserialize_DATAWRITER_Representation(buffer, &output->_.data_writer);
+                ret &= deserialize_DATAWRITER_Representation(buffer, &output->_.data_writer);
                 break;
             case OBJK_DATAREADER:
-                ret &= mc_deserialize_DATAREADER_Representation(buffer, &output->_.data_reader);
+                ret &= deserialize_DATAREADER_Representation(buffer, &output->_.data_reader);
                 break;
             default:
                 break;
@@ -1218,7 +1218,7 @@ bool mc_deserialize_ObjectVariant(mcMicroBuffer* buffer, ObjectVariant* output)
     return ret;
 }
 
-bool mc_serialize_CreationMode(mcMicroBuffer* buffer, const CreationMode* input)
+bool serialize_CreationMode(mcMicroBuffer* buffer, const CreationMode* input)
 {
     bool ret = true;
     ret &= mc_serialize_bool(buffer, input->reuse);
@@ -1226,7 +1226,7 @@ bool mc_serialize_CreationMode(mcMicroBuffer* buffer, const CreationMode* input)
     return ret;
 }
 
-bool mc_deserialize_CreationMode(mcMicroBuffer* buffer, CreationMode* output)
+bool deserialize_CreationMode(mcMicroBuffer* buffer, CreationMode* output)
 {
     bool ret = true;
     ret &= mc_deserialize_bool(buffer, &output->reuse);
@@ -1234,21 +1234,21 @@ bool mc_deserialize_CreationMode(mcMicroBuffer* buffer, CreationMode* output)
     return ret;
 }
 
-bool mc_serialize_RequestId(mcMicroBuffer* buffer, const RequestId* input)
+bool serialize_RequestId(mcMicroBuffer* buffer, const RequestId* input)
 {
     bool ret = true;
     ret &= mc_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool mc_deserialize_RequestId(mcMicroBuffer* buffer, RequestId* output)
+bool deserialize_RequestId(mcMicroBuffer* buffer, RequestId* output)
 {
     bool ret = true;
     ret &= mc_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool mc_serialize_ResultStatus(mcMicroBuffer* buffer, const ResultStatus* input)
+bool serialize_ResultStatus(mcMicroBuffer* buffer, const ResultStatus* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->status);
@@ -1256,7 +1256,7 @@ bool mc_serialize_ResultStatus(mcMicroBuffer* buffer, const ResultStatus* input)
     return ret;
 }
 
-bool mc_deserialize_ResultStatus(mcMicroBuffer* buffer, ResultStatus* output)
+bool deserialize_ResultStatus(mcMicroBuffer* buffer, ResultStatus* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->status);
@@ -1264,53 +1264,53 @@ bool mc_deserialize_ResultStatus(mcMicroBuffer* buffer, ResultStatus* output)
     return ret;
 }
 
-bool mc_serialize_BaseObjectRequest(mcMicroBuffer* buffer, const BaseObjectRequest* input)
+bool serialize_BaseObjectRequest(mcMicroBuffer* buffer, const BaseObjectRequest* input)
 {
     bool ret = true;
-    ret &= mc_serialize_RequestId(buffer, &input->request_id);
-    ret &= mc_serialize_ObjectId(buffer, &input->object_id);
+    ret &= serialize_RequestId(buffer, &input->request_id);
+    ret &= serialize_ObjectId(buffer, &input->object_id);
     return ret;
 }
 
-bool mc_deserialize_BaseObjectRequest(mcMicroBuffer* buffer, BaseObjectRequest* output)
+bool deserialize_BaseObjectRequest(mcMicroBuffer* buffer, BaseObjectRequest* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_RequestId(buffer, &output->request_id);
-    ret &= mc_deserialize_ObjectId(buffer, &output->object_id);
+    ret &= deserialize_RequestId(buffer, &output->request_id);
+    ret &= deserialize_ObjectId(buffer, &output->object_id);
     return ret;
 }
 
-bool mc_serialize_AGENT_ActivityInfo(mcMicroBuffer* buffer, const AGENT_ActivityInfo* input)
+bool serialize_AGENT_ActivityInfo(mcMicroBuffer* buffer, const AGENT_ActivityInfo* input)
 {
     bool ret = true;
     ret &= mc_serialize_int16_t(buffer, input->availibility);
-    ret &= mc_serialize_TransportLocatorSeq(buffer, &input->address_seq);
+    ret &= serialize_TransportLocatorSeq(buffer, &input->address_seq);
     return ret;
 }
 
-bool mc_deserialize_AGENT_ActivityInfo(mcMicroBuffer* buffer, AGENT_ActivityInfo* output)
+bool deserialize_AGENT_ActivityInfo(mcMicroBuffer* buffer, AGENT_ActivityInfo* output)
 {
     bool ret = true;
     ret &= mc_deserialize_int16_t(buffer, &output->availibility);
-    ret &= mc_deserialize_TransportLocatorSeq(buffer, &output->address_seq);
+    ret &= deserialize_TransportLocatorSeq(buffer, &output->address_seq);
     return ret;
 }
 
-bool mc_serialize_DATAREADER_ActivityInfo(mcMicroBuffer* buffer, const DATAREADER_ActivityInfo* input)
+bool serialize_DATAREADER_ActivityInfo(mcMicroBuffer* buffer, const DATAREADER_ActivityInfo* input)
 {
     bool ret = true;
     ret &= mc_serialize_int16_t(buffer, input->highest_acked_num);
     return ret;
 }
 
-bool mc_deserialize_DATAREADER_ActivityInfo(mcMicroBuffer* buffer, DATAREADER_ActivityInfo* output)
+bool deserialize_DATAREADER_ActivityInfo(mcMicroBuffer* buffer, DATAREADER_ActivityInfo* output)
 {
     bool ret = true;
     ret &= mc_deserialize_int16_t(buffer, &output->highest_acked_num);
     return ret;
 }
 
-bool mc_serialize_DATAWRITER_ActivityInfo(mcMicroBuffer* buffer, const DATAWRITER_ActivityInfo* input)
+bool serialize_DATAWRITER_ActivityInfo(mcMicroBuffer* buffer, const DATAWRITER_ActivityInfo* input)
 {
     bool ret = true;
     ret &= mc_serialize_int16_t(buffer, input->stream_seq_num);
@@ -1318,7 +1318,7 @@ bool mc_serialize_DATAWRITER_ActivityInfo(mcMicroBuffer* buffer, const DATAWRITE
     return ret;
 }
 
-bool mc_deserialize_DATAWRITER_ActivityInfo(mcMicroBuffer* buffer, DATAWRITER_ActivityInfo* output)
+bool deserialize_DATAWRITER_ActivityInfo(mcMicroBuffer* buffer, DATAWRITER_ActivityInfo* output)
 {
     bool ret = true;
     ret &= mc_deserialize_int16_t(buffer, &output->stream_seq_num);
@@ -1326,7 +1326,7 @@ bool mc_deserialize_DATAWRITER_ActivityInfo(mcMicroBuffer* buffer, DATAWRITER_Ac
     return ret;
 }
 
-bool mc_serialize_ActivityInfoVariant(mcMicroBuffer* buffer, const ActivityInfoVariant* input)
+bool serialize_ActivityInfoVariant(mcMicroBuffer* buffer, const ActivityInfoVariant* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->kind);
@@ -1335,13 +1335,13 @@ bool mc_serialize_ActivityInfoVariant(mcMicroBuffer* buffer, const ActivityInfoV
         switch(input->kind)
         {
             case OBJK_AGENT:
-                ret &= mc_serialize_AGENT_ActivityInfo(buffer, &input->_.agent);
+                ret &= serialize_AGENT_ActivityInfo(buffer, &input->_.agent);
                 break;
             case OBJK_DATAWRITER:
-                ret &= mc_serialize_DATAWRITER_ActivityInfo(buffer, &input->_.data_writer);
+                ret &= serialize_DATAWRITER_ActivityInfo(buffer, &input->_.data_writer);
                 break;
             case OBJK_DATAREADER:
-                ret &= mc_serialize_DATAREADER_ActivityInfo(buffer, &input->_.data_reader);
+                ret &= serialize_DATAREADER_ActivityInfo(buffer, &input->_.data_reader);
                 break;
             default:
                 break;
@@ -1350,7 +1350,7 @@ bool mc_serialize_ActivityInfoVariant(mcMicroBuffer* buffer, const ActivityInfoV
     return ret;
 }
 
-bool mc_deserialize_ActivityInfoVariant(mcMicroBuffer* buffer, ActivityInfoVariant* output)
+bool deserialize_ActivityInfoVariant(mcMicroBuffer* buffer, ActivityInfoVariant* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->kind);
@@ -1359,13 +1359,13 @@ bool mc_deserialize_ActivityInfoVariant(mcMicroBuffer* buffer, ActivityInfoVaria
         switch(output->kind)
         {
             case OBJK_AGENT:
-                ret &= mc_deserialize_AGENT_ActivityInfo(buffer, &output->_.agent);
+                ret &= deserialize_AGENT_ActivityInfo(buffer, &output->_.agent);
                 break;
             case OBJK_DATAWRITER:
-                ret &= mc_deserialize_DATAWRITER_ActivityInfo(buffer, &output->_.data_writer);
+                ret &= deserialize_DATAWRITER_ActivityInfo(buffer, &output->_.data_writer);
                 break;
             case OBJK_DATAREADER:
-                ret &= mc_deserialize_DATAREADER_ActivityInfo(buffer, &output->_.data_reader);
+                ret &= deserialize_DATAREADER_ActivityInfo(buffer, &output->_.data_reader);
                 break;
             default:
                 break;
@@ -1374,59 +1374,59 @@ bool mc_deserialize_ActivityInfoVariant(mcMicroBuffer* buffer, ActivityInfoVaria
     return ret;
 }
 
-bool mc_serialize_ObjectInfo(mcMicroBuffer* buffer, const ObjectInfo* input)
+bool serialize_ObjectInfo(mcMicroBuffer* buffer, const ObjectInfo* input)
 {
     bool ret = true;
     ret &= mc_serialize_bool(buffer, input->optional_config);
     if(input->optional_config == true)
     {
-        ret &= mc_serialize_ObjectVariant(buffer, &input->config);
+        ret &= serialize_ObjectVariant(buffer, &input->config);
     }
 
     ret &= mc_serialize_bool(buffer, input->optional_activity);
     if(input->optional_activity == true)
     {
-        ret &= mc_serialize_ActivityInfoVariant(buffer, &input->activity);
+        ret &= serialize_ActivityInfoVariant(buffer, &input->activity);
     }
 
     return ret;
 }
 
-bool mc_deserialize_ObjectInfo(mcMicroBuffer* buffer, ObjectInfo* output)
+bool deserialize_ObjectInfo(mcMicroBuffer* buffer, ObjectInfo* output)
 {
     bool ret = true;
     ret &= mc_deserialize_bool(buffer, &output->optional_config);
     if(output->optional_config == true)
     {
-            ret &= mc_deserialize_ObjectVariant(buffer, &output->config);
+            ret &= deserialize_ObjectVariant(buffer, &output->config);
     }
 
     ret &= mc_deserialize_bool(buffer, &output->optional_activity);
     if(output->optional_activity == true)
     {
-            ret &= mc_deserialize_ActivityInfoVariant(buffer, &output->activity);
+            ret &= deserialize_ActivityInfoVariant(buffer, &output->activity);
     }
 
     return ret;
 }
 
-bool mc_serialize_BaseObjectReply(mcMicroBuffer* buffer, const BaseObjectReply* input)
+bool serialize_BaseObjectReply(mcMicroBuffer* buffer, const BaseObjectReply* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->related_request);
-    ret &= mc_serialize_ResultStatus(buffer, &input->result);
+    ret &= serialize_BaseObjectRequest(buffer, &input->related_request);
+    ret &= serialize_ResultStatus(buffer, &input->result);
     return ret;
 }
 
-bool mc_deserialize_BaseObjectReply(mcMicroBuffer* buffer, BaseObjectReply* output)
+bool deserialize_BaseObjectReply(mcMicroBuffer* buffer, BaseObjectReply* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->related_request);
-    ret &= mc_deserialize_ResultStatus(buffer, &output->result);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->related_request);
+    ret &= deserialize_ResultStatus(buffer, &output->result);
     return ret;
 }
 
-bool mc_serialize_DataDeliveryControl(mcMicroBuffer* buffer, const DataDeliveryControl* input)
+bool serialize_DataDeliveryControl(mcMicroBuffer* buffer, const DataDeliveryControl* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint16_t(buffer, input->max_samples);
@@ -1436,7 +1436,7 @@ bool mc_serialize_DataDeliveryControl(mcMicroBuffer* buffer, const DataDeliveryC
     return ret;
 }
 
-bool mc_deserialize_DataDeliveryControl(mcMicroBuffer* buffer, DataDeliveryControl* output)
+bool deserialize_DataDeliveryControl(mcMicroBuffer* buffer, DataDeliveryControl* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint16_t(buffer, &output->max_samples);
@@ -1446,7 +1446,7 @@ bool mc_deserialize_DataDeliveryControl(mcMicroBuffer* buffer, DataDeliveryContr
     return ret;
 }
 
-bool mc_serialize_ReadSpecification(mcMicroBuffer* buffer, const ReadSpecification* input)
+bool serialize_ReadSpecification(mcMicroBuffer* buffer, const ReadSpecification* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->input_stream_id);
@@ -1460,13 +1460,13 @@ bool mc_serialize_ReadSpecification(mcMicroBuffer* buffer, const ReadSpecificati
     ret &= mc_serialize_bool(buffer, input->optional_delivery_control);
     if(input->optional_delivery_control == true)
     {
-        ret &= mc_serialize_DataDeliveryControl(buffer, &input->delivery_control);
+        ret &= serialize_DataDeliveryControl(buffer, &input->delivery_control);
     }
 
     return ret;
 }
 
-bool mc_deserialize_ReadSpecification(mcMicroBuffer* buffer, ReadSpecification* output)
+bool deserialize_ReadSpecification(mcMicroBuffer* buffer, ReadSpecification* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->input_stream_id);
@@ -1480,13 +1480,13 @@ bool mc_deserialize_ReadSpecification(mcMicroBuffer* buffer, ReadSpecification* 
     ret &= mc_deserialize_bool(buffer, &output->optional_delivery_control);
     if(output->optional_delivery_control == true)
     {
-        ret &= mc_deserialize_DataDeliveryControl(buffer, &output->delivery_control);
+        ret &= deserialize_DataDeliveryControl(buffer, &output->delivery_control);
     }
 
     return ret;
 }
 
-bool mc_serialize_SeqNumberAndTimestamp(mcMicroBuffer* buffer, const SeqNumberAndTimestamp* input)
+bool serialize_SeqNumberAndTimestamp(mcMicroBuffer* buffer, const SeqNumberAndTimestamp* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint32_t(buffer, input->sequence_number);
@@ -1494,7 +1494,7 @@ bool mc_serialize_SeqNumberAndTimestamp(mcMicroBuffer* buffer, const SeqNumberAn
     return ret;
 }
 
-bool mc_deserialize_SeqNumberAndTimestamp(mcMicroBuffer* buffer, SeqNumberAndTimestamp* output)
+bool deserialize_SeqNumberAndTimestamp(mcMicroBuffer* buffer, SeqNumberAndTimestamp* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint32_t(buffer, &output->sequence_number);
@@ -1502,7 +1502,7 @@ bool mc_deserialize_SeqNumberAndTimestamp(mcMicroBuffer* buffer, SeqNumberAndTim
     return ret;
 }
 
-bool mc_serialize_SampleInfoDetail(mcMicroBuffer* buffer, const SampleInfoDetail* input)
+bool serialize_SampleInfoDetail(mcMicroBuffer* buffer, const SampleInfoDetail* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint32_t(buffer, input->format);
@@ -1517,7 +1517,7 @@ bool mc_serialize_SampleInfoDetail(mcMicroBuffer* buffer, const SampleInfoDetail
                 ret &= mc_serialize_uint32_t(buffer, input->_.session_time_offset);
                 break;
             case FORMAT_TIMESTAMP:
-                ret &= mc_serialize_SeqNumberAndTimestamp(buffer, &input->_.seqnum_n_timestamp);
+                ret &= serialize_SeqNumberAndTimestamp(buffer, &input->_.seqnum_n_timestamp);
                 break;
             default:
                 break;
@@ -1526,7 +1526,7 @@ bool mc_serialize_SampleInfoDetail(mcMicroBuffer* buffer, const SampleInfoDetail
     return ret;
 }
 
-bool mc_deserialize_SampleInfoDetail(mcMicroBuffer* buffer, SampleInfoDetail* output)
+bool deserialize_SampleInfoDetail(mcMicroBuffer* buffer, SampleInfoDetail* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint32_t(buffer, &output->format);
@@ -1541,7 +1541,7 @@ bool mc_deserialize_SampleInfoDetail(mcMicroBuffer* buffer, SampleInfoDetail* ou
                 ret &= mc_deserialize_uint32_t(buffer, &output->_.session_time_offset);
                 break;
             case FORMAT_TIMESTAMP:
-                ret &= mc_deserialize_SeqNumberAndTimestamp(buffer, &output->_.seqnum_n_timestamp);
+                ret &= deserialize_SeqNumberAndTimestamp(buffer, &output->_.seqnum_n_timestamp);
                 break;
             default:
                 break;
@@ -1550,23 +1550,23 @@ bool mc_deserialize_SampleInfoDetail(mcMicroBuffer* buffer, SampleInfoDetail* ou
     return ret;
 }
 
-bool mc_serialize_SampleInfo(mcMicroBuffer* buffer, const SampleInfo* input)
+bool serialize_SampleInfo(mcMicroBuffer* buffer, const SampleInfo* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->state);
-    ret &= mc_serialize_SampleInfoDetail(buffer, &input->detail);
+    ret &= serialize_SampleInfoDetail(buffer, &input->detail);
     return ret;
 }
 
-bool mc_deserialize_SampleInfo(mcMicroBuffer* buffer, SampleInfo* output)
+bool deserialize_SampleInfo(mcMicroBuffer* buffer, SampleInfo* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->state);
-    ret &= mc_deserialize_SampleInfoDetail(buffer, &output->detail);
+    ret &= deserialize_SampleInfoDetail(buffer, &output->detail);
     return ret;
 }
 
-bool mc_serialize_SampleInfoDelta(mcMicroBuffer* buffer, const SampleInfoDelta* input)
+bool serialize_SampleInfoDelta(mcMicroBuffer* buffer, const SampleInfoDelta* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->state);
@@ -1575,7 +1575,7 @@ bool mc_serialize_SampleInfoDelta(mcMicroBuffer* buffer, const SampleInfoDelta* 
     return ret;
 }
 
-bool mc_deserialize_SampleInfoDelta(mcMicroBuffer* buffer, SampleInfoDelta* output)
+bool deserialize_SampleInfoDelta(mcMicroBuffer* buffer, SampleInfoDelta* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->state);
@@ -1584,27 +1584,27 @@ bool mc_deserialize_SampleInfoDelta(mcMicroBuffer* buffer, SampleInfoDelta* outp
     return ret;
 }
 
-bool mc_serialize_SampleData(mcMicroBuffer* buffer, const SampleData* input)
+bool serialize_SampleData(mcMicroBuffer* buffer, const SampleData* input)
 {
     return mc_serialize_sequence_uint8_t(buffer, input->data, input->size);
 }
 
-bool mc_deserialize_SampleData(mcMicroBuffer* buffer, SampleData* output)
+bool deserialize_SampleData(mcMicroBuffer* buffer, SampleData* output)
 {
     return mc_deserialize_sequence_uint8_t(buffer, output->data, SAMPLE_DATA_SIZE_MAX, &output->size);
 }
 
-bool mc_serialize_SampleDataSeq(mcMicroBuffer* buffer, const SampleDataSeq* input)
+bool serialize_SampleDataSeq(mcMicroBuffer* buffer, const SampleDataSeq* input)
 {
     bool ret = mc_serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = mc_serialize_SampleData(buffer, &input->data[i]);
+        ret = serialize_SampleData(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool mc_deserialize_SampleDataSeq(mcMicroBuffer* buffer, SampleDataSeq* output)
+bool deserialize_SampleDataSeq(mcMicroBuffer* buffer, SampleDataSeq* output)
 {
     bool ret = mc_deserialize_uint32_t(buffer, &output->size);
     if(output->size > SAMPLE_DATA_SEQUENCE_MAX)
@@ -1616,39 +1616,39 @@ bool mc_deserialize_SampleDataSeq(mcMicroBuffer* buffer, SampleDataSeq* output)
     {
         for(uint32_t i = 0; i < output->size && ret; i++)
         {
-            ret = mc_deserialize_SampleData(buffer, &output->data[i]);
+            ret = deserialize_SampleData(buffer, &output->data[i]);
         }
     }
     return ret;
 }
 
-bool mc_serialize_Sample(mcMicroBuffer* buffer, const Sample* input)
+bool serialize_Sample(mcMicroBuffer* buffer, const Sample* input)
 {
     bool ret = true;
-    ret &= mc_serialize_SampleInfo(buffer, &input->info);
-    ret &= mc_serialize_SampleData(buffer, &input->data);
+    ret &= serialize_SampleInfo(buffer, &input->info);
+    ret &= serialize_SampleData(buffer, &input->data);
     return ret;
 }
 
-bool mc_deserialize_Sample(mcMicroBuffer* buffer, Sample* output)
+bool deserialize_Sample(mcMicroBuffer* buffer, Sample* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_SampleInfo(buffer, &output->info);
-    ret &= mc_deserialize_SampleData(buffer, &output->data);
+    ret &= deserialize_SampleInfo(buffer, &output->info);
+    ret &= deserialize_SampleData(buffer, &output->data);
     return ret;
 }
 
-bool mc_serialize_SampleSeq(mcMicroBuffer* buffer, const SampleSeq* input)
+bool serialize_SampleSeq(mcMicroBuffer* buffer, const SampleSeq* input)
 {
     bool ret = mc_serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = mc_serialize_Sample(buffer, &input->data[i]);
+        ret = serialize_Sample(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool mc_deserialize_SampleSeq(mcMicroBuffer* buffer, SampleSeq* output)
+bool deserialize_SampleSeq(mcMicroBuffer* buffer, SampleSeq* output)
 {
     bool ret = mc_deserialize_uint32_t(buffer, &output->size);
     if(output->size > SAMPLE_SEQUENCE_MAX)
@@ -1660,39 +1660,39 @@ bool mc_deserialize_SampleSeq(mcMicroBuffer* buffer, SampleSeq* output)
     {
         for(uint32_t i = 0; i < output->size && ret; i++)
         {
-            ret = mc_deserialize_Sample(buffer, &output->data[i]);
+            ret = deserialize_Sample(buffer, &output->data[i]);
         }
     }
     return ret;
 }
 
-bool mc_serialize_SampleDelta(mcMicroBuffer* buffer, const SampleDelta* input)
+bool serialize_SampleDelta(mcMicroBuffer* buffer, const SampleDelta* input)
 {
     bool ret = true;
-    ret &= mc_serialize_SampleInfoDelta(buffer, &input->info_delta);
-    ret &= mc_serialize_SampleData(buffer, &input->data);
+    ret &= serialize_SampleInfoDelta(buffer, &input->info_delta);
+    ret &= serialize_SampleData(buffer, &input->data);
     return ret;
 }
 
-bool mc_deserialize_SampleDelta(mcMicroBuffer* buffer, SampleDelta* output)
+bool deserialize_SampleDelta(mcMicroBuffer* buffer, SampleDelta* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_SampleInfoDelta(buffer, &output->info_delta);
-    ret &= mc_deserialize_SampleData(buffer, &output->data);
+    ret &= deserialize_SampleInfoDelta(buffer, &output->info_delta);
+    ret &= deserialize_SampleData(buffer, &output->data);
     return ret;
 }
 
-bool mc_serialize_SampleDeltaSequence(mcMicroBuffer* buffer, const SampleDeltaSequence* input)
+bool serialize_SampleDeltaSequence(mcMicroBuffer* buffer, const SampleDeltaSequence* input)
 {
     bool ret = mc_serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = mc_serialize_SampleDelta(buffer, &input->data[i]);
+        ret = serialize_SampleDelta(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool mc_deserialize_SampleDeltaSequence(mcMicroBuffer* buffer, SampleDeltaSequence* output)
+bool deserialize_SampleDeltaSequence(mcMicroBuffer* buffer, SampleDeltaSequence* output)
 {
     bool ret = mc_deserialize_uint32_t(buffer, &output->size);
     if(output->size > SAMPLE_DELTA_SEQUENCE_MAX)
@@ -1704,39 +1704,39 @@ bool mc_deserialize_SampleDeltaSequence(mcMicroBuffer* buffer, SampleDeltaSequen
     {
         for(uint32_t i = 0; i < output->size && ret; i++)
         {
-            ret = mc_deserialize_SampleDelta(buffer, &output->data[i]);
+            ret = deserialize_SampleDelta(buffer, &output->data[i]);
         }
     }
     return ret;
 }
 
-bool mc_serialize_PackedSamples(mcMicroBuffer* buffer, const PackedSamples* input)
+bool serialize_PackedSamples(mcMicroBuffer* buffer, const PackedSamples* input)
 {
     bool ret = true;
-    ret &= mc_serialize_SampleInfo(buffer, &input->info_base);
-    ret &= mc_serialize_SampleDeltaSequence(buffer, &input->sample_delta_seq);
+    ret &= serialize_SampleInfo(buffer, &input->info_base);
+    ret &= serialize_SampleDeltaSequence(buffer, &input->sample_delta_seq);
     return ret;
 }
 
-bool mc_deserialize_PackedSamples(mcMicroBuffer* buffer, PackedSamples* output)
+bool deserialize_PackedSamples(mcMicroBuffer* buffer, PackedSamples* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_SampleInfo(buffer, &output->info_base);
-    ret &= mc_deserialize_SampleDeltaSequence(buffer, &output->sample_delta_seq);
+    ret &= deserialize_SampleInfo(buffer, &output->info_base);
+    ret &= deserialize_SampleDeltaSequence(buffer, &output->sample_delta_seq);
     return ret;
 }
 
-bool mc_serialize_SamplePackedSeq(mcMicroBuffer* buffer, const SamplePackedSeq* input)
+bool serialize_SamplePackedSeq(mcMicroBuffer* buffer, const SamplePackedSeq* input)
 {
     bool ret = mc_serialize_uint32_t(buffer, input->size);
     for(uint32_t i = 0; i < input->size && ret; i++)
     {
-        ret = mc_serialize_PackedSamples(buffer, &input->data[i]);
+        ret = serialize_PackedSamples(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool mc_deserialize_SamplePackedSeq(mcMicroBuffer* buffer, SamplePackedSeq* output)
+bool deserialize_SamplePackedSeq(mcMicroBuffer* buffer, SamplePackedSeq* output)
 {
     bool ret = mc_deserialize_uint32_t(buffer, &output->size);
     if(output->size > PACKED_SAMPLES_SEQUENCE_MAX)
@@ -1748,13 +1748,13 @@ bool mc_deserialize_SamplePackedSeq(mcMicroBuffer* buffer, SamplePackedSeq* outp
     {
         for(uint32_t i = 0; i < output->size && ret; i++)
         {
-            ret = mc_deserialize_PackedSamples(buffer, &output->data[i]);
+            ret = deserialize_PackedSamples(buffer, &output->data[i]);
         }
     }
     return ret;
 }
 
-bool mc_serialize_DataRepresentation(mcMicroBuffer* buffer, const DataRepresentation* input)
+bool serialize_DataRepresentation(mcMicroBuffer* buffer, const DataRepresentation* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint8_t(buffer, input->format);
@@ -1763,19 +1763,19 @@ bool mc_serialize_DataRepresentation(mcMicroBuffer* buffer, const DataRepresenta
         switch(input->format)
         {
             case FORMAT_DATA:
-                ret &= mc_serialize_SampleData(buffer, &input->_.data);
+                ret &= serialize_SampleData(buffer, &input->_.data);
                 break;
             case FORMAT_SAMPLE:
-                ret &= mc_serialize_Sample(buffer, &input->_.sample);
+                ret &= serialize_Sample(buffer, &input->_.sample);
                 break;
             case FORMAT_DATA_SEQ:
-                ret &= mc_serialize_SampleDataSeq(buffer, &input->_.data_seq);
+                ret &= serialize_SampleDataSeq(buffer, &input->_.data_seq);
                 break;
             case FORMAT_SAMPLE_SEQ:
-                ret &= mc_serialize_SampleSeq(buffer, &input->_.sample_seq);
+                ret &= serialize_SampleSeq(buffer, &input->_.sample_seq);
                 break;
             case FORMAT_PACKED_SAMPLES:
-                ret &= mc_serialize_PackedSamples(buffer, &input->_.packed_samples);
+                ret &= serialize_PackedSamples(buffer, &input->_.packed_samples);
                 break;
             default:
                 break;
@@ -1784,7 +1784,7 @@ bool mc_serialize_DataRepresentation(mcMicroBuffer* buffer, const DataRepresenta
     return ret;
 }
 
-bool mc_deserialize_DataRepresentation(mcMicroBuffer* buffer, DataRepresentation* output)
+bool deserialize_DataRepresentation(mcMicroBuffer* buffer, DataRepresentation* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint8_t(buffer, &output->format);
@@ -1793,19 +1793,19 @@ bool mc_deserialize_DataRepresentation(mcMicroBuffer* buffer, DataRepresentation
         switch(output->format)
         {
             case FORMAT_DATA:
-                ret &= mc_deserialize_SampleData(buffer, &output->_.data);
+                ret &= deserialize_SampleData(buffer, &output->_.data);
                 break;
             case FORMAT_SAMPLE:
-                ret &= mc_deserialize_Sample(buffer, &output->_.sample);
+                ret &= deserialize_Sample(buffer, &output->_.sample);
                 break;
             case FORMAT_DATA_SEQ:
-                ret &= mc_deserialize_SampleDataSeq(buffer, &output->_.data_seq);
+                ret &= deserialize_SampleDataSeq(buffer, &output->_.data_seq);
                 break;
             case FORMAT_SAMPLE_SEQ:
-                ret &= mc_deserialize_SampleSeq(buffer, &output->_.sample_seq);
+                ret &= deserialize_SampleSeq(buffer, &output->_.sample_seq);
                 break;
             case FORMAT_PACKED_SAMPLES:
-                ret &= mc_deserialize_PackedSamples(buffer, &output->_.packed_samples);
+                ret &= deserialize_PackedSamples(buffer, &output->_.packed_samples);
                 break;
             default:
                 break;
@@ -1814,289 +1814,289 @@ bool mc_deserialize_DataRepresentation(mcMicroBuffer* buffer, DataRepresentation
     return ret;
 }
 
-bool mc_serialize_CREATE_CLIENT_Payload(mcMicroBuffer* buffer, const CREATE_CLIENT_Payload* input)
+bool serialize_CREATE_CLIENT_Payload(mcMicroBuffer* buffer, const CREATE_CLIENT_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_CLIENT_Representation(buffer, &input->client_representation);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_CLIENT_Representation(buffer, &input->client_representation);
     return ret;
 }
 
-bool mc_deserialize_CREATE_CLIENT_Payload(mcMicroBuffer* buffer, CREATE_CLIENT_Payload* output)
+bool deserialize_CREATE_CLIENT_Payload(mcMicroBuffer* buffer, CREATE_CLIENT_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_CLIENT_Representation(buffer, &output->client_representation);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_CLIENT_Representation(buffer, &output->client_representation);
     return ret;
 }
 
-bool mc_serialize_CREATE_Payload(mcMicroBuffer* buffer, const CREATE_Payload* input)
+bool serialize_CREATE_Payload(mcMicroBuffer* buffer, const CREATE_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_ObjectVariant(buffer, &input->object_representation);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_ObjectVariant(buffer, &input->object_representation);
     return ret;
 }
 
-bool mc_deserialize_CREATE_Payload(mcMicroBuffer* buffer, CREATE_Payload* output)
+bool deserialize_CREATE_Payload(mcMicroBuffer* buffer, CREATE_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_ObjectVariant(buffer, &output->object_representation);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_ObjectVariant(buffer, &output->object_representation);
     return ret;
 }
 
-bool mc_serialize_GET_INFO_Payload(mcMicroBuffer* buffer, const GET_INFO_Payload* input)
+bool serialize_GET_INFO_Payload(mcMicroBuffer* buffer, const GET_INFO_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
     ret &= mc_serialize_uint32_t(buffer, input->info_mask);
     return ret;
 }
 
-bool mc_deserialize_GET_INFO_Payload(mcMicroBuffer* buffer, GET_INFO_Payload* output)
+bool deserialize_GET_INFO_Payload(mcMicroBuffer* buffer, GET_INFO_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
     ret &= mc_deserialize_uint32_t(buffer, &output->info_mask);
     return ret;
 }
 
-bool mc_serialize_DELETE_Payload(mcMicroBuffer* buffer, const DELETE_Payload* input)
+bool serialize_DELETE_Payload(mcMicroBuffer* buffer, const DELETE_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
     return ret;
 }
 
-bool mc_deserialize_DELETE_Payload(mcMicroBuffer* buffer, DELETE_Payload* output)
+bool deserialize_DELETE_Payload(mcMicroBuffer* buffer, DELETE_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
     return ret;
 }
 
-bool mc_serialize_STATUS_AGENT_Payload(mcMicroBuffer* buffer, const STATUS_AGENT_Payload* input)
+bool serialize_STATUS_AGENT_Payload(mcMicroBuffer* buffer, const STATUS_AGENT_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectReply(buffer, &input->base);
-    ret &= mc_serialize_AGENT_Representation(buffer, &input->agent_info);
+    ret &= serialize_BaseObjectReply(buffer, &input->base);
+    ret &= serialize_AGENT_Representation(buffer, &input->agent_info);
     return ret;
 }
 
-bool mc_deserialize_STATUS_AGENT_Payload(mcMicroBuffer* buffer, STATUS_AGENT_Payload* output)
+bool deserialize_STATUS_AGENT_Payload(mcMicroBuffer* buffer, STATUS_AGENT_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectReply(buffer, &output->base);
-    ret &= mc_deserialize_AGENT_Representation(buffer, &output->agent_info);
+    ret &= deserialize_BaseObjectReply(buffer, &output->base);
+    ret &= deserialize_AGENT_Representation(buffer, &output->agent_info);
     return ret;
 }
 
-bool mc_serialize_STATUS_Payload(mcMicroBuffer* buffer, const STATUS_Payload* input)
+bool serialize_STATUS_Payload(mcMicroBuffer* buffer, const STATUS_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectReply(buffer, &input->base);
+    ret &= serialize_BaseObjectReply(buffer, &input->base);
     return ret;
 }
 
-bool mc_deserialize_STATUS_Payload(mcMicroBuffer* buffer, STATUS_Payload* output)
+bool deserialize_STATUS_Payload(mcMicroBuffer* buffer, STATUS_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectReply(buffer, &output->base);
+    ret &= deserialize_BaseObjectReply(buffer, &output->base);
     return ret;
 }
 
-bool mc_serialize_INFO_Payload(mcMicroBuffer* buffer, const INFO_Payload* input)
+bool serialize_INFO_Payload(mcMicroBuffer* buffer, const INFO_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectReply(buffer, &input->base);
-    ret &= mc_serialize_ObjectInfo(buffer, &input->object_info);
+    ret &= serialize_BaseObjectReply(buffer, &input->base);
+    ret &= serialize_ObjectInfo(buffer, &input->object_info);
     return ret;
 }
 
-bool mc_deserialize_INFO_Payload(mcMicroBuffer* buffer, INFO_Payload* output)
+bool deserialize_INFO_Payload(mcMicroBuffer* buffer, INFO_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectReply(buffer, &output->base);
-    ret &= mc_deserialize_ObjectInfo(buffer, &output->object_info);
+    ret &= deserialize_BaseObjectReply(buffer, &output->base);
+    ret &= deserialize_ObjectInfo(buffer, &output->object_info);
     return ret;
 }
 
-bool mc_serialize_READ_DATA_Payload(mcMicroBuffer* buffer, const READ_DATA_Payload* input)
+bool serialize_READ_DATA_Payload(mcMicroBuffer* buffer, const READ_DATA_Payload* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_ReadSpecification(buffer, &input->read_specification);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_ReadSpecification(buffer, &input->read_specification);
     return ret;
 }
 
-bool mc_deserialize_READ_DATA_Payload(mcMicroBuffer* buffer, READ_DATA_Payload* output)
+bool deserialize_READ_DATA_Payload(mcMicroBuffer* buffer, READ_DATA_Payload* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_ReadSpecification(buffer, &output->read_specification);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_ReadSpecification(buffer, &output->read_specification);
     return ret;
 }
 
-bool mc_serialize_WRITE_DATA_Payload_Data(mcMicroBuffer* buffer, const WRITE_DATA_Payload_Data* input)
+bool serialize_WRITE_DATA_Payload_Data(mcMicroBuffer* buffer, const WRITE_DATA_Payload_Data* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
     return ret;
 }
 
-bool mc_deserialize_WRITE_DATA_Payload_Data(mcMicroBuffer* buffer, WRITE_DATA_Payload_Data* output)
+bool deserialize_WRITE_DATA_Payload_Data(mcMicroBuffer* buffer, WRITE_DATA_Payload_Data* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
     return ret;
 }
 
-bool mc_serialize_WRITE_DATA_Payload_Sample(mcMicroBuffer* buffer, const WRITE_DATA_Payload_Sample* input)
+bool serialize_WRITE_DATA_Payload_Sample(mcMicroBuffer* buffer, const WRITE_DATA_Payload_Sample* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_Sample(buffer, &input->sample);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_Sample(buffer, &input->sample);
     return ret;
 }
 
-bool mc_deserialize_WRITE_DATA_Payload_Sample(mcMicroBuffer* buffer, WRITE_DATA_Payload_Sample* output)
+bool deserialize_WRITE_DATA_Payload_Sample(mcMicroBuffer* buffer, WRITE_DATA_Payload_Sample* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_Sample(buffer, &output->sample);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_Sample(buffer, &output->sample);
     return ret;
 }
 
-bool mc_serialize_WRITE_DATA_Payload_DataSeq(mcMicroBuffer* buffer, const WRITE_DATA_Payload_DataSeq* input)
+bool serialize_WRITE_DATA_Payload_DataSeq(mcMicroBuffer* buffer, const WRITE_DATA_Payload_DataSeq* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_SampleDataSeq(buffer, &input->data_seq);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_SampleDataSeq(buffer, &input->data_seq);
     return ret;
 }
 
-bool mc_deserialize_WRITE_DATA_Payload_DataSeq(mcMicroBuffer* buffer, WRITE_DATA_Payload_DataSeq* output)
+bool deserialize_WRITE_DATA_Payload_DataSeq(mcMicroBuffer* buffer, WRITE_DATA_Payload_DataSeq* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_SampleDataSeq(buffer, &output->data_seq);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_SampleDataSeq(buffer, &output->data_seq);
     return ret;
 }
 
-bool mc_serialize_WRITE_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, const WRITE_DATA_Payload_SampleSeq* input)
+bool serialize_WRITE_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, const WRITE_DATA_Payload_SampleSeq* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_SampleSeq(buffer, &input->sample_seq);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_SampleSeq(buffer, &input->sample_seq);
     return ret;
 }
 
-bool mc_deserialize_WRITE_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, WRITE_DATA_Payload_SampleSeq* output)
+bool deserialize_WRITE_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, WRITE_DATA_Payload_SampleSeq* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_SampleSeq(buffer, &output->sample_seq);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_SampleSeq(buffer, &output->sample_seq);
     return ret;
 }
 
-bool mc_serialize_WRITE_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, const WRITE_DATA_Payload_PackedSamples* input)
+bool serialize_WRITE_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, const WRITE_DATA_Payload_PackedSamples* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_PackedSamples(buffer, &input->packed_samples);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_PackedSamples(buffer, &input->packed_samples);
     return ret;
 }
 
-bool mc_deserialize_WRITE_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, WRITE_DATA_Payload_PackedSamples* output)
+bool deserialize_WRITE_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, WRITE_DATA_Payload_PackedSamples* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_PackedSamples(buffer, &output->packed_samples);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_PackedSamples(buffer, &output->packed_samples);
     return ret;
 }
 
-bool mc_serialize_DATA_Payload_Data(mcMicroBuffer* buffer, const DATA_Payload_Data* input)
+bool serialize_DATA_Payload_Data(mcMicroBuffer* buffer, const DATA_Payload_Data* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_SampleData(buffer, &input->data);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_SampleData(buffer, &input->data);
     return ret;
 }
 
-bool mc_deserialize_DATA_Payload_Data(mcMicroBuffer* buffer, DATA_Payload_Data* output)
+bool deserialize_DATA_Payload_Data(mcMicroBuffer* buffer, DATA_Payload_Data* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_SampleData(buffer, &output->data);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_SampleData(buffer, &output->data);
     return ret;
 }
 
-bool mc_serialize_DATA_Payload_Sample(mcMicroBuffer* buffer, const DATA_Payload_Sample* input)
+bool serialize_DATA_Payload_Sample(mcMicroBuffer* buffer, const DATA_Payload_Sample* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_Sample(buffer, &input->sample);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_Sample(buffer, &input->sample);
     return ret;
 }
 
-bool mc_deserialize_DATA_Payload_Sample(mcMicroBuffer* buffer, DATA_Payload_Sample* output)
+bool deserialize_DATA_Payload_Sample(mcMicroBuffer* buffer, DATA_Payload_Sample* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_Sample(buffer, &output->sample);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_Sample(buffer, &output->sample);
     return ret;
 }
 
-bool mc_serialize_DATA_Payload_DataSeq(mcMicroBuffer* buffer, const DATA_Payload_DataSeq* input)
+bool serialize_DATA_Payload_DataSeq(mcMicroBuffer* buffer, const DATA_Payload_DataSeq* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_SampleDataSeq(buffer, &input->data_seq);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_SampleDataSeq(buffer, &input->data_seq);
     return ret;
 }
 
-bool mc_deserialize_DATA_Payload_DataSeq(mcMicroBuffer* buffer, DATA_Payload_DataSeq* output)
+bool deserialize_DATA_Payload_DataSeq(mcMicroBuffer* buffer, DATA_Payload_DataSeq* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_SampleDataSeq(buffer, &output->data_seq);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_SampleDataSeq(buffer, &output->data_seq);
     return ret;
 }
 
-bool mc_serialize_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, const DATA_Payload_SampleSeq* input)
+bool serialize_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, const DATA_Payload_SampleSeq* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_SampleSeq(buffer, &input->sample_seq);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_SampleSeq(buffer, &input->sample_seq);
     return ret;
 }
 
-bool mc_deserialize_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, DATA_Payload_SampleSeq* output)
+bool deserialize_DATA_Payload_SampleSeq(mcMicroBuffer* buffer, DATA_Payload_SampleSeq* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_SampleSeq(buffer, &output->sample_seq);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_SampleSeq(buffer, &output->sample_seq);
     return ret;
 }
 
-bool mc_serialize_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, const DATA_Payload_PackedSamples* input)
+bool serialize_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, const DATA_Payload_PackedSamples* input)
 {
     bool ret = true;
-    ret &= mc_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= mc_serialize_PackedSamples(buffer, &input->packed_samples);
+    ret &= serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= serialize_PackedSamples(buffer, &input->packed_samples);
     return ret;
 }
 
-bool mc_deserialize_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, DATA_Payload_PackedSamples* output)
+bool deserialize_DATA_Payload_PackedSamples(mcMicroBuffer* buffer, DATA_Payload_PackedSamples* output)
 {
     bool ret = true;
-    ret &= mc_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= mc_deserialize_PackedSamples(buffer, &output->packed_samples);
+    ret &= deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= deserialize_PackedSamples(buffer, &output->packed_samples);
     return ret;
 }
 
-bool mc_serialize_ACKNACK_Payload(mcMicroBuffer* buffer, const ACKNACK_Payload* input)
+bool serialize_ACKNACK_Payload(mcMicroBuffer* buffer, const ACKNACK_Payload* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint16_t(buffer, input->first_unacked_seq_num);
@@ -2104,7 +2104,7 @@ bool mc_serialize_ACKNACK_Payload(mcMicroBuffer* buffer, const ACKNACK_Payload* 
     return ret;
 }
 
-bool mc_deserialize_ACKNACK_Payload(mcMicroBuffer* buffer, ACKNACK_Payload* output)
+bool deserialize_ACKNACK_Payload(mcMicroBuffer* buffer, ACKNACK_Payload* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint16_t(buffer, &output->first_unacked_seq_num);
@@ -2112,7 +2112,7 @@ bool mc_deserialize_ACKNACK_Payload(mcMicroBuffer* buffer, ACKNACK_Payload* outp
     return ret;
 }
 
-bool mc_serialize_HEARTBEAT_Payload(mcMicroBuffer* buffer, const HEARTBEAT_Payload* input)
+bool serialize_HEARTBEAT_Payload(mcMicroBuffer* buffer, const HEARTBEAT_Payload* input)
 {
     bool ret = true;
     ret &= mc_serialize_uint16_t(buffer, input->first_unacked_seq_nr);
@@ -2120,7 +2120,7 @@ bool mc_serialize_HEARTBEAT_Payload(mcMicroBuffer* buffer, const HEARTBEAT_Paylo
     return ret;
 }
 
-bool mc_deserialize_HEARTBEAT_Payload(mcMicroBuffer* buffer, HEARTBEAT_Payload* output)
+bool deserialize_HEARTBEAT_Payload(mcMicroBuffer* buffer, HEARTBEAT_Payload* output)
 {
     bool ret = true;
     ret &= mc_deserialize_uint16_t(buffer, &output->first_unacked_seq_nr);
