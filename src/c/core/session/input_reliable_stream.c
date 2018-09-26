@@ -82,7 +82,7 @@ bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, u
 }
 
 
-bool next_input_reliable_buffer_available(mrInputReliableStream* stream, MicroBuffer* mb)
+bool next_input_reliable_buffer_available(mrInputReliableStream* stream, mcMicroBuffer* mb)
 {
     mrSeqNum next = seq_num_add(stream->last_handled, 1);
     uint8_t* internal_buffer = get_input_buffer(stream, next % stream->history);
@@ -98,7 +98,7 @@ bool next_input_reliable_buffer_available(mrInputReliableStream* stream, MicroBu
     return available_to_read;
 }
 
-void write_acknack(const mrInputReliableStream* stream, MicroBuffer* mb) {
+void write_acknack(const mrInputReliableStream* stream, mcMicroBuffer* mb) {
     uint16_t nack_bitmap = compute_nack_bitmap(stream);
 
     ACKNACK_Payload payload;
@@ -107,14 +107,14 @@ void write_acknack(const mrInputReliableStream* stream, MicroBuffer* mb) {
     payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
-    (void) serialize_ACKNACK_Payload(mb, &payload);
+    (void) mc_serialize_ACKNACK_Payload(mb, &payload);
     (void) stream; (void) mb;
 }
 
-void read_heartbeat(mrInputReliableStream* stream, MicroBuffer* payload)
+void read_heartbeat(mrInputReliableStream* stream, mcMicroBuffer* payload)
 {
     HEARTBEAT_Payload heartbeat;
-    deserialize_HEARTBEAT_Payload(payload, &heartbeat);
+    mc_deserialize_HEARTBEAT_Payload(payload, &heartbeat);
 
     process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
 }

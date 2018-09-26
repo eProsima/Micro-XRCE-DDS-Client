@@ -8,9 +8,9 @@
 //                             PUBLIC
 //==================================================================
 bool mr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
-                              struct MicroBuffer* mb_topic, uint32_t topic_size)
+                              struct mcMicroBuffer* mb_topic, uint32_t topic_size)
 {
-    MicroBuffer mb;
+    mcMicroBuffer mb;
     size_t submessage_size = SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE + topic_size;
     if(prepare_stream_to_write(&session->streams, stream_id, submessage_size, &mb))
     {
@@ -19,8 +19,8 @@ bool mr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObject
 
         WRITE_DATA_Payload_Data payload;
         init_base_object_request(&session->info, datawriter_id, &payload.base);
-        (void) serialize_WRITE_DATA_Payload_Data(&mb, &payload);
-        (void) serialize_uint32_t(&mb, topic_size); //REMOVE: when topics have not a previous size in the agent.
+        (void) mc_serialize_WRITE_DATA_Payload_Data(&mb, &payload);
+        (void) mc_serialize_uint32_t(&mb, topic_size); //REMOVE: when topics have not a previous size in the agent.
 
         init_micro_buffer(mb_topic, mb.iterator, topic_size);
     }

@@ -24,20 +24,20 @@
 #include <microcdr/microcdr.h>
 #include <string.h>
 
-bool HelloWorld_serialize_topic(MicroBuffer* writer, const HelloWorld* topic)
+bool HelloWorld_serialize_topic(mcMicroBuffer* writer, const HelloWorld* topic)
 {
-    (void) serialize_uint32_t(writer, topic->index);
+    (void) mc_serialize_uint32_t(writer, topic->index);
 
-    (void) serialize_string(writer, topic->message);
+    (void) mc_serialize_string(writer, topic->message);
 
     return writer->error;
 }
 
-bool HelloWorld_deserialize_topic(MicroBuffer* reader, HelloWorld* topic)
+bool HelloWorld_deserialize_topic(mcMicroBuffer* reader, HelloWorld* topic)
 {
-    (void) deserialize_uint32_t(reader, &topic->index);
+    (void) mc_deserialize_uint32_t(reader, &topic->index);
 
-    (void) deserialize_string(reader, topic->message, 255);
+    (void) mc_deserialize_string(reader, topic->message, 255);
 
     return reader->error;
 }

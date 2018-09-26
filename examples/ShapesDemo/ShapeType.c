@@ -24,28 +24,28 @@
 #include <microcdr/microcdr.h>
 #include <string.h>
 
-bool ShapeType_serialize_topic(MicroBuffer* writer, const ShapeType* topic)
+bool ShapeType_serialize_topic(mcMicroBuffer* writer, const ShapeType* topic)
 {
-    (void) serialize_string(writer, topic->color);
+    (void) mc_serialize_string(writer, topic->color);
 
-    (void) serialize_int32_t(writer, topic->x);
+    (void) mc_serialize_int32_t(writer, topic->x);
 
-    (void) serialize_int32_t(writer, topic->y);
+    (void) mc_serialize_int32_t(writer, topic->y);
 
-    (void) serialize_int32_t(writer, topic->shapesize);
+    (void) mc_serialize_int32_t(writer, topic->shapesize);
 
     return writer->error;
 }
 
-bool ShapeType_deserialize_topic(MicroBuffer* reader, ShapeType* topic)
+bool ShapeType_deserialize_topic(mcMicroBuffer* reader, ShapeType* topic)
 {
-    (void) deserialize_string(reader, topic->color, 255);
+    (void) mc_deserialize_string(reader, topic->color, 255);
 
-    (void) deserialize_int32_t(reader, &topic->x);
+    (void) mc_deserialize_int32_t(reader, &topic->x);
 
-    (void) deserialize_int32_t(reader, &topic->y);
+    (void) mc_deserialize_int32_t(reader, &topic->y);
 
-    (void) deserialize_int32_t(reader, &topic->shapesize);
+    (void) mc_deserialize_int32_t(reader, &topic->shapesize);
 
     return reader->error;
 }

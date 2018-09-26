@@ -31,7 +31,7 @@ struct mrCommunication;
 typedef void (*mrOnStatusFunc) (struct mrSession* session, mrObjectId object_id, uint16_t request_id,
                              uint8_t status, void* args);
 typedef void (*mrOnTopicFunc) (struct mrSession* session, mrObjectId object_id, uint16_t request_id,
-                             mrStreamId stream_id, struct MicroBuffer* mb, void* args);
+                             mrStreamId stream_id, struct mcMicroBuffer* mb, void* args);
 
 typedef struct mrSession
 {

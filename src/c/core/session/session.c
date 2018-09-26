@@ -24,17 +24,17 @@ static bool recv_message(const mrSession* session, uint8_t**buffer, size_t* leng
 static void write_submessage_heartbeat(const mrSession* session, mrStreamId stream);
 static void write_submessage_acknack(const mrSession* session, mrStreamId stream);
 
-static void read_message(mrSession* session, MicroBuffer* message);
-static void read_stream(mrSession* session, MicroBuffer* message, mrStreamId id, mrSeqNum seq_num);
-static void read_submessage_list(mrSession* session, MicroBuffer* submessages, mrStreamId stream_id);
-static void read_submessage(mrSession* session, MicroBuffer* submessage,
+static void read_message(mrSession* session, mcMicroBuffer* message);
+static void read_stream(mrSession* session, mcMicroBuffer* message, mrStreamId id, mrSeqNum seq_num);
+static void read_submessage_list(mrSession* session, mcMicroBuffer* submessages, mrStreamId stream_id);
+static void read_submessage(mrSession* session, mcMicroBuffer* submessage,
                             uint8_t submessage_id, mrStreamId stream_id, uint16_t length, uint8_t flags);
 
-static void read_submessage_fragment(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id, bool last_fragment);
-static void read_submessage_status(mrSession* session, MicroBuffer* submessage);
-static void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t length, mrStreamId stream_id, uint8_t format);
-static void read_submessage_heartbeat(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id);
-static void read_submessage_acknack(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id);
+static void read_submessage_fragment(mrSession* session, mcMicroBuffer* submessage, mrStreamId stream_id, bool last_fragment);
+static void read_submessage_status(mrSession* session, mcMicroBuffer* submessage);
+static void read_submessage_data(mrSession* session, mcMicroBuffer* submessage, uint16_t length, mrStreamId stream_id, uint8_t format);
+static void read_submessage_heartbeat(mrSession* session, mcMicroBuffer* submessage, mrStreamId stream_id);
+static void read_submessage_acknack(mrSession* session, mcMicroBuffer* submessage, mrStreamId stream_id);
 
 static void process_status(mrSession* session, mrObjectId object_id, uint16_t request_id, uint8_t status);
 
@@ -76,7 +76,7 @@ bool mr_create_session(mrSession* session)
     reset_stream_storage(&session->streams);
 
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
-    MicroBuffer mb;
+    mcMicroBuffer mb;
     init_micro_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_create_session(&session->info, &mb, get_milli_time());
@@ -90,7 +90,7 @@ bool mr_create_session(mrSession* session)
 bool mr_delete_session(mrSession* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
-    MicroBuffer mb;
+    mcMicroBuffer mb;
     init_micro_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     write_delete_session(&session->info, &mb);
@@ -260,7 +260,7 @@ bool listen_message(mrSession* session, int poll_ms)
     bool must_be_read = recv_message(session, &data, &length, poll_ms);
     if(must_be_read)
     {
-        MicroBuffer mb;
+        mcMicroBuffer mb;
         init_micro_buffer(&mb, data, (uint32_t)length);
         read_message(session, &mb);
     }
@@ -343,7 +343,7 @@ inline bool recv_message(const mrSession* session, uint8_t**buffer, size_t* leng
 void write_submessage_heartbeat(const mrSession* session, mrStreamId id)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
-    MicroBuffer mb;
+    mcMicroBuffer mb;
     init_micro_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     const mrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
@@ -356,7 +356,7 @@ void write_submessage_heartbeat(const mrSession* session, mrStreamId id)
 void write_submessage_acknack(const mrSession* session, mrStreamId id)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
-    MicroBuffer mb;
+    mcMicroBuffer mb;
     init_micro_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
 
     const mrInputReliableStream* stream = &session->streams.input_reliable[id.index];
@@ -366,7 +366,7 @@ void write_submessage_acknack(const mrSession* session, mrStreamId id)
     send_message(session, acknack_buffer, micro_buffer_length(&mb));
 }
 
-void read_message(mrSession* session, MicroBuffer* mb)
+void read_message(mrSession* session, mcMicroBuffer* mb)
 {
     uint8_t stream_id_raw; mrSeqNum seq_num;
     if(read_session_header(&session->info, mb, &stream_id_raw, &seq_num))
@@ -376,7 +376,7 @@ void read_message(mrSession* session, MicroBuffer* mb)
     }
 }
 
-void read_stream(mrSession* session, MicroBuffer* mb, mrStreamId stream_id, mrSeqNum seq_num)
+void read_stream(mrSession* session, mcMicroBuffer* mb, mrStreamId stream_id, mrSeqNum seq_num)
 {
     switch(stream_id.type)
     {
@@ -401,7 +401,7 @@ void read_stream(mrSession* session, MicroBuffer* mb, mrStreamId stream_id, mrSe
             if(stream && receive_reliable_message(stream, seq_num, mb->iterator, micro_buffer_size(mb)))
             {
                 read_submessage_list(session, mb, stream_id);
-                MicroBuffer next_mb;
+                mcMicroBuffer next_mb;
                 while(next_input_reliable_buffer_available(stream, &next_mb))
                 {
                     read_submessage_list(session, &next_mb, stream_id);
@@ -415,7 +415,7 @@ void read_stream(mrSession* session, MicroBuffer* mb, mrStreamId stream_id, mrSe
     }
 }
 
-void read_submessage_list(mrSession* session, MicroBuffer* submessages, mrStreamId stream_id)
+void read_submessage_list(mrSession* session, mcMicroBuffer* submessages, mrStreamId stream_id)
 {
     uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
     while(read_submessage_header(submessages, &id, &length, &flags, &payload_it))
@@ -424,7 +424,7 @@ void read_submessage_list(mrSession* session, MicroBuffer* submessages, mrStream
     }
 }
 
-void read_submessage(mrSession* session, MicroBuffer* submessage, uint8_t submessage_id, mrStreamId stream_id, uint16_t length, uint8_t flags)
+void read_submessage(mrSession* session, mcMicroBuffer* submessage, uint8_t submessage_id, mrStreamId stream_id, uint16_t length, uint8_t flags)
 {
     switch(submessage_id)
     {
@@ -467,10 +467,10 @@ void read_submessage(mrSession* session, MicroBuffer* submessage, uint8_t submes
     }
 }
 
-void read_submessage_status(mrSession* session, MicroBuffer* submessage)
+void read_submessage_status(mrSession* session, mcMicroBuffer* submessage)
 {
     STATUS_Payload payload;
-    deserialize_STATUS_Payload(submessage, &payload);
+    mc_deserialize_STATUS_Payload(submessage, &payload);
 
 
     mrObjectId object_id; uint16_t request_id;
@@ -481,14 +481,14 @@ void read_submessage_status(mrSession* session, MicroBuffer* submessage)
 }
 
 
-extern void read_submessage_format(mrSession* session, MicroBuffer* data, uint16_t length, uint8_t format,
+extern void read_submessage_format(mrSession* session, mcMicroBuffer* data, uint16_t length, uint8_t format,
                                    mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
 
-void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t length, mrStreamId stream_id, uint8_t format)
+void read_submessage_data(mrSession* session, mcMicroBuffer* submessage, uint16_t length, mrStreamId stream_id, uint8_t format)
 {
 #ifdef PROFILE_READ_ACCESS
     BaseObjectRequest base;
-    deserialize_BaseObjectRequest(submessage, &base);
+    mc_deserialize_BaseObjectRequest(submessage, &base);
     length = (uint16_t)(length - 4); //CHANGE: by a future size_of_BaseObjectRequest
 
     mrObjectId object_id; uint16_t request_id;
@@ -505,13 +505,13 @@ void read_submessage_data(mrSession* session, MicroBuffer* submessage, uint16_t 
 #endif
 }
 
-void read_submessage_fragment(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id, bool last_fragment)
+void read_submessage_fragment(mrSession* session, mcMicroBuffer* submessage, mrStreamId stream_id, bool last_fragment)
 {
     (void) session; (void) submessage; (void) stream_id; (void) last_fragment;
     //TODO
 }
 
-void read_submessage_heartbeat(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id)
+void read_submessage_heartbeat(mrSession* session, mcMicroBuffer* submessage, mrStreamId stream_id)
 {
     mrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
     if(stream)
@@ -521,7 +521,7 @@ void read_submessage_heartbeat(mrSession* session, MicroBuffer* submessage, mrSt
     }
 }
 
-void read_submessage_acknack(mrSession* session, MicroBuffer* submessage, mrStreamId stream_id)
+void read_submessage_acknack(mrSession* session, mcMicroBuffer* submessage, mrStreamId stream_id)
 {
     mrOutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
     if(stream)

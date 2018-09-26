@@ -27,9 +27,9 @@ protected:
 TEST_F(OutputBestEffortStreamTest, WriteSubmessage)
 {
     // Write
-    MicroBuffer mb;
+    mcMicroBuffer mb;
     bool available_to_write = prepare_best_effort_buffer_to_write(&stream, submessage.size(), &mb);
-    serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
+    mc_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
 
     // Send
     mrSeqNum init_seq_num = stream.last_send;
