@@ -54,7 +54,7 @@ void reset_output_reliable_stream(mrOutputReliableStream* stream)
     stream->send_lost = false;
 }
 
-bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, mcMicroBuffer* mb)
+bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, mcBuffer* mb)
 {
     bool available_to_write = false;
 
@@ -88,7 +88,7 @@ bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t siz
         size_t current_padding = (current_length % 4 != 0) ? 4 - (current_length % 4) : 0;
         size_t future_length = current_length + current_padding + size;
         set_output_buffer_length(internal_buffer, future_length);
-        mc_init_micro_buffer_offset(mb, internal_buffer, (uint32_t)future_length, (uint32_t)current_length);
+        mc_init_buffer_offset(mb, internal_buffer, (uint32_t)future_length, (uint32_t)current_length);
     }
 
     return available_to_write;
@@ -173,7 +173,7 @@ bool next_reliable_nack_buffer_to_send(mrOutputReliableStream* stream, uint8_t**
     return it_updated;
 }
 
-void write_heartbeat(const mrOutputReliableStream* stream, mcMicroBuffer* mb)
+void write_heartbeat(const mrOutputReliableStream* stream, mcBuffer* mb)
 {
     HEARTBEAT_Payload payload;
     payload.first_unacked_seq_nr = seq_num_add(stream->last_acknown, 1);
@@ -183,7 +183,7 @@ void write_heartbeat(const mrOutputReliableStream* stream, mcMicroBuffer* mb)
     (void) serialize_HEARTBEAT_Payload(mb, &payload);
 }
 
-void read_acknack(mrOutputReliableStream* stream, mcMicroBuffer* payload)
+void read_acknack(mrOutputReliableStream* stream, mcBuffer* payload)
 {
     ACKNACK_Payload acknack;
     deserialize_ACKNACK_Payload(payload, &acknack);

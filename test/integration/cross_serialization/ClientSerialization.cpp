@@ -11,7 +11,7 @@ std::vector<uint8_t> ClientSerialization::create_client_payload()
     //change in a future by client_payload_sizeof function and remove resize
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     CREATE_CLIENT_Payload payload;
@@ -36,7 +36,7 @@ std::vector<uint8_t> ClientSerialization::create_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     CREATE_Payload payload;
@@ -58,7 +58,7 @@ std::vector<uint8_t> ClientSerialization::get_info_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     GET_INFO_Payload payload;
@@ -76,7 +76,7 @@ std::vector<uint8_t> ClientSerialization::delete_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     DELETE_Payload payload;
@@ -93,7 +93,7 @@ std::vector<uint8_t> ClientSerialization::status_agent_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     STATUS_AGENT_Payload payload;
@@ -117,7 +117,7 @@ std::vector<uint8_t> ClientSerialization::status_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     STATUS_Payload payload;
@@ -142,7 +142,7 @@ std::vector<uint8_t> ClientSerialization::read_data_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     READ_DATA_Payload payload;
@@ -169,7 +169,7 @@ std::vector<uint8_t> ClientSerialization::write_data_payload_data()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     WRITE_DATA_Payload_Data payload;
@@ -212,7 +212,7 @@ std::vector<uint8_t> ClientSerialization::data_payload_data()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     BaseObjectRequest base;
@@ -255,7 +255,7 @@ std::vector<uint8_t> ClientSerialization::acknack_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     ACKNACK_Payload payload;
@@ -273,7 +273,7 @@ std::vector<uint8_t> ClientSerialization::heartbeat_payload()
 {
     std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     mc_init_micro_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
 
     HEARTBEAT_Payload payload;

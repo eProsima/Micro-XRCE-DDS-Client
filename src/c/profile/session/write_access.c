@@ -8,9 +8,9 @@
 //                             PUBLIC
 //==================================================================
 bool mr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
-                              struct mcMicroBuffer* mb_topic, uint32_t topic_size)
+                              struct mcBuffer* mb_topic, uint32_t topic_size)
 {
-    mcMicroBuffer mb;
+    mcBuffer mb;
     size_t submessage_size = SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE + topic_size;
     if(prepare_stream_to_write(&session->streams, stream_id, submessage_size, &mb))
     {

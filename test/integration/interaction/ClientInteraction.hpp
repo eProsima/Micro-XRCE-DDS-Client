@@ -89,7 +89,7 @@ public:
         {
             HelloWorld topic = {static_cast<uint32_t>(i), "Hello DDS world!"};
 
-            mcMicroBuffer mb;
+            mcBuffer mb;
             uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
             bool prepared = mr_prepare_output_stream(&session_, output_stream_id, datawriter_id, &mb, topic_size);
             ASSERT_TRUE(prepared);
@@ -128,7 +128,7 @@ public:
     }
 
 private:
-    static void on_topic_dispatcher(mrSession* session_, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct mcMicroBuffer* serialization, void* args)
+    static void on_topic_dispatcher(mrSession* session_, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct mcBuffer* serialization, void* args)
     {
         static_cast<Client*>(args)->on_topic(session_, object_id, request_id, stream_id, serialization);
     }
@@ -176,7 +176,7 @@ private:
     }
 
 
-    void on_topic(mrSession* /*session_*/, mrObjectId object_id, uint16_t /*request_id*/, mrStreamId stream_id, struct mcMicroBuffer* serialization)
+    void on_topic(mrSession* /*session_*/, mrObjectId object_id, uint16_t /*request_id*/, mrStreamId stream_id, struct mcBuffer* serialization)
     {
         HelloWorld topic;
         HelloWorld_deserialize_topic(serialization, &topic);

@@ -43,10 +43,10 @@ typedef struct ShapeType
     int32_t shapesize;
 } ShapeType;
 
-struct mcMicroBuffer;
+struct mcBuffer;
 
-bool ShapeType_serialize_topic(struct mcMicroBuffer* writer, const ShapeType* topic);
-bool ShapeType_deserialize_topic(struct mcMicroBuffer* reader, ShapeType* topic);
+bool ShapeType_serialize_topic(struct mcBuffer* writer, const ShapeType* topic);
+bool ShapeType_deserialize_topic(struct mcBuffer* reader, ShapeType* topic);
 uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size);
 
 

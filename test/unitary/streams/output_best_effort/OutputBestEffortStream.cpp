@@ -27,7 +27,7 @@ protected:
 TEST_F(OutputBestEffortStreamTest, WriteSubmessage)
 {
     // Write
-    mcMicroBuffer mb;
+    mcBuffer mb;
     bool available_to_write = prepare_best_effort_buffer_to_write(&stream, submessage.size(), &mb);
     mc_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
 

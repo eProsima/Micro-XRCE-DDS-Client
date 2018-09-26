@@ -22,7 +22,7 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct mcMicroBuffer* mb, void* args)
+void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct mcBuffer* mb, void* args)
 {
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
 

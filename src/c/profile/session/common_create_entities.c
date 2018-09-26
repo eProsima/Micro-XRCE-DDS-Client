@@ -15,7 +15,7 @@ uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObje
     uint16_t payload_length = 0; //DELETE_Payload_size(&payload);
     payload_length = (uint16_t)(payload_length + 4); // delete payload (request id + object_id), no padding.
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
@@ -44,7 +44,7 @@ uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
     payload_length = (uint16_t)(payload_length + ((object_id.type == OBJK_PARTICIPANT && payload_length % 2 != 0) ? 1 : 0)); // necessary padding
     payload_length = (uint16_t)(payload_length + 2); //object id ref
 
-    mcMicroBuffer mb;
+    mcBuffer mb;
     if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
         request_id = init_base_object_request(&session->info, object_id, &payload->base);

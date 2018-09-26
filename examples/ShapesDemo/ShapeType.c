@@ -24,7 +24,7 @@
 #include <microcdr/microcdr.h>
 #include <string.h>
 
-bool ShapeType_serialize_topic(mcMicroBuffer* writer, const ShapeType* topic)
+bool ShapeType_serialize_topic(mcBuffer* writer, const ShapeType* topic)
 {
     (void) mc_serialize_string(writer, topic->color);
 
@@ -37,7 +37,7 @@ bool ShapeType_serialize_topic(mcMicroBuffer* writer, const ShapeType* topic)
     return writer->error;
 }
 
-bool ShapeType_deserialize_topic(mcMicroBuffer* reader, ShapeType* topic)
+bool ShapeType_deserialize_topic(mcBuffer* reader, ShapeType* topic)
 {
     (void) mc_deserialize_string(reader, topic->color, 255);
 
