@@ -86,7 +86,7 @@ void read_delete_session_status(mrSessionInfo* info, mcBuffer* mb)
 void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer)
 {
     mcBuffer mb;
-    mc_init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
+    mc_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
     (void) mc_serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
@@ -94,7 +94,7 @@ void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer)
 void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSeqNum seq_num, uint8_t* buffer)
 {
     mcBuffer mb;
-    mc_init_micro_buffer(&mb, buffer, MAX_HEADER_SIZE);
+    mc_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
     (void) mc_serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }

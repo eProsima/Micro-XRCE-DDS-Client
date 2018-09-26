@@ -261,7 +261,7 @@ bool listen_message(mrSession* session, int poll_ms)
     if(must_be_read)
     {
         mcBuffer mb;
-        mc_init_micro_buffer(&mb, data, (uint32_t)length);
+        mc_init_buffer(&mb, data, (uint32_t)length);
         read_message(session, &mb);
     }
 

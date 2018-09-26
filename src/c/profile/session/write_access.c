@@ -22,7 +22,7 @@ bool mr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObject
         (void) serialize_WRITE_DATA_Payload_Data(&mb, &payload);
         (void) mc_serialize_uint32_t(&mb, topic_size); //REMOVE: when topics have not a previous size in the agent.
 
-        mc_init_micro_buffer(mb_topic, mb.iterator, topic_size);
+        mc_init_buffer(mb_topic, mb.iterator, topic_size);
     }
     else
     {

@@ -102,7 +102,7 @@ inline void read_format_data(mrSession* session, mcBuffer* payload, uint16_t len
     length = (uint16_t)(length - 4); //by the offset. Remove too with the future serialization according to XRCE
 
     mcBuffer mb_topic;
-    mc_init_micro_buffer(&mb_topic, payload->iterator, length);
+    mc_init_buffer(&mb_topic, payload->iterator, length);
     mb_topic.endianness = payload->endianness;
     session->on_topic(session, object_id, request_id, stream_id, &mb_topic, session->on_topic_args);
 }

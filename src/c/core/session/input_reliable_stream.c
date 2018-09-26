@@ -91,7 +91,7 @@ bool next_input_reliable_buffer_available(mrInputReliableStream* stream, mcBuffe
     if(available_to_read)
     {
         stream->last_handled = next;
-        mc_init_micro_buffer(mb, internal_buffer, (uint32_t)length);
+        mc_init_buffer(mb, internal_buffer, (uint32_t)length);
         set_input_buffer_length(internal_buffer, 0);
     }
 
