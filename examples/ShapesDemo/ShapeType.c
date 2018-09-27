@@ -24,28 +24,28 @@
 #include <microcdr/microcdr.h>
 #include <string.h>
 
-bool ShapeType_serialize_topic(MicroBuffer* writer, const ShapeType* topic)
+bool ShapeType_serialize_topic(mcBuffer* writer, const ShapeType* topic)
 {
-    (void) serialize_string(writer, topic->color);
+    (void) mc_serialize_string(writer, topic->color);
 
-    (void) serialize_int32_t(writer, topic->x);
+    (void) mc_serialize_int32_t(writer, topic->x);
 
-    (void) serialize_int32_t(writer, topic->y);
+    (void) mc_serialize_int32_t(writer, topic->y);
 
-    (void) serialize_int32_t(writer, topic->shapesize);
+    (void) mc_serialize_int32_t(writer, topic->shapesize);
 
     return writer->error;
 }
 
-bool ShapeType_deserialize_topic(MicroBuffer* reader, ShapeType* topic)
+bool ShapeType_deserialize_topic(mcBuffer* reader, ShapeType* topic)
 {
-    (void) deserialize_string(reader, topic->color, 255);
+    (void) mc_deserialize_string(reader, topic->color, 255);
 
-    (void) deserialize_int32_t(reader, &topic->x);
+    (void) mc_deserialize_int32_t(reader, &topic->x);
 
-    (void) deserialize_int32_t(reader, &topic->y);
+    (void) mc_deserialize_int32_t(reader, &topic->y);
 
-    (void) deserialize_int32_t(reader, &topic->shapesize);
+    (void) mc_deserialize_int32_t(reader, &topic->shapesize);
 
     return reader->error;
 }
@@ -53,13 +53,13 @@ bool ShapeType_deserialize_topic(MicroBuffer* reader, ShapeType* topic)
 uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size)
 {
     uint32_t previousSize = size;
-    size += get_alignment(size, 4) + 4 + (uint32_t)strlen(topic->color) + 1;
+    size += mc_alignment(size, 4) + 4 + (uint32_t)strlen(topic->color) + 1;
 
-    size += get_alignment(size, 4) + 4;
+    size += mc_alignment(size, 4) + 4;
 
-    size += get_alignment(size, 4) + 4;
+    size += mc_alignment(size, 4) + 4;
 
-    size += get_alignment(size, 4) + 4;
+    size += mc_alignment(size, 4) + 4;
 
     return size - previousSize;
 }

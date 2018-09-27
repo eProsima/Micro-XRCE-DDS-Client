@@ -19,12 +19,12 @@ void reset_output_best_effort_stream(mrOutputBestEffortStream* stream)
     stream->last_send = UINT16_MAX;
 }
 
-bool prepare_best_effort_buffer_to_write(mrOutputBestEffortStream* stream, size_t size, MicroBuffer* mb)
+bool prepare_best_effort_buffer_to_write(mrOutputBestEffortStream* stream, size_t size, mcBuffer* mb)
 {
     bool available_to_write = stream->writer + size <= stream->size;
     if(available_to_write)
     {
-        init_micro_buffer_offset(mb, stream->buffer, (uint32_t)(stream->writer + size), (uint32_t)stream->writer);
+        mc_init_buffer_offset(mb, stream->buffer, (uint32_t)(stream->writer + size), (uint32_t)stream->writer);
         stream->writer += size;
     }
 

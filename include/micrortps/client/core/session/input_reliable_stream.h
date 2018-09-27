@@ -25,7 +25,7 @@ extern "C"
 #include <stdbool.h>
 #include <stddef.h>
 
-struct MicroBuffer;
+struct mcBuffer;
 
 typedef struct mrInputReliableStream
 {
@@ -41,10 +41,10 @@ typedef struct mrInputReliableStream
 void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);
 void reset_input_reliable_stream(mrInputReliableStream* stream);
 bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
-bool next_input_reliable_buffer_available(mrInputReliableStream* stream, struct MicroBuffer* mb);
+bool next_input_reliable_buffer_available(mrInputReliableStream* stream, struct mcBuffer* mb);
 
-void write_acknack(const mrInputReliableStream* stream, struct MicroBuffer* mb);
-void read_heartbeat(mrInputReliableStream* stream, struct MicroBuffer* payload);
+void write_acknack(const mrInputReliableStream* stream, struct mcBuffer* mb);
+void read_heartbeat(mrInputReliableStream* stream, struct mcBuffer* payload);
 
 bool is_input_reliable_stream_busy(mrInputReliableStream* stream);
 
