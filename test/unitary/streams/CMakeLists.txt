@@ -26,7 +26,11 @@ else()
     project(output_best_effort_stream_test LANGUAGES C CXX)
 endif()
 
-set(SRCS OutputBestEffortStream.cpp)
+set(SRCS
+    OutputBestEffortStream.cpp
+    OutputReliableStream.cpp
+    InputBestEffortStream.cpp
+    )
 add_executable(${PROJECT_NAME} ${SRCS})
 set_common_compile_options(${PROJECT_NAME})
 if(MSVC OR MSVC_IDE)

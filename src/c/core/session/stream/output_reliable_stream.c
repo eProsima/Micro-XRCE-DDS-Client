@@ -22,8 +22,6 @@ static void set_output_buffer_length(uint8_t* buffer, size_t length);
 static uint8_t* get_output_buffer(const uxrOutputReliableStream* stream, size_t history_pos);
 static size_t get_output_buffer_size(const uxrOutputReliableStream* stream);
 
-// Implementation note: the SUBHEADER_SIZE must be used to represent the header of the fragment.
-
 //==================================================================
 //                             PUBLIC
 //==================================================================

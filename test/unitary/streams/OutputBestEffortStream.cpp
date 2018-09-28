@@ -7,6 +7,7 @@ class OutputBestEffortStreamTest : public testing::Test
 {
 public:
     OutputBestEffortStreamTest()
+    : submessage(STREAM_BUFFER_SIZE / 8, 'A')
     {
 //        init_output_best_effort_stream(&stream, buffer, STREAM_BUFFER_SIZE, OFFSET);
     }
@@ -76,7 +77,7 @@ public:
     }
 
 protected:
-    const std::string submessage = "This is a submessage";
+    const std::string submessage;
     uint8_t buffer[STREAM_BUFFER_SIZE];
 //    uxrOutputBestEffortStream stream;
 };

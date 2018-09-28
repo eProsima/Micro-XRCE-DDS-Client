@@ -268,7 +268,7 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     include(CTest)
 
     if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-        add_subdirectory(test/unitary/streams/output_best_effort)
+        add_subdirectory(test/unitary/streams)
 
         if(NOT WIN32)
             add_subdirectory(test/transport/serial_comm)
