@@ -33,6 +33,10 @@
 #include <uxr/client/profile/session/write_access.h>
 #endif //PROFILE_WRITE_ACCESS
 
+#ifdef PROFILE_DISCOVERY
+#include <micrortps/client/profile/discovery/discovery.h>
+#endif //PROFILE_DISCOVERY
+
 #ifdef PROFILE_UDP_TRANSPORT
 #if defined(PLATFORM_NAME_LINUX)
 #include <uxr/client/profile/transport/udp_transport_linux.h>

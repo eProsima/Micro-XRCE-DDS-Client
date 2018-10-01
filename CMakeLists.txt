@@ -150,6 +150,7 @@ set(SRCS
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
     $<$<BOOL:${PROFILE_WRITE_ACCESS}>:src/c/profile/session/write_access.c>
+    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${SERIAL_SRCS}
@@ -229,6 +230,7 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
+    add_subdirectory(examples/Discovery)
 endif()
 
 ###############################################################################
