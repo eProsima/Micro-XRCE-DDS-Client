@@ -27,18 +27,18 @@ protected:
 
 TEST_F(InputBestEffortStreamTest, ReadMessagePrevious)
 {
-    mrSeqNum next_seq_num = seq_num_sub(stream.last_handled, 1);
-    bool ready_to_read = receive_best_effort_message(&stream, next_seq_num);
-    ASSERT_TRUE(ready_to_read);
-    ASSERT_EQ(stream.last_handled, next_seq_num);
+    mrSeqNum last_handled = stream.last_handled;
+    bool ready_to_read = receive_best_effort_message(&stream, seq_num_sub(stream.last_handled, 1));
+    ASSERT_FALSE(ready_to_read);
+    ASSERT_EQ(stream.last_handled, last_handled);
 }
 
 TEST_F(InputBestEffortStreamTest, ReadMessageSame)
 {
-    mrSeqNum next_seq_num = stream.last_handled;
-    bool ready_to_read = receive_best_effort_message(&stream, next_seq_num);
-    ASSERT_TRUE(ready_to_read);
-    ASSERT_EQ(stream.last_handled, next_seq_num);
+    mrSeqNum last_handled = stream.last_handled;
+    bool ready_to_read = receive_best_effort_message(&stream, stream.last_handled);
+    ASSERT_FALSE(ready_to_read);
+    ASSERT_EQ(stream.last_handled, last_handled);
 }
 
 TEST_F(InputBestEffortStreamTest, ReadMessageNext)

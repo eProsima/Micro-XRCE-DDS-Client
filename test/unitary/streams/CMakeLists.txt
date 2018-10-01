@@ -20,15 +20,15 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 # New project because of the CXX GTest dependency.
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(output_best_effort_stream_test C CXX)
+    project(stream_test C CXX)
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(output_best_effort_stream_test LANGUAGES C CXX)
+    project(stream_test LANGUAGES C CXX)
 endif()
 
 set(SRCS
     OutputBestEffortStream.cpp
-    OutputReliableStream.cpp
+    #OutputReliableStream.cpp
     InputBestEffortStream.cpp
     )
 add_executable(${PROJECT_NAME} ${SRCS})
