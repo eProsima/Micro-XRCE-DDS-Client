@@ -34,8 +34,8 @@ typedef struct mrUDPTransport
     mrCommunication comm;
 } mrUDPTransport;
 
-bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
-bool mr_close_udp_transport(mrUDPTransport* transport);
+bool uxr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
+bool uxr_close_udp_transport(mrUDPTransport* transport);
 
 #ifdef __cplusplus
 }

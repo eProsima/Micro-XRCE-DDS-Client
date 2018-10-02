@@ -40,7 +40,7 @@ mrStreamId add_output_best_effort_buffer(mrStreamStorage* storage, uint8_t* buff
     // assert for index
     mrOutputBestEffortStream* stream = &storage->output_best_effort[index];
     init_output_best_effort_stream(stream, buffer, size, header_offset);
-    return mr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
+    return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
 }
 
 mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
@@ -49,7 +49,7 @@ mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer,
     // assert for index
     mrOutputReliableStream* stream = &storage->output_reliable[index];
     init_output_reliable_stream(stream, buffer, size, history, header_offset);
-    return mr_stream_id(index, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 }
 
 mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage)
@@ -58,7 +58,7 @@ mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage)
     // assert for index
     mrInputBestEffortStream* stream = &storage->input_best_effort[index];
     init_input_best_effort_stream(stream);
-    return mr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_INPUT_STREAM);
+    return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_INPUT_STREAM);
 }
 
 mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history)
@@ -67,7 +67,7 @@ mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, 
     // assert for index
     mrInputReliableStream* stream = &storage->input_reliable[index];
     init_input_reliable_stream(stream, buffer, size, history);
-    return mr_stream_id(index, UXR_RELIABLE_STREAM, UXR_INPUT_STREAM);
+    return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_INPUT_STREAM);
 }
 
 mrOutputBestEffortStream* get_output_best_effort_stream(mrStreamStorage* storage, uint8_t index)

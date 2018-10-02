@@ -9,7 +9,7 @@ static uint16_t create_entity_xml(mrSession* session, mrStreamId stream_id,
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t mr_write_configure_participant_xml(mrSession* session, mrStreamId stream_id,
+uint16_t uxr_write_configure_participant_xml(mrSession* session, mrStreamId stream_id,
                                          mrObjectId object_id, uint16_t domain, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
@@ -21,7 +21,7 @@ uint16_t mr_write_configure_participant_xml(mrSession* session, mrStreamId strea
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t mr_write_configure_topic_xml(mrSession* session, mrStreamId stream_id,
+uint16_t uxr_write_configure_topic_xml(mrSession* session, mrStreamId stream_id,
                                    mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
@@ -33,7 +33,7 @@ uint16_t mr_write_configure_topic_xml(mrSession* session, mrStreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t mr_write_configure_publisher_xml(mrSession* session, mrStreamId stream_id,
+uint16_t uxr_write_configure_publisher_xml(mrSession* session, mrStreamId stream_id,
                                        mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
@@ -45,7 +45,7 @@ uint16_t mr_write_configure_publisher_xml(mrSession* session, mrStreamId stream_
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t mr_write_configure_subscriber_xml(mrSession* session, mrStreamId stream_id,
+uint16_t uxr_write_configure_subscriber_xml(mrSession* session, mrStreamId stream_id,
                                         mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
@@ -57,7 +57,7 @@ uint16_t mr_write_configure_subscriber_xml(mrSession* session, mrStreamId stream
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t mr_write_configure_datawriter_xml(mrSession* session, mrStreamId stream_id,
+uint16_t uxr_write_configure_datawriter_xml(mrSession* session, mrStreamId stream_id,
                                         mrObjectId object_id, mrObjectId publisher_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
@@ -69,7 +69,7 @@ uint16_t mr_write_configure_datawriter_xml(mrSession* session, mrStreamId stream
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t mr_write_configure_datareader_xml(mrSession* session, mrStreamId stream_id,
+uint16_t uxr_write_configure_datareader_xml(mrSession* session, mrStreamId stream_id,
                                         mrObjectId object_id, mrObjectId subscriber_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type

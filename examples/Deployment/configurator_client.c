@@ -77,7 +77,7 @@ int main(int args, char** argv)
 
     // Transport
     mrUDPTransport transport;
-    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
+    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -85,9 +85,9 @@ int main(int args, char** argv)
 
     // Session
     mrSession session;
-    mr_init_session(&session, &transport.comm, key);
-    mr_set_status_callback(&session, on_status, NULL);
-    if(!mr_create_session(&session))
+    uxr_init_session(&session, &transport.comm, key);
+    uxr_set_status_callback(&session, on_status, NULL);
+    if(!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -95,10 +95,10 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     switch(create_delete | pub_sub)
     {
@@ -119,30 +119,30 @@ int main(int args, char** argv)
             break;
     }
 
-    mr_close_udp_transport(&transport);
+    uxr_close_udp_transport(&transport);
 
     return 0;
 }
 
 void create_publisher(mrSession* session, uint16_t id)
 {
-    mrStreamId output = mr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    mrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
-    mrObjectId participant_id = mr_object_id(id, UXR_PARTICIPANT_ID);
+    mrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
     const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
+    uint16_t participant_req = uxr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
 
-    mrObjectId topic_id = mr_object_id(id, UXR_TOPIC_ID);
+    mrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = mr_write_configure_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
+    uint16_t topic_req = uxr_write_configure_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
-    mrObjectId publisher_id = mr_object_id(id, UXR_PUBLISHER_ID);
+    mrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
     const char* publisher_xml = "<publisher name=\"MyPublisher\">";
-    uint16_t publisher_req = mr_write_configure_publisher_xml(session, output, publisher_id, participant_id, publisher_xml, 0);
+    uint16_t publisher_req = uxr_write_configure_publisher_xml(session, output, publisher_id, participant_id, publisher_xml, 0);
 
-    mrObjectId datawriter_id = mr_object_id(id, UXR_DATAWRITER_ID);
+    mrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-    uint16_t datawriter_req = mr_write_configure_datawriter_xml(session, output, datawriter_id, publisher_id, datawriter_xml, 0);
+    uint16_t datawriter_req = uxr_write_configure_datawriter_xml(session, output, datawriter_id, publisher_id, datawriter_xml, 0);
 
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
     wait_status(session, requests);
@@ -150,23 +150,23 @@ void create_publisher(mrSession* session, uint16_t id)
 
 void create_subscriber(mrSession* session, uint16_t id)
 {
-    mrStreamId output = mr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    mrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
-    mrObjectId participant_id = mr_object_id(id, UXR_PARTICIPANT_ID);
+    mrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
     const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = mr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
+    uint16_t participant_req = uxr_write_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
 
-    mrObjectId topic_id = mr_object_id(id, UXR_TOPIC_ID);
+    mrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = mr_write_configure_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
+    uint16_t topic_req = uxr_write_configure_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
-    mrObjectId subscriber_id = mr_object_id(id, UXR_SUBSCRIBER_ID);
+    mrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
     const char* subscriber_xml = "<subscriber name=\"MySubscriber\">";
-    uint16_t subscriber_req = mr_write_configure_subscriber_xml(session, output, subscriber_id, participant_id, subscriber_xml, 0);
+    uint16_t subscriber_req = uxr_write_configure_subscriber_xml(session, output, subscriber_id, participant_id, subscriber_xml, 0);
 
-    mrObjectId datareader_id = mr_object_id(id, UXR_DATAREADER_ID);
+    mrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
     const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
-    uint16_t datareader_req = mr_write_configure_datareader_xml(session, output, datareader_id, subscriber_id, datareader_xml, 0);
+    uint16_t datareader_req = uxr_write_configure_datareader_xml(session, output, datareader_id, subscriber_id, datareader_xml, 0);
 
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
     wait_status(session, requests);
@@ -174,12 +174,12 @@ void create_subscriber(mrSession* session, uint16_t id)
 
 void delete_publisher(mrSession* session, uint16_t id)
 {
-    mrStreamId output = mr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    mrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
-    uint16_t datawriter_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_DATAWRITER_ID));
-    uint16_t publisher_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_PUBLISHER_ID));
-    uint16_t topic_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_TOPIC_ID));
-    uint16_t participant_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_PARTICIPANT_ID));
+    uint16_t datawriter_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_DATAWRITER_ID));
+    uint16_t publisher_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_PUBLISHER_ID));
+    uint16_t topic_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_TOPIC_ID));
+    uint16_t participant_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_PARTICIPANT_ID));
 
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
     wait_status(session, requests);
@@ -187,12 +187,12 @@ void delete_publisher(mrSession* session, uint16_t id)
 
 void delete_subscriber(mrSession* session, uint16_t id)
 {
-    mrStreamId output = mr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    mrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
-    uint16_t datareader_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_DATAREADER_ID));
-    uint16_t subscriber_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_SUBSCRIBER_ID));
-    uint16_t topic_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_TOPIC_ID));
-    uint16_t participant_req = mr_write_delete_entity(session, output, mr_object_id(id, UXR_PARTICIPANT_ID));
+    uint16_t datareader_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_DATAREADER_ID));
+    uint16_t subscriber_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_SUBSCRIBER_ID));
+    uint16_t topic_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_TOPIC_ID));
+    uint16_t participant_req = uxr_write_delete_entity(session, output, uxr_object_id(id, UXR_PARTICIPANT_ID));
 
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
     wait_status(session, requests);
@@ -201,7 +201,7 @@ void delete_subscriber(mrSession* session, uint16_t id)
 void wait_status(mrSession* session, uint16_t* requests)
 {
     uint8_t status[4];
-    if(mr_run_session_until_all_status(session, 3000, requests, status, 4))
+    if(uxr_run_session_until_all_status(session, 3000, requests, status, 4))
     {
         printf("Ok\n");
     }

@@ -5,7 +5,7 @@
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id)
+uint16_t uxr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id)
 {
     uint16_t request_id = UXR_INVALID_REQUEST_ID;
 

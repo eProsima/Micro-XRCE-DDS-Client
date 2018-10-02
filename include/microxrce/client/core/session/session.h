@@ -54,24 +54,24 @@ typedef struct mrSession
 //==================================================================
 //                         PUBLIC FUNCTIONS
 //==================================================================
-MRDLLAPI void mr_init_session(mrSession* session, struct mrCommunication* comm, uint32_t key);
-MRDLLAPI void mr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args);
-MRDLLAPI void mr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args);
+MRDLLAPI void uxr_init_session(mrSession* session, struct mrCommunication* comm, uint32_t key);
+MRDLLAPI void uxr_set_status_callback(mrSession* session, mrOnStatusFunc on_status_func, void* args);
+MRDLLAPI void uxr_set_topic_callback(mrSession* session, mrOnTopicFunc on_topic_func, void* args);
 
-MRDLLAPI bool mr_create_session(mrSession* session);
-MRDLLAPI bool mr_delete_session(mrSession* session);
+MRDLLAPI bool uxr_create_session(mrSession* session);
+MRDLLAPI bool uxr_delete_session(mrSession* session);
 
-MRDLLAPI mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size);
-MRDLLAPI mrStreamId mr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
-MRDLLAPI mrStreamId mr_create_input_best_effort_stream(mrSession* session);
-MRDLLAPI mrStreamId mr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
+MRDLLAPI mrStreamId uxr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size);
+MRDLLAPI mrStreamId uxr_create_output_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
+MRDLLAPI mrStreamId uxr_create_input_best_effort_stream(mrSession* session);
+MRDLLAPI mrStreamId uxr_create_input_reliable_stream(mrSession* session, uint8_t* buffer, size_t size, uint16_t history);
 
-MRDLLAPI void mr_flash_output_streams(mrSession* session);
-MRDLLAPI bool mr_run_session_time(mrSession* session, int time);
-MRDLLAPI bool mr_run_session_until_timeout(mrSession* session, int timeout);
-MRDLLAPI bool mr_run_session_until_confirm_delivery(mrSession* session, int timeout);
-MRDLLAPI bool mr_run_session_until_all_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
-MRDLLAPI bool mr_run_session_until_one_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
+MRDLLAPI void uxr_flash_output_streams(mrSession* session);
+MRDLLAPI bool uxr_run_session_time(mrSession* session, int time);
+MRDLLAPI bool uxr_run_session_until_timeout(mrSession* session, int timeout);
+MRDLLAPI bool uxr_run_session_until_confirm_delivery(mrSession* session, int timeout);
+MRDLLAPI bool uxr_run_session_until_all_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
+MRDLLAPI bool uxr_run_session_until_one_status(mrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
 
 #ifdef __cplusplus
 }

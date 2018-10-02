@@ -95,7 +95,7 @@ static int get_serial_error(void)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool mr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
+bool uxr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
@@ -103,13 +103,13 @@ bool mr_init_serial_transport(mrSerialTransport* transport, const char* device, 
     int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd != -1)
     {
-        rv = mr_init_serial_transport_fd(transport, fd, remote_addr, local_addr);
+        rv = uxr_init_serial_transport_fd(transport, fd, remote_addr, local_addr);
     }
 
     return rv;
 }
 
-bool mr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
+bool uxr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
@@ -140,7 +140,7 @@ bool mr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t r
     return rv;
 }
 
-bool mr_close_serial_transport(mrSerialTransport* transport)
+bool uxr_close_serial_transport(mrSerialTransport* transport)
 {
     return (0 == close(transport->poll_fd.fd));
 }

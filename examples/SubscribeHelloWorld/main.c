@@ -48,7 +48,7 @@ int main(int args, char** argv)
 
     // Transport
     mrUDPTransport transport;
-    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
+    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -56,9 +56,9 @@ int main(int args, char** argv)
 
     // Session
     mrSession session;
-    mr_init_session(&session, &transport.comm, 0xCCCCDDDD);
-    mr_set_topic_callback(&session, on_topic, &count);
-    if(!mr_create_session(&session))
+    uxr_init_session(&session, &transport.comm, 0xCCCCDDDD);
+    uxr_set_topic_callback(&session, on_topic, &count);
+    if(!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -66,32 +66,32 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_in = mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Create entities
-    mrObjectId participant_id = mr_object_id(0x01, UXR_PARTICIPANT_ID);
+    mrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
     const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
+    uint16_t participant_req = uxr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
 
-    mrObjectId topic_id = mr_object_id(0x01, UXR_TOPIC_ID);
+    mrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
+    uint16_t topic_req = uxr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
-    mrObjectId subscriber_id = mr_object_id(0x01, UXR_SUBSCRIBER_ID);
+    mrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
     const char* subscriber_xml = "<subscriber name=\"MySubscriber\">";
-    uint16_t subscriber_req = mr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
+    uint16_t subscriber_req = uxr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
 
-    mrObjectId datareader_id = mr_object_id(0x01, UXR_DATAREADER_ID);
+    mrObjectId datareader_id = uxr_object_id(0x01, UXR_DATAREADER_ID);
     const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
-    uint16_t datareader_req = mr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
+    uint16_t datareader_req = uxr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
-    if(!mr_run_session_until_all_status(&session, 1000, requests, status, 4))
+    if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
         return 1;
@@ -100,19 +100,19 @@ int main(int args, char** argv)
     // Request topics
     mrDeliveryControl delivery_control = {0};
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req = mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+    uint16_t read_data_req = uxr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
 
     // Read topics
     bool connected = true;
     while(connected && count < max_topics)
     {
         uint8_t read_data_status;
-        connected = mr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
     }
 
     // Delete resources
-    mr_delete_session(&session);
-    mr_close_udp_transport(&transport);
+    uxr_delete_session(&session);
+    uxr_close_udp_transport(&transport);
 
     return 0;
 }

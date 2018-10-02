@@ -60,7 +60,7 @@ static int get_udp_error(void)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port)
+bool uxr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -99,7 +99,7 @@ bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t p
     return rv;
 }
 
-bool mr_close_udp_transport(mrUDPTransport* transport)
+bool uxr_close_udp_transport(mrUDPTransport* transport)
 {
     (void)transport;
     return 1;

@@ -276,7 +276,7 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
 }
 
 uint16_t read_serial_msg(mrSerialIO* serial_io,
-                        mr_read_cb cb,
+                        uxr_read_cb cb,
                         void* cb_arg,
                         uint8_t* buf,
                         size_t len,

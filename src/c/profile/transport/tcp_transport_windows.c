@@ -69,7 +69,7 @@ static int get_tcp_error(void)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port)
+bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -108,7 +108,7 @@ bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t p
     return rv;
 }
 
-bool mr_close_tcp_transport(mrTCPTransport* transport)
+bool uxr_close_tcp_transport(mrTCPTransport* transport)
 {
     (void)transport;
     return 1;

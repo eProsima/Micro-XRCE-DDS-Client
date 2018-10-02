@@ -18,7 +18,7 @@ static void read_format_packed_samples(mrSession* session, ucdrBuffer* payload, 
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
+uint16_t uxr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
                          mrStreamId data_stream_id, mrDeliveryControl* control)
 {
     uint16_t request_id = UXR_INVALID_REQUEST_ID;
@@ -55,10 +55,10 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
     return request_id;
 }
 
-uint16_t mr_write_cancel_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id)
+uint16_t uxr_write_cancel_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id)
 {
     mrDeliveryControl delivery_control = {0};
-    return mr_write_request_data(session, stream_id, datareader_id, (mrStreamId){0}, &delivery_control);
+    return uxr_write_request_data(session, stream_id, datareader_id, (mrStreamId){0}, &delivery_control);
 }
 
 //==================================================================

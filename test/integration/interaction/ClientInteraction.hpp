@@ -37,53 +37,53 @@ public:
 
     void create_entities(uint8_t id, uint8_t stream_id_raw, uint8_t expected_status, uint8_t flags)
     {
-        mrStreamId output_stream_id = mr_stream_id_from_raw(stream_id_raw, UXR_OUTPUT_STREAM);
+        mrStreamId output_stream_id = uxr_stream_id_from_raw(stream_id_raw, UXR_OUTPUT_STREAM);
         uint16_t request_id; uint8_t status;
 
-        mrObjectId participant_id = mr_object_id(id, UXR_PARTICIPANT_ID);
-        request_id = mr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant_profile", flags);
+        mrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
+        request_id = uxr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant_profile", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
-        mrObjectId topic_id = mr_object_id(id, UXR_TOPIC_ID);
-        request_id = mr_write_configure_topic_xml(&session_, output_stream_id, topic_id, participant_id, topic_xml_, flags);
+        mrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
+        request_id = uxr_write_configure_topic_xml(&session_, output_stream_id, topic_id, participant_id, topic_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
-        mrObjectId publisher_id = mr_object_id(id, UXR_PUBLISHER_ID);
-        request_id = mr_write_configure_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, publisher_xml_, flags);
+        mrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
+        request_id = uxr_write_configure_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, publisher_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
-        mrObjectId datawriter_id = mr_object_id(id, UXR_DATAWRITER_ID);
-        request_id = mr_write_configure_datawriter_xml(&session_, output_stream_id, datawriter_id, publisher_id, datawriter_xml_, flags);
+        mrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
+        request_id = uxr_write_configure_datawriter_xml(&session_, output_stream_id, datawriter_id, publisher_id, datawriter_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
-        mrObjectId subscriber_id = mr_object_id(id, UXR_SUBSCRIBER_ID);
-        request_id = mr_write_configure_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, subscriber_xml_, flags);
+        mrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
+        request_id = uxr_write_configure_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, subscriber_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
-        mrObjectId datareader_id = mr_object_id(id, UXR_DATAREADER_ID);
-        request_id = mr_write_configure_datareader_xml(&session_, output_stream_id, datareader_id, subscriber_id, datareader_xml_, flags);
+        mrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
+        request_id = uxr_write_configure_datareader_xml(&session_, output_stream_id, datareader_id, subscriber_id, datareader_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        mr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
     }
 
     void publish(uint8_t id, uint8_t stream_id_raw, size_t number)
     {
         //Used only for waiting the RTPS subscriber matching
-        (void) mr_run_session_time(&session_, 50);
+        (void) uxr_run_session_time(&session_, 50);
 
-        mrStreamId output_stream_id = mr_stream_id_from_raw(stream_id_raw, UXR_OUTPUT_STREAM);
-        mrObjectId datawriter_id = mr_object_id(id, UXR_DATAWRITER_ID);
+        mrStreamId output_stream_id = uxr_stream_id_from_raw(stream_id_raw, UXR_OUTPUT_STREAM);
+        mrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
 
         for(size_t i = 0; i < number; ++i)
         {
@@ -91,11 +91,11 @@ public:
 
             ucdrBuffer mb;
             uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
-            bool prepared = mr_prepare_output_stream(&session_, output_stream_id, datawriter_id, &mb, topic_size);
+            bool prepared = uxr_prepare_output_stream(&session_, output_stream_id, datawriter_id, &mb, topic_size);
             ASSERT_TRUE(prepared);
             bool written = HelloWorld_serialize_topic(&mb, &topic);
             ASSERT_TRUE(written);
-            bool sent = mr_run_session_until_confirm_delivery(&session_, 60000);
+            bool sent = uxr_run_session_until_confirm_delivery(&session_, 60000);
             ASSERT_TRUE(sent);
             std::cout << "topic sent: " << i << std::endl;
         }
@@ -104,22 +104,22 @@ public:
     void subscribe(uint8_t id, uint8_t stream_id_raw, size_t number)
     {
         expected_topic_index_ = 0;
-        last_topic_stream_id_ = mr_stream_id_from_raw(0, UXR_OUTPUT_STREAM);
-        last_topic_object_id_ = mr_object_id(255, 15);
+        last_topic_stream_id_ = uxr_stream_id_from_raw(0, UXR_OUTPUT_STREAM);
+        last_topic_object_id_ = uxr_object_id(255, 15);
 
-        mrStreamId output_stream_id = mr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
-        mrStreamId input_stream_id = mr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
-        mrObjectId datareader_id = mr_object_id(id, UXR_DATAREADER_ID);
+        mrStreamId output_stream_id = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+        mrStreamId input_stream_id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
+        mrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
 
         mrDeliveryControl delivery_control = {};
         delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-        uint16_t request_id = mr_write_request_data(&session_, output_stream_id, datareader_id, input_stream_id, &delivery_control);
+        uint16_t request_id = uxr_write_request_data(&session_, output_stream_id, datareader_id, input_stream_id, &delivery_control);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
 
         while(expected_topic_index_ < number)
         {
             uint8_t status;
-            bool received_ok = mr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+            bool received_ok = uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
             ASSERT_EQ(UXR_STATUS_OK, status);
             ASSERT_TRUE(received_ok);
             //ASSERT_EQ(last_topic_object_id_, datareader_id);
@@ -135,44 +135,44 @@ private:
 
     void init()
     {
-        ASSERT_TRUE(mr_init_udp_transport(&transport_, "127.0.0.1", port_));
+        ASSERT_TRUE(uxr_init_udp_transport(&transport_, "127.0.0.1", port_));
 
-        mr_init_session(&session_, gateway_.monitorize(&transport_.comm), client_key_);
-        mr_set_topic_callback(&session_, on_topic_dispatcher, this);
+        uxr_init_session(&session_, gateway_.monitorize(&transport_.comm), client_key_);
+        uxr_set_topic_callback(&session_, on_topic_dispatcher, this);
 
-        ASSERT_TRUE(mr_create_session(&session_));
+        ASSERT_TRUE(uxr_create_session(&session_));
         ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
 
         for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
         {
             uint8_t* buffer = output_best_effort_stream_buffer_ + UXR_CONFIG_UDP_TRANSPORT_MTU * i;
-            (void) mr_create_output_best_effort_stream(&session_, buffer, transport_.comm.mtu);
+            (void) uxr_create_output_best_effort_stream(&session_, buffer, transport_.comm.mtu);
         }
         for(int i = 0; i < UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
         {
-            (void) mr_create_input_best_effort_stream(&session_);
+            (void) uxr_create_input_best_effort_stream(&session_);
         }
         for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
         {
             uint8_t* buffer = output_reliable_stream_buffer_ + UXR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
-            (void) mr_create_output_reliable_stream(&session_, buffer , static_cast<size_t>(transport_.comm.mtu * history_), history_);
+            (void) uxr_create_output_reliable_stream(&session_, buffer , static_cast<size_t>(transport_.comm.mtu * history_), history_);
         }
         for(int i = 0; i < UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
         {
             uint8_t* buffer = input_reliable_stream_buffer_ + UXR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
-            (void) mr_create_input_reliable_stream(&session_, buffer, static_cast<size_t>(transport_.comm.mtu * history_), history_);
+            (void) uxr_create_input_reliable_stream(&session_, buffer, static_cast<size_t>(transport_.comm.mtu * history_), history_);
         }
     }
 
     void close()
     {
-        bool deleted = mr_delete_session(&session_);
+        bool deleted = uxr_delete_session(&session_);
         if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
         {
             ASSERT_TRUE(deleted);
             ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
         }
-        ASSERT_TRUE(mr_close_udp_transport(&transport_));
+        ASSERT_TRUE(uxr_close_udp_transport(&transport_));
     }
 
 

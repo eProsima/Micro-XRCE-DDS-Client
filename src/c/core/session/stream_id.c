@@ -7,7 +7,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-mrStreamId mr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction)
+mrStreamId uxr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction)
 {
     mrStreamId stream_id;
     stream_id.direction = direction;
@@ -30,7 +30,7 @@ mrStreamId mr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection dire
     return stream_id;
 }
 
-mrStreamId mr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction)
+mrStreamId uxr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction)
 {
     mrStreamId stream_id;
     stream_id.raw = stream_id_raw;

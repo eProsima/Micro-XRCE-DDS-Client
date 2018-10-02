@@ -33,7 +33,7 @@ typedef struct SerialTransport
     struct SerialProperties* properties;
 } SerialTransport;
 
-bool mr_init_uart_transport(SerialTransport* transport, const char* device);
+bool uxr_init_uart_transport(SerialTransport* transport, const char* device);
 
 #ifdef __cplusplus
 }

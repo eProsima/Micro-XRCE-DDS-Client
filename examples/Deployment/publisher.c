@@ -37,7 +37,7 @@ int main(int args, char** argv)
 
     // Transport
     mrUDPTransport transport;
-    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
+    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -45,8 +45,8 @@ int main(int args, char** argv)
 
     // Session
     mrSession session;
-    mr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
-    if(!mr_create_session(&session))
+    uxr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
+    if(!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -54,12 +54,12 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
-    mrObjectId datawriter_id = mr_object_id((uint16_t)atoi(argv[4]), UXR_DATAWRITER_ID);
+    mrObjectId datawriter_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAWRITER_ID);
 
     // Write topics
     bool connected = true;
@@ -70,10 +70,10 @@ int main(int args, char** argv)
 
         ucdrBuffer mb;
         uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
-        mr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
+        uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
         HelloWorld_serialize_topic(&mb, &topic);
 
-        connected = mr_run_session_time(&session, 1000);
+        connected = uxr_run_session_time(&session, 1000);
         if(connected)
         {
             printf("Sent topic: %s, id: %i\n", topic.message, topic.index);
@@ -81,7 +81,7 @@ int main(int args, char** argv)
     }
 
     // Delete resources
-    mr_close_udp_transport(&transport);
+    uxr_close_udp_transport(&transport);
 
     return 0;
 }

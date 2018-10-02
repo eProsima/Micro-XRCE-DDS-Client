@@ -47,57 +47,57 @@ int main()
 
     // Transport.
     mrSerialTransport transport = {0};
-    (void) mr_init_serial_transport_fd(&transport, fd, 0, 1);
+    (void) uxr_init_serial_transport_fd(&transport, fd, 0, 1);
 
     // Session.
     mrSession session;
-    mr_init_session(&session, &transport.comm, 0xAAAAAAAA);
-    mr_set_topic_callback(&session, on_topic, NULL);
+    uxr_init_session(&session, &transport.comm, 0xAAAAAAAA);
+    uxr_set_topic_callback(&session, on_topic, NULL);
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE] = {0};
-    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE] = {0};
-    mrStreamId reliable_in = mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    mrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Create entities.
-    mrObjectId participant_id = mr_object_id(0x01, UXR_PARTICIPANT_ID);
+    mrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
     const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
+    uint16_t participant_req = uxr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
 
-    mrObjectId topic_id = mr_object_id(0x01, UXR_TOPIC_ID);
+    mrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
+    uint16_t topic_req = uxr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
-    mrObjectId publisher_id = mr_object_id(0x01, UXR_PUBLISHER_ID);
+    mrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml = "<publisher name=\"MyPublisher\">";
-    uint16_t publisher_req = mr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
+    uint16_t publisher_req = uxr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
 
-    mrObjectId datawriter_id = mr_object_id(0x01, UXR_DATAWRITER_ID);
+    mrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-    uint16_t datawriter_req = mr_write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
+    uint16_t datawriter_req = uxr_write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
 
-    mrObjectId subscriber_id = mr_object_id(0x01, UXR_SUBSCRIBER_ID);
+    mrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
     const char* subscriber_xml = "<subscriber name=\"MySubscriber\">";
-    uint16_t subscriber_req = mr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
+    uint16_t subscriber_req = uxr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
 
-    mrObjectId datareader_id = mr_object_id(0x01, UXR_DATAREADER_ID);
+    mrObjectId datareader_id = uxr_object_id(0x01, UXR_DATAREADER_ID);
     const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
-    uint16_t datareader_req = mr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
+    uint16_t datareader_req = uxr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
 
     uint8_t status[6];
     uint16_t request[6] = {participant_req, topic_req, publisher_req, datawriter_req, subscriber_req, datareader_req};
-    (void) mr_run_session_until_status(&session, 0, request, status, 6);
+    (void) uxr_run_session_until_status(&session, 0, request, status, 6);
 
     // Request topics
     mrDeliveryControl delivery_control = {0};
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    (void) mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+    (void) uxr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
 
     // Delete resources.
-    mr_delete_session(&session);
-    mr_close_serial_transport(&transport);
+    uxr_delete_session(&session);
+    uxr_close_serial_transport(&transport);
 
     // Free resources.
     int b = *memory_flag;

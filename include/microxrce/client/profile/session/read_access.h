@@ -35,10 +35,10 @@ typedef struct mrDeliveryControl
 
 } mrDeliveryControl;
 
-MRDLLAPI uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
+MRDLLAPI uint16_t uxr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
                                mrStreamId data_stream_id, mrDeliveryControl* delivery_control);
 
-MRDLLAPI uint16_t mr_write_cancel_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id);
+MRDLLAPI uint16_t uxr_write_cancel_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id);
 
 #ifdef __cplusplus
 }

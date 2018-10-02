@@ -34,9 +34,9 @@ typedef struct mrSerialTransport
     mrCommunication comm;
 } mrSerialTransport;
 
-bool mr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
-bool mr_init_serial_transport_fd(mrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
-bool mr_close_serial_transport(mrSerialTransport* transport);
+bool uxr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
+bool uxr_init_serial_transport_fd(mrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
+bool uxr_close_serial_transport(mrSerialTransport* transport);
 
 #ifdef __cplusplus
 }

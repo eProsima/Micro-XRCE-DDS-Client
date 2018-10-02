@@ -22,7 +22,7 @@ extern "C"
 
 #include <microxrce/client/core/session/session.h>
 
-MRDLLAPI bool mr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
+MRDLLAPI bool uxr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
                                        struct ucdrBuffer* mb_topic, uint32_t topic_size);
 
 #ifdef __cplusplus

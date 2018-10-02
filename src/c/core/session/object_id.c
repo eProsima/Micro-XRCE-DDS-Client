@@ -11,7 +11,7 @@ const uint8_t UXR_DATAREADER_ID = OBJK_DATAREADER;
 //==================================================================
 //                             PUBLIC
 //==================================================================
-mrObjectId mr_object_id(uint16_t id, uint8_t type)
+mrObjectId uxr_object_id(uint16_t id, uint8_t type)
 {
     mrObjectId object_id;
     object_id.id = id;
