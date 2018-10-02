@@ -21,7 +21,7 @@ static void read_format_packed_samples(mrSession* session, ucdrBuffer* payload, 
 uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
                          mrStreamId data_stream_id, mrDeliveryControl* control)
 {
-    uint16_t request_id = MR_INVALID_REQUEST_ID;
+    uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     READ_DATA_Payload payload;
     payload.read_specification.input_stream_id = data_stream_id.raw;

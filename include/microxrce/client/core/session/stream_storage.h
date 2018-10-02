@@ -29,13 +29,13 @@ extern "C"
 
 typedef struct mrStreamStorage
 {
-    mrOutputBestEffortStream output_best_effort[MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
+    mrOutputBestEffortStream output_best_effort[UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
     uint8_t output_best_effort_size;
-    mrOutputReliableStream output_reliable[MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
+    mrOutputReliableStream output_reliable[UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
     uint8_t output_reliable_size;
-    mrInputBestEffortStream input_best_effort[MR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS];
+    mrInputBestEffortStream input_best_effort[UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS];
     uint8_t input_best_effort_size;
-    mrInputReliableStream input_reliable[MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
+    mrInputReliableStream input_reliable[UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
     uint8_t input_reliable_size;
 
 } mrStreamStorage;

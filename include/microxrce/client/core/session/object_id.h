@@ -23,12 +23,12 @@ extern "C"
 #include <microxrce/client/dll.h>
 #include <stdint.h>
 
-extern const uint8_t MR_PARTICIPANT_ID;
-extern const uint8_t MR_TOPIC_ID;
-extern const uint8_t MR_PUBLISHER_ID;
-extern const uint8_t MR_SUBSCRIBER_ID;
-extern const uint8_t MR_DATAWRITER_ID;
-extern const uint8_t MR_DATAREADER_ID;
+extern const uint8_t UXR_PARTICIPANT_ID;
+extern const uint8_t UXR_TOPIC_ID;
+extern const uint8_t UXR_PUBLISHER_ID;
+extern const uint8_t UXR_SUBSCRIBER_ID;
+extern const uint8_t UXR_DATAWRITER_ID;
+extern const uint8_t UXR_DATAREADER_ID;
 
 typedef struct mrObjectId
 {

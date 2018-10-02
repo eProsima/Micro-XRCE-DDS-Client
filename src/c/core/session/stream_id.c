@@ -16,13 +16,13 @@ mrStreamId mr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection dire
 
     switch(type)
     {
-        case MR_NONE_STREAM:
+        case UXR_NONE_STREAM:
             stream_id.raw = index;
             break;
-        case MR_BEST_EFFORT_STREAM:
+        case UXR_BEST_EFFORT_STREAM:
             stream_id.raw = (uint8_t)(index + BEST_EFFORT_STREAM_THRESHOLD);
             break;
-        case MR_RELIABLE_STREAM:
+        case UXR_RELIABLE_STREAM:
             stream_id.raw = (uint8_t)(index + RELIABLE_STREAM_THRESHOLD);
             break;
     }
@@ -39,17 +39,17 @@ mrStreamId mr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direct
     if(BEST_EFFORT_STREAM_THRESHOLD > stream_id_raw)
     {
         stream_id.index = stream_id_raw;
-        stream_id.type = MR_NONE_STREAM;
+        stream_id.type = UXR_NONE_STREAM;
     }
     else if(RELIABLE_STREAM_THRESHOLD > stream_id_raw)
     {
         stream_id.index = (uint8_t)(stream_id_raw - BEST_EFFORT_STREAM_THRESHOLD);
-        stream_id.type = MR_BEST_EFFORT_STREAM;
+        stream_id.type = UXR_BEST_EFFORT_STREAM;
     }
     else
     {
         stream_id.index = (uint8_t)(stream_id_raw - RELIABLE_STREAM_THRESHOLD);
-        stream_id.type = MR_RELIABLE_STREAM;
+        stream_id.type = UXR_RELIABLE_STREAM;
     }
 
     return stream_id;

@@ -1,12 +1,12 @@
 #include <microxrce/client/core/session/object_id.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 
-const uint8_t MR_PARTICIPANT_ID = OBJK_PARTICIPANT;
-const uint8_t MR_TOPIC_ID = OBJK_TOPIC;
-const uint8_t MR_PUBLISHER_ID = OBJK_PUBLISHER;
-const uint8_t MR_SUBSCRIBER_ID = OBJK_SUBSCRIBER;
-const uint8_t MR_DATAWRITER_ID = OBJK_DATAWRITER;
-const uint8_t MR_DATAREADER_ID = OBJK_DATAREADER;
+const uint8_t UXR_PARTICIPANT_ID = OBJK_PARTICIPANT;
+const uint8_t UXR_TOPIC_ID = OBJK_TOPIC;
+const uint8_t UXR_PUBLISHER_ID = OBJK_PUBLISHER;
+const uint8_t UXR_SUBSCRIBER_ID = OBJK_SUBSCRIBER;
+const uint8_t UXR_DATAWRITER_ID = OBJK_DATAWRITER;
+const uint8_t UXR_DATAREADER_ID = OBJK_DATAREADER;
 
 //==================================================================
 //                             PUBLIC

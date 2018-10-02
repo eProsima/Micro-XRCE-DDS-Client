@@ -25,17 +25,17 @@ extern "C"
 #include <stdbool.h>
 #include <microxrce/client/config.h>
 
-#define MR_FRAMING_END_FLAG 0x7E
-#define MR_FRAMING_ESC_FLAG 0x7D
-#define MR_FRAMING_XOR_FLAG 0x20
+#define UXR_FRAMING_END_FLAG 0x7E
+#define UXR_FRAMING_ESC_FLAG 0x7D
+#define UXR_FRAMING_XOR_FLAG 0x20
 
-#define MR_SERIAL_MTU          MR_CONFIG_SERIAL_TRANSPORT_MTU //TODO: Change the name for a generic serial mtu.
-#define MR_SERIAL_OVERHEAD     5
-#define MR_SERIAL_BUFFER_SIZE  (2 * (MR_SERIAL_MTU + MR_SERIAL_OVERHEAD))
+#define UXR_SERIAL_MTU          UXR_CONFIG_SERIAL_TRANSPORT_MTU //TODO: Change the name for a generic serial mtu.
+#define UXR_SERIAL_OVERHEAD     5
+#define UXR_SERIAL_BUFFER_SIZE  (2 * (UXR_SERIAL_MTU + UXR_SERIAL_OVERHEAD))
 
 typedef struct mrSerialInputBuffer
 {
-    uint8_t buffer[MR_SERIAL_BUFFER_SIZE];
+    uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
     uint16_t head;
     uint16_t marker;
     uint16_t tail;
@@ -45,7 +45,7 @@ typedef struct mrSerialInputBuffer
 
 typedef struct mrSerialOutputBuffer
 {
-    uint8_t buffer[MR_SERIAL_BUFFER_SIZE];
+    uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
 
 } mrSerialOutputBuffer;
 

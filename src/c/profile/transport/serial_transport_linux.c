@@ -121,7 +121,7 @@ bool mr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t r
     init_serial_io(&transport->serial_io);
 
     /* Send init flag. */
-    uint8_t flag = MR_FRAMING_END_FLAG;
+    uint8_t flag = UXR_FRAMING_END_FLAG;
     ssize_t bytes_written = write(transport->poll_fd.fd, &flag, 1);
     if (0 < bytes_written && 1 == bytes_written)
     {
@@ -133,7 +133,7 @@ bool mr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t r
         transport->comm.send_msg = send_serial_msg;
         transport->comm.recv_msg = recv_serial_msg;
         transport->comm.comm_error = get_serial_error;
-        transport->comm.mtu = MR_CONFIG_SERIAL_TRANSPORT_MTU;
+        transport->comm.mtu = UXR_CONFIG_SERIAL_TRANSPORT_MTU;
         rv = true;
     }
 

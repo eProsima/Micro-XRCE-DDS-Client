@@ -255,34 +255,34 @@ const char* reply_to_string(const BaseObjectReply* reply)
     char status[64];
     switch(reply->result.status)
     {
-        case MR_STATUS_OK:
+        case UXR_STATUS_OK:
             sprintf(status, "OK");
             break;
-        case MR_STATUS_OK_MATCHED:
+        case UXR_STATUS_OK_MATCHED:
             sprintf(status, "OK_MATCHED");
             break;
-        case MR_STATUS_ERR_DDS_ERROR:
+        case UXR_STATUS_ERR_DDS_ERROR:
             sprintf(status, "ERR_DDS_ERROR");
             break;
-        case MR_STATUS_ERR_MISMATCH:
+        case UXR_STATUS_ERR_MISMATCH:
             sprintf(status, "ERR_MISMATCH");
             break;
-        case MR_STATUS_ERR_ALREADY_EXISTS:
+        case UXR_STATUS_ERR_ALREADY_EXISTS:
             sprintf(status, "ERR_ALREADY_EXISTS");
             break;
-        case MR_STATUS_ERR_DENIED:
+        case UXR_STATUS_ERR_DENIED:
             sprintf(status, "ERR_DENIED");
             break;
-        case MR_STATUS_ERR_UNKNOWN_REFERENCE:
+        case UXR_STATUS_ERR_UNKNOWN_REFERENCE:
             sprintf(status, "ERR_UNKNOWN_REFERENCE");
             break;
-        case MR_STATUS_ERR_INVALID_DATA:
+        case UXR_STATUS_ERR_INVALID_DATA:
             sprintf(status, "ERR_INVALID_DATA");
             break;
-        case MR_STATUS_ERR_INCOMPATIBLE:
+        case UXR_STATUS_ERR_INCOMPATIBLE:
             sprintf(status, "ERR_INCOMPATIBLE");
             break;
-        case MR_STATUS_ERR_RESOURCES:
+        case UXR_STATUS_ERR_RESOURCES:
             sprintf(status, "ERR_RESOURCES");
             break;
         default:
@@ -367,9 +367,9 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
             sprintf(content, "UNKNOWN");
     }
 
-    const char* reuse_flag = (flags & MR_REUSE) ? "REUSE" : "";
-    const char* replace_flag = (flags & MR_REPLACE) ? "REPLACE" : "";
-    const char* separator = ((flags & MR_REUSE && flags & MR_REPLACE) || (!(flags & MR_REUSE) && !(flags & MR_REPLACE))) ? " " : "";
+    const char* reuse_flag = (flags & UXR_REUSE) ? "REUSE" : "";
+    const char* replace_flag = (flags & UXR_REPLACE) ? "REPLACE" : "";
+    const char* separator = ((flags & UXR_REUSE && flags & UXR_REPLACE) || (!(flags & UXR_REUSE) && !(flags & UXR_REPLACE))) ? " " : "";
 
     printf("%s[CREATE | %s%s%s | %s | %s]%s",
             pre,

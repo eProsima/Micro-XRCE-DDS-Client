@@ -22,7 +22,7 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 int main(int args, char** argv)
 {
@@ -59,7 +59,7 @@ int main(int args, char** argv)
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
     mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
-    mrObjectId datawriter_id = mr_object_id((uint16_t)atoi(argv[4]), MR_DATAWRITER_ID);
+    mrObjectId datawriter_id = mr_object_id((uint16_t)atoi(argv[4]), UXR_DATAWRITER_ID);
 
     // Write topics
     bool connected = true;

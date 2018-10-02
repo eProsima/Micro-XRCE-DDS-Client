@@ -25,16 +25,16 @@ extern "C"
 
 typedef enum mrStreamType
 {
-    MR_NONE_STREAM,
-    MR_BEST_EFFORT_STREAM,
-    MR_RELIABLE_STREAM
+    UXR_NONE_STREAM,
+    UXR_BEST_EFFORT_STREAM,
+    UXR_RELIABLE_STREAM
 
 } mrStreamType;
 
 typedef enum mrStreamDirection
 {
-    MR_INPUT_STREAM,
-    MR_OUTPUT_STREAM
+    UXR_INPUT_STREAM,
+    UXR_OUTPUT_STREAM
 
 } mrStreamDirection;
 

@@ -23,7 +23,7 @@ extern "C"
 #include <microxrce/client/core/session/session_info.h>
 #include <microxrce/client/core/session/stream_storage.h>
 
-#define MR_TIMEOUT_INF       -1
+#define UXR_TIMEOUT_INF       -1
 
 struct mrSession;
 struct mrCommunication;

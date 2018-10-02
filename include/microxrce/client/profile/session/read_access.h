@@ -22,9 +22,9 @@ extern "C"
 
 #include <microxrce/client/core/session/session.h>
 
-#define MR_MAX_SAMPLES_UNLIMITED        0xFFFF
-#define MR_MAX_ELAPSED_TIME_UNLIMITED   0x0000
-#define MR_MAX_BYTES_PER_SECOND_UNLIMITED   0x0000
+#define UXR_MAX_SAMPLES_UNLIMITED        0xFFFF
+#define UXR_MAX_ELAPSED_TIME_UNLIMITED   0x0000
+#define UXR_MAX_BYTES_PER_SECOND_UNLIMITED   0x0000
 
 typedef struct mrDeliveryControl
 {

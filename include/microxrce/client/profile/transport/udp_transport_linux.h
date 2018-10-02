@@ -27,7 +27,7 @@ extern "C"
 
 typedef struct mrUDPTransport
 {
-    uint8_t buffer[MR_CONFIG_UDP_TRANSPORT_MTU];
+    uint8_t buffer[UXR_CONFIG_UDP_TRANSPORT_MTU];
     int socket_fd;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;

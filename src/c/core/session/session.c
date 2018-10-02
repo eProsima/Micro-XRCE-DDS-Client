@@ -82,8 +82,8 @@ bool mr_create_session(mrSession* session)
     write_create_session(&session->info, &mb, get_milli_time());
     stamp_create_session_header(&session->info, mb.init);
 
-    bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
-    bool created = received && MR_STATUS_OK == session->info.last_requested_status;
+    bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&mb), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
+    bool created = received && UXR_STATUS_OK == session->info.last_requested_status;
     return created;
 }
 
@@ -96,8 +96,8 @@ bool mr_delete_session(mrSession* session)
     write_delete_session(&session->info, &mb);
     stamp_session_header(&session->info, 0, 0, mb.init);
 
-    bool received = wait_session_status(session, delete_session_buffer, ucdr_buffer_length(&mb), MR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
-    return received && MR_STATUS_OK == session->info.last_requested_status;
+    bool received = wait_session_status(session, delete_session_buffer, ucdr_buffer_length(&mb), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
+    return received && UXR_STATUS_OK == session->info.last_requested_status;
 }
 
 mrStreamId mr_create_output_best_effort_stream(mrSession* session, uint8_t* buffer, size_t size)
@@ -161,7 +161,7 @@ bool mr_run_session_until_all_status(mrSession* session, int timeout_ms, const u
 
     for(unsigned i = 0; i < list_size; ++i)
     {
-        status_list[i] = MR_STATUS_NONE;
+        status_list[i] = UXR_STATUS_NONE;
     }
 
     session->request_list = request_list;
@@ -176,8 +176,8 @@ bool mr_run_session_until_all_status(mrSession* session, int timeout_ms, const u
         status_confirmed = true;
         for(unsigned i = 0; i < list_size && status_confirmed; ++i)
         {
-            status_confirmed = status_list[i] != MR_STATUS_NONE
-                            || request_list[i] == MR_INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
+            status_confirmed = status_list[i] != UXR_STATUS_NONE
+                            || request_list[i] == UXR_INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
         }
     }
 
@@ -186,7 +186,7 @@ bool mr_run_session_until_all_status(mrSession* session, int timeout_ms, const u
     bool status_ok = true;
     for(unsigned i = 0; i < list_size && status_ok; ++i)
     {
-        status_ok = status_list[i] == MR_STATUS_OK || status_list[i] == MR_STATUS_OK_MATCHED;
+        status_ok = status_list[i] == UXR_STATUS_OK || status_list[i] == UXR_STATUS_OK_MATCHED;
     }
 
     return status_ok;
@@ -198,7 +198,7 @@ bool mr_run_session_until_one_status(mrSession* session, int timeout_ms, const u
 
     for(unsigned i = 0; i < list_size; ++i)
     {
-        status_list[i] = MR_STATUS_NONE;
+        status_list[i] = UXR_STATUS_NONE;
     }
 
     session->request_list = request_list;
@@ -212,8 +212,8 @@ bool mr_run_session_until_one_status(mrSession* session, int timeout_ms, const u
         timeout = !listen_message_reliably(session, timeout_ms);
         for(unsigned i = 0; i < list_size && !status_confirmed; ++i)
         {
-            status_confirmed = status_list[i] != MR_STATUS_NONE
-                            || request_list[i] == MR_INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
+            status_confirmed = status_list[i] != UXR_STATUS_NONE
+                            || request_list[i] == UXR_INVALID_REQUEST_ID; //CHECK: better give an error? an assert?
         }
     }
 
@@ -227,7 +227,7 @@ void mr_flash_output_streams(mrSession* session)
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
         mrOutputBestEffortStream* stream = &session->streams.output_best_effort[i];
-        mrStreamId id = mr_stream_id(i, MR_BEST_EFFORT_STREAM, MR_OUTPUT_STREAM);
+        mrStreamId id = mr_stream_id(i, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
 
         uint8_t* buffer; size_t length; mrSeqNum seq_num;
         if(prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
@@ -240,7 +240,7 @@ void mr_flash_output_streams(mrSession* session)
     for(uint8_t i = 0; i < session->streams.output_reliable_size; ++i)
     {
         mrOutputReliableStream* stream = &session->streams.output_reliable[i];
-        mrStreamId id = mr_stream_id(i, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
+        mrStreamId id = mr_stream_id(i, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
         uint8_t* buffer; size_t length; mrSeqNum seq_num;
         while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
@@ -279,7 +279,7 @@ bool listen_message_reliably(mrSession* session, int poll_ms)
         for(uint8_t i = 0; i < session->streams.output_reliable_size; ++i)
         {
             mrOutputReliableStream* stream = &session->streams.output_reliable[i];
-            mrStreamId id = mr_stream_id(i, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
+            mrStreamId id = mr_stream_id(i, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
             if(update_output_stream_heartbeat_timestamp(stream, timestamp))
             {
@@ -312,16 +312,16 @@ bool listen_message_reliably(mrSession* session, int poll_ms)
 
 bool wait_session_status(mrSession* session, uint8_t* buffer, size_t length, size_t attempts)
 {
-    session->info.last_requested_status = MR_STATUS_NONE;
+    session->info.last_requested_status = UXR_STATUS_NONE;
 
-    int poll_ms = MR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
-    for(size_t i = 0; i < attempts && session->info.last_requested_status == MR_STATUS_NONE; ++i)
+    int poll_ms = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
+    for(size_t i = 0; i < attempts && session->info.last_requested_status == UXR_STATUS_NONE; ++i)
     {
         send_message(session, buffer, length);
-        poll_ms = listen_message(session, poll_ms) ? MR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL : poll_ms * 2;
+        poll_ms = listen_message(session, poll_ms) ? UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL : poll_ms * 2;
     }
 
-    return session->info.last_requested_status != MR_STATUS_NONE;
+    return session->info.last_requested_status != UXR_STATUS_NONE;
 }
 
 inline void send_message(const mrSession* session, uint8_t* buffer, size_t length)
@@ -371,7 +371,7 @@ void read_message(mrSession* session, ucdrBuffer* mb)
     uint8_t stream_id_raw; mrSeqNum seq_num;
     if(read_session_header(&session->info, mb, &stream_id_raw, &seq_num))
     {
-        mrStreamId id = mr_stream_id_from_raw(stream_id_raw, MR_INPUT_STREAM);
+        mrStreamId id = mr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, mb, id, seq_num);
     }
 }
@@ -380,13 +380,13 @@ void read_stream(mrSession* session, ucdrBuffer* mb, mrStreamId stream_id, mrSeq
 {
     switch(stream_id.type)
     {
-        case MR_NONE_STREAM:
+        case UXR_NONE_STREAM:
         {
-            stream_id = mr_stream_id_from_raw((uint8_t)seq_num, MR_INPUT_STREAM); // The real stream_id is into seq_num
+            stream_id = mr_stream_id_from_raw((uint8_t)seq_num, UXR_INPUT_STREAM); // The real stream_id is into seq_num
             read_submessage_list(session, mb, stream_id);
             break;
         }
-        case MR_BEST_EFFORT_STREAM:
+        case UXR_BEST_EFFORT_STREAM:
         {
             mrInputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
             if(stream && receive_best_effort_message(stream, seq_num))
@@ -395,7 +395,7 @@ void read_stream(mrSession* session, ucdrBuffer* mb, mrStreamId stream_id, mrSeq
             }
             break;
         }
-        case MR_RELIABLE_STREAM:
+        case UXR_RELIABLE_STREAM:
         {
             mrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
             if(stream && receive_reliable_message(stream, seq_num, mb->iterator, ucdr_buffer_size(mb)))
@@ -429,14 +429,14 @@ void read_submessage(mrSession* session, ucdrBuffer* submessage, uint8_t submess
     switch(submessage_id)
     {
         case SUBMESSAGE_ID_STATUS_AGENT:
-            if(stream_id.type == MR_NONE_STREAM)
+            if(stream_id.type == UXR_NONE_STREAM)
             {
                 read_create_session_status(&session->info, submessage);
             }
             break;
 
         case SUBMESSAGE_ID_STATUS:
-            if(stream_id.type == MR_NONE_STREAM)
+            if(stream_id.type == UXR_NONE_STREAM)
             {
                 read_delete_session_status(&session->info, submessage);
             }
@@ -494,7 +494,7 @@ void read_submessage_data(mrSession* session, ucdrBuffer* submessage, uint16_t l
     mrObjectId object_id; uint16_t request_id;
     parse_base_object_request(&base, &object_id, &request_id);
 
-    process_status(session, object_id, request_id, MR_STATUS_OK);
+    process_status(session, object_id, request_id, UXR_STATUS_OK);
 
     if(session->on_topic != NULL)
     {

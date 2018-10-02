@@ -36,8 +36,8 @@
 #define RESTORE_COLOR       "\x1B[0m"
 
 // Getting the max MTU at compile time.
-#define MAX_UDP_TCP_MTU ((MR_CONFIG_UDP_TRANSPORT_MTU > MR_CONFIG_TCP_TRANSPORT_MTU) ? MR_CONFIG_UDP_TRANSPORT_MTU : MR_CONFIG_UDP_TRANSPORT_MTU)
-#define MAX_TRANSPORT_MTU ((MR_CONFIG_SERIAL_TRANSPORT_MTU > MAX_UDP_TCP_MTU) ? MR_CONFIG_SERIAL_TRANSPORT_MTU : MAX_UDP_TCP_MTU)
+#define MAX_UDP_TCP_MTU ((UXR_CONFIG_UDP_TRANSPORT_MTU > UXR_CONFIG_TCP_TRANSPORT_MTU) ? UXR_CONFIG_UDP_TRANSPORT_MTU : UXR_CONFIG_UDP_TRANSPORT_MTU)
+#define MAX_TRANSPORT_MTU ((UXR_CONFIG_SERIAL_TRANSPORT_MTU > MAX_UDP_TCP_MTU) ? UXR_CONFIG_SERIAL_TRANSPORT_MTU : MAX_UDP_TCP_MTU)
 
 // Stream buffers
 #define MAX_HISTORY        16
@@ -153,28 +153,28 @@ int main(int args, char** argv)
     mr_set_topic_callback(&session, on_topic, NULL);
     mr_set_status_callback(&session, on_status, NULL);
 
-    uint8_t output_best_effort_stream_buffer[MAX_TRANSPORT_MTU * MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
-    uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE * MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
-    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE * MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
+    uint8_t output_best_effort_stream_buffer[MAX_TRANSPORT_MTU * UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
+    uint8_t output_reliable_stream_buffer[MAX_BUFFER_SIZE * UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
+    uint8_t input_reliable_stream_buffer[MAX_BUFFER_SIZE * UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
 
-    for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
+    for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
     {
         (void) mr_create_output_best_effort_stream(&session, output_best_effort_stream_buffer + MAX_TRANSPORT_MTU * i, comm->mtu);
     }
-    for(int i = 0; i < MR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
+    for(int i = 0; i < UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
     {
         (void) mr_create_input_best_effort_stream(&session);
     }
-    for(int i = 0; i < MR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
+    for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
     {
         (void) mr_create_output_reliable_stream(&session, output_reliable_stream_buffer + MAX_BUFFER_SIZE * i, comm->mtu * history, history);
     }
-    for(int i = 0; i < MR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
+    for(int i = 0; i < UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
     {
         (void) mr_create_input_reliable_stream(&session, input_reliable_stream_buffer + MAX_BUFFER_SIZE * i, comm->mtu * history, history);
     }
 
-    mrStreamId default_output = mr_stream_id(0, MR_RELIABLE_STREAM, MR_OUTPUT_STREAM);
+    mrStreamId default_output = mr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
     // Waiting user commands
     char command_stdin_line[256];
@@ -237,42 +237,42 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     }
     else if(0 == strcmp(name, "create_participant") && 2 == length)
     {
-        mrObjectId participant_id = mr_object_id((uint16_t)arg1, MR_PARTICIPANT_ID);
+        mrObjectId participant_id = mr_object_id((uint16_t)arg1, UXR_PARTICIPANT_ID);
         const char* participant_ref = "default_xrce_participant_profile";
         (void) mr_write_create_participant_ref(session, *stream_id, participant_id, 0, participant_ref, 0);
     }
     else if(0 == strcmp(name, "create_topic") && 3 == length)
     {
-        mrObjectId topic_id = mr_object_id((uint16_t)arg1, MR_TOPIC_ID);
-        mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
+        mrObjectId topic_id = mr_object_id((uint16_t)arg1, UXR_TOPIC_ID);
+        mrObjectId participant_id = mr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* topic_xml = "<dds><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
         (void) mr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
     }
     else if(0 == strcmp(name, "create_publisher") && 3 == length)
     {
-        mrObjectId publisher_id = mr_object_id((uint16_t)arg1, MR_PUBLISHER_ID);
-        mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
+        mrObjectId publisher_id = mr_object_id((uint16_t)arg1, UXR_PUBLISHER_ID);
+        mrObjectId participant_id = mr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* publisher_xml = "<publisher name=\"MyPublisher\">";
         (void) mr_write_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
     else if(0 == strcmp(name, "create_subscriber") && 3 == length)
     {
-        mrObjectId subscriber_id = mr_object_id((uint16_t)arg1, MR_SUBSCRIBER_ID);
-        mrObjectId participant_id = mr_object_id((uint16_t)arg2, MR_PARTICIPANT_ID);
+        mrObjectId subscriber_id = mr_object_id((uint16_t)arg1, UXR_SUBSCRIBER_ID);
+        mrObjectId participant_id = mr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* subscriber_xml = { "<subscriber name=\"MySubscriber\">" };
         (void) mr_write_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
     else if(0 == strcmp(name, "create_datawriter") && 3 == length)
     {
-        mrObjectId datawriter_id = mr_object_id((uint16_t)arg1, MR_DATAWRITER_ID);
-        mrObjectId publisher_id = mr_object_id((uint16_t)arg2, MR_PUBLISHER_ID);
+        mrObjectId datawriter_id = mr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
+        mrObjectId publisher_id = mr_object_id((uint16_t)arg2, UXR_PUBLISHER_ID);
         const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
         (void) mr_write_configure_datawriter_xml(session, *stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
     }
     else if(0 == strcmp(name, "create_datareader") && 3 == length)
     {
-        mrObjectId datareader_id = mr_object_id((uint16_t)arg1, MR_DATAREADER_ID);
-        mrObjectId subscriber_id = mr_object_id((uint16_t)arg2, MR_SUBSCRIBER_ID);
+        mrObjectId datareader_id = mr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
+        mrObjectId subscriber_id = mr_object_id((uint16_t)arg2, UXR_SUBSCRIBER_ID);
         const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
         (void) mr_write_configure_datareader_xml(session, *stream_id, datareader_id, subscriber_id, datareader_xml, 0);
     }
@@ -287,8 +287,8 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
             topic.shapesize = arg5;
         }
 
-        mrObjectId datawriter_id = mr_object_id((uint16_t)arg1, MR_DATAWRITER_ID);
-        mrStreamId output_stream_id = mr_stream_id_from_raw((uint8_t)arg2, MR_INPUT_STREAM);
+        mrObjectId datawriter_id = mr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
+        mrStreamId output_stream_id = mr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
 
         ucdrBuffer mb;
         uint32_t topic_size = ShapeType_size_of_topic(&topic, 0);
@@ -302,17 +302,17 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     {
         mrDeliveryControl delivery_control;
         delivery_control.max_samples = (uint16_t)arg3;
-        delivery_control.max_elapsed_time = MR_MAX_ELAPSED_TIME_UNLIMITED;
-        delivery_control.max_bytes_per_second = MR_MAX_BYTES_PER_SECOND_UNLIMITED;
+        delivery_control.max_elapsed_time = UXR_MAX_ELAPSED_TIME_UNLIMITED;
+        delivery_control.max_bytes_per_second = UXR_MAX_BYTES_PER_SECOND_UNLIMITED;
         delivery_control.min_pace_period = 0;
 
-        mrObjectId datareader_id = mr_object_id((uint16_t)arg1, MR_DATAREADER_ID);
-        mrStreamId input_stream_id = mr_stream_id_from_raw((uint8_t)arg2, MR_INPUT_STREAM);
+        mrObjectId datareader_id = mr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
+        mrStreamId input_stream_id = mr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
         (void) mr_write_request_data(session, *stream_id, datareader_id, input_stream_id, &delivery_control);
     }
     else if(0 == strcmp(name, "cancel_data") && 2 == length)
     {
-        mrObjectId datareader_id = mr_object_id((uint16_t)arg1, MR_DATAREADER_ID);
+        mrObjectId datareader_id = mr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
         (void) mr_write_cancel_data(session, *stream_id, datareader_id);
     }
     else if(0 == strcmp(name, "delete") && 3 == length)
@@ -322,7 +322,7 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     }
     else if((0 == strcmp(name, "default_output_stream") || 0 == strcmp(name, "stream")) && 2 == length)
     {
-        *stream_id = mr_stream_id_from_raw((uint8_t)arg1, MR_OUTPUT_STREAM);
+        *stream_id = mr_stream_id_from_raw((uint8_t)arg1, UXR_OUTPUT_STREAM);
     }
     else if(0 == strcmp(name, "delete_session") && 1 == length)
     {
@@ -399,52 +399,52 @@ void print_ShapeType_topic(const ShapeType* shape_topic)
 void print_status(uint8_t status)
 {
     char status_name[128];
-    if(MR_STATUS_OK == status)
+    if(UXR_STATUS_OK == status)
     {
         strcpy(status_name, "OK");
     }
-    else if(MR_STATUS_OK_MATCHED == status)
+    else if(UXR_STATUS_OK_MATCHED == status)
     {
         strcpy(status_name, "OK_MATCHED");
     }
-    else if(MR_STATUS_ERR_DDS_ERROR == status)
+    else if(UXR_STATUS_ERR_DDS_ERROR == status)
     {
         strcpy(status_name, "ERR_DDS_ERROR");
     }
-    else if(MR_STATUS_ERR_MISMATCH == status)
+    else if(UXR_STATUS_ERR_MISMATCH == status)
     {
         strcpy(status_name, "ERR_MISMATCH");
     }
-    else if(MR_STATUS_ERR_ALREADY_EXISTS == status)
+    else if(UXR_STATUS_ERR_ALREADY_EXISTS == status)
     {
         strcpy(status_name, "ERR_ALREADY_EXISTS");
     }
-    else if(MR_STATUS_ERR_DENIED == status)
+    else if(UXR_STATUS_ERR_DENIED == status)
     {
         strcpy(status_name, "ERR_DDS_DENIED");
     }
-    else if(MR_STATUS_ERR_UNKNOWN_REFERENCE == status)
+    else if(UXR_STATUS_ERR_UNKNOWN_REFERENCE == status)
     {
         strcpy(status_name, "UNKNOWN_REFERENCE");
     }
-    else if(MR_STATUS_ERR_INVALID_DATA == status)
+    else if(UXR_STATUS_ERR_INVALID_DATA == status)
     {
         strcpy(status_name, "ERR_INVALID_DATA");
     }
-    else if(MR_STATUS_ERR_INCOMPATIBLE == status)
+    else if(UXR_STATUS_ERR_INCOMPATIBLE == status)
     {
         strcpy(status_name, "ERR_INCOMPATIBLE");
     }
-    else if(MR_STATUS_ERR_RESOURCES == status)
+    else if(UXR_STATUS_ERR_RESOURCES == status)
     {
         strcpy(status_name, "ERR_RESOURCES");
     }
-    else if(MR_STATUS_NONE == status)
+    else if(UXR_STATUS_NONE == status)
     {
         strcpy(status_name, "NONE");
     }
 
-    const char* color = (MR_STATUS_OK == status || MR_STATUS_OK_MATCHED == status) ? GREEN_CONSOLE_COLOR : RED_CONSOLE_COLOR;
+    const char* color = (UXR_STATUS_OK == status || UXR_STATUS_OK_MATCHED == status) ? GREEN_CONSOLE_COLOR : RED_CONSOLE_COLOR;
     printf("%sStatus: %s%s\n", color, status_name, RESTORE_COLOR);
 }
 

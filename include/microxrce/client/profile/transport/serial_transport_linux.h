@@ -26,7 +26,7 @@ extern "C"
 
 typedef struct mrSerialTransport
 {
-    uint8_t buffer[MR_CONFIG_SERIAL_TRANSPORT_MTU];
+    uint8_t buffer[UXR_CONFIG_SERIAL_TRANSPORT_MTU];
     uint8_t remote_addr;
     uint8_t local_addr;
     struct pollfd poll_fd;

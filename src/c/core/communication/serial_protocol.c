@@ -77,8 +77,8 @@ uint16_t process_serial_message(mrSerialInputBuffer* input,
 
     /* Check raw message length. */
     msg_len = (input->head < input->marker) ? (uint16_t)(input->marker - input->head) :
-                                              (uint16_t)(MR_SERIAL_BUFFER_SIZE - input->marker + input->head);
-    if (MR_SERIAL_OVERHEAD > msg_len)
+                                              (uint16_t)(UXR_SERIAL_BUFFER_SIZE - input->marker + input->head);
+    if (UXR_SERIAL_OVERHEAD > msg_len)
     {
         cond = false;
     }
@@ -91,7 +91,7 @@ uint16_t process_serial_message(mrSerialInputBuffer* input,
         payload_len = (uint16_t)(payload_len + (get_next_octet(input, &msg_marker) << 8));
 
         /* Check message length. */
-        if (payload_len > len || payload_len > msg_len - MR_SERIAL_OVERHEAD)
+        if (payload_len > len || payload_len > msg_len - UXR_SERIAL_OVERHEAD)
         {
             cond = false;
         }
@@ -134,7 +134,7 @@ bool init_serial_stream(mrSerialInputBuffer* input)
     bool rv = true;
 
     /* Find BEGIN_FLAG. */
-    while (MR_FRAMING_END_FLAG != input->buffer[input->head])
+    while (UXR_FRAMING_END_FLAG != input->buffer[input->head])
     {
         input->head = (uint16_t)((size_t)(input->head + 1) % sizeof(input->buffer));
         if (input->head == input->tail)
@@ -159,7 +159,7 @@ bool find_serial_message(mrSerialInputBuffer* input)
     bool rv = true;
 
     /* Find END_FLAG. */
-    while (MR_FRAMING_END_FLAG != input->buffer[input->marker])
+    while (UXR_FRAMING_END_FLAG != input->buffer[input->marker])
     {
         input->marker = (uint16_t)((size_t)(input->marker + 1) % sizeof(input->buffer));
         if (input->marker == input->tail)
@@ -183,9 +183,9 @@ uint8_t get_next_octet(mrSerialInputBuffer* input, uint16_t* relative_position)
     uint8_t rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)];
 
     *relative_position = (uint16_t)(*relative_position + 1);
-    if (MR_FRAMING_ESC_FLAG == rv)
+    if (UXR_FRAMING_ESC_FLAG == rv)
     {
-        rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)] ^ MR_FRAMING_XOR_FLAG;
+        rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)] ^ UXR_FRAMING_XOR_FLAG;
         *relative_position = (uint16_t)(*relative_position + 1);
     }
 
@@ -196,12 +196,12 @@ bool add_next_octet(mrSerialOutputBuffer* output, uint8_t octet, uint16_t* posit
 {
     bool rv = false;
 
-    if (MR_FRAMING_END_FLAG == octet || MR_FRAMING_ESC_FLAG == octet)
+    if (UXR_FRAMING_END_FLAG == octet || UXR_FRAMING_ESC_FLAG == octet)
     {
         if (*position < sizeof(output->buffer))
         {
-            output->buffer[*position] = MR_FRAMING_ESC_FLAG;
-            output->buffer[*position + 1] = octet ^ MR_FRAMING_XOR_FLAG;
+            output->buffer[*position] = UXR_FRAMING_ESC_FLAG;
+            output->buffer[*position + 1] = octet ^ UXR_FRAMING_XOR_FLAG;
             *position = (uint16_t)(*position + 2);
             rv = true;
         }
@@ -235,7 +235,7 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
     uint16_t writing_len = 0;
 
     /* Check output buffer size. */
-    if (MR_SERIAL_MTU < len || sizeof(serial_io->output.buffer) - MR_SERIAL_OVERHEAD < len)
+    if (UXR_SERIAL_MTU < len || sizeof(serial_io->output.buffer) - UXR_SERIAL_OVERHEAD < len)
     {
         cond = false;
     }
@@ -267,7 +267,7 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
             /* Write end flag. */
             if (cond)
             {
-                serial_io->output.buffer[position] = MR_FRAMING_END_FLAG;
+                serial_io->output.buffer[position] = UXR_FRAMING_END_FLAG;
             }
         }
     }

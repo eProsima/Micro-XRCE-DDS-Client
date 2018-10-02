@@ -7,7 +7,7 @@
 //==================================================================
 uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id)
 {
-    uint16_t request_id = MR_INVALID_REQUEST_ID;
+    uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     DELETE_Payload payload;
 
@@ -31,7 +31,7 @@ uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
                                   mrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
                                   CREATE_Payload* payload)
 {
-    uint16_t request_id = MR_INVALID_REQUEST_ID;
+    uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     // Change this when microcdr supports size_of function. Currently, DOMAIN_ID is not supported.
     uint16_t payload_length = 0; //CREATE_Payload_size(&payload);

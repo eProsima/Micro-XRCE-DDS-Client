@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct ucdrBuffer* mb, void* args)
 {
@@ -70,9 +70,9 @@ int main(int args, char** argv)
 
     // Request topics
     mrDeliveryControl delivery_control = {0};
-    delivery_control.max_samples = MR_MAX_SAMPLES_UNLIMITED;
+    delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
 
-    mrObjectId datareader_id = mr_object_id((uint16_t)atoi(argv[4]), MR_DATAREADER_ID);
+    mrObjectId datareader_id = mr_object_id((uint16_t)atoi(argv[4]), UXR_DATAREADER_ID);
     uint16_t read_data_req = mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
 
     // Read topics
@@ -80,7 +80,7 @@ int main(int args, char** argv)
     while(connected)
     {
         uint8_t read_data_status;
-        connected = mr_run_session_until_all_status(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        connected = mr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
     }
 
     // Delete resources

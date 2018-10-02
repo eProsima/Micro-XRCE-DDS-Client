@@ -113,7 +113,7 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
     {
         switch (transport->input_buffer.state)
         {
-            case MR_TCP_BUFFER_EMPTY:
+            case UXR_TCP_BUFFER_EMPTY:
             {
                 transport->input_buffer.position = 0;
                 uint8_t size_buf[2];
@@ -126,17 +126,17 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                         transport->input_buffer.msg_size = (uint16_t)(((uint16_t)size_buf[1] << 8) | size_buf[0]);
                         if (transport->input_buffer.msg_size != 0)
                         {
-                            transport->input_buffer.state = MR_TCP_SIZE_READ;
+                            transport->input_buffer.state = UXR_TCP_SIZE_READ;
                         }
                         else
                         {
-                            transport->input_buffer.state = MR_TCP_BUFFER_EMPTY;
+                            transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
                         }
                     }
                     else
                     {
                         transport->input_buffer.msg_size = (uint16_t)size_buf[0];
-                        transport->input_buffer.state = MR_TCP_SIZE_INCOMPLETE;
+                        transport->input_buffer.state = UXR_TCP_SIZE_INCOMPLETE;
                     }
                 }
                 else
@@ -151,7 +151,7 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                 exit_flag = (0 == poll(&transport->poll_fd, 1, 0));
                 break;
             }
-            case MR_TCP_SIZE_INCOMPLETE:
+            case UXR_TCP_SIZE_INCOMPLETE:
             {
                 uint8_t size_msb;
                 ssize_t bytes_received = recv(transport->poll_fd.fd, &size_msb, 1, 0);
@@ -160,11 +160,11 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                     transport->input_buffer.msg_size = (uint16_t)(size_msb << 8) | transport->input_buffer.msg_size;
                     if (transport->input_buffer.msg_size != 0)
                     {
-                        transport->input_buffer.state = MR_TCP_SIZE_READ;
+                        transport->input_buffer.state = UXR_TCP_SIZE_READ;
                     }
                     else
                     {
-                        transport->input_buffer.state = MR_TCP_BUFFER_EMPTY;
+                        transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
                     }
                 }
                 else
@@ -179,7 +179,7 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                 exit_flag = (0 == poll(&transport->poll_fd, 1, 0));
                 break;
             }
-            case MR_TCP_SIZE_READ:
+            case UXR_TCP_SIZE_READ:
             {
                 ssize_t bytes_received = recv(transport->poll_fd.fd,
                                               transport->input_buffer.buffer,
@@ -188,12 +188,12 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                 {
                     if ((uint16_t)bytes_received == transport->input_buffer.msg_size)
                     {
-                        transport->input_buffer.state = MR_TCP_MESSAGE_AVAILABLE;
+                        transport->input_buffer.state = UXR_TCP_MESSAGE_AVAILABLE;
                     }
                     else
                     {
                         transport->input_buffer.position = (uint16_t)bytes_received;
-                        transport->input_buffer.state = MR_TCP_MESSAGE_INCOMPLETE;
+                        transport->input_buffer.state = UXR_TCP_MESSAGE_INCOMPLETE;
                         exit_flag = true;
                     }
                 }
@@ -208,7 +208,7 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                 }
                 break;
             }
-            case MR_TCP_MESSAGE_INCOMPLETE:
+            case UXR_TCP_MESSAGE_INCOMPLETE:
             {
                 ssize_t bytes_received = recv(transport->poll_fd.fd,
                                               transport->input_buffer.buffer + transport->input_buffer.position,
@@ -219,7 +219,7 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                     transport->input_buffer.position = (uint16_t)(transport->input_buffer.position +  bytes_received);
                     if (transport->input_buffer.position == transport->input_buffer.msg_size)
                     {
-                        transport->input_buffer.state = MR_TCP_MESSAGE_AVAILABLE;
+                        transport->input_buffer.state = UXR_TCP_MESSAGE_AVAILABLE;
                     }
                     else
                     {
@@ -237,10 +237,10 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
                 }
                 break;
             }
-            case MR_TCP_MESSAGE_AVAILABLE:
+            case UXR_TCP_MESSAGE_AVAILABLE:
             {
                 rv = transport->input_buffer.msg_size;
-                transport->input_buffer.state = MR_TCP_BUFFER_EMPTY;
+                transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
                 exit_flag = true;
                 break;
             }
@@ -292,7 +292,7 @@ bool mr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t p
             transport->comm.send_msg = send_tcp_msg;
             transport->comm.recv_msg = recv_tcp_msg;
             transport->comm.comm_error = get_tcp_error;
-            transport->comm.mtu = MR_CONFIG_TCP_TRANSPORT_MTU;
+            transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
             rv = true;
         }
     }

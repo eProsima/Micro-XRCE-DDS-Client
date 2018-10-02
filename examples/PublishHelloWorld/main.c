@@ -22,7 +22,7 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 int main(int args, char** argv)
 {
@@ -59,21 +59,21 @@ int main(int args, char** argv)
     mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Create entities
-    mrObjectId participant_id = mr_object_id(0x01, MR_PARTICIPANT_ID);
+    mrObjectId participant_id = mr_object_id(0x01, UXR_PARTICIPANT_ID);
     const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, MR_REPLACE);
+    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
 
-    mrObjectId topic_id = mr_object_id(0x01, MR_TOPIC_ID);
+    mrObjectId topic_id = mr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, MR_REPLACE);
+    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
-    mrObjectId publisher_id = mr_object_id(0x01, MR_PUBLISHER_ID);
+    mrObjectId publisher_id = mr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml = "<publisher name=\"MyPublisher\">";
-    uint16_t publisher_req = mr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, MR_REPLACE);
+    uint16_t publisher_req = mr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
 
-    mrObjectId datawriter_id = mr_object_id(0x01, MR_DATAWRITER_ID);
+    mrObjectId datawriter_id = mr_object_id(0x01, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-    uint16_t datawriter_req = mr_write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, MR_REPLACE);
+    uint16_t datawriter_req = mr_write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[4];

@@ -30,13 +30,13 @@ void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key)
     info->key[2] = (uint8_t)((key << 16) >> 24);
     info->key[3] = (uint8_t)((key << 24) >> 24);
     info->last_request_id = INITIAL_REQUEST_ID;
-    info->last_requested_status = MR_STATUS_NONE;
+    info->last_requested_status = UXR_STATUS_NONE;
 }
 
 void write_create_session(const mrSessionInfo* info, ucdrBuffer* mb, int64_t nanoseconds)
 {
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, MR_REQUEST_LOGIN}};
+    payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
     payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
@@ -58,7 +58,7 @@ void write_delete_session(const mrSessionInfo* info, ucdrBuffer* mb)
 {
     (void) info;
     DELETE_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, MR_REQUEST_LOGOUT}};
+    payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
