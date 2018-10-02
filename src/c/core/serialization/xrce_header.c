@@ -3,7 +3,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void mc_serialize_message_header(mcBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key)
+void serialize_message_header(mcBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key)
 {
     (void) mc_serialize_uint8_t(mb, session_id);
     (void) mc_serialize_uint8_t(mb, stream_id);
@@ -14,7 +14,7 @@ void mc_serialize_message_header(mcBuffer* mb, uint8_t session_id, uint8_t strea
     }
 }
 
-void mc_deserialize_message_header(mcBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key)
+void deserialize_message_header(mcBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key)
 {
     (void) mc_deserialize_uint8_t(mb, session_id);
     (void) mc_deserialize_uint8_t(mb, stream_id);

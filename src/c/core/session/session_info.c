@@ -88,7 +88,7 @@ void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer)
     mcBuffer mb;
     mc_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
-    (void) mc_serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
+    (void) serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
 void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSeqNum seq_num, uint8_t* buffer)
@@ -96,7 +96,7 @@ void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSe
     mcBuffer mb;
     mc_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
-    (void) mc_serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
+    (void) serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }
 
 bool read_session_header(const mrSessionInfo* info, mcBuffer* mb, uint8_t* stream_id_raw, mrSeqNum* seq_num)
@@ -105,7 +105,7 @@ bool read_session_header(const mrSessionInfo* info, mcBuffer* mb, uint8_t* strea
     if(must_be_read)
     {
         uint8_t session_id; uint8_t key[CLIENT_KEY_SIZE];
-        (void) mc_deserialize_message_header(mb, &session_id, stream_id_raw, seq_num, key);
+        (void) deserialize_message_header(mb, &session_id, stream_id_raw, seq_num, key);
 
         must_be_read = session_id == info->id;
         if(must_be_read)
