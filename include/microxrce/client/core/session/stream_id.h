@@ -47,8 +47,8 @@ typedef struct mrStreamId
 
 } mrStreamId;
 
-MRDLLAPI mrStreamId uxr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction);
-MRDLLAPI mrStreamId uxr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction);
+UXRDLLAPI mrStreamId uxr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction);
+UXRDLLAPI mrStreamId uxr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction);
 
 #ifdef __cplusplus
 }

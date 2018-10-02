@@ -38,8 +38,8 @@ typedef struct mrTCPTransport
 } mrTCPTransport;
 
 
-MRDLLAPI bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
-MRDLLAPI bool uxr_close_tcp_transport(mrTCPTransport* transport);
+UXRDLLAPI bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
+UXRDLLAPI bool uxr_close_tcp_transport(mrTCPTransport* transport);
 
 #ifdef __cplusplus
 }

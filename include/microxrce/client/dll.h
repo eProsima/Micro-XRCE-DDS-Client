@@ -19,15 +19,15 @@
 #if defined(_WIN32)
 #if defined(microxrce_client_SHARED)
 #if defined(microxrce_client_EXPORTS)
-#define MRDLLAPI __declspec( dllexport )
+#define UXRDLLAPI __declspec( dllexport )
 #else
-#define MRDLLAPI __declspec( dllimport )
+#define UXRDLLAPI __declspec( dllimport )
 #endif // microxrce_client_EXPORTS
 #else
-#define MRDLLAPI
+#define UXRDLLAPI
 #endif // BUILDING_SHARED_LIBS
 #else
-#define MRDLLAPI
+#define UXRDLLAPI
 #endif // _WIN32
 
 #endif // _MICROXRCE_DLL_H_

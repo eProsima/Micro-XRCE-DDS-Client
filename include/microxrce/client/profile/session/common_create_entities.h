@@ -24,7 +24,7 @@ extern "C"
 
 struct CREATE_Payload;
 
-MRDLLAPI uint16_t uxr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id);
+UXRDLLAPI uint16_t uxr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id);
 
 uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
                               mrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,

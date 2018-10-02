@@ -71,7 +71,7 @@ bool read_session_header(const mrSessionInfo* info, struct ucdrBuffer* mb, uint8
 
 uint8_t session_header_offset(const mrSessionInfo* info);
 
-MRDLLAPI uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, struct BaseObjectRequest* base);
+UXRDLLAPI uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, struct BaseObjectRequest* base);
 void parse_base_object_request(const struct BaseObjectRequest* base, mrObjectId* object_id, uint16_t* request_id);
 
 #ifdef __cplusplus
