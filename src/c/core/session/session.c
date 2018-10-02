@@ -1,9 +1,9 @@
-#include <micrortps/client/core/session/session.h>
-#include <micrortps/client/core/session/submessage.h>
-#include <micrortps/client/core/util/time.h>
-#include <micrortps/client/core/communication/communication.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
-#include <micrortps/client/config.h>
+#include <microxrce/client/core/session/session.h>
+#include <microxrce/client/core/session/submessage.h>
+#include <microxrce/client/core/util/time.h>
+#include <microxrce/client/core/communication/communication.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/config.h>
 #include "log/message.h"
 
 // Autogenerate these defines by the protocol generator tool?

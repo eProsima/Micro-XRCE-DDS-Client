@@ -14,11 +14,11 @@
 
 #include "message.h"
 
-#include <micrortps/client/core/session/session_info.h>
-#include <micrortps/client/core/session/submessage.h>
-#include <micrortps/client/core/util/time.h>
-#include <micrortps/client/core/serialization/xrce_header.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/core/session/session_info.h>
+#include <microxrce/client/core/session/submessage.h>
+#include <microxrce/client/core/util/time.h>
+#include <microxrce/client/core/serialization/xrce_header.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
 
 #include <string.h>
 #include <stdio.h>

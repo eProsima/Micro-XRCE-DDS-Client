@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <micrortps/client/core/session/output_best_effort_stream.h>
+#include <microxrce/client/core/session/output_best_effort_stream.h>
 #include <microcdr/microcdr.h>
 
 #define SUBMESSAGE_MAX 256

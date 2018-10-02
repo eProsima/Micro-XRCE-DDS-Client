@@ -1,6 +1,6 @@
-#include <micrortps/client/profile/session/common_create_entities.h>
-#include <micrortps/client/core/session/submessage.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/profile/session/common_create_entities.h>
+#include <microxrce/client/core/session/submessage.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
 
 //==================================================================
 //                              PUBLIC

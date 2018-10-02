@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <micrortps/client/client.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/client.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>

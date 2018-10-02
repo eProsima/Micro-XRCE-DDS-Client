@@ -14,7 +14,7 @@
 
 #include "HelloWorld.h"
 
-#include <micrortps/client/client.h>
+#include <microxrce/client/client.h>
 #include <microcdr/microcdr.h>
 
 #include <stdio.h>

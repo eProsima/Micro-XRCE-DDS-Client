@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <micrortps/client/client.h>
+#include <microxrce/client/client.h>
 #include <stdio.h>
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi

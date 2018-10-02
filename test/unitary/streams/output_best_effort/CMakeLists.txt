@@ -37,9 +37,9 @@ add_gtest(${PROJECT_NAME}
     SOURCES
         ${SRCS}
     DEPENDENCIES
-        micrortps_client
+        microxrce_client
     )
-target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} microxrce_client ${GTEST_BOTH_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${PROJECT_SOURCE_DIR}

@@ -25,7 +25,7 @@ set(SRC
 add_executable(${PROJECT_NAME} ${SRC})
 set_common_compile_options(${PROJECT_NAME})
 
-target_link_libraries(${PROJECT_NAME} micrortps_client)
+target_link_libraries(${PROJECT_NAME} microxrce_client)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

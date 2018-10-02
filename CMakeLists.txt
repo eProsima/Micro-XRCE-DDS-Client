@@ -13,7 +13,7 @@
 # limitations under the License.
 
 ###############################################################################
-# CMake build rules for Micro RTPS Client
+# CMake build rules for MicroXRCE Client
 ###############################################################################
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
@@ -35,14 +35,14 @@ endif()
 # Product information
 ###############################################################################
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(micrortps_client C)
+    project(microxrce_client C)
     set(PROJECT_VERSION_MAJOR 1)
     set(PROJECT_VERSION_MINOR 0)
     set(PROJECT_VERSION_PATCH 0)
     set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(micrortps_client VERSION "1.0.0" LANGUAGES C)
+    project(microxrce_client VERSION "1.0.0" LANGUAGES C)
 endif()
 
 ###############################################################################
@@ -195,8 +195,8 @@ else()
 endif()
 
 # Create source files with the define
-configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/microxrce/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/microxrce/client/config.h
     )
 
 ###############################################################################
@@ -271,14 +271,14 @@ install(TARGETS ${PROJECT_NAME}
     )
 
 # Install includes
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/micrortps/client/
-    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/microxrce/client/
+    DESTINATION ${INCLUDE_INSTALL_DIR}/microxrce/client
     FILES_MATCHING PATTERN "*.h"
     )
 
 # Install config.h
-install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+install(FILES ${PROJECT_BINARY_DIR}/include/microxrce/client/config.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/microxrce/client
     )
 
 # Export library

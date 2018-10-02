@@ -1,5 +1,5 @@
-#include <micrortps/client/core/session/object_id.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/core/session/object_id.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
 
 const uint8_t MR_PARTICIPANT_ID = OBJK_PARTICIPANT;
 const uint8_t MR_TOPIC_ID = OBJK_TOPIC;

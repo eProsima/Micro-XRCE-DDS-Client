@@ -1,7 +1,7 @@
-#include <micrortps/client/core/session/session_info.h>
-#include <micrortps/client/core/session/submessage.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
-#include <micrortps/client/core/serialization/xrce_header.h>
+#include <microxrce/client/core/session/session_info.h>
+#include <microxrce/client/core/session/submessage.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/core/serialization/xrce_header.h>
 
 #include <string.h>
 

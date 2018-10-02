@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _PRIVATE_MICRORTPS_CORE_SESSION_C_LOG_MESSAGE_H_
-#define _PRIVATE_MICRORTPS_CORE_SESSION_C_LOG_MESSAGE_H_
+#ifndef _PRIVATE_MICROXRCE_CORE_SESSION_C_LOG_MESSAGE_H_
+#define _PRIVATE_MICROXRCE_CORE_SESSION_C_LOG_MESSAGE_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -51,4 +51,4 @@ void print_serialization(int direction, const uint8_t* buffer, size_t size);
 }
 #endif
 
-#endif // _PRIVATE_MICRORTPS_CORE_SESSION_C_LOG_MESSAGE_H_
+#endif // _PRIVATE_MICROXRCE_CORE_SESSION_C_LOG_MESSAGE_H_

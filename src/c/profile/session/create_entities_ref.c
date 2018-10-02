@@ -1,5 +1,5 @@
-#include <micrortps/client/profile/session/create_entities_ref.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/profile/session/create_entities_ref.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <string.h>
 
 static uint16_t create_entity_ref(mrSession* session, mrStreamId stream_id,

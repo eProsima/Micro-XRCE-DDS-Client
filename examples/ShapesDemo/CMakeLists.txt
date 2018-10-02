@@ -34,16 +34,16 @@ else()
 
     target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        micrortps_client
+        microxrce_client
         $<$<BOOL:${WIN32}>:ws2_32>
         )
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/microxrce/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        DESTINATION  examples/microxrce/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"

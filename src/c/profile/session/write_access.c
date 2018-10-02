@@ -1,6 +1,6 @@
-#include <micrortps/client/profile/session/write_access.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
-#include <micrortps/client/core/session/submessage.h>
+#include <microxrce/client/profile/session/write_access.h>
+#include <microxrce/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/core/session/submessage.h>
 
 #define WRITE_DATA_PAYLOAD_SIZE 8
 

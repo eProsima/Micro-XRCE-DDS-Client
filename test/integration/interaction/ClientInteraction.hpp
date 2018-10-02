@@ -4,7 +4,7 @@
 #include "HelloWorld.h"
 #include "Gateway.hpp"
 
-#include <micrortps/client/client.h>
+#include <microxrce/client/client.h>
 #include <microcdr/microcdr.h>
 
 #include <gtest/gtest.h>
