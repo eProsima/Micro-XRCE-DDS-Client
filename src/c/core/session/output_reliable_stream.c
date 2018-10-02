@@ -13,19 +13,19 @@
 #define MAX_HEARTBEAT_TRIES (sizeof(int64_t) * 8 - 1)
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
-static void process_acknack(mrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num);
+static void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num);
 
 static size_t get_output_buffer_length(uint8_t* buffer);
 static void set_output_buffer_length(uint8_t* buffer, size_t length);
-static uint8_t* get_output_buffer(const mrOutputReliableStream* stream, size_t history_pos);
-static size_t get_output_buffer_size(const mrOutputReliableStream* stream);
+static uint8_t* get_output_buffer(const uxrOutputReliableStream* stream, size_t history_pos);
+static size_t get_output_buffer_size(const uxrOutputReliableStream* stream);
 
 // Implementation note: the SUBHEADER_SIZE must be used to represent the header of the fragment.
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
+void init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
 {
     // assert for history (must be 2^)
 
@@ -37,7 +37,7 @@ void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer
     reset_output_reliable_stream(stream);
 }
 
-void reset_output_reliable_stream(mrOutputReliableStream* stream)
+void reset_output_reliable_stream(uxrOutputReliableStream* stream)
 {
     for(size_t i = 0; i < stream->history; i++)
     {
@@ -54,7 +54,7 @@ void reset_output_reliable_stream(mrOutputReliableStream* stream)
     stream->send_lost = false;
 }
 
-bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, ucdrBuffer* mb)
+bool prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* mb)
 {
     bool available_to_write = false;
 
@@ -65,15 +65,15 @@ bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t siz
     if(length + submessage_padding(length) + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
-        mrSeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
+        uxrSeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
         available_to_write = 0 >= seq_num_cmp(stream->last_written, last_available);
     }
     /* Check if the message fit in a new empty buffer */
     else if(stream->offset + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
-        mrSeqNum next = seq_num_add(stream->last_written, 1);
-        mrSeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
+        uxrSeqNum next = seq_num_add(stream->last_written, 1);
+        uxrSeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
         available_to_write = 0 >= seq_num_cmp(next, last_available);
         if(available_to_write)
         {
@@ -94,7 +94,7 @@ bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t siz
     return available_to_write;
 }
 
-bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, mrSeqNum* seq_num)
+bool prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num)
 {
     *seq_num = seq_num_add(stream->last_sent, 1);
     *buffer = get_output_buffer(stream, *seq_num % stream->history);
@@ -115,7 +115,7 @@ bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_
     return data_to_send;
 }
 
-bool update_output_stream_heartbeat_timestamp(mrOutputReliableStream* stream, int64_t current_timestamp)
+bool update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp)
 {
     bool must_confirm = false;
     if(0 > seq_num_cmp(stream->last_acknown, stream->last_sent))
@@ -141,12 +141,12 @@ bool update_output_stream_heartbeat_timestamp(mrOutputReliableStream* stream, in
     return must_confirm;
 }
 
-mrSeqNum begin_output_nack_buffer_it(const mrOutputReliableStream* stream)
+uxrSeqNum begin_output_nack_buffer_it(const uxrOutputReliableStream* stream)
 {
     return stream->last_acknown;
 }
 
-bool next_reliable_nack_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t *length, mrSeqNum* seq_num_it)
+bool next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t *length, uxrSeqNum* seq_num_it)
 {
     bool it_updated = false;
     if(stream->send_lost)
@@ -173,7 +173,7 @@ bool next_reliable_nack_buffer_to_send(mrOutputReliableStream* stream, uint8_t**
     return it_updated;
 }
 
-void write_heartbeat(const mrOutputReliableStream* stream, ucdrBuffer* mb)
+void write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
 {
     HEARTBEAT_Payload payload;
     payload.first_unacked_seq_nr = seq_num_add(stream->last_acknown, 1);
@@ -183,7 +183,7 @@ void write_heartbeat(const mrOutputReliableStream* stream, ucdrBuffer* mb)
     (void) serialize_HEARTBEAT_Payload(mb, &payload);
 }
 
-void read_acknack(mrOutputReliableStream* stream, ucdrBuffer* payload)
+void read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)
 {
     ACKNACK_Payload acknack;
     deserialize_ACKNACK_Payload(payload, &acknack);
@@ -193,7 +193,7 @@ void read_acknack(mrOutputReliableStream* stream, ucdrBuffer* payload)
     process_acknack(stream, nack_bitmap, (uint16_t)seq_num_sub(acknack.first_unacked_seq_num, 1));
 }
 
-bool is_output_reliable_stream_busy(const mrOutputReliableStream* stream)
+bool is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
 {
     return 0 > seq_num_cmp(stream->last_acknown, stream->last_sent);
 }
@@ -201,7 +201,7 @@ bool is_output_reliable_stream_busy(const mrOutputReliableStream* stream)
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void process_acknack(mrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num)
+void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num)
 {
     size_t buffers_to_clean = seq_num_sub(last_acked_seq_num, stream->last_acknown);
     for(size_t i = 0; i < buffers_to_clean; i++)
@@ -220,7 +220,7 @@ void process_acknack(mrOutputReliableStream* stream, uint16_t bitmap, uint16_t l
         }
         else
         {
-            mrSeqNum seq_num = seq_num_add(last_acked_seq_num, i);
+            uxrSeqNum seq_num = seq_num_add(last_acked_seq_num, i);
             uint8_t* internal_buffer = get_output_buffer(stream, seq_num % stream->history);
             set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
         }
@@ -242,12 +242,12 @@ inline void set_output_buffer_length(uint8_t* buffer, size_t length)
     memcpy(buffer - INTERNAL_BUFFER_OFFSET, &length, sizeof(size_t));
 }
 
-inline uint8_t* get_output_buffer(const mrOutputReliableStream* stream, size_t history_pos)
+inline uint8_t* get_output_buffer(const uxrOutputReliableStream* stream, size_t history_pos)
 {
     return stream->buffer + history_pos * (stream->size / stream->history) + INTERNAL_BUFFER_OFFSET;
 }
 
-inline size_t get_output_buffer_size(const mrOutputReliableStream* stream)
+inline size_t get_output_buffer_size(const uxrOutputReliableStream* stream)
 {
     return (stream->size / stream->history) - INTERNAL_BUFFER_OFFSET;
 }

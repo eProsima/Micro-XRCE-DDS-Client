@@ -35,7 +35,7 @@ int main(int args, char** argv)
     uint32_t max_topics = (args == 2) ? (uint32_t)atoi(argv[1]) : UINT32_MAX;
 
     // Transport
-    mrUDPTransport transport;
+    uxrUDPTransport transport;
     if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
@@ -43,7 +43,7 @@ int main(int args, char** argv)
     }
 
     // Session
-    mrSession session;
+    uxrSession session;
     uxr_init_session(&session, &transport.comm, 0xAAAABBBB);
     if(!uxr_create_session(&session))
     {
@@ -53,25 +53,25 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
     uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Create entities
-    mrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
+    uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
     const char* participant_ref = "default_xrce_participant_profile";
     uint16_t participant_req = uxr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
 
-    mrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
+    uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
     uint16_t topic_req = uxr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
-    mrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
+    uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml = "<publisher name=\"MyPublisher\">";
     uint16_t publisher_req = uxr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
 
-    mrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
+    uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
     uint16_t datawriter_req = uxr_write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
 

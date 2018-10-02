@@ -44,15 +44,15 @@ static const uint16_t crc16_table[256] = {
  * Private function declarations.
  *******************************************************************************/
 static void update_crc(uint16_t* crc, const uint8_t data);
-static uint16_t process_serial_message(mrSerialInputBuffer* input,
+static uint16_t process_serial_message(uxrSerialInputBuffer* input,
                                       uint8_t* buf,
                                       size_t len,
                                       uint8_t* src_addr,
                                       uint8_t* rmt_addr);
-static bool init_serial_stream(mrSerialInputBuffer* input);
-static bool find_serial_message(mrSerialInputBuffer* input);
-static inline uint8_t get_next_octet(mrSerialInputBuffer* input, uint16_t* relative_position);
-static inline bool add_next_octet(mrSerialOutputBuffer* output, uint8_t octet, uint16_t* position);
+static bool init_serial_stream(uxrSerialInputBuffer* input);
+static bool find_serial_message(uxrSerialInputBuffer* input);
+static inline uint8_t get_next_octet(uxrSerialInputBuffer* input, uint16_t* relative_position);
+static inline bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet, uint16_t* position);
 
 /*******************************************************************************
  * Private function definitions.
@@ -62,7 +62,7 @@ void update_crc(uint16_t* crc, const uint8_t data)
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-uint16_t process_serial_message(mrSerialInputBuffer* input,
+uint16_t process_serial_message(uxrSerialInputBuffer* input,
                                uint8_t* buf,
                                size_t len,
                                uint8_t* src_addr,
@@ -129,7 +129,7 @@ uint16_t process_serial_message(mrSerialInputBuffer* input,
     return cond ? payload_len : 0;
 }
 
-bool init_serial_stream(mrSerialInputBuffer* input)
+bool init_serial_stream(uxrSerialInputBuffer* input)
 {
     bool rv = true;
 
@@ -154,7 +154,7 @@ bool init_serial_stream(mrSerialInputBuffer* input)
     return rv;
 }
 
-bool find_serial_message(mrSerialInputBuffer* input)
+bool find_serial_message(uxrSerialInputBuffer* input)
 {
     bool rv = true;
 
@@ -178,7 +178,7 @@ bool find_serial_message(mrSerialInputBuffer* input)
     return rv;
 }
 
-uint8_t get_next_octet(mrSerialInputBuffer* input, uint16_t* relative_position)
+uint8_t get_next_octet(uxrSerialInputBuffer* input, uint16_t* relative_position)
 {
     uint8_t rv = input->buffer[(size_t)(input->head + *relative_position) % sizeof(input->buffer)];
 
@@ -192,7 +192,7 @@ uint8_t get_next_octet(mrSerialInputBuffer* input, uint16_t* relative_position)
     return rv;
 }
 
-bool add_next_octet(mrSerialOutputBuffer* output, uint8_t octet, uint16_t* position)
+bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet, uint16_t* position)
 {
     bool rv = false;
 
@@ -222,12 +222,12 @@ bool add_next_octet(mrSerialOutputBuffer* output, uint8_t octet, uint16_t* posit
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-void init_serial_io(mrSerialIO* serial_io)
+void init_serial_io(uxrSerialIO* serial_io)
 {
     serial_io->input.stream_init = false;
 }
 
-uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr)
+uint16_t write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr)
 {
     bool cond = true;
     uint16_t crc = 0;
@@ -275,7 +275,7 @@ uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len,
     return cond ? (uint16_t)(position + 1) : 0;
 }
 
-uint16_t read_serial_msg(mrSerialIO* serial_io,
+uint16_t read_serial_msg(uxrSerialIO* serial_io,
                         uxr_read_cb cb,
                         void* cb_arg,
                         uint8_t* buf,

@@ -26,21 +26,21 @@ extern "C"
 #include <stdbool.h>
 
 struct ucdrBuffer;
-typedef struct mrOutputBestEffortStream
+typedef struct uxrOutputBestEffortStream
 {
     uint8_t* buffer;
     size_t writer;
     size_t size;
     uint8_t offset;
 
-    mrSeqNum last_send;
+    uxrSeqNum last_send;
 
-} mrOutputBestEffortStream;
+} uxrOutputBestEffortStream;
 
-void init_output_best_effort_stream(mrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
-void reset_output_best_effort_stream(mrOutputBestEffortStream* stream);
-bool prepare_best_effort_buffer_to_send(mrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
-bool prepare_best_effort_buffer_to_write(mrOutputBestEffortStream* stream, size_t size, struct ucdrBuffer* mb);
+void init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
+void reset_output_best_effort_stream(uxrOutputBestEffortStream* stream);
+bool prepare_best_effort_buffer_to_send(uxrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
+bool prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, struct ucdrBuffer* mb);
 
 #ifdef __cplusplus
 }

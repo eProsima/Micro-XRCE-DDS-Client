@@ -48,31 +48,31 @@ extern "C"
 struct ucdrBuffer;
 struct BaseObjectRequest;
 
-typedef struct mrSessionInfo
+typedef struct uxrSessionInfo
 {
     uint8_t id;
     uint8_t key[4];
     uint8_t last_requested_status;
     uint16_t last_request_id;
 
-} mrSessionInfo;
+} uxrSessionInfo;
 
 
-void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key);
+void init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key);
 
-void write_create_session(const mrSessionInfo* info, struct ucdrBuffer* mb, int64_t nanoseconds);
-void write_delete_session(const mrSessionInfo* info, struct ucdrBuffer* mb);
-void read_create_session_status(mrSessionInfo* info, struct ucdrBuffer* mb);
-void read_delete_session_status(mrSessionInfo* info, struct ucdrBuffer* mb);
+void write_create_session(const uxrSessionInfo* info, struct ucdrBuffer* mb, int64_t nanoseconds);
+void write_delete_session(const uxrSessionInfo* info, struct ucdrBuffer* mb);
+void read_create_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
+void read_delete_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
 
-void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer);
-void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSeqNum seq_num, uint8_t* buffer);
-bool read_session_header(const mrSessionInfo* info, struct ucdrBuffer* mb, uint8_t* stream_id_raw, mrSeqNum* seq_num);
+void stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer);
+void stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer);
+bool read_session_header(const uxrSessionInfo* info, struct ucdrBuffer* mb, uint8_t* stream_id_raw, uxrSeqNum* seq_num);
 
-uint8_t session_header_offset(const mrSessionInfo* info);
+uint8_t session_header_offset(const uxrSessionInfo* info);
 
-UXRDLLAPI uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, struct BaseObjectRequest* base);
-void parse_base_object_request(const struct BaseObjectRequest* base, mrObjectId* object_id, uint16_t* request_id);
+UXRDLLAPI uint16_t init_base_object_request(uxrSessionInfo* info, uxrObjectId object_id, struct BaseObjectRequest* base);
+void parse_base_object_request(const struct BaseObjectRequest* base, uxrObjectId* object_id, uint16_t* request_id);
 
 #ifdef __cplusplus
 }

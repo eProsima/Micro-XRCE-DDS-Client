@@ -43,13 +43,13 @@
 #define MAX_HISTORY        16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
 
-static bool run_command(const char* command, mrSession* session, mrStreamId* stream_id);
-static bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+static bool run_command(const char* command, uxrSession* session, uxrStreamId* stream_id);
+static bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
-static bool compute_print_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+static bool compute_print_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
-static void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct ucdrBuffer* serialization, void* args);
-static void on_status(mrSession* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
+static void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args);
+static void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
 static void print_ShapeType_topic(const ShapeType* topic);
 static void print_status(uint8_t status);
 static void print_help(void);
@@ -58,14 +58,14 @@ static int check_input(void);
 
 int main(int args, char** argv)
 {
-    mrSession session;
+    uxrSession session;
 #if !defined(WIN32)
-    mrSerialTransport serial;
+    uxrSerialTransport serial;
 #endif
-    mrUDPTransport udp;
-    mrTCPTransport tcp;
+    uxrUDPTransport udp;
+    uxrTCPTransport tcp;
 
-    mrCommunication* comm;
+    uxrCommunication* comm;
 
     int args_index = 0;
 
@@ -174,7 +174,7 @@ int main(int args, char** argv)
         (void) uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer + MAX_BUFFER_SIZE * i, comm->mtu * history, history);
     }
 
-    mrStreamId default_output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    uxrStreamId default_output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
     // Waiting user commands
     char command_stdin_line[256];
@@ -209,7 +209,7 @@ int main(int args, char** argv)
     return 0;
 }
 
-bool run_command(const char* command, mrSession* session, mrStreamId* stream_id)
+bool run_command(const char* command, uxrSession* session, uxrStreamId* stream_id)
 {
     char name[128];
     uint32_t arg1 = 0;
@@ -227,7 +227,7 @@ bool run_command(const char* command, mrSession* session, mrStreamId* stream_id)
     return compute_command(session, stream_id, length, name, arg1, arg2, arg3, arg4, arg5, topic_color);
 }
 
-bool compute_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                      uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color)
 {
     if(0 == strcmp(name, "create_session") && 1 == length)
@@ -237,42 +237,42 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     }
     else if(0 == strcmp(name, "create_participant") && 2 == length)
     {
-        mrObjectId participant_id = uxr_object_id((uint16_t)arg1, UXR_PARTICIPANT_ID);
+        uxrObjectId participant_id = uxr_object_id((uint16_t)arg1, UXR_PARTICIPANT_ID);
         const char* participant_ref = "default_xrce_participant_profile";
         (void) uxr_write_create_participant_ref(session, *stream_id, participant_id, 0, participant_ref, 0);
     }
     else if(0 == strcmp(name, "create_topic") && 3 == length)
     {
-        mrObjectId topic_id = uxr_object_id((uint16_t)arg1, UXR_TOPIC_ID);
-        mrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
+        uxrObjectId topic_id = uxr_object_id((uint16_t)arg1, UXR_TOPIC_ID);
+        uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* topic_xml = "<dds><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType></topic></dds>";
         (void) uxr_write_configure_topic_xml(session, *stream_id, topic_id, participant_id, topic_xml, 0);
     }
     else if(0 == strcmp(name, "create_publisher") && 3 == length)
     {
-        mrObjectId publisher_id = uxr_object_id((uint16_t)arg1, UXR_PUBLISHER_ID);
-        mrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
+        uxrObjectId publisher_id = uxr_object_id((uint16_t)arg1, UXR_PUBLISHER_ID);
+        uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* publisher_xml = "<publisher name=\"MyPublisher\">";
         (void) uxr_write_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
     else if(0 == strcmp(name, "create_subscriber") && 3 == length)
     {
-        mrObjectId subscriber_id = uxr_object_id((uint16_t)arg1, UXR_SUBSCRIBER_ID);
-        mrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
+        uxrObjectId subscriber_id = uxr_object_id((uint16_t)arg1, UXR_SUBSCRIBER_ID);
+        uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* subscriber_xml = { "<subscriber name=\"MySubscriber\">" };
         (void) uxr_write_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
     else if(0 == strcmp(name, "create_datawriter") && 3 == length)
     {
-        mrObjectId datawriter_id = uxr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
-        mrObjectId publisher_id = uxr_object_id((uint16_t)arg2, UXR_PUBLISHER_ID);
+        uxrObjectId datawriter_id = uxr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
+        uxrObjectId publisher_id = uxr_object_id((uint16_t)arg2, UXR_PUBLISHER_ID);
         const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
         (void) uxr_write_configure_datawriter_xml(session, *stream_id, datawriter_id, publisher_id, datawriter_xml, 0);
     }
     else if(0 == strcmp(name, "create_datareader") && 3 == length)
     {
-        mrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
-        mrObjectId subscriber_id = uxr_object_id((uint16_t)arg2, UXR_SUBSCRIBER_ID);
+        uxrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
+        uxrObjectId subscriber_id = uxr_object_id((uint16_t)arg2, UXR_SUBSCRIBER_ID);
         const char* datareader_xml = {"<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>WITH_KEY</kind><name>Square</name><dataType>ShapeType</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>"};
         (void) uxr_write_configure_datareader_xml(session, *stream_id, datareader_id, subscriber_id, datareader_xml, 0);
     }
@@ -287,8 +287,8 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
             topic.shapesize = arg5;
         }
 
-        mrObjectId datawriter_id = uxr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
-        mrStreamId output_stream_id = uxr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
+        uxrObjectId datawriter_id = uxr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
+        uxrStreamId output_stream_id = uxr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
 
         ucdrBuffer mb;
         uint32_t topic_size = ShapeType_size_of_topic(&topic, 0);
@@ -300,24 +300,24 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
     }
     else if(0 == strcmp(name, "request_data") && 4 == length)
     {
-        mrDeliveryControl delivery_control;
+        uxrDeliveryControl delivery_control;
         delivery_control.max_samples = (uint16_t)arg3;
         delivery_control.max_elapsed_time = UXR_MAX_ELAPSED_TIME_UNLIMITED;
         delivery_control.max_bytes_per_second = UXR_MAX_BYTES_PER_SECOND_UNLIMITED;
         delivery_control.min_pace_period = 0;
 
-        mrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
-        mrStreamId input_stream_id = uxr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
+        uxrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
+        uxrStreamId input_stream_id = uxr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
         (void) uxr_write_request_data(session, *stream_id, datareader_id, input_stream_id, &delivery_control);
     }
     else if(0 == strcmp(name, "cancel_data") && 2 == length)
     {
-        mrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
+        uxrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
         (void) uxr_write_cancel_data(session, *stream_id, datareader_id);
     }
     else if(0 == strcmp(name, "delete") && 3 == length)
     {
-        mrObjectId entity_id = uxr_object_id((uint16_t)(arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
+        uxrObjectId entity_id = uxr_object_id((uint16_t)(arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
         (void) uxr_write_delete_entity(session, *stream_id, entity_id);
     }
     else if((0 == strcmp(name, "default_output_stream") || 0 == strcmp(name, "stream")) && 2 == length)
@@ -361,20 +361,20 @@ bool compute_command(mrSession* session, mrStreamId* stream_id, int length, cons
 }
 
 
-static bool compute_print_command(mrSession* session, mrStreamId* stream_id, int length, const char* name,
+static bool compute_print_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color)
 {
     printf("%s\n", name);
     return compute_command(session, stream_id, length, name, arg1, arg2, arg3, arg4, arg5, topic_color);
 }
 
-void on_status(mrSession* session, mrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
+void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
 {
     (void) session; (void) object_id; (void) request_id; (void) args;
     print_status(status);
 }
 
-void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct ucdrBuffer* serialization, void* args)
+void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args)
 {
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args;
 

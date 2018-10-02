@@ -27,35 +27,35 @@ extern "C"
 
 struct ucdrBuffer;
 
-typedef struct mrOutputReliableStream
+typedef struct uxrOutputReliableStream
 {
     uint8_t* buffer;
     size_t size;
     uint16_t history;
     uint8_t offset;
 
-    mrSeqNum last_written;
-    mrSeqNum last_sent;
-    mrSeqNum last_acknown;
+    uxrSeqNum last_written;
+    uxrSeqNum last_sent;
+    uxrSeqNum last_acknown;
 
     int64_t next_heartbeat_timestamp;
     uint8_t next_heartbeat_tries;
     bool send_lost;
 
-} mrOutputReliableStream;
+} uxrOutputReliableStream;
 
-void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
-void reset_output_reliable_stream(mrOutputReliableStream* stream);
-bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, struct ucdrBuffer* mb);
-bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, mrSeqNum* seq_num);
+void init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
+void reset_output_reliable_stream(uxrOutputReliableStream* stream);
+bool prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, struct ucdrBuffer* mb);
+bool prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num);
 
-bool update_output_stream_heartbeat_timestamp(mrOutputReliableStream* stream, int64_t current_timestamp);
-mrSeqNum begin_output_nack_buffer_it(const mrOutputReliableStream* stream);
-bool next_reliable_nack_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t *length, mrSeqNum* seq_num_it);
-void write_heartbeat(const mrOutputReliableStream* stream, struct ucdrBuffer* mb);
-void read_acknack(mrOutputReliableStream* stream, struct ucdrBuffer* payload);
+bool update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp);
+uxrSeqNum begin_output_nack_buffer_it(const uxrOutputReliableStream* stream);
+bool next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t *length, uxrSeqNum* seq_num_it);
+void write_heartbeat(const uxrOutputReliableStream* stream, struct ucdrBuffer* mb);
+void read_acknack(uxrOutputReliableStream* stream, struct ucdrBuffer* payload);
 
-bool is_output_reliable_stream_busy(const mrOutputReliableStream* stream);
+bool is_output_reliable_stream_busy(const uxrOutputReliableStream* stream);
 
 #ifdef __cplusplus
 }

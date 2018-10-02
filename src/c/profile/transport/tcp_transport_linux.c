@@ -12,8 +12,8 @@
 static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
 static int get_tcp_error(void);
-static uint16_t read_tcp_data(mrTCPTransport* transport);
-static inline void disconnect_tcp(mrTCPTransport* transport);
+static uint16_t read_tcp_data(uxrTCPTransport* transport);
+static inline void disconnect_tcp(uxrTCPTransport* transport);
 
 /*******************************************************************************
  * Private function definitions.
@@ -21,7 +21,7 @@ static inline void disconnect_tcp(mrTCPTransport* transport);
 bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
-    mrTCPTransport* transport = (mrTCPTransport*)instance;
+    uxrTCPTransport* transport = (uxrTCPTransport*)instance;
     uint16_t bytes_sent = 0;
     ssize_t send_rv = 0;
     uint8_t msg_size_buf[2];
@@ -70,7 +70,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = false;
-    mrTCPTransport* transport = (mrTCPTransport*)instance;
+    uxrTCPTransport* transport = (uxrTCPTransport*)instance;
 
     int poll_rv = poll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -103,7 +103,7 @@ int get_tcp_error(void)
     return errno;
 }
 
-uint16_t read_tcp_data(mrTCPTransport* transport)
+uint16_t read_tcp_data(uxrTCPTransport* transport)
 {
     uint16_t rv = 0;
     bool exit_flag = false;
@@ -254,7 +254,7 @@ uint16_t read_tcp_data(mrTCPTransport* transport)
     return rv;
 }
 
-void disconnect_tcp(mrTCPTransport* transport)
+void disconnect_tcp(uxrTCPTransport* transport)
 {
     close(transport->poll_fd.fd);
     transport->poll_fd.fd = -1;
@@ -263,7 +263,7 @@ void disconnect_tcp(mrTCPTransport* transport)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port)
+bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -300,7 +300,7 @@ bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t 
     return rv;
 }
 
-bool uxr_close_tcp_transport(mrTCPTransport* transport)
+bool uxr_close_tcp_transport(uxrTCPTransport* transport)
 {
     return (0 == close(transport->poll_fd.fd));
 }

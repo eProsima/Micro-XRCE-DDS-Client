@@ -27,39 +27,39 @@ extern "C"
 #include <microxrce/client/core/session/stream_id.h>
 #include <microxrce/client/config.h>
 
-typedef struct mrStreamStorage
+typedef struct uxrStreamStorage
 {
-    mrOutputBestEffortStream output_best_effort[UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
+    uxrOutputBestEffortStream output_best_effort[UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS];
     uint8_t output_best_effort_size;
-    mrOutputReliableStream output_reliable[UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
+    uxrOutputReliableStream output_reliable[UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS];
     uint8_t output_reliable_size;
-    mrInputBestEffortStream input_best_effort[UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS];
+    uxrInputBestEffortStream input_best_effort[UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS];
     uint8_t input_best_effort_size;
-    mrInputReliableStream input_reliable[UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
+    uxrInputReliableStream input_reliable[UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS];
     uint8_t input_reliable_size;
 
-} mrStreamStorage;
+} uxrStreamStorage;
 
-void init_stream_storage(mrStreamStorage* storage);
-void reset_stream_storage(mrStreamStorage* storage);
+void init_stream_storage(uxrStreamStorage* storage);
+void reset_stream_storage(uxrStreamStorage* storage);
 
-mrStreamId add_output_best_effort_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset);
-mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
-mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage);
-mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history);
+uxrStreamId add_output_best_effort_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset);
+uxrStreamId add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
+uxrStreamId add_input_best_effort_buffer(uxrStreamStorage* storage);
+uxrStreamId add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history);
 
-mrOutputBestEffortStream* get_output_best_effort_stream_id(mrStreamStorage* storage, uint8_t index);
-mrOutputReliableStream* get_output_reliable_stream_id(mrStreamStorage* storage, uint8_t index);
-mrInputBestEffortStream* get_input_best_effort_stream_id(mrStreamStorage* storage, uint8_t index);
-mrInputReliableStream* get_input_reliable_stream_id(mrStreamStorage* storage, uint8_t index);
+uxrOutputBestEffortStream* get_output_best_effort_stream_id(uxrStreamStorage* storage, uint8_t index);
+uxrOutputReliableStream* get_output_reliable_stream_id(uxrStreamStorage* storage, uint8_t index);
+uxrInputBestEffortStream* get_input_best_effort_stream_id(uxrStreamStorage* storage, uint8_t index);
+uxrInputReliableStream* get_input_reliable_stream_id(uxrStreamStorage* storage, uint8_t index);
 
-mrOutputBestEffortStream* get_output_best_effort_stream(mrStreamStorage* storage, uint8_t index);
-mrOutputReliableStream* get_output_reliable_stream(mrStreamStorage* storage, uint8_t index);
-mrInputBestEffortStream* get_input_best_effort_stream(mrStreamStorage* storage, uint8_t index);
-mrInputReliableStream* get_input_reliable_stream(mrStreamStorage* storage, uint8_t index);
+uxrOutputBestEffortStream* get_output_best_effort_stream(uxrStreamStorage* storage, uint8_t index);
+uxrOutputReliableStream* get_output_reliable_stream(uxrStreamStorage* storage, uint8_t index);
+uxrInputBestEffortStream* get_input_best_effort_stream(uxrStreamStorage* storage, uint8_t index);
+uxrInputReliableStream* get_input_reliable_stream(uxrStreamStorage* storage, uint8_t index);
 
-UXRDLLAPI bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, struct ucdrBuffer* mb);
-bool output_streams_confirmed(const mrStreamStorage* storage);
+UXRDLLAPI bool prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* mb);
+bool output_streams_confirmed(const uxrStreamStorage* storage);
 
 #ifdef __cplusplus
 }

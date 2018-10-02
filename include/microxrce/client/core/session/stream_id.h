@@ -23,32 +23,32 @@ extern "C"
 #include <microxrce/client/dll.h>
 #include <stdint.h>
 
-typedef enum mrStreamType
+typedef enum uxrStreamType
 {
     UXR_NONE_STREAM,
     UXR_BEST_EFFORT_STREAM,
     UXR_RELIABLE_STREAM
 
-} mrStreamType;
+} uxrStreamType;
 
-typedef enum mrStreamDirection
+typedef enum uxrStreamDirection
 {
     UXR_INPUT_STREAM,
     UXR_OUTPUT_STREAM
 
-} mrStreamDirection;
+} uxrStreamDirection;
 
-typedef struct mrStreamId
+typedef struct uxrStreamId
 {
     uint8_t raw;
     uint8_t index;
-    mrStreamType type;
-    mrStreamDirection direction;
+    uxrStreamType type;
+    uxrStreamDirection direction;
 
-} mrStreamId;
+} uxrStreamId;
 
-UXRDLLAPI mrStreamId uxr_stream_id(uint8_t index, mrStreamType type, mrStreamDirection direction);
-UXRDLLAPI mrStreamId uxr_stream_id_from_raw(uint8_t stream_id_raw, mrStreamDirection direction);
+UXRDLLAPI uxrStreamId uxr_stream_id(uint8_t index, uxrStreamType type, uxrStreamDirection direction);
+UXRDLLAPI uxrStreamId uxr_stream_id_from_raw(uint8_t stream_id_raw, uxrStreamDirection direction);
 
 #ifdef __cplusplus
 }

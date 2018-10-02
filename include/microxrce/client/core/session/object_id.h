@@ -30,17 +30,17 @@ extern const uint8_t UXR_SUBSCRIBER_ID;
 extern const uint8_t UXR_DATAWRITER_ID;
 extern const uint8_t UXR_DATAREADER_ID;
 
-typedef struct mrObjectId
+typedef struct uxrObjectId
 {
     uint16_t id;
     uint8_t type;
 
-} mrObjectId;
+} uxrObjectId;
 
-UXRDLLAPI mrObjectId uxr_object_id(uint16_t id, uint8_t type);
+UXRDLLAPI uxrObjectId uxr_object_id(uint16_t id, uint8_t type);
 
-mrObjectId object_id_from_raw(const uint8_t* raw);
-void object_id_to_raw(mrObjectId object_id, uint8_t* raw);
+uxrObjectId object_id_from_raw(const uint8_t* raw);
+void object_id_to_raw(uxrObjectId object_id, uint8_t* raw);
 
 #ifdef __cplusplus
 }

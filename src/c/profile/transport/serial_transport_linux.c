@@ -21,7 +21,7 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
 static uint16_t read_serial_data(void* instance, uint8_t* buf, size_t len, int timeout)
 {
     uint16_t rv = 0;
-    mrSerialTransport* transport = (mrSerialTransport*)instance;
+    uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
     int poll_rv = poll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -39,7 +39,7 @@ static uint16_t read_serial_data(void* instance, uint8_t* buf, size_t len, int t
 static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = false;
-    mrSerialTransport* transport = (mrSerialTransport*)instance;
+    uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
     uint16_t bytes_written = write_serial_msg(&transport->serial_io,
                                               buf,
@@ -62,7 +62,7 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
 static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = true;
-    mrSerialTransport* transport = (mrSerialTransport*)instance;
+    uxrSerialTransport* transport = (uxrSerialTransport*)instance;
     uint8_t src_addr;
     uint8_t rmt_addr;
     uint16_t bytes_read = read_serial_msg(&transport->serial_io,
@@ -95,7 +95,7 @@ static int get_serial_error(void)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool uxr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
+bool uxr_init_serial_transport(uxrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
@@ -109,7 +109,7 @@ bool uxr_init_serial_transport(mrSerialTransport* transport, const char* device,
     return rv;
 }
 
-bool uxr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
+bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
     bool rv = false;
 
@@ -140,7 +140,7 @@ bool uxr_init_serial_transport_fd(mrSerialTransport* transport, int fd, uint8_t 
     return rv;
 }
 
-bool uxr_close_serial_transport(mrSerialTransport* transport)
+bool uxr_close_serial_transport(uxrSerialTransport* transport)
 {
     return (0 == close(transport->poll_fd.fd));
 }

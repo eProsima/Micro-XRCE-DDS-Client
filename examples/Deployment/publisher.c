@@ -36,7 +36,7 @@ int main(int args, char** argv)
     }
 
     // Transport
-    mrUDPTransport transport;
+    uxrUDPTransport transport;
     if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
@@ -44,7 +44,7 @@ int main(int args, char** argv)
     }
 
     // Session
-    mrSession session;
+    uxrSession session;
     uxr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
     if(!uxr_create_session(&session))
     {
@@ -54,12 +54,12 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
     uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
-    mrObjectId datawriter_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAWRITER_ID);
+    uxrObjectId datawriter_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAWRITER_ID);
 
     // Write topics
     bool connected = true;

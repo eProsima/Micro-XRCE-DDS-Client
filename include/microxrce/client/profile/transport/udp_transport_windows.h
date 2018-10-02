@@ -28,18 +28,18 @@ extern "C"
 
 #define UDP_TRANSPORT_MTU 512
 
-typedef struct mrUDPTransport
+typedef struct uxrUDPTransport
 {
     uint8_t buffer[UDP_TRANSPORT_MTU];
     SOCKET socket_fd;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
-    mrCommunication comm;
-} mrUDPTransport;
+    uxrCommunication comm;
+} uxrUDPTransport;
 
 
-UXRDLLAPI bool uxr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port);
-UXRDLLAPI bool uxr_close_udp_transport(mrUDPTransport* transport);
+UXRDLLAPI bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t port);
+UXRDLLAPI bool uxr_close_udp_transport(uxrUDPTransport* transport);
 
 #ifdef __cplusplus
 }

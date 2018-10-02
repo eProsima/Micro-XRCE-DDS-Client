@@ -26,19 +26,19 @@ extern "C"
 #define UXR_MAX_ELAPSED_TIME_UNLIMITED   0x0000
 #define UXR_MAX_BYTES_PER_SECOND_UNLIMITED   0x0000
 
-typedef struct mrDeliveryControl
+typedef struct uxrDeliveryControl
 {
     uint16_t max_samples;
     uint16_t max_elapsed_time;
     uint16_t max_bytes_per_second;
     uint16_t min_pace_period;
 
-} mrDeliveryControl;
+} uxrDeliveryControl;
 
-UXRDLLAPI uint16_t uxr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
-                               mrStreamId data_stream_id, mrDeliveryControl* delivery_control);
+UXRDLLAPI uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id,
+                               uxrStreamId data_stream_id, uxrDeliveryControl* delivery_control);
 
-UXRDLLAPI uint16_t uxr_write_cancel_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id);
+UXRDLLAPI uint16_t uxr_write_cancel_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id);
 
 #ifdef __cplusplus
 }

@@ -33,7 +33,7 @@ extern "C"
 #define UXR_SERIAL_OVERHEAD     5
 #define UXR_SERIAL_BUFFER_SIZE  (2 * (UXR_SERIAL_MTU + UXR_SERIAL_OVERHEAD))
 
-typedef struct mrSerialInputBuffer
+typedef struct uxrSerialInputBuffer
 {
     uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
     uint16_t head;
@@ -41,26 +41,26 @@ typedef struct mrSerialInputBuffer
     uint16_t tail;
     bool stream_init;
 
-} mrSerialInputBuffer;
+} uxrSerialInputBuffer;
 
-typedef struct mrSerialOutputBuffer
+typedef struct uxrSerialOutputBuffer
 {
     uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
 
-} mrSerialOutputBuffer;
+} uxrSerialOutputBuffer;
 
-typedef struct mrSerialIO
+typedef struct uxrSerialIO
 {
-    mrSerialInputBuffer input;
-    mrSerialOutputBuffer output;
+    uxrSerialInputBuffer input;
+    uxrSerialOutputBuffer output;
 
-} mrSerialIO;
+} uxrSerialIO;
 
 typedef uint16_t (*uxr_read_cb)(void*, uint8_t*, size_t, int);
 
-void init_serial_io(mrSerialIO* serial_io);
-uint16_t write_serial_msg(mrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr);
-uint16_t read_serial_msg(mrSerialIO* serial_io,
+void init_serial_io(uxrSerialIO* serial_io);
+uint16_t write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr);
+uint16_t read_serial_msg(uxrSerialIO* serial_io,
                         uxr_read_cb cb,
                         void* cb_arg,
                         uint8_t* buf,

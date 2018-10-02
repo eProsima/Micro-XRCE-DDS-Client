@@ -24,10 +24,10 @@ extern "C"
 
 struct CREATE_Payload;
 
-UXRDLLAPI uint16_t uxr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id);
+UXRDLLAPI uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id);
 
-uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
-                              mrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
+uint16_t common_create_entity(uxrSession* session, uxrStreamId stream_id,
+                              uxrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
                               struct CREATE_Payload* payload);
 
 #ifdef __cplusplus

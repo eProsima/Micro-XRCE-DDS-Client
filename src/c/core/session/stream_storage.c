@@ -3,7 +3,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_stream_storage(mrStreamStorage* storage)
+void init_stream_storage(uxrStreamStorage* storage)
 {
     storage->output_best_effort_size = 0;
     storage->output_reliable_size = 0;
@@ -11,7 +11,7 @@ void init_stream_storage(mrStreamStorage* storage)
     storage->input_reliable_size = 0;
 }
 
-void reset_stream_storage(mrStreamStorage* storage)
+void reset_stream_storage(uxrStreamStorage* storage)
 {
     for(unsigned i = 0; i < storage->output_best_effort_size; ++i)
     {
@@ -34,43 +34,43 @@ void reset_stream_storage(mrStreamStorage* storage)
     }
 }
 
-mrStreamId add_output_best_effort_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset)
+uxrStreamId add_output_best_effort_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset)
 {
     uint8_t index = storage->output_best_effort_size++;
     // assert for index
-    mrOutputBestEffortStream* stream = &storage->output_best_effort[index];
+    uxrOutputBestEffortStream* stream = &storage->output_best_effort[index];
     init_output_best_effort_stream(stream, buffer, size, header_offset);
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
 }
 
-mrStreamId add_output_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
+uxrStreamId add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
 {
     uint8_t index = storage->output_reliable_size++;
     // assert for index
-    mrOutputReliableStream* stream = &storage->output_reliable[index];
+    uxrOutputReliableStream* stream = &storage->output_reliable[index];
     init_output_reliable_stream(stream, buffer, size, history, header_offset);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 }
 
-mrStreamId add_input_best_effort_buffer(mrStreamStorage* storage)
+uxrStreamId add_input_best_effort_buffer(uxrStreamStorage* storage)
 {
     uint8_t index = storage->input_best_effort_size++;
     // assert for index
-    mrInputBestEffortStream* stream = &storage->input_best_effort[index];
+    uxrInputBestEffortStream* stream = &storage->input_best_effort[index];
     init_input_best_effort_stream(stream);
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_INPUT_STREAM);
 }
 
-mrStreamId add_input_reliable_buffer(mrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history)
+uxrStreamId add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history)
 {
     uint8_t index = storage->input_reliable_size++;
     // assert for index
-    mrInputReliableStream* stream = &storage->input_reliable[index];
+    uxrInputReliableStream* stream = &storage->input_reliable[index];
     init_input_reliable_stream(stream, buffer, size, history);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_INPUT_STREAM);
 }
 
-mrOutputBestEffortStream* get_output_best_effort_stream(mrStreamStorage* storage, uint8_t index)
+uxrOutputBestEffortStream* get_output_best_effort_stream(uxrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->output_best_effort_size)
     {
@@ -79,7 +79,7 @@ mrOutputBestEffortStream* get_output_best_effort_stream(mrStreamStorage* storage
     return NULL;
 }
 
-mrOutputReliableStream* get_output_reliable_stream(mrStreamStorage* storage, uint8_t index)
+uxrOutputReliableStream* get_output_reliable_stream(uxrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->output_reliable_size)
     {
@@ -88,7 +88,7 @@ mrOutputReliableStream* get_output_reliable_stream(mrStreamStorage* storage, uin
     return NULL;
 }
 
-mrInputBestEffortStream* get_input_best_effort_stream(mrStreamStorage* storage, uint8_t index)
+uxrInputBestEffortStream* get_input_best_effort_stream(uxrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->input_best_effort_size)
     {
@@ -97,7 +97,7 @@ mrInputBestEffortStream* get_input_best_effort_stream(mrStreamStorage* storage, 
     return NULL;
 }
 
-mrInputReliableStream* get_input_reliable_stream(mrStreamStorage* storage, uint8_t index)
+uxrInputReliableStream* get_input_reliable_stream(uxrStreamStorage* storage, uint8_t index)
 {
     if(index < storage->input_reliable_size)
     {
@@ -106,20 +106,20 @@ mrInputReliableStream* get_input_reliable_stream(mrStreamStorage* storage, uint8
     return NULL;
 }
 
-bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, struct ucdrBuffer* mb)
+bool prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* mb)
 {
     bool available = false;
     switch(stream_id.type)
     {
         case UXR_BEST_EFFORT_STREAM:
         {
-            mrOutputBestEffortStream* stream = get_output_best_effort_stream(storage, stream_id.index);
+            uxrOutputBestEffortStream* stream = get_output_best_effort_stream(storage, stream_id.index);
             available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
             break;
         }
         case UXR_RELIABLE_STREAM:
         {
-            mrOutputReliableStream* stream = get_output_reliable_stream(storage, stream_id.index);
+            uxrOutputReliableStream* stream = get_output_reliable_stream(storage, stream_id.index);
             available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
             break;
         }
@@ -130,7 +130,7 @@ bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, siz
     return available;
 }
 
-bool output_streams_confirmed(const mrStreamStorage* storage)
+bool output_streams_confirmed(const uxrStreamStorage* storage)
 {
     bool busy = false;
     for(unsigned i = 0; i < storage->output_reliable_size && !busy; ++i)

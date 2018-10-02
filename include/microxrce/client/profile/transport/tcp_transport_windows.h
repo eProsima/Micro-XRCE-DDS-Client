@@ -28,18 +28,18 @@ extern "C"
 
 #define TCP_TRANSPORT_MTU 512
 
-typedef struct mrTCPTransport
+typedef struct uxrTCPTransport
 {
     uint8_t buffer[TCP_TRANSPORT_MTU];
     SOCKET socket_fd;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
-    mrCommunication comm;
-} mrTCPTransport;
+    uxrCommunication comm;
+} uxrTCPTransport;
 
 
-UXRDLLAPI bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
-UXRDLLAPI bool uxr_close_tcp_transport(mrTCPTransport* transport);
+UXRDLLAPI bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t port);
+UXRDLLAPI bool uxr_close_tcp_transport(uxrTCPTransport* transport);
 
 #ifdef __cplusplus
 }

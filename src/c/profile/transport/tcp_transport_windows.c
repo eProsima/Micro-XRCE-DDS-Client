@@ -13,7 +13,7 @@ static int get_tcp_error(void);
 static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
-    mrTCPTransport* transport = (mrTCPTransport*)instance;
+    uxrTCPTransport* transport = (uxrTCPTransport*)instance;
     size_t bytes_sent = 0;
     int send_rv = 0;
 
@@ -36,7 +36,7 @@ static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = true;
-    mrTCPTransport* transport = (mrTCPTransport*)instance;
+    uxrTCPTransport* transport = (uxrTCPTransport*)instance;
 
     int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -69,7 +69,7 @@ static int get_tcp_error(void)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port)
+bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -108,7 +108,7 @@ bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t 
     return rv;
 }
 
-bool uxr_close_tcp_transport(mrTCPTransport* transport)
+bool uxr_close_tcp_transport(uxrTCPTransport* transport)
 {
     (void)transport;
     return 1;

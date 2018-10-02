@@ -27,26 +27,26 @@ extern "C"
 
 struct ucdrBuffer;
 
-typedef struct mrInputReliableStream
+typedef struct uxrInputReliableStream
 {
     uint8_t* buffer;
     size_t size;
     uint16_t history;
 
-    mrSeqNum last_handled;
-    mrSeqNum last_announced;
+    uxrSeqNum last_handled;
+    uxrSeqNum last_announced;
 
-} mrInputReliableStream;
+} uxrInputReliableStream;
 
-void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);
-void reset_input_reliable_stream(mrInputReliableStream* stream);
-bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
-bool next_input_reliable_buffer_available(mrInputReliableStream* stream, struct ucdrBuffer* mb);
+void init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);
+void reset_input_reliable_stream(uxrInputReliableStream* stream);
+bool receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
+bool next_input_reliable_buffer_available(uxrInputReliableStream* stream, struct ucdrBuffer* mb);
 
-void write_acknack(const mrInputReliableStream* stream, struct ucdrBuffer* mb);
-void read_heartbeat(mrInputReliableStream* stream, struct ucdrBuffer* payload);
+void write_acknack(const uxrInputReliableStream* stream, struct ucdrBuffer* mb);
+void read_heartbeat(uxrInputReliableStream* stream, struct ucdrBuffer* payload);
 
-bool is_input_reliable_stream_busy(mrInputReliableStream* stream);
+bool is_input_reliable_stream_busy(uxrInputReliableStream* stream);
 
 #ifdef __cplusplus
 }

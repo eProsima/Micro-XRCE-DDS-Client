@@ -21,7 +21,7 @@ public:
 protected:
     const std::string submessage = "This is a submessage";
     uint8_t buffer[STREAM_BUFFER_SIZE];
-    mrOutputBestEffortStream stream;
+    uxrOutputBestEffortStream stream;
 };
 
 TEST_F(OutputBestEffortStreamTest, WriteSubmessage)
@@ -32,8 +32,8 @@ TEST_F(OutputBestEffortStreamTest, WriteSubmessage)
     ucdr_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
 
     // Send
-    mrSeqNum init_seq_num = stream.last_send;
-    uint8_t* output_buffer; size_t length; mrSeqNum seq_num;
+    uxrSeqNum init_seq_num = stream.last_send;
+    uint8_t* output_buffer; size_t length; uxrSeqNum seq_num;
     bool available_to_send = prepare_best_effort_buffer_to_send(&stream, &output_buffer, &length, &seq_num);
 
     // Check

@@ -27,8 +27,8 @@ public:
 
 protected:
     int fd_;
-    mrSerialTransport master_;
-    mrSerialTransport slave_;
+    uxrSerialTransport master_;
+    uxrSerialTransport slave_;
 };
 
 #endif //_MICROXRCE_TEST_TRANSPORT_SERIALCOMM_HPP_

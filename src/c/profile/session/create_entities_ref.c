@@ -2,15 +2,15 @@
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <string.h>
 
-static uint16_t create_entity_ref(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, const char* ref, uint8_t mode,
+static uint16_t create_entity_ref(uxrSession* session, uxrStreamId stream_id,
+                                  uxrObjectId object_id, const char* ref, uint8_t mode,
                                   CREATE_Payload* payload);
 
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t uxr_write_create_participant_ref(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, int16_t domain_id, const char* ref, uint8_t mode)
+uint16_t uxr_write_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
+                                         uxrObjectId object_id, int16_t domain_id, const char* ref, uint8_t mode)
 {
     //assert with the object_id type
 
@@ -21,8 +21,8 @@ uint16_t uxr_write_create_participant_ref(mrSession* session, mrStreamId stream_
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_write_create_topic_ref(mrSession* session, mrStreamId stream_id,
-                                   mrObjectId object_id, mrObjectId participant_id,
+uint16_t uxr_write_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
+                                   uxrObjectId object_id, uxrObjectId participant_id,
                                    const char* ref, uint8_t mode)
 {
     CREATE_Payload payload;
@@ -32,8 +32,8 @@ uint16_t uxr_write_create_topic_ref(mrSession* session, mrStreamId stream_id,
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_write_create_datawriter_ref(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId publisher_id,
+uint16_t uxr_write_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
+                                        uxrObjectId object_id, uxrObjectId publisher_id,
                                         const char* ref, uint8_t mode)
 {
     CREATE_Payload payload;
@@ -43,8 +43,8 @@ uint16_t uxr_write_create_datawriter_ref(mrSession* session, mrStreamId stream_i
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_write_create_datareader_ref(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId subscriber_id,
+uint16_t uxr_write_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
+                                        uxrObjectId object_id, uxrObjectId subscriber_id,
                                         const char* ref, uint8_t mode)
 {
     CREATE_Payload payload;
@@ -58,8 +58,8 @@ uint16_t uxr_write_create_datareader_ref(mrSession* session, mrStreamId stream_i
 //                             PRIVATE
 //==================================================================
 
-inline uint16_t create_entity_ref(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, const char* ref, uint8_t mode,
+inline uint16_t create_entity_ref(uxrSession* session, uxrStreamId stream_id,
+                                  uxrObjectId object_id, const char* ref, uint8_t mode,
                                   CREATE_Payload* payload)
 {
     // Use participant access to access to the ref base of any object variant. //Future elegant change?

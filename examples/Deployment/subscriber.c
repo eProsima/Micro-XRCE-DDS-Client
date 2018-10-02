@@ -22,7 +22,7 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct ucdrBuffer* mb, void* args)
+void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* mb, void* args)
 {
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
 
@@ -44,7 +44,7 @@ int main(int args, char** argv)
     }
 
     // Transport
-    mrUDPTransport transport;
+    uxrUDPTransport transport;
     if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
@@ -52,7 +52,7 @@ int main(int args, char** argv)
     }
 
     // Session
-    mrSession session;
+    uxrSession session;
     uxr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
     uxr_set_topic_callback(&session, on_topic, NULL);
     if(!uxr_create_session(&session))
@@ -63,16 +63,16 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Request topics
-    mrDeliveryControl delivery_control = {0};
+    uxrDeliveryControl delivery_control = {0};
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
 
-    mrObjectId datareader_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAREADER_ID);
+    uxrObjectId datareader_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAREADER_ID);
     uint16_t read_data_req = uxr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
 
     // Read topics

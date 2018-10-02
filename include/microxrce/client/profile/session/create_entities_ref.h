@@ -23,20 +23,20 @@ extern "C"
 
 #include <microxrce/client/profile/session/common_create_entities.h>
 
-UXRDLLAPI uint16_t uxr_write_create_participant_ref(mrSession* session, mrStreamId stream_id,
-                                                  mrObjectId object_id, int16_t domain_id,
+UXRDLLAPI uint16_t uxr_write_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
+                                                  uxrObjectId object_id, int16_t domain_id,
                                                   const char* ref, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_write_create_topic_ref(mrSession* session, mrStreamId stream_id,
-                                            mrObjectId object_id, mrObjectId participant_id,
+UXRDLLAPI uint16_t uxr_write_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
+                                            uxrObjectId object_id, uxrObjectId participant_id,
                                             const char* ref, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_write_create_datawriter_ref(mrSession* session, mrStreamId stream_id,
-                                                 mrObjectId object_id, mrObjectId publisher_id,
+UXRDLLAPI uint16_t uxr_write_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
+                                                 uxrObjectId object_id, uxrObjectId publisher_id,
                                                  const char* ref, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_write_create_datareader_ref(mrSession* session, mrStreamId stream_id,
-                                                 mrObjectId object_id, mrObjectId subscriber_id,
+UXRDLLAPI uint16_t uxr_write_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
+                                                 uxrObjectId object_id, uxrObjectId subscriber_id,
                                                  const char* ref, uint8_t mode);
 
 #ifdef __cplusplus

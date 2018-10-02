@@ -24,19 +24,19 @@ extern "C"
 #include <microxrce/client/core/communication/serial_protocol.h>
 #include <poll.h>
 
-typedef struct mrSerialTransport
+typedef struct uxrSerialTransport
 {
     uint8_t buffer[UXR_CONFIG_SERIAL_TRANSPORT_MTU];
     uint8_t remote_addr;
     uint8_t local_addr;
     struct pollfd poll_fd;
-    mrSerialIO serial_io;
-    mrCommunication comm;
-} mrSerialTransport;
+    uxrSerialIO serial_io;
+    uxrCommunication comm;
+} uxrSerialTransport;
 
-bool uxr_init_serial_transport(mrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
-bool uxr_init_serial_transport_fd(mrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
-bool uxr_close_serial_transport(mrSerialTransport* transport);
+bool uxr_init_serial_transport(uxrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
+bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
+bool uxr_close_serial_transport(uxrSerialTransport* transport);
 
 #ifdef __cplusplus
 }

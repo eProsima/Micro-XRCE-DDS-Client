@@ -9,18 +9,18 @@
 
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
-static void process_heartbeat(mrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
-static uint16_t compute_nack_bitmap(const mrInputReliableStream* stream);
+static void process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
+static uint16_t compute_nack_bitmap(const uxrInputReliableStream* stream);
 
 static size_t get_input_buffer_length(uint8_t* buffer);
 static void set_input_buffer_length(uint8_t* buffer, size_t length);
-static uint8_t* get_input_buffer(const mrInputReliableStream* stream, size_t history_pos);
-static size_t get_input_buffer_size(const mrInputReliableStream* stream);
+static uint8_t* get_input_buffer(const uxrInputReliableStream* stream, size_t history_pos);
+static size_t get_input_buffer_size(const uxrInputReliableStream* stream);
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history)
+void init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history)
 {
     // assert for history (must be 2^)
     stream->buffer = buffer;
@@ -30,7 +30,7 @@ void init_input_reliable_stream(mrInputReliableStream* stream, uint8_t* buffer, 
     reset_input_reliable_stream(stream);
 }
 
-void reset_input_reliable_stream(mrInputReliableStream* stream)
+void reset_input_reliable_stream(uxrInputReliableStream* stream)
 {
     for(size_t i = 0; i < stream->history; i++)
     {
@@ -42,16 +42,16 @@ void reset_input_reliable_stream(mrInputReliableStream* stream)
     stream->last_announced = UINT16_MAX;
 }
 
-bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length)
+bool receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length)
 {
     bool result = false;
 
     /* Check if the seq_num is valid for the stream state */
-    mrSeqNum last_history = seq_num_add(stream->last_handled, stream->history);
+    uxrSeqNum last_history = seq_num_add(stream->last_handled, stream->history);
     if(0 > seq_num_cmp(stream->last_handled, seq_num) && 0 <= seq_num_cmp(last_history, seq_num))
     {
         /* Process the message */
-        mrSeqNum next = seq_num_add(stream->last_handled, 1);
+        uxrSeqNum next = seq_num_add(stream->last_handled, 1);
         if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
         {
             stream->last_handled = next;
@@ -82,9 +82,9 @@ bool receive_reliable_message(mrInputReliableStream* stream, uint16_t seq_num, u
 }
 
 
-bool next_input_reliable_buffer_available(mrInputReliableStream* stream, ucdrBuffer* mb)
+bool next_input_reliable_buffer_available(uxrInputReliableStream* stream, ucdrBuffer* mb)
 {
-    mrSeqNum next = seq_num_add(stream->last_handled, 1);
+    uxrSeqNum next = seq_num_add(stream->last_handled, 1);
     uint8_t* internal_buffer = get_input_buffer(stream, next % stream->history);
     size_t length = get_input_buffer_length(internal_buffer);
     bool available_to_read = 0 != length;
@@ -98,7 +98,7 @@ bool next_input_reliable_buffer_available(mrInputReliableStream* stream, ucdrBuf
     return available_to_read;
 }
 
-void write_acknack(const mrInputReliableStream* stream, ucdrBuffer* mb) {
+void write_acknack(const uxrInputReliableStream* stream, ucdrBuffer* mb) {
     uint16_t nack_bitmap = compute_nack_bitmap(stream);
 
     ACKNACK_Payload payload;
@@ -111,7 +111,7 @@ void write_acknack(const mrInputReliableStream* stream, ucdrBuffer* mb) {
     (void) stream; (void) mb;
 }
 
-void read_heartbeat(mrInputReliableStream* stream, ucdrBuffer* payload)
+void read_heartbeat(uxrInputReliableStream* stream, ucdrBuffer* payload)
 {
     HEARTBEAT_Payload heartbeat;
     deserialize_HEARTBEAT_Payload(payload, &heartbeat);
@@ -119,7 +119,7 @@ void read_heartbeat(mrInputReliableStream* stream, ucdrBuffer* payload)
     process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
 }
 
-bool is_input_reliable_stream_busy(mrInputReliableStream* stream)
+bool is_input_reliable_stream_busy(uxrInputReliableStream* stream)
 {
     return stream->last_announced != stream->last_handled;
 }
@@ -127,7 +127,7 @@ bool is_input_reliable_stream_busy(mrInputReliableStream* stream)
 //==================================================================
 //                             PRIVATE
 //==================================================================
-void process_heartbeat(mrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num)
+void process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num)
 {
     if(0 > seq_num_cmp(seq_num_add(stream->last_handled, 1), first_seq_num))
     {
@@ -140,14 +140,14 @@ void process_heartbeat(mrInputReliableStream* stream, uint16_t first_seq_num, ui
     }
 }
 
-uint16_t compute_nack_bitmap(const mrInputReliableStream* stream)
+uint16_t compute_nack_bitmap(const uxrInputReliableStream* stream)
 {
     uint16_t buffers_to_ack = seq_num_sub(stream->last_announced, stream->last_handled);
     uint16_t nack_bitmap = (buffers_to_ack > 0) ? 1 : 0;
 
     for(unsigned i = 0; i < (unsigned)buffers_to_ack; i++)
     {
-        mrSeqNum seq_num = seq_num_add(stream->last_handled, (uint16_t)(i + 1));
+        uxrSeqNum seq_num = seq_num_add(stream->last_handled, (uint16_t)(i + 1));
         uint8_t* internal_buffer = get_input_buffer(stream, seq_num % stream->history);
         if(0 == get_input_buffer_length(internal_buffer))
         {
@@ -168,12 +168,12 @@ inline void set_input_buffer_length(uint8_t* buffer, size_t length)
     memcpy(buffer - INTERNAL_BUFFER_OFFSET, &length, sizeof(size_t));
 }
 
-inline uint8_t* get_input_buffer(const mrInputReliableStream* stream, size_t history_pos)
+inline uint8_t* get_input_buffer(const uxrInputReliableStream* stream, size_t history_pos)
 {
     return stream->buffer + history_pos * (stream->size / stream->history) + INTERNAL_BUFFER_OFFSET;
 }
 
-inline size_t get_input_buffer_size(const mrInputReliableStream* stream)
+inline size_t get_input_buffer_size(const uxrInputReliableStream* stream)
 {
     return (stream->size / stream->history) - INTERNAL_BUFFER_OFFSET;
 }

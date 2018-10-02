@@ -2,15 +2,15 @@
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <string.h>
 
-static uint16_t create_entity_xml(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, const char* xml, uint8_t mode,
+static uint16_t create_entity_xml(uxrSession* session, uxrStreamId stream_id,
+                                  uxrObjectId object_id, const char* xml, uint8_t mode,
                                   CREATE_Payload* payload);
 
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t uxr_write_configure_participant_xml(mrSession* session, mrStreamId stream_id,
-                                         mrObjectId object_id, uint16_t domain, const char* xml, uint8_t mode)
+uint16_t uxr_write_configure_participant_xml(uxrSession* session, uxrStreamId stream_id,
+                                         uxrObjectId object_id, uint16_t domain, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
 
@@ -21,8 +21,8 @@ uint16_t uxr_write_configure_participant_xml(mrSession* session, mrStreamId stre
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_write_configure_topic_xml(mrSession* session, mrStreamId stream_id,
-                                   mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode)
+uint16_t uxr_write_configure_topic_xml(uxrSession* session, uxrStreamId stream_id,
+                                   uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
 
@@ -33,8 +33,8 @@ uint16_t uxr_write_configure_topic_xml(mrSession* session, mrStreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_write_configure_publisher_xml(mrSession* session, mrStreamId stream_id,
-                                       mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode)
+uint16_t uxr_write_configure_publisher_xml(uxrSession* session, uxrStreamId stream_id,
+                                       uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
 
@@ -45,8 +45,8 @@ uint16_t uxr_write_configure_publisher_xml(mrSession* session, mrStreamId stream
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_write_configure_subscriber_xml(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId participant_id, const char* xml, uint8_t mode)
+uint16_t uxr_write_configure_subscriber_xml(uxrSession* session, uxrStreamId stream_id,
+                                        uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
 
@@ -57,8 +57,8 @@ uint16_t uxr_write_configure_subscriber_xml(mrSession* session, mrStreamId strea
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_write_configure_datawriter_xml(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId publisher_id, const char* xml, uint8_t mode)
+uint16_t uxr_write_configure_datawriter_xml(uxrSession* session, uxrStreamId stream_id,
+                                        uxrObjectId object_id, uxrObjectId publisher_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
 
@@ -69,8 +69,8 @@ uint16_t uxr_write_configure_datawriter_xml(mrSession* session, mrStreamId strea
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_write_configure_datareader_xml(mrSession* session, mrStreamId stream_id,
-                                        mrObjectId object_id, mrObjectId subscriber_id, const char* xml, uint8_t mode)
+uint16_t uxr_write_configure_datareader_xml(uxrSession* session, uxrStreamId stream_id,
+                                        uxrObjectId object_id, uxrObjectId subscriber_id, const char* xml, uint8_t mode)
 {
     //assert with the object_id type
 
@@ -85,8 +85,8 @@ uint16_t uxr_write_configure_datareader_xml(mrSession* session, mrStreamId strea
 //                             PRIVATE
 //==================================================================
 
-inline uint16_t create_entity_xml(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, const char* xml, uint8_t mode,
+inline uint16_t create_entity_xml(uxrSession* session, uxrStreamId stream_id,
+                                  uxrObjectId object_id, const char* xml, uint8_t mode,
                                   CREATE_Payload* payload)
 {
     // Use participant access to access to the xml base of any object variant. //Future elegant change?

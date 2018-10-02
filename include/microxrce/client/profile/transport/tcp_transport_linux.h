@@ -25,7 +25,7 @@ extern "C"
 #include <sys/socket.h>
 #include <poll.h>
 
-typedef enum mrTCPInputBufferState
+typedef enum uxrTCPInputBufferState
 {
     UXR_TCP_BUFFER_EMPTY,
     UXR_TCP_SIZE_INCOMPLETE,
@@ -33,28 +33,28 @@ typedef enum mrTCPInputBufferState
     UXR_TCP_MESSAGE_INCOMPLETE,
     UXR_TCP_MESSAGE_AVAILABLE
 
-} mrTCPInputBufferState;
+} uxrTCPInputBufferState;
 
-typedef struct mrTCPInputBuffer
+typedef struct uxrTCPInputBuffer
 {
     uint8_t buffer[UXR_CONFIG_TCP_TRANSPORT_MTU];
     uint16_t position;
-    mrTCPInputBufferState state;
+    uxrTCPInputBufferState state;
     uint16_t msg_size;
 
-} mrTCPInputBuffer;
+} uxrTCPInputBuffer;
 
-typedef struct mrTCPTransport
+typedef struct uxrTCPTransport
 {
-    mrTCPInputBuffer input_buffer;
+    uxrTCPInputBuffer input_buffer;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
-    mrCommunication comm;
+    uxrCommunication comm;
 
-} mrTCPTransport;
+} uxrTCPTransport;
 
-bool uxr_init_tcp_transport(mrTCPTransport* transport, const char* ip, uint16_t port);
-bool uxr_close_tcp_transport(mrTCPTransport* transport);
+bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t port);
+bool uxr_close_tcp_transport(uxrTCPTransport* transport);
 
 #ifdef __cplusplus
 }

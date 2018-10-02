@@ -13,16 +13,16 @@
 
 #define INITIAL_REQUEST_ID 1
 
-static uint16_t generate_request_id(mrSessionInfo* info);
+static uint16_t generate_request_id(uxrSessionInfo* info);
 
-static void process_create_session_status(mrSessionInfo* info, uint8_t status, AGENT_Representation* agent);
-static void process_delete_session_status(mrSessionInfo* info, uint8_t status);
+static void process_create_session_status(uxrSessionInfo* info, uint8_t status, AGENT_Representation* agent);
+static void process_delete_session_status(uxrSessionInfo* info, uint8_t status);
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
 
-void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key)
+void init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
 {
     info->id = id;
     info->key[0] = (uint8_t)(key >> 24);
@@ -33,7 +33,7 @@ void init_session_info(mrSessionInfo* info, uint8_t id, uint32_t key)
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
-void write_create_session(const mrSessionInfo* info, ucdrBuffer* mb, int64_t nanoseconds)
+void write_create_session(const uxrSessionInfo* info, ucdrBuffer* mb, int64_t nanoseconds)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
@@ -54,7 +54,7 @@ void write_create_session(const mrSessionInfo* info, ucdrBuffer* mb, int64_t nan
     (void) serialize_CREATE_CLIENT_Payload(mb, &payload);
 }
 
-void write_delete_session(const mrSessionInfo* info, ucdrBuffer* mb)
+void write_delete_session(const uxrSessionInfo* info, ucdrBuffer* mb)
 {
     (void) info;
     DELETE_Payload payload;
@@ -65,7 +65,7 @@ void write_delete_session(const mrSessionInfo* info, ucdrBuffer* mb)
     (void) serialize_DELETE_Payload(mb, &payload);
 }
 
-void read_create_session_status(mrSessionInfo* info, ucdrBuffer* mb)
+void read_create_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
 {
     STATUS_AGENT_Payload payload;
     if(deserialize_STATUS_AGENT_Payload(mb, &payload))
@@ -74,7 +74,7 @@ void read_create_session_status(mrSessionInfo* info, ucdrBuffer* mb)
     }
 }
 
-void read_delete_session_status(mrSessionInfo* info, ucdrBuffer* mb)
+void read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
 {
     STATUS_Payload payload;
     if(deserialize_STATUS_Payload(mb, &payload))
@@ -83,7 +83,7 @@ void read_delete_session_status(mrSessionInfo* info, ucdrBuffer* mb)
     }
 }
 
-void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer)
+void stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer)
 {
     ucdrBuffer mb;
     ucdr_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
@@ -91,7 +91,7 @@ void stamp_create_session_header(const mrSessionInfo* info, uint8_t* buffer)
     (void) serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
-void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSeqNum seq_num, uint8_t* buffer)
+void stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer)
 {
     ucdrBuffer mb;
     ucdr_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
@@ -99,7 +99,7 @@ void stamp_session_header(const mrSessionInfo* info, uint8_t stream_id_raw, mrSe
     (void) serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }
 
-bool read_session_header(const mrSessionInfo* info, ucdrBuffer* mb, uint8_t* stream_id_raw, mrSeqNum* seq_num)
+bool read_session_header(const uxrSessionInfo* info, ucdrBuffer* mb, uint8_t* stream_id_raw, uxrSeqNum* seq_num)
 {
     bool must_be_read = ucdr_buffer_remaining(mb) > MAX_HEADER_SIZE;
     if(must_be_read)
@@ -120,12 +120,12 @@ bool read_session_header(const mrSessionInfo* info, ucdrBuffer* mb, uint8_t* str
     return must_be_read;
 }
 
-uint8_t session_header_offset(const mrSessionInfo* info)
+uint8_t session_header_offset(const uxrSessionInfo* info)
 {
     return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MIN_HEADER_SIZE;
 }
 
-uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, BaseObjectRequest* base)
+uint16_t init_base_object_request(uxrSessionInfo* info, uxrObjectId object_id, BaseObjectRequest* base)
 {
     uint16_t request_id = generate_request_id(info);
 
@@ -136,7 +136,7 @@ uint16_t init_base_object_request(mrSessionInfo* info, mrObjectId object_id, Bas
     return request_id;
 }
 
-void parse_base_object_request(const BaseObjectRequest* base, mrObjectId* object_id, uint16_t* request_id)
+void parse_base_object_request(const BaseObjectRequest* base, uxrObjectId* object_id, uint16_t* request_id)
 {
     *object_id = object_id_from_raw(base->object_id.data);
     *request_id = (uint16_t)((((uint16_t) base->request_id.data[0]) << 8)
@@ -146,7 +146,7 @@ void parse_base_object_request(const BaseObjectRequest* base, mrObjectId* object
 //==================================================================
 //                            PRIVATE
 //==================================================================
-inline uint16_t generate_request_id(mrSessionInfo* session)
+inline uint16_t generate_request_id(uxrSessionInfo* session)
 {
     uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
         ? INITIAL_REQUEST_ID
@@ -156,13 +156,13 @@ inline uint16_t generate_request_id(mrSessionInfo* session)
     return last_request_id;
 }
 
-inline void process_create_session_status(mrSessionInfo* info, uint8_t status, AGENT_Representation* agent)
+inline void process_create_session_status(uxrSessionInfo* info, uint8_t status, AGENT_Representation* agent)
 {
     (void) agent;
     info->last_requested_status = status;
 }
 
-inline void process_delete_session_status(mrSessionInfo* info, uint8_t status)
+inline void process_delete_session_status(uxrSessionInfo* info, uint8_t status)
 {
     info->last_requested_status = status;
 }
