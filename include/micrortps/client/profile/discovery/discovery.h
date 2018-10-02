@@ -30,14 +30,16 @@ typedef struct AgentAddress
 {
     char ip[16]; //xxx.xxx.xxx.xxx\0
     uint16_t port;
+
 } AgentAddress;
 
 typedef bool (*mrOnAgentFound) (const AgentAddress* address, int64_t timestamp, void* args);
 
+
 MRDLLAPI bool mr_discovery_agents_multicast(int time, int period, mrOnAgentFound on_agent_func, void* args, AgentAddress* choosen);
 
-MRDLLAPI bool mr_discovery_agents_unicast(int time, int period, const AgentAddress* agent_list, size_t agent_list_size,
-                                          mrOnAgentFound on_agent_func, void* args, AgentAddress* choosen);
+MRDLLAPI bool mr_discovery_agents_unicast(int time, int period, mrOnAgentFound on_agent_func, void* args, AgentAddress* choosen,
+                                          const AgentAddress* agent_list, size_t agent_list_size);
 
 #ifdef __cplusplus
 }

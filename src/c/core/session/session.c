@@ -26,7 +26,7 @@ static bool listen_message_reliably(uxrSession* session, int poll_ms);
 static bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, size_t attempts);
 
 static void send_message(const uxrSession* session, uint8_t* buffer, size_t length);
-static bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms);
+static bool recv_message(const uxrSession* session, uint8_t** buffer, size_t* length, int poll_ms);
 
 static void write_submessage_heartbeat(const uxrSession* session, uxrStreamId stream);
 static void write_submessage_acknack(const uxrSession* session, uxrStreamId stream);

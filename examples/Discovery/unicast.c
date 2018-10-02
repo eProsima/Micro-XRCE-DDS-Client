@@ -46,7 +46,7 @@ int main(int args, char** argv)
     }
 
     AgentAddress choosen;
-    if(mr_discovery_agents_unicast(10000, 1000, agent_list, agent_list_size, on_agent_found, NULL, &choosen))
+    if(mr_discovery_agents_unicast(10000, 1000, on_agent_found, NULL, &choosen, agent_list, agent_list_size))
     {
         //true -> The user returns true in the callback.
         //false -> timeout or the user returns false in all callbacks

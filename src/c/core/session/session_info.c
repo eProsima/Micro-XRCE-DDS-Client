@@ -13,7 +13,7 @@
 
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
 
-#define INITIAL_REQUEST_ID 1
+#define INITIAL_REQUEST_ID 10
 
 static uint16_t generate_request_id(uxrSessionInfo* info);
 
