@@ -10,12 +10,12 @@ static int get_udp_error(void);
 /*******************************************************************************
  * Private function definitions.
  *******************************************************************************/
-static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
+bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
 
-    int bytes_sent = send(transport->socket_fd, (void*)buf, (int)len, 0);
+    int bytes_sent = send(transport->socket_fd, (const char*)buf, (int)len, 0);
     if (0 > bytes_sent)
     {
         rv = false;
@@ -24,7 +24,7 @@ static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
     return rv;
 }
 
-static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
+bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = false;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
@@ -51,7 +51,7 @@ static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
     return rv;
 }
 
-static int get_udp_error(void)
+int get_udp_error(void)
 {
     return WSAGetLastError();
 }
@@ -63,6 +63,13 @@ bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t
 {
     bool rv = false;
 
+    /* WSA initialization. */
+    WSADATA wsa_data;
+    if (0 != WSAStartup(MAKEWORD(2, 2), &wsa_data))
+    {
+        return false;
+    }
+
     /* Socket initialization. */
     transport->socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (INVALID_SOCKET != transport->socket_fd)
@@ -70,7 +77,7 @@ bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
         temp_addr.sin_family = AF_INET;
-        temp_addr.sin_port = port;
+        temp_addr.sin_port = htons(port);
         temp_addr.sin_addr.s_addr = inet_addr(ip);
         memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
         transport->remote_addr = *((struct sockaddr *)&temp_addr);
@@ -101,5 +108,5 @@ bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t
 bool uxr_close_udp_transport(uxrUDPTransport* transport)
 {
     (void)transport;
-    return 1;
+    return (0 == WSACleanup());
 }

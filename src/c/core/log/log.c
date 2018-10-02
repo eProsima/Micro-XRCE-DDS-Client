@@ -94,7 +94,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
         {
             case SUBMESSAGE_ID_CREATE_CLIENT:
             {
-                initial_log_time = uxr_milli_time();
+                initial_log_time = uxr_millis();
                 CREATE_CLIENT_Payload payload;
                 uxr_deserialize_CREATE_CLIENT_Payload(&mb, &payload);
                 print_create_client_submessage(color, &payload);
@@ -527,7 +527,7 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
 
 void print_tail(int64_t initial_log_time)
 {
-    int64_t ms = uxr_milli_time() - initial_log_time;
+    int64_t ms = uxr_millis() - initial_log_time;
 #ifdef WIN32
     printf(" %st: %I64ims%s", BLUE, ms, RESTORE_COLOR);
 #else

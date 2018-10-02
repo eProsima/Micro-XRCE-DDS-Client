@@ -21,16 +21,34 @@ extern "C"
 #endif
 
 #include <uxr/client/core/communication/communication.h>
+#include <uxr/client/config.h>
 #include <uxr/client/dll.h>
 #include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
 
-#define TCP_TRANSPORT_MTU 512
+typedef enum mrTCPInputBufferState
+{
+    MR_TCP_BUFFER_EMPTY,
+    MR_TCP_SIZE_INCOMPLETE,
+    MR_TCP_SIZE_READ,
+    MR_TCP_MESSAGE_INCOMPLETE,
+    MR_TCP_MESSAGE_AVAILABLE
+
+} mrTCPInputBufferState;
+
+typedef struct mrTCPInputBuffer
+{
+    uint8_t buffer[UXR_CONFIG_TCP_TRANSPORT_MTU];
+    uint16_t position;
+    mrTCPInputBufferState state;
+    uint16_t msg_size;
+
+} mrTCPInputBuffer;
 
 typedef struct uxrTCPTransport
 {
-    uint8_t buffer[TCP_TRANSPORT_MTU];
+    mrTCPInputBuffer input_buffer;
     SOCKET socket_fd;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
