@@ -68,7 +68,7 @@ int main(int args, char** argv)
     {
         HelloWorld topic = {count++, "Hello DDS world!"};
 
-        mcBuffer mb;
+        ucdrBuffer mb;
         uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
         mr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
         HelloWorld_serialize_topic(&mb, &topic);

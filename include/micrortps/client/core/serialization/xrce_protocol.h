@@ -978,281 +978,281 @@ typedef struct HEARTBEAT_Payload
 
 } HEARTBEAT_Payload;
 
-bool serialize_Time_t(mcBuffer* buffer, const Time_t* input);
-bool deserialize_Time_t(mcBuffer* buffer, Time_t* output);
+bool serialize_Time_t(ucdrBuffer* buffer, const Time_t* input);
+bool deserialize_Time_t(ucdrBuffer* buffer, Time_t* output);
 
-bool serialize_BinarySequence_t(mcBuffer* buffer, const BinarySequence_t* input);
-bool deserialize_BinarySequence_t(mcBuffer* buffer, BinarySequence_t* output);
+bool serialize_BinarySequence_t(ucdrBuffer* buffer, const BinarySequence_t* input);
+bool deserialize_BinarySequence_t(ucdrBuffer* buffer, BinarySequence_t* output);
 
-bool serialize_StringSequence_t(mcBuffer* buffer, const StringSequence_t* input);
-bool deserialize_StringSequence_t(mcBuffer* buffer, StringSequence_t* output);
+bool serialize_StringSequence_t(ucdrBuffer* buffer, const StringSequence_t* input);
+bool deserialize_StringSequence_t(ucdrBuffer* buffer, StringSequence_t* output);
 
-bool serialize_ClientKey(mcBuffer* buffer, const ClientKey* input);
-bool deserialize_ClientKey(mcBuffer* buffer, ClientKey* output);
+bool serialize_ClientKey(ucdrBuffer* buffer, const ClientKey* input);
+bool deserialize_ClientKey(ucdrBuffer* buffer, ClientKey* output);
 
-bool serialize_ObjectId(mcBuffer* buffer, const ObjectId* input);
-bool deserialize_ObjectId(mcBuffer* buffer, ObjectId* output);
+bool serialize_ObjectId(ucdrBuffer* buffer, const ObjectId* input);
+bool deserialize_ObjectId(ucdrBuffer* buffer, ObjectId* output);
 
-bool serialize_ObjectPrefix(mcBuffer* buffer, const ObjectPrefix* input);
-bool deserialize_ObjectPrefix(mcBuffer* buffer, ObjectPrefix* output);
+bool serialize_ObjectPrefix(ucdrBuffer* buffer, const ObjectPrefix* input);
+bool deserialize_ObjectPrefix(ucdrBuffer* buffer, ObjectPrefix* output);
 
-bool serialize_XrceCookie(mcBuffer* buffer, const XrceCookie* input);
-bool deserialize_XrceCookie(mcBuffer* buffer, XrceCookie* output);
+bool serialize_XrceCookie(ucdrBuffer* buffer, const XrceCookie* input);
+bool deserialize_XrceCookie(ucdrBuffer* buffer, XrceCookie* output);
 
-bool serialize_XrceVersion(mcBuffer* buffer, const XrceVersion* input);
-bool deserialize_XrceVersion(mcBuffer* buffer, XrceVersion* output);
+bool serialize_XrceVersion(ucdrBuffer* buffer, const XrceVersion* input);
+bool deserialize_XrceVersion(ucdrBuffer* buffer, XrceVersion* output);
 
-bool serialize_XrceVendorId(mcBuffer* buffer, const XrceVendorId* input);
-bool deserialize_XrceVendorId(mcBuffer* buffer, XrceVendorId* output);
+bool serialize_XrceVendorId(ucdrBuffer* buffer, const XrceVendorId* input);
+bool deserialize_XrceVendorId(ucdrBuffer* buffer, XrceVendorId* output);
 
-bool serialize_TransportLocatorSmall(mcBuffer* buffer, const TransportLocatorSmall* input);
-bool deserialize_TransportLocatorSmall(mcBuffer* buffer, TransportLocatorSmall* output);
+bool serialize_TransportLocatorSmall(ucdrBuffer* buffer, const TransportLocatorSmall* input);
+bool deserialize_TransportLocatorSmall(ucdrBuffer* buffer, TransportLocatorSmall* output);
 
-bool serialize_TransportLocatorMedium(mcBuffer* buffer, const TransportLocatorMedium* input);
-bool deserialize_TransportLocatorMedium(mcBuffer* buffer, TransportLocatorMedium* output);
+bool serialize_TransportLocatorMedium(ucdrBuffer* buffer, const TransportLocatorMedium* input);
+bool deserialize_TransportLocatorMedium(ucdrBuffer* buffer, TransportLocatorMedium* output);
 
-bool serialize_TransportLocatorLarge(mcBuffer* buffer, const TransportLocatorLarge* input);
-bool deserialize_TransportLocatorLarge(mcBuffer* buffer, TransportLocatorLarge* output);
+bool serialize_TransportLocatorLarge(ucdrBuffer* buffer, const TransportLocatorLarge* input);
+bool deserialize_TransportLocatorLarge(ucdrBuffer* buffer, TransportLocatorLarge* output);
 
-bool serialize_TransportLocatorString(mcBuffer* buffer, const TransportLocatorString* input);
-bool deserialize_TransportLocatorString(mcBuffer* buffer, TransportLocatorString* output);
+bool serialize_TransportLocatorString(ucdrBuffer* buffer, const TransportLocatorString* input);
+bool deserialize_TransportLocatorString(ucdrBuffer* buffer, TransportLocatorString* output);
 
-bool serialize_TransportLocator(mcBuffer* buffer, const TransportLocator* input);
-bool deserialize_TransportLocator(mcBuffer* buffer, TransportLocator* output);
+bool serialize_TransportLocator(ucdrBuffer* buffer, const TransportLocator* input);
+bool deserialize_TransportLocator(ucdrBuffer* buffer, TransportLocator* output);
 
-bool serialize_TransportLocatorSeq(mcBuffer* buffer, const TransportLocatorSeq* input);
-bool deserialize_TransportLocatorSeq(mcBuffer* buffer, TransportLocatorSeq* output);
+bool serialize_TransportLocatorSeq(ucdrBuffer* buffer, const TransportLocatorSeq* input);
+bool deserialize_TransportLocatorSeq(ucdrBuffer* buffer, TransportLocatorSeq* output);
 
-bool serialize_Property(mcBuffer* buffer, const Property* input);
-bool deserialize_Property(mcBuffer* buffer, Property* output);
+bool serialize_Property(ucdrBuffer* buffer, const Property* input);
+bool deserialize_Property(ucdrBuffer* buffer, Property* output);
 
-bool serialize_PropertySeq(mcBuffer* buffer, const PropertySeq* input);
-bool deserialize_PropertySeq(mcBuffer* buffer, PropertySeq* output);
+bool serialize_PropertySeq(ucdrBuffer* buffer, const PropertySeq* input);
+bool deserialize_PropertySeq(ucdrBuffer* buffer, PropertySeq* output);
 
-bool serialize_CLIENT_Representation(mcBuffer* buffer, const CLIENT_Representation* input);
-bool deserialize_CLIENT_Representation(mcBuffer* buffer, CLIENT_Representation* output);
+bool serialize_CLIENT_Representation(ucdrBuffer* buffer, const CLIENT_Representation* input);
+bool deserialize_CLIENT_Representation(ucdrBuffer* buffer, CLIENT_Representation* output);
 
-bool serialize_AGENT_Representation(mcBuffer* buffer, const AGENT_Representation* input);
-bool deserialize_AGENT_Representation(mcBuffer* buffer, AGENT_Representation* output);
+bool serialize_AGENT_Representation(ucdrBuffer* buffer, const AGENT_Representation* input);
+bool deserialize_AGENT_Representation(ucdrBuffer* buffer, AGENT_Representation* output);
 
-bool serialize_OBJK_Representation3Formats(mcBuffer* buffer, const OBJK_Representation3Formats* input);
-bool deserialize_OBJK_Representation3Formats(mcBuffer* buffer, OBJK_Representation3Formats* output);
+bool serialize_OBJK_Representation3Formats(ucdrBuffer* buffer, const OBJK_Representation3Formats* input);
+bool deserialize_OBJK_Representation3Formats(ucdrBuffer* buffer, OBJK_Representation3Formats* output);
 
-bool serialize_OBJK_RepresentationRefAndXMLFormats(mcBuffer* buffer, const OBJK_RepresentationRefAndXMLFormats* input);
-bool deserialize_OBJK_RepresentationRefAndXMLFormats(mcBuffer* buffer, OBJK_RepresentationRefAndXMLFormats* output);
+bool serialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, const OBJK_RepresentationRefAndXMLFormats* input);
+bool deserialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, OBJK_RepresentationRefAndXMLFormats* output);
 
-bool serialize_OBJK_RepresentationBinAndXMLFormats(mcBuffer* buffer, const OBJK_RepresentationBinAndXMLFormats* input);
-bool deserialize_OBJK_RepresentationBinAndXMLFormats(mcBuffer* buffer, OBJK_RepresentationBinAndXMLFormats* output);
+bool serialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, const OBJK_RepresentationBinAndXMLFormats* input);
+bool deserialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, OBJK_RepresentationBinAndXMLFormats* output);
 
-bool serialize_OBJK_RepresentationRefAndXML_Base(mcBuffer* buffer, const OBJK_RepresentationRefAndXML_Base* input);
-bool deserialize_OBJK_RepresentationRefAndXML_Base(mcBuffer* buffer, OBJK_RepresentationRefAndXML_Base* output);
+bool serialize_OBJK_RepresentationRefAndXML_Base(ucdrBuffer* buffer, const OBJK_RepresentationRefAndXML_Base* input);
+bool deserialize_OBJK_RepresentationRefAndXML_Base(ucdrBuffer* buffer, OBJK_RepresentationRefAndXML_Base* output);
 
-bool serialize_OBJK_RepresentationBinAndXML_Base(mcBuffer* buffer, const OBJK_RepresentationBinAndXML_Base* input);
-bool deserialize_OBJK_RepresentationBinAndXML_Base(mcBuffer* buffer, OBJK_RepresentationBinAndXML_Base* output);
+bool serialize_OBJK_RepresentationBinAndXML_Base(ucdrBuffer* buffer, const OBJK_RepresentationBinAndXML_Base* input);
+bool deserialize_OBJK_RepresentationBinAndXML_Base(ucdrBuffer* buffer, OBJK_RepresentationBinAndXML_Base* output);
 
-bool serialize_OBJK_Representation3_Base(mcBuffer* buffer, const OBJK_Representation3_Base* input);
-bool deserialize_OBJK_Representation3_Base(mcBuffer* buffer, OBJK_Representation3_Base* output);
+bool serialize_OBJK_Representation3_Base(ucdrBuffer* buffer, const OBJK_Representation3_Base* input);
+bool deserialize_OBJK_Representation3_Base(ucdrBuffer* buffer, OBJK_Representation3_Base* output);
 
-bool serialize_OBJK_QOSPROFILE_Representation(mcBuffer* buffer, const OBJK_QOSPROFILE_Representation* input);
-bool deserialize_OBJK_QOSPROFILE_Representation(mcBuffer* buffer, OBJK_QOSPROFILE_Representation* output);
+bool serialize_OBJK_QOSPROFILE_Representation(ucdrBuffer* buffer, const OBJK_QOSPROFILE_Representation* input);
+bool deserialize_OBJK_QOSPROFILE_Representation(ucdrBuffer* buffer, OBJK_QOSPROFILE_Representation* output);
 
-bool serialize_OBJK_TYPE_Representation(mcBuffer* buffer, const OBJK_TYPE_Representation* input);
-bool deserialize_OBJK_TYPE_Representation(mcBuffer* buffer, OBJK_TYPE_Representation* output);
+bool serialize_OBJK_TYPE_Representation(ucdrBuffer* buffer, const OBJK_TYPE_Representation* input);
+bool deserialize_OBJK_TYPE_Representation(ucdrBuffer* buffer, OBJK_TYPE_Representation* output);
 
-bool serialize_OBJK_DOMAIN_Representation(mcBuffer* buffer, const OBJK_DOMAIN_Representation* input);
-bool deserialize_OBJK_DOMAIN_Representation(mcBuffer* buffer, OBJK_DOMAIN_Representation* output);
+bool serialize_OBJK_DOMAIN_Representation(ucdrBuffer* buffer, const OBJK_DOMAIN_Representation* input);
+bool deserialize_OBJK_DOMAIN_Representation(ucdrBuffer* buffer, OBJK_DOMAIN_Representation* output);
 
-bool serialize_OBJK_APPLICATION_Representation(mcBuffer* buffer, const OBJK_APPLICATION_Representation* input);
-bool deserialize_OBJK_APPLICATION_Representation(mcBuffer* buffer, OBJK_APPLICATION_Representation* output);
+bool serialize_OBJK_APPLICATION_Representation(ucdrBuffer* buffer, const OBJK_APPLICATION_Representation* input);
+bool deserialize_OBJK_APPLICATION_Representation(ucdrBuffer* buffer, OBJK_APPLICATION_Representation* output);
 
-bool serialize_OBJK_PUBLISHER_Representation(mcBuffer* buffer, const OBJK_PUBLISHER_Representation* input);
-bool deserialize_OBJK_PUBLISHER_Representation(mcBuffer* buffer, OBJK_PUBLISHER_Representation* output);
+bool serialize_OBJK_PUBLISHER_Representation(ucdrBuffer* buffer, const OBJK_PUBLISHER_Representation* input);
+bool deserialize_OBJK_PUBLISHER_Representation(ucdrBuffer* buffer, OBJK_PUBLISHER_Representation* output);
 
-bool serialize_OBJK_SUBSCRIBER_Representation(mcBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input);
-bool deserialize_OBJK_SUBSCRIBER_Representation(mcBuffer* buffer, OBJK_SUBSCRIBER_Representation* output);
+bool serialize_OBJK_SUBSCRIBER_Representation(ucdrBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input);
+bool deserialize_OBJK_SUBSCRIBER_Representation(ucdrBuffer* buffer, OBJK_SUBSCRIBER_Representation* output);
 
-bool serialize_DATAWRITER_Representation(mcBuffer* buffer, const DATAWRITER_Representation* input);
-bool deserialize_DATAWRITER_Representation(mcBuffer* buffer, DATAWRITER_Representation* output);
+bool serialize_DATAWRITER_Representation(ucdrBuffer* buffer, const DATAWRITER_Representation* input);
+bool deserialize_DATAWRITER_Representation(ucdrBuffer* buffer, DATAWRITER_Representation* output);
 
-bool serialize_DATAREADER_Representation(mcBuffer* buffer, const DATAREADER_Representation* input);
-bool deserialize_DATAREADER_Representation(mcBuffer* buffer, DATAREADER_Representation* output);
+bool serialize_DATAREADER_Representation(ucdrBuffer* buffer, const DATAREADER_Representation* input);
+bool deserialize_DATAREADER_Representation(ucdrBuffer* buffer, DATAREADER_Representation* output);
 
-bool serialize_OBJK_PARTICIPANT_Representation(mcBuffer* buffer, const OBJK_PARTICIPANT_Representation* input);
-bool deserialize_OBJK_PARTICIPANT_Representation(mcBuffer* buffer, OBJK_PARTICIPANT_Representation* output);
+bool serialize_OBJK_PARTICIPANT_Representation(ucdrBuffer* buffer, const OBJK_PARTICIPANT_Representation* input);
+bool deserialize_OBJK_PARTICIPANT_Representation(ucdrBuffer* buffer, OBJK_PARTICIPANT_Representation* output);
 
-bool serialize_OBJK_TOPIC_Representation(mcBuffer* buffer, const OBJK_TOPIC_Representation* input);
-bool deserialize_OBJK_TOPIC_Representation(mcBuffer* buffer, OBJK_TOPIC_Representation* output);
+bool serialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, const OBJK_TOPIC_Representation* input);
+bool deserialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, OBJK_TOPIC_Representation* output);
 
-bool serialize_OBJK_DomainParticipant_Binary(mcBuffer* buffer, const OBJK_DomainParticipant_Binary* input);
-bool deserialize_OBJK_DomainParticipant_Binary(mcBuffer* buffer, OBJK_DomainParticipant_Binary* output);
+bool serialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, const OBJK_DomainParticipant_Binary* input);
+bool deserialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, OBJK_DomainParticipant_Binary* output);
 
-bool serialize_OBJK_Topic_Binary(mcBuffer* buffer, const OBJK_Topic_Binary* input);
-bool deserialize_OBJK_Topic_Binary(mcBuffer* buffer, OBJK_Topic_Binary* output);
+bool serialize_OBJK_Topic_Binary(ucdrBuffer* buffer, const OBJK_Topic_Binary* input);
+bool deserialize_OBJK_Topic_Binary(ucdrBuffer* buffer, OBJK_Topic_Binary* output);
 
-bool serialize_OBJK_Publisher_Binary_Qos(mcBuffer* buffer, const OBJK_Publisher_Binary_Qos* input);
-bool deserialize_OBJK_Publisher_Binary_Qos(mcBuffer* buffer, OBJK_Publisher_Binary_Qos* output);
+bool serialize_OBJK_Publisher_Binary_Qos(ucdrBuffer* buffer, const OBJK_Publisher_Binary_Qos* input);
+bool deserialize_OBJK_Publisher_Binary_Qos(ucdrBuffer* buffer, OBJK_Publisher_Binary_Qos* output);
 
-bool serialize_OBJK_Publisher_Binary(mcBuffer* buffer, const OBJK_Publisher_Binary* input);
-bool deserialize_OBJK_Publisher_Binary(mcBuffer* buffer, OBJK_Publisher_Binary* output);
+bool serialize_OBJK_Publisher_Binary(ucdrBuffer* buffer, const OBJK_Publisher_Binary* input);
+bool deserialize_OBJK_Publisher_Binary(ucdrBuffer* buffer, OBJK_Publisher_Binary* output);
 
-bool serialize_OBJK_Subscriber_Binary_Qos(mcBuffer* buffer, const OBJK_Subscriber_Binary_Qos* input);
-bool deserialize_OBJK_Subscriber_Binary_Qos(mcBuffer* buffer, OBJK_Subscriber_Binary_Qos* output);
+bool serialize_OBJK_Subscriber_Binary_Qos(ucdrBuffer* buffer, const OBJK_Subscriber_Binary_Qos* input);
+bool deserialize_OBJK_Subscriber_Binary_Qos(ucdrBuffer* buffer, OBJK_Subscriber_Binary_Qos* output);
 
-bool serialize_OBJK_Subscriber_Binary(mcBuffer* buffer, const OBJK_Subscriber_Binary* input);
-bool deserialize_OBJK_Subscriber_Binary(mcBuffer* buffer, OBJK_Subscriber_Binary* output);
+bool serialize_OBJK_Subscriber_Binary(ucdrBuffer* buffer, const OBJK_Subscriber_Binary* input);
+bool deserialize_OBJK_Subscriber_Binary(ucdrBuffer* buffer, OBJK_Subscriber_Binary* output);
 
-bool serialize_OBJK_Endpoint_QosBinary(mcBuffer* buffer, const OBJK_Endpoint_QosBinary* input);
-bool deserialize_OBJK_Endpoint_QosBinary(mcBuffer* buffer, OBJK_Endpoint_QosBinary* output);
+bool serialize_OBJK_Endpoint_QosBinary(ucdrBuffer* buffer, const OBJK_Endpoint_QosBinary* input);
+bool deserialize_OBJK_Endpoint_QosBinary(ucdrBuffer* buffer, OBJK_Endpoint_QosBinary* output);
 
-bool serialize_OBJK_DataWriter_Binary_Qos(mcBuffer* buffer, const OBJK_DataWriter_Binary_Qos* input);
-bool deserialize_OBJK_DataWriter_Binary_Qos(mcBuffer* buffer, OBJK_DataWriter_Binary_Qos* output);
+bool serialize_OBJK_DataWriter_Binary_Qos(ucdrBuffer* buffer, const OBJK_DataWriter_Binary_Qos* input);
+bool deserialize_OBJK_DataWriter_Binary_Qos(ucdrBuffer* buffer, OBJK_DataWriter_Binary_Qos* output);
 
-bool serialize_OBJK_DataReader_Binary_Qos(mcBuffer* buffer, const OBJK_DataReader_Binary_Qos* input);
-bool deserialize_OBJK_DataReader_Binary_Qos(mcBuffer* buffer, OBJK_DataReader_Binary_Qos* output);
+bool serialize_OBJK_DataReader_Binary_Qos(ucdrBuffer* buffer, const OBJK_DataReader_Binary_Qos* input);
+bool deserialize_OBJK_DataReader_Binary_Qos(ucdrBuffer* buffer, OBJK_DataReader_Binary_Qos* output);
 
-bool serialize_OBJK_DataReader_Binary(mcBuffer* buffer, const OBJK_DataReader_Binary* input);
-bool deserialize_OBJK_DataReader_Binary(mcBuffer* buffer, OBJK_DataReader_Binary* output);
+bool serialize_OBJK_DataReader_Binary(ucdrBuffer* buffer, const OBJK_DataReader_Binary* input);
+bool deserialize_OBJK_DataReader_Binary(ucdrBuffer* buffer, OBJK_DataReader_Binary* output);
 
-bool serialize_OBJK_DataWriter_Binary(mcBuffer* buffer, const OBJK_DataWriter_Binary* input);
-bool deserialize_OBJK_DataWriter_Binary(mcBuffer* buffer, OBJK_DataWriter_Binary* output);
+bool serialize_OBJK_DataWriter_Binary(ucdrBuffer* buffer, const OBJK_DataWriter_Binary* input);
+bool deserialize_OBJK_DataWriter_Binary(ucdrBuffer* buffer, OBJK_DataWriter_Binary* output);
 
-bool serialize_ObjectVariant(mcBuffer* buffer, const ObjectVariant* input);
-bool deserialize_ObjectVariant(mcBuffer* buffer, ObjectVariant* output);
+bool serialize_ObjectVariant(ucdrBuffer* buffer, const ObjectVariant* input);
+bool deserialize_ObjectVariant(ucdrBuffer* buffer, ObjectVariant* output);
 
-bool serialize_CreationMode(mcBuffer* buffer, const CreationMode* input);
-bool deserialize_CreationMode(mcBuffer* buffer, CreationMode* output);
+bool serialize_CreationMode(ucdrBuffer* buffer, const CreationMode* input);
+bool deserialize_CreationMode(ucdrBuffer* buffer, CreationMode* output);
 
-bool serialize_RequestId(mcBuffer* buffer, const RequestId* input);
-bool deserialize_RequestId(mcBuffer* buffer, RequestId* output);
+bool serialize_RequestId(ucdrBuffer* buffer, const RequestId* input);
+bool deserialize_RequestId(ucdrBuffer* buffer, RequestId* output);
 
-bool serialize_ResultStatus(mcBuffer* buffer, const ResultStatus* input);
-bool deserialize_ResultStatus(mcBuffer* buffer, ResultStatus* output);
+bool serialize_ResultStatus(ucdrBuffer* buffer, const ResultStatus* input);
+bool deserialize_ResultStatus(ucdrBuffer* buffer, ResultStatus* output);
 
-bool serialize_BaseObjectRequest(mcBuffer* buffer, const BaseObjectRequest* input);
-bool deserialize_BaseObjectRequest(mcBuffer* buffer, BaseObjectRequest* output);
+bool serialize_BaseObjectRequest(ucdrBuffer* buffer, const BaseObjectRequest* input);
+bool deserialize_BaseObjectRequest(ucdrBuffer* buffer, BaseObjectRequest* output);
 
-bool serialize_AGENT_ActivityInfo(mcBuffer* buffer, const AGENT_ActivityInfo* input);
-bool deserialize_AGENT_ActivityInfo(mcBuffer* buffer, AGENT_ActivityInfo* output);
+bool serialize_AGENT_ActivityInfo(ucdrBuffer* buffer, const AGENT_ActivityInfo* input);
+bool deserialize_AGENT_ActivityInfo(ucdrBuffer* buffer, AGENT_ActivityInfo* output);
 
-bool serialize_DATAREADER_ActivityInfo(mcBuffer* buffer, const DATAREADER_ActivityInfo* input);
-bool deserialize_DATAREADER_ActivityInfo(mcBuffer* buffer, DATAREADER_ActivityInfo* output);
+bool serialize_DATAREADER_ActivityInfo(ucdrBuffer* buffer, const DATAREADER_ActivityInfo* input);
+bool deserialize_DATAREADER_ActivityInfo(ucdrBuffer* buffer, DATAREADER_ActivityInfo* output);
 
-bool serialize_DATAWRITER_ActivityInfo(mcBuffer* buffer, const DATAWRITER_ActivityInfo* input);
-bool deserialize_DATAWRITER_ActivityInfo(mcBuffer* buffer, DATAWRITER_ActivityInfo* output);
+bool serialize_DATAWRITER_ActivityInfo(ucdrBuffer* buffer, const DATAWRITER_ActivityInfo* input);
+bool deserialize_DATAWRITER_ActivityInfo(ucdrBuffer* buffer, DATAWRITER_ActivityInfo* output);
 
-bool serialize_ActivityInfoVariant(mcBuffer* buffer, const ActivityInfoVariant* input);
-bool deserialize_ActivityInfoVariant(mcBuffer* buffer, ActivityInfoVariant* output);
+bool serialize_ActivityInfoVariant(ucdrBuffer* buffer, const ActivityInfoVariant* input);
+bool deserialize_ActivityInfoVariant(ucdrBuffer* buffer, ActivityInfoVariant* output);
 
-bool serialize_ObjectInfo(mcBuffer* buffer, const ObjectInfo* input);
-bool deserialize_ObjectInfo(mcBuffer* buffer, ObjectInfo* output);
+bool serialize_ObjectInfo(ucdrBuffer* buffer, const ObjectInfo* input);
+bool deserialize_ObjectInfo(ucdrBuffer* buffer, ObjectInfo* output);
 
-bool serialize_BaseObjectReply(mcBuffer* buffer, const BaseObjectReply* input);
-bool deserialize_BaseObjectReply(mcBuffer* buffer, BaseObjectReply* output);
+bool serialize_BaseObjectReply(ucdrBuffer* buffer, const BaseObjectReply* input);
+bool deserialize_BaseObjectReply(ucdrBuffer* buffer, BaseObjectReply* output);
 
-bool serialize_DataDeliveryControl(mcBuffer* buffer, const DataDeliveryControl* input);
-bool deserialize_DataDeliveryControl(mcBuffer* buffer, DataDeliveryControl* output);
+bool serialize_DataDeliveryControl(ucdrBuffer* buffer, const DataDeliveryControl* input);
+bool deserialize_DataDeliveryControl(ucdrBuffer* buffer, DataDeliveryControl* output);
 
-bool serialize_ReadSpecification(mcBuffer* buffer, const ReadSpecification* input);
-bool deserialize_ReadSpecification(mcBuffer* buffer, ReadSpecification* output);
+bool serialize_ReadSpecification(ucdrBuffer* buffer, const ReadSpecification* input);
+bool deserialize_ReadSpecification(ucdrBuffer* buffer, ReadSpecification* output);
 
-bool serialize_SeqNumberAndTimestamp(mcBuffer* buffer, const SeqNumberAndTimestamp* input);
-bool deserialize_SeqNumberAndTimestamp(mcBuffer* buffer, SeqNumberAndTimestamp* output);
+bool serialize_SeqNumberAndTimestamp(ucdrBuffer* buffer, const SeqNumberAndTimestamp* input);
+bool deserialize_SeqNumberAndTimestamp(ucdrBuffer* buffer, SeqNumberAndTimestamp* output);
 
-bool serialize_SampleInfoDetail(mcBuffer* buffer, const SampleInfoDetail* input);
-bool deserialize_SampleInfoDetail(mcBuffer* buffer, SampleInfoDetail* output);
+bool serialize_SampleInfoDetail(ucdrBuffer* buffer, const SampleInfoDetail* input);
+bool deserialize_SampleInfoDetail(ucdrBuffer* buffer, SampleInfoDetail* output);
 
-bool serialize_SampleInfo(mcBuffer* buffer, const SampleInfo* input);
-bool deserialize_SampleInfo(mcBuffer* buffer, SampleInfo* output);
+bool serialize_SampleInfo(ucdrBuffer* buffer, const SampleInfo* input);
+bool deserialize_SampleInfo(ucdrBuffer* buffer, SampleInfo* output);
 
-bool serialize_SampleInfoDelta(mcBuffer* buffer, const SampleInfoDelta* input);
-bool deserialize_SampleInfoDelta(mcBuffer* buffer, SampleInfoDelta* output);
+bool serialize_SampleInfoDelta(ucdrBuffer* buffer, const SampleInfoDelta* input);
+bool deserialize_SampleInfoDelta(ucdrBuffer* buffer, SampleInfoDelta* output);
 
-bool serialize_SampleData(mcBuffer* buffer, const SampleData* input);
-bool deserialize_SampleData(mcBuffer* buffer, SampleData* output);
+bool serialize_SampleData(ucdrBuffer* buffer, const SampleData* input);
+bool deserialize_SampleData(ucdrBuffer* buffer, SampleData* output);
 
-bool serialize_SampleDataSeq(mcBuffer* buffer, const SampleDataSeq* input);
-bool deserialize_SampleDataSeq(mcBuffer* buffer, SampleDataSeq* output);
+bool serialize_SampleDataSeq(ucdrBuffer* buffer, const SampleDataSeq* input);
+bool deserialize_SampleDataSeq(ucdrBuffer* buffer, SampleDataSeq* output);
 
-bool serialize_Sample(mcBuffer* buffer, const Sample* input);
-bool deserialize_Sample(mcBuffer* buffer, Sample* output);
+bool serialize_Sample(ucdrBuffer* buffer, const Sample* input);
+bool deserialize_Sample(ucdrBuffer* buffer, Sample* output);
 
-bool serialize_SampleSeq(mcBuffer* buffer, const SampleSeq* input);
-bool deserialize_SampleSeq(mcBuffer* buffer, SampleSeq* output);
+bool serialize_SampleSeq(ucdrBuffer* buffer, const SampleSeq* input);
+bool deserialize_SampleSeq(ucdrBuffer* buffer, SampleSeq* output);
 
-bool serialize_SampleDelta(mcBuffer* buffer, const SampleDelta* input);
-bool deserialize_SampleDelta(mcBuffer* buffer, SampleDelta* output);
+bool serialize_SampleDelta(ucdrBuffer* buffer, const SampleDelta* input);
+bool deserialize_SampleDelta(ucdrBuffer* buffer, SampleDelta* output);
 
-bool serialize_SampleDeltaSequence(mcBuffer* buffer, const SampleDeltaSequence* input);
-bool deserialize_SampleDeltaSequence(mcBuffer* buffer, SampleDeltaSequence* output);
+bool serialize_SampleDeltaSequence(ucdrBuffer* buffer, const SampleDeltaSequence* input);
+bool deserialize_SampleDeltaSequence(ucdrBuffer* buffer, SampleDeltaSequence* output);
 
-bool serialize_PackedSamples(mcBuffer* buffer, const PackedSamples* input);
-bool deserialize_PackedSamples(mcBuffer* buffer, PackedSamples* output);
+bool serialize_PackedSamples(ucdrBuffer* buffer, const PackedSamples* input);
+bool deserialize_PackedSamples(ucdrBuffer* buffer, PackedSamples* output);
 
-bool serialize_SamplePackedSeq(mcBuffer* buffer, const SamplePackedSeq* input);
-bool deserialize_SamplePackedSeq(mcBuffer* buffer, SamplePackedSeq* output);
+bool serialize_SamplePackedSeq(ucdrBuffer* buffer, const SamplePackedSeq* input);
+bool deserialize_SamplePackedSeq(ucdrBuffer* buffer, SamplePackedSeq* output);
 
-bool serialize_DataRepresentation(mcBuffer* buffer, const DataRepresentation* input);
-bool deserialize_DataRepresentation(mcBuffer* buffer, DataRepresentation* output);
+bool serialize_DataRepresentation(ucdrBuffer* buffer, const DataRepresentation* input);
+bool deserialize_DataRepresentation(ucdrBuffer* buffer, DataRepresentation* output);
 
-bool serialize_CREATE_CLIENT_Payload(mcBuffer* buffer, const CREATE_CLIENT_Payload* input);
-bool deserialize_CREATE_CLIENT_Payload(mcBuffer* buffer, CREATE_CLIENT_Payload* output);
+bool serialize_CREATE_CLIENT_Payload(ucdrBuffer* buffer, const CREATE_CLIENT_Payload* input);
+bool deserialize_CREATE_CLIENT_Payload(ucdrBuffer* buffer, CREATE_CLIENT_Payload* output);
 
-bool serialize_CREATE_Payload(mcBuffer* buffer, const CREATE_Payload* input);
-bool deserialize_CREATE_Payload(mcBuffer* buffer, CREATE_Payload* output);
+bool serialize_CREATE_Payload(ucdrBuffer* buffer, const CREATE_Payload* input);
+bool deserialize_CREATE_Payload(ucdrBuffer* buffer, CREATE_Payload* output);
 
-bool serialize_GET_INFO_Payload(mcBuffer* buffer, const GET_INFO_Payload* input);
-bool deserialize_GET_INFO_Payload(mcBuffer* buffer, GET_INFO_Payload* output);
+bool serialize_GET_INFO_Payload(ucdrBuffer* buffer, const GET_INFO_Payload* input);
+bool deserialize_GET_INFO_Payload(ucdrBuffer* buffer, GET_INFO_Payload* output);
 
-bool serialize_DELETE_Payload(mcBuffer* buffer, const DELETE_Payload* input);
-bool deserialize_DELETE_Payload(mcBuffer* buffer, DELETE_Payload* output);
+bool serialize_DELETE_Payload(ucdrBuffer* buffer, const DELETE_Payload* input);
+bool deserialize_DELETE_Payload(ucdrBuffer* buffer, DELETE_Payload* output);
 
-bool serialize_STATUS_AGENT_Payload(mcBuffer* buffer, const STATUS_AGENT_Payload* input);
-bool deserialize_STATUS_AGENT_Payload(mcBuffer* buffer, STATUS_AGENT_Payload* output);
+bool serialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, const STATUS_AGENT_Payload* input);
+bool deserialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, STATUS_AGENT_Payload* output);
 
-bool serialize_STATUS_Payload(mcBuffer* buffer, const STATUS_Payload* input);
-bool deserialize_STATUS_Payload(mcBuffer* buffer, STATUS_Payload* output);
+bool serialize_STATUS_Payload(ucdrBuffer* buffer, const STATUS_Payload* input);
+bool deserialize_STATUS_Payload(ucdrBuffer* buffer, STATUS_Payload* output);
 
-bool serialize_INFO_Payload(mcBuffer* buffer, const INFO_Payload* input);
-bool deserialize_INFO_Payload(mcBuffer* buffer, INFO_Payload* output);
+bool serialize_INFO_Payload(ucdrBuffer* buffer, const INFO_Payload* input);
+bool deserialize_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* output);
 
-bool serialize_READ_DATA_Payload(mcBuffer* buffer, const READ_DATA_Payload* input);
-bool deserialize_READ_DATA_Payload(mcBuffer* buffer, READ_DATA_Payload* output);
+bool serialize_READ_DATA_Payload(ucdrBuffer* buffer, const READ_DATA_Payload* input);
+bool deserialize_READ_DATA_Payload(ucdrBuffer* buffer, READ_DATA_Payload* output);
 
-bool serialize_WRITE_DATA_Payload_Data(mcBuffer* buffer, const WRITE_DATA_Payload_Data* input);
-bool deserialize_WRITE_DATA_Payload_Data(mcBuffer* buffer, WRITE_DATA_Payload_Data* output);
+bool serialize_WRITE_DATA_Payload_Data(ucdrBuffer* buffer, const WRITE_DATA_Payload_Data* input);
+bool deserialize_WRITE_DATA_Payload_Data(ucdrBuffer* buffer, WRITE_DATA_Payload_Data* output);
 
-bool serialize_WRITE_DATA_Payload_Sample(mcBuffer* buffer, const WRITE_DATA_Payload_Sample* input);
-bool deserialize_WRITE_DATA_Payload_Sample(mcBuffer* buffer, WRITE_DATA_Payload_Sample* output);
+bool serialize_WRITE_DATA_Payload_Sample(ucdrBuffer* buffer, const WRITE_DATA_Payload_Sample* input);
+bool deserialize_WRITE_DATA_Payload_Sample(ucdrBuffer* buffer, WRITE_DATA_Payload_Sample* output);
 
-bool serialize_WRITE_DATA_Payload_DataSeq(mcBuffer* buffer, const WRITE_DATA_Payload_DataSeq* input);
-bool deserialize_WRITE_DATA_Payload_DataSeq(mcBuffer* buffer, WRITE_DATA_Payload_DataSeq* output);
+bool serialize_WRITE_DATA_Payload_DataSeq(ucdrBuffer* buffer, const WRITE_DATA_Payload_DataSeq* input);
+bool deserialize_WRITE_DATA_Payload_DataSeq(ucdrBuffer* buffer, WRITE_DATA_Payload_DataSeq* output);
 
-bool serialize_WRITE_DATA_Payload_SampleSeq(mcBuffer* buffer, const WRITE_DATA_Payload_SampleSeq* input);
-bool deserialize_WRITE_DATA_Payload_SampleSeq(mcBuffer* buffer, WRITE_DATA_Payload_SampleSeq* output);
+bool serialize_WRITE_DATA_Payload_SampleSeq(ucdrBuffer* buffer, const WRITE_DATA_Payload_SampleSeq* input);
+bool deserialize_WRITE_DATA_Payload_SampleSeq(ucdrBuffer* buffer, WRITE_DATA_Payload_SampleSeq* output);
 
-bool serialize_WRITE_DATA_Payload_PackedSamples(mcBuffer* buffer, const WRITE_DATA_Payload_PackedSamples* input);
-bool deserialize_WRITE_DATA_Payload_PackedSamples(mcBuffer* buffer, WRITE_DATA_Payload_PackedSamples* output);
+bool serialize_WRITE_DATA_Payload_PackedSamples(ucdrBuffer* buffer, const WRITE_DATA_Payload_PackedSamples* input);
+bool deserialize_WRITE_DATA_Payload_PackedSamples(ucdrBuffer* buffer, WRITE_DATA_Payload_PackedSamples* output);
 
-bool serialize_DATA_Payload_Data(mcBuffer* buffer, const DATA_Payload_Data* input);
-bool deserialize_DATA_Payload_Data(mcBuffer* buffer, DATA_Payload_Data* output);
+bool serialize_DATA_Payload_Data(ucdrBuffer* buffer, const DATA_Payload_Data* input);
+bool deserialize_DATA_Payload_Data(ucdrBuffer* buffer, DATA_Payload_Data* output);
 
-bool serialize_DATA_Payload_Sample(mcBuffer* buffer, const DATA_Payload_Sample* input);
-bool deserialize_DATA_Payload_Sample(mcBuffer* buffer, DATA_Payload_Sample* output);
+bool serialize_DATA_Payload_Sample(ucdrBuffer* buffer, const DATA_Payload_Sample* input);
+bool deserialize_DATA_Payload_Sample(ucdrBuffer* buffer, DATA_Payload_Sample* output);
 
-bool serialize_DATA_Payload_DataSeq(mcBuffer* buffer, const DATA_Payload_DataSeq* input);
-bool deserialize_DATA_Payload_DataSeq(mcBuffer* buffer, DATA_Payload_DataSeq* output);
+bool serialize_DATA_Payload_DataSeq(ucdrBuffer* buffer, const DATA_Payload_DataSeq* input);
+bool deserialize_DATA_Payload_DataSeq(ucdrBuffer* buffer, DATA_Payload_DataSeq* output);
 
-bool serialize_DATA_Payload_SampleSeq(mcBuffer* buffer, const DATA_Payload_SampleSeq* input);
-bool deserialize_DATA_Payload_SampleSeq(mcBuffer* buffer, DATA_Payload_SampleSeq* output);
+bool serialize_DATA_Payload_SampleSeq(ucdrBuffer* buffer, const DATA_Payload_SampleSeq* input);
+bool deserialize_DATA_Payload_SampleSeq(ucdrBuffer* buffer, DATA_Payload_SampleSeq* output);
 
-bool serialize_DATA_Payload_PackedSamples(mcBuffer* buffer, const DATA_Payload_PackedSamples* input);
-bool deserialize_DATA_Payload_PackedSamples(mcBuffer* buffer, DATA_Payload_PackedSamples* output);
+bool serialize_DATA_Payload_PackedSamples(ucdrBuffer* buffer, const DATA_Payload_PackedSamples* input);
+bool deserialize_DATA_Payload_PackedSamples(ucdrBuffer* buffer, DATA_Payload_PackedSamples* output);
 
-bool serialize_ACKNACK_Payload(mcBuffer* buffer, const ACKNACK_Payload* input);
-bool deserialize_ACKNACK_Payload(mcBuffer* buffer, ACKNACK_Payload* output);
+bool serialize_ACKNACK_Payload(ucdrBuffer* buffer, const ACKNACK_Payload* input);
+bool deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output);
 
-bool serialize_HEARTBEAT_Payload(mcBuffer* buffer, const HEARTBEAT_Payload* input);
-bool deserialize_HEARTBEAT_Payload(mcBuffer* buffer, HEARTBEAT_Payload* output);
+bool serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload* input);
+bool deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* output);
 
 #ifdef __cplusplus
 }

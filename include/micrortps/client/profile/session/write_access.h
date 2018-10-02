@@ -23,7 +23,7 @@ extern "C"
 #include <micrortps/client/core/session/session.h>
 
 MRDLLAPI bool mr_prepare_output_stream(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
-                                       struct mcBuffer* mb_topic, uint32_t topic_size);
+                                       struct ucdrBuffer* mb_topic, uint32_t topic_size);
 
 #ifdef __cplusplus
 }

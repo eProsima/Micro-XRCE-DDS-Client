@@ -24,8 +24,8 @@ extern "C"
 #include <stdbool.h>
 #include <microcdr/microcdr.h>
 
-void serialize_submessage_header(mcBuffer* buffer, uint8_t id, uint8_t flags, uint16_t length);
-void deserialize_submessage_header(mcBuffer* buffer, uint8_t* id, uint8_t* flags, uint16_t* length);
+void serialize_submessage_header(ucdrBuffer* buffer, uint8_t id, uint8_t flags, uint16_t length);
+void deserialize_submessage_header(ucdrBuffer* buffer, uint8_t* id, uint8_t* flags, uint16_t* length);
 
 #ifdef __cplusplus
 }

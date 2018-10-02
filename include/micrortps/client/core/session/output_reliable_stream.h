@@ -25,7 +25,7 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-struct mcBuffer;
+struct ucdrBuffer;
 
 typedef struct mrOutputReliableStream
 {
@@ -46,14 +46,14 @@ typedef struct mrOutputReliableStream
 
 void init_output_reliable_stream(mrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
 void reset_output_reliable_stream(mrOutputReliableStream* stream);
-bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, struct mcBuffer* mb);
+bool prepare_reliable_buffer_to_write(mrOutputReliableStream* stream, size_t size, struct ucdrBuffer* mb);
 bool prepare_next_reliable_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t* length, mrSeqNum* seq_num);
 
 bool update_output_stream_heartbeat_timestamp(mrOutputReliableStream* stream, int64_t current_timestamp);
 mrSeqNum begin_output_nack_buffer_it(const mrOutputReliableStream* stream);
 bool next_reliable_nack_buffer_to_send(mrOutputReliableStream* stream, uint8_t** buffer, size_t *length, mrSeqNum* seq_num_it);
-void write_heartbeat(const mrOutputReliableStream* stream, struct mcBuffer* mb);
-void read_acknack(mrOutputReliableStream* stream, struct mcBuffer* payload);
+void write_heartbeat(const mrOutputReliableStream* stream, struct ucdrBuffer* mb);
+void read_acknack(mrOutputReliableStream* stream, struct ucdrBuffer* payload);
 
 bool is_output_reliable_stream_busy(const mrOutputReliableStream* stream);
 

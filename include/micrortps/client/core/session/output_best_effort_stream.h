@@ -25,7 +25,7 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-struct mcBuffer;
+struct ucdrBuffer;
 typedef struct mrOutputBestEffortStream
 {
     uint8_t* buffer;
@@ -40,7 +40,7 @@ typedef struct mrOutputBestEffortStream
 void init_output_best_effort_stream(mrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
 void reset_output_best_effort_stream(mrOutputBestEffortStream* stream);
 bool prepare_best_effort_buffer_to_send(mrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
-bool prepare_best_effort_buffer_to_write(mrOutputBestEffortStream* stream, size_t size, struct mcBuffer* mb);
+bool prepare_best_effort_buffer_to_write(mrOutputBestEffortStream* stream, size_t size, struct ucdrBuffer* mb);
 
 #ifdef __cplusplus
 }

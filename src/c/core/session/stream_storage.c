@@ -106,7 +106,7 @@ mrInputReliableStream* get_input_reliable_stream(mrStreamStorage* storage, uint8
     return NULL;
 }
 
-bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, struct mcBuffer* mb)
+bool prepare_stream_to_write(mrStreamStorage* storage, mrStreamId stream_id, size_t size, struct ucdrBuffer* mb)
 {
     bool available = false;
     switch(stream_id.type)
