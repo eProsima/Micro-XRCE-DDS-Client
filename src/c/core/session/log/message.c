@@ -77,7 +77,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
     mc_init_buffer(&mb, buffer, (uint32_t)size);
 
     uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
-    (void) mc_deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
+    (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
     print_header(size, direction, stream_id_raw, seq_num, client_key);
 
