@@ -25,7 +25,7 @@ if(MSVC OR MSVC_IDE)
     target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
 endif()
 
-target_link_libraries(${PROJECT_NAME} microxrce_client)
+target_link_libraries(${PROJECT_NAME} micro_xrce_dds_client)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

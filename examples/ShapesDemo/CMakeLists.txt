@@ -34,7 +34,7 @@ else()
 
     target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        microxrce_client
+        micro_xrce_dds_client
         $<$<BOOL:${WIN32}>:ws2_32>
         )
 

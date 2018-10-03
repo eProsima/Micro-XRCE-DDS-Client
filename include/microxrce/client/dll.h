@@ -17,12 +17,12 @@
 #define _MICROXRCE_DLL_H_
 
 #if defined(_WIN32)
-#if defined(microxrce_client_SHARED)
-#if defined(microxrce_client_EXPORTS)
+#if defined(micro_xrce_dds_client_SHARED)
+#if defined(micro_xrce_dds_client_EXPORTS)
 #define UXRDLLAPI __declspec( dllexport )
 #else
 #define UXRDLLAPI __declspec( dllimport )
-#endif // microxrce_client_EXPORTS
+#endif // micro_xrce_client_dds_EXPORTS
 #else
 #define UXRDLLAPI
 #endif // BUILDING_SHARED_LIBS

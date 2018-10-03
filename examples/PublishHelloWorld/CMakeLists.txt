@@ -33,7 +33,7 @@ else()
         C_STANDARD_REQUIRED YES
         )
 
-    target_link_libraries(${PROJECT_NAME} microxrce_client)
+    target_link_libraries(${PROJECT_NAME} micro_xrce_dds_client)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/microxrce/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}

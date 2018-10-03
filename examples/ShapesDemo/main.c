@@ -116,7 +116,7 @@ int main(int args, char** argv)
         return 1;
     }
 
-    printf("Running Shapes Demo XRCE Client...\n");
+    printf("Running Shapes Demo Client...\n");
 
     uint32_t key = 0xAABBCCDD;
     if(args_index < args && 0 == strcmp(argv[args_index++], "--key"))
