@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_STREAM_STREAM_STORAGE_INTERNAL_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_STREAM_STREAM_STORAGE_INTERNAL_H_
+#ifndef _SRC_C_CORE_SESSION_STREAM_STREAM_STORAGE_INTERNAL_H_
+#define _SRC_C_CORE_SESSION_STREAM_STREAM_STORAGE_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -53,4 +53,4 @@ bool uxr_output_streams_confirmed(const uxrStreamStorage* storage);
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_STREAM_STREAM_STORAGE_INTERNAL_H_
+#endif // _SRC_C_CORE_SESSION_STREAM_STREAM_STORAGE_INTERNAL_H_

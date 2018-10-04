@@ -1,4 +1,4 @@
-#include <microxrce/client/core/communication/serial_protocol.h>
+#include "serial_protocol_internal.h"
 #include <string.h>
 
 /*******************************************************************************

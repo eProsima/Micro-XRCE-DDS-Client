@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_SESSION_INFO_INTERNAL_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_SESSION_INFO_INTERNAL_H_
+#ifndef _SRC_C_CORE_SESSION_SESSION_INFO_INTERNAL_H_
+#define _SRC_C_CORE_SESSION_SESSION_INFO_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -45,5 +45,5 @@ void uxr_parse_base_object_request(const struct BaseObjectRequest* base, uxrObje
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_SESSION_INFO_INTERNAL_H_
+#endif // _SRC_C_CORE_SESSION_SESSION_INFO_INTERNAL_H_
 

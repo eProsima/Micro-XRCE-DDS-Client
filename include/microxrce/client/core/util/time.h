@@ -20,9 +20,10 @@ extern "C"
 {
 #endif
 
+#include <microxrce/client/dll.h>
 #include <stdint.h>
 
-int64_t uxr_milli_time(void);
+UXRDLLAPI int64_t uxr_milli_time(void);
 
 #ifdef __cplusplus
 }
