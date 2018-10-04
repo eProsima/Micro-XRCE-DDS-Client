@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #include <microxrce/client/core/session/session_info.h>
-#include <microxrce/client/core/session/stream_storage.h>
+#include <microxrce/client/core/session/stream/stream_storage.h>
 
 #define UXR_TIMEOUT_INF       -1
 

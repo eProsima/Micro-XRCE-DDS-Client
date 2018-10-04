@@ -6,6 +6,7 @@
 #include <microxrce/client/core/log/log.h>
 #include <microxrce/client/config.h>
 
+#include "stream/stream_storage_internal.h"
 #include "stream/input_best_effort_stream_internal.h"
 #include "stream/input_reliable_stream_internal.h"
 #include "stream/output_best_effort_stream_internal.h"
@@ -61,7 +62,7 @@ void uxr_init_session(uxrSession* session, uxrCommunication* comm, uint32_t key)
     session->on_topic_args = NULL;
 
     init_session_info(&session->info, 0x81, key);
-    init_stream_storage(&session->streams);
+    uxr_init_stream_storage(&session->streams);
 }
 
 void uxr_set_status_callback(uxrSession* session, uxrOnStatusFunc on_status_func, void* args)
@@ -78,7 +79,7 @@ void uxr_set_topic_callback(uxrSession* session, uxrOnTopicFunc on_topic_func, v
 
 bool uxr_create_session(uxrSession* session)
 {
-    reset_stream_storage(&session->streams);
+    uxr_reset_stream_storage(&session->streams);
 
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer mb;
@@ -108,23 +109,23 @@ bool uxr_delete_session(uxrSession* session)
 uxrStreamId uxr_create_output_best_effort_stream(uxrSession* session, uint8_t* buffer, size_t size)
 {
     uint8_t header_offset = session_header_offset(&session->info);
-    return add_output_best_effort_buffer(&session->streams, buffer, size, header_offset);
+    return uxr_add_output_best_effort_buffer(&session->streams, buffer, size, header_offset);
 }
 
 uxrStreamId uxr_create_output_reliable_stream(uxrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
     uint8_t header_offset = session_header_offset(&session->info);
-    return add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
+    return uxr_add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
 }
 
 uxrStreamId uxr_create_input_best_effort_stream(uxrSession* session)
 {
-    return add_input_best_effort_buffer(&session->streams);
+    return uxr_add_input_best_effort_buffer(&session->streams);
 }
 
 uxrStreamId uxr_create_input_reliable_stream(uxrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
-    return add_input_reliable_buffer(&session->streams, buffer, size, history);
+    return uxr_add_input_reliable_buffer(&session->streams, buffer, size, history);
 }
 
 bool uxr_run_session_time(uxrSession* session, int timeout_ms)
@@ -137,7 +138,7 @@ bool uxr_run_session_time(uxrSession* session, int timeout_ms)
          timeout = !listen_message_reliably(session, timeout_ms);
     }
 
-    return output_streams_confirmed(&session->streams);
+    return uxr_output_streams_confirmed(&session->streams);
 }
 
 bool uxr_run_session_until_timeout(uxrSession* session, int timeout_ms)
@@ -152,12 +153,12 @@ bool uxr_run_session_until_confirm_delivery(uxrSession* session, int timeout_ms)
     uxr_flash_output_streams(session);
 
     bool timeout = false;
-    while(!output_streams_confirmed(&session->streams) && !timeout)
+    while(!uxr_output_streams_confirmed(&session->streams) && !timeout)
     {
         timeout = !listen_message_reliably(session, timeout_ms);
     }
 
-    return output_streams_confirmed(&session->streams);
+    return uxr_output_streams_confirmed(&session->streams);
 }
 
 bool uxr_run_session_until_all_status(uxrSession* session, int timeout_ms, const uint16_t* request_list, uint8_t* status_list, size_t list_size)
@@ -393,7 +394,7 @@ void read_stream(uxrSession* session, ucdrBuffer* mb, uxrStreamId stream_id, uxr
         }
         case UXR_BEST_EFFORT_STREAM:
         {
-            uxrInputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
+            uxrInputBestEffortStream* stream = uxr_get_input_best_effort_stream(&session->streams, stream_id.index);
             if(stream && uxr_receive_best_effort_message(stream, seq_num))
             {
                 read_submessage_list(session, mb, stream_id);
@@ -402,7 +403,7 @@ void read_stream(uxrSession* session, ucdrBuffer* mb, uxrStreamId stream_id, uxr
         }
         case UXR_RELIABLE_STREAM:
         {
-            uxrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
+            uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, stream_id.index);
             if(stream && uxr_receive_reliable_message(stream, seq_num, mb->iterator, ucdr_buffer_size(mb)))
             {
                 read_submessage_list(session, mb, stream_id);
@@ -518,7 +519,7 @@ void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrSt
 
 void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id)
 {
-    uxrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
+    uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, stream_id.index);
     if(stream)
     {
         uxr_read_heartbeat(stream, submessage);
@@ -528,7 +529,7 @@ void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrS
 
 void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id)
 {
-    uxrOutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
+    uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
     if(stream)
     {
         uxr_read_acknack(stream, submessage);

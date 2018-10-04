@@ -12,7 +12,7 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
 {
     ucdrBuffer mb;
     size_t submessage_size = SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE + topic_size;
-    if(prepare_stream_to_write(&session->streams, stream_id, submessage_size, &mb))
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, submessage_size, &mb))
     {
         uint16_t payload_size = (uint16_t)(WRITE_DATA_PAYLOAD_SIZE + topic_size);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, payload_size, FORMAT_DATA);

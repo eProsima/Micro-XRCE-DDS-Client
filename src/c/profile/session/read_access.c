@@ -44,7 +44,7 @@ uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrO
     payload_length = (uint16_t)(payload_length + ((control != NULL) ? 8 : 0)); // delivery control
 
     ucdrBuffer mb;
-    if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 

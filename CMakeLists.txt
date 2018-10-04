@@ -128,6 +128,23 @@ endforeach()
 
 # Other sources
 set(SRCS
+    src/c/core/communication/serial_protocol.c
+    src/c/core/session/stream/input_best_effort_stream.c
+    src/c/core/session/stream/input_reliable_stream.c
+    src/c/core/session/stream/output_best_effort_stream.c
+    src/c/core/session/stream/output_reliable_stream.c
+    src/c/core/session/stream/stream_storage.c
+    src/c/core/session/stream/stream_id.c
+    src/c/core/session/stream/seq_num.c
+    src/c/core/session/session.c
+    src/c/core/session/session_info.c
+    src/c/core/session/submessage.c
+    src/c/core/session/object_id.c
+    src/c/core/serialization/xrce_protocol.c
+    src/c/core/serialization/xrce_header.c
+    src/c/core/serialization/xrce_subheader.c
+    src/c/core/util/time.c
+    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
@@ -136,23 +153,6 @@ set(SRCS
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${SERIAL_SRCS}
-    src/c/core/communication/serial_protocol.c
-    src/c/core/session/stream/input_best_effort_stream.c
-    src/c/core/session/stream/input_reliable_stream.c
-    src/c/core/session/stream/output_best_effort_stream.c
-    src/c/core/session/stream/output_reliable_stream.c
-    src/c/core/session/stream/seq_num.c
-    src/c/core/session/session.c
-    src/c/core/session/session_info.c
-    src/c/core/session/stream_id.c
-    src/c/core/session/stream_storage.c
-    src/c/core/session/submessage.c
-    src/c/core/session/object_id.c
-    src/c/core/serialization/xrce_protocol.c
-    src/c/core/serialization/xrce_header.c
-    src/c/core/serialization/xrce_subheader.c
-    src/c/core/util/time.c
-    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     )
 
 ###############################################################################
