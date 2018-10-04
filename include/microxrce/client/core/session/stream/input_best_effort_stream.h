@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_INPUT_BEST_EFFORT_STREAM_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_INPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICROXRCE_CLIENT_CORE_SESSION_STREAM_INPUT_BEST_EFFORT_STREAM_H_
+#define _MICROXRCE_CLIENT_CORE_SESSION_STREAM_INPUT_BEST_EFFORT_STREAM_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -31,12 +31,8 @@ typedef struct uxrInputBestEffortStream
 
 } uxrInputBestEffortStream;
 
-void init_input_best_effort_stream(uxrInputBestEffortStream* stream);
-void reset_input_best_effort_stream(uxrInputBestEffortStream* stream);
-bool receive_best_effort_message(uxrInputBestEffortStream* stream, uxrSeqNum seq_num);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_INPUT_BEST_EFFORT_STREAM_H_
+#endif // _MICROXRCE_CLIENT_CORE_SESSION_STREAM_INPUT_BEST_EFFORT_STREAM_H_

@@ -4,6 +4,11 @@
 #include <microxrce/client/core/communication/communication.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/config.h>
+
+#include "stream/input_best_effort_stream_internal.h"
+#include "stream/input_reliable_stream_internal.h"
+#include "stream/output_best_effort_stream_internal.h"
+#include "stream/output_reliable_stream_internal.h"
 #include "log/message.h"
 
 // Autogenerate these defines by the protocol generator tool?
@@ -230,7 +235,7 @@ void uxr_flash_output_streams(uxrSession* session)
         uxrStreamId id = uxr_stream_id(i, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
 
         uint8_t* buffer; size_t length; uxrSeqNum seq_num;
-        if(prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
+        if(uxr_prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
             stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
@@ -243,7 +248,7 @@ void uxr_flash_output_streams(uxrSession* session)
         uxrStreamId id = uxr_stream_id(i, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
         uint8_t* buffer; size_t length; uxrSeqNum seq_num;
-        while(prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
+        while(uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
             stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
@@ -281,7 +286,7 @@ bool listen_message_reliably(uxrSession* session, int poll_ms)
             uxrOutputReliableStream* stream = &session->streams.output_reliable[i];
             uxrStreamId id = uxr_stream_id(i, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
-            if(update_output_stream_heartbeat_timestamp(stream, timestamp))
+            if(uxr_update_output_stream_heartbeat_timestamp(stream, timestamp))
             {
                 write_submessage_heartbeat(session, id);
             }
@@ -348,7 +353,7 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
-    write_heartbeat(stream, &mb);
+    uxr_write_heartbeat(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, heartbeat_buffer, ucdr_buffer_length(&mb));
 }
@@ -361,7 +366,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
-    write_acknack(stream, &mb);
+    uxr_write_acknack(stream, &mb);
     stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, acknack_buffer, ucdr_buffer_length(&mb));
 }
@@ -389,7 +394,7 @@ void read_stream(uxrSession* session, ucdrBuffer* mb, uxrStreamId stream_id, uxr
         case UXR_BEST_EFFORT_STREAM:
         {
             uxrInputBestEffortStream* stream = get_input_best_effort_stream(&session->streams, stream_id.index);
-            if(stream && receive_best_effort_message(stream, seq_num))
+            if(stream && uxr_receive_best_effort_message(stream, seq_num))
             {
                 read_submessage_list(session, mb, stream_id);
             }
@@ -398,11 +403,11 @@ void read_stream(uxrSession* session, ucdrBuffer* mb, uxrStreamId stream_id, uxr
         case UXR_RELIABLE_STREAM:
         {
             uxrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
-            if(stream && receive_reliable_message(stream, seq_num, mb->iterator, ucdr_buffer_size(mb)))
+            if(stream && uxr_receive_reliable_message(stream, seq_num, mb->iterator, ucdr_buffer_size(mb)))
             {
                 read_submessage_list(session, mb, stream_id);
                 ucdrBuffer next_mb;
-                while(next_input_reliable_buffer_available(stream, &next_mb))
+                while(uxr_next_input_reliable_buffer_available(stream, &next_mb))
                 {
                     read_submessage_list(session, &next_mb, stream_id);
                 }
@@ -516,7 +521,7 @@ void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrS
     uxrInputReliableStream* stream = get_input_reliable_stream(&session->streams, stream_id.index);
     if(stream)
     {
-        read_heartbeat(stream, submessage);
+        uxr_read_heartbeat(stream, submessage);
         write_submessage_acknack(session, stream_id);
     }
 }
@@ -526,11 +531,11 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStr
     uxrOutputReliableStream* stream = get_output_reliable_stream(&session->streams, stream_id.index);
     if(stream)
     {
-        read_acknack(stream, submessage);
+        uxr_read_acknack(stream, submessage);
 
         uint8_t* buffer; size_t length;
-        uxrSeqNum seq_num_it = begin_output_nack_buffer_it(stream);
-        if(next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
+        uxrSeqNum seq_num_it = uxr_begin_output_nack_buffer_it(stream);
+        if(uxr_next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
         {
             send_message(session, buffer, length);
         }

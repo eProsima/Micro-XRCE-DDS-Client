@@ -1,10 +1,10 @@
-#include <microxrce/client/core/session/output_best_effort_stream.h>
+#include "output_best_effort_stream_internal.h"
 #include <microcdr/microcdr.h>
 
 //==================================================================
 //                              PUBLIC
 //==================================================================
-void init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset)
+void uxr_init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset)
 {
     stream->buffer = buffer;
     stream->writer = offset;
@@ -13,13 +13,13 @@ void init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* 
     stream->last_send = UINT16_MAX;
 }
 
-void reset_output_best_effort_stream(uxrOutputBestEffortStream* stream)
+void uxr_reset_output_best_effort_stream(uxrOutputBestEffortStream* stream)
 {
     stream->writer = stream->offset;
     stream->last_send = UINT16_MAX;
 }
 
-bool prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, ucdrBuffer* mb)
+bool uxr_prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, ucdrBuffer* mb)
 {
     bool available_to_write = stream->writer + size <= stream->size;
     if(available_to_write)
@@ -31,7 +31,7 @@ bool prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size
     return available_to_write;
 }
 
-bool prepare_best_effort_buffer_to_send(uxrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num)
+bool uxr_prepare_best_effort_buffer_to_send(uxrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num)
 {
     bool data_to_send = stream->writer > stream->offset;
     if(data_to_send)

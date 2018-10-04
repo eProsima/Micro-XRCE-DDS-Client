@@ -1,4 +1,4 @@
-#include <microxrce/client/core/session/output_reliable_stream.h>
+#include "output_reliable_stream_internal.h"
 #include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/config.h>
@@ -25,7 +25,7 @@ static size_t get_output_buffer_size(const uxrOutputReliableStream* stream);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
+void uxr_init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
 {
     // assert for history (must be 2^)
 
@@ -34,10 +34,10 @@ void init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffe
     stream->offset = header_offset;
     stream->history = history;
 
-    reset_output_reliable_stream(stream);
+    uxr_reset_output_reliable_stream(stream);
 }
 
-void reset_output_reliable_stream(uxrOutputReliableStream* stream)
+void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream)
 {
     for(size_t i = 0; i < stream->history; i++)
     {
@@ -54,7 +54,7 @@ void reset_output_reliable_stream(uxrOutputReliableStream* stream)
     stream->send_lost = false;
 }
 
-bool prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* mb)
+bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* mb)
 {
     bool available_to_write = false;
 
@@ -94,7 +94,7 @@ bool prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t si
     return available_to_write;
 }
 
-bool prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num)
+bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num)
 {
     *seq_num = seq_num_add(stream->last_sent, 1);
     *buffer = get_output_buffer(stream, *seq_num % stream->history);
@@ -115,7 +115,7 @@ bool prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8
     return data_to_send;
 }
 
-bool update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp)
+bool uxr_update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp)
 {
     bool must_confirm = false;
     if(0 > seq_num_cmp(stream->last_acknown, stream->last_sent))
@@ -141,12 +141,12 @@ bool update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, i
     return must_confirm;
 }
 
-uxrSeqNum begin_output_nack_buffer_it(const uxrOutputReliableStream* stream)
+uxrSeqNum uxr_begin_output_nack_buffer_it(const uxrOutputReliableStream* stream)
 {
     return stream->last_acknown;
 }
 
-bool next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t *length, uxrSeqNum* seq_num_it)
+bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t *length, uxrSeqNum* seq_num_it)
 {
     bool it_updated = false;
     if(stream->send_lost)
@@ -173,7 +173,7 @@ bool next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint8_t*
     return it_updated;
 }
 
-void write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
+void uxr_write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
 {
     HEARTBEAT_Payload payload;
     payload.first_unacked_seq_nr = seq_num_add(stream->last_acknown, 1);
@@ -183,7 +183,7 @@ void write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
     (void) uxr_serialize_HEARTBEAT_Payload(mb, &payload);
 }
 
-void read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)
+void uxr_read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)
 {
     ACKNACK_Payload acknack;
     uxr_deserialize_ACKNACK_Payload(payload, &acknack);
@@ -193,7 +193,7 @@ void read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)
     process_acknack(stream, nack_bitmap, (uint16_t)seq_num_sub(acknack.first_unacked_seq_num, 1));
 }
 
-bool is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
+bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
 {
     return 0 > seq_num_cmp(stream->last_acknown, stream->last_sent);
 }

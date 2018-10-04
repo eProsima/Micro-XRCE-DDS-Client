@@ -137,10 +137,10 @@ set(SRCS
     ${TCP_SRCS}
     ${SERIAL_SRCS}
     src/c/core/communication/serial_protocol.c
-    src/c/core/session/input_best_effort_stream.c
-    src/c/core/session/input_reliable_stream.c
-    src/c/core/session/output_best_effort_stream.c
-    src/c/core/session/output_reliable_stream.c
+    src/c/core/session/stream/input_best_effort_stream.c
+    src/c/core/session/stream/input_reliable_stream.c
+    src/c/core/session/stream/output_best_effort_stream.c
+    src/c/core/session/stream/output_reliable_stream.c
     src/c/core/session/session.c
     src/c/core/session/session_info.c
     src/c/core/session/stream_id.c
@@ -243,7 +243,7 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
         add_subdirectory(test/integration/interaction)
         add_subdirectory(test/integration/cross_serialization)
-        add_subdirectory(test/unitary/streams/output_best_effort)
+        #add_subdirectory(test/unitary/streams/output_best_effort)
 
         if(NOT WIN32)
             add_subdirectory(test/transport/serial_comm)

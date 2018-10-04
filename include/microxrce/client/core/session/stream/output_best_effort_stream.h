@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_OUTPUT_BEST_EFFORT_STREAM_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_OUTPUT_BEST_EFFORT_STREAM_H_
+#ifndef _MICROXRCE_CLIENT_CORE_SESSION_STREAM_OUTPUT_BEST_EFFORT_STREAM_H_
+#define _MICROXRCE_CLIENT_CORE_SESSION_STREAM_OUTPUT_BEST_EFFORT_STREAM_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -37,13 +37,8 @@ typedef struct uxrOutputBestEffortStream
 
 } uxrOutputBestEffortStream;
 
-void init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
-void reset_output_best_effort_stream(uxrOutputBestEffortStream* stream);
-bool prepare_best_effort_buffer_to_send(uxrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
-bool prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, struct ucdrBuffer* mb);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_OUTPUT_BEST_EFFORT_STREAM_H
+#endif // _MICROXRCE_CLIENT_CORE_SESSION_STREAM_OUTPUT_BEST_EFFORT_STREAM_H

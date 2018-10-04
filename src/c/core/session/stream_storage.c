@@ -1,5 +1,10 @@
 #include <microxrce/client/core/session/stream_storage.h>
 
+#include "stream/input_best_effort_stream_internal.h"
+#include "stream/input_reliable_stream_internal.h"
+#include "stream/output_best_effort_stream_internal.h"
+#include "stream/output_reliable_stream_internal.h"
+
 //==================================================================
 //                             PUBLIC
 //==================================================================
@@ -15,22 +20,22 @@ void reset_stream_storage(uxrStreamStorage* storage)
 {
     for(unsigned i = 0; i < storage->output_best_effort_size; ++i)
     {
-        reset_output_best_effort_stream(&storage->output_best_effort[i]);
+        uxr_reset_output_best_effort_stream(&storage->output_best_effort[i]);
     }
 
     for(unsigned i = 0; i < storage->input_best_effort_size; ++i)
     {
-        reset_input_best_effort_stream(&storage->input_best_effort[i]);
+        uxr_reset_input_best_effort_stream(&storage->input_best_effort[i]);
     }
 
     for(unsigned i = 0; i < storage->output_reliable_size; ++i)
     {
-        reset_output_reliable_stream(&storage->output_reliable[i]);
+        uxr_reset_output_reliable_stream(&storage->output_reliable[i]);
     }
 
     for(unsigned i = 0; i < storage->input_reliable_size; ++i)
     {
-        reset_input_reliable_stream(&storage->input_reliable[i]);
+        uxr_reset_input_reliable_stream(&storage->input_reliable[i]);
     }
 }
 
@@ -39,7 +44,7 @@ uxrStreamId add_output_best_effort_buffer(uxrStreamStorage* storage, uint8_t* bu
     uint8_t index = storage->output_best_effort_size++;
     // assert for index
     uxrOutputBestEffortStream* stream = &storage->output_best_effort[index];
-    init_output_best_effort_stream(stream, buffer, size, header_offset);
+    uxr_init_output_best_effort_stream(stream, buffer, size, header_offset);
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
 }
 
@@ -48,7 +53,7 @@ uxrStreamId add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffe
     uint8_t index = storage->output_reliable_size++;
     // assert for index
     uxrOutputReliableStream* stream = &storage->output_reliable[index];
-    init_output_reliable_stream(stream, buffer, size, history, header_offset);
+    uxr_init_output_reliable_stream(stream, buffer, size, history, header_offset);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 }
 
@@ -57,7 +62,7 @@ uxrStreamId add_input_best_effort_buffer(uxrStreamStorage* storage)
     uint8_t index = storage->input_best_effort_size++;
     // assert for index
     uxrInputBestEffortStream* stream = &storage->input_best_effort[index];
-    init_input_best_effort_stream(stream);
+    uxr_init_input_best_effort_stream(stream);
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_INPUT_STREAM);
 }
 
@@ -66,7 +71,7 @@ uxrStreamId add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer
     uint8_t index = storage->input_reliable_size++;
     // assert for index
     uxrInputReliableStream* stream = &storage->input_reliable[index];
-    init_input_reliable_stream(stream, buffer, size, history);
+    uxr_init_input_reliable_stream(stream, buffer, size, history);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_INPUT_STREAM);
 }
 
@@ -114,13 +119,13 @@ bool prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, s
         case UXR_BEST_EFFORT_STREAM:
         {
             uxrOutputBestEffortStream* stream = get_output_best_effort_stream(storage, stream_id.index);
-            available = stream && prepare_best_effort_buffer_to_write(stream, size, mb);
+            available = stream && uxr_prepare_best_effort_buffer_to_write(stream, size, mb);
             break;
         }
         case UXR_RELIABLE_STREAM:
         {
             uxrOutputReliableStream* stream = get_output_reliable_stream(storage, stream_id.index);
-            available = stream && prepare_reliable_buffer_to_write(stream, size, mb);
+            available = stream && uxr_prepare_reliable_buffer_to_write(stream, size, mb);
             break;
         }
         default:
@@ -135,7 +140,7 @@ bool output_streams_confirmed(const uxrStreamStorage* storage)
     bool busy = false;
     for(unsigned i = 0; i < storage->output_reliable_size && !busy; ++i)
     {
-        busy = is_output_reliable_stream_busy(&storage->output_reliable[i]);
+        busy = uxr_is_output_reliable_stream_busy(&storage->output_reliable[i]);
     }
     return !busy;
 }

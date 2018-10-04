@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_INPUT_RELIABLE_STREAM_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_INPUT_RELIABLE_STREAM_H_
+#ifndef _MICROXRCE_CLIENT_CORE_SESSION_STREAM_INPUT_RELIABLE_STREAM_H_
+#define _MICROXRCE_CLIENT_CORE_SESSION_STREAM_INPUT_RELIABLE_STREAM_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -38,18 +38,8 @@ typedef struct uxrInputReliableStream
 
 } uxrInputReliableStream;
 
-void init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);
-void reset_input_reliable_stream(uxrInputReliableStream* stream);
-bool receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
-bool next_input_reliable_buffer_available(uxrInputReliableStream* stream, struct ucdrBuffer* mb);
-
-void write_acknack(const uxrInputReliableStream* stream, struct ucdrBuffer* mb);
-void read_heartbeat(uxrInputReliableStream* stream, struct ucdrBuffer* payload);
-
-bool is_input_reliable_stream_busy(uxrInputReliableStream* stream);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_INPUT_RELIABLE_STREAM_H_
+#endif // _MICROXRCE_CLIENT_CORE_SESSION_STREAM_INPUT_RELIABLE_STREAM_H_

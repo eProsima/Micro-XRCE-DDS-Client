@@ -20,10 +20,10 @@ extern "C"
 {
 #endif
 
-#include <microxrce/client/core/session/output_best_effort_stream.h>
-#include <microxrce/client/core/session/output_reliable_stream.h>
-#include <microxrce/client/core/session/input_best_effort_stream.h>
-#include <microxrce/client/core/session/input_reliable_stream.h>
+#include <microxrce/client/core/session/stream/output_best_effort_stream.h>
+#include <microxrce/client/core/session/stream/output_reliable_stream.h>
+#include <microxrce/client/core/session/stream/input_best_effort_stream.h>
+#include <microxrce/client/core/session/stream/input_reliable_stream.h>
 #include <microxrce/client/core/session/stream_id.h>
 #include <microxrce/client/config.h>
 
