@@ -22,7 +22,7 @@ extern "C"
 
 #include <stdint.h>
 
-int64_t get_milli_time(void);
+int64_t uxr_milli_time(void);
 
 #ifdef __cplusplus
 }
