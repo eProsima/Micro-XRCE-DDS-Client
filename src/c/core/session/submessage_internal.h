@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_SUBMESSAGE_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_SUBMESSAGE_H_
+#ifndef _SRC_C_CORE_SESSION_SUBMESSAGE_INTERNAL_H_
+#define _SRC_C_CORE_SESSION_SUBMESSAGE_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -59,12 +59,12 @@ typedef enum SubmessageFlags
 
 } SubmessageFlags;
 
-UXRDLLAPI bool write_submessage_header(struct ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
-bool read_submessage_header(struct ucdrBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it);
-size_t submessage_padding(size_t length);
+bool uxr_write_submessage_header(struct ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
+bool uxr_read_submessage_header(struct ucdrBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it);
+size_t uxr_submessage_padding(size_t length);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_SUBMESSAGE_H_
+#endif // _MICROXRCE_CLIENT_CORE_SESSION_SUBMESSAGE_INTERNAL_H_

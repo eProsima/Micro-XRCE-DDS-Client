@@ -1,6 +1,9 @@
 #include <microxrce/client/profile/session/read_access.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
-#include <microxrce/client/core/session/submessage.h>
+
+#include "../../core/session/stream/stream_storage_internal.h"
+#include "../../core/session/session_info_internal.h"
+#include "../../core/session/submessage_internal.h"
 
 extern void read_submessage_format(uxrSession* session, ucdrBuffer* data, uint16_t length, uint8_t format,
                                    uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);
@@ -46,9 +49,9 @@ uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrO
     ucdrBuffer mb;
     if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
+        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
-        request_id = init_base_object_request(&session->info, datareader_id, &payload.base);
+        request_id = uxr_init_base_object_request(&session->info, datareader_id, &payload.base);
         (void) uxr_serialize_READ_DATA_Payload(&mb, &payload);
     }
 

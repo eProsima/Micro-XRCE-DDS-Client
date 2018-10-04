@@ -1,7 +1,7 @@
 #include "output_reliable_stream_internal.h"
 #include "seq_num_internal.h"
+#include "../submessage_internal.h"
 
-#include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/config.h>
 #include <string.h>
@@ -64,7 +64,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
     size_t length = get_output_buffer_length(internal_buffer);
 
     /* Check if the message fit in the current buffer */
-    if(length + submessage_padding(length) + size <= get_output_buffer_size(stream))
+    if(length + uxr_submessage_padding(length) + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
         uxrSeqNum last_available = uxr_seq_num_add(stream->last_acknown, stream->history);
@@ -181,7 +181,7 @@ void uxr_write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
     payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
     payload.last_unacked_seq_nr = stream->last_sent;
 
-    (void) write_submessage_header(mb, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
+    (void) uxr_write_submessage_header(mb, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_HEARTBEAT_Payload(mb, &payload);
 }
 

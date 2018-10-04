@@ -1,7 +1,7 @@
 #include "input_reliable_stream_internal.h"
 #include "seq_num_internal.h"
 
-#include <microxrce/client/core/session/submessage.h>
+#include "../submessage_internal.h"
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <string.h>
 
@@ -108,7 +108,7 @@ void uxr_write_acknack(const uxrInputReliableStream* stream, ucdrBuffer* mb) {
     payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
     payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
 
-    (void) write_submessage_header(mb, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
+    (void) uxr_write_submessage_header(mb, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_ACKNACK_Payload(mb, &payload);
     (void) stream; (void) mb;
 }

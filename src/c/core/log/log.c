@@ -14,10 +14,11 @@
 
 #include <microxrce/client/core/log/log.h>
 #include <microxrce/client/core/session/session_info.h>
-#include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/util/time.h>
 #include <microxrce/client/core/serialization/xrce_header.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
+
+#include "../session/submessage_internal.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -82,7 +83,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
     size_t submessage_counter = 0;
     uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    while(read_submessage_header(&mb, &submessage_id, &length, &flags, &payload_it))
+    while(uxr_read_submessage_header(&mb, &submessage_id, &length, &flags, &payload_it))
     {
         if(submessage_counter != 0)
         {

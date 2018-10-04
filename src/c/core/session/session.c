@@ -1,11 +1,12 @@
 #include <microxrce/client/core/session/session.h>
-#include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/util/time.h>
 #include <microxrce/client/core/communication/communication.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/core/log/log.h>
 #include <microxrce/client/config.h>
 
+#include "submessage_internal.h"
+#include "session_info_internal.h"
 #include "stream/stream_storage_internal.h"
 #include "stream/input_best_effort_stream_internal.h"
 #include "stream/input_reliable_stream_internal.h"
@@ -61,7 +62,7 @@ void uxr_init_session(uxrSession* session, uxrCommunication* comm, uint32_t key)
     session->on_topic = NULL;
     session->on_topic_args = NULL;
 
-    init_session_info(&session->info, 0x81, key);
+    uxr_init_session_info(&session->info, 0x81, key);
     uxr_init_stream_storage(&session->streams);
 }
 
@@ -83,10 +84,10 @@ bool uxr_create_session(uxrSession* session)
 
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer mb;
-    ucdr_init_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
+    ucdr_init_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
-    write_create_session(&session->info, &mb, uxr_milli_time());
-    stamp_create_session_header(&session->info, mb.init);
+    uxr_write_create_session(&session->info, &mb, uxr_milli_time());
+    uxr_stamp_create_session_header(&session->info, mb.init);
 
     bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&mb), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     bool created = received && UXR_STATUS_OK == session->info.last_requested_status;
@@ -97,10 +98,10 @@ bool uxr_delete_session(uxrSession* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer mb;
-    ucdr_init_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, session_header_offset(&session->info));
+    ucdr_init_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
-    write_delete_session(&session->info, &mb);
-    stamp_session_header(&session->info, 0, 0, mb.init);
+    uxr_write_delete_session(&session->info, &mb);
+    uxr_stamp_session_header(&session->info, 0, 0, mb.init);
 
     bool received = wait_session_status(session, delete_session_buffer, ucdr_buffer_length(&mb), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
     return received && UXR_STATUS_OK == session->info.last_requested_status;
@@ -108,13 +109,13 @@ bool uxr_delete_session(uxrSession* session)
 
 uxrStreamId uxr_create_output_best_effort_stream(uxrSession* session, uint8_t* buffer, size_t size)
 {
-    uint8_t header_offset = session_header_offset(&session->info);
+    uint8_t header_offset = uxr_session_header_offset(&session->info);
     return uxr_add_output_best_effort_buffer(&session->streams, buffer, size, header_offset);
 }
 
 uxrStreamId uxr_create_output_reliable_stream(uxrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
-    uint8_t header_offset = session_header_offset(&session->info);
+    uint8_t header_offset = uxr_session_header_offset(&session->info);
     return uxr_add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
 }
 
@@ -238,7 +239,7 @@ void uxr_flash_output_streams(uxrSession* session)
         uint8_t* buffer; size_t length; uxrSeqNum seq_num;
         if(uxr_prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
-            stamp_session_header(&session->info, id.raw, seq_num, buffer);
+            uxr_stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
         }
     }
@@ -251,7 +252,7 @@ void uxr_flash_output_streams(uxrSession* session)
         uint8_t* buffer; size_t length; uxrSeqNum seq_num;
         while(uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
-            stamp_session_header(&session->info, id.raw, seq_num, buffer);
+            uxr_stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
         }
     }
@@ -350,12 +351,12 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
     ucdrBuffer mb;
-    ucdr_init_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, session_header_offset(&session->info));
+    ucdr_init_buffer_offset(&mb, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
     uxr_write_heartbeat(stream, &mb);
-    stamp_session_header(&session->info, 0, id.raw, mb.init);
+    uxr_stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, heartbeat_buffer, ucdr_buffer_length(&mb));
 }
 
@@ -363,19 +364,19 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
     ucdrBuffer mb;
-    ucdr_init_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, session_header_offset(&session->info));
+    ucdr_init_buffer_offset(&mb, acknack_buffer, ACKNACK_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
     uxr_write_acknack(stream, &mb);
-    stamp_session_header(&session->info, 0, id.raw, mb.init);
+    uxr_stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, acknack_buffer, ucdr_buffer_length(&mb));
 }
 
 void read_message(uxrSession* session, ucdrBuffer* mb)
 {
     uint8_t stream_id_raw; uxrSeqNum seq_num;
-    if(read_session_header(&session->info, mb, &stream_id_raw, &seq_num))
+    if(uxr_read_session_header(&session->info, mb, &stream_id_raw, &seq_num))
     {
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, mb, id, seq_num);
@@ -424,7 +425,7 @@ void read_stream(uxrSession* session, ucdrBuffer* mb, uxrStreamId stream_id, uxr
 void read_submessage_list(uxrSession* session, ucdrBuffer* submessages, uxrStreamId stream_id)
 {
     uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    while(read_submessage_header(submessages, &id, &length, &flags, &payload_it))
+    while(uxr_read_submessage_header(submessages, &id, &length, &flags, &payload_it))
     {
         read_submessage(session, submessages, id, stream_id, length, flags);
     }
@@ -437,14 +438,14 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
         case SUBMESSAGE_ID_STATUS_AGENT:
             if(stream_id.type == UXR_NONE_STREAM)
             {
-                read_create_session_status(&session->info, submessage);
+                uxr_read_create_session_status(&session->info, submessage);
             }
             break;
 
         case SUBMESSAGE_ID_STATUS:
             if(stream_id.type == UXR_NONE_STREAM)
             {
-                read_delete_session_status(&session->info, submessage);
+                uxr_read_delete_session_status(&session->info, submessage);
             }
             else
             {
@@ -480,7 +481,7 @@ void read_submessage_status(uxrSession* session, ucdrBuffer* submessage)
 
 
     uxrObjectId object_id; uint16_t request_id;
-    parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
+    uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
 
     uint8_t status = payload.base.result.status;
     process_status(session, object_id, request_id, status);
@@ -498,7 +499,7 @@ void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t 
     length = (uint16_t)(length - 4); //CHANGE: by a future size_of_BaseObjectRequest
 
     uxrObjectId object_id; uint16_t request_id;
-    parse_base_object_request(&base, &object_id, &request_id);
+    uxr_parse_base_object_request(&base, &object_id, &request_id);
 
     process_status(session, object_id, request_id, UXR_STATUS_OK);
 

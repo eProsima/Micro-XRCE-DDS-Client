@@ -40,8 +40,6 @@ typedef struct uxrStreamStorage
 
 } uxrStreamStorage;
 
-UXRDLLAPI bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* mb);
-
 #ifdef __cplusplus
 }
 #endif

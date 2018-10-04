@@ -1,4 +1,4 @@
-#include <microxrce/client/core/session/submessage.h>
+#include "submessage_internal.h"
 #include <microxrce/client/core/serialization/xrce_subheader.h>
 
 #define FLAG_ENDIANNESS 1
@@ -6,7 +6,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-bool write_submessage_header(ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags)
+bool uxr_write_submessage_header(ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags)
 {
     ucdr_align_to(mb, 4);
     mb->endianness = UCDR_MACHINE_ENDIANNESS;
@@ -16,7 +16,7 @@ bool write_submessage_header(ucdrBuffer* mb, uint8_t submessage_id, uint16_t len
     return ucdr_buffer_remaining(mb) >= length;
 }
 
-bool read_submessage_header(ucdrBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it)
+bool uxr_read_submessage_header(ucdrBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it)
 {
     if(*payload_it != NULL)
     {
@@ -39,7 +39,7 @@ bool read_submessage_header(ucdrBuffer* mb, uint8_t* submessage_id, uint16_t* le
     return ready_to_read;
 }
 
-size_t submessage_padding(size_t length)
+size_t uxr_submessage_padding(size_t length)
 {
     return (length % SUBHEADER_SIZE != 0) ? SUBHEADER_SIZE - (length % SUBHEADER_SIZE) : 0;
 }

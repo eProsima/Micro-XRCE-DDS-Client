@@ -45,9 +45,6 @@ extern "C"
 #define UXR_REQUEST_LOGIN    0x01
 #define UXR_REQUEST_LOGOUT   0x02
 
-struct ucdrBuffer;
-struct BaseObjectRequest;
-
 typedef struct uxrSessionInfo
 {
     uint8_t id;
@@ -56,23 +53,6 @@ typedef struct uxrSessionInfo
     uint16_t last_request_id;
 
 } uxrSessionInfo;
-
-
-void init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key);
-
-void write_create_session(const uxrSessionInfo* info, struct ucdrBuffer* mb, int64_t nanoseconds);
-void write_delete_session(const uxrSessionInfo* info, struct ucdrBuffer* mb);
-void read_create_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
-void read_delete_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
-
-void stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer);
-void stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer);
-bool read_session_header(const uxrSessionInfo* info, struct ucdrBuffer* mb, uint8_t* stream_id_raw, uxrSeqNum* seq_num);
-
-uint8_t session_header_offset(const uxrSessionInfo* info);
-
-UXRDLLAPI uint16_t init_base_object_request(uxrSessionInfo* info, uxrObjectId object_id, struct BaseObjectRequest* base);
-void parse_base_object_request(const struct BaseObjectRequest* base, uxrObjectId* object_id, uint16_t* request_id);
 
 #ifdef __cplusplus
 }
