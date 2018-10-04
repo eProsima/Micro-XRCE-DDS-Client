@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #include <microxrce/client/core/session/stream/input_reliable_stream.h>
-#include <microxrce/client/core/session/seq_num.h>
+#include <microxrce/client/core/session/stream/seq_num.h>
 
 #include <stdbool.h>
 #include <stddef.h>

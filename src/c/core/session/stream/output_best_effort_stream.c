@@ -1,4 +1,6 @@
 #include "output_best_effort_stream_internal.h"
+#include "seq_num_internal.h"
+
 #include <microcdr/microcdr.h>
 
 //==================================================================
@@ -36,7 +38,7 @@ bool uxr_prepare_best_effort_buffer_to_send(uxrOutputBestEffortStream* stream, u
     bool data_to_send = stream->writer > stream->offset;
     if(data_to_send)
     {
-        stream->last_send = seq_num_add(stream->last_send, 1);
+        stream->last_send = uxr_seq_num_add(stream->last_send, 1);
 
         *seq_num = stream->last_send;
         *buffer = stream->buffer;

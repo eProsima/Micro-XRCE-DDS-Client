@@ -1,4 +1,6 @@
 #include "output_reliable_stream_internal.h"
+#include "seq_num_internal.h"
+
 #include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/config.h>
@@ -65,16 +67,16 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
     if(length + submessage_padding(length) + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
-        uxrSeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
-        available_to_write = 0 >= seq_num_cmp(stream->last_written, last_available);
+        uxrSeqNum last_available = uxr_seq_num_add(stream->last_acknown, stream->history);
+        available_to_write = 0 >= uxr_seq_num_cmp(stream->last_written, last_available);
     }
     /* Check if the message fit in a new empty buffer */
     else if(stream->offset + size <= get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
-        uxrSeqNum next = seq_num_add(stream->last_written, 1);
-        uxrSeqNum last_available = seq_num_add(stream->last_acknown, stream->history);
-        available_to_write = 0 >= seq_num_cmp(next, last_available);
+        uxrSeqNum next = uxr_seq_num_add(stream->last_written, 1);
+        uxrSeqNum last_available = uxr_seq_num_add(stream->last_acknown, stream->history);
+        available_to_write = 0 >= uxr_seq_num_cmp(next, last_available);
         if(available_to_write)
         {
             internal_buffer = get_output_buffer(stream, next % stream->history);
@@ -96,19 +98,19 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
 
 bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num)
 {
-    *seq_num = seq_num_add(stream->last_sent, 1);
+    *seq_num = uxr_seq_num_add(stream->last_sent, 1);
     *buffer = get_output_buffer(stream, *seq_num % stream->history);
     *length = get_output_buffer_length(*buffer);
 
-    bool data_to_send = 0 >= seq_num_cmp(*seq_num, stream->last_written)
+    bool data_to_send = 0 >= uxr_seq_num_cmp(*seq_num, stream->last_written)
                         && *length > stream->offset
-                        && seq_num_sub(stream->last_sent, stream->last_acknown) != stream->history;
+                        && uxr_seq_num_sub(stream->last_sent, stream->last_acknown) != stream->history;
     if(data_to_send)
     {
         stream->last_sent = *seq_num;
         if(stream->last_sent == stream->last_written)
         {
-            stream->last_written = seq_num_add(stream->last_written, 1);
+            stream->last_written = uxr_seq_num_add(stream->last_written, 1);
         }
     }
 
@@ -118,7 +120,7 @@ bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, u
 bool uxr_update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp)
 {
     bool must_confirm = false;
-    if(0 > seq_num_cmp(stream->last_acknown, stream->last_sent))
+    if(0 > uxr_seq_num_cmp(stream->last_acknown, stream->last_sent))
     {
         if(0 == stream->next_heartbeat_tries)
         {
@@ -154,8 +156,8 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
         bool check_next_buffer = true;
         while(check_next_buffer && !it_updated)
         {
-            *seq_num_it = seq_num_add(*seq_num_it, 1);
-            check_next_buffer = 0 >= seq_num_cmp(*seq_num_it, stream->last_sent);
+            *seq_num_it = uxr_seq_num_add(*seq_num_it, 1);
+            check_next_buffer = 0 >= uxr_seq_num_cmp(*seq_num_it, stream->last_sent);
             if(check_next_buffer)
             {
                 *buffer = get_output_buffer(stream, *seq_num_it % stream->history);
@@ -176,7 +178,7 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
 void uxr_write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
 {
     HEARTBEAT_Payload payload;
-    payload.first_unacked_seq_nr = seq_num_add(stream->last_acknown, 1);
+    payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
     payload.last_unacked_seq_nr = stream->last_sent;
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
@@ -190,12 +192,12 @@ void uxr_read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)
 
     uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]);
 
-    process_acknack(stream, nack_bitmap, (uint16_t)seq_num_sub(acknack.first_unacked_seq_num, 1));
+    process_acknack(stream, nack_bitmap, (uint16_t)uxr_seq_num_sub(acknack.first_unacked_seq_num, 1));
 }
 
 bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
 {
-    return 0 > seq_num_cmp(stream->last_acknown, stream->last_sent);
+    return 0 > uxr_seq_num_cmp(stream->last_acknown, stream->last_sent);
 }
 
 //==================================================================
@@ -203,15 +205,15 @@ bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
 //==================================================================
 void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num)
 {
-    size_t buffers_to_clean = seq_num_sub(last_acked_seq_num, stream->last_acknown);
+    size_t buffers_to_clean = uxr_seq_num_sub(last_acked_seq_num, stream->last_acknown);
     for(size_t i = 0; i < buffers_to_clean; i++)
     {
-        stream->last_acknown = seq_num_add(stream->last_acknown, 1);
+        stream->last_acknown = uxr_seq_num_add(stream->last_acknown, 1);
         uint8_t* internal_buffer = get_output_buffer(stream, stream->last_acknown % stream->history);
         set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
     }
 
-    uint16_t buffers_to_check_clean = seq_num_sub(stream->last_sent, last_acked_seq_num);
+    uint16_t buffers_to_check_clean = uxr_seq_num_sub(stream->last_sent, last_acked_seq_num);
     for(uint16_t i = 0; i < buffers_to_check_clean; i++)
     {
         if(bitmap & (1 << i)) /* message lost */
@@ -220,7 +222,7 @@ void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t 
         }
         else
         {
-            uxrSeqNum seq_num = seq_num_add(last_acked_seq_num, i);
+            uxrSeqNum seq_num = uxr_seq_num_add(last_acked_seq_num, i);
             uint8_t* internal_buffer = get_output_buffer(stream, seq_num % stream->history);
             set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
         }

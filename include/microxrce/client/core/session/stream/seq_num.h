@@ -12,26 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_CORE_SESSION_INPUT_STREAM_BEST_EFFORT_STREAM_INTERNAL_H_
-#define _SRC_C_CORE_SESSION_INPUT_STREAM_BEST_EFFORT_STREAM_INTERNAL_H_
+#ifndef _MICROXRCE_CLIENT_CORE_SESSION_STREAM_SEQ_NUM_H_
+#define _MICROXRCE_CLIENT_CORE_SESSION_STREAM_SEQ_NUM_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <microxrce/client/core/session/stream/input_best_effort_stream.h>
-#include <microxrce/client/core/session/stream/seq_num.h>
-
 #include <stdint.h>
-#include <stdbool.h>
 
-void uxr_init_input_best_effort_stream(uxrInputBestEffortStream* stream);
-void uxr_reset_input_best_effort_stream(uxrInputBestEffortStream* stream);
-bool uxr_receive_best_effort_message(uxrInputBestEffortStream* stream, uxrSeqNum seq_num);
+typedef uint16_t uxrSeqNum;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _SRC_C_CORE_SESSION_INPUT_STREAM_BEST_EFFORT_STREAM_INTERNAL_H_
+#endif // _MICROXRCE_CLIENT_CORE_SESSION_STREAM_SEQ_NUM_H_

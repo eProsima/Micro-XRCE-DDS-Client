@@ -27,7 +27,7 @@ uint16_t uxr_write_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
 {
     CREATE_Payload payload;
     payload.object_representation.kind = OBJK_TOPIC;
-    object_id_to_raw(participant_id, payload.object_representation._.topic.participant_id.data);
+    uxr_object_id_to_raw(participant_id, payload.object_representation._.topic.participant_id.data);
 
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
@@ -38,7 +38,7 @@ uint16_t uxr_write_create_datawriter_ref(uxrSession* session, uxrStreamId stream
 {
     CREATE_Payload payload;
     payload.object_representation.kind = OBJK_DATAWRITER;
-    object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
+    uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
 
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
@@ -49,7 +49,7 @@ uint16_t uxr_write_create_datareader_ref(uxrSession* session, uxrStreamId stream
 {
     CREATE_Payload payload;
     payload.object_representation.kind = OBJK_DATAREADER;
-    object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
+    uxr_object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
 
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }

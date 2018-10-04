@@ -23,12 +23,14 @@ extern "C"
 #include <microxrce/client/dll.h>
 #include <stdint.h>
 
-extern const uint8_t UXR_PARTICIPANT_ID;
-extern const uint8_t UXR_TOPIC_ID;
-extern const uint8_t UXR_PUBLISHER_ID;
-extern const uint8_t UXR_SUBSCRIBER_ID;
-extern const uint8_t UXR_DATAWRITER_ID;
-extern const uint8_t UXR_DATAREADER_ID;
+#define UXR_INVALID_ID     0x00
+#define UXR_PARTICIPANT_ID 0x01
+#define UXR_TOPIC_ID       0x02
+#define UXR_PUBLISHER_ID   0x03
+#define UXR_SUBSCRIBER_ID  0x04
+#define UXR_DATAWRITER_ID  0x05
+#define UXR_DATAREADER_ID  0x06
+#define UXR_OTHER_ID       0x0F
 
 typedef struct uxrObjectId
 {
@@ -39,8 +41,8 @@ typedef struct uxrObjectId
 
 UXRDLLAPI uxrObjectId uxr_object_id(uint16_t id, uint8_t type);
 
-uxrObjectId object_id_from_raw(const uint8_t* raw);
-void object_id_to_raw(uxrObjectId object_id, uint8_t* raw);
+uxrObjectId uxr_object_id_from_raw(const uint8_t* raw);
+void uxr_object_id_to_raw(uxrObjectId object_id, uint8_t* raw);
 
 #ifdef __cplusplus
 }

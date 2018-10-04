@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <microxrce/client/core/session/seq_num.h>
+#include <microxrce/client/core/session/stream/seq_num.h>
 #include <microxrce/client/core/session/object_id.h>
 #include <stdbool.h>
 

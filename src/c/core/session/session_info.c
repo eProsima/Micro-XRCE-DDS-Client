@@ -1,4 +1,5 @@
 #include <microxrce/client/core/session/session_info.h>
+#include <microxrce/client/core/session/object_id.h>
 #include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/core/serialization/xrce_header.h>
@@ -131,14 +132,14 @@ uint16_t init_base_object_request(uxrSessionInfo* info, uxrObjectId object_id, B
 
     base->request_id.data[0] = (uint8_t) (request_id >> 8);
     base->request_id.data[1] = (uint8_t) request_id;
-    object_id_to_raw(object_id, base->object_id.data);
+    uxr_object_id_to_raw(object_id, base->object_id.data);
 
     return request_id;
 }
 
 void parse_base_object_request(const BaseObjectRequest* base, uxrObjectId* object_id, uint16_t* request_id)
 {
-    *object_id = object_id_from_raw(base->object_id.data);
+    *object_id = uxr_object_id_from_raw(base->object_id.data);
     *request_id = (uint16_t)((((uint16_t) base->request_id.data[0]) << 8)
                             + base->request_id.data[1]);
 }

@@ -1,4 +1,4 @@
-#include <microxrce/client/core/session/seq_num.h>
+#include "seq_num_internal.h"
 
 #define UINT16_SIZE (1 << 16)
 #define UINT16_MIDSIZE (1 << 15)
@@ -6,19 +6,19 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uxrSeqNum seq_num_add(uxrSeqNum seq_num, uxrSeqNum increment)
+uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uxrSeqNum increment)
 {
     return (uxrSeqNum)((seq_num + increment) % UINT16_SIZE);
 }
 
-uxrSeqNum seq_num_sub(uxrSeqNum seq_num, uxrSeqNum decrement)
+uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uxrSeqNum decrement)
 {
     return (uxrSeqNum)((decrement > seq_num)
         ? (seq_num + (UINT16_SIZE - decrement)) % UINT16_SIZE
         : seq_num - decrement);
 }
 
-int seq_num_cmp(uxrSeqNum seq_num_1, uxrSeqNum seq_num_2)
+int uxr_seq_num_cmp(uxrSeqNum seq_num_1, uxrSeqNum seq_num_2)
 {
     int result;
     if(seq_num_1 == seq_num_2)

@@ -12,24 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_SEQ_NUM_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_SEQ_NUM_H_
+#ifndef _SRC_C_CORE_SESSION_STREAM_SEQ_NUM_INTERNAL_H_
+#define _SRC_C_CORE_SESSION_STREAM_SEQ_NUM_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stdint.h>
+#include <microxrce/client/core/session/stream/seq_num.h>
 
-typedef uint16_t uxrSeqNum;
-
-uxrSeqNum seq_num_add(uxrSeqNum seq_num, uxrSeqNum increment);
-uxrSeqNum seq_num_sub(uxrSeqNum seq_num, uxrSeqNum decrement);
-int seq_num_cmp(uxrSeqNum seq_num_1, uxrSeqNum seq_num_2);
+uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uxrSeqNum increment);
+uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uxrSeqNum decrement);
+int uxr_seq_num_cmp(uxrSeqNum seq_num_1, uxrSeqNum seq_num_2);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_SEQ_NUM_H_
+#endif // _SRC_C_CORE_SESSION_STREAM_SEQ_NUM_INTERNAL_H_

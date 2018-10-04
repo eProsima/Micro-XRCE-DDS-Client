@@ -1,4 +1,6 @@
 #include "input_reliable_stream_internal.h"
+#include "seq_num_internal.h"
+
 #include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <string.h>
@@ -47,15 +49,15 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
     bool result = false;
 
     /* Check if the seq_num is valid for the stream state */
-    uxrSeqNum last_history = seq_num_add(stream->last_handled, stream->history);
-    if(0 > seq_num_cmp(stream->last_handled, seq_num) && 0 <= seq_num_cmp(last_history, seq_num))
+    uxrSeqNum last_history = uxr_seq_num_add(stream->last_handled, stream->history);
+    if(0 > uxr_seq_num_cmp(stream->last_handled, seq_num) && 0 <= uxr_seq_num_cmp(last_history, seq_num))
     {
         /* Process the message */
-        uxrSeqNum next = seq_num_add(stream->last_handled, 1);
+        uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
         if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
         {
             stream->last_handled = next;
-            if(0 > seq_num_cmp(stream->last_announced, stream->last_handled))
+            if(0 > uxr_seq_num_cmp(stream->last_announced, stream->last_handled))
             {
                 stream->last_announced = stream->last_handled;
             }
@@ -73,7 +75,7 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
         }
     }
 
-    if(0 > seq_num_cmp(stream->last_announced, seq_num))
+    if(0 > uxr_seq_num_cmp(stream->last_announced, seq_num))
     {
         stream->last_announced = seq_num;
     }
@@ -84,7 +86,7 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
 
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, ucdrBuffer* mb)
 {
-    uxrSeqNum next = seq_num_add(stream->last_handled, 1);
+    uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
     uint8_t* internal_buffer = get_input_buffer(stream, next % stream->history);
     size_t length = get_input_buffer_length(internal_buffer);
     bool available_to_read = 0 != length;
@@ -102,7 +104,7 @@ void uxr_write_acknack(const uxrInputReliableStream* stream, ucdrBuffer* mb) {
     uint16_t nack_bitmap = compute_nack_bitmap(stream);
 
     ACKNACK_Payload payload;
-    payload.first_unacked_seq_num = seq_num_add(stream->last_handled, 1);
+    payload.first_unacked_seq_num = uxr_seq_num_add(stream->last_handled, 1);
     payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
     payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
 
@@ -129,12 +131,12 @@ bool uxr_is_input_reliable_stream_busy(uxrInputReliableStream* stream)
 //==================================================================
 void process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num)
 {
-    if(0 > seq_num_cmp(seq_num_add(stream->last_handled, 1), first_seq_num))
+    if(0 > uxr_seq_num_cmp(uxr_seq_num_add(stream->last_handled, 1), first_seq_num))
     {
-        stream->last_handled = seq_num_sub(first_seq_num, 1);
+        stream->last_handled = uxr_seq_num_sub(first_seq_num, 1);
     }
 
-    if(0 > seq_num_cmp(stream->last_announced, last_seq_num))
+    if(0 > uxr_seq_num_cmp(stream->last_announced, last_seq_num))
     {
         stream->last_announced = last_seq_num;
     }
@@ -142,12 +144,12 @@ void process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_num, u
 
 uint16_t compute_nack_bitmap(const uxrInputReliableStream* stream)
 {
-    uint16_t buffers_to_ack = seq_num_sub(stream->last_announced, stream->last_handled);
+    uint16_t buffers_to_ack = uxr_seq_num_sub(stream->last_announced, stream->last_handled);
     uint16_t nack_bitmap = (buffers_to_ack > 0) ? 1 : 0;
 
     for(unsigned i = 0; i < (unsigned)buffers_to_ack; i++)
     {
-        uxrSeqNum seq_num = seq_num_add(stream->last_handled, (uint16_t)(i + 1));
+        uxrSeqNum seq_num = uxr_seq_num_add(stream->last_handled, (uint16_t)(i + 1));
         uint8_t* internal_buffer = get_input_buffer(stream, seq_num % stream->history);
         if(0 == get_input_buffer_length(internal_buffer))
         {

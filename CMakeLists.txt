@@ -141,12 +141,12 @@ set(SRCS
     src/c/core/session/stream/input_reliable_stream.c
     src/c/core/session/stream/output_best_effort_stream.c
     src/c/core/session/stream/output_reliable_stream.c
+    src/c/core/session/stream/seq_num.c
     src/c/core/session/session.c
     src/c/core/session/session_info.c
     src/c/core/session/stream_id.c
     src/c/core/session/stream_storage.c
     src/c/core/session/submessage.c
-    src/c/core/session/seq_num.c
     src/c/core/session/object_id.c
     src/c/core/serialization/xrce_protocol.c
     src/c/core/serialization/xrce_header.c
