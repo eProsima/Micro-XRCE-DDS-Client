@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "message.h"
-
+#include <microxrce/client/core/log/log.h>
 #include <microxrce/client/core/session/session_info.h>
 #include <microxrce/client/core/session/submessage.h>
 #include <microxrce/client/core/util/time.h>
@@ -67,11 +66,11 @@ static void print_tail(int64_t initial_log_time);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* client_key)
+void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* client_key)
 {
     static int64_t initial_log_time = 0;
 
-    const char* color = (direction == SEND) ? YELLOW : PURPLE;
+    const char* color = (direction == UXR_SEND) ? YELLOW : PURPLE;
 
     ucdrBuffer mb;
     ucdr_init_buffer(&mb, buffer, (uint32_t)size);
@@ -208,9 +207,9 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
     printf(" \n");
 }
 
-void print_serialization(int direction, const uint8_t* buffer, size_t size)
+void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size)
 {
-    const char* dir = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
+    const char* dir = (direction == UXR_SEND) ? SEND_ARROW : RECV_ARROW;
 
     printf("%s%s<< [%zu]: %s>>%s\n",
             dir,
@@ -494,8 +493,8 @@ void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payloa
 
 void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, const uint8_t* client_key)
 {
-    const char* arrow = (direction == SEND) ? SEND_ARROW : RECV_ARROW;
-    const char* color = (direction == SEND) ? YELLOW : PURPLE;
+    const char* arrow = (direction == UXR_SEND) ? SEND_ARROW : RECV_ARROW;
+    const char* color = (direction == UXR_SEND) ? YELLOW : PURPLE;
 
     char stream_representation;
     if(0 == stream_id)

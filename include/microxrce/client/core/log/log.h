@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _PRIVATE_MICROXRCE_CORE_SESSION_C_LOG_MESSAGE_H_
-#define _PRIVATE_MICROXRCE_CORE_SESSION_C_LOG_MESSAGE_H_
+#ifndef _MICROXRCE_CORE_SESSION_LOG_LOG_H_
+#define _MICROXRCE_CORE_SESSION_LOG_LOG_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -23,32 +23,32 @@ extern "C"
 #include <stdint.h>
 #include <stddef.h>
 
-#define SEND 1
-#define RECV 2
+#define UXR_SEND 1
+#define UXR_RECV 2
 
-#ifdef MESSAGE_LOGS
-#define MESSAGE_LOGS_AVAILABLE 1
+#ifdef UXR_MESSAGE_LOGS
+#define UXR_MESSAGE_LOGS_AVAILABLE 1
 #else
-#define MESSAGE_LOGS_AVAILABLE 0
+#define UXR_MESSAGE_LOGS_AVAILABLE 0
 #endif
 
-#ifdef SERIALIZATION_LOGS
-#define SERIALIZATION_LOGS_AVAILABLE 1
+#ifdef UXR_SERIALIZATION_LOGS
+#define UXR_SERIALIZATION_LOGS_AVAILABLE 1
 #else
-#define SERIALIZATION_LOGS_AVAILABLE 0
+#define UXR_SERIALIZATION_LOGS_AVAILABLE 0
 #endif
 
-void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* client_key);
-void print_serialization(int direction, const uint8_t* buffer, size_t size);
+void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* client_key);
+void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size);
 
 #define DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) \
     do { \
-        if (MESSAGE_LOGS_AVAILABLE) print_message(direction, buffer, size, client_key); \
-        if (SERIALIZATION_LOGS_AVAILABLE) print_serialization(direction, buffer, size); \
+        if (UXR_MESSAGE_LOGS_AVAILABLE) uxr_print_message(direction, buffer, size, client_key); \
+        if (UXR_SERIALIZATION_LOGS_AVAILABLE) uxr_print_serialization(direction, buffer, size); \
     } while (0);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _PRIVATE_MICROXRCE_CORE_SESSION_C_LOG_MESSAGE_H_
+#endif // _MICROXRCE_CORE_SESSION_LOG_LOG_H_

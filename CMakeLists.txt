@@ -152,7 +152,7 @@ set(SRCS
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/core/util/time.c
-    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/session/log/message.c>
+    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     )
 
 ###############################################################################
@@ -206,8 +206,8 @@ configure_file(${PROJECT_SOURCE_DIR}/include/microxrce/client/config.h.in
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
-        -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:SERIALIZATION_LOGS>
-        -D$<$<BOOL:${VERBOSE_MESSAGE}>:MESSAGE_LOGS>
+        -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:UXR_SERIALIZATION_LOGS>
+        -D$<$<BOOL:${VERBOSE_MESSAGE}>:UXR_MESSAGE_LOGS>
     )
 
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)

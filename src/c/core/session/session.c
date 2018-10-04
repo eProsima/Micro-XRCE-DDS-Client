@@ -3,13 +3,13 @@
 #include <microxrce/client/core/util/time.h>
 #include <microxrce/client/core/communication/communication.h>
 #include <microxrce/client/core/serialization/xrce_protocol.h>
+#include <microxrce/client/core/log/log.h>
 #include <microxrce/client/config.h>
 
 #include "stream/input_best_effort_stream_internal.h"
 #include "stream/input_reliable_stream_internal.h"
 #include "stream/output_best_effort_stream_internal.h"
 #include "stream/output_reliable_stream_internal.h"
-#include "log/message.h"
 
 // Autogenerate these defines by the protocol generator tool?
 #define HEARTBEAT_MAX_MSG_SIZE 16
@@ -332,7 +332,7 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
 inline void send_message(const uxrSession* session, uint8_t* buffer, size_t length)
 {
     (void) session->comm->send_msg(session->comm->instance, buffer, length);
-    DEBUG_PRINT_MESSAGE(SEND, buffer, length, session->info.key);
+    DEBUG_PRINT_MESSAGE(UXR_SEND, buffer, length, session->info.key);
 }
 
 inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
@@ -340,7 +340,7 @@ inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* len
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
     if(received)
     {
-        DEBUG_PRINT_MESSAGE(RECV, *buffer, *length, session->info.key);
+        DEBUG_PRINT_MESSAGE(UXR_RECV, *buffer, *length, session->info.key);
     }
     return received;
 }
