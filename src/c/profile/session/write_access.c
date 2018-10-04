@@ -1,9 +1,9 @@
 #include <microxrce/client/profile/session/write_access.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
 
 #include "../../core/session/stream/stream_storage_internal.h"
 #include "../../core/session/session_info_internal.h"
 #include "../../core/session/submessage_internal.h"
+#include "../../core/serialization/xrce_protocol_internal.h"
 
 #define WRITE_DATA_PAYLOAD_SIZE 8
 

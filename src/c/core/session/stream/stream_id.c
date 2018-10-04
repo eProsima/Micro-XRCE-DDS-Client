@@ -1,5 +1,6 @@
 #include <microxrce/client/core/session/stream/stream_id.h>
-#include <microxrce/client/core/serialization/xrce_header.h>
+
+#include "../../serialization/xrce_header_internal.h"
 
 #define BEST_EFFORT_STREAM_THRESHOLD 1
 #define RELIABLE_STREAM_THRESHOLD  128

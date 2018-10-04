@@ -1,5 +1,5 @@
 #include "submessage_internal.h"
-#include <microxrce/client/core/serialization/xrce_subheader.h>
+#include "../serialization/xrce_subheader_internal.h"
 
 #define FLAG_ENDIANNESS 1
 

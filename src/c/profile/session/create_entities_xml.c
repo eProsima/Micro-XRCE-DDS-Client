@@ -1,5 +1,7 @@
 #include <microxrce/client/profile/session/create_entities_xml.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
+
+#include "../../core/serialization/xrce_protocol_internal.h"
+
 #include <string.h>
 
 static uint16_t create_entity_xml(uxrSession* session, uxrStreamId stream_id,

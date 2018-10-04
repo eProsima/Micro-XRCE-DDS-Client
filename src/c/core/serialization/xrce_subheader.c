@@ -1,4 +1,4 @@
-#include <microxrce/client/core/serialization/xrce_subheader.h>
+#include "xrce_subheader_internal.h"
 
 //==================================================================
 //                             PUBLIC

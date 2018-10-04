@@ -1,7 +1,6 @@
 #include <microxrce/client/core/session/session.h>
 #include <microxrce/client/core/util/time.h>
 #include <microxrce/client/core/communication/communication.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/core/log/log.h>
 #include <microxrce/client/config.h>
 
@@ -12,6 +11,7 @@
 #include "stream/input_reliable_stream_internal.h"
 #include "stream/output_best_effort_stream_internal.h"
 #include "stream/output_reliable_stream_internal.h"
+#include "../serialization/xrce_protocol_internal.h"
 
 // Autogenerate these defines by the protocol generator tool?
 #define HEARTBEAT_MAX_MSG_SIZE 16

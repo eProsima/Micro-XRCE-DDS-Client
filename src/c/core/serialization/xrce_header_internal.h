@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SERIALIZATION_HEADER_H_
-#define _MICROXRCE_CLIENT_CORE_SERIALIZATION_HEADER_H_
+#ifndef _SRC_C_CORE_SERIALIZATION_HEADER_INTERNAL_H_
+#define _SRC_C_CORE_SERIALIZATION_HEADER_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -24,13 +24,13 @@ extern "C"
 #include <stdbool.h>
 #include <microcdr/microcdr.h>
 
-#define CLIENT_KEY_SIZE 4
+#define UXR_CLIENT_KEY_SIZE 4
 
-#define MIN_HEADER_SIZE 4
-#define MAX_HEADER_SIZE (MIN_HEADER_SIZE + CLIENT_KEY_SIZE)
+#define UXR_MIN_HEADER_SIZE 4
+#define UXR_MAX_HEADER_SIZE (UXR_MIN_HEADER_SIZE + UXR_CLIENT_KEY_SIZE)
 
-#define SESSION_ID_WITH_CLIENT_KEY 0x00
-#define SESSION_ID_WITHOUT_CLIENT_KEY 0x80
+#define UXR_SESSION_ID_WITH_CLIENT_KEY 0x00
+#define UXR_SESSION_ID_WITHOUT_CLIENT_KEY 0x80
 
 void uxr_serialize_message_header(ucdrBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key);
 void uxr_deserialize_message_header(ucdrBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key);
@@ -39,4 +39,4 @@ void uxr_deserialize_message_header(ucdrBuffer* mb, uint8_t* session_id, uint8_t
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SERIALIZATION_HEADER_H_
+#endif // _SRC_C_CORE_SERIALIZATION_HEADER_INTERNAL_H_

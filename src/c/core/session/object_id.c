@@ -1,5 +1,4 @@
 #include <microxrce/client/core/session/object_id.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
 
 //==================================================================
 //                             PUBLIC

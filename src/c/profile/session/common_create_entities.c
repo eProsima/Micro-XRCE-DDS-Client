@@ -1,9 +1,9 @@
 #include <microxrce/client/profile/session/common_create_entities.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
 
 #include "../../core/session/stream/stream_storage_internal.h"
 #include "../../core/session/session_info_internal.h"
 #include "../../core/session/submessage_internal.h"
+#include "../../core/serialization/xrce_protocol_internal.h"
 
 //==================================================================
 //                              PUBLIC

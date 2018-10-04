@@ -1,10 +1,10 @@
-#include "output_reliable_stream_internal.h"
-#include "seq_num_internal.h"
-#include "../submessage_internal.h"
-
-#include <microxrce/client/core/serialization/xrce_protocol.h>
 #include <microxrce/client/config.h>
 #include <string.h>
+
+#include "seq_num_internal.h"
+#include "output_reliable_stream_internal.h"
+#include "../submessage_internal.h"
+#include "../../serialization/xrce_protocol_internal.h"
 
 // Remove when Microcdr supports size_of functions
 #define HEARTBEAT_PAYLOAD_SIZE 4

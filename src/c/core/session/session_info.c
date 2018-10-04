@@ -1,9 +1,9 @@
 #include <microxrce/client/core/session/session_info.h>
 #include <microxrce/client/core/session/object_id.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
-#include <microxrce/client/core/serialization/xrce_header.h>
 
 #include "submessage_internal.h"
+#include "../serialization/xrce_protocol_internal.h"
+#include "../serialization/xrce_header_internal.h"
 
 #include <string.h>
 
@@ -88,33 +88,33 @@ void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
 void uxr_stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer)
 {
     ucdrBuffer mb;
-    ucdr_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
+    ucdr_init_buffer(&mb, buffer, UXR_MAX_HEADER_SIZE);
 
-    (void) uxr_serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
+    (void) uxr_serialize_message_header(&mb, info->id & UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
 void uxr_stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer)
 {
     ucdrBuffer mb;
-    ucdr_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
+    ucdr_init_buffer(&mb, buffer, UXR_MAX_HEADER_SIZE);
 
     (void) uxr_serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }
 
 bool uxr_read_session_header(const uxrSessionInfo* info, ucdrBuffer* mb, uint8_t* stream_id_raw, uxrSeqNum* seq_num)
 {
-    bool must_be_read = ucdr_buffer_remaining(mb) > MAX_HEADER_SIZE;
+    bool must_be_read = ucdr_buffer_remaining(mb) > UXR_MAX_HEADER_SIZE;
     if(must_be_read)
     {
-        uint8_t session_id; uint8_t key[CLIENT_KEY_SIZE];
+        uint8_t session_id; uint8_t key[UXR_CLIENT_KEY_SIZE];
         (void) uxr_deserialize_message_header(mb, &session_id, stream_id_raw, seq_num, key);
 
         must_be_read = session_id == info->id;
         if(must_be_read)
         {
-            if (SESSION_ID_WITHOUT_CLIENT_KEY > info->id)
+            if (UXR_SESSION_ID_WITHOUT_CLIENT_KEY > info->id)
             {
-                must_be_read = (0 == memcmp(key, info->key, CLIENT_KEY_SIZE));
+                must_be_read = (0 == memcmp(key, info->key, UXR_CLIENT_KEY_SIZE));
             }
         }
     }
@@ -124,7 +124,7 @@ bool uxr_read_session_header(const uxrSessionInfo* info, ucdrBuffer* mb, uint8_t
 
 uint8_t uxr_session_header_offset(const uxrSessionInfo* info)
 {
-    return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MIN_HEADER_SIZE;
+    return (UXR_SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? UXR_MAX_HEADER_SIZE : UXR_MIN_HEADER_SIZE;
 }
 
 uint16_t uxr_init_base_object_request(uxrSessionInfo* info, uxrObjectId object_id, BaseObjectRequest* base)

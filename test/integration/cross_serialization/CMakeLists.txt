@@ -25,6 +25,8 @@ if(MSVC OR MSVC_IDE)
     target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
 endif()
 
+get_target_property(CLIENT_INCLUDES micro_xrce_dds_client INCLUDE_DIRECTORIES)
+include_directories("${CLIENT_INCLUDES}") #Used to include internal headers
 target_link_libraries(${PROJECT_NAME} micro_xrce_dds_client)
 target_include_directories(${PROJECT_NAME}
     PUBLIC

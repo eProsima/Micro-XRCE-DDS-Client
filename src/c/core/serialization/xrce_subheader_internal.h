@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SERIALIZATION_SUBHEADER_H_
-#define _MICROXRCE_CLIENT_CORE_SERIALIZATION_SUBHEADER_H_
+#ifndef _SRC_C_CORE_SERIALIZATION_SUBHEADER_H_
+#define _SRC_C_CORE_SERIALIZATION_SUBHEADER_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -31,4 +31,4 @@ void uxr_deserialize_submessage_header(ucdrBuffer* buffer, uint8_t* id, uint8_t*
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SERIALIZATION_SUBHEADER_H_
+#endif // _SRC_C_CORE_SERIALIZATION_SUBHEADER_H_

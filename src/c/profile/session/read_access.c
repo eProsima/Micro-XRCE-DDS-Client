@@ -1,9 +1,9 @@
 #include <microxrce/client/profile/session/read_access.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
 
 #include "../../core/session/stream/stream_storage_internal.h"
 #include "../../core/session/session_info_internal.h"
 #include "../../core/session/submessage_internal.h"
+#include "../../core/serialization/xrce_protocol_internal.h"
 
 extern void read_submessage_format(uxrSession* session, ucdrBuffer* data, uint16_t length, uint8_t format,
                                    uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);

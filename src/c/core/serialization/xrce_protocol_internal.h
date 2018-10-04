@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_H_
-#define _MICROXRCE_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_H_
+#ifndef _MICROXRCE_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
+#define _MICROXRCE_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -24,16 +24,16 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-#define STRING_SIZE_MAX                512
-#define SAMPLE_DATA_SIZE_MAX           512
-#define STRING_SEQUENCE_MAX            8
-#define BINARY_SEQUENCE_MAX            8
-#define SAMPLE_SEQUENCE_MAX            8
-#define SAMPLE_DATA_SEQUENCE_MAX       8
-#define SAMPLE_DELTA_SEQUENCE_MAX      8
-#define PACKED_SAMPLES_SEQUENCE_MAX    8
-#define TRANSPORT_LOCATOR_SEQUENCE_MAX 8
-#define PROPERTY_SEQUENCE_MAX          8
+#define UXR_STRING_SIZE_MAX                512
+#define UXR_SAMPLE_DATA_SIZE_MAX           512
+#define UXR_STRING_SEQUENCE_MAX            8
+#define UXR_BINARY_SEQUENCE_MAX            8
+#define UXR_SAMPLE_SEQUENCE_MAX            8
+#define UXR_SAMPLE_DATA_SEQUENCE_MAX       8
+#define UXR_SAMPLE_DELTA_SEQUENCE_MAX      8
+#define UXR_PACKED_SAMPLES_SEQUENCE_MAX    8
+#define UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX 1
+#define UXR_PROPERTY_SEQUENCE_MAX          8
 
 typedef struct Time_t
 {
@@ -45,7 +45,7 @@ typedef struct Time_t
 typedef struct BinarySequence_t
 {
     uint32_t size;
-    uint8_t data[BINARY_SEQUENCE_MAX];
+    uint8_t data[UXR_BINARY_SEQUENCE_MAX];
 
 } BinarySequence_t;
 
@@ -53,7 +53,7 @@ typedef struct BinarySequence_t
 typedef struct StringSequence_t
 {
     uint32_t size;
-    char* data[STRING_SEQUENCE_MAX];
+    char* data[UXR_STRING_SEQUENCE_MAX];
 
 } StringSequence_t;
 
@@ -186,7 +186,7 @@ typedef struct TransportLocator
 typedef struct TransportLocatorSeq
 {
     uint32_t size;
-    TransportLocator data[TRANSPORT_LOCATOR_SEQUENCE_MAX];
+    TransportLocator data[UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX];
 
 } TransportLocatorSeq;
 
@@ -743,7 +743,7 @@ typedef struct SampleInfoDelta
 typedef struct SampleData
 {
     uint32_t size;
-    uint8_t data[SAMPLE_DATA_SIZE_MAX];
+    uint8_t data[UXR_SAMPLE_DATA_SIZE_MAX];
 
 } SampleData;
 
@@ -751,7 +751,7 @@ typedef struct SampleData
 typedef struct SampleDataSeq
 {
     uint32_t size;
-    SampleData data[SAMPLE_DATA_SEQUENCE_MAX];
+    SampleData data[UXR_SAMPLE_DATA_SEQUENCE_MAX];
 
 } SampleDataSeq;
 
@@ -767,7 +767,7 @@ typedef struct Sample
 typedef struct SampleSeq
 {
     uint32_t size;
-    Sample data[SAMPLE_SEQUENCE_MAX];
+    Sample data[UXR_SAMPLE_SEQUENCE_MAX];
 
 } SampleSeq;
 
@@ -783,7 +783,7 @@ typedef struct SampleDelta
 typedef struct SampleDeltaSequence
 {
     uint32_t size;
-    SampleDelta data[SAMPLE_DELTA_SEQUENCE_MAX];
+    SampleDelta data[UXR_SAMPLE_DELTA_SEQUENCE_MAX];
 
 } SampleDeltaSequence;
 
@@ -799,7 +799,7 @@ typedef struct PackedSamples
 typedef struct SamplePackedSeq
 {
     uint32_t size;
-    PackedSamples data[PACKED_SAMPLES_SEQUENCE_MAX];
+    PackedSamples data[UXR_PACKED_SAMPLES_SEQUENCE_MAX];
 
 } SamplePackedSeq;
 

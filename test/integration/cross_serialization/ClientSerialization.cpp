@@ -1,6 +1,6 @@
 #include "ClientSerialization.hpp"
 
-#include <microxrce/client/core/serialization/xrce_protocol.h>
+#include <core/serialization/xrce_protocol_internal.h>
 #include <microcdr/microcdr.h>
 #include <cstring>
 

@@ -1,8 +1,8 @@
-#include "input_reliable_stream_internal.h"
 #include "seq_num_internal.h"
-
+#include "input_reliable_stream_internal.h"
 #include "../submessage_internal.h"
-#include <microxrce/client/core/serialization/xrce_protocol.h>
+#include "../../serialization/xrce_protocol_internal.h"
+
 #include <string.h>
 
 // Remove when Microcdr supports size_of functions

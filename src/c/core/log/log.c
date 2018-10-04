@@ -15,9 +15,9 @@
 #include <microxrce/client/core/log/log.h>
 #include <microxrce/client/core/session/session_info.h>
 #include <microxrce/client/core/util/time.h>
-#include <microxrce/client/core/serialization/xrce_header.h>
-#include <microxrce/client/core/serialization/xrce_protocol.h>
 
+#include "../serialization/xrce_header_internal.h"
+#include "../serialization/xrce_protocol_internal.h"
 #include "../session/submessage_internal.h"
 
 #include <string.h>
@@ -76,7 +76,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
     ucdrBuffer mb;
     ucdr_init_buffer(&mb, buffer, (uint32_t)size);
 
-    uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
+    uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[UXR_CLIENT_KEY_SIZE];
     (void) uxr_deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
     print_header(size, direction, stream_id_raw, seq_num, client_key);
@@ -103,7 +103,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
             case SUBMESSAGE_ID_CREATE:
             {
-                char string_buffer[STRING_SIZE_MAX];
+                char string_buffer[UXR_STRING_SIZE_MAX];
                 CREATE_Payload payload;
                 payload.object_representation._.participant.base.representation._.xml_string_represenatation = string_buffer;
                 payload.object_representation._.publisher.base.representation._.string_represenatation = string_buffer;
@@ -157,7 +157,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
             case SUBMESSAGE_ID_READ_DATA:
             {
-                char string_buffer[STRING_SIZE_MAX];
+                char string_buffer[UXR_STRING_SIZE_MAX];
                 READ_DATA_Payload payload;
                 payload.read_specification.content_filter_expression = string_buffer;
 

@@ -1,4 +1,4 @@
-#include <microxrce/client/core/serialization/xrce_protocol.h>
+#include "xrce_protocol_internal.h"
 #include <string.h>
 
 //==================================================================
@@ -27,7 +27,7 @@ bool uxr_serialize_BinarySequence_t(ucdrBuffer* buffer, const BinarySequence_t* 
 
 bool uxr_deserialize_BinarySequence_t(ucdrBuffer* buffer, BinarySequence_t* output)
 {
-    return ucdr_deserialize_sequence_uint8_t(buffer, output->data, BINARY_SEQUENCE_MAX, &output->size);
+    return ucdr_deserialize_sequence_uint8_t(buffer, output->data, UXR_BINARY_SEQUENCE_MAX, &output->size);
 }
 
 bool uxr_serialize_StringSequence_t(ucdrBuffer* buffer, const StringSequence_t* input)
@@ -43,7 +43,7 @@ bool uxr_serialize_StringSequence_t(ucdrBuffer* buffer, const StringSequence_t* 
 bool uxr_deserialize_StringSequence_t(ucdrBuffer* buffer, StringSequence_t* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > STRING_SEQUENCE_MAX)
+    if(output->size > UXR_STRING_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
@@ -52,7 +52,7 @@ bool uxr_deserialize_StringSequence_t(ucdrBuffer* buffer, StringSequence_t* outp
     {
         for(uint32_t i = 0; i < output->size && ret; i++)
         {
-            ret = ucdr_deserialize_string(buffer, output->data[i], STRING_SIZE_MAX);
+            ret = ucdr_deserialize_string(buffer, output->data[i], UXR_STRING_SIZE_MAX);
         }
     }
     return ret;
@@ -200,7 +200,7 @@ bool uxr_serialize_TransportLocatorString(ucdrBuffer* buffer, const TransportLoc
 bool uxr_deserialize_TransportLocatorString(ucdrBuffer* buffer, TransportLocatorString* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_string(buffer, output->value, STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->value, UXR_STRING_SIZE_MAX);
     return ret;
 }
 
@@ -271,7 +271,7 @@ bool uxr_serialize_TransportLocatorSeq(ucdrBuffer* buffer, const TransportLocato
 bool uxr_deserialize_TransportLocatorSeq(ucdrBuffer* buffer, TransportLocatorSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > TRANSPORT_LOCATOR_SEQUENCE_MAX)
+    if(output->size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
@@ -297,8 +297,8 @@ bool uxr_serialize_Property(ucdrBuffer* buffer, const Property* input)
 bool uxr_deserialize_Property(ucdrBuffer* buffer, Property* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_string(buffer, output->name, STRING_SIZE_MAX);
-    ret &= ucdr_deserialize_string(buffer, output->value, STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->name, UXR_STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->value, UXR_STRING_SIZE_MAX);
     return ret;
 }
 
@@ -316,7 +316,7 @@ bool uxr_deserialize_PropertySeq(ucdrBuffer* buffer, PropertySeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
 
-    if(output->size > PROPERTY_SEQUENCE_MAX)
+    if(output->size > UXR_PROPERTY_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
@@ -433,10 +433,10 @@ bool uxr_deserialize_OBJK_Representation3Formats(ucdrBuffer* buffer, OBJK_Repres
         switch(output->format)
         {
             case REPRESENTATION_BY_REFERENCE:
-                ret &= ucdr_deserialize_string(buffer, output->_.object_reference, STRING_SIZE_MAX);
+                ret &= ucdr_deserialize_string(buffer, output->_.object_reference, UXR_STRING_SIZE_MAX);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= ucdr_deserialize_string(buffer, output->_.xml_string_represenatation, STRING_SIZE_MAX);
+                ret &= ucdr_deserialize_string(buffer, output->_.xml_string_represenatation, UXR_STRING_SIZE_MAX);
                 break;
             case REPRESENTATION_IN_BINARY:
                 ret &= uxr_deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
@@ -478,10 +478,10 @@ bool uxr_deserialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, OBJ
         switch(output->format)
         {
             case REPRESENTATION_BY_REFERENCE:
-                ret &= ucdr_deserialize_string(buffer, output->_.object_name, STRING_SIZE_MAX);
+                ret &= ucdr_deserialize_string(buffer, output->_.object_name, UXR_STRING_SIZE_MAX);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= ucdr_deserialize_string(buffer, output->_.xml_string_represenatation, STRING_SIZE_MAX);
+                ret &= ucdr_deserialize_string(buffer, output->_.xml_string_represenatation, UXR_STRING_SIZE_MAX);
                 break;
             default:
                 break;
@@ -523,7 +523,7 @@ bool uxr_deserialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, OBJ
                 ret &= uxr_deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
                 break;
             case REPRESENTATION_AS_XML_STRING:
-                ret &= ucdr_deserialize_string(buffer, output->_.string_represenatation, STRING_SIZE_MAX);
+                ret &= ucdr_deserialize_string(buffer, output->_.string_represenatation, UXR_STRING_SIZE_MAX);
                 break;
             default:
                 break;
@@ -750,13 +750,13 @@ bool uxr_deserialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, OBJK_Doma
     ret &= ucdr_deserialize_bool(buffer, &output->optional_domain_reference);
     if(output->optional_domain_reference == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->domain_reference, STRING_SIZE_MAX);
+            ret &= ucdr_deserialize_string(buffer, output->domain_reference, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos_profile_reference);
     if(output->optional_qos_profile_reference == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->qos_profile_reference, STRING_SIZE_MAX);
+            ret &= ucdr_deserialize_string(buffer, output->qos_profile_reference, UXR_STRING_SIZE_MAX);
     }
 
     return ret;
@@ -784,17 +784,17 @@ bool uxr_serialize_OBJK_Topic_Binary(ucdrBuffer* buffer, const OBJK_Topic_Binary
 bool uxr_deserialize_OBJK_Topic_Binary(ucdrBuffer* buffer, OBJK_Topic_Binary* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_type_reference);
     if(output->optional_type_reference == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->type_reference, STRING_SIZE_MAX);
+            ret &= ucdr_deserialize_string(buffer, output->type_reference, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_type_name);
     if(output->optional_type_name == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->type_name, STRING_SIZE_MAX);
+            ret &= ucdr_deserialize_string(buffer, output->type_name, UXR_STRING_SIZE_MAX);
     }
 
     return ret;
@@ -860,7 +860,7 @@ bool uxr_deserialize_OBJK_Publisher_Binary(ucdrBuffer* buffer, OBJK_Publisher_Bi
     ret &= ucdr_deserialize_bool(buffer, &output->optional_publisher_name);
     if(output->optional_publisher_name == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->publisher_name, STRING_SIZE_MAX);
+            ret &= ucdr_deserialize_string(buffer, output->publisher_name, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
@@ -932,7 +932,7 @@ bool uxr_deserialize_OBJK_Subscriber_Binary(ucdrBuffer* buffer, OBJK_Subscriber_
     ret &= ucdr_deserialize_bool(buffer, &output->optional_subscriber_name);
     if(output->optional_subscriber_name == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->subscriber_name, STRING_SIZE_MAX);
+            ret &= ucdr_deserialize_string(buffer, output->subscriber_name, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
@@ -1064,7 +1064,7 @@ bool uxr_deserialize_OBJK_DataReader_Binary_Qos(ucdrBuffer* buffer, OBJK_DataRea
     ret &= ucdr_deserialize_bool(buffer, &output->optional_contentbased_filter);
     if(output->optional_contentbased_filter == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->contentbased_filter, STRING_SIZE_MAX);
+            ret &= ucdr_deserialize_string(buffer, output->contentbased_filter, UXR_STRING_SIZE_MAX);
     }
 
     return ret;
@@ -1086,7 +1086,7 @@ bool uxr_serialize_OBJK_DataReader_Binary(ucdrBuffer* buffer, const OBJK_DataRea
 bool uxr_deserialize_OBJK_DataReader_Binary(ucdrBuffer* buffer, OBJK_DataReader_Binary* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
@@ -1112,7 +1112,7 @@ bool uxr_serialize_OBJK_DataWriter_Binary(ucdrBuffer* buffer, const OBJK_DataWri
 bool uxr_deserialize_OBJK_DataWriter_Binary(ucdrBuffer* buffer, OBJK_DataWriter_Binary* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_string(buffer, output->topic_name, STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
     if(output->optional_qos == true)
     {
@@ -1474,7 +1474,7 @@ bool uxr_deserialize_ReadSpecification(ucdrBuffer* buffer, ReadSpecification* ou
     ret &= ucdr_deserialize_bool(buffer, &output->optional_content_filter_expression);
     if(output->optional_content_filter_expression == true)
     {
-        ret &= ucdr_deserialize_string(buffer, output->content_filter_expression, STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->content_filter_expression, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_delivery_control);
@@ -1591,7 +1591,7 @@ bool uxr_serialize_SampleData(ucdrBuffer* buffer, const SampleData* input)
 
 bool uxr_deserialize_SampleData(ucdrBuffer* buffer, SampleData* output)
 {
-    return ucdr_deserialize_sequence_uint8_t(buffer, output->data, SAMPLE_DATA_SIZE_MAX, &output->size);
+    return ucdr_deserialize_sequence_uint8_t(buffer, output->data, UXR_SAMPLE_DATA_SIZE_MAX, &output->size);
 }
 
 bool uxr_serialize_SampleDataSeq(ucdrBuffer* buffer, const SampleDataSeq* input)
@@ -1607,7 +1607,7 @@ bool uxr_serialize_SampleDataSeq(ucdrBuffer* buffer, const SampleDataSeq* input)
 bool uxr_deserialize_SampleDataSeq(ucdrBuffer* buffer, SampleDataSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > SAMPLE_DATA_SEQUENCE_MAX)
+    if(output->size > UXR_SAMPLE_DATA_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
@@ -1651,7 +1651,7 @@ bool uxr_serialize_SampleSeq(ucdrBuffer* buffer, const SampleSeq* input)
 bool uxr_deserialize_SampleSeq(ucdrBuffer* buffer, SampleSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > SAMPLE_SEQUENCE_MAX)
+    if(output->size > UXR_SAMPLE_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
@@ -1695,7 +1695,7 @@ bool uxr_serialize_SampleDeltaSequence(ucdrBuffer* buffer, const SampleDeltaSequ
 bool uxr_deserialize_SampleDeltaSequence(ucdrBuffer* buffer, SampleDeltaSequence* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > SAMPLE_DELTA_SEQUENCE_MAX)
+    if(output->size > UXR_SAMPLE_DELTA_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
@@ -1739,7 +1739,7 @@ bool uxr_serialize_SamplePackedSeq(ucdrBuffer* buffer, const SamplePackedSeq* in
 bool uxr_deserialize_SamplePackedSeq(ucdrBuffer* buffer, SamplePackedSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > PACKED_SAMPLES_SEQUENCE_MAX)
+    if(output->size > UXR_PACKED_SAMPLES_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
