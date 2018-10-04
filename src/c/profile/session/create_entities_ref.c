@@ -1,5 +1,6 @@
 #include <microxrce/client/profile/session/create_entities_ref.h>
 
+#include "common_create_entities_internal.h"
 #include "../../core/serialization/xrce_protocol_internal.h"
 
 #include <string.h>
@@ -68,5 +69,5 @@ inline uint16_t create_entity_ref(uxrSession* session, uxrStreamId stream_id,
     payload->object_representation._.participant.base.representation.format = REPRESENTATION_BY_REFERENCE;
     payload->object_representation._.participant.base.representation._.object_reference = (char*) ref;
 
-    return common_create_entity(session, stream_id, object_id, (uint16_t)(strlen(ref) + 1), mode, payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t)(strlen(ref) + 1), mode, payload);
 }

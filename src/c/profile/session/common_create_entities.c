@@ -1,5 +1,4 @@
-#include <microxrce/client/profile/session/common_create_entities.h>
-
+#include "common_create_entities_internal.h"
 #include "../../core/session/stream/stream_storage_internal.h"
 #include "../../core/session/session_info_internal.h"
 #include "../../core/session/submessage_internal.h"
@@ -30,7 +29,7 @@ uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxr
     return request_id;
 }
 
-uint16_t common_create_entity(uxrSession* session, uxrStreamId stream_id,
+uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
                                   uxrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
                                   CREATE_Payload* payload)
 {

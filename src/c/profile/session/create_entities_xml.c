@@ -1,5 +1,6 @@
 #include <microxrce/client/profile/session/create_entities_xml.h>
 
+#include "common_create_entities_internal.h"
 #include "../../core/serialization/xrce_protocol_internal.h"
 
 #include <string.h>
@@ -95,5 +96,5 @@ inline uint16_t create_entity_xml(uxrSession* session, uxrStreamId stream_id,
     payload->object_representation._.participant.base.representation.format = REPRESENTATION_AS_XML_STRING;
     payload->object_representation._.participant.base.representation._.xml_string_represenatation = (char*)xml;
 
-    return common_create_entity(session, stream_id, object_id, (uint16_t)(strlen(xml) + 1), mode, payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t)(strlen(xml) + 1), mode, payload);
 }

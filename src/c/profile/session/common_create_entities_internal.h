@@ -12,20 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
-#define _MICROXRCE_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
+#ifndef _SRC_C_PROFILE_SESSION_COMMON_CREATE_ENTITIES_INTERNAL_H_
+#define _SRC_C_PROFILE_SESSION_COMMON_CREATE_ENTITIES_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <microxrce/client/core/session/session.h>
+#include <microxrce/client/profile/session/common_create_entities.h>
 
-UXRDLLAPI uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id);
+struct CREATE_Payload;
+
+uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
+                              uxrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
+                              struct CREATE_Payload* payload);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICROXRCE_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
+#endif //_SRC_C_PROFILE_SESSION_COMMON_CREATE_ENTITIES_INTERNAL_H_
