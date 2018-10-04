@@ -21,7 +21,7 @@ uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxr
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
 
         request_id = init_base_object_request(&session->info, object_id, &payload.base);
-        (void) serialize_DELETE_Payload(&mb, &payload);
+        (void) uxr_serialize_DELETE_Payload(&mb, &payload);
     }
 
     return request_id;
@@ -49,7 +49,7 @@ uint16_t common_create_entity(uxrSession* session, uxrStreamId stream_id,
     {
         request_id = init_base_object_request(&session->info, object_id, &payload->base);
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
-        (void) serialize_CREATE_Payload(&mb, payload);
+        (void) uxr_serialize_CREATE_Payload(&mb, payload);
     }
 
     return request_id;

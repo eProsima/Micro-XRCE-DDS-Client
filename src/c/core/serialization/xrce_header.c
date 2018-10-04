@@ -3,7 +3,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void serialize_message_header(ucdrBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key)
+void uxr_serialize_message_header(ucdrBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key)
 {
     (void) ucdr_serialize_uint8_t(mb, session_id);
     (void) ucdr_serialize_uint8_t(mb, stream_id);
@@ -14,7 +14,7 @@ void serialize_message_header(ucdrBuffer* mb, uint8_t session_id, uint8_t stream
     }
 }
 
-void deserialize_message_header(ucdrBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key)
+void uxr_deserialize_message_header(ucdrBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key)
 {
     (void) ucdr_deserialize_uint8_t(mb, session_id);
     (void) ucdr_deserialize_uint8_t(mb, stream_id);

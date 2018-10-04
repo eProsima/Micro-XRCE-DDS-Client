@@ -51,7 +51,7 @@ void write_create_session(const uxrSessionInfo* info, ucdrBuffer* mb, int64_t na
     payload.client_representation.optional_properties = false;
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
-    (void) serialize_CREATE_CLIENT_Payload(mb, &payload);
+    (void) uxr_serialize_CREATE_CLIENT_Payload(mb, &payload);
 }
 
 void write_delete_session(const uxrSessionInfo* info, ucdrBuffer* mb)
@@ -62,13 +62,13 @@ void write_delete_session(const uxrSessionInfo* info, ucdrBuffer* mb)
     payload.base.object_id = OBJECTID_CLIENT;
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
-    (void) serialize_DELETE_Payload(mb, &payload);
+    (void) uxr_serialize_DELETE_Payload(mb, &payload);
 }
 
 void read_create_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
 {
     STATUS_AGENT_Payload payload;
-    if(deserialize_STATUS_AGENT_Payload(mb, &payload))
+    if(uxr_deserialize_STATUS_AGENT_Payload(mb, &payload))
     {
         process_create_session_status(info, payload.base.result.status, &payload.agent_info);
     }
@@ -77,7 +77,7 @@ void read_create_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
 void read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
 {
     STATUS_Payload payload;
-    if(deserialize_STATUS_Payload(mb, &payload))
+    if(uxr_deserialize_STATUS_Payload(mb, &payload))
     {
         process_delete_session_status(info, payload.base.result.status);
     }
@@ -88,7 +88,7 @@ void stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer)
     ucdrBuffer mb;
     ucdr_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
-    (void) serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
+    (void) uxr_serialize_message_header(&mb, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
 void stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer)
@@ -96,7 +96,7 @@ void stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxr
     ucdrBuffer mb;
     ucdr_init_buffer(&mb, buffer, MAX_HEADER_SIZE);
 
-    (void) serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
+    (void) uxr_serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
 }
 
 bool read_session_header(const uxrSessionInfo* info, ucdrBuffer* mb, uint8_t* stream_id_raw, uxrSeqNum* seq_num)
@@ -105,7 +105,7 @@ bool read_session_header(const uxrSessionInfo* info, ucdrBuffer* mb, uint8_t* st
     if(must_be_read)
     {
         uint8_t session_id; uint8_t key[CLIENT_KEY_SIZE];
-        (void) deserialize_message_header(mb, &session_id, stream_id_raw, seq_num, key);
+        (void) uxr_deserialize_message_header(mb, &session_id, stream_id_raw, seq_num, key);
 
         must_be_read = session_id == info->id;
         if(must_be_read)

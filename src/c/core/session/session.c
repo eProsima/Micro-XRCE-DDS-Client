@@ -470,7 +470,7 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
 void read_submessage_status(uxrSession* session, ucdrBuffer* submessage)
 {
     STATUS_Payload payload;
-    deserialize_STATUS_Payload(submessage, &payload);
+    uxr_deserialize_STATUS_Payload(submessage, &payload);
 
 
     uxrObjectId object_id; uint16_t request_id;
@@ -488,7 +488,7 @@ void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t 
 {
 #ifdef PROFILE_READ_ACCESS
     BaseObjectRequest base;
-    deserialize_BaseObjectRequest(submessage, &base);
+    uxr_deserialize_BaseObjectRequest(submessage, &base);
     length = (uint16_t)(length - 4); //CHANGE: by a future size_of_BaseObjectRequest
 
     uxrObjectId object_id; uint16_t request_id;

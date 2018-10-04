@@ -49,7 +49,7 @@ uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrO
         (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
         request_id = init_base_object_request(&session->info, datareader_id, &payload.base);
-        (void) serialize_READ_DATA_Payload(&mb, &payload);
+        (void) uxr_serialize_READ_DATA_Payload(&mb, &payload);
     }
 
     return request_id;

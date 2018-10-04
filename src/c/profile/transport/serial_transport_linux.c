@@ -41,7 +41,7 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
-    uint16_t bytes_written = write_serial_msg(&transport->serial_io,
+    uint16_t bytes_written = uxr_write_serial_msg(&transport->serial_io,
                                               buf,
                                               len,
                                               transport->local_addr,
@@ -65,7 +65,7 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
     uint8_t src_addr;
     uint8_t rmt_addr;
-    uint16_t bytes_read = read_serial_msg(&transport->serial_io,
+    uint16_t bytes_read = uxr_read_serial_msg(&transport->serial_io,
                                           read_serial_data,
                                           instance,
                                           transport->buffer,
@@ -118,7 +118,7 @@ bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, int fd, uint8_t
     transport->poll_fd.fd = fd;
 
     /* Init SerialIO. */
-    init_serial_io(&transport->serial_io);
+    uxr_init_serial_io(&transport->serial_io);
 
     /* Send init flag. */
     uint8_t flag = UXR_FRAMING_END_FLAG;

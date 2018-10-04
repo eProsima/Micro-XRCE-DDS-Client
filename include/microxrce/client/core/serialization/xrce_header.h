@@ -32,8 +32,8 @@ extern "C"
 #define SESSION_ID_WITH_CLIENT_KEY 0x00
 #define SESSION_ID_WITHOUT_CLIENT_KEY 0x80
 
-void serialize_message_header(ucdrBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key);
-void deserialize_message_header(ucdrBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key);
+void uxr_serialize_message_header(ucdrBuffer* mb, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key);
+void uxr_deserialize_message_header(ucdrBuffer* mb, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key);
 
 #ifdef __cplusplus
 }

@@ -19,7 +19,7 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
 
         WRITE_DATA_Payload_Data payload;
         init_base_object_request(&session->info, datawriter_id, &payload.base);
-        (void) serialize_WRITE_DATA_Payload_Data(&mb, &payload);
+        (void) uxr_serialize_WRITE_DATA_Payload_Data(&mb, &payload);
         (void) ucdr_serialize_uint32_t(&mb, topic_size); //REMOVE: when topics have not a previous size in the agent.
 
         ucdr_init_buffer(mb_topic, mb.iterator, topic_size);

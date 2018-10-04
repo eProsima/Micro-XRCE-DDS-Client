@@ -222,12 +222,12 @@ bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet, uint16_t* posi
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-void init_serial_io(uxrSerialIO* serial_io)
+void uxr_init_serial_io(uxrSerialIO* serial_io)
 {
     serial_io->input.stream_init = false;
 }
 
-uint16_t write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr)
+uint16_t uxr_write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr)
 {
     bool cond = true;
     uint16_t crc = 0;
@@ -275,7 +275,7 @@ uint16_t write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len
     return cond ? (uint16_t)(position + 1) : 0;
 }
 
-uint16_t read_serial_msg(uxrSerialIO* serial_io,
+uint16_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                         uxr_read_cb cb,
                         void* cb_arg,
                         uint8_t* buf,

@@ -58,9 +58,9 @@ typedef struct uxrSerialIO
 
 typedef uint16_t (*uxr_read_cb)(void*, uint8_t*, size_t, int);
 
-void init_serial_io(uxrSerialIO* serial_io);
-uint16_t write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr);
-uint16_t read_serial_msg(uxrSerialIO* serial_io,
+void uxr_init_serial_io(uxrSerialIO* serial_io);
+uint16_t uxr_write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr);
+uint16_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                         uxr_read_cb cb,
                         void* cb_arg,
                         uint8_t* buf,

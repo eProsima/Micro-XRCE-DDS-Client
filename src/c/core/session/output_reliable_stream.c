@@ -180,13 +180,13 @@ void write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
     payload.last_unacked_seq_nr = stream->last_sent;
 
     (void) write_submessage_header(mb, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
-    (void) serialize_HEARTBEAT_Payload(mb, &payload);
+    (void) uxr_serialize_HEARTBEAT_Payload(mb, &payload);
 }
 
 void read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)
 {
     ACKNACK_Payload acknack;
-    deserialize_ACKNACK_Payload(payload, &acknack);
+    uxr_deserialize_ACKNACK_Payload(payload, &acknack);
 
     uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]);
 

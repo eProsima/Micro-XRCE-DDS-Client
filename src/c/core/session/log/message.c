@@ -77,7 +77,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
     ucdr_init_buffer(&mb, buffer, (uint32_t)size);
 
     uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
-    (void) deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
+    (void) uxr_deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
 
     print_header(size, direction, stream_id_raw, seq_num, client_key);
 
@@ -96,7 +96,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
             {
                 initial_log_time = get_milli_time();
                 CREATE_CLIENT_Payload payload;
-                deserialize_CREATE_CLIENT_Payload(&mb, &payload);
+                uxr_deserialize_CREATE_CLIENT_Payload(&mb, &payload);
                 print_create_client_submessage(color, &payload);
 
             } break;
@@ -108,7 +108,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
                 payload.object_representation._.participant.base.representation._.xml_string_represenatation = string_buffer;
                 payload.object_representation._.publisher.base.representation._.string_represenatation = string_buffer;
 
-                deserialize_CREATE_Payload(&mb, &payload);
+                uxr_deserialize_CREATE_Payload(&mb, &payload);
                 print_create_submessage(color, &payload, flags);
 
             } break;
@@ -122,7 +122,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
             case SUBMESSAGE_ID_DELETE:
             {
                 DELETE_Payload payload;
-                deserialize_DELETE_Payload(&mb, &payload);
+                uxr_deserialize_DELETE_Payload(&mb, &payload);
                 print_delete_submessage(color, &payload);
 
             } break;
@@ -130,14 +130,14 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
             case SUBMESSAGE_ID_STATUS_AGENT:
             {
                 STATUS_AGENT_Payload payload;
-                deserialize_STATUS_AGENT_Payload(&mb, &payload);
+                uxr_deserialize_STATUS_AGENT_Payload(&mb, &payload);
                 print_status_agent_submessage(color, &payload);
             } break;
 
             case SUBMESSAGE_ID_STATUS:
             {
                 STATUS_Payload payload;
-                deserialize_STATUS_Payload(&mb, &payload);
+                uxr_deserialize_STATUS_Payload(&mb, &payload);
                 print_status_submessage(color, &payload);
 
             } break;
@@ -150,7 +150,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
             case SUBMESSAGE_ID_WRITE_DATA:
             {
                 WRITE_DATA_Payload_Data payload;
-                deserialize_WRITE_DATA_Payload_Data(&mb, &payload);
+                uxr_deserialize_WRITE_DATA_Payload_Data(&mb, &payload);
                 print_write_data_data_submessage(color, &payload);
 
             } break;
@@ -161,7 +161,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
                 READ_DATA_Payload payload;
                 payload.read_specification.content_filter_expression = string_buffer;
 
-                deserialize_READ_DATA_Payload(&mb, &payload);
+                uxr_deserialize_READ_DATA_Payload(&mb, &payload);
                 print_read_data_submessage(color, &payload);
 
             } break;
@@ -169,7 +169,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
             case SUBMESSAGE_ID_HEARTBEAT:
             {
                 HEARTBEAT_Payload payload;
-                deserialize_HEARTBEAT_Payload(&mb, &payload);
+                uxr_deserialize_HEARTBEAT_Payload(&mb, &payload);
                 print_heartbeat_submessage(color, &payload);
 
             } break;
@@ -177,7 +177,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
             case SUBMESSAGE_ID_ACKNACK:
             {
                 ACKNACK_Payload payload;
-                deserialize_ACKNACK_Payload(&mb, &payload);
+                uxr_deserialize_ACKNACK_Payload(&mb, &payload);
                 print_acknack_submessage(color, &payload);
 
             } break;
@@ -185,7 +185,7 @@ void print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* c
             case SUBMESSAGE_ID_DATA:
             {
                 DATA_Payload_Data payload;
-                deserialize_DATA_Payload_Data(&mb, &payload);
+                uxr_deserialize_DATA_Payload_Data(&mb, &payload);
                 print_data_data_submessage(color, &payload);
 
             } break;
