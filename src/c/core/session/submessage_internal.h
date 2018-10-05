@@ -67,4 +67,4 @@ size_t uxr_submessage_padding(size_t length);
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_SUBMESSAGE_INTERNAL_H_
+#endif // _SRC_C_CORE_SESSION_SUBMESSAGE_INTERNAL_H_

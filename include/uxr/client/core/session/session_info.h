@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_SESSION_INFO_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_SESSION_INFO_H_
+#ifndef _UXR_CLIENT_CORE_SESSION_SESSION_INFO_H_
+#define _UXR_CLIENT_CORE_SESSION_SESSION_INFO_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -58,4 +58,4 @@ typedef struct uxrSessionInfo
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_SESSION_INFO_H
+#endif // _UXR_CLIENT_CORE_SESSION_SESSION_INFO_H

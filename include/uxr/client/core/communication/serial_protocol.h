@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_
-#define _MICROXRCE_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_
+#ifndef _UXR_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_
+#define _UXR_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -62,4 +62,4 @@ typedef uint16_t (*uxr_read_cb)(void*, uint8_t*, size_t, int);
 }
 #endif
 
-#endif //_MICROXRCE_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_
+#endif //_UXR_CLIENT_CORE_COMMUNICATION_SERIAL_PROTOCOL_H_

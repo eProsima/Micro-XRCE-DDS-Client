@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
-#define _MICROXRCE_CLIENT_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
+#ifndef _SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
+#define _SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -1258,4 +1258,4 @@ bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* ou
 }
 #endif
 
-#endif //_MICROXRCE_CLIENT_SERIALIZATION_XRCE_PROTOCOL_H_
+#endif //_SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_H_

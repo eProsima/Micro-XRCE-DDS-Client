@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
-#define _MICROXRCE_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
+#ifndef _UXR_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
+#define _UXR_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -44,4 +44,4 @@ UXRDLLAPI uint16_t uxr_write_configure_datareader_xml(uxrSession* session, uxrSt
 }
 #endif
 
-#endif //_MICROXRCE_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
+#endif //_UXR_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_

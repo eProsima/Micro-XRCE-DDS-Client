@@ -13,8 +13,8 @@
 // limitations under the License.
 
 
-#ifndef _MICROXRCE_DLL_H_
-#define _MICROXRCE_DLL_H_
+#ifndef _UXR_CLIENT_DLL_H_
+#define _UXR_CLIENT_DLL_H_
 
 #if defined(_WIN32)
 #if defined(micro_xrce_dds_client_SHARED)
@@ -30,4 +30,4 @@
 #define UXRDLLAPI
 #endif // _WIN32
 
-#endif // _MICROXRCE_DLL_H_
+#endif // _UXR_CLIENT_DLL_H_

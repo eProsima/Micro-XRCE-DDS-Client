@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CORE_SESSION_SESSION_H_
-#define _MICROXRCE_CLIENT_CORE_SESSION_SESSION_H_
+#ifndef _UXR_CLIENT_CORE_SESSION_SESSION_H_
+#define _UXR_CLIENT_CORE_SESSION_SESSION_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -77,4 +77,4 @@ UXRDLLAPI bool uxr_run_session_until_one_status(uxrSession* session, int timeout
 }
 #endif
 
-#endif // _MICROXRCE_CLIENT_CORE_SESSION_SESSION_H
+#endif // _UXR_CLIENT_CORE_SESSION_SESSION_H

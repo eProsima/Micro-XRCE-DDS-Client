@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_CLIENT_H_
-#define _MICROXRCE_CLIENT_CLIENT_H_
+#ifndef _UXR_CLIENT_CLIENT_H_
+#define _UXR_CLIENT_CLIENT_H_
 
 #include <uxr/client/config.h>
 
@@ -65,4 +65,4 @@
 
 #include <uxr/client/core/session/session.h>
 
-#endif // _MICROXRCE_CLIENT_CLIENT_H_
+#endif // _UXR_CLIENT_CLIENT_H_

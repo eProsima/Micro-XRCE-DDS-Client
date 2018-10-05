@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_CLIENT_SERIAL_TRANSPORT_H_
-#define _MICROXRCE_CLIENT_SERIAL_TRANSPORT_H_
+#ifndef _UXR_CLIENT_SERIAL_TRANSPORT_H_
+#define _UXR_CLIENT_SERIAL_TRANSPORT_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -41,5 +41,5 @@ UXRDLLAPI bool uxr_init_uart_transport(SerialTransport* transport, const char* d
 }
 #endif
 
-#endif //_MICROXRCE_CLIENT_SERIAL_TRANSPORT_H_
+#endif //_UXR_CLIENT_SERIAL_TRANSPORT_H_
 

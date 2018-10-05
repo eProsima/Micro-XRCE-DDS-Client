@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICROXRCE_TEST_TRANSPORT_SERIALCOMM_HPP_
-#define _MICROXRCE_TEST_TRANSPORT_SERIALCOMM_HPP_
+#ifndef _TEST_TRANSPORT_SERIALCOMM_HPP_
+#define _TEST_TRANSPORT_SERIALCOMM_HPP_
 
 #include <gtest/gtest.h>
 #include <uxr/client/client.h>
@@ -31,4 +31,4 @@ protected:
     uxrSerialTransport slave_;
 };
 
-#endif //_MICROXRCE_TEST_TRANSPORT_SERIALCOMM_HPP_
+#endif //_TEST_TRANSPORT_SERIALCOMM_HPP_
