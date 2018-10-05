@@ -17,8 +17,8 @@
 #define _UXR_CLIENT_DLL_H_
 
 #if defined(_WIN32)
-#if defined(micro_xrce_dds_client_SHARED)
-#if defined(micro_xrce_dds_client_EXPORTS)
+#if defined(microxrcedds_client_SHARED)
+#if defined(microxrcedds_client_EXPORTS)
 #define UXRDLLAPI __declspec( dllexport )
 #else
 #define UXRDLLAPI __declspec( dllimport )

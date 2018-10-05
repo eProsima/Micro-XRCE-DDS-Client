@@ -31,7 +31,7 @@ if(MSVC OR MSVC_IDE)
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} micro_xrce_dds_client ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} microxrcedds_client ${GTEST_BOTH_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

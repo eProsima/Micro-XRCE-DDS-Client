@@ -35,14 +35,14 @@ endif()
 # Product information
 ###############################################################################
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(micro_xrce_dds_client C)
+    project(microxrcedds_client C)
     set(PROJECT_VERSION_MAJOR 1)
     set(PROJECT_VERSION_MINOR 0)
     set(PROJECT_VERSION_PATCH 0)
     set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(micro_xrce_dds_client VERSION "1.0.0" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.0.0" LANGUAGES C)
 endif()
 
 ###############################################################################

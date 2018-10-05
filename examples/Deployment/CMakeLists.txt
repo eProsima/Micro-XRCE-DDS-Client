@@ -30,7 +30,7 @@ else()
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(ConfiguratorClient micro_xrce_dds_client)
+    target_link_libraries(ConfiguratorClient microxrcedds_client)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
@@ -51,7 +51,7 @@ else()
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(PublisherClient micro_xrce_dds_client)
+    target_link_libraries(PublisherClient microxrcedds_client)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
@@ -72,7 +72,7 @@ else()
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(SubscriberClient micro_xrce_dds_client)
+    target_link_libraries(SubscriberClient microxrcedds_client)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
