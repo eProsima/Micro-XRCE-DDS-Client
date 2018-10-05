@@ -1,4 +1,4 @@
-#include <microxrce/client/profile/session/write_access.h>
+#include <uxr/client/profile/session/write_access.h>
 
 #include "../../core/session/stream/stream_storage_internal.h"
 #include "../../core/session/session_info_internal.h"

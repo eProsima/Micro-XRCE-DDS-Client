@@ -195,8 +195,8 @@ else()
 endif()
 
 # Create source files with the define
-configure_file(${PROJECT_SOURCE_DIR}/include/microxrce/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/microxrce/client/config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
     )
 
 ###############################################################################
@@ -271,14 +271,14 @@ install(TARGETS ${PROJECT_NAME}
     )
 
 # Install includes
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/microxrce/client/
-    DESTINATION ${INCLUDE_INSTALL_DIR}/microxrce/client
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/uxr/client/
+    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
     FILES_MATCHING PATTERN "*.h"
     )
 
 # Install config.h
-install(FILES ${PROJECT_BINARY_DIR}/include/microxrce/client/config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/microxrce/client
+install(FILES ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
     )
 
 # Export library

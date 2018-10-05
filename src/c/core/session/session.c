@@ -1,8 +1,8 @@
-#include <microxrce/client/core/session/session.h>
-#include <microxrce/client/core/util/time.h>
-#include <microxrce/client/core/communication/communication.h>
-#include <microxrce/client/core/log/log.h>
-#include <microxrce/client/config.h>
+#include <uxr/client/core/session/session.h>
+#include <uxr/client/core/util/time.h>
+#include <uxr/client/core/communication/communication.h>
+#include <uxr/client/core/log/log.h>
+#include <uxr/client/config.h>
 
 #include "submessage_internal.h"
 #include "session_info_internal.h"

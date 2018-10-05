@@ -20,8 +20,8 @@ extern "C"
 {
 #endif
 
-#include <microxrce/client/core/session/stream/output_best_effort_stream.h>
-#include <microxrce/client/core/session/stream/seq_num.h>
+#include <uxr/client/core/session/stream/output_best_effort_stream.h>
+#include <uxr/client/core/session/stream/seq_num.h>
 
 #include <stddef.h>
 #include <stdbool.h>

@@ -33,11 +33,11 @@ else()
     target_link_libraries(ConfiguratorClient micro_xrce_dds_client)
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/microxrce/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/microxrce/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"
@@ -54,11 +54,11 @@ else()
     target_link_libraries(PublisherClient micro_xrce_dds_client)
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/microxrce/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/microxrce/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"
@@ -75,11 +75,11 @@ else()
     target_link_libraries(SubscriberClient micro_xrce_dds_client)
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/microxrce/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/microxrce/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"

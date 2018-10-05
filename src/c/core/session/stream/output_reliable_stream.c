@@ -1,4 +1,4 @@
-#include <microxrce/client/config.h>
+#include <uxr/client/config.h>
 #include <string.h>
 
 #include "seq_num_internal.h"

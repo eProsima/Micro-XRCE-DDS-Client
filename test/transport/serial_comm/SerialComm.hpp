@@ -16,7 +16,7 @@
 #define _MICROXRCE_TEST_TRANSPORT_SERIALCOMM_HPP_
 
 #include <gtest/gtest.h>
-#include <microxrce/client/client.h>
+#include <uxr/client/client.h>
 
 class SerialComm : public testing::Test
 {

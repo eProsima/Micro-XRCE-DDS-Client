@@ -1,4 +1,4 @@
-#include <microxrce/client/core/session/stream/stream_id.h>
+#include <uxr/client/core/session/stream/stream_id.h>
 
 #include "../../serialization/xrce_header_internal.h"
 

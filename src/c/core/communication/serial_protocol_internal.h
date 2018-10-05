@@ -19,7 +19,7 @@
 extern "C"
 {
 #endif
-#include <microxrce/client/core/communication/serial_protocol.h>
+#include <uxr/client/core/communication/serial_protocol.h>
 
 void uxr_init_serial_io(uxrSerialIO* serial_io);
 uint16_t uxr_write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr);

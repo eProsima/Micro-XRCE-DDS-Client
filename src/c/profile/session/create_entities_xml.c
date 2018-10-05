@@ -1,4 +1,4 @@
-#include <microxrce/client/profile/session/create_entities_xml.h>
+#include <uxr/client/profile/session/create_entities_xml.h>
 
 #include "common_create_entities_internal.h"
 #include "../../core/serialization/xrce_protocol_internal.h"

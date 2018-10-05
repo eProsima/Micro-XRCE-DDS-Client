@@ -39,11 +39,11 @@ else()
         )
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/microxrce/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/microxrce/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"

@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <microxrce/client/core/session/stream/seq_num.h>
+#include <uxr/client/core/session/stream/seq_num.h>
 
 uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uxrSeqNum increment);
 uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uxrSeqNum decrement);

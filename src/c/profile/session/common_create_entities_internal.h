@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <microxrce/client/profile/session/common_create_entities.h>
+#include <uxr/client/profile/session/common_create_entities.h>
 
 struct CREATE_Payload;
 

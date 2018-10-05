@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <microxrce/client/dll.h>
+#include <uxr/client/dll.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>

@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <microxrce/client/core/session/session_info.h>
+#include <uxr/client/core/session/session_info.h>
 
 struct ucdrBuffer;
 struct BaseObjectRequest;

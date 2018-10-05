@@ -4,7 +4,7 @@
 #include <iostream>
 #include <random>
 #include <chrono>
-#include <microxrce/client/core/communication/communication.h>
+#include <uxr/client/core/communication/communication.h>
 
 class Gateway
 {

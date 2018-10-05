@@ -1,5 +1,5 @@
-#include <microxrce/client/core/session/session_info.h>
-#include <microxrce/client/core/session/object_id.h>
+#include <uxr/client/core/session/session_info.h>
+#include <uxr/client/core/session/object_id.h>
 
 #include "submessage_internal.h"
 #include "../serialization/xrce_protocol_internal.h"
