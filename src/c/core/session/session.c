@@ -1,7 +1,6 @@
 #include <uxr/client/core/session/session.h>
 #include <uxr/client/core/util/time.h>
 #include <uxr/client/core/communication/communication.h>
-#include <uxr/client/core/log/log.h>
 #include <uxr/client/config.h>
 
 #include "submessage_internal.h"
@@ -12,6 +11,7 @@
 #include "stream/output_best_effort_stream_internal.h"
 #include "stream/output_reliable_stream_internal.h"
 #include "../serialization/xrce_protocol_internal.h"
+#include "../log/log_internal.h"
 
 // Autogenerate these defines by the protocol generator tool?
 #define HEARTBEAT_MAX_MSG_SIZE 16

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <uxr/client/core/log/log.h>
 #include <uxr/client/core/session/session_info.h>
 #include <uxr/client/core/util/time.h>
 
 #include "../serialization/xrce_header_internal.h"
 #include "../serialization/xrce_protocol_internal.h"
 #include "../session/submessage_internal.h"
+#include "log_internal.h"
 
 #include <string.h>
 #include <stdio.h>

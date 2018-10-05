@@ -41,8 +41,8 @@ typedef struct uxrObjectId
 
 UXRDLLAPI uxrObjectId uxr_object_id(uint16_t id, uint8_t type);
 
-uxrObjectId uxr_object_id_from_raw(const uint8_t* raw);
-void uxr_object_id_to_raw(uxrObjectId object_id, uint8_t* raw);
+UXRDLLAPI uxrObjectId uxr_object_id_from_raw(const uint8_t* raw);
+UXRDLLAPI void uxr_object_id_to_raw(uxrObjectId object_id, uint8_t* raw);
 
 #ifdef __cplusplus
 }

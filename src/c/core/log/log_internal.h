@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CORE_SESSION_LOG_LOG_H_
-#define _UXR_CORE_SESSION_LOG_LOG_H_
+#ifndef _SRC_C_CORE_SESSION_LOG_LOG_INTERNAL_H_
+#define _SRC_C_CORE_SESSION_LOG_LOG_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -51,4 +51,4 @@ void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size);
 }
 #endif
 
-#endif // _UXR_CORE_SESSION_LOG_LOG_H_
+#endif // _SRC_C_CORE_SESSION_LOG_LOG_INTERNAL_H_
