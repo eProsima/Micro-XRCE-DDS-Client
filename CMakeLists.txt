@@ -272,13 +272,13 @@ install(TARGETS ${PROJECT_NAME}
 
 # Install includes
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/uxr/client/
-    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
+    DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/client
     FILES_MATCHING PATTERN "*.h"
     )
 
 # Install config.h
 install(FILES ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
+    DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/client
     )
 
 # Export library

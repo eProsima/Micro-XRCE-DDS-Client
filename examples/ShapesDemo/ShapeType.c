@@ -21,7 +21,7 @@
 
 #include "ShapeType.h"
 
-#include <microcdr/microcdr.h>
+#include <ucdr/microcdr.h>
 #include <string.h>
 
 bool ShapeType_serialize_topic(ucdrBuffer* writer, const ShapeType* topic)
