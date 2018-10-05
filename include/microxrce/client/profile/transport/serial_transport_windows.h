@@ -20,6 +20,8 @@ extern "C"
 {
 #endif
 
+#include <microxrce/client/dll.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -33,7 +35,7 @@ typedef struct SerialTransport
     struct SerialProperties* properties;
 } SerialTransport;
 
-bool uxr_init_uart_transport(SerialTransport* transport, const char* device);
+UXRDLLAPI bool uxr_init_uart_transport(SerialTransport* transport, const char* device);
 
 #ifdef __cplusplus
 }

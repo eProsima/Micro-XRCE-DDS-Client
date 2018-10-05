@@ -22,6 +22,7 @@ extern "C"
 
 #include <microxrce/client/core/communication/communication.h>
 #include <microxrce/client/core/communication/serial_protocol.h>
+#include <microxrce/client/dll.h>
 #include <poll.h>
 
 typedef struct uxrSerialTransport
@@ -32,11 +33,12 @@ typedef struct uxrSerialTransport
     struct pollfd poll_fd;
     uxrSerialIO serial_io;
     uxrCommunication comm;
+
 } uxrSerialTransport;
 
-bool uxr_init_serial_transport(uxrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
-bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
-bool uxr_close_serial_transport(uxrSerialTransport* transport);
+UXRDLLAPI bool uxr_init_serial_transport(uxrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
+UXRDLLAPI bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
+UXRDLLAPI bool uxr_close_serial_transport(uxrSerialTransport* transport);
 
 #ifdef __cplusplus
 }

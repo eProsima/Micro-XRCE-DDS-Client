@@ -21,6 +21,7 @@ extern "C"
 #endif
 
 #include <microxrce/client/core/communication/communication.h>
+#include <microxrce/client/dll.h>
 #include <microxrce/client/config.h>
 #include <sys/socket.h>
 #include <poll.h>
@@ -34,8 +35,8 @@ typedef struct uxrUDPTransport
     uxrCommunication comm;
 } uxrUDPTransport;
 
-bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t port);
-bool uxr_close_udp_transport(uxrUDPTransport* transport);
+UXRDLLAPI bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t port);
+UXRDLLAPI bool uxr_close_udp_transport(uxrUDPTransport* transport);
 
 #ifdef __cplusplus
 }
