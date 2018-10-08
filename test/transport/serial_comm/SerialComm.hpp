@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_TEST_TRANSPORT_SERIALCOMM_HPP_
-#define _MICRORTPS_TEST_TRANSPORT_SERIALCOMM_HPP_
+#ifndef _TEST_TRANSPORT_SERIALCOMM_HPP_
+#define _TEST_TRANSPORT_SERIALCOMM_HPP_
 
 #include <gtest/gtest.h>
-#include <micrortps/client/client.h>
+#include <uxr/client/client.h>
 
 class SerialComm : public testing::Test
 {
@@ -27,8 +27,8 @@ public:
 
 protected:
     int fd_;
-    mrSerialTransport master_;
-    mrSerialTransport slave_;
+    uxrSerialTransport master_;
+    uxrSerialTransport slave_;
 };
 
-#endif //_MICRORTPS_TEST_TRANSPORT_SERIALCOMM_HPP_
+#endif //_TEST_TRANSPORT_SERIALCOMM_HPP_

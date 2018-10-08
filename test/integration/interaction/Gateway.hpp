@@ -4,7 +4,7 @@
 #include <iostream>
 #include <random>
 #include <chrono>
-#include <micrortps/client/core/communication/communication.h>
+#include <uxr/client/core/communication/communication.h>
 
 class Gateway
 {
@@ -21,7 +21,7 @@ public:
     {
     }
 
-    mrCommunication* monitorize(mrCommunication* user_comm)
+    uxrCommunication* monitorize(uxrCommunication* user_comm)
     {
         user_comm_ = user_comm;
         communication_.instance = this;
@@ -102,8 +102,8 @@ private:
 
     std::mt19937 random_;
 
-    mrCommunication* user_comm_;
-    mrCommunication communication_;
+    uxrCommunication* user_comm_;
+    uxrCommunication communication_;
 
     float lost_;
 };

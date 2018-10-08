@@ -14,15 +14,15 @@
 
 #include "HelloWorld.h"
 
-#include <micrortps/client/client.h>
+#include <uxr/client/client.h>
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
 #include <stdio.h>
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct mcBuffer* mb, void* args)
+void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* mb, void* args)
 {
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
 
@@ -44,18 +44,18 @@ int main(int args, char** argv)
     }
 
     // Transport
-    mrUDPTransport transport;
-    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
+    uxrUDPTransport transport;
+    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
     }
 
     // Session
-    mrSession session;
-    mr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
-    mr_set_topic_callback(&session, on_topic, NULL);
-    if(!mr_create_session(&session))
+    uxrSession session;
+    uxr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
+    uxr_set_topic_callback(&session, on_topic, NULL);
+    if(!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -63,28 +63,28 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_in = mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     // Request topics
-    mrDeliveryControl delivery_control = {0};
-    delivery_control.max_samples = MR_MAX_SAMPLES_UNLIMITED;
+    uxrDeliveryControl delivery_control = {0};
+    delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
 
-    mrObjectId datareader_id = mr_object_id((uint16_t)atoi(argv[4]), MR_DATAREADER_ID);
-    uint16_t read_data_req = mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+    uxrObjectId datareader_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAREADER_ID);
+    uint16_t read_data_req = uxr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
 
     // Read topics
     bool connected = true;
     while(connected)
     {
         uint8_t read_data_status;
-        connected = mr_run_session_until_all_status(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
     }
 
     // Delete resources
-    mr_close_udp_transport(&transport);
+    uxr_close_udp_transport(&transport);
 
     return 0;
 }

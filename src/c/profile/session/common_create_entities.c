@@ -1,13 +1,15 @@
-#include <micrortps/client/profile/session/common_create_entities.h>
-#include <micrortps/client/core/session/submessage.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
+#include "common_create_entities_internal.h"
+#include "../../core/session/stream/stream_storage_internal.h"
+#include "../../core/session/session_info_internal.h"
+#include "../../core/session/submessage_internal.h"
+#include "../../core/serialization/xrce_protocol_internal.h"
 
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObjectId object_id)
+uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id)
 {
-    uint16_t request_id = MR_INVALID_REQUEST_ID;
+    uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     DELETE_Payload payload;
 
@@ -15,23 +17,23 @@ uint16_t mr_write_delete_entity(mrSession* session, mrStreamId stream_id, mrObje
     uint16_t payload_length = 0; //DELETE_Payload_size(&payload);
     payload_length = (uint16_t)(payload_length + 4); // delete payload (request id + object_id), no padding.
 
-    mcBuffer mb;
-    if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
+    ucdrBuffer mb;
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
+        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
 
-        request_id = init_base_object_request(&session->info, object_id, &payload.base);
-        (void) serialize_DELETE_Payload(&mb, &payload);
+        request_id = uxr_init_base_object_request(&session->info, object_id, &payload.base);
+        (void) uxr_serialize_DELETE_Payload(&mb, &payload);
     }
 
     return request_id;
 }
 
-uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
-                                  mrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
+uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
+                                  uxrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
                                   CREATE_Payload* payload)
 {
-    uint16_t request_id = MR_INVALID_REQUEST_ID;
+    uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     // Change this when microcdr supports size_of function. Currently, DOMAIN_ID is not supported.
     uint16_t payload_length = 0; //CREATE_Payload_size(&payload);
@@ -44,12 +46,12 @@ uint16_t common_create_entity(mrSession* session, mrStreamId stream_id,
     payload_length = (uint16_t)(payload_length + ((object_id.type == OBJK_PARTICIPANT && payload_length % 2 != 0) ? 1 : 0)); // necessary padding
     payload_length = (uint16_t)(payload_length + 2); //object id ref
 
-    mcBuffer mb;
-    if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
+    ucdrBuffer mb;
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
-        request_id = init_base_object_request(&session->info, object_id, &payload->base);
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
-        (void) serialize_CREATE_Payload(&mb, payload);
+        request_id = uxr_init_base_object_request(&session->info, object_id, &payload->base);
+        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
+        (void) uxr_serialize_CREATE_Payload(&mb, payload);
     }
 
     return request_id;

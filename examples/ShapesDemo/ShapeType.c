@@ -21,31 +21,31 @@
 
 #include "ShapeType.h"
 
-#include <microcdr/microcdr.h>
+#include <ucdr/microcdr.h>
 #include <string.h>
 
-bool ShapeType_serialize_topic(mcBuffer* writer, const ShapeType* topic)
+bool ShapeType_serialize_topic(ucdrBuffer* writer, const ShapeType* topic)
 {
-    (void) mc_serialize_string(writer, topic->color);
+    (void) ucdr_serialize_string(writer, topic->color);
 
-    (void) mc_serialize_int32_t(writer, topic->x);
+    (void) ucdr_serialize_int32_t(writer, topic->x);
 
-    (void) mc_serialize_int32_t(writer, topic->y);
+    (void) ucdr_serialize_int32_t(writer, topic->y);
 
-    (void) mc_serialize_int32_t(writer, topic->shapesize);
+    (void) ucdr_serialize_int32_t(writer, topic->shapesize);
 
     return writer->error;
 }
 
-bool ShapeType_deserialize_topic(mcBuffer* reader, ShapeType* topic)
+bool ShapeType_deserialize_topic(ucdrBuffer* reader, ShapeType* topic)
 {
-    (void) mc_deserialize_string(reader, topic->color, 255);
+    (void) ucdr_deserialize_string(reader, topic->color, 255);
 
-    (void) mc_deserialize_int32_t(reader, &topic->x);
+    (void) ucdr_deserialize_int32_t(reader, &topic->x);
 
-    (void) mc_deserialize_int32_t(reader, &topic->y);
+    (void) ucdr_deserialize_int32_t(reader, &topic->y);
 
-    (void) mc_deserialize_int32_t(reader, &topic->shapesize);
+    (void) ucdr_deserialize_int32_t(reader, &topic->shapesize);
 
     return reader->error;
 }
@@ -53,13 +53,13 @@ bool ShapeType_deserialize_topic(mcBuffer* reader, ShapeType* topic)
 uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size)
 {
     uint32_t previousSize = size;
-    size += mc_alignment(size, 4) + 4 + (uint32_t)strlen(topic->color) + 1;
+    size += ucdr_alignment(size, 4) + 4 + (uint32_t)strlen(topic->color) + 1;
 
-    size += mc_alignment(size, 4) + 4;
+    size += ucdr_alignment(size, 4) + 4;
 
-    size += mc_alignment(size, 4) + 4;
+    size += ucdr_alignment(size, 4) + 4;
 
-    size += mc_alignment(size, 4) + 4;
+    size += ucdr_alignment(size, 4) + 4;
 
     return size - previousSize;
 }

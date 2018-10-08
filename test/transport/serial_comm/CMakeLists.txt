@@ -41,9 +41,9 @@ else()
         SOURCES
             ${SRCS}
         DEPENDENCIES
-            micrortps_client
+            microxrcedds_client
         )
-    target_link_libraries(${PROJECT_NAME} micrortps_client ${GTEST_BOTH_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} microxrcedds_client ${GTEST_BOTH_LIBRARIES})
     target_include_directories(${PROJECT_NAME}
         PUBLIC
             ${PROJECT_SOURCE_DIR}

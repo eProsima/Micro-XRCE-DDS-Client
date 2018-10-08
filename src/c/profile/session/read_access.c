@@ -1,27 +1,30 @@
-#include <micrortps/client/profile/session/read_access.h>
-#include <micrortps/client/core/serialization/xrce_protocol.h>
-#include <micrortps/client/core/session/submessage.h>
+#include <uxr/client/profile/session/read_access.h>
 
-extern void read_submessage_format(mrSession* session, mcBuffer* data, uint16_t length, uint8_t format,
-                                   mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
+#include "../../core/session/stream/stream_storage_internal.h"
+#include "../../core/session/session_info_internal.h"
+#include "../../core/session/submessage_internal.h"
+#include "../../core/serialization/xrce_protocol_internal.h"
 
-static void read_format_data(mrSession* session, mcBuffer* payload, uint16_t length,
-                      mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_sample(mrSession* session, mcBuffer* payload, uint16_t length,
-                        mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_data_seq(mrSession* session, mcBuffer* payload, uint16_t length,
-                          mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_sample_seq(mrSession* session, mcBuffer* payload, uint16_t length,
-                            mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
-static void read_format_packed_samples(mrSession* session, mcBuffer* payload, uint16_t length,
-                                mrStreamId stream_id, mrObjectId object_id, uint16_t request_id);
+extern void read_submessage_format(uxrSession* session, ucdrBuffer* data, uint16_t length, uint8_t format,
+                                   uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);
+
+static void read_format_data(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                      uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);
+static void read_format_sample(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                        uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);
+static void read_format_data_seq(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                          uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);
+static void read_format_sample_seq(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                            uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);
+static void read_format_packed_samples(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                                uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id,
-                         mrStreamId data_stream_id, mrDeliveryControl* control)
+uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id,
+                         uxrStreamId data_stream_id, uxrDeliveryControl* control)
 {
-    uint16_t request_id = MR_INVALID_REQUEST_ID;
+    uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     READ_DATA_Payload payload;
     payload.read_specification.input_stream_id = data_stream_id.raw;
@@ -43,29 +46,29 @@ uint16_t mr_write_request_data(mrSession* session, mrStreamId stream_id, mrObjec
     payload_length = (uint16_t)(payload_length + 4); // stream, format, and two optionals.
     payload_length = (uint16_t)(payload_length + ((control != NULL) ? 8 : 0)); // delivery control
 
-    mcBuffer mb;
-    if(prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
+    ucdrBuffer mb;
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
+        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
-        request_id = init_base_object_request(&session->info, datareader_id, &payload.base);
-        (void) serialize_READ_DATA_Payload(&mb, &payload);
+        request_id = uxr_init_base_object_request(&session->info, datareader_id, &payload.base);
+        (void) uxr_serialize_READ_DATA_Payload(&mb, &payload);
     }
 
     return request_id;
 }
 
-uint16_t mr_write_cancel_data(mrSession* session, mrStreamId stream_id, mrObjectId datareader_id)
+uint16_t uxr_write_cancel_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id)
 {
-    mrDeliveryControl delivery_control = {0};
-    return mr_write_request_data(session, stream_id, datareader_id, (mrStreamId){0}, &delivery_control);
+    uxrDeliveryControl delivery_control = {0};
+    return uxr_write_request_data(session, stream_id, datareader_id, (uxrStreamId){0}, &delivery_control);
 }
 
 //==================================================================
 //                            PRIVATE
 //==================================================================
-void read_submessage_format(mrSession* session, mcBuffer* data, uint16_t length, uint8_t format,
-                      mrStreamId stream_id, mrObjectId object_id, uint16_t request_id)
+void read_submessage_format(uxrSession* session, ucdrBuffer* data, uint16_t length, uint8_t format,
+                      uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
     switch(format)
     {
@@ -94,42 +97,42 @@ void read_submessage_format(mrSession* session, mcBuffer* data, uint16_t length,
     }
 }
 
-inline void read_format_data(mrSession* session, mcBuffer* payload, uint16_t length,
-                      mrStreamId stream_id, mrObjectId object_id, uint16_t request_id)
+inline void read_format_data(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                      uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
     uint32_t offset;
-    mc_deserialize_uint32_t(payload, &offset); //Remove this when data serialization will be according to the XRCE spec.
+    ucdr_deserialize_uint32_t(payload, &offset); //Remove this when data serialization will be according to the XRCE spec.
     length = (uint16_t)(length - 4); //by the offset. Remove too with the future serialization according to XRCE
 
-    mcBuffer mb_topic;
-    mc_init_buffer(&mb_topic, payload->iterator, length);
+    ucdrBuffer mb_topic;
+    ucdr_init_buffer(&mb_topic, payload->iterator, length);
     mb_topic.endianness = payload->endianness;
     session->on_topic(session, object_id, request_id, stream_id, &mb_topic, session->on_topic_args);
 }
 
-void read_format_sample(mrSession* session, mcBuffer* payload, uint16_t length,
-                        mrStreamId stream_id, mrObjectId object_id, uint16_t request_id)
+void read_format_sample(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                        uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
     (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
 }
 
-void read_format_data_seq(mrSession* session, mcBuffer* payload, uint16_t length,
-                          mrStreamId stream_id, mrObjectId object_id, uint16_t request_id)
+void read_format_data_seq(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                          uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
     (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
 }
 
-void read_format_sample_seq(mrSession* session, mcBuffer* payload, uint16_t length,
-                            mrStreamId stream_id, mrObjectId object_id, uint16_t request_id)
+void read_format_sample_seq(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                            uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
     (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
 }
 
-void read_format_packed_samples(mrSession* session, mcBuffer* payload, uint16_t length,
-                                mrStreamId stream_id, mrObjectId object_id, uint16_t request_id)
+void read_format_packed_samples(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+                                uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
     (void) session; (void) payload; (void) length; (void) stream_id; (void) object_id; (void) request_id;
     //TODO
