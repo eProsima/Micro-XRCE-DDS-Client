@@ -1,8 +1,10 @@
 #include <micrortps/client/profile/discovery/discovery.h>
+#include <micrortps/client/core/communication/communication.h>
 #include <micrortps/client/core/serialization/xrce_protocol.h>
 #include <micrortps/client/core/serialization/xrce_header.h>
 #include <micrortps/client/core/session/submessage.h>
 #include <micrortps/client/core/session/object_id.h>
+#include <micrortps/client/core/session/seq_num.h>
 #include <micrortps/client/core/log/log.h>
 #include <micrortps/client/transport.h>
 
@@ -22,6 +24,7 @@ typedef struct CallbackData
 
 static void write_get_info_message(mcBuffer* mb);
 static bool listen_read_info_message(mrCommunication* communication, int period, CallbackData* callback);
+static bool read_info_headers(mcBuffer* mb);
 static bool read_info_message(mcBuffer* mb, CallbackData* callback);
 static bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* transport);
 
@@ -96,10 +99,29 @@ bool listen_read_info_message(mrCommunication* communication, int period, Callba
 
         mcBuffer mb;
         mc_init_buffer(&mb, input_buffer, (uint32_t)length);
-        consumed = read_info_message(&mb, callback);
+        if(read_info_headers(&mb))
+        {
+            consumed = read_info_message(&mb, callback);
+        }
     }
 
     return consumed;
+}
+
+bool read_info_headers(mcBuffer* mb)
+{
+    bool valid = false;
+
+    uint8_t session_id; uint8_t stream_id_raw; mrSeqNum seq_num; uint8_t key[CLIENT_KEY_SIZE];
+    mc_deserialize_message_header(mb, &session_id, &stream_id_raw, &seq_num, key);
+
+    uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
+    if(read_submessage_header(mb, &id, &length, &flags, &payload_it))
+    {
+        valid = true;
+    }
+
+    return valid;
 }
 
 bool read_info_message(mcBuffer* mb, CallbackData* callback)
