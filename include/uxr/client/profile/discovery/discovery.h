@@ -12,37 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
-#define _MICRORTPS_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
+#ifndef _UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
+#define _UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <micrortps/client/config.h>
+#include <uxr/client/config.h>
+#include <uxr/client/dll.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct AgentAddress
+typedef struct uxrAgentAddress
 {
     char ip[16]; //xxx.xxx.xxx.xxx\0
     uint16_t port;
 
-} AgentAddress;
+} uxrAgentAddress;
 
-typedef bool (*mrOnAgentFound) (const AgentAddress* address, int64_t timestamp, void* args);
+typedef bool (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timestamp, void* args);
 
 
-MRDLLAPI bool mr_discovery_agents_multicast(int time, int period, mrOnAgentFound on_agent_func, void* args, AgentAddress* choosen);
+UXRDLLAPI bool uxr_discovery_agents_multicast(int time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen);
 
-MRDLLAPI bool mr_discovery_agents_unicast(int time, int period, mrOnAgentFound on_agent_func, void* args, AgentAddress* choosen,
-                                          const AgentAddress* agent_list, size_t agent_list_size);
+UXRDLLAPI bool uxr_discovery_agents_unicast(int time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen,
+                                          const uxrAgentAddress* agent_list, size_t agent_list_size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_MICRORTPS_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
+#endif //_UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <micrortps/client/client.h>
+#include <uxr/client/client.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-bool on_agent_found(const AgentAddress* address, int64_t timestamp, void* args)
+bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
 {
     (void) timestamp; (void) args;
     printf("Found agent => ip: %s, port: %d\n", address->ip, address->port);
@@ -28,8 +28,8 @@ int main(int args, char** argv)
 {
     (void) args; (void) argv;
 
-    AgentAddress choosen;
-    if(mr_discovery_agents_multicast(10000, 1000, on_agent_found, NULL, &choosen))
+    uxrAgentAddress choosen;
+    if(uxr_discovery_agents_multicast(10000, 1000, on_agent_found, NULL, &choosen))
     {
         //true -> The user returns true in the callback.
         //false -> timeout

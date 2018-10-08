@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <micrortps/client/client.h>
+#include <uxr/client/client.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #define MAX_AGENTS 10
 
-bool on_agent_found(const AgentAddress* address, int64_t timestamp, void* args)
+bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
 {
     (void) timestamp; (void) args;
     printf("Found agent => ip: %s, port: %d\n", address->ip, address->port);
@@ -36,7 +36,7 @@ int main(int args, char** argv)
     }
 
     size_t agent_list_size = 0;
-    AgentAddress agent_list[MAX_AGENTS];
+    uxrAgentAddress agent_list[MAX_AGENTS];
     for(int i = 2; i < args; i += 2)
     {
         strcpy(agent_list[agent_list_size].ip, argv[i]);
@@ -45,8 +45,8 @@ int main(int args, char** argv)
         ++agent_list_size;
     }
 
-    AgentAddress choosen;
-    if(mr_discovery_agents_unicast(10000, 1000, on_agent_found, NULL, &choosen, agent_list, agent_list_size))
+    uxrAgentAddress choosen;
+    if(uxr_discovery_agents_unicast(10000, 1000, on_agent_found, NULL, &choosen, agent_list, agent_list_size))
     {
         //true -> The user returns true in the callback.
         //false -> timeout or the user returns false in all callbacks

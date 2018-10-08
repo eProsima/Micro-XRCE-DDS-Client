@@ -34,10 +34,10 @@
 #endif //PROFILE_WRITE_ACCESS
 
 #ifdef PROFILE_DISCOVERY
-#include <micrortps/client/profile/discovery/discovery.h>
+#include <uxr/client/profile/discovery/discovery.h>
 #endif //PROFILE_DISCOVERY
 
-#include <micrortps/client/transport.h>
+#include <uxr/client/transport.h>
 
 #include <uxr/client/core/session/session.h>
 

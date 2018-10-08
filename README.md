@@ -8,10 +8,9 @@ Clients can publish and subscribe to data topics in *DDS Global Data Space*. *Mi
 
 <p align="center"> <img src="docs/client_architecture.svg" alt="Image"/> </p>
 
-
 ## Documentation
 
-You can access Micro-XRCE documentation online, which is hosted on Read the Docs.
+You can access *MicroXRCE-DDS* documentation online, which is hosted on Read the Docs.
 
 * [Start Page](http://micro-xrce-dds.readthedocs.io)
 * [Installation manual](http://micro-xrce-dds.readthedocs.io/en/latest/installation.html)

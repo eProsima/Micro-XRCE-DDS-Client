@@ -12,39 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _MICRORTPS_CLIENT_TRANSPORT_H_
-#define _MICRORTPS_CLIENT_TRANSPORT_H_
+#ifndef _UXR_CLIENT_TRANSPORT_H_
+#define _UXR_CLIENT_TRANSPORT_H_
 
-#include <micrortps/client/config.h>
+#include <uxr/client/config.h>
 
 #ifdef PROFILE_UDP_TRANSPORT
 #if defined(PLATFORM_NAME_LINUX)
-#include <micrortps/client/profile/transport/udp_transport_linux.h>
+#include <uxr/client/profile/transport/udp_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <micrortps/client/profile/transport/udp_transport_windows.h>
+#include <uxr/client/profile/transport/udp_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
-#include <micrortps/client/profile/transport/udp_transport_linux.h>
+#include <uxr/client/profile/transport/udp_transport_linux.h>
 #endif
 #endif //PROFILE_UDP_TRANSPORT
 
 #ifdef PROFILE_TCP_TRANSPORT
 #if defined(PLATFORM_NAME_LINUX)
-#include <micrortps/client/profile/transport/tcp_transport_linux.h>
+#include <uxr/client/profile/transport/tcp_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <micrortps/client/profile/transport/tcp_transport_windows.h>
+#include <uxr/client/profile/transport/tcp_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
-#include <micrortps/client/profile/transport/tcp_transport_linux.h>
+#include <uxr/client/profile/transport/tcp_transport_linux.h>
 #endif
 #endif //PROFILE_TCP_TRANSPORT
 
 #ifdef PROFILE_SERIAL_TRANSPORT
 #if defined(PLATFORM_NAME_LINUX)
-#include <micrortps/client/profile/transport/serial_transport_linux.h>
+#include <uxr/client/profile/transport/serial_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <micrortps/client/profile/transport/serial_transport_windows.h>
+#include <uxr/client/profile/transport/serial_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
-#include <micrortps/client/profile/transport/serial_transport_linux.h>
+#include <uxr/client/profile/transport/serial_transport_linux.h>
 #endif
 #endif //PROFILE_SERIAL_TRANSPORT
 
-#endif // _MICRORTPS_CLIENT_TRANSPORT_H_
+#endif // _UXR_CLIENT_TRANSPORT_H_
