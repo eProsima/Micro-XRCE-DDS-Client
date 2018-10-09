@@ -35,7 +35,7 @@ static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
-    bool rv = true;
+    bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
 
     int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
@@ -46,15 +46,14 @@ static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
         {
             *len = (size_t)bytes_received;
             *buf = transport->buffer;
-        }
-        else if (0 == poll_rv)
-        {
-           rv = false;
-           WSASetLastError(WAIT_TIMEOUT);
+            rv = true;
         }
         else
         {
-            rv = false;
+            if (0 == poll_rv)
+            {
+                WSASetLastError(WAIT_TIMEOUT);
+            }
         }
     }
 

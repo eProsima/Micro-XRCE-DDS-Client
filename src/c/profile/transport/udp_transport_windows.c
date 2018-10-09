@@ -26,7 +26,7 @@ static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 
 static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
-    bool rv = true;
+    bool rv = false;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
 
     int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
@@ -37,16 +37,15 @@ static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
         {
             *len = (size_t)bytes_received;
             *buf = transport->buffer;
+            rv = true;
         }
-    }
-    else if (0 == poll_rv)
-    {
-        rv = false;
-        WSASetLastError(WAIT_TIMEOUT);
     }
     else
     {
-        rv = false;
+        if (0 == poll_rv)
+        {
+            WSASetLastError(WAIT_TIMEOUT);
+        }
     }
 
     return rv;

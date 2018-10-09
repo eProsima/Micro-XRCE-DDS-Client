@@ -23,7 +23,7 @@ extern "C"
 #include <uxr/client/dll.h>
 #include <stdint.h>
 
-UXRDLLAPI int64_t uxr_milli_time(void);
+UXRDLLAPI int64_t uxr_millis(void);
 
 #ifdef __cplusplus
 }
