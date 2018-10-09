@@ -16,29 +16,38 @@
 #
 ###############################################################################
 
-project(interaction-intest-client CXX)
+if(NOT PROFILE_CREATE_ENTITIES_REF OR
+   NOT PROFILE_CREATE_ENTITIES_XML OR
+   NOT PROFILE_READ_ACCESS OR
+   NOT PROFILE_WRITE_ACCESS OR
+   NOT PROFILE_UDP_TRANSPORT OR
+   NOT PROFILE_TCP_TRANSPORT OR
+   NOT PROFILE_SERIAL_TRANSPORT)
+    message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, PROFILE_WRITE_ACCESS, ROFILE_UDP_TRANSPORT, PROFILE_TCP_PROFILE and PROFILE_SERIAL_TRANSPORT must be enabled.")
+else()
+    project(interaction-intest-client CXX)
 
-set(SRCS
-    ClientInteraction.cpp
-    Gateway.cpp
-    HelloWorld.c
-    )
+    set(SRCS
+        ClientInteraction.cpp
+        Gateway.cpp
+        HelloWorld.c
+        )
 
-add_library(${PROJECT_NAME} STATIC ${SRCS})
-set_common_compile_options(${PROJECT_NAME})
-if(MSVC OR MSVC_IDE)
-    target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
+    add_library(${PROJECT_NAME} STATIC ${SRCS})
+    set_common_compile_options(${PROJECT_NAME})
+    if(MSVC OR MSVC_IDE)
+        target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
+    endif()
+
+    target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} microxrcedds_client ${GTEST_BOTH_LIBRARIES})
+    target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+        )
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED YES
+        )
 endif()
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} microxrcedds_client ${GTEST_BOTH_LIBRARIES})
-target_include_directories(${PROJECT_NAME}
-    PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-    )
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    )
-
