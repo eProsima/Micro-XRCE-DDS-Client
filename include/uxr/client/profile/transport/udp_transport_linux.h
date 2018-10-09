@@ -29,10 +29,9 @@ extern "C"
 typedef struct uxrUDPTransport
 {
     uint8_t buffer[UXR_CONFIG_UDP_TRANSPORT_MTU];
-    int socket_fd;
-    struct sockaddr remote_addr;
     struct pollfd poll_fd;
     uxrCommunication comm;
+
 } uxrUDPTransport;
 
 UXRDLLAPI bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t port);
