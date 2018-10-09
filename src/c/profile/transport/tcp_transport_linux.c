@@ -132,10 +132,6 @@ uint16_t read_tcp_data(uxrTCPTransport* transport)
                         {
                             transport->input_buffer.state = UXR_TCP_SIZE_READ;
                         }
-                        else
-                        {
-                            transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
-                        }
                     }
                     else
                     {
@@ -297,6 +293,7 @@ bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t
             transport->comm.recv_msg = recv_tcp_msg;
             transport->comm.comm_error = get_tcp_error;
             transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
+            transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
             rv = true;
         }
     }

@@ -27,29 +27,28 @@ extern "C"
 #include <stdint.h>
 #include <stddef.h>
 
-typedef enum mrTCPInputBufferState
+typedef enum uxrTCPInputBufferState
 {
-    MR_TCP_BUFFER_EMPTY,
-    MR_TCP_SIZE_INCOMPLETE,
-    MR_TCP_SIZE_READ,
-    MR_TCP_MESSAGE_INCOMPLETE,
-    MR_TCP_MESSAGE_AVAILABLE
+    UXR_TCP_BUFFER_EMPTY,
+    UXR_TCP_SIZE_INCOMPLETE,
+    UXR_TCP_SIZE_READ,
+    UXR_TCP_MESSAGE_INCOMPLETE,
+    UXR_TCP_MESSAGE_AVAILABLE
 
-} mrTCPInputBufferState;
+} uxrTCPInputBufferState;
 
-typedef struct mrTCPInputBuffer
+typedef struct uxrTCPInputBuffer
 {
     uint8_t buffer[UXR_CONFIG_TCP_TRANSPORT_MTU];
     uint16_t position;
-    mrTCPInputBufferState state;
+    uxrTCPInputBufferState state;
     uint16_t msg_size;
 
-} mrTCPInputBuffer;
+} uxrTCPInputBuffer;
 
 typedef struct uxrTCPTransport
 {
-    mrTCPInputBuffer input_buffer;
-    SOCKET socket_fd;
+    uxrTCPInputBuffer input_buffer;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
     uxrCommunication comm;

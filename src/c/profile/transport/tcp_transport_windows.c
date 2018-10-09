@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/tcp_transport_windows.h>
+#include <uxr/client/core/util/time.h>
 
 /*******************************************************************************
  * Private function declarations.
@@ -44,7 +45,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
         bytes_sent = 0;
         do
         {
-            send_rv = send(transport->socket_fd, (const char*)(buf + bytes_sent), (int)(len - bytes_sent), 0);
+            send_rv = send(transport->poll_fd.fd, (const char*)(buf + bytes_sent), (int)(len - bytes_sent), 0);
             if (SOCKET_ERROR != send_rv)
             {
                 bytes_sent += (uint16_t)send_rv;
@@ -61,39 +62,46 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
     return rv;
 }
 
-static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
+bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
 
-    int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
-    if (0 < poll_rv)
+    uint16_t bytes_read = 0;
+    do
     {
-        uint16_t bytes_read = read_tcp_data(transport);
-        if (0 < bytes_read)
+        int64_t time_init = uxr_millis();
+        int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
+        if (0 < poll_rv)
         {
-            *len = (size_t)bytes_read;
-            *buf = transport->input_buffer.buffer;
-            rv = true;
+            bytes_read = read_tcp_data(transport);
+            if (0 < bytes_read)
+            {
+                *len = (size_t)bytes_read;
+                *buf = transport->input_buffer.buffer;
+                rv = true;
+            }
         }
-    }
-    else
-    {
-        if (0 == poll_rv)
+        else
         {
-            WSASetLastError(WAIT_TIMEOUT);
+            if (0 == poll_rv)
+            {
+                WSASetLastError(WAIT_TIMEOUT);
+            }
         }
+        timeout -= (int)(uxr_millis() - time_init);
     }
+    while ((0 == bytes_read) && (0 < timeout));
 
     return rv;
 }
 
-static int get_tcp_error(void)
+int get_tcp_error(void)
 {
     return WSAGetLastError();
 }
 
-uint16_t read_tcp_data(uxrTCPTransport *transport)
+uint16_t read_tcp_data(uxrTCPTransport* transport)
 {
     uint16_t rv = 0;
     bool exit_flag = false;
@@ -103,7 +111,7 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
     {
         switch (transport->input_buffer.state)
         {
-            case MR_TCP_BUFFER_EMPTY:
+            case UXR_TCP_BUFFER_EMPTY:
             {
                 transport->input_buffer.position = 0;
                 uint8_t size_buf[2];
@@ -116,17 +124,13 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                         transport->input_buffer.msg_size = (uint16_t)(((uint16_t)size_buf[1] << 8) | size_buf[0]);
                         if (transport->input_buffer.msg_size != 0)
                         {
-                            transport->input_buffer.state = MR_TCP_SIZE_READ;
-                        }
-                        else
-                        {
-                            transport->input_buffer.state = MR_TCP_BUFFER_EMPTY;
+                            transport->input_buffer.state = UXR_TCP_SIZE_READ;
                         }
                     }
                     else
                     {
                         transport->input_buffer.msg_size = (uint16_t)size_buf[0];
-                        transport->input_buffer.state = MR_TCP_SIZE_INCOMPLETE;
+                        transport->input_buffer.state = UXR_TCP_SIZE_INCOMPLETE;
                     }
                 }
                 else
@@ -141,7 +145,7 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                 exit_flag = (0 == WSAPoll(&transport->poll_fd, 1, 0));
                 break;
             }
-            case MR_TCP_SIZE_INCOMPLETE:
+            case UXR_TCP_SIZE_INCOMPLETE:
             {
                 uint8_t size_msb;
                 int bytes_received = recv(transport->poll_fd.fd, (char*)&size_msb, 1, 0);
@@ -150,11 +154,11 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                     transport->input_buffer.msg_size = (uint16_t)(size_msb << 8) | transport->input_buffer.msg_size;
                     if (transport->input_buffer.msg_size != 0)
                     {
-                        transport->input_buffer.state = MR_TCP_SIZE_READ;
+                        transport->input_buffer.state = UXR_TCP_SIZE_READ;
                     }
                     else
                     {
-                        transport->input_buffer.state = MR_TCP_BUFFER_EMPTY;
+                        transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
                     }
                 }
                 else
@@ -169,7 +173,7 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                 exit_flag = (0 == WSAPoll(&transport->poll_fd, 1, 0));
                 break;
             }
-            case MR_TCP_SIZE_READ:
+            case UXR_TCP_SIZE_READ:
             {
                 int bytes_received = recv(transport->poll_fd.fd,
                                               (char*)transport->input_buffer.buffer,
@@ -178,12 +182,12 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                 {
                     if ((uint16_t)bytes_received == transport->input_buffer.msg_size)
                     {
-                        transport->input_buffer.state = MR_TCP_MESSAGE_AVAILABLE;
+                        transport->input_buffer.state = UXR_TCP_MESSAGE_AVAILABLE;
                     }
                     else
                     {
                         transport->input_buffer.position = (uint16_t)bytes_received;
-                        transport->input_buffer.state = MR_TCP_MESSAGE_INCOMPLETE;
+                        transport->input_buffer.state = UXR_TCP_MESSAGE_INCOMPLETE;
                         exit_flag = true;
                     }
                 }
@@ -198,7 +202,7 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                 }
                 break;
             }
-            case MR_TCP_MESSAGE_INCOMPLETE:
+            case UXR_TCP_MESSAGE_INCOMPLETE:
             {
                 int bytes_received = recv(transport->poll_fd.fd,
                                               (char*)transport->input_buffer.buffer + transport->input_buffer.position,
@@ -209,7 +213,7 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                     transport->input_buffer.position = (uint16_t)(transport->input_buffer.position +  bytes_received);
                     if (transport->input_buffer.position == transport->input_buffer.msg_size)
                     {
-                        transport->input_buffer.state = MR_TCP_MESSAGE_AVAILABLE;
+                        transport->input_buffer.state = UXR_TCP_MESSAGE_AVAILABLE;
                     }
                     else
                     {
@@ -227,10 +231,10 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
                 }
                 break;
             }
-            case MR_TCP_MESSAGE_AVAILABLE:
+            case UXR_TCP_MESSAGE_AVAILABLE:
             {
                 rv = transport->input_buffer.msg_size;
-                transport->input_buffer.state = MR_TCP_BUFFER_EMPTY;
+                transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
                 exit_flag = true;
                 break;
             }
@@ -244,7 +248,7 @@ uint16_t read_tcp_data(uxrTCPTransport *transport)
     return rv;
 }
 
-void disconnect_tcp(uxrTCPTransport *transport)
+void disconnect_tcp(uxrTCPTransport* transport)
 {
     closesocket(transport->poll_fd.fd);
     transport->poll_fd.fd = INVALID_SOCKET;
@@ -265,23 +269,21 @@ bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t
     }
 
     /* Socket initialization. */
-    transport->socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (INVALID_SOCKET != transport->socket_fd)
+    transport->poll_fd.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (INVALID_SOCKET != transport->poll_fd.fd)
     {
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
         temp_addr.sin_family = AF_INET;
         temp_addr.sin_port = htons(port);
         temp_addr.sin_addr.s_addr = inet_addr(ip);
-        memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
-        transport->remote_addr = *((struct sockaddr *)&temp_addr);
+        transport->remote_addr = *((struct sockaddr *) &temp_addr);
 
         /* Poll setup. */
-        transport->poll_fd.fd = transport->socket_fd;
         transport->poll_fd.events = POLLIN;
 
         /* Server connection. */
-        int connected = connect(transport->socket_fd,
+        int connected = connect(transport->poll_fd.fd,
                                 &transport->remote_addr,
                                 sizeof(transport->remote_addr));
         if (SOCKET_ERROR != connected)
@@ -292,7 +294,7 @@ bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t
             transport->comm.recv_msg = recv_tcp_msg;
             transport->comm.comm_error = get_tcp_error;
             transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
-            transport->input_buffer.state = MR_TCP_BUFFER_EMPTY;
+            transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
             rv = true;
         }
     }
@@ -302,6 +304,10 @@ bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t
 
 bool uxr_close_tcp_transport(uxrTCPTransport* transport)
 {
-    (void)transport;
-    return (0 == WSACleanup());
+    bool rv = false;
+    if (0 == closesocket(transport->poll_fd.fd))
+    {
+        rv = (0 == WSACleanup());
+    }
+    return rv;
 }
