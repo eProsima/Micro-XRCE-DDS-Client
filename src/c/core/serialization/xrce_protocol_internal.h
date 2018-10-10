@@ -144,7 +144,7 @@ typedef struct TransportLocatorSmall
 typedef struct TransportLocatorMedium
 {
     uint8_t address[4];
-    uint8_t locator_port;
+    uint16_t locator_port;
 
 } TransportLocatorMedium;
 
@@ -152,7 +152,7 @@ typedef struct TransportLocatorMedium
 typedef struct TransportLocatorLarge
 {
     uint8_t address[16];
-    uint8_t locator_port;
+    uint32_t locator_port;
 
 } TransportLocatorLarge;
 
