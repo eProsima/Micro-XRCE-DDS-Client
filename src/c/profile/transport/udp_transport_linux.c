@@ -16,7 +16,7 @@ static int get_udp_error(void);
 /*******************************************************************************
  * Private function definitions.
  *******************************************************************************/
-static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
+bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
@@ -30,7 +30,7 @@ static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
     return rv;
 }
 
-static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
+bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
     bool rv = false;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
@@ -57,7 +57,7 @@ static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
     return rv;
 }
 
-static int get_udp_error(void)
+int get_udp_error(void)
 {
     return errno;
 }
@@ -74,19 +74,18 @@ bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t
     if (-1 != fd)
     {
         /* Remote IP setup. */
-        struct sockaddr_in temp_addr;
-        if(0 != inet_aton(ip, &temp_addr.sin_addr))
+        struct sockaddr_in remote_addr;
+        if(0 != inet_aton(ip, &remote_addr.sin_addr))
         {
-            temp_addr.sin_family = AF_INET;
-            temp_addr.sin_port = htons(port);
-            struct sockaddr* remote_addr = ((struct sockaddr*) &temp_addr);
+            remote_addr.sin_family = AF_INET;
+            remote_addr.sin_port = htons(port);
 
             /* Poll setup. */
             transport->poll_fd.fd = fd;
             transport->poll_fd.events = POLLIN;
 
             /* Remote address filter. */
-            int connected = connect(fd, remote_addr, sizeof(*remote_addr));
+            int connected = connect(fd, (struct sockaddr*)&remote_addr, sizeof(remote_addr));
             if (0 == connected)
             {
                 /* Interface setup. */

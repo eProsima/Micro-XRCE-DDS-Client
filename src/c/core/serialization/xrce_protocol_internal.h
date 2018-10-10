@@ -49,7 +49,6 @@ typedef struct BinarySequence_t
 
 } BinarySequence_t;
 
-
 typedef struct StringSequence_t
 {
     uint32_t size;
@@ -57,12 +56,12 @@ typedef struct StringSequence_t
 
 } StringSequence_t;
 
-
 typedef struct ClientKey
 {
     uint8_t data[4];
 
 } ClientKey;
+
 #define CLIENT_INVALID (ClientKey){{0x00, 0x00, 0x00, 0x00}}
 
 typedef uint8_t ObjectKind;

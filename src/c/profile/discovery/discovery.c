@@ -1,18 +1,21 @@
 #include <uxr/client/profile/discovery/discovery.h>
-#include <uxr/client/core/communication/communication.h>
 #include <uxr/client/core/session/object_id.h>
 #include <uxr/client/core/session/stream/seq_num.h>
-#include <uxr/client/transport.h>
+#include <uxr/client/core/util/time.h>
 
 #include "../../core/serialization/xrce_protocol_internal.h"
 #include "../../core/serialization/xrce_header_internal.h"
 #include "../../core/session/submessage_internal.h"
 #include "../../core/log/log_internal.h"
+#include "transport/udp_transport_linux_datagram_internal.h"
 
 #include <string.h>
 
 #define GET_INFO_MSG_SIZE   8
 #define GET_INFO_REQUEST_ID 9
+
+#define MULTICAST_DEFAULT_IP   "239.255.0.2"
+#define MULTICAST_DEFAULT_PORT 7400
 
 typedef struct CallbackData
 {
@@ -23,7 +26,7 @@ typedef struct CallbackData
 } CallbackData;
 
 static void write_get_info_message(ucdrBuffer* mb);
-static bool listen_read_info_message(uxrCommunication* communication, int period, CallbackData* callback);
+static bool listen_info_message(uxrUDPTransportDatagram* transport, int period, CallbackData* callback);
 static bool read_info_headers(ucdrBuffer* mb);
 static bool read_info_message(ucdrBuffer* mb, CallbackData* callback);
 static bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* transport);
@@ -32,39 +35,44 @@ static bool process_info(CallbackData* callback, Time_t timestamp, TransportLoca
 //                             PUBLIC
 //==================================================================
 
-bool uxr_discovery_agents_multicast(int time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen)
+bool uxr_discovery_agents_multicast(int64_t time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen)
 {
-    (void) time; (void) period; (void) on_agent_func; (void) args; (void) choosen;
-    //TODO
-    return false;
+    uxrAgentAddress multicast = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT};
+    return uxr_discovery_agents_unicast(time, period, on_agent_func, args, choosen, &multicast, 1);
 }
 
-bool uxr_discovery_agents_unicast(int time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen,
+bool uxr_discovery_agents_unicast(int64_t time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen,
                                  const uxrAgentAddress* agent_list, size_t agent_list_size)
 {
-    (void) time;
-
     CallbackData callback = {choosen, on_agent_func, args};
 
-    uint8_t output_buffer[UXR_CONFIG_UDP_TRANSPORT_MTU];
+    uint8_t output_buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
     ucdrBuffer mb;
-    ucdr_init_buffer(&mb, output_buffer, UXR_CONFIG_UDP_TRANSPORT_MTU);
+    ucdr_init_buffer(&mb, output_buffer, UXR_UDP_TRANSPORT_MTU_DATAGRAM);
     write_get_info_message(&mb);
     size_t message_length = ucdr_buffer_length(&mb);
 
     bool consumed = false;
-    for(size_t i = 0; i < agent_list_size && !consumed; ++i)
+    uxrUDPTransportDatagram transport;
+    if(uxr_init_udp_transport_datagram(&transport))
     {
-        uxrUDPTransport transport;
-        if(uxr_init_udp_transport(&transport, agent_list[i].ip, agent_list[i].port))
+        int64_t remining_time = time;
+        while(0 < remining_time && !consumed)
         {
-            bool sent = transport.comm.send_msg(&transport, output_buffer, message_length);
-            UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, output_buffer, message_length, 0);
-
-            if(sent)
+            for(size_t i = 0; i < agent_list_size && !consumed; ++i)
             {
-                consumed = listen_read_info_message(&transport.comm, period, &callback);
+                (void) uxr_udp_send_datagram_to(&transport, output_buffer, message_length, agent_list[i].ip, agent_list[i].port);
+                UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, output_buffer, message_length, 0);
             }
+
+            int64_t timestamp = uxr_milli_time();
+            int poll = period;
+            while(0 < poll && !consumed)
+            {
+                consumed = listen_info_message(&transport, poll, &callback);
+                poll -= (int)(timestamp - uxr_milli_time());
+            }
+            remining_time -= period;
         }
     }
 
@@ -87,12 +95,12 @@ void write_get_info_message(ucdrBuffer* mb)
     (void) uxr_serialize_GET_INFO_Payload(mb, &payload);
 }
 
-bool listen_read_info_message(uxrCommunication* communication, int period, CallbackData* callback)
+bool listen_info_message(uxrUDPTransportDatagram* transport, int poll, CallbackData* callback)
 {
     bool consumed = false;
     uint8_t* input_buffer; size_t length;
 
-    bool received = communication->recv_msg(communication->instance, &input_buffer, &length, period);
+    bool received = uxr_udp_recv_datagram(transport, &input_buffer, &length, poll);
     if(received)
     {
         UXR_DEBUG_PRINT_MESSAGE(UXR_RECV, input_buffer, length, 0);
@@ -144,15 +152,15 @@ bool read_info_message(ucdrBuffer* mb, CallbackData* callback)
     return consumed;
 }
 
-bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* transport)
+bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* locator)
 {
     bool consumed = false;
     int64_t nanoseconds = (int64_t)timestamp.seconds + (int64_t)timestamp.nanoseconds * 1000000000L;
 
-    if(transport->format == ADDRESS_FORMAT_MEDIUM)
+    if(locator->format == ADDRESS_FORMAT_MEDIUM)
     {
-        memcpy(callback->choosen->ip, transport->_.medium_locator.address, 4); //CHECK
-        callback->choosen->port = transport->_.medium_locator.locator_port;
+        callback->choosen->port = locator->_.medium_locator.locator_port;
+        uxr_bytes_to_ip(locator->_.medium_locator.address, callback->choosen->ip);
 
         consumed = callback->on_agent(callback->choosen, nanoseconds, callback->args);
     }
