@@ -60,19 +60,38 @@ int main(int args, char** argv)
 
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
-    const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = uxr_write_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
+    const char* participant_xml = "<dds>"
+                                      "<participant>"
+                                          "<rtps>"
+                                              "<name>default_xrce_participant</name>"
+                                          "</rtps>"
+                                      "</participant>"
+                                  "</dds>";
+    uint16_t participant_req = uxr_write_configure_participant_xml(&session, reliable_out, participant_id, 0, participant_xml, UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
-    const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
+    const char* topic_xml = "<dds>"
+                                "<topic>"
+                                    "<name>HelloWorldTopic</name>"
+                                    "<dataType>HelloWorld</dataType>"
+                                "</topic>"
+                            "</dds>";
     uint16_t topic_req = uxr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
-    const char* publisher_xml = "<publisher name=\"MyPublisher\">";
+    const char* publisher_xml = "";
     uint16_t publisher_req = uxr_write_configure_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
-    const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
+    const char* datawriter_xml = "<dds>"
+                                     "<data_writer>"
+                                         "<topic>"
+                                             "<kind>NO_KEY</kind>"
+                                             "<name>HelloWorldTopic</name>"
+                                             "<dataType>HelloWorld</dataType>"
+                                         "</topic>"
+                                     "</data_writer>"
+                                 "</dds>";
     uint16_t datawriter_req = uxr_write_configure_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
 
     // Send create entities message and wait its status
