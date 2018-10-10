@@ -28,8 +28,8 @@ bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* arg
 
 int main(int args, char** argv)
 {
-    if(args >= 2 && (0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
-                || 0 != args % 2 || MAX_AGENTS * 2 < args + 2))
+    if((args >= 2 && (0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
+                || 0 == args % 2 || MAX_AGENTS * 2 < args + 2)) || args < 2)
     {
         printf("usage: program [ -h | --help | [<ip> <port> ...] ]\n");
         return 0;
@@ -37,13 +37,15 @@ int main(int args, char** argv)
 
     size_t agent_list_size = 0;
     uxrAgentAddress agent_list[MAX_AGENTS];
-    for(int i = 2; i < args; i += 2)
+    for(int i = 1; i < args; i += 2)
     {
         strcpy(agent_list[agent_list_size].ip, argv[i]);
-        agent_list[i].port = atoi(argv[i + 1]);
+        agent_list[agent_list_size].port = atoi(argv[i + 1]);
 
         ++agent_list_size;
     }
+
+    printf("%s %d\n", agent_list[0].ip, agent_list[0].port);
 
     uxrAgentAddress choosen;
     if(uxr_discovery_agents_unicast(10000, 1000, on_agent_found, NULL, &choosen, agent_list, agent_list_size))

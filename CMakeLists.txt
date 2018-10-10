@@ -126,6 +126,19 @@ foreach(TRANSPORT_TYPE UDP TCP SERIAL)
     endif()
 endforeach()
 
+# Transport discovery source
+if(PROFILE_DISCOVERY)
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_windows_datagram.c)
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
+        if(${PLATFORM_NAME} STREQUAL "nuttx")
+            set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        endif()
+    endif()
+endif()
+
 # Other sources
 set(SRCS
     src/c/core/communication/serial_protocol.c
@@ -151,6 +164,7 @@ set(SRCS
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
     $<$<BOOL:${PROFILE_WRITE_ACCESS}>:src/c/profile/session/write_access.c>
     $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
+    ${UDP_DISCOVERY_SRCS}
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${SERIAL_SRCS}

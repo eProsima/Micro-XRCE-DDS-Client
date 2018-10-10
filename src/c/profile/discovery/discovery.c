@@ -7,7 +7,7 @@
 #include "../../core/serialization/xrce_header_internal.h"
 #include "../../core/session/submessage_internal.h"
 #include "../../core/log/log_internal.h"
-#include "transport/udp_transport_linux_datagram_internal.h"
+#include "transport/udp_transport_datagram_internal.h"
 
 #include <string.h>
 
@@ -62,9 +62,11 @@ bool uxr_discovery_agents_unicast(int64_t time, int period, uxrOnAgentFound on_a
             for(size_t i = 0; i < agent_list_size && !consumed; ++i)
             {
                 (void) uxr_udp_send_datagram_to(&transport, output_buffer, message_length, agent_list[i].ip, agent_list[i].port);
+                printf("aaaaaaaa\n");
                 UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, output_buffer, message_length, 0);
             }
 
+            printf("bbbbbbbb\n");
             int64_t timestamp = uxr_milli_time();
             int poll = period;
             while(0 < poll && !consumed)

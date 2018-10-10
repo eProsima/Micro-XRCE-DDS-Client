@@ -1,4 +1,4 @@
-#include "udp_transport_linux_datagram_internal.h"
+#include "udp_transport_datagram_internal.h"
 
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -7,17 +7,18 @@
 #include <errno.h>
 #include <string.h>
 
-static bool send_to(uxrUDPTransportDatagram* transport, const uint8_t* buf, size_t len, const char* ip, uint16_t port);
-
 bool uxr_init_udp_transport_datagram(uxrUDPTransportDatagram* transport)
 {
-    bool rv = false;
-
     int fd = socket(PF_INET, SOCK_DGRAM, 0);
     transport->poll_fd.fd = fd;
     transport->poll_fd.events = POLLIN;
 
-    return rv;
+    return fd != -1;
+}
+
+bool uxr_close_udp_transport_datagram(uxrUDPTransportDatagram* transport)
+{
+    return (0 == close(transport->poll_fd.fd));
 }
 
 bool uxr_udp_send_datagram_to(uxrUDPTransportDatagram* transport, const uint8_t* buf, size_t len, const char* ip, uint16_t port)
