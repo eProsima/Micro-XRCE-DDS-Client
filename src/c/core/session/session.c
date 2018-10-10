@@ -86,7 +86,7 @@ bool uxr_create_session(uxrSession* session)
     ucdrBuffer mb;
     ucdr_init_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
-    uxr_write_create_session(&session->info, &mb, uxr_milli_time());
+    uxr_write_create_session(&session->info, &mb, uxr_millis());
     uxr_stamp_create_session_header(&session->info, mb.init);
 
     bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&mb), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
@@ -282,7 +282,7 @@ bool listen_message_reliably(uxrSession* session, int poll_ms)
     do
     {
         int64_t next_heartbeat_timestamp = INT64_MAX;
-        int64_t timestamp = uxr_milli_time();
+        int64_t timestamp = uxr_millis();
         for(uint8_t i = 0; i < session->streams.output_reliable_size; ++i)
         {
             uxrOutputReliableStream* stream = &session->streams.output_reliable[i];

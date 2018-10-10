@@ -21,16 +21,15 @@ extern "C"
 #endif
 
 #include <uxr/client/core/communication/communication.h>
+#include <uxr/client/config.h>
 #include <uxr/client/dll.h>
 #include <winsock2.h>
 #include <stdint.h>
 #include <stddef.h>
 
-#define UDP_TRANSPORT_MTU 512
-
 typedef struct uxrUDPTransport
 {
-    uint8_t buffer[UDP_TRANSPORT_MTU];
+    uint8_t buffer[UXR_CONFIG_UDP_TRANSPORT_MTU];
     SOCKET socket_fd;
     struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;

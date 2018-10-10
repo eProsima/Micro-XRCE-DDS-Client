@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/serial_transport_linux.h>
+#include <uxr/client/core/util/time.h>
 
 #include "../../core/communication/serial_protocol_internal.h"
 
@@ -45,10 +46,10 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
     uint16_t bytes_written = uxr_write_serial_msg(&transport->serial_io,
-                                              buf,
-                                              len,
-                                              transport->local_addr,
-                                              transport->remote_addr);
+                                                  buf,
+                                                  len,
+                                                  transport->local_addr,
+                                                  transport->remote_addr);
     if (0 < bytes_written)
     {
         ssize_t bytes_sent = write(transport->poll_fd.fd, transport->serial_io.output.buffer, (size_t)bytes_written);
@@ -64,28 +65,36 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
 
 static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
-    bool rv = true;
+    bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
     uint8_t src_addr;
     uint8_t rmt_addr;
-    uint16_t bytes_read = uxr_read_serial_msg(&transport->serial_io,
-                                          read_serial_data,
-                                          instance,
-                                          transport->buffer,
-                                          sizeof(transport->buffer),
-                                          &src_addr,
-                                          &rmt_addr,
-                                          timeout);
-    if (0 < bytes_read && src_addr == transport->remote_addr)
+
+    uint16_t bytes_read = 0;
+    do
     {
-        *len = bytes_read;
-        *buf = transport->buffer;
+        int64_t time_init = uxr_millis();
+        bytes_read = uxr_read_serial_msg(&transport->serial_io,
+                                         read_serial_data,
+                                         instance,
+                                         transport->buffer,
+                                         sizeof(transport->buffer),
+                                         &src_addr,
+                                         &rmt_addr,
+                                         timeout);
+        if (0 < bytes_read && src_addr == transport->remote_addr)
+        {
+            *len = bytes_read;
+            *buf = transport->buffer;
+            rv = true;
+        }
+        else
+        {
+            serial_errno = -1;
+        }
+        timeout -= (int)(uxr_millis() - time_init);
     }
-    else
-    {
-        serial_errno = -1;
-        rv = false;
-    }
+    while ((0 == bytes_read) && (0 < timeout));
 
     return rv;
 }

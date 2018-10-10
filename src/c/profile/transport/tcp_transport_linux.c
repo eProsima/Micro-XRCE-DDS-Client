@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/tcp_transport_linux.h>
+#include <uxr/client/core/util/time.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -72,28 +73,31 @@ bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
 
-    int poll_rv = poll(&transport->poll_fd, 1, timeout);
-    if (0 < poll_rv)
+    uint16_t bytes_read = 0;
+    do
     {
-        uint16_t bytes_read = read_tcp_data(transport);
-        if (0 < bytes_read)
+        int64_t time_init = uxr_millis();
+        int poll_rv = poll(&transport->poll_fd, 1, timeout);
+        if (0 < poll_rv)
         {
-            *len = (size_t)bytes_read;
-            *buf = transport->input_buffer.buffer;
-            rv = true;
+            bytes_read = read_tcp_data(transport);
+            if (0 < bytes_read)
+            {
+                *len = (size_t)bytes_read;
+                *buf = transport->input_buffer.buffer;
+                rv = true;
+            }
         }
         else
         {
-            rv = false;
+            if (0 == poll_rv)
+            {
+                errno = ETIME;
+            }
         }
+        timeout -= (int)(uxr_millis() - time_init);
     }
-    else
-    {
-        if (0 == poll_rv)
-        {
-            rv = false;
-        }
-    }
+    while ((0 == bytes_read) && (0 < timeout));
 
     return rv;
 }
@@ -127,10 +131,6 @@ uint16_t read_tcp_data(uxrTCPTransport* transport)
                         if (transport->input_buffer.msg_size != 0)
                         {
                             transport->input_buffer.state = UXR_TCP_SIZE_READ;
-                        }
-                        else
-                        {
-                            transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
                         }
                     }
                     else
@@ -293,6 +293,7 @@ bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t
             transport->comm.recv_msg = recv_tcp_msg;
             transport->comm.comm_error = get_tcp_error;
             transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
+            transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
             rv = true;
         }
     }
