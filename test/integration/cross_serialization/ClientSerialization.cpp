@@ -134,8 +134,39 @@ std::vector<uint8_t> ClientSerialization::status_payload()
 
 std::vector<uint8_t> ClientSerialization::info_payload()
 {
-    //TODO
-    return std::vector<uint8_t>();
+    std::vector<uint8_t> buffer(BUFFER_LENGTH, 0x00);
+
+    ucdrBuffer mb;
+    ucdr_init_buffer(&mb, &buffer.front(), static_cast<uint32_t>(buffer.capacity()));
+
+    INFO_Payload payload;
+    payload.base.related_request.request_id = RequestId{0x01, 0x23};
+    payload.base.related_request.object_id = ObjectId{0x45, 0x67};
+    payload.base.result.implementation_status = 0x89;
+    payload.object_info.optional_activity = 0x01;
+    payload.object_info.optional_config = 0x01;
+    payload.object_info.config.kind = OBJK_AGENT;
+    payload.object_info.config._.agent.agent_timestamp.seconds = static_cast<int32_t>(0x89ABCDEF);
+    payload.object_info.config._.agent.agent_timestamp.nanoseconds = 0x01234567;
+    payload.object_info.config._.agent.optional_properties = 0x00;
+    payload.object_info.config._.agent.xrce_cookie = XrceCookie{0x89, 0xAB, 0xCD, 0xEF};
+    payload.object_info.config._.agent.xrce_version = XrceVersion{0x01, 0x23};
+    payload.object_info.config._.agent.xrce_vendor_id = XrceVendorId{0x45, 0x67};
+    payload.object_info.activity.kind = OBJK_AGENT;
+    payload.object_info.activity._.agent.availibility = INFO_CONFIGURATION | INFO_ACTIVITY;
+    payload.object_info.activity._.agent.address_seq.size = 0x01;
+    payload.object_info.activity._.agent.address_seq.data[0].format = ADDRESS_FORMAT_MEDIUM;
+    payload.object_info.activity._.agent.address_seq.data[0]._.medium_locator.locator_port = 0x0123;
+    payload.object_info.activity._.agent.address_seq.data[0]._.medium_locator.address[0] = 0x01;
+    payload.object_info.activity._.agent.address_seq.data[0]._.medium_locator.address[1] = 0x23;
+    payload.object_info.activity._.agent.address_seq.data[0]._.medium_locator.address[2] = 0x45;
+    payload.object_info.activity._.agent.address_seq.data[0]._.medium_locator.address[3] = 0x67;
+
+    uxr_serialize_INFO_Payload(&mb, &payload);
+
+    buffer.resize(static_cast<std::size_t>(mb.iterator - mb.init));
+
+    return buffer;
 }
 
 std::vector<uint8_t> ClientSerialization::read_data_payload()
@@ -150,8 +181,8 @@ std::vector<uint8_t> ClientSerialization::read_data_payload()
     payload.base.object_id = ObjectId{0x45, 0x67};
     payload.read_specification.input_stream_id = 0x80;
     payload.read_specification.data_format = 0x89;
-    payload.read_specification.optional_content_filter_expression = 0x00;
-    payload.read_specification.optional_delivery_control = 0x00;
+    payload.read_specification.optional_content_filter_expression = 0x01;
+    payload.read_specification.optional_delivery_control = 0x01;
     payload.read_specification.delivery_control.max_bytes_per_seconds = 0xABCD;
     payload.read_specification.delivery_control.max_elapsed_time = 0x2345;
     payload.read_specification.delivery_control.max_samples = 0xABCD;
