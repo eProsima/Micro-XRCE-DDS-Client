@@ -48,8 +48,7 @@ int main(int args, char** argv)
     uxrAgentAddress choosen;
     if(uxr_discovery_agents_unicast(10, 1000, on_agent_found, NULL, &choosen, agent_list, agent_list_size))
     {
-        //true -> The user returns true in the callback.
-        //false -> timeout or the user returns false in all callbacks
+        // The user returns true in the callback.
         printf("Choosen agent => ip: %s, port: %d\n", choosen.ip, choosen.port);
     }
 

@@ -10,6 +10,8 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#define MAX_AGENTS 10
+
 class Client
 {
 public:
@@ -212,6 +214,62 @@ private:
     uxrStreamId last_topic_stream_id_;
     size_t expected_topic_index_;
 
+};
+
+class Discovery
+{
+public:
+    Discovery(const std::vector<std::pair<std::string, uint16_t>>& agent_addresses)
+    : agent_addresses_(agent_addresses)
+    {
+    }
+
+    void multicast()
+    {
+        ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, NULL, &choosen_));
+    }
+
+    void unicast()
+    {
+        size_t agent_list_size = 0;
+        uxrAgentAddress agent_list[MAX_AGENTS];
+        for(size_t i = 0; i < agent_addresses_.size(); i += 2)
+        {
+            strcpy(agent_list[agent_list_size].ip, agent_addresses_[i].first.c_str());
+            agent_list[agent_list_size].port = agent_addresses_[i].second;
+
+            ++agent_list_size;
+        }
+
+        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, NULL, &choosen_, agent_list, agent_list_size));
+    }
+
+private:
+    static bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
+    {
+        static_cast<Discovery*>(args)->on_agent_found_member(address, timestamp);
+
+        return false;
+    }
+
+    void on_agent_found_member(const uxrAgentAddress* address, int64_t timestamp)
+    {
+        (void) timestamp;
+
+        Client client(address->port, 0.0f, 0);
+
+        std::pair<std::string, uint16_t> agent_address(address->ip, address->port);
+        std::vector<std::pair<std::string, uint16_t>>::iterator it =
+            std::find(agent_addresses_.begin(), agent_addresses_.end(), agent_address);
+
+        bool found = it != agent_addresses_.end();
+        ASSERT_TRUE(found);
+
+        agent_addresses_.erase(it);
+    }
+
+    std::vector<std::pair<std::string, uint16_t>> agent_addresses_;
+    uxrAgentAddress choosen_;
 };
 
 #endif //IN_TEST_CLIENT_INTERACTION_HPP
