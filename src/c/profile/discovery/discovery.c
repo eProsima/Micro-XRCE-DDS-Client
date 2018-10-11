@@ -70,7 +70,7 @@ bool uxr_discovery_agents_unicast(int64_t time, int period, uxrOnAgentFound on_a
             while(0 < poll && !consumed)
             {
                 consumed = listen_info_message(&transport, poll, &callback);
-                poll -= (int)(uxr_milli_time()- timestamp);
+                poll -= (int)(uxr_milli_time() - timestamp);
             }
             remining_time -= period;
         }

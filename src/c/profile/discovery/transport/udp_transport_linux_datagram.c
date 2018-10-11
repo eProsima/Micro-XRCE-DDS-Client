@@ -76,7 +76,7 @@ bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, si
 void uxr_bytes_to_ip(const uint8_t* bytes, char* ip)
 {
     struct in_addr addr;
-    addr.s_addr = inet_addr((char*)bytes);
+    addr.s_addr = (in_addr_t)(*bytes + (*(bytes + 1) << 8) + (*(bytes + 2) << 16) + (*(bytes + 3) << 24));
     char* internal_ip = inet_ntoa(addr);
     strcpy(ip, internal_ip);
 }
