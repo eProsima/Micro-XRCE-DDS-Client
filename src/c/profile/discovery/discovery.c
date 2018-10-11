@@ -35,13 +35,13 @@ static bool process_info(CallbackData* callback, Time_t timestamp, TransportLoca
 //                             PUBLIC
 //==================================================================
 
-bool uxr_discovery_agents_multicast(int64_t time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen)
+bool uxr_discovery_agents_multicast(uint32_t attemps, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen)
 {
     uxrAgentAddress multicast = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT};
-    return uxr_discovery_agents_unicast(time, period, on_agent_func, args, choosen, &multicast, 1);
+    return uxr_discovery_agents_unicast(attemps, period, on_agent_func, args, choosen, &multicast, 1);
 }
 
-bool uxr_discovery_agents_unicast(int64_t time, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen,
+bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen,
                                  const uxrAgentAddress* agent_list, size_t agent_list_size)
 {
     CallbackData callback = {choosen, on_agent_func, args};
@@ -56,8 +56,7 @@ bool uxr_discovery_agents_unicast(int64_t time, int period, uxrOnAgentFound on_a
     uxrUDPTransportDatagram transport;
     if(uxr_init_udp_transport_datagram(&transport))
     {
-        int64_t remining_time = time;
-        while(0 < remining_time && !consumed)
+        for(uint32_t a = 0; a < attempts && !consumed; ++a)
         {
             for(size_t i = 0; i < agent_list_size && !consumed; ++i)
             {
@@ -72,7 +71,6 @@ bool uxr_discovery_agents_unicast(int64_t time, int period, uxrOnAgentFound on_a
                 consumed = listen_info_message(&transport, poll, &callback);
                 poll -= (int)(uxr_millis() - timestamp);
             }
-            remining_time -= period;
         }
     }
 

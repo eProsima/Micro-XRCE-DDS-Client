@@ -29,7 +29,7 @@ int main(int args, char** argv)
     (void) args; (void) argv;
 
     uxrAgentAddress choosen;
-    if(uxr_discovery_agents_multicast(10000, 1000, on_agent_found, NULL, &choosen))
+    if(uxr_discovery_agents_multicast(10, 1000, on_agent_found, NULL, &choosen))
     {
         //true -> The user returns true in the callback.
         //false -> timeout
