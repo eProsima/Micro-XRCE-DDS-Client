@@ -90,7 +90,7 @@ void write_get_info_message(ucdrBuffer* mb)
     payload.base.object_id = OBJECTID_AGENT;
     payload.info_mask = INFO_CONFIGURATION | INFO_ACTIVITY;
 
-    uxr_serialize_message_header(mb, 0x80, 0, 0, 0);
+    uxr_serialize_message_header(mb, UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, 0);
     (void) uxr_write_submessage_header(mb, SUBMESSAGE_ID_GET_INFO, GET_INFO_MSG_SIZE, 0);
     (void) uxr_serialize_GET_INFO_Payload(mb, &payload);
 }

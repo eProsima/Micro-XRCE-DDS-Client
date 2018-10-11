@@ -34,9 +34,9 @@ extern "C"
 #define UXR_STATUS_ERR_INVALID_DATA       0x85
 #define UXR_STATUS_ERR_INCOMPATIBLE       0x86
 #define UXR_STATUS_ERR_RESOURCES          0x87
-#define UXR_STATUS_NONE                   0xFF //Never sent. It corresponds as an unknown status
+#define UXR_STATUS_NONE                   0xFF //Never sent or received. It is used for managing an unknown status
 
-#define UXR_REUSE            0x01 << 1 //Not supported yet
+#define UXR_REUSE            0x01 << 1
 #define UXR_REPLACE          0x01 << 2
 
 #define UXR_INVALID_REQUEST_ID 0

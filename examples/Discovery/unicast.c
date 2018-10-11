@@ -45,8 +45,6 @@ int main(int args, char** argv)
         ++agent_list_size;
     }
 
-    printf("%s %d\n", agent_list[0].ip, agent_list[0].port);
-
     uxrAgentAddress choosen;
     if(uxr_discovery_agents_unicast(10000, 1000, on_agent_found, NULL, &choosen, agent_list, agent_list_size))
     {
