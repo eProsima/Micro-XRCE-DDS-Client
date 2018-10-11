@@ -34,7 +34,7 @@ extern "C"
 #endif
 
 
-#define UXR_UDP_TRANSPORT_MTU_DATAGRAM 128 //Adjust with the minimun necessary buffer to discovery
+#define UXR_UDP_TRANSPORT_MTU_DATAGRAM 52 //Adjusted to the minimun necessary buffer for discovery messages.
 
 typedef struct uxrUDPTransportDatagram
 {

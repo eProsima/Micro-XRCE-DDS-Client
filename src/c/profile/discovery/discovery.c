@@ -65,12 +65,12 @@ bool uxr_discovery_agents_unicast(int64_t time, int period, uxrOnAgentFound on_a
                 UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, output_buffer, message_length, 0);
             }
 
-            int64_t timestamp = uxr_milli_time();
+            int64_t timestamp = uxr_millis();
             int poll = period;
             while(0 < poll && !consumed)
             {
                 consumed = listen_info_message(&transport, poll, &callback);
-                poll -= (int)(uxr_milli_time() - timestamp);
+                poll -= (int)(uxr_millis() - timestamp);
             }
             remining_time -= period;
         }

@@ -44,7 +44,7 @@ bool uxr_udp_send_datagram_to(uxrUDPTransportDatagram* transport, const uint8_t*
 
 bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, size_t* len, int timeout)
 {
-    bool rv = true;
+    bool rv = false;
 
     int poll_rv = poll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -54,20 +54,12 @@ bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, si
         {
             *len = (size_t)bytes_received;
             *buf = transport->buffer;
-        }
-        else
-        {
-            rv = false;
+            rv = true;
         }
     }
     else if (0 == poll_rv)
     {
-        rv = false;
         errno = ETIME;
-    }
-    else
-    {
-        rv = false;
     }
 
     return rv;
