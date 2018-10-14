@@ -25,7 +25,7 @@ extern "C"
 #include <stdbool.h>
 #include <uxr/client/config.h>
 
-#define UXR_FRAMING_END_FLAG 0x7E
+#define UXR_FRAMING_BEGIN_FLAG 0x7E
 #define UXR_FRAMING_ESC_FLAG 0x7D
 #define UXR_FRAMING_XOR_FLAG 0x20
 
@@ -33,13 +33,32 @@ extern "C"
 #define UXR_SERIAL_OVERHEAD     5
 #define UXR_SERIAL_BUFFER_SIZE  (2 * (UXR_SERIAL_MTU + UXR_SERIAL_OVERHEAD))
 
+typedef enum uxrSerialInputBufferState
+{
+    UXR_SERIAL_UNINITIALIZED,
+    UXR_SERIAL_READING_SRC_ADDR,
+    UXR_SERIAL_READING_DST_ADDR,
+    UXR_SERIAL_READING_LEN_LSB,
+    UXR_SERIAL_READING_LEN_MSB,
+    UXR_SERIAL_READING_PAYLOAD,
+    UXR_SERIAL_READING_CRC_LSB,
+    UXR_SERIAL_READING_CRC_MSB,
+
+} uxrSerialInputBufferState;
+
 typedef struct uxrSerialInputBuffer
 {
-    uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
-    uint16_t head;
-    uint16_t marker;
-    uint16_t tail;
-    bool stream_init;
+    uint8_t buffer[UXR_CONFIG_SERIAL_TRANSPORT_MTU];
+    uxrSerialInputBufferState state;
+    uint8_t rb[32];
+    uint8_t rb_head;
+    uint8_t rb_tail;
+    uint8_t src_addr;
+    uint8_t dst_addr;
+    uint16_t msg_len;
+    uint16_t msg_pos;
+    uint16_t msg_crc;
+    uint16_t crc;
 
 } uxrSerialInputBuffer;
 

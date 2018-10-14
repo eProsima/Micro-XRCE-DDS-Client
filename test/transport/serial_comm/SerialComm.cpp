@@ -51,10 +51,10 @@ TEST_F(SerialComm, WorstStuffingTest)
     uint8_t* input_msg;
     size_t input_msg_len;
 
-    memset(output_msg, UXR_FRAMING_END_FLAG, sizeof(output_msg));
+    memset(output_msg, UXR_FRAMING_BEGIN_FLAG, sizeof(output_msg));
     ASSERT_TRUE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 
-    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
     ASSERT_EQ(memcmp(output_msg, input_msg, sizeof(output_msg)), 0);
 }
 
@@ -73,26 +73,26 @@ TEST_F(SerialComm, BufferOverflowTest)
     size_t input_msg_len;
     uint8_t overflow_msg[UXR_SERIAL_BUFFER_SIZE + 1] = {0};
     uint8_t output_msg[] = {0, 0, 1, 0, 0, 0, 0};
-    uint8_t flag = UXR_FRAMING_END_FLAG;
+    uint8_t flag = UXR_FRAMING_BEGIN_FLAG;
 
     /* Send BEGIN flag. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     /* Send overflow PAYLOAD. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&overflow_msg), sizeof(overflow_msg)), sizeof(overflow_msg));
-    ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
 
     /* Send BEGIN flag. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     /* Send PAYLOAD. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&output_msg), sizeof(output_msg)), sizeof(output_msg));
-    ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
 
     /* Send END flag. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
-    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
     ASSERT_EQ(*input_msg, 0);
     ASSERT_EQ(input_msg_len, 1);
 }
@@ -144,7 +144,7 @@ TEST_F(SerialComm, SplitMessageTest)
     uint8_t* input_msg;
     size_t input_msg_len;
     uint8_t output_msg[] = {0, 0, 1, 0, 0, 0, 0};
-    uint8_t flag = UXR_FRAMING_END_FLAG;
+    uint8_t flag = UXR_FRAMING_BEGIN_FLAG;
 
     /* Send BEGIN flag. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);

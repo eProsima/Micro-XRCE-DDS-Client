@@ -27,11 +27,10 @@ extern "C"
 
 typedef struct uxrSerialTransport
 {
-    uint8_t buffer[UXR_CONFIG_SERIAL_TRANSPORT_MTU];
+    uxrSerialIO serial_io;
     uint8_t remote_addr;
     uint8_t local_addr;
     struct pollfd poll_fd;
-    uxrSerialIO serial_io;
     uxrCommunication comm;
 
 } uxrSerialTransport;

@@ -67,25 +67,19 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
 {
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
-    uint8_t src_addr;
-    uint8_t rmt_addr;
 
     uint16_t bytes_read = 0;
     do
     {
         int64_t time_init = uxr_millis();
-        bytes_read = uxr_read_serial_msg(&transport->serial_io,
+        bytes_read = uxr_read_serial_msg(&transport->serial_io.input,
                                          read_serial_data,
                                          instance,
-                                         transport->buffer,
-                                         sizeof(transport->buffer),
-                                         &src_addr,
-                                         &rmt_addr,
                                          timeout);
-        if (0 < bytes_read && src_addr == transport->remote_addr)
+        if (0 < bytes_read && transport->serial_io.input.src_addr == transport->remote_addr)
         {
             *len = bytes_read;
-            *buf = transport->buffer;
+            *buf = transport->serial_io.input.buffer;
             rv = true;
         }
         else
@@ -133,7 +127,7 @@ bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, int fd, uint8_t
     uxr_init_serial_io(&transport->serial_io);
 
     /* Send init flag. */
-    uint8_t flag = UXR_FRAMING_END_FLAG;
+    uint8_t flag = UXR_FRAMING_BEGIN_FLAG;
     ssize_t bytes_written = write(transport->poll_fd.fd, &flag, 1);
     if (0 < bytes_written && 1 == bytes_written)
     {
