@@ -15,14 +15,28 @@ static int serial_errno = 0;
 /*******************************************************************************
  * Private function declarations.
  *******************************************************************************/
-static uint16_t read_serial_data(void* instance, uint8_t* buf, size_t len, int timeout);
+static uint16_t write_serial_data(void* instance, uint8_t* buf, uint16_t len);
+static uint16_t read_serial_data(void* instance, uint8_t* buf, uint16_t len, int timeout);
 static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
 
 /*******************************************************************************
  * Private function definitions.
  *******************************************************************************/
-static uint16_t read_serial_data(void* instance, uint8_t* buf, size_t len, int timeout)
+static uint16_t write_serial_data(void* instance, uint8_t* buf, uint16_t len)
+{
+    uint16_t rv = 0;
+    uxrSerialTransport* transport = (uxrSerialTransport*)instance;
+
+    ssize_t bytes_written = write(transport->poll_fd.fd, (void*)buf, (size_t)len);
+    if ((0 < bytes_written) && (bytes_written == len))
+    {
+        rv = (uint16_t)bytes_written;
+    }
+    return rv;
+}
+
+static uint16_t read_serial_data(void* instance, uint8_t* buf, uint16_t len, int timeout)
 {
     uint16_t rv = 0;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
@@ -45,18 +59,16 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
-    uint16_t bytes_written = uxr_write_serial_msg(&transport->serial_io,
+    uint16_t bytes_written = uxr_write_serial_msg(&transport->serial_io.output,
+                                                  write_serial_data,
+                                                  instance,
                                                   buf,
-                                                  len,
+                                                  (uint16_t)len,
                                                   transport->local_addr,
                                                   transport->remote_addr);
-    if (0 < bytes_written)
+    if ((0 < bytes_written) && (bytes_written == len))
     {
-        ssize_t bytes_sent = write(transport->poll_fd.fd, transport->serial_io.output.buffer, (size_t)bytes_written);
-        if (0 < bytes_sent && (uint16_t)bytes_sent == bytes_written)
-        {
-            rv = true;
-        }
+        rv = true;
     }
     serial_errno = rv ? 0 : -1;
 

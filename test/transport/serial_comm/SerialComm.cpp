@@ -75,24 +75,16 @@ TEST_F(SerialComm, BufferOverflowTest)
     uint8_t output_msg[] = {0, 0, 1, 0, 0, 0, 0};
     uint8_t flag = UXR_FRAMING_BEGIN_FLAG;
 
-    /* Send BEGIN flag. */
+    /* Send overflow message. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
-
-    /* Send overflow PAYLOAD. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&overflow_msg), sizeof(overflow_msg)), sizeof(overflow_msg));
     ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
 
-    /* Send BEGIN flag. */
+    /* Send normal message. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
-
-    /* Send PAYLOAD. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&output_msg), sizeof(output_msg)), sizeof(output_msg));
-    ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
-
-    /* Send END flag. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
-
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
+
     ASSERT_EQ(*input_msg, 0);
     ASSERT_EQ(input_msg_len, 1);
 }
@@ -100,7 +92,7 @@ TEST_F(SerialComm, BufferOverflowTest)
 TEST_F(SerialComm, FatigueTest)
 {
     ASSERT_EQ(init(), 0);
-    unsigned int msgs_size = 2048;
+    unsigned int msgs_size = 65536;
     unsigned int sent_counter = 0;
     unsigned int recv_counter = 0;
     uint8_t receiver_ratio = 8;
@@ -120,16 +112,16 @@ TEST_F(SerialComm, FatigueTest)
             ++sent_counter;
         }
 
-        if (i % receiver_ratio == 0)
+        if ((i % receiver_ratio == 0) && (recv_counter < sent_counter))
         {
-            if (slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0))
+            if (slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100))
             {
                 ++recv_counter;
             }
         }
     }
 
-    while (slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0))
+    while (slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100))
     {
         ++recv_counter;
     }
@@ -152,14 +144,11 @@ TEST_F(SerialComm, SplitMessageTest)
     /* Send PAYLOAD. */
     for (unsigned int i = 0; i < sizeof(output_msg); ++i)
     {
+        ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
         ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&output_msg[i]), 1), 1);
-        ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
     }
 
-    /* Send END flag. */
-    ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
-
-    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
+    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
     ASSERT_EQ(*input_msg, 0);
     ASSERT_EQ(input_msg_len, 1);
 }

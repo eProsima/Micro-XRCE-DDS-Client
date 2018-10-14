@@ -45,7 +45,7 @@ static const uint16_t crc16_table[256] = {
  *******************************************************************************/
 static void update_crc(uint16_t* crc, const uint8_t data);
 static inline bool get_next_octet(uxrSerialInputBuffer* input, uint8_t* octet);
-static inline bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet, uint16_t* position);
+static inline bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet);
 
 /*******************************************************************************
  * Private function definitions.
@@ -85,26 +85,26 @@ bool get_next_octet(uxrSerialInputBuffer* input, uint8_t* octet)
     return rv;
 }
 
-bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet, uint16_t* position)
+bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet)
 {
     bool rv = false;
 
     if (UXR_FRAMING_BEGIN_FLAG == octet || UXR_FRAMING_ESC_FLAG == octet)
     {
-        if (*position < sizeof(output->buffer))
+        if ((uint8_t)(output->wb_pos + 1) < sizeof(output->wb))
         {
-            output->buffer[*position] = UXR_FRAMING_ESC_FLAG;
-            output->buffer[*position + 1] = octet ^ UXR_FRAMING_XOR_FLAG;
-            *position = (uint16_t)(*position + 2);
+            output->wb[output->wb_pos] = UXR_FRAMING_ESC_FLAG;
+            output->wb[output->wb_pos + 1] = octet ^ UXR_FRAMING_XOR_FLAG;
+            output->wb_pos = (uint8_t)(output->wb_pos + 2);
             rv = true;
         }
     }
     else
     {
-        if (*position <= sizeof(output->buffer))
+        if (output->wb_pos < sizeof(output->wb))
         {
-            output->buffer[*position] = octet;
-            *position = (uint16_t)(*position + 1);
+            output->wb[output->wb_pos] = octet;
+            output->wb_pos = (uint8_t)(output->wb_pos + 1);
             rv = true;
         }
     }
@@ -122,55 +122,88 @@ void uxr_init_serial_io(uxrSerialIO* serial_io)
     serial_io->input.rb_tail = 0;
 }
 
-uint16_t uxr_write_serial_msg(uxrSerialIO* serial_io, const uint8_t* buf, size_t len, uint8_t src_addr, uint8_t rmt_addr)
+uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
+                              uxr_write_cb write_cb,
+                              void* cb_arg,
+                              const uint8_t* buf,
+                              uint16_t len,
+                              uint8_t src_addr,
+                              uint8_t rmt_addr)
 {
-    bool cond = true;
-    uint16_t crc = 0;
-    uint16_t position = 0;
-    uint16_t writing_len = 0;
-
     /* Check output buffer size. */
-    if (UXR_SERIAL_MTU < len || sizeof(serial_io->output.buffer) - UXR_SERIAL_OVERHEAD < len)
+    if (UXR_SERIAL_MTU < len)
     {
-        cond = false;
+        return 0;
     }
 
-    if (cond)
+    /* Buffer being flag. */
+    output->wb[0] = UXR_FRAMING_BEGIN_FLAG;
+    output->wb_pos = 1;
+
+    /* Buffer header. */
+    add_next_octet(output, src_addr);
+    add_next_octet(output, rmt_addr);
+    add_next_octet(output, (uint8_t)(len & 0xFF));
+    add_next_octet(output, (uint8_t)(len >> 8));
+
+    /* Write payload. */
+    uint8_t octet = 0;
+    uint16_t written_len = 0;
+    uint16_t crc = 0;
+    bool cond = true;
+    while (written_len < len && cond)
     {
-        /* Write header. */
-        cond = add_next_octet(&serial_io->output, src_addr, &position) &&
-               add_next_octet(&serial_io->output, rmt_addr, &position) &&
-               add_next_octet(&serial_io->output, (uint8_t)(len & 0xFF), &position) &&
-               add_next_octet(&serial_io->output, (uint8_t)(len >> 8), &position);
-
-        /* Write payload. */
-        uint8_t octet = 0;
-        while (writing_len < len && cond)
+        octet = *(buf + written_len);
+        if (add_next_octet(output, octet))
         {
-            octet = *(buf + writing_len);
-            cond &= add_next_octet(&serial_io->output, octet, &position);
             update_crc(&crc, octet);
-            ++writing_len;
+            ++written_len;
         }
-
-        /* Write CRC and end flag. */
-        if (cond)
+        else
         {
-            cond = add_next_octet(&serial_io->output, (uint8_t)(crc & 0xFF), &position) &&
-                   add_next_octet(&serial_io->output, (uint8_t)(crc >> 8), &position);
-
-            /* Write end flag. */
-            if (cond)
+            uint16_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            if (0 < bytes_written)
             {
-                serial_io->output.buffer[position] = UXR_FRAMING_BEGIN_FLAG;
+                cond = true;
+                output->wb_pos = (uint8_t)(output->wb_pos - bytes_written);
+            }
+            else
+            {
+                cond = false;
             }
         }
     }
 
-    return cond ? (uint16_t)(position + 1) : 0;
+    /* Write CRC. */
+    uint8_t temp_crc[2] = {(uint8_t)(crc & 0xFF), (uint8_t)(crc >> 8)};
+    written_len = 0;
+    while (written_len < len && cond)
+    {
+        octet = *(temp_crc + written_len);
+        if (add_next_octet(output, octet))
+        {
+            update_crc(&crc, octet);
+            ++written_len;
+        }
+        else
+        {
+            uint16_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            if (0 < bytes_written)
+            {
+                cond = true;
+                output->wb_pos = (uint8_t)(output->wb_pos - bytes_written);
+            }
+            else
+            {
+                cond = false;
+            }
+        }
+    }
+
+    return cond ? (uint16_t)(len) : 0;
 }
 
-uint16_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb cb, void* cb_arg, int timeout)
+uint16_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, void* cb_arg, int timeout)
 {
     uint16_t rv = 0;
 
@@ -203,13 +236,13 @@ uint16_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb cb, void* 
     uint16_t bytes_read[2] = {0};
     if (0 < av_len[0])
     {
-        bytes_read[0] = cb(cb_arg, &input->rb[input->rb_head], av_len[0], timeout);
+        bytes_read[0] = read_cb(cb_arg, &input->rb[input->rb_head], av_len[0], timeout);
         input->rb_head = (uint8_t)((size_t)(input->rb_head + bytes_read[0]) % sizeof(input->rb));
         if (0 < bytes_read[0])
         {
             if ((bytes_read[0] == av_len[0]) && (0 < av_len[1]))
             {
-                bytes_read[1] = cb(cb_arg, &input->rb[input->rb_head], av_len[1], 0);
+                bytes_read[1] = read_cb(cb_arg, &input->rb[input->rb_head], av_len[1], 0);
                 input->rb_head = (uint8_t)((size_t)(input->rb_head + bytes_read[1]) % sizeof(input->rb));
             }
         }

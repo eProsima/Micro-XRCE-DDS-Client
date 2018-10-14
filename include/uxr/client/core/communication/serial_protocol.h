@@ -50,7 +50,7 @@ typedef struct uxrSerialInputBuffer
 {
     uint8_t buffer[UXR_CONFIG_SERIAL_TRANSPORT_MTU];
     uxrSerialInputBufferState state;
-    uint8_t rb[32];
+    uint8_t rb[42];
     uint8_t rb_head;
     uint8_t rb_tail;
     uint8_t src_addr;
@@ -64,7 +64,8 @@ typedef struct uxrSerialInputBuffer
 
 typedef struct uxrSerialOutputBuffer
 {
-    uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
+    uint8_t wb[42];
+    uint8_t wb_pos;
 
 } uxrSerialOutputBuffer;
 
@@ -75,7 +76,8 @@ typedef struct uxrSerialIO
 
 } uxrSerialIO;
 
-typedef uint16_t (*uxr_read_cb)(void*, uint8_t*, size_t, int);
+typedef uint16_t (*uxr_write_cb)(void*, uint8_t*, uint16_t);
+typedef uint16_t (*uxr_read_cb)(void*, uint8_t*, uint16_t, int);
 
 #ifdef __cplusplus
 }
