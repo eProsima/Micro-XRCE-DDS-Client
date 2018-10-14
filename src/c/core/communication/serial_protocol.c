@@ -175,11 +175,11 @@ uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     }
 
     /* Write CRC. */
-    uint8_t temp_crc[2] = {(uint8_t)(crc & 0xFF), (uint8_t)(crc >> 8)};
+    uint8_t tmp_crc[2] = {(uint8_t)(crc & 0xFF), (uint8_t)(crc >> 8)};
     written_len = 0;
-    while (written_len < len && cond)
+    while (written_len < sizeof(tmp_crc) && cond)
     {
-        octet = *(temp_crc + written_len);
+        octet = *(tmp_crc + written_len);
         if (add_next_octet(output, octet))
         {
             update_crc(&crc, octet);
@@ -198,6 +198,21 @@ uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
                 cond = false;
             }
         }
+    }
+
+    /* Flus write buffer. */
+    if (cond && (0 < output->wb_pos))
+    {
+            uint16_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            if (0 < bytes_written)
+            {
+                cond = true;
+                output->wb_pos = (uint8_t)(output->wb_pos - bytes_written);
+            }
+            else
+            {
+                cond = false;
+            }
     }
 
     return cond ? (uint16_t)(len) : 0;

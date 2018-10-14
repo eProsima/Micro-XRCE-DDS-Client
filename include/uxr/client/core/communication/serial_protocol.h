@@ -30,8 +30,6 @@ extern "C"
 #define UXR_FRAMING_XOR_FLAG 0x20
 
 #define UXR_SERIAL_MTU          UXR_CONFIG_SERIAL_TRANSPORT_MTU //TODO: Change the name for a generic serial mtu.
-#define UXR_SERIAL_OVERHEAD     5
-#define UXR_SERIAL_BUFFER_SIZE  (2 * (UXR_SERIAL_MTU + UXR_SERIAL_OVERHEAD))
 
 typedef enum uxrSerialInputBufferState
 {

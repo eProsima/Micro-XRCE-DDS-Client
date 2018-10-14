@@ -129,8 +129,6 @@ bool uxr_init_serial_transport(uxrSerialTransport* transport, const char* device
 
 bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
-    bool rv = false;
-
     transport->remote_addr = remote_addr;
     transport->local_addr = local_addr;
     transport->poll_fd.fd = fd;
@@ -138,24 +136,17 @@ bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, int fd, uint8_t
     /* Init SerialIO. */
     uxr_init_serial_io(&transport->serial_io);
 
-    /* Send init flag. */
-    uint8_t flag = UXR_FRAMING_BEGIN_FLAG;
-    ssize_t bytes_written = write(transport->poll_fd.fd, &flag, 1);
-    if (0 < bytes_written && 1 == bytes_written)
-    {
-        /* Poll setup. */
-        transport->poll_fd.events = POLLIN;
+    /* Poll setup. */
+    transport->poll_fd.events = POLLIN;
 
-        /* Interface setup. */
-        transport->comm.instance = (void*)transport;
-        transport->comm.send_msg = send_serial_msg;
-        transport->comm.recv_msg = recv_serial_msg;
-        transport->comm.comm_error = get_serial_error;
-        transport->comm.mtu = UXR_CONFIG_SERIAL_TRANSPORT_MTU;
-        rv = true;
-    }
+    /* Interface setup. */
+    transport->comm.instance = (void*)transport;
+    transport->comm.send_msg = send_serial_msg;
+    transport->comm.recv_msg = recv_serial_msg;
+    transport->comm.comm_error = get_serial_error;
+    transport->comm.mtu = UXR_CONFIG_SERIAL_TRANSPORT_MTU;
 
-    return rv;
+    return true;
 }
 
 bool uxr_close_serial_transport(uxrSerialTransport* transport)
