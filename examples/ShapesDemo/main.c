@@ -61,9 +61,11 @@ int main(int args, char** argv)
     uxrSession session;
 #if !defined(WIN32)
     uxrSerialTransport serial;
+    uxrSerialPlatform serial_platform;
 #endif
-    uxrUDPTransport udp;
+    //uxrUDPTransport udp;
     uxrTCPTransport tcp;
+    uxrTCPPlatform tcp_platform;
 
     uxrCommunication* comm;
 
@@ -71,22 +73,22 @@ int main(int args, char** argv)
 
     if(args >= 4 && strcmp(argv[1], "--udp") == 0)
     {
-        char* ip = argv[2];
-        uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_udp_transport(&udp, ip, port))
-        {
-            printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
-            return 1;
-        }
-        comm = &udp.comm;
-        printf("UDP mode => ip: %s - port: %hu\n", argv[2], port);
-        args_index = 4;
+//        char* ip = argv[2];
+//        uint16_t port = (uint16_t)atoi(argv[3]);
+//        if(!uxr_init_udp_transport(&udp, ip, port))
+//        {
+//            printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+//            return 1;
+//        }
+//        comm = &udp.comm;
+//        printf("UDP mode => ip: %s - port: %hu\n", argv[2], port);
+//        args_index = 4;
     }
     else if(args >= 4 && strcmp(argv[1], "--tcp") == 0)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_tcp_transport(&tcp, ip, port))
+        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, ip, port))
         {
             printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -100,7 +102,7 @@ int main(int args, char** argv)
     {
         char* device = argv[2];
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
-        if(!uxr_init_serial_transport_fd(&serial, fd, 0, 1))
+        if(!uxr_init_serial_transport(&serial, &serial_platform, fd, 0, 1))
         {
             printf("%sCan not create a serial connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -191,11 +193,11 @@ int main(int args, char** argv)
         }
     }
 
-    if(&udp.comm == comm)
-    {
-        uxr_close_udp_transport(&udp);
-    }
-    else if(&tcp.comm == comm)
+//    if(&udp.comm == comm)
+//    {
+//        uxr_close_udp_transport(&udp);
+//    }
+    if(&tcp.comm == comm)
     {
         uxr_close_tcp_transport(&tcp);
     }

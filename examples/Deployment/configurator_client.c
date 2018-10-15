@@ -37,91 +37,91 @@ static void wait_status(uxrSession* session, uint16_t* requests);
 
 int main(int args, char** argv)
 {
-    // Check args
-    uint32_t key;
-    int create_delete = 0;
-    int pub_sub = 0;
-    uint16_t ids = 0;
-
-    if(args == 7)
-    {
-        key = atoi(argv[2]);
-        if(0 == strcmp(argv[3], "create"))
-        {
-            create_delete = ACTION_CREATE;
-        }
-        else if(0 == strcmp(argv[3], "delete"))
-        {
-            create_delete = ACTION_DELETE;
-        }
-
-        if(0 == strcmp(argv[4], "pub"))
-        {
-            pub_sub = TARGET_PUBLISHER;
-        }
-        else if(0 == strcmp(argv[4], "sub"))
-        {
-            pub_sub = TARGET_SUBSCRIBER;
-        }
-        ids = atoi(argv[6]);
-    }
-
-    if(args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
-                || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[5])
-                || 0 == atoi(argv[2]) || 0 == atoi(argv[6])
-                || !create_delete || !pub_sub)
-    {
-        printf("usage: program [-h | --help] | --key <number> <'create'/'delete'> <'pub'/'sub'> --id <id>]\n");
-        return 0;
-    }
-
-    // Transport
-    uxrUDPTransport transport;
-    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
-    {
-        printf("Error at create transport.\n");
-        return 1;
-    }
-
-    // Session
-    uxrSession session;
-    uxr_init_session(&session, &transport.comm, key);
-    uxr_set_status_callback(&session, on_status, NULL);
-    if(!uxr_create_session(&session))
-    {
-        printf("Error at create session.\n");
-        return 1;
-    }
-
-    // Streams
-    uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
-
-    uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
-
-    switch(create_delete | pub_sub)
-    {
-        case ACTION_CREATE | TARGET_PUBLISHER:
-            create_publisher(&session, ids);
-            break;
-
-        case ACTION_CREATE | TARGET_SUBSCRIBER:
-            create_subscriber(&session, ids);
-            break;
-
-        case ACTION_DELETE | TARGET_PUBLISHER:
-            delete_publisher(&session, ids);
-            break;
-
-        case ACTION_DELETE | TARGET_SUBSCRIBER:
-            delete_subscriber(&session, ids);
-            break;
-    }
-
-    uxr_close_udp_transport(&transport);
-
-    return 0;
+//    // Check args
+//    uint32_t key;
+//    int create_delete = 0;
+//    int pub_sub = 0;
+//    uint16_t ids = 0;
+//
+//    if(args == 7)
+//    {
+//        key = atoi(argv[2]);
+//        if(0 == strcmp(argv[3], "create"))
+//        {
+//            create_delete = ACTION_CREATE;
+//        }
+//        else if(0 == strcmp(argv[3], "delete"))
+//        {
+//            create_delete = ACTION_DELETE;
+//        }
+//
+//        if(0 == strcmp(argv[4], "pub"))
+//        {
+//            pub_sub = TARGET_PUBLISHER;
+//        }
+//        else if(0 == strcmp(argv[4], "sub"))
+//        {
+//            pub_sub = TARGET_SUBSCRIBER;
+//        }
+//        ids = atoi(argv[6]);
+//    }
+//
+//    if(args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
+//                || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[5])
+//                || 0 == atoi(argv[2]) || 0 == atoi(argv[6])
+//                || !create_delete || !pub_sub)
+//    {
+//        printf("usage: program [-h | --help] | --key <number> <'create'/'delete'> <'pub'/'sub'> --id <id>]\n");
+//        return 0;
+//    }
+//
+//    // Transport
+//    uxrUDPTransport transport;
+//    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
+//    {
+//        printf("Error at create transport.\n");
+//        return 1;
+//    }
+//
+//    // Session
+//    uxrSession session;
+//    uxr_init_session(&session, &transport.comm, key);
+//    uxr_set_status_callback(&session, on_status, NULL);
+//    if(!uxr_create_session(&session))
+//    {
+//        printf("Error at create session.\n");
+//        return 1;
+//    }
+//
+//    // Streams
+//    uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
+//    uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+//
+//    uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
+//    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+//
+//    switch(create_delete | pub_sub)
+//    {
+//        case ACTION_CREATE | TARGET_PUBLISHER:
+//            create_publisher(&session, ids);
+//            break;
+//
+//        case ACTION_CREATE | TARGET_SUBSCRIBER:
+//            create_subscriber(&session, ids);
+//            break;
+//
+//        case ACTION_DELETE | TARGET_PUBLISHER:
+//            delete_publisher(&session, ids);
+//            break;
+//
+//        case ACTION_DELETE | TARGET_SUBSCRIBER:
+//            delete_subscriber(&session, ids);
+//            break;
+//    }
+//
+//    uxr_close_udp_transport(&transport);
+//
+//    return 0;
 }
 
 void create_publisher(uxrSession* session, uint16_t id)
