@@ -36,8 +36,6 @@ typedef struct uxrSerialTransport
 
 } uxrSerialTransport;
 
-typedef size_t (*uxr_write_cb)(struct uxrSerialPlatform*, uint8_t*, size_t);
-typedef size_t (*uxr_read_cb)(struct uxrSerialPlatform*, uint8_t*, size_t, int);
 
 UXRDLLAPI bool uxr_init_serial_transport(uxrSerialTransport* transport,
                                          struct uxrSerialPlatform* platform,
@@ -45,14 +43,6 @@ UXRDLLAPI bool uxr_init_serial_transport(uxrSerialTransport* transport,
                                          uint8_t remote_addr,
                                          uint8_t local_addr);
 UXRDLLAPI bool uxr_close_serial_transport(uxrSerialTransport* transport);
-size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
-                            uxr_write_cb write_cb,
-                            void* cb_arg,
-                            const uint8_t* buf,
-                            size_t len,
-                            uint8_t src_addr,
-                            uint8_t dst_addr);
-size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, void* cb_arg, int timeout);
 
 bool uxr_init_serial_platform(struct uxrSerialPlatform* platform, const int fd, uint8_t remote_addr, uint8_t local_addr);
 bool uxr_close_serial_platform(struct uxrSerialPlatform* platform);

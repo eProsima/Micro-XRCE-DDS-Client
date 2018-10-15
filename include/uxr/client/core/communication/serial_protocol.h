@@ -80,6 +80,19 @@ void update_crc(uint16_t* crc, const uint8_t data);
 bool get_next_octet(uxrSerialInputBuffer* input, uint8_t* octet);
 bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet);
 
+struct uxrSerialPlatform;
+typedef size_t (*uxr_write_cb)(struct uxrSerialPlatform*, uint8_t*, size_t);
+typedef size_t (*uxr_read_cb)(struct uxrSerialPlatform*, uint8_t*, size_t, int);
+
+size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
+                            uxr_write_cb write_cb,
+                            void* cb_arg,
+                            const uint8_t* buf,
+                            size_t len,
+                            uint8_t src_addr,
+                            uint8_t dst_addr);
+size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, void* cb_arg, int timeout);
+
 #ifdef __cplusplus
 }
 #endif
