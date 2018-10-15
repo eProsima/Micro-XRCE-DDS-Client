@@ -239,42 +239,42 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
     {
         uxrObjectId participant_id = uxr_object_id((uint16_t)arg1, UXR_PARTICIPANT_ID);
         const char* participant_ref = "default_xrce_participant";
-        (void) uxr_write_create_participant_ref(session, *stream_id, participant_id, 0, participant_ref, 0);
+        (void) uxr_buffer_create_participant_ref(session, *stream_id, participant_id, 0, participant_ref, 0);
     }
     else if(0 == strcmp(name, "create_topic") && 3 == length)
     {
         uxrObjectId topic_id = uxr_object_id((uint16_t)arg1, UXR_TOPIC_ID);
         uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* topic_ref = "shapetype_topic";
-        (void) uxr_write_create_topic_ref(session, *stream_id, topic_id, participant_id, topic_ref, 0);
+        (void) uxr_buffer_create_topic_ref(session, *stream_id, topic_id, participant_id, topic_ref, 0);
     }
     else if(0 == strcmp(name, "create_publisher") && 3 == length)
     {
         uxrObjectId publisher_id = uxr_object_id((uint16_t)arg1, UXR_PUBLISHER_ID);
         uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* publisher_xml = "";
-        (void) uxr_write_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
+        (void) uxr_buffer_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
     else if(0 == strcmp(name, "create_subscriber") && 3 == length)
     {
         uxrObjectId subscriber_id = uxr_object_id((uint16_t)arg1, UXR_SUBSCRIBER_ID);
         uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* subscriber_xml = "";
-        (void) uxr_write_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
+        (void) uxr_buffer_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
     else if(0 == strcmp(name, "create_datawriter") && 3 == length)
     {
         uxrObjectId datawriter_id = uxr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
         uxrObjectId publisher_id = uxr_object_id((uint16_t)arg2, UXR_PUBLISHER_ID);
         const char* datawriter_ref = "shapetype_data_writer";
-        (void) uxr_write_create_datawriter_ref(session, *stream_id, datawriter_id, publisher_id, datawriter_ref, 0);
+        (void) uxr_buffer_create_datawriter_ref(session, *stream_id, datawriter_id, publisher_id, datawriter_ref, 0);
     }
     else if(0 == strcmp(name, "create_datareader") && 3 == length)
     {
         uxrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
         uxrObjectId subscriber_id = uxr_object_id((uint16_t)arg2, UXR_SUBSCRIBER_ID);
         const char* datareader_ref = "shapetype_data_reader";
-        (void) uxr_write_create_datareader_ref(session, *stream_id, datareader_id, subscriber_id, datareader_ref, 0);
+        (void) uxr_buffer_create_datareader_ref(session, *stream_id, datareader_id, subscriber_id, datareader_ref, 0);
     }
     else if(0 == strcmp(name, "write_data") && 3 <= length)
     {
@@ -308,17 +308,17 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
 
         uxrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
         uxrStreamId input_stream_id = uxr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
-        (void) uxr_write_request_data(session, *stream_id, datareader_id, input_stream_id, &delivery_control);
+        (void) uxr_buffer_request_data(session, *stream_id, datareader_id, input_stream_id, &delivery_control);
     }
     else if(0 == strcmp(name, "cancel_data") && 2 == length)
     {
         uxrObjectId datareader_id = uxr_object_id((uint16_t)arg1, UXR_DATAREADER_ID);
-        (void) uxr_write_cancel_data(session, *stream_id, datareader_id);
+        (void) uxr_buffer_cancel_data(session, *stream_id, datareader_id);
     }
     else if(0 == strcmp(name, "delete") && 3 == length)
     {
         uxrObjectId entity_id = uxr_object_id((uint16_t)(arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
-        (void) uxr_write_delete_entity(session, *stream_id, entity_id);
+        (void) uxr_buffer_delete_entity(session, *stream_id, entity_id);
     }
     else if((0 == strcmp(name, "default_output_stream") || 0 == strcmp(name, "stream")) && 2 == length)
     {

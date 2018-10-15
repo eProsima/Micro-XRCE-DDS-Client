@@ -6,7 +6,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-bool uxr_write_submessage_header(ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags)
+bool uxr_buffer_submessage_header(ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags)
 {
     ucdr_align_to(mb, 4);
     mb->endianness = UCDR_MACHINE_ENDIANNESS;

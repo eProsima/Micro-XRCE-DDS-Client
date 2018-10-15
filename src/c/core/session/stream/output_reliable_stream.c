@@ -175,13 +175,13 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
     return it_updated;
 }
 
-void uxr_write_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
+void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
 {
     HEARTBEAT_Payload payload;
     payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
     payload.last_unacked_seq_nr = stream->last_sent;
 
-    (void) uxr_write_submessage_header(mb, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
+    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_HEARTBEAT_Payload(mb, &payload);
 }
 

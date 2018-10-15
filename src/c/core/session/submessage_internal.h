@@ -59,7 +59,7 @@ typedef enum SubmessageFlags
 
 } SubmessageFlags;
 
-bool uxr_write_submessage_header(struct ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
+bool uxr_buffer_submessage_header(struct ucdrBuffer* mb, uint8_t submessage_id, uint16_t length, uint8_t flags);
 bool uxr_read_submessage_header(struct ucdrBuffer* mb, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it);
 size_t uxr_submessage_padding(size_t length);
 

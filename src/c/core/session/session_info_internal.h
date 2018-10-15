@@ -27,8 +27,8 @@ struct BaseObjectRequest;
 
 void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key);
 
-void uxr_write_create_session(const uxrSessionInfo* info, struct ucdrBuffer* mb, int64_t nanoseconds);
-void uxr_write_delete_session(const uxrSessionInfo* info, struct ucdrBuffer* mb);
+void uxr_buffer_create_session(const uxrSessionInfo* info, struct ucdrBuffer* mb, int64_t nanoseconds);
+void uxr_buffer_delete_session(const uxrSessionInfo* info, struct ucdrBuffer* mb);
 void uxr_read_create_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
 void uxr_read_delete_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
 

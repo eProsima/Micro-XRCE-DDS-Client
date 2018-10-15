@@ -22,7 +22,7 @@ extern "C"
 
 #include <uxr/client/core/session/session.h>
 
-UXRDLLAPI uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id);
+UXRDLLAPI uint16_t uxr_buffer_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id);
 
 #ifdef __cplusplus
 }
