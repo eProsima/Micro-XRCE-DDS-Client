@@ -108,19 +108,22 @@ eprosima_find_package(microcdr)
 ###############################################################################
 
 # Transport source
-foreach(TRANSPORT_TYPE UDP TCP SERIAL)
+foreach(TRANSPORT_TYPE SERIAL)
     if(PROFILE_${TRANSPORT_TYPE}_TRANSPORT)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             set(PLATFORM_NAME_LINUX ON)
-            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
+            set(${TRANSPORT_TYPE}_SRCS
+                src/c/profile/transport/${TT}/${TT}_transport.c
+                src/c/profile/transport/${TT}/${TT}_transport_linux.c
+                )
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             set(PLATFORM_NAME_WINDOWS ON)
-            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_windows.c)
+            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}/${TT}_transport_windows.c)
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "nuttx")
                 set(PLATFORM_NAME_NUTTX ON)
-                set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
+                set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}/${TT}_transport_linux.c)
             endif()
         endif()
     endif()

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <uxr/client/client.h>
-#include <uxr/client/core/serialization/xrce_protocol.h>
+//#include <uxr/client/core/serialization/xrce_protocol.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -88,7 +88,7 @@ int main()
 
     uint8_t status[6];
     uint16_t request[6] = {participant_req, topic_req, publisher_req, datawriter_req, subscriber_req, datareader_req};
-    (void) uxr_run_session_until_status(&session, 0, request, status, 6);
+    (void) uxr_run_session_until_all_status(&session, 0, request, status, 6);
 
     // Request topics
     uxrDeliveryControl delivery_control = {0};

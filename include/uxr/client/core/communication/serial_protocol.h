@@ -74,8 +74,11 @@ typedef struct uxrSerialIO
 
 } uxrSerialIO;
 
-typedef uint16_t (*uxr_write_cb)(void*, uint8_t*, uint16_t);
-typedef uint16_t (*uxr_read_cb)(void*, uint8_t*, uint16_t, int);
+void uxr_init_serial_io(uxrSerialIO* serial_io);
+
+void update_crc(uint16_t* crc, const uint8_t data);
+bool get_next_octet(uxrSerialInputBuffer* input, uint8_t* octet);
+bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet);
 
 #ifdef __cplusplus
 }

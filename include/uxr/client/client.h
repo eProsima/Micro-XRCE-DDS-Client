@@ -38,7 +38,6 @@
 #endif //PROFILE_DISCOVERY
 
 #include <uxr/client/transport.h>
-
 #include <uxr/client/core/session/session.h>
 
 #endif // _UXR_CLIENT_CLIENT_H_
