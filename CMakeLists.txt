@@ -108,7 +108,7 @@ eprosima_find_package(microcdr)
 ###############################################################################
 
 # Transport source
-foreach(TRANSPORT_TYPE TCP SERIAL)
+foreach(TRANSPORT_TYPE UDP TCP SERIAL)
     if(PROFILE_${TRANSPORT_TYPE}_TRANSPORT)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

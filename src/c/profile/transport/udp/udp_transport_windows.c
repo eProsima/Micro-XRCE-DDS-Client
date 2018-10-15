@@ -1,65 +1,7 @@
-#include <uxr/client/profile/transport/udp_transport_windows.h>
+#include <uxr/client/profile/transport/udp/udp_transport_windows.h>
+#include <uxr/client/profile/transport/udp/udp_transport.h>
 
-/*******************************************************************************
- * Private function declarations.
- *******************************************************************************/
-static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len);
-static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static int get_udp_error(void);
-
-/*******************************************************************************
- * Private function definitions.
- *******************************************************************************/
-bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
-{
-    bool rv = true;
-    uxrUDPTransport* transport = (uxrUDPTransport*)instance;
-
-    int bytes_sent = send(transport->socket_fd, (const char*)buf, (int)len, 0);
-    if (0 > bytes_sent)
-    {
-        rv = false;
-    }
-
-    return rv;
-}
-
-bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
-{
-    bool rv = false;
-    uxrUDPTransport* transport = (uxrUDPTransport*)instance;
-
-    int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
-    if (0 < poll_rv)
-    {
-        int bytes_received = recv(transport->socket_fd, (void*)transport->buffer, sizeof(transport->buffer), 0);
-        if (SOCKET_ERROR != bytes_received)
-        {
-            *len = (size_t)bytes_received;
-            *buf = transport->buffer;
-            rv = true;
-        }
-    }
-    else
-    {
-        if (0 == poll_rv)
-        {
-            WSASetLastError(WAIT_TIMEOUT);
-        }
-    }
-
-    return rv;
-}
-
-int get_udp_error(void)
-{
-    return WSAGetLastError();
-}
-
-/*******************************************************************************
- * Public function definitions.
- *******************************************************************************/
-bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t port)
+bool uxr_init_udp_platform(uxrUDPPlatform* platform, const char* ip, uint16_t port)
 {
     bool rv = false;
 
@@ -70,9 +12,9 @@ bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t
         return false;
     }
 
-    /* Socket initialization. */
-    transport->socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (INVALID_SOCKET != transport->socket_fd)
+    /* Socket initialization */
+    platform->poll_fd.fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (INVALID_SOCKET != platform->poll_fd.fd)
     {
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
@@ -80,33 +22,52 @@ bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t
         temp_addr.sin_port = htons(port);
         temp_addr.sin_addr.s_addr = inet_addr(ip);
         memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
-        transport->remote_addr = *((struct sockaddr *)&temp_addr);
+        platform->remote_addr = *((struct sockaddr *) &temp_addr);
 
         /* Poll setup. */
-        transport->poll_fd.fd = transport->socket_fd;
-        transport->poll_fd.events = POLLIN;
+        platform->poll_fd.events = POLLIN;
 
         /* Remote address filter. */
-        int connected = connect(transport->socket_fd,
-                                &transport->remote_addr,
-                                sizeof(transport->remote_addr));
-        if (0 == connected)
-        {
-            /* Interface setup. */
-            transport->comm.instance = (void*)transport;
-            transport->comm.send_msg = send_udp_msg;
-            transport->comm.recv_msg = recv_udp_msg;
-            transport->comm.comm_error = get_udp_error;
-            transport->comm.mtu = UXR_CONFIG_UDP_TRANSPORT_MTU;
-            rv = true;
-        }
+        int connected = connect(platform->poll_fd.fd, &platform->remote_addr, sizeof(platform->remote_addr));
+        rv = (0 == connected);
     }
-
     return rv;
 }
 
-bool uxr_close_udp_transport(uxrUDPTransport* transport)
+bool uxr_close_udp_platform(uxrUDPPlatform* platform)
 {
-    (void)transport;
-    return (0 == WSACleanup());
+    bool rv = false;
+    if (0 == closesocket(platform->poll_fd.fd))
+    {
+        rv = (0 == WSACleanup());
+    }
+    return rv;
+}
+
+size_t uxr_write_udp_data_platform(uxrUDPPlatform* platform, const uint8_t* buf, size_t len)
+{
+    size_t rv = 0;
+    int bytes_sent = send(platform->poll_fd.fd, (const char*)buf, (int)len, 0);
+    if (0 < bytes_sent)
+    {
+        rv = (size_t)bytes_sent;
+    }
+    // TODO (julian): take into account error.
+    return rv;
+}
+
+size_t uxr_read_udp_data_platform(uxrUDPPlatform* platform, uint8_t* buf, size_t len, int timeout)
+{
+    size_t rv = 0;
+    int poll_rv = WSAPoll(&platform->poll_fd, 1, timeout);
+    if (0 < poll_rv)
+    {
+        int bytes_received = recv(platform->poll_fd.fd, (char*)buf, (int)len, 0);
+        if (0 < bytes_received)
+        {
+            rv = (size_t)bytes_received;
+        }
+    }
+    return rv;
+    // TODO (julian): take into account error.
 }

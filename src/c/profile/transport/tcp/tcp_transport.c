@@ -7,7 +7,7 @@
 static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
 static int get_tcp_error(void);
-static uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout);
+static size_t read_tcp_data(uxrTCPTransport* transport, int timeout);
 
 /*******************************************************************************
  * Private function definitions.
@@ -16,8 +16,8 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
-    uint16_t bytes_sent = 0;
-    uint16_t send_rv = 0;
+    size_t bytes_sent = 0;
+    size_t send_rv = 0;
     uint8_t msg_size_buf[2];
 
     /* Send message size. */
@@ -28,7 +28,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
         send_rv = uxr_write_tcp_data_platform(transport->platform, msg_size_buf, 2);
         if (0 < send_rv)
         {
-            bytes_sent = (uint16_t)(bytes_sent + send_rv);
+            bytes_sent = (size_t)(bytes_sent + send_rv);
         }
         else
         {
@@ -48,7 +48,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
             send_rv = uxr_write_tcp_data_platform(transport->platform, buf + bytes_sent, len - bytes_sent);
             if (0 < send_rv)
             {
-                bytes_sent = (uint16_t)(bytes_sent + send_rv);
+                bytes_sent = (size_t)(bytes_sent + send_rv);
             }
             else
             {
@@ -57,7 +57,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
                 rv = false;
             }
         }
-        while (rv && bytes_sent != (uint16_t)len);
+        while (rv && bytes_sent != len);
     }
 
     return rv;
@@ -68,15 +68,15 @@ bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
 
-    uint16_t bytes_read = 0;
+    size_t bytes_read = 0;
     do
     {
         int64_t time_init = uxr_millis();
         bytes_read = read_tcp_data(transport, timeout);
         if (0 < bytes_read)
         {
-            *len = (size_t)bytes_read;
             *buf = transport->input_buffer.buffer;
+            *len = bytes_read;
             rv = true;
         }
         timeout -= (int)(uxr_millis() - time_init);
@@ -91,9 +91,9 @@ int get_tcp_error(void)
     return 0; //TODO (julian)
 }
 
-uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout)
+size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
 {
-    uint16_t rv = 0;
+    size_t rv = 0;
     bool exit_flag = false;
 
     /* State Machine. */
@@ -105,13 +105,13 @@ uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             {
                 transport->input_buffer.position = 0;
                 uint8_t size_buf[2];
-                uint16_t bytes_received = uxr_read_tcp_data_platform(transport->platform, size_buf, 2, timeout);
+                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, size_buf, 2, timeout);
                 if (0 < bytes_received)
                 {
                     transport->input_buffer.msg_size = 0;
                     if (2 == bytes_received)
                     {
-                        transport->input_buffer.msg_size = (uint16_t)(((uint16_t)size_buf[1] << 8) | size_buf[0]);
+                        transport->input_buffer.msg_size = (size_t)(((uint16_t)size_buf[1] << 8) | size_buf[0]);
                         if (transport->input_buffer.msg_size != 0)
                         {
                             transport->input_buffer.state = UXR_TCP_SIZE_READ;
@@ -119,7 +119,7 @@ uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                     }
                     else
                     {
-                        transport->input_buffer.msg_size = (uint16_t)size_buf[0];
+                        transport->input_buffer.msg_size = (size_t)size_buf[0];
                         transport->input_buffer.state = UXR_TCP_SIZE_INCOMPLETE;
                     }
                 }
@@ -134,10 +134,10 @@ uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             case UXR_TCP_SIZE_INCOMPLETE:
             {
                 uint8_t size_msb;
-                uint16_t bytes_received = uxr_read_tcp_data_platform(transport->platform, &size_msb, 1, timeout);
+                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, &size_msb, 1, timeout);
                 if (0 < bytes_received)
                 {
-                    transport->input_buffer.msg_size = (uint16_t)(size_msb << 8) | transport->input_buffer.msg_size;
+                    transport->input_buffer.msg_size = (size_t)(size_msb << 8) | transport->input_buffer.msg_size;
                     if (transport->input_buffer.msg_size != 0)
                     {
                         transport->input_buffer.state = UXR_TCP_SIZE_READ;
@@ -157,10 +157,10 @@ uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             }
             case UXR_TCP_SIZE_READ:
             {
-                uint16_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
-                                                                     transport->input_buffer.buffer,
-                                                                     transport->input_buffer.msg_size,
-                                                                     timeout);
+                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
+                                                                   transport->input_buffer.buffer,
+                                                                   transport->input_buffer.msg_size,
+                                                                   timeout);
                 if (0 < bytes_received)
                 {
                     if (bytes_received == transport->input_buffer.msg_size)
@@ -169,7 +169,7 @@ uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                     }
                     else
                     {
-                        transport->input_buffer.position = (uint16_t)bytes_received;
+                        transport->input_buffer.position = bytes_received;
                         transport->input_buffer.state = UXR_TCP_MESSAGE_INCOMPLETE;
                         exit_flag = true;
                     }
@@ -184,15 +184,15 @@ uint16_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             }
             case UXR_TCP_MESSAGE_INCOMPLETE:
             {
-                uint16_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
-                                                                     transport->input_buffer.buffer +
-                                                                     transport->input_buffer.position,
-                                                                     (uint16_t)(transport->input_buffer.msg_size -
-                                                                                transport->input_buffer.position),
-                                                                     timeout);
+                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
+                                                                   transport->input_buffer.buffer +
+                                                                   transport->input_buffer.position,
+                                                                   (size_t)(transport->input_buffer.msg_size -
+                                                                              transport->input_buffer.position),
+                                                                   timeout);
                 if (0 < bytes_received)
                 {
-                    transport->input_buffer.position = (uint16_t)(transport->input_buffer.position +  bytes_received);
+                    transport->input_buffer.position = (size_t)(transport->input_buffer.position +  bytes_received);
                     if (transport->input_buffer.position == transport->input_buffer.msg_size)
                     {
                         transport->input_buffer.state = UXR_TCP_MESSAGE_AVAILABLE;

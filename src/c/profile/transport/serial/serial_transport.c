@@ -17,13 +17,13 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
-    uint16_t bytes_written = uxr_write_serial_msg(&transport->serial_io.output,
-                                                  uxr_write_serial_data_platform,
-                                                  transport->platform,
-                                                  buf,
-                                                  (uint16_t)len,
-                                                  transport->local_addr,
-                                                  transport->remote_addr);
+    size_t bytes_written = uxr_write_serial_msg(&transport->serial_io.output,
+                                                uxr_write_serial_data_platform,
+                                                transport->platform,
+                                                buf,
+                                                len,
+                                                transport->local_addr,
+                                                transport->remote_addr);
     if ((0 < bytes_written) && (bytes_written == len))
     {
         rv = true;
@@ -37,7 +37,7 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
-    uint16_t bytes_read = 0;
+    size_t bytes_read = 0;
     do
     {
         int64_t time_init = uxr_millis();
@@ -102,13 +102,13 @@ bool uxr_close_serial_transport(uxrSerialTransport* transport)
     return uxr_close_serial_platform(transport->platform);
 }
 
-uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
-                              uxr_write_cb write_cb,
-                              void* cb_arg,
-                              const uint8_t* buf,
-                              uint16_t len,
-                              uint8_t src_addr,
-                              uint8_t dst_addr)
+size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
+                            uxr_write_cb write_cb,
+                            void* cb_arg,
+                            const uint8_t* buf,
+                            size_t len,
+                            uint8_t src_addr,
+                            uint8_t dst_addr)
 {
     /* Check output buffer size. */
     if (UXR_SERIAL_MTU < len)
@@ -141,7 +141,7 @@ uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
         }
         else
         {
-            uint16_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
             if (0 < bytes_written)
             {
                 cond = true;
@@ -155,7 +155,9 @@ uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     }
 
     /* Write CRC. */
-    uint8_t tmp_crc[2] = {(uint8_t)(crc & 0xFF), (uint8_t)(crc >> 8)};
+    uint8_t tmp_crc[2];
+    tmp_crc[0] = (uint8_t)(crc & 0xFF);
+    tmp_crc[1] = (uint8_t)(crc >> 8);
     written_len = 0;
     while (written_len < sizeof(tmp_crc) && cond)
     {
@@ -167,7 +169,7 @@ uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
         }
         else
         {
-            uint16_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
             if (0 < bytes_written)
             {
                 cond = true;
@@ -183,7 +185,7 @@ uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     /* Flus write buffer. */
     if (cond && (0 < output->wb_pos))
     {
-            uint16_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
             if (0 < bytes_written)
             {
                 cond = true;
@@ -198,9 +200,9 @@ uint16_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     return cond ? (uint16_t)(len) : 0;
 }
 
-uint16_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, void* cb_arg, int timeout)
+size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, void* cb_arg, int timeout)
 {
-    uint16_t rv = 0;
+    size_t rv = 0;
 
     /* Compute read-buffer available size. */
     uint8_t av_len[2] = {0, 0};
@@ -228,7 +230,7 @@ uint16_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, v
     }
 
     /* Read from serial. */
-    uint16_t bytes_read[2] = {0};
+    size_t bytes_read[2] = {0};
     if (0 < av_len[0])
     {
         bytes_read[0] = read_cb(cb_arg, &input->rb[input->rb_head], av_len[0], timeout);

@@ -37,9 +37,9 @@ typedef enum uxrTCPInputBufferState
 typedef struct uxrTCPInputBuffer
 {
     uint8_t buffer[UXR_CONFIG_TCP_TRANSPORT_MTU];
-    uint16_t position;
+    size_t position;
     uxrTCPInputBufferState state;
-    uint16_t msg_size;
+    size_t msg_size;
 
 } uxrTCPInputBuffer;
 
@@ -61,8 +61,8 @@ UXRDLLAPI bool uxr_close_tcp_transport(uxrTCPTransport* transport);
 
 bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port);
 bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform);
-uint16_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform, const uint8_t* buf, uint16_t len);
-uint16_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform, uint8_t* buf, uint16_t len, int timeout);
+size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform, const uint8_t* buf, size_t len);
+size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform, uint8_t* buf, size_t len, int timeout);
 void uxr_disconnect_tcp_platform(struct uxrTCPPlatform* platform);
 
 #ifdef __cplusplus

@@ -40,29 +40,29 @@ bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform)
     return (0 == close(platform->poll_fd.fd));
 }
 
-uint16_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform, const uint8_t* buf, uint16_t len)
+size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform, const uint8_t* buf, size_t len)
 {
-    uint16_t rv = 0;
-    ssize_t bytes_sent = send(platform->poll_fd.fd, (void*)buf, (size_t)len, 0);
+    size_t rv = 0;
+    ssize_t bytes_sent = send(platform->poll_fd.fd, (void*)buf, len, 0);
     if (0 < bytes_sent)
     {
         // TODO (julian): take into account errors.
-        rv = (uint16_t)bytes_sent;
+        rv = (size_t)bytes_sent;
     }
     return rv;
 }
 
-uint16_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform, uint8_t* buf, uint16_t len, int timeout)
+size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform, uint8_t* buf, size_t len, int timeout)
 {
-    uint16_t rv = 0;
+    size_t rv = 0;
     int poll_rv = poll(&platform->poll_fd, 1, timeout);
     if (0 < poll_rv)
     {
-        ssize_t bytes_received = recv(platform->poll_fd.fd, (void*)buf, (size_t)len, 0);
+        ssize_t bytes_received = recv(platform->poll_fd.fd, (void*)buf, len, 0);
         if (0 < bytes_received)
         {
             // TODO (julian): take into account errors.
-            rv = (uint16_t)bytes_received;
+            rv = (size_t)bytes_received;
         }
     }
     return rv;
