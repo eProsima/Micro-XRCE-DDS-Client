@@ -41,37 +41,37 @@ public:
         uint16_t request_id; uint8_t status;
 
         uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
-        request_id = uxr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant_profile", flags);
+        request_id = uxr_buffer_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant_profile", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
-        request_id = uxr_write_configure_topic_xml(&session_, output_stream_id, topic_id, participant_id, topic_xml_, flags);
+        request_id = uxr_buffer_configure_topic_xml(&session_, output_stream_id, topic_id, participant_id, topic_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
-        request_id = uxr_write_configure_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, publisher_xml_, flags);
+        request_id = uxr_buffer_configure_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, publisher_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
-        request_id = uxr_write_configure_datawriter_xml(&session_, output_stream_id, datawriter_id, publisher_id, datawriter_xml_, flags);
+        request_id = uxr_buffer_configure_datawriter_xml(&session_, output_stream_id, datawriter_id, publisher_id, datawriter_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
-        request_id = uxr_write_configure_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, subscriber_xml_, flags);
+        request_id = uxr_buffer_configure_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, subscriber_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
-        request_id = uxr_write_configure_datareader_xml(&session_, output_stream_id, datareader_id, subscriber_id, datareader_xml_, flags);
+        request_id = uxr_buffer_configure_datareader_xml(&session_, output_stream_id, datareader_id, subscriber_id, datareader_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
@@ -113,7 +113,7 @@ public:
 
         uxrDeliveryControl delivery_control = {};
         delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-        uint16_t request_id = uxr_write_request_data(&session_, output_stream_id, datareader_id, input_stream_id, &delivery_control);
+        uint16_t request_id = uxr_buffer_request_data(&session_, output_stream_id, datareader_id, input_stream_id, &delivery_control);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
 
         while(expected_topic_index_ < number)

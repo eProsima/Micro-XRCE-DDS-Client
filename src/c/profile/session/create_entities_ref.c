@@ -12,7 +12,7 @@ static uint16_t create_entity_ref(uxrSession* session, uxrStreamId stream_id,
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t uxr_write_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
+uint16_t uxr_buffer_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
                                          uxrObjectId object_id, int16_t domain_id, const char* ref, uint8_t mode)
 {
     //assert with the object_id type
@@ -24,7 +24,7 @@ uint16_t uxr_write_create_participant_ref(uxrSession* session, uxrStreamId strea
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_write_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
+uint16_t uxr_buffer_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
                                    uxrObjectId object_id, uxrObjectId participant_id,
                                    const char* ref, uint8_t mode)
 {
@@ -35,7 +35,7 @@ uint16_t uxr_write_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_write_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
+uint16_t uxr_buffer_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
                                         uxrObjectId object_id, uxrObjectId publisher_id,
                                         const char* ref, uint8_t mode)
 {
@@ -46,7 +46,7 @@ uint16_t uxr_write_create_datawriter_ref(uxrSession* session, uxrStreamId stream
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_write_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
+uint16_t uxr_buffer_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
                                         uxrObjectId object_id, uxrObjectId subscriber_id,
                                         const char* ref, uint8_t mode)
 {

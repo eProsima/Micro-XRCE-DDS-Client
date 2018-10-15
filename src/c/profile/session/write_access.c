@@ -18,7 +18,7 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
     if(uxr_prepare_stream_to_write(&session->streams, stream_id, submessage_size, &mb))
     {
         uint16_t payload_size = (uint16_t)(WRITE_DATA_PAYLOAD_SIZE + topic_size);
-        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, payload_size, FORMAT_DATA);
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, payload_size, FORMAT_DATA);
 
         WRITE_DATA_Payload_Data payload;
         uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);

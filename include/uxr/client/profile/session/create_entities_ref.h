@@ -23,19 +23,19 @@ extern "C"
 
 #include <uxr/client/profile/session/common_create_entities.h>
 
-UXRDLLAPI uint16_t uxr_write_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
                                                   uxrObjectId object_id, int16_t domain_id,
                                                   const char* ref, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_write_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
                                             uxrObjectId object_id, uxrObjectId participant_id,
                                             const char* ref, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_write_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
                                                  uxrObjectId object_id, uxrObjectId publisher_id,
                                                  const char* ref, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_write_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
                                                  uxrObjectId object_id, uxrObjectId subscriber_id,
                                                  const char* ref, uint8_t mode);
 

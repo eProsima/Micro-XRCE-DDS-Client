@@ -73,7 +73,7 @@ int main(int args, char** argv)
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
 
     uxrObjectId datareader_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAREADER_ID);
-    uint16_t read_data_req = uxr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
 
     // Read topics
     bool connected = true;

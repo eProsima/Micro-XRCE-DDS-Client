@@ -86,7 +86,7 @@ bool uxr_create_session(uxrSession* session)
     ucdrBuffer mb;
     ucdr_init_buffer_offset(&mb, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
-    uxr_write_create_session(&session->info, &mb, uxr_millis());
+    uxr_buffer_create_session(&session->info, &mb, uxr_millis());
     uxr_stamp_create_session_header(&session->info, mb.init);
 
     bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&mb), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
@@ -100,7 +100,7 @@ bool uxr_delete_session(uxrSession* session)
     ucdrBuffer mb;
     ucdr_init_buffer_offset(&mb, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
-    uxr_write_delete_session(&session->info, &mb);
+    uxr_buffer_delete_session(&session->info, &mb);
     uxr_stamp_session_header(&session->info, 0, 0, mb.init);
 
     bool received = wait_session_status(session, delete_session_buffer, ucdr_buffer_length(&mb), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
@@ -355,7 +355,7 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
-    uxr_write_heartbeat(stream, &mb);
+    uxr_buffer_heartbeat(stream, &mb);
     uxr_stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, heartbeat_buffer, ucdr_buffer_length(&mb));
 }
@@ -368,7 +368,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
-    uxr_write_acknack(stream, &mb);
+    uxr_buffer_acknack(stream, &mb);
     uxr_stamp_session_header(&session->info, 0, id.raw, mb.init);
     send_message(session, acknack_buffer, ucdr_buffer_length(&mb));
 }

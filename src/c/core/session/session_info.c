@@ -35,7 +35,7 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
-void uxr_write_create_session(const uxrSessionInfo* info, ucdrBuffer* mb, int64_t nanoseconds)
+void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* mb, int64_t nanoseconds)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
@@ -52,18 +52,18 @@ void uxr_write_create_session(const uxrSessionInfo* info, ucdrBuffer* mb, int64_
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
 
-    (void) uxr_write_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_CREATE_CLIENT_Payload(mb, &payload);
 }
 
-void uxr_write_delete_session(const uxrSessionInfo* info, ucdrBuffer* mb)
+void uxr_buffer_delete_session(const uxrSessionInfo* info, ucdrBuffer* mb)
 {
     (void) info;
     DELETE_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
-    (void) uxr_write_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_DELETE_Payload(mb, &payload);
 }
 

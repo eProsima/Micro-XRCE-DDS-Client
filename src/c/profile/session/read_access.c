@@ -21,7 +21,7 @@ static void read_format_packed_samples(uxrSession* session, ucdrBuffer* payload,
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id,
+uint16_t uxr_buffer_request_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id,
                          uxrStreamId data_stream_id, uxrDeliveryControl* control)
 {
     uint16_t request_id = UXR_INVALID_REQUEST_ID;
@@ -49,7 +49,7 @@ uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrO
     ucdrBuffer mb;
     if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
-        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
         request_id = uxr_init_base_object_request(&session->info, datareader_id, &payload.base);
         (void) uxr_serialize_READ_DATA_Payload(&mb, &payload);
@@ -58,10 +58,10 @@ uint16_t uxr_write_request_data(uxrSession* session, uxrStreamId stream_id, uxrO
     return request_id;
 }
 
-uint16_t uxr_write_cancel_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id)
+uint16_t uxr_buffer_cancel_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id)
 {
     uxrDeliveryControl delivery_control = {0};
-    return uxr_write_request_data(session, stream_id, datareader_id, (uxrStreamId){0}, &delivery_control);
+    return uxr_buffer_request_data(session, stream_id, datareader_id, (uxrStreamId){0}, &delivery_control);
 }
 
 //==================================================================

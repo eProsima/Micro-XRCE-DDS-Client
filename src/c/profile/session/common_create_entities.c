@@ -7,7 +7,7 @@
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id)
+uint16_t uxr_buffer_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id)
 {
     uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
@@ -20,7 +20,7 @@ uint16_t uxr_write_delete_entity(uxrSession* session, uxrStreamId stream_id, uxr
     ucdrBuffer mb;
     if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
-        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
 
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload.base);
         (void) uxr_serialize_DELETE_Payload(&mb, &payload);
@@ -50,7 +50,7 @@ uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
     if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
     {
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload->base);
-        (void) uxr_write_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
         (void) uxr_serialize_CREATE_Payload(&mb, payload);
     }
 

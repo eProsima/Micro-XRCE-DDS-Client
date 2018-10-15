@@ -34,7 +34,7 @@ bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, u
 bool uxr_update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp);
 uxrSeqNum uxr_begin_output_nack_buffer_it(const uxrOutputReliableStream* stream);
 bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t *length, uxrSeqNum* seq_num_it);
-void uxr_write_heartbeat(const uxrOutputReliableStream* stream, struct ucdrBuffer* mb);
+void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, struct ucdrBuffer* mb);
 void uxr_read_acknack(uxrOutputReliableStream* stream, struct ucdrBuffer* payload);
 
 bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream);

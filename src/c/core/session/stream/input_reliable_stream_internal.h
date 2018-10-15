@@ -33,7 +33,7 @@ void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream);
 bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, struct ucdrBuffer* mb);
 
-void uxr_write_acknack(const uxrInputReliableStream* stream, struct ucdrBuffer* mb);
+void uxr_buffer_acknack(const uxrInputReliableStream* stream, struct ucdrBuffer* mb);
 void uxr_read_heartbeat(uxrInputReliableStream* stream, struct ucdrBuffer* payload);
 
 bool uxr_is_input_reliable_stream_busy(uxrInputReliableStream* stream);
