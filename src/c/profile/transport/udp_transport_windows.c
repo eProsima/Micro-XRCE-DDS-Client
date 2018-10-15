@@ -1,21 +1,21 @@
-#include <micrortps/client/profile/transport/udp_transport_windows.h>
+#include <uxr/client/profile/transport/udp_transport_windows.h>
 
 /*******************************************************************************
  * Private function declarations.
  *******************************************************************************/
 static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static int get_udp_error();
+static int get_udp_error(void);
 
 /*******************************************************************************
  * Private function definitions.
  *******************************************************************************/
-static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
+bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
 {
     bool rv = true;
-    mrUDPTransport* transport = (mrUDPTransport*)instance;
+    uxrUDPTransport* transport = (uxrUDPTransport*)instance;
 
-    int bytes_sent = send(transport->socket_fd, (void*)buf, (int)len, 0);
+    int bytes_sent = send(transport->socket_fd, (const char*)buf, (int)len, 0);
     if (0 > bytes_sent)
     {
         rv = false;
@@ -24,10 +24,10 @@ static bool send_udp_msg(void* instance, const uint8_t* buf, size_t len)
     return rv;
 }
 
-static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
+bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
 {
-    bool rv = true;
-    mrUDPTransport* transport = (mrUDPTransport*)instance;
+    bool rv = false;
+    uxrUDPTransport* transport = (uxrUDPTransport*)instance;
 
     int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
@@ -37,22 +37,21 @@ static bool recv_udp_msg(void* instance, uint8_t** buf, size_t* len, int timeout
         {
             *len = (size_t)bytes_received;
             *buf = transport->buffer;
+            rv = true;
         }
-    }
-    else if (0 == poll_rv)
-    {
-        rv = false;
-        WSASetLastError(WAIT_TIMEOUT);
     }
     else
     {
-        rv = false;
+        if (0 == poll_rv)
+        {
+            WSASetLastError(WAIT_TIMEOUT);
+        }
     }
 
     return rv;
 }
 
-static int get_udp_error()
+int get_udp_error(void)
 {
     return WSAGetLastError();
 }
@@ -60,9 +59,16 @@ static int get_udp_error()
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t port)
+bool uxr_init_udp_transport(uxrUDPTransport* transport, const char* ip, uint16_t port)
 {
     bool rv = false;
+
+    /* WSA initialization. */
+    WSADATA wsa_data;
+    if (0 != WSAStartup(MAKEWORD(2, 2), &wsa_data))
+    {
+        return false;
+    }
 
     /* Socket initialization. */
     transport->socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -71,7 +77,7 @@ bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t p
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
         temp_addr.sin_family = AF_INET;
-        temp_addr.sin_port = port;
+        temp_addr.sin_port = htons(port);
         temp_addr.sin_addr.s_addr = inet_addr(ip);
         memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
         transport->remote_addr = *((struct sockaddr *)&temp_addr);
@@ -91,7 +97,7 @@ bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t p
             transport->comm.send_msg = send_udp_msg;
             transport->comm.recv_msg = recv_udp_msg;
             transport->comm.comm_error = get_udp_error;
-            transport->comm.mtu = UDP_TRANSPORT_MTU;
+            transport->comm.mtu = UXR_CONFIG_UDP_TRANSPORT_MTU;
             rv = true;
         }
     }
@@ -99,8 +105,8 @@ bool mr_init_udp_transport(mrUDPTransport* transport, const char* ip, uint16_t p
     return rv;
 }
 
-bool mr_close_udp_transport(mrUDPTransport* transport)
+bool uxr_close_udp_transport(uxrUDPTransport* transport)
 {
     (void)transport;
-    return 1;
+    return (0 == WSACleanup());
 }

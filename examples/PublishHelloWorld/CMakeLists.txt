@@ -20,10 +20,13 @@ endif()
 project(PublishHelloWorldClient)
 
 
-if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML and PROFILE_UDP_TRANSPORT must be enabled.")
+if(NOT PROFILE_CREATE_ENTITIES_REF OR
+   NOT PROFILE_CREATE_ENTITIES_XML OR
+   NOT PROFILE_WRITE_ACCESS OR
+   NOT PROFILE_UDP_TRANSPORT)
+    message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_CREATE_ENTITIES_XML, and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
-    add_executable(${PROJECT_NAME} main.c HelloWorld.c HelloWorldWriter.c)
+    add_executable(${PROJECT_NAME} main.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
@@ -33,14 +36,14 @@ else()
         C_STANDARD_REQUIRED YES
         )
 
-    target_link_libraries(${PROJECT_NAME} micrortps_client)
+    target_link_libraries(${PROJECT_NAME} microxrcedds_client)
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"

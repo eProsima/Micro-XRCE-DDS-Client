@@ -29,8 +29,8 @@ int SerialComm::init()
         {
             fcntl(fd_, F_SETFL, O_NONBLOCK);
             fcntl(fd_, F_SETPIPE_SZ, 4096);
-            if (!mr_init_serial_transport_fd(&master_, fd_, 1, 0) ||
-                !mr_init_serial_transport_fd(&slave_, fd_, 0, 1))
+            if (!uxr_init_serial_transport_fd(&master_, fd_, 1, 0) ||
+                !uxr_init_serial_transport_fd(&slave_, fd_, 0, 1))
             {
                 rv = -1;
             }
@@ -47,11 +47,11 @@ int SerialComm::init()
 TEST_F(SerialComm, WorstStuffingTest)
 {
     ASSERT_EQ(init(), 0);
-    uint8_t output_msg[MR_SERIAL_MTU];
+    uint8_t output_msg[UXR_SERIAL_MTU];
     uint8_t* input_msg;
     size_t input_msg_len;
 
-    memset(output_msg, MR_FRAMING_END_FLAG, sizeof(output_msg));
+    memset(output_msg, UXR_FRAMING_END_FLAG, sizeof(output_msg));
     ASSERT_TRUE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 0));
@@ -61,7 +61,7 @@ TEST_F(SerialComm, WorstStuffingTest)
 TEST_F(SerialComm, MessageOverflowTest)
 {
     ASSERT_EQ(init(), 0);
-    uint8_t output_msg[MR_SERIAL_MTU + 1] = {0};
+    uint8_t output_msg[UXR_SERIAL_MTU + 1] = {0};
     ASSERT_FALSE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 }
 
@@ -71,9 +71,9 @@ TEST_F(SerialComm, BufferOverflowTest)
 
     uint8_t* input_msg;
     size_t input_msg_len;
-    uint8_t overflow_msg[MR_SERIAL_BUFFER_SIZE + 1] = {0};
+    uint8_t overflow_msg[UXR_SERIAL_BUFFER_SIZE + 1] = {0};
     uint8_t output_msg[] = {0, 0, 1, 0, 0, 0, 0};
-    uint8_t flag = MR_FRAMING_END_FLAG;
+    uint8_t flag = UXR_FRAMING_END_FLAG;
 
     /* Send BEGIN flag. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
@@ -104,7 +104,7 @@ TEST_F(SerialComm, FatigueTest)
     unsigned int sent_counter = 0;
     unsigned int recv_counter = 0;
     uint8_t receiver_ratio = 8;
-    uint8_t output_msg[MR_SERIAL_MTU];
+    uint8_t output_msg[UXR_SERIAL_MTU];
     uint8_t* input_msg;
     size_t input_msg_len;
 
@@ -144,7 +144,7 @@ TEST_F(SerialComm, SplitMessageTest)
     uint8_t* input_msg;
     size_t input_msg_len;
     uint8_t output_msg[] = {0, 0, 1, 0, 0, 0, 0};
-    uint8_t flag = MR_FRAMING_END_FLAG;
+    uint8_t flag = UXR_FRAMING_END_FLAG;
 
     /* Send BEGIN flag. */
     ASSERT_EQ(write(slave_.poll_fd.fd, static_cast<void*>(&flag), 1), 1);

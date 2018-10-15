@@ -41,11 +41,12 @@ typedef struct HelloWorld
 
 } HelloWorld;
 
-struct MicroBuffer;
+struct ucdrBuffer;
 
-bool HelloWorld_serialize_topic(struct MicroBuffer* writer, const HelloWorld* topic);
-bool HelloWorld_deserialize_topic(struct MicroBuffer* reader, HelloWorld* topic);
+bool HelloWorld_serialize_topic(struct ucdrBuffer* writer, const HelloWorld* topic);
+bool HelloWorld_deserialize_topic(struct ucdrBuffer* reader, HelloWorld* topic);
 uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size);
+
 
 #ifdef __cplusplus
 }

@@ -19,10 +19,16 @@ endif()
 
 project(ShapeDemoClient)
 
-if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PROFILE_READ_ACCESS OR NOT PROFILE_UDP_TRANSPORT OR NOT PROFILE_TCP_TRANSPORT OR NOT PROFILE_SERIAL_TRANSPORT)
-    message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, PROFILE_UDP_TRANSPORT, PROFILE_TCP_PROFILE and PROFILE_SERIAL_TRANSPORT must be enabled.")
+if(NOT PROFILE_CREATE_ENTITIES_REF OR
+   NOT PROFILE_CREATE_ENTITIES_XML OR
+   NOT PROFILE_READ_ACCESS OR
+   NOT PROFILE_WRITE_ACCESS OR
+   NOT PROFILE_UDP_TRANSPORT OR
+   NOT PROFILE_TCP_TRANSPORT OR
+   NOT PROFILE_SERIAL_TRANSPORT)
+    message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, PROFILE_WRITE_ACCESS, PROFILE_UDP_TRANSPORT, PROFILE_TCP_PROFILE and PROFILE_SERIAL_TRANSPORT must be enabled.")
 else()
-    add_executable(${PROJECT_NAME} main.c ShapeType.c ShapeTypeWriter.c)
+    add_executable(${PROJECT_NAME} main.c ShapeType.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
@@ -34,16 +40,16 @@ else()
 
     target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        micrortps_client
+        microxrcedds_client
         $<$<BOOL:${WIN32}>:ws2_32>
         )
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"

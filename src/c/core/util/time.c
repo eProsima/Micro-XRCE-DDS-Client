@@ -1,4 +1,4 @@
-#include <micrortps/client/core/util/time.h>
+#include <uxr/client/core/util/time.h>
 #include <time.h>
 
 #ifdef WIN32
@@ -8,7 +8,7 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-int64_t get_milli_time(void)
+int64_t uxr_millis(void)
 {
 #ifdef WIN32
     SYSTEMTIME epoch_tm = {1970, 1, 4, 1, 0, 0, 0, 0};
