@@ -43,7 +43,7 @@ public:
         uint16_t request_id; uint8_t status;
 
         uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
-        request_id = uxr_buffer_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant_profile", flags);
+        request_id = uxr_buffer_create_participant_xml(&session_, output_stream_id, participant_id, 0, participant_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
@@ -191,6 +191,7 @@ private:
     }
 
     static uint32_t next_client_key_;
+    static const char* participant_xml_;
     static const char* topic_xml_;
     static const char* publisher_xml_;
     static const char* subscriber_xml_;
