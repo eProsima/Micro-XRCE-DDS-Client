@@ -262,29 +262,32 @@ public:
     {
     }
 
-    void multicast()
-    {
-        ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, NULL, &choosen_));
-    }
-
     void unicast()
     {
         size_t agent_list_size = 0;
         uxrAgentAddress agent_list[MAX_AGENTS];
-        for(size_t i = 0; i < agent_addresses_.size(); i += 2)
+        for(size_t i = 0; i < agent_addresses_.size(); ++i)
         {
             strcpy(agent_list[agent_list_size].ip, agent_addresses_[i].first.c_str());
-            agent_list[agent_list_size].port = agent_addresses_[i].second;
+            agent_list[agent_list_size].port = 7400;
 
             ++agent_list_size;
         }
 
-        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, NULL, &choosen_, agent_list, agent_list_size));
+        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &choosen_, agent_list, agent_list_size));
+        ASSERT_TRUE(agent_addresses_.empty());
+    }
+
+    void multicast()
+    {
+        ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, this, &choosen_));
+        ASSERT_TRUE(agent_addresses_.empty());
     }
 
 private:
     static bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
     {
+        std::cout << address->ip << ":" << address->port << std::endl;
         static_cast<Discovery*>(args)->on_agent_found_member(address, timestamp);
 
         return false;
@@ -294,10 +297,10 @@ private:
     {
         (void) timestamp;
 
-        Client client(0.0f, 0);
-        client.init_udp("127.0.0.1", address->port);
+        Client client(0.0f, 1);
+        client.init_udp(address->ip, address->port);
 
-        std::pair<std::string, uint16_t> agent_address(address->ip, address->port);
+        std::pair<std::string, uint16_t> agent_address("127.0.0.1", address->port);
         std::vector<std::pair<std::string, uint16_t>>::iterator it =
             std::find(agent_addresses_.begin(), agent_addresses_.end(), agent_address);
 
