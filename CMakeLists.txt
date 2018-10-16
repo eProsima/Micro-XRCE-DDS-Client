@@ -143,7 +143,7 @@ set(SRCS
     src/c/core/serialization/xrce_protocol.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
-    src/c/core/util/time.c
+    src/c/util/time.c
     $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>

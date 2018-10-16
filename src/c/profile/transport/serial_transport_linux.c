@@ -1,5 +1,5 @@
 #include <uxr/client/profile/transport/serial_transport_linux.h>
-#include <uxr/client/core/util/time.h>
+#include <uxr/client/util/time.h>
 
 #include "../../core/communication/serial_protocol_internal.h"
 
