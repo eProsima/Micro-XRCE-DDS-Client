@@ -48,25 +48,25 @@ void update_crc(uint16_t* crc, const uint8_t data)
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-bool get_next_octet(uxrSerialInputBuffer* input, uint8_t* octet)
+bool get_next_octet(uxrSerialIO* serial_io, uint8_t* octet)
 {
     bool rv = false;
     *octet = 0;
-    if (input->rb_head != input->rb_tail)
+    if (serial_io->rb_head != serial_io->rb_tail)
     {
-        if (UXR_FRAMING_ESC_FLAG != input->rb[input->rb_tail])
+        if (UXR_FRAMING_ESC_FLAG != serial_io->rb[serial_io->rb_tail])
         {
-            *octet = input->rb[input->rb_tail];
-            input->rb_tail = (uint8_t)((size_t)(input->rb_tail + 1) % sizeof(input->rb));
+            *octet = serial_io->rb[serial_io->rb_tail];
+            serial_io->rb_tail = (uint8_t)((size_t)(serial_io->rb_tail + 1) % sizeof(serial_io->rb));
             rv = (UXR_FRAMING_BEGIN_FLAG != *octet);
         }
         else
         {
-            uint8_t temp_tail = (uint8_t)((size_t)(input->rb_tail + 1) % sizeof(input->rb));
-            if (temp_tail != input->rb_head)
+            uint8_t temp_tail = (uint8_t)((size_t)(serial_io->rb_tail + 1) % sizeof(serial_io->rb));
+            if (temp_tail != serial_io->rb_head)
             {
-                *octet = input->rb[temp_tail];
-                input->rb_tail = (uint8_t)((size_t)(input->rb_tail + 2) % sizeof(input->rb));
+                *octet = serial_io->rb[temp_tail];
+                serial_io->rb_tail = (uint8_t)((size_t)(serial_io->rb_tail + 2) % sizeof(serial_io->rb));
                 if (UXR_FRAMING_BEGIN_FLAG != *octet)
                 {
                     *octet ^= UXR_FRAMING_XOR_FLAG;
@@ -78,26 +78,26 @@ bool get_next_octet(uxrSerialInputBuffer* input, uint8_t* octet)
     return rv;
 }
 
-bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet)
+bool add_next_octet(uxrSerialIO* serial_io, uint8_t octet)
 {
     bool rv = false;
 
     if (UXR_FRAMING_BEGIN_FLAG == octet || UXR_FRAMING_ESC_FLAG == octet)
     {
-        if ((uint8_t)(output->wb_pos + 1) < sizeof(output->wb))
+        if ((uint8_t)(serial_io->wb_pos + 1) < sizeof(serial_io->wb))
         {
-            output->wb[output->wb_pos] = UXR_FRAMING_ESC_FLAG;
-            output->wb[output->wb_pos + 1] = octet ^ UXR_FRAMING_XOR_FLAG;
-            output->wb_pos = (uint8_t)(output->wb_pos + 2);
+            serial_io->wb[serial_io->wb_pos] = UXR_FRAMING_ESC_FLAG;
+            serial_io->wb[serial_io->wb_pos + 1] = octet ^ UXR_FRAMING_XOR_FLAG;
+            serial_io->wb_pos = (uint8_t)(serial_io->wb_pos + 2);
             rv = true;
         }
     }
     else
     {
-        if (output->wb_pos < sizeof(output->wb))
+        if (serial_io->wb_pos < sizeof(serial_io->wb))
         {
-            output->wb[output->wb_pos] = octet;
-            output->wb_pos = (uint8_t)(output->wb_pos + 1);
+            serial_io->wb[serial_io->wb_pos] = octet;
+            serial_io->wb_pos = (uint8_t)(serial_io->wb_pos + 1);
             rv = true;
         }
     }
@@ -105,36 +105,30 @@ bool add_next_octet(uxrSerialOutputBuffer* output, uint8_t octet)
     return rv;
 }
 
-void uxr_init_serial_io(uxrSerialIO* serial_io)
+void uxr_init_serial_io(uxrSerialIO* serial_io, uint8_t local_addr)
 {
-    serial_io->input.state = UXR_SERIAL_UNINITIALIZED;
-    serial_io->input.rb_head = 0;
-    serial_io->input.rb_tail = 0;
+    serial_io->local_addr = local_addr;
+    serial_io->state = UXR_SERIAL_UNINITIALIZED;
+    serial_io->rb_head = 0;
+    serial_io->rb_tail = 0;
 }
 
-size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
+size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
                             uxr_write_cb write_cb,
                             void* cb_arg,
                             const uint8_t* buf,
                             size_t len,
-                            uint8_t src_addr,
-                            uint8_t dst_addr)
+                            uint8_t remote_addr)
 {
-    /* Check output buffer size. */
-    if (UXR_SERIAL_MTU < len)
-    {
-        return 0;
-    }
-
     /* Buffer being flag. */
-    output->wb[0] = UXR_FRAMING_BEGIN_FLAG;
-    output->wb_pos = 1;
+    serial_io->wb[0] = UXR_FRAMING_BEGIN_FLAG;
+    serial_io->wb_pos = 1;
 
     /* Buffer header. */
-    add_next_octet(output, src_addr);
-    add_next_octet(output, dst_addr);
-    add_next_octet(output, (uint8_t)(len & 0xFF));
-    add_next_octet(output, (uint8_t)(len >> 8));
+    add_next_octet(serial_io, serial_io->local_addr);
+    add_next_octet(serial_io, remote_addr);
+    add_next_octet(serial_io, (uint8_t)(len & 0xFF));
+    add_next_octet(serial_io, (uint8_t)(len >> 8));
 
     /* Write payload. */
     uint8_t octet = 0;
@@ -144,18 +138,18 @@ size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     while (written_len < len && cond)
     {
         octet = *(buf + written_len);
-        if (add_next_octet(output, octet))
+        if (add_next_octet(serial_io, octet))
         {
             update_crc(&crc, octet);
             ++written_len;
         }
         else
         {
-            size_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos);
             if (0 < bytes_written)
             {
                 cond = true;
-                output->wb_pos = (uint8_t)(output->wb_pos - bytes_written);
+                serial_io->wb_pos = (uint8_t)(serial_io->wb_pos - bytes_written);
             }
             else
             {
@@ -172,18 +166,18 @@ size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     while (written_len < sizeof(tmp_crc) && cond)
     {
         octet = *(tmp_crc + written_len);
-        if (add_next_octet(output, octet))
+        if (add_next_octet(serial_io, octet))
         {
             update_crc(&crc, octet);
             ++written_len;
         }
         else
         {
-            size_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos);
             if (0 < bytes_written)
             {
                 cond = true;
-                output->wb_pos = (uint8_t)(output->wb_pos - bytes_written);
+                serial_io->wb_pos = (uint8_t)(serial_io->wb_pos - bytes_written);
             }
             else
             {
@@ -193,13 +187,13 @@ size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     }
 
     /* Flus write buffer. */
-    if (cond && (0 < output->wb_pos))
+    if (cond && (0 < serial_io->wb_pos))
     {
-            size_t bytes_written = write_cb(cb_arg, output->wb, output->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos);
             if (0 < bytes_written)
             {
                 cond = true;
-                output->wb_pos = (uint8_t)(output->wb_pos - bytes_written);
+                serial_io->wb_pos = (uint8_t)(serial_io->wb_pos - bytes_written);
             }
             else
             {
@@ -210,47 +204,53 @@ size_t uxr_write_serial_msg(uxrSerialOutputBuffer* output,
     return cond ? (uint16_t)(len) : 0;
 }
 
-size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, void* cb_arg, int timeout)
+size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
+                           uxr_read_cb read_cb,
+                           void* cb_arg,
+                           uint8_t* buf,
+                           size_t len,
+                           uint8_t* remote_addr,
+                           int timeout)
 {
     size_t rv = 0;
 
     /* Compute read-buffer available size. */
     uint8_t av_len[2] = {0, 0};
-    if (input->rb_head == input->rb_tail)
+    if (serial_io->rb_head == serial_io->rb_tail)
     {
-        input->rb_head = 0;
-        input->rb_tail = 0;
-        av_len[0] = sizeof(input->rb) - 1;
+        serial_io->rb_head = 0;
+        serial_io->rb_tail = 0;
+        av_len[0] = sizeof(serial_io->rb) - 1;
     }
-    else if (input->rb_head > input->rb_tail)
+    else if (serial_io->rb_head > serial_io->rb_tail)
     {
-        if (0 < input->rb_tail)
+        if (0 < serial_io->rb_tail)
         {
-            av_len[0] = (uint8_t)(sizeof(input->rb) - input->rb_head);
-            av_len[1] = (uint8_t)(input->rb_tail - 1);
+            av_len[0] = (uint8_t)(sizeof(serial_io->rb) - serial_io->rb_head);
+            av_len[1] = (uint8_t)(serial_io->rb_tail - 1);
         }
         else
         {
-            av_len[0] = (uint8_t)(sizeof(input->rb) - input->rb_head - 1);
+            av_len[0] = (uint8_t)(sizeof(serial_io->rb) - serial_io->rb_head - 1);
         }
     }
     else
     {
-        av_len[0] = (uint8_t)(input->rb_tail - input->rb_head - 1);
+        av_len[0] = (uint8_t)(serial_io->rb_tail - serial_io->rb_head - 1);
     }
 
     /* Read from serial. */
     size_t bytes_read[2] = {0};
     if (0 < av_len[0])
     {
-        bytes_read[0] = read_cb(cb_arg, &input->rb[input->rb_head], av_len[0], timeout);
-        input->rb_head = (uint8_t)((size_t)(input->rb_head + bytes_read[0]) % sizeof(input->rb));
+        bytes_read[0] = read_cb(cb_arg, &serial_io->rb[serial_io->rb_head], av_len[0], timeout);
+        serial_io->rb_head = (uint8_t)((size_t)(serial_io->rb_head + bytes_read[0]) % sizeof(serial_io->rb));
         if (0 < bytes_read[0])
         {
             if ((bytes_read[0] == av_len[0]) && (0 < av_len[1]))
             {
-                bytes_read[1] = read_cb(cb_arg, &input->rb[input->rb_head], av_len[1], 0);
-                input->rb_head = (uint8_t)((size_t)(input->rb_head + bytes_read[1]) % sizeof(input->rb));
+                bytes_read[1] = read_cb(cb_arg, &serial_io->rb[serial_io->rb_head], av_len[1], 0);
+                serial_io->rb_head = (uint8_t)((size_t)(serial_io->rb_head + bytes_read[1]) % sizeof(serial_io->rb));
             }
         }
     }
@@ -262,20 +262,20 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
         while (!exit_cond)
         {
             uint8_t octet = 0;
-            switch (input->state)
+            switch (serial_io->state)
             {
                 case UXR_SERIAL_UNINITIALIZED:
                 {
                     octet = 0;
-                    while ((UXR_FRAMING_BEGIN_FLAG != octet) && (input->rb_head != input->rb_tail))
+                    while ((UXR_FRAMING_BEGIN_FLAG != octet) && (serial_io->rb_head != serial_io->rb_tail))
                     {
-                        octet = input->rb[input->rb_tail];
-                        input->rb_tail = (uint8_t)((size_t)(input->rb_tail + 1) % sizeof(input->rb));
+                        octet = serial_io->rb[serial_io->rb_tail];
+                        serial_io->rb_tail = (uint8_t)((size_t)(serial_io->rb_tail + 1) % sizeof(serial_io->rb));
                     }
 
                     if (UXR_FRAMING_BEGIN_FLAG == octet)
                     {
-                        input->state = UXR_SERIAL_READING_SRC_ADDR;
+                        serial_io->state = UXR_SERIAL_READING_SRC_ADDR;
                     }
                     else
                     {
@@ -285,13 +285,13 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                 }
                 case UXR_SERIAL_READING_SRC_ADDR:
                 {
-                    if (get_next_octet(input, &input->src_addr))
+                    if (get_next_octet(serial_io, &serial_io->src_addr))
                     {
-                        input->state = UXR_SERIAL_READING_DST_ADDR;
+                        serial_io->state = UXR_SERIAL_READING_DST_ADDR;
                     }
                     else
                     {
-                        if (UXR_FRAMING_BEGIN_FLAG != input->src_addr)
+                        if (UXR_FRAMING_BEGIN_FLAG != serial_io->src_addr)
                         {
                             exit_cond = true;
                         }
@@ -299,15 +299,16 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                     break;
                 }
                 case UXR_SERIAL_READING_DST_ADDR:
-                    if (get_next_octet(input, &input->dst_addr))
+                    if (get_next_octet(serial_io, &octet))
                     {
-                        input->state = UXR_SERIAL_READING_LEN_LSB;
+                        serial_io->state = (octet == serial_io->local_addr) ? UXR_SERIAL_READING_LEN_LSB :
+                                                                              UXR_SERIAL_UNINITIALIZED;
                     }
                     else
                     {
-                        if (UXR_FRAMING_BEGIN_FLAG == input->dst_addr)
+                        if (UXR_FRAMING_BEGIN_FLAG == octet)
                         {
-                            input->state = UXR_SERIAL_READING_SRC_ADDR;
+                            serial_io->state = UXR_SERIAL_READING_SRC_ADDR;
                         }
                         else
                         {
@@ -316,16 +317,16 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                     }
                     break;
                 case UXR_SERIAL_READING_LEN_LSB:
-                    if (get_next_octet(input, &octet))
+                    if (get_next_octet(serial_io, &octet))
                     {
-                        input->msg_len = octet;
-                        input->state = UXR_SERIAL_READING_LEN_MSB;
+                        serial_io->msg_len = octet;
+                        serial_io->state = UXR_SERIAL_READING_LEN_MSB;
                     }
                     else
                     {
                         if (UXR_FRAMING_BEGIN_FLAG == octet)
                         {
-                            input->state = UXR_SERIAL_READING_SRC_ADDR;
+                            serial_io->state = UXR_SERIAL_READING_SRC_ADDR;
                         }
                         else
                         {
@@ -334,18 +335,26 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                     }
                     break;
                 case UXR_SERIAL_READING_LEN_MSB:
-                    if (get_next_octet(input, &octet))
+                    if (get_next_octet(serial_io, &octet))
                     {
-                        input->msg_len = (uint16_t)(input->msg_len + (octet << 8));
-                        input->msg_pos = 0;
-                        input->msg_crc = 0;
-                        input->state = UXR_SERIAL_READING_PAYLOAD;
+                        serial_io->msg_len = (uint16_t)(serial_io->msg_len + (octet << 8));
+                        serial_io->msg_pos = 0;
+                        serial_io->cmp_crc = 0;
+                        if (len < serial_io->msg_len)
+                        {
+                            serial_io->state = UXR_SERIAL_UNINITIALIZED;
+                            exit_cond = true;
+                        }
+                        else
+                        {
+                            serial_io->state = UXR_SERIAL_READING_PAYLOAD;
+                        }
                     }
                     else
                     {
                         if (UXR_FRAMING_BEGIN_FLAG == octet)
                         {
-                            input->state = UXR_SERIAL_READING_SRC_ADDR;
+                            serial_io->state = UXR_SERIAL_READING_SRC_ADDR;
                         }
                         else
                         {
@@ -355,22 +364,22 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                     break;
                 case UXR_SERIAL_READING_PAYLOAD:
                 {
-                    while ((input->msg_pos < input->msg_len) && get_next_octet(input, &octet))
+                    while ((serial_io->msg_pos < serial_io->msg_len) && get_next_octet(serial_io, &octet))
                     {
-                        input->buffer[(size_t)input->msg_pos] = octet;
-                        input->msg_pos = (uint16_t)(input->msg_pos + 1);
-                        update_crc(&input->msg_crc, octet);
+                        buf[(size_t)serial_io->msg_pos] = octet;
+                        serial_io->msg_pos = (uint16_t)(serial_io->msg_pos + 1);
+                        update_crc(&serial_io->cmp_crc, octet);
                     }
 
-                    if (input->msg_pos == input->msg_len)
+                    if (serial_io->msg_pos == serial_io->msg_len)
                     {
-                        input->state = UXR_SERIAL_READING_CRC_LSB;
+                        serial_io->state = UXR_SERIAL_READING_CRC_LSB;
                     }
                     else
                     {
                         if (UXR_FRAMING_BEGIN_FLAG == octet)
                         {
-                            input->state = UXR_SERIAL_READING_SRC_ADDR;
+                            serial_io->state = UXR_SERIAL_READING_SRC_ADDR;
                         }
                         else
                         {
@@ -380,16 +389,16 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                     break;
                 }
                 case UXR_SERIAL_READING_CRC_LSB:
-                    if (get_next_octet(input, &octet))
+                    if (get_next_octet(serial_io, &octet))
                     {
-                        input->crc = octet;
-                        input->state = UXR_SERIAL_READING_CRC_MSB;
+                        serial_io->msg_crc = octet;
+                        serial_io->state = UXR_SERIAL_READING_CRC_MSB;
                     }
                     else
                     {
                         if (UXR_FRAMING_BEGIN_FLAG == octet)
                         {
-                            input->state = UXR_SERIAL_READING_SRC_ADDR;
+                            serial_io->state = UXR_SERIAL_READING_SRC_ADDR;
                         }
                         else
                         {
@@ -398,13 +407,14 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                     }
                     break;
                 case UXR_SERIAL_READING_CRC_MSB:
-                    if (get_next_octet(input, &octet))
+                    if (get_next_octet(serial_io, &octet))
                     {
-                        input->crc = (uint16_t)(input->crc + (octet << 8));
-                        input->state = UXR_SERIAL_UNINITIALIZED;
-                        if (input->crc == input->msg_crc)
+                        serial_io->msg_crc = (uint16_t)(serial_io->msg_crc + (octet << 8));
+                        serial_io->state = UXR_SERIAL_UNINITIALIZED;
+                        if (serial_io->cmp_crc == serial_io->msg_crc)
                         {
-                            rv = input->msg_len;
+                            *remote_addr = serial_io->src_addr;
+                            rv = serial_io->msg_len;
                         }
                         exit_cond = true;
                     }
@@ -412,7 +422,7 @@ size_t uxr_read_serial_msg(uxrSerialInputBuffer* input, uxr_read_cb read_cb, voi
                     {
                         if (UXR_FRAMING_BEGIN_FLAG == octet)
                         {
-                            input->state = UXR_SERIAL_READING_SRC_ADDR;
+                            serial_io->state = UXR_SERIAL_READING_SRC_ADDR;
                         }
                         else
                         {

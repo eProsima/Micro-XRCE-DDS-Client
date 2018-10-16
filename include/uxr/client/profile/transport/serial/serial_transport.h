@@ -22,15 +22,16 @@ extern "C"
 
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/core/communication/serial_protocol.h>
+#include <uxr/client/config.h>
 #include <uxr/client/dll.h>
 
 struct uxrSerialPlatform;
 
 typedef struct uxrSerialTransport
 {
+    uint8_t buffer[UXR_CONFIG_SERIAL_TRANSPORT_MTU];
     uxrSerialIO serial_io;
     uint8_t remote_addr;
-    uint8_t local_addr;
     uxrCommunication comm;
     struct uxrSerialPlatform* platform;
 
