@@ -9,33 +9,22 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <thread>
 
 #define MAX_AGENTS 10
 
 class Client
 {
 public:
-    Client(uint16_t port, float lost, uint16_t history)
+    Client(float lost, uint16_t history)
     : gateway_(lost)
-    , port_(port)
     , client_key_(++next_client_key_)
     , history_(history)
     {
-        output_best_effort_stream_buffer_ = new uint8_t[UXR_CONFIG_UDP_TRANSPORT_MTU * UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS]{0};
-        output_reliable_stream_buffer_ = new uint8_t[UXR_CONFIG_UDP_TRANSPORT_MTU * history_ * UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS]{0};
-        input_reliable_stream_buffer_ = new uint8_t[UXR_CONFIG_UDP_TRANSPORT_MTU * history_ * UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS]{0};
-
-        init();
     }
 
     virtual ~Client()
-    {
-        close();
-
-        delete[] output_best_effort_stream_buffer_;
-        delete[] output_reliable_stream_buffer_;
-        delete[] input_reliable_stream_buffer_;
-    }
+    {}
 
     void create_entities(uint8_t id, uint8_t stream_id_raw, uint8_t expected_status, uint8_t flags)
     {
@@ -100,6 +89,7 @@ public:
             bool sent = uxr_run_session_until_confirm_delivery(&session_, 60000);
             ASSERT_TRUE(sent);
             std::cout << "topic sent: " << i << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -129,44 +119,23 @@ public:
         }
     }
 
-private:
-    static void on_topic_dispatcher(uxrSession* session_, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args)
+    /**********************************************************************************************
+     * UDP transport.
+     **********************************************************************************************/
+    void init_udp(const char* ip, uint16_t port)
     {
-        static_cast<Client*>(args)->on_topic(session_, object_id, request_id, stream_id, serialization);
+        mtu_ = UXR_CONFIG_UDP_TRANSPORT_MTU;
+
+        /* init transport. */
+        ASSERT_TRUE(uxr_init_udp_transport(&udp_transport_, ip, port));
+
+        /* init session. */
+        uxr_init_session(&session_, gateway_.monitorize(&udp_transport_.comm), client_key_);
+
+        init_common();
     }
 
-    void init()
-    {
-        ASSERT_TRUE(uxr_init_udp_transport(&transport_, "127.0.0.1", port_));
-
-        uxr_init_session(&session_, gateway_.monitorize(&transport_.comm), client_key_);
-        uxr_set_topic_callback(&session_, on_topic_dispatcher, this);
-
-        ASSERT_TRUE(uxr_create_session(&session_));
-        ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
-
-        for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
-        {
-            uint8_t* buffer = output_best_effort_stream_buffer_ + UXR_CONFIG_UDP_TRANSPORT_MTU * i;
-            (void) uxr_create_output_best_effort_stream(&session_, buffer, transport_.comm.mtu);
-        }
-        for(int i = 0; i < UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
-        {
-            (void) uxr_create_input_best_effort_stream(&session_);
-        }
-        for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
-        {
-            uint8_t* buffer = output_reliable_stream_buffer_ + UXR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
-            (void) uxr_create_output_reliable_stream(&session_, buffer , static_cast<size_t>(transport_.comm.mtu * history_), history_);
-        }
-        for(int i = 0; i < UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
-        {
-            uint8_t* buffer = input_reliable_stream_buffer_ + UXR_CONFIG_UDP_TRANSPORT_MTU * history_ * i;
-            (void) uxr_create_input_reliable_stream(&session_, buffer, static_cast<size_t>(transport_.comm.mtu * history_), history_);
-        }
-    }
-
-    void close()
+    void close_udp()
     {
         bool deleted = uxr_delete_session(&session_);
         if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
@@ -174,9 +143,75 @@ private:
             ASSERT_TRUE(deleted);
             ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
         }
-        ASSERT_TRUE(uxr_close_udp_transport(&transport_));
+        ASSERT_TRUE(uxr_close_udp_transport(&udp_transport_));
     }
 
+    /**********************************************************************************************
+     * TCP transport.
+     **********************************************************************************************/
+    void init_tcp(const char* ip, uint16_t port)
+    {
+        mtu_ = UXR_CONFIG_TCP_TRANSPORT_MTU;
+
+        /* init transport. */
+        ASSERT_TRUE(uxr_init_tcp_transport(&tcp_transport_, ip, port));
+
+        /* init session. */
+        uxr_init_session(&session_, gateway_.monitorize(&tcp_transport_.comm), client_key_);
+
+        init_common();
+    }
+
+    void close_tcp()
+    {
+        bool deleted = uxr_delete_session(&session_);
+        if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
+        {
+            ASSERT_TRUE(deleted);
+            ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
+        }
+        ASSERT_TRUE(uxr_close_tcp_transport(&tcp_transport_));
+    }
+
+private:
+    void init_common()
+    {
+        /* Setup callback. */
+        uxr_set_topic_callback(&session_, on_topic_dispatcher, this);
+
+        /* Create session. */
+        ASSERT_TRUE(uxr_create_session(&session_));
+        ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
+
+        /* Setup streams. */
+        output_best_effort_stream_buffer_.reset(new uint8_t[mtu_ * UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS]{0});
+        output_reliable_stream_buffer_.reset(new uint8_t[mtu_ * history_ * UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS]{0});
+        input_reliable_stream_buffer_.reset(new uint8_t[mtu_ * history_ * UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS]{0});
+        for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
+        {
+            uint8_t* buffer = output_best_effort_stream_buffer_.get() + mtu_ * i;
+            (void) uxr_create_output_best_effort_stream(&session_, buffer, size_t(mtu_));
+        }
+        for(int i = 0; i < UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
+        {
+            (void) uxr_create_input_best_effort_stream(&session_);
+        }
+        for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
+        {
+            uint8_t* buffer = output_reliable_stream_buffer_.get() + mtu_ * history_ * i;
+            (void) uxr_create_output_reliable_stream(&session_, buffer , static_cast<size_t>(mtu_ * history_), history_);
+        }
+        for(int i = 0; i < UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
+        {
+            uint8_t* buffer = input_reliable_stream_buffer_.get() + mtu_ * history_ * i;
+            (void) uxr_create_input_reliable_stream(&session_, buffer, static_cast<size_t>(mtu_ * history_), history_);
+        }
+    }
+
+    static void on_topic_dispatcher(uxrSession* session_, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args)
+    {
+        static_cast<Client*>(args)->on_topic(session_, object_id, request_id, stream_id, serialization);
+    }
 
     void on_topic(uxrSession* /*session_*/, uxrObjectId object_id, uint16_t /*request_id*/, uxrStreamId stream_id, struct ucdrBuffer* serialization)
     {
@@ -199,17 +234,19 @@ private:
     static const char* datareader_xml_;
 
     Gateway gateway_;
-    uint16_t port_;
 
     uint32_t client_key_;
     uint16_t history_;
 
-    uxrUDPTransport transport_;
+    uxrUDPTransport udp_transport_;
+    uxrTCPTransport tcp_transport_;
+    uxrSerialTransport serial_transport_;
+    int mtu_;
     uxrSession session_;
 
-    uint8_t* output_best_effort_stream_buffer_;
-    uint8_t* output_reliable_stream_buffer_;
-    uint8_t* input_reliable_stream_buffer_;
+    std::unique_ptr<uint8_t> output_best_effort_stream_buffer_;
+    std::unique_ptr<uint8_t> output_reliable_stream_buffer_;
+    std::unique_ptr<uint8_t> input_reliable_stream_buffer_;
 
     uxrObjectId last_topic_object_id_;
     uxrStreamId last_topic_stream_id_;
@@ -257,7 +294,8 @@ private:
     {
         (void) timestamp;
 
-        Client client(address->port, 0.0f, 0);
+        Client client(0.0f, 0);
+        client.init_udp("127.0.0.1", address->port);
 
         std::pair<std::string, uint16_t> agent_address(address->ip, address->port);
         std::vector<std::pair<std::string, uint16_t>>::iterator it =
@@ -267,6 +305,7 @@ private:
         ASSERT_TRUE(found);
 
         agent_addresses_.erase(it);
+        client.close_udp();
     }
 
     std::vector<std::pair<std::string, uint16_t>> agent_addresses_;
