@@ -34,7 +34,7 @@ bool ShapeType_serialize_topic(ucdrBuffer* writer, const ShapeType* topic)
 
     (void) ucdr_serialize_int32_t(writer, topic->shapesize);
 
-    return writer->error;
+    return !writer->error;
 }
 
 bool ShapeType_deserialize_topic(ucdrBuffer* reader, ShapeType* topic)
@@ -47,7 +47,7 @@ bool ShapeType_deserialize_topic(ucdrBuffer* reader, ShapeType* topic)
 
     (void) ucdr_deserialize_int32_t(reader, &topic->shapesize);
 
-    return reader->error;
+    return !reader->error;
 }
 
 uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size)

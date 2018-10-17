@@ -30,7 +30,7 @@ bool HelloWorld_serialize_topic(ucdrBuffer* writer, const HelloWorld* topic)
 
     (void) ucdr_serialize_string(writer, topic->message);
 
-    return writer->error;
+    return !writer->error;
 }
 
 bool HelloWorld_deserialize_topic(ucdrBuffer* reader, HelloWorld* topic)
@@ -39,7 +39,7 @@ bool HelloWorld_deserialize_topic(ucdrBuffer* reader, HelloWorld* topic)
 
     (void) ucdr_deserialize_string(reader, topic->message, 255);
 
-    return reader->error;
+    return !reader->error;
 }
 
 uint32_t HelloWorld_size_of_topic(const HelloWorld* topic, uint32_t size)
