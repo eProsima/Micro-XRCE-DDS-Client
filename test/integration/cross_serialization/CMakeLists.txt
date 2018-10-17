@@ -26,7 +26,7 @@ if(MSVC OR MSVC_IDE)
 endif()
 
 get_target_property(CLIENT_INCLUDES microxrcedds_client INCLUDE_DIRECTORIES)
-include_directories("${CLIENT_INCLUDES}") #Used to include internal headers
+include_directories("${CLIENT_INCLUDES}") #Used to include private includes
 target_link_libraries(${PROJECT_NAME} microxrcedds_client)
 target_include_directories(${PROJECT_NAME}
     PUBLIC

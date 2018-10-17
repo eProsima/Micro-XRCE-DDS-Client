@@ -12,7 +12,7 @@ void uxr_init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8
     stream->offset = offset;
     stream->size = size;
 
-    reset_output_best_effort_stream(stream);
+    uxr_reset_output_best_effort_stream(stream);
 }
 
 void uxr_reset_output_best_effort_stream(uxrOutputBestEffortStream* stream)

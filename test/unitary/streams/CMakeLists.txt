@@ -28,8 +28,9 @@ endif()
 
 set(SRCS
     OutputBestEffortStream.cpp
-    #OutputReliableStream.cpp
     InputBestEffortStream.cpp
+    #OutputReliableStream.cpp
+    #InputReliableStream.cpp
     )
 add_executable(${PROJECT_NAME} ${SRCS})
 set_common_compile_options(${PROJECT_NAME})
@@ -43,6 +44,9 @@ add_gtest(${PROJECT_NAME}
     DEPENDENCIES
         microxrcedds_client
     )
+
+get_target_property(CLIENT_INCLUDES microxrcedds_client INCLUDE_DIRECTORIES)
+include_directories("${CLIENT_INCLUDES}") #Used to include private includes
 target_link_libraries(${PROJECT_NAME} microxrcedds_client ${GTEST_BOTH_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC

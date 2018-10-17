@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+#include <core/session/stream/output_best_effort_stream_internal.h>
+#include <core/session/stream/seq_num_internal.h>
+#include <ucdr/microcdr.h>
 
 #define STREAM_BUFFER_SIZE 512
 #define OFFSET 4
@@ -9,16 +12,16 @@ public:
     OutputBestEffortStreamTest()
     : submessage(STREAM_BUFFER_SIZE / 8, 'A')
     {
-//        init_output_best_effort_stream(&stream, buffer, STREAM_BUFFER_SIZE, OFFSET);
+        uxr_init_output_best_effort_stream(&stream, buffer, STREAM_BUFFER_SIZE, OFFSET);
     }
 
     void write_submessage(bool expected)
     {
         size_t previous_writer = stream.writer;
 
-        mcBuffer mb;
-        bool available_to_write = prepare_best_effort_buffer_to_write(&stream, submessage.size(), &mb);
-        bool serialized = mc_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
+        ucdrBuffer mb;
+        bool available_to_write = uxr_prepare_best_effort_buffer_to_write(&stream, submessage.size(), &mb);
+        bool serialized = ucdr_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
 
         if(expected)
         {
@@ -40,13 +43,13 @@ public:
 
     void send_message()
     {
-        mrSeqNum previous_seq_num = stream.last_send;
+        uxrSeqNum previous_seq_num = stream.last_send;
         size_t previous_writer = stream.writer;
 
-        uint8_t* output_buffer; size_t length; mrSeqNum seq_num;
-        bool available_to_send = prepare_best_effort_buffer_to_send(&stream, &output_buffer, &length, &seq_num);
+        uint8_t* output_buffer; size_t length; uxrSeqNum seq_num;
+        bool available_to_send = uxr_prepare_best_effort_buffer_to_send(&stream, &output_buffer, &length, &seq_num);
 
-        ASSERT_EQ(previous_seq_num, seq_num_sub(seq_num, 1));
+        ASSERT_EQ(previous_seq_num, uxr_seq_num_sub(seq_num, 1));
         ASSERT_EQ(previous_writer, length);
         ASSERT_EQ(stream.writer, stream.offset);
         ASSERT_TRUE(available_to_send);
@@ -67,7 +70,7 @@ public:
 
     void reset()
     {
-        reset_output_best_effort_stream(&stream);
+        uxr_reset_output_best_effort_stream(&stream);
         ASSERT_EQ(stream.writer, OFFSET);
         ASSERT_EQ(stream.last_send, UINT16_MAX);
     }
@@ -79,7 +82,7 @@ public:
 protected:
     const std::string submessage;
     uint8_t buffer[STREAM_BUFFER_SIZE];
-//    uxrOutputBestEffortStream stream;
+    uxrOutputBestEffortStream stream;
 };
 
 TEST_F(OutputBestEffortStreamTest, WriteOneSubmessage)
