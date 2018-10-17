@@ -253,14 +253,14 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
         uxrObjectId publisher_id = uxr_object_id((uint16_t)arg1, UXR_PUBLISHER_ID);
         uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* publisher_xml = "";
-        (void) uxr_buffer_configure_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
+        (void) uxr_buffer_create_publisher_xml(session, *stream_id, publisher_id, participant_id, publisher_xml, 0);
     }
     else if(0 == strcmp(name, "create_subscriber") && 3 == length)
     {
         uxrObjectId subscriber_id = uxr_object_id((uint16_t)arg1, UXR_SUBSCRIBER_ID);
         uxrObjectId participant_id = uxr_object_id((uint16_t)arg2, UXR_PARTICIPANT_ID);
         const char* subscriber_xml = "";
-        (void) uxr_buffer_configure_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
+        (void) uxr_buffer_create_subscriber_xml(session, *stream_id, subscriber_id, participant_id, subscriber_xml, 0);
     }
     else if(0 == strcmp(name, "create_datawriter") && 3 == length)
     {
