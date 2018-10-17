@@ -134,15 +134,15 @@ void create_publisher(uxrSession* session, uint16_t id)
 
     uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = uxr_buffer_configure_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
+    uint16_t topic_req = uxr_buffer_create_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
     uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
     const char* publisher_xml = "<publisher name=\"MyPublisher\">";
-    uint16_t publisher_req = uxr_buffer_configure_publisher_xml(session, output, publisher_id, participant_id, publisher_xml, 0);
+    uint16_t publisher_req = uxr_buffer_create_publisher_xml(session, output, publisher_id, participant_id, publisher_xml, 0);
 
     uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-    uint16_t datawriter_req = uxr_buffer_configure_datawriter_xml(session, output, datawriter_id, publisher_id, datawriter_xml, 0);
+    uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(session, output, datawriter_id, publisher_id, datawriter_xml, 0);
 
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
     wait_status(session, requests);
@@ -158,15 +158,15 @@ void create_subscriber(uxrSession* session, uint16_t id)
 
     uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
     const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
-    uint16_t topic_req = uxr_buffer_configure_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
+    uint16_t topic_req = uxr_buffer_create_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
     uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
     const char* subscriber_xml = "<subscriber name=\"MySubscriber\">";
-    uint16_t subscriber_req = uxr_buffer_configure_subscriber_xml(session, output, subscriber_id, participant_id, subscriber_xml, 0);
+    uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(session, output, subscriber_id, participant_id, subscriber_xml, 0);
 
     uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
     const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
-    uint16_t datareader_req = uxr_buffer_configure_datareader_xml(session, output, datareader_id, subscriber_id, datareader_xml, 0);
+    uint16_t datareader_req = uxr_buffer_create_datareader_xml(session, output, datareader_id, subscriber_id, datareader_xml, 0);
 
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
     wait_status(session, requests);

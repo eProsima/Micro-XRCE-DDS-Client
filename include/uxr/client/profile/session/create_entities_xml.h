@@ -22,22 +22,22 @@ extern "C"
 
 #include <uxr/client/profile/session/common_create_entities.h>
 
-UXRDLLAPI uint16_t uxr_buffer_configure_participant_xml(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_participant_xml(uxrSession* session, uxrStreamId stream_id,
                                          uxrObjectId object_id, uint16_t domain, const char* xml, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_configure_topic_xml(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_topic_xml(uxrSession* session, uxrStreamId stream_id,
                                    uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_configure_publisher_xml(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_publisher_xml(uxrSession* session, uxrStreamId stream_id,
                                        uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_configure_subscriber_xml(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_subscriber_xml(uxrSession* session, uxrStreamId stream_id,
                                         uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_configure_datawriter_xml(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_datawriter_xml(uxrSession* session, uxrStreamId stream_id,
                                         uxrObjectId object_id, uxrObjectId publisher_id, const char* xml, uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_configure_datareader_xml(uxrSession* session, uxrStreamId stream_id,
+UXRDLLAPI uint16_t uxr_buffer_create_datareader_xml(uxrSession* session, uxrStreamId stream_id,
                                         uxrObjectId object_id, uxrObjectId subscriber_id, const char* xml, uint8_t mode);
 
 #ifdef __cplusplus
