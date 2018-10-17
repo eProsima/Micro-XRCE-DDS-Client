@@ -14,6 +14,7 @@
 
 #include <uxr/client/core/session/session_info.h>
 #include <uxr/client/util/time.h>
+#include <uxr/client/config.h>
 
 #include "../serialization/xrce_header_internal.h"
 #include "../serialization/xrce_protocol_internal.h"
@@ -41,8 +42,29 @@
 #define SEND_ARROW       "=>> "
 #define RECV_ARROW       "<<= "
 
+/* Compute output buffer size. */
+#if !defined(UXR_CONFIG_SERIAL_TRANSPORT_MTU)
+#define UXR_CONFIG_SERIAL_TRANSPORT_MTU 0
+#endif
+#if !defined(UXR_CONFIG_UDP_TRANSPORT_MTU)
+#define UXR_CONFIG_UDP_TRANSPORT_MTU 0
+#endif
+#if !defined(UXR_CONFIG_TCP_TRANSPORT_MTU)
+#define UXR_CONFIG_TCP_TRANSPORT_MTU 0
+#endif
 
-#define DATA_TO_STRING_BUFFER     4096
+#if UXR_CONFIG_UDP_TRANSPORT_MTU > UXR_CONFIG_TCP_TRANSPORT_MTU
+#define MAX_UDP_TCP_MTU UXR_CONFIG_UDP_TRANSPORT_MTU
+#else
+#define MAX_UDP_TCP_MTU UXR_CONFIG_TCP_TRANSPORT_MTU
+#endif
+#if UXR_CONFIG_SERIAL_TRANSPORT_MTU > MAX_UDP_TCP_MTU
+#define MAX_MTU_CONFIG UXR_CONFIG_SERIAL_TRANSPORT_MTU
+#else
+#define MAX_MTU_CONFIG MAX_UDP_TCP_MTU
+#endif
+
+#define DATA_TO_STRING_BUFFER     MAX_MTU_CONFIG * 3 + 100
 
 static char* print_array_2(const uint8_t* array_2);
 static const char* data_to_string(const uint8_t* data, uint32_t size);
@@ -232,7 +254,7 @@ char* print_array_2(const uint8_t* array_2)
 
 const char* data_to_string(const uint8_t* data, uint32_t size)
 {
-    static char buffer[4096];
+    static char buffer[DATA_TO_STRING_BUFFER];
     for(uint32_t i = 0; i < size; i++)
         sprintf(buffer + 3 * i, "%02X ", data[i]);
     buffer[3 * size] = '\0';
@@ -325,7 +347,7 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
 
     }
 
-    char content[4096];
+    char content[DATA_TO_STRING_BUFFER];
     switch(payload->object_representation.kind)
     {
         case OBJK_PARTICIPANT:
