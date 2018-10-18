@@ -134,7 +134,6 @@ public:
             bool sent = uxr_run_session_until_confirm_delivery(&session_, 60000);
             ASSERT_TRUE(sent);
             std::cout << "topic sent: " << i << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -200,6 +199,7 @@ public:
                 break;
             case TCP_TRANSPORT:
                 ASSERT_TRUE(uxr_close_tcp_transport(&tcp_transport_));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100)); //waiting the socket to close
                 break;
         }
 
@@ -289,39 +289,35 @@ private:
 class Discovery
 {
 public:
-    Discovery(const std::vector<std::pair<std::string, uint16_t>>& agent_addresses)
-    : agent_addresses_(agent_addresses)
+    Discovery(int transport, std::vector<uint16_t>& agent_ports)
+    : agent_ports_(agent_ports)
+    , transport_(transport)
     {
     }
 
-    void unicast()
+    void unicast(uint16_t base_port)
     {
-        size_t agent_list_size = 0;
         uxrAgentAddress agent_list[MAX_AGENTS_DISCOVERY];
-        for(size_t i = 0; i < agent_addresses_.size(); ++i)
+        for(size_t i = 0; i < agent_ports_.size(); ++i)
         {
-            strcpy(agent_list[agent_list_size].ip, agent_addresses_[i].first.c_str());
-            agent_list[agent_list_size].port = 7400;
-
-            ++agent_list_size;
+            strcpy(agent_list[i].ip, "127.0.0.1");
+            agent_list[i].port = uint16_t(base_port + i);
         }
 
-        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &choosen_, agent_list, agent_list_size));
-        ASSERT_TRUE(agent_addresses_.empty());
+        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &choosen_, agent_list, agent_ports_.size()));
+        ASSERT_TRUE(agent_ports_.empty());
     }
 
     void multicast()
     {
         ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, this, &choosen_));
-        ASSERT_TRUE(agent_addresses_.empty());
+        ASSERT_TRUE(agent_ports_.empty());
     }
 
 private:
     static bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
     {
-        std::cout << address->ip << ":" << address->port << std::endl;
         static_cast<Discovery*>(args)->on_agent_found_member(address, timestamp);
-
         return false;
     }
 
@@ -329,22 +325,27 @@ private:
     {
         (void) timestamp;
 
+        std::cout << "Agent found on port: " << address->port << std::endl;
+
         Client client(0.0f, 1);
-        client.init_transport(UDP_TRANSPORT, address->ip, address->port);
+        client.init_transport(transport_, address->ip, address->port);
 
-        std::pair<std::string, uint16_t> agent_address("127.0.0.1", address->port);
-        std::vector<std::pair<std::string, uint16_t>>::iterator it =
-            std::find(agent_addresses_.begin(), agent_addresses_.end(), agent_address);
+        std::vector<uint16_t>::iterator it = std::find(agent_ports_.begin(), agent_ports_.end(), address->port);
 
-        bool found = it != agent_addresses_.end();
-        ASSERT_TRUE(found);
+        bool found = it != agent_ports_.end();
+        if(found)
+        {
+            agent_ports_.erase(it);
+        }
 
-        agent_addresses_.erase(it);
-        client.close_transport(UDP_TRANSPORT);
+        //ASSERT_TRUE(found); //in multicast, it is possible to read agents out of the tests that will not be found.
+
+        client.close_transport(transport_);
     }
 
-    std::vector<std::pair<std::string, uint16_t>> agent_addresses_;
+    std::vector<uint16_t> agent_ports_;
     uxrAgentAddress choosen_;
+    int transport_;
 };
 
 #endif //IN_TEST_CLIENT_INTERACTION_HPP
