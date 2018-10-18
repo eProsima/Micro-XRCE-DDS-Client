@@ -11,7 +11,10 @@
 #include <iostream>
 #include <thread>
 
-#define MAX_AGENTS 10
+#define MAX_AGENTS_DISCOVERY 10
+
+#define UDP_TRANSPORT 1
+#define TCP_TRANSPORT 2
 
 class Client
 {
@@ -161,58 +164,45 @@ public:
         }
     }
 
-    /**********************************************************************************************
-     * UDP transport.
-     **********************************************************************************************/
-    void init_udp(const char* ip, uint16_t port)
+    void init_transport(int transport, const char* ip, uint16_t port)
     {
-        mtu_ = UXR_CONFIG_UDP_TRANSPORT_MTU;
-
-        /* init transport. */
-        ASSERT_TRUE(uxr_init_udp_transport(&udp_transport_, ip, port));
-
-        /* init session. */
-        uxr_init_session(&session_, gateway_.monitorize(&udp_transport_.comm), client_key_);
+        switch(transport)
+        {
+            case UDP_TRANSPORT:
+                mtu_ = UXR_CONFIG_UDP_TRANSPORT_MTU;
+                ASSERT_TRUE(uxr_init_udp_transport(&udp_transport_, ip, port));
+                uxr_init_session(&session_, gateway_.monitorize(&udp_transport_.comm), client_key_);
+                break;
+            case TCP_TRANSPORT:
+                mtu_ = UXR_CONFIG_TCP_TRANSPORT_MTU;
+                ASSERT_TRUE(uxr_init_tcp_transport(&tcp_transport_, ip, port));
+                uxr_init_session(&session_, gateway_.monitorize(&tcp_transport_.comm), client_key_);
+                break;
+        }
 
         init_common();
     }
 
-    void close_udp()
+    void close_transport(int transport)
     {
         bool deleted = uxr_delete_session(&session_);
+
         if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
         {
             ASSERT_TRUE(deleted);
             ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
         }
-        ASSERT_TRUE(uxr_close_udp_transport(&udp_transport_));
-    }
 
-    /**********************************************************************************************
-     * TCP transport.
-     **********************************************************************************************/
-    void init_tcp(const char* ip, uint16_t port)
-    {
-        mtu_ = UXR_CONFIG_TCP_TRANSPORT_MTU;
-
-        /* init transport. */
-        ASSERT_TRUE(uxr_init_tcp_transport(&tcp_transport_, ip, port));
-
-        /* init session. */
-        uxr_init_session(&session_, gateway_.monitorize(&tcp_transport_.comm), client_key_);
-
-        init_common();
-    }
-
-    void close_tcp()
-    {
-        bool deleted = uxr_delete_session(&session_);
-        if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
+        switch(transport)
         {
-            ASSERT_TRUE(deleted);
-            ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
+            case UDP_TRANSPORT:
+                ASSERT_TRUE(uxr_close_udp_transport(&udp_transport_));
+                break;
+            case TCP_TRANSPORT:
+                ASSERT_TRUE(uxr_close_tcp_transport(&tcp_transport_));
+                break;
         }
-        ASSERT_TRUE(uxr_close_tcp_transport(&tcp_transport_));
+
     }
 
 private:
@@ -307,7 +297,7 @@ public:
     void unicast()
     {
         size_t agent_list_size = 0;
-        uxrAgentAddress agent_list[MAX_AGENTS];
+        uxrAgentAddress agent_list[MAX_AGENTS_DISCOVERY];
         for(size_t i = 0; i < agent_addresses_.size(); ++i)
         {
             strcpy(agent_list[agent_list_size].ip, agent_addresses_[i].first.c_str());
@@ -340,7 +330,7 @@ private:
         (void) timestamp;
 
         Client client(0.0f, 1);
-        client.init_udp(address->ip, address->port);
+        client.init_transport(UDP_TRANSPORT, address->ip, address->port);
 
         std::pair<std::string, uint16_t> agent_address("127.0.0.1", address->port);
         std::vector<std::pair<std::string, uint16_t>>::iterator it =
@@ -350,7 +340,7 @@ private:
         ASSERT_TRUE(found);
 
         agent_addresses_.erase(it);
-        client.close_udp();
+        client.close_transport(UDP_TRANSPORT);
     }
 
     std::vector<std::pair<std::string, uint16_t>> agent_addresses_;
