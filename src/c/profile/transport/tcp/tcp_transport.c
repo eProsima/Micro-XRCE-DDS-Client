@@ -1,5 +1,5 @@
 #include <uxr/client/profile/transport/tcp/tcp_transport.h>
-#include <uxr/client/core/util/time.h>
+#include <uxr/client/util/time.h>
 
 /*******************************************************************************
  * Static members.

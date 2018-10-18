@@ -139,8 +139,8 @@ endforeach()
 if(PROFILE_DISCOVERY)
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
-    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_windows_datagram.c)
+#    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+#        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_windows_datagram.c)
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
         if(${PLATFORM_NAME} STREQUAL "nuttx")
             set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
@@ -172,7 +172,7 @@ set(SRCS
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
     $<$<BOOL:${PROFILE_WRITE_ACCESS}>:src/c/profile/session/write_access.c>
-    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
+    $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${PROFILE_DISCOVERY}>>:src/c/profile/discovery/discovery.c>
     ${UDP_DISCOVERY_SRCS}
     ${UDP_SRCS}
     ${TCP_SRCS}
@@ -253,7 +253,9 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
-    add_subdirectory(examples/Discovery)
+    if(NOT ${SYSTEM_CMAKE_NAME} STREQUAL "Windows")
+        add_subdirectory(examples/Discovery)
+    endif()
 endif()
 
 ###############################################################################

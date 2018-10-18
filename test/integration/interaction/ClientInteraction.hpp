@@ -169,12 +169,12 @@ public:
         {
             case UDP_TRANSPORT:
                 mtu_ = UXR_CONFIG_UDP_TRANSPORT_MTU;
-                ASSERT_TRUE(uxr_init_udp_transport(&udp_transport_, ip, port));
+                ASSERT_TRUE(uxr_init_udp_transport(&udp_transport_, &udp_platform_, ip, port));
                 uxr_init_session(&session_, gateway_.monitorize(&udp_transport_.comm), client_key_);
                 break;
             case TCP_TRANSPORT:
                 mtu_ = UXR_CONFIG_TCP_TRANSPORT_MTU;
-                ASSERT_TRUE(uxr_init_tcp_transport(&tcp_transport_, ip, port));
+                ASSERT_TRUE(uxr_init_tcp_transport(&tcp_transport_, &tcp_platform_, ip, port));
                 uxr_init_session(&session_, gateway_.monitorize(&tcp_transport_.comm), client_key_);
                 break;
         }
@@ -270,8 +270,11 @@ private:
     uint16_t history_;
 
     uxrUDPTransport udp_transport_;
+    uxrUDPPlatform udp_platform_;
     uxrTCPTransport tcp_transport_;
+    uxrTCPPlatform tcp_platform_;
     uxrSerialTransport serial_transport_;
+    uxrSerialPlatform serial_platform_;
     int mtu_;
     uxrSession session_;
 

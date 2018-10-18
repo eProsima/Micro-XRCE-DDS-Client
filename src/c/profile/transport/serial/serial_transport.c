@@ -1,6 +1,6 @@
 #include <uxr/client/profile/transport/serial/serial_transport.h>
 #include <uxr/client/core/communication/serial_protocol.h>
-#include <uxr/client/core/util/time.h>
+#include <uxr/client/util/time.h>
 
 /*******************************************************************************
  * Static members.

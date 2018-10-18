@@ -18,32 +18,35 @@
 #include <uxr/client/config.h>
 
 #ifdef PROFILE_UDP_TRANSPORT
+#include <uxr/client/profile/transport/udp/udp_transport.h>
 #if defined(PLATFORM_NAME_LINUX)
-#include <uxr/client/profile/transport/udp_transport_linux.h>
+#include <uxr/client/profile/transport/udp/udp_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <uxr/client/profile/transport/udp_transport_windows.h>
+#include <uxr/client/profile/transport/udp/udp_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
-#include <uxr/client/profile/transport/udp_transport_linux.h>
+#include <uxr/client/profile/transport/udp/udp_transport_linux.h>
 #endif
 #endif //PROFILE_UDP_TRANSPORT
 
 #ifdef PROFILE_TCP_TRANSPORT
+#include <uxr/client/profile/transport/tcp/tcp_transport.h>
 #if defined(PLATFORM_NAME_LINUX)
-#include <uxr/client/profile/transport/tcp_transport_linux.h>
+#include <uxr/client/profile/transport/tcp/tcp_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <uxr/client/profile/transport/tcp_transport_windows.h>
+#include <uxr/client/profile/transport/tcp/tcp_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
-#include <uxr/client/profile/transport/tcp_transport_linux.h>
+#include <uxr/client/profile/transport/tcp/tcp_transport_linux.h>
 #endif
 #endif //PROFILE_TCP_TRANSPORT
 
 #ifdef PROFILE_SERIAL_TRANSPORT
+#include <uxr/client/profile/transport/serial/serial_transport.h>
 #if defined(PLATFORM_NAME_LINUX)
-#include <uxr/client/profile/transport/serial_transport_linux.h>
+#include <uxr/client/profile/transport/serial/serial_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <uxr/client/profile/transport/serial_transport_windows.h>
+#include <uxr/client/profile/transport/serial/serial_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
-#include <uxr/client/profile/transport/serial_transport_linux.h>
+#include <uxr/client/profile/transport/serial/serial_transport_linux.h>
 #endif
 #endif //PROFILE_SERIAL_TRANSPORT
 
