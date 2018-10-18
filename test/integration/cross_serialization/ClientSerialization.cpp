@@ -143,6 +143,7 @@ std::vector<uint8_t> ClientSerialization::info_payload()
     payload.base.related_request.request_id = RequestId{0x01, 0x23};
     payload.base.related_request.object_id = ObjectId{0x45, 0x67};
     payload.base.result.implementation_status = 0x89;
+    payload.base.result.status = 0xAB;
     payload.object_info.optional_activity = 0x01;
     payload.object_info.optional_config = 0x01;
     payload.object_info.config.kind = OBJK_AGENT;
@@ -153,7 +154,7 @@ std::vector<uint8_t> ClientSerialization::info_payload()
     payload.object_info.config._.agent.xrce_version = XrceVersion{0x01, 0x23};
     payload.object_info.config._.agent.xrce_vendor_id = XrceVendorId{0x45, 0x67};
     payload.object_info.activity.kind = OBJK_AGENT;
-    payload.object_info.activity._.agent.availibility = INFO_CONFIGURATION | INFO_ACTIVITY;
+    payload.object_info.activity._.agent.availibility = 1;
     payload.object_info.activity._.agent.address_seq.size = 0x01;
     payload.object_info.activity._.agent.address_seq.data[0].format = ADDRESS_FORMAT_MEDIUM;
     payload.object_info.activity._.agent.address_seq.data[0]._.medium_locator.locator_port = 0x0123;
