@@ -271,30 +271,33 @@ bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t
     transport->poll_fd.fd = socket(PF_INET, SOCK_STREAM, 0);
     if (-1 != transport->poll_fd.fd)
     {
-        /* Remote IP setup. */
-        struct sockaddr_in temp_addr;
-        temp_addr.sin_family = AF_INET;
-        temp_addr.sin_port = htons(port);
-        temp_addr.sin_addr.s_addr = inet_addr(ip);
-        transport->remote_addr = *((struct sockaddr *) &temp_addr);
-
-        /* Poll setup. */
-        transport->poll_fd.events = POLLIN;
-
-        /* Server connection. */
-        int connected = connect(transport->poll_fd.fd,
-                                &transport->remote_addr,
-                                sizeof(transport->remote_addr));
-        if(0 == connected)
+        if (0 <= setsockopt(transport->poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)))
         {
-            /* Interface setup. */
-            transport->comm.instance = (void*)transport;
-            transport->comm.send_msg = send_tcp_msg;
-            transport->comm.recv_msg = recv_tcp_msg;
-            transport->comm.comm_error = get_tcp_error;
-            transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
-            transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
-            rv = true;
+            /* Remote IP setup. */
+            struct sockaddr_in temp_addr;
+            temp_addr.sin_family = AF_INET;
+            temp_addr.sin_port = htons(port);
+            temp_addr.sin_addr.s_addr = inet_addr(ip);
+            transport->remote_addr = *((struct sockaddr *) &temp_addr);
+
+            /* Poll setup. */
+            transport->poll_fd.events = POLLIN;
+
+            /* Server connection. */
+            int connected = connect(transport->poll_fd.fd,
+                                    &transport->remote_addr,
+                                    sizeof(transport->remote_addr));
+            if(0 == connected)
+            {
+                /* Interface setup. */
+                transport->comm.instance = (void*)transport;
+                transport->comm.send_msg = send_tcp_msg;
+                transport->comm.recv_msg = recv_tcp_msg;
+                transport->comm.comm_error = get_tcp_error;
+                transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
+                transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
+                rv = true;
+            }
         }
     }
 
