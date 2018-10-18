@@ -118,7 +118,8 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
                             void* cb_arg,
                             const uint8_t* buf,
                             size_t len,
-                            uint8_t remote_addr)
+                            uint8_t remote_addr,
+                            uint8_t* errcode)
 {
     /* Buffer being flag. */
     serial_io->wb[0] = UXR_FRAMING_BEGIN_FLAG;
@@ -145,7 +146,7 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
         }
         else
         {
-            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos, errcode);
             if (0 < bytes_written)
             {
                 cond = true;
@@ -173,7 +174,7 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
         }
         else
         {
-            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos, errcode);
             if (0 < bytes_written)
             {
                 cond = true;
@@ -189,7 +190,7 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
     /* Flus write buffer. */
     if (cond && (0 < serial_io->wb_pos))
     {
-            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos);
+            size_t bytes_written = write_cb(cb_arg, serial_io->wb, serial_io->wb_pos, errcode);
             if (0 < bytes_written)
             {
                 cond = true;
@@ -210,7 +211,8 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                            uint8_t* buf,
                            size_t len,
                            uint8_t* remote_addr,
-                           int timeout)
+                           int timeout,
+                           uint8_t* errcode)
 {
     size_t rv = 0;
 
@@ -243,13 +245,13 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
     size_t bytes_read[2] = {0};
     if (0 < av_len[0])
     {
-        bytes_read[0] = read_cb(cb_arg, &serial_io->rb[serial_io->rb_head], av_len[0], timeout);
+        bytes_read[0] = read_cb(cb_arg, &serial_io->rb[serial_io->rb_head], av_len[0], timeout, errcode);
         serial_io->rb_head = (uint8_t)((size_t)(serial_io->rb_head + bytes_read[0]) % sizeof(serial_io->rb));
         if (0 < bytes_read[0])
         {
             if ((bytes_read[0] == av_len[0]) && (0 < av_len[1]))
             {
-                bytes_read[1] = read_cb(cb_arg, &serial_io->rb[serial_io->rb_head], av_len[1], 0);
+                bytes_read[1] = read_cb(cb_arg, &serial_io->rb[serial_io->rb_head], av_len[1], 0, errcode);
                 serial_io->rb_head = (uint8_t)((size_t)(serial_io->rb_head + bytes_read[1]) % sizeof(serial_io->rb));
             }
         }

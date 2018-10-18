@@ -2,11 +2,16 @@
 #include <uxr/client/core/util/time.h>
 
 /*******************************************************************************
+ * Static members.
+ *******************************************************************************/
+static uint8_t error_code;
+
+/*******************************************************************************
  * Private function declarations.
  *******************************************************************************/
 static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static int get_tcp_error(void);
+static uint8_t get_tcp_error(void);
 static size_t read_tcp_data(uxrTCPTransport* transport, int timeout);
 
 /*******************************************************************************
@@ -25,16 +30,20 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
     msg_size_buf[1] = (uint8_t)((0xFF00 & len) >> 8);
     do
     {
-        send_rv = uxr_write_tcp_data_platform(transport->platform, msg_size_buf, 2);
+        uint8_t errcode;
+        send_rv = uxr_write_tcp_data_platform(transport->platform, msg_size_buf, 2, &errcode);
         if (0 < send_rv)
         {
             bytes_sent = (size_t)(bytes_sent + send_rv);
         }
         else
         {
-            // TODO (julian).
-            uxr_disconnect_tcp_platform(transport->platform);
-            rv = false;
+            if (0 < errcode)
+            {
+                uxr_disconnect_tcp_platform(transport->platform);
+                error_code = errcode;
+                rv = false;
+            }
         }
     }
     while (rv && bytes_sent != 2);
@@ -45,19 +54,23 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
         bytes_sent = 0;
         do
         {
-            send_rv = uxr_write_tcp_data_platform(transport->platform, buf + bytes_sent, len - bytes_sent);
+            uint8_t errcode;
+            send_rv = uxr_write_tcp_data_platform(transport->platform, buf + bytes_sent, len - bytes_sent, &errcode);
             if (0 < send_rv)
             {
                 bytes_sent = (size_t)(bytes_sent + send_rv);
             }
             else
             {
-                // TODO (julian).
-                uxr_disconnect_tcp_platform(transport->platform);
-                rv = false;
+                if (0 < errcode)
+                {
+                    uxr_disconnect_tcp_platform(transport->platform);
+                    error_code = errcode;
+                    rv = false;
+                }
             }
         }
-        while (rv && bytes_sent != len);
+        while (rv && (bytes_sent != len));
     }
 
     return rv;
@@ -86,9 +99,9 @@ bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
     return rv;
 }
 
-int get_tcp_error(void)
+uint8_t get_tcp_error(void)
 {
-    return 0; //TODO (julian)
+    return error_code;
 }
 
 size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
@@ -105,7 +118,8 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             {
                 transport->input_buffer.position = 0;
                 uint8_t size_buf[2];
-                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, size_buf, 2, timeout);
+                uint8_t errcode;
+                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, size_buf, 2, timeout, &errcode);
                 if (0 < bytes_received)
                 {
                     transport->input_buffer.msg_size = 0;
@@ -125,8 +139,11 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 }
                 else
                 {
-                    // TODO (julian).
-                    //uxr_disconnect_tcp_platform(transport->platform);
+                    if (0 < errcode)
+                    {
+                        uxr_disconnect_tcp_platform(transport->platform);
+                    }
+                    error_code = errcode;
                     exit_flag = true;
                 }
                 break;
@@ -134,7 +151,8 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             case UXR_TCP_SIZE_INCOMPLETE:
             {
                 uint8_t size_msb;
-                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, &size_msb, 1, timeout);
+                uint8_t errcode;
+                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, &size_msb, 1, timeout, &errcode);
                 if (0 < bytes_received)
                 {
                     transport->input_buffer.msg_size = (size_t)(size_msb << 8) | transport->input_buffer.msg_size;
@@ -149,18 +167,23 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 }
                 else
                 {
-                    // TODO (julian).
-                    //uxr_disconnect_tcp_platform(transport->platform);
+                    if (0 < errcode)
+                    {
+                        uxr_disconnect_tcp_platform(transport->platform);
+                    }
+                    error_code = errcode;
                     exit_flag = true;
                 }
                 break;
             }
             case UXR_TCP_SIZE_READ:
             {
+                uint8_t errcode;
                 size_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
                                                                    transport->input_buffer.buffer,
                                                                    transport->input_buffer.msg_size,
-                                                                   timeout);
+                                                                   timeout,
+                                                                   &errcode);
                 if (0 < bytes_received)
                 {
                     if (bytes_received == transport->input_buffer.msg_size)
@@ -176,20 +199,25 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 }
                 else
                 {
-                    // TODO (julian).
-                    //uxr_disconnect_tcp_platform(transport->platform);
+                    if (0 < errcode)
+                    {
+                        uxr_disconnect_tcp_platform(transport->platform);
+                    }
+                    error_code = errcode;
                     exit_flag = true;
                 }
                 break;
             }
             case UXR_TCP_MESSAGE_INCOMPLETE:
             {
+                uint8_t errcode;
                 size_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
                                                                    transport->input_buffer.buffer +
                                                                    transport->input_buffer.position,
                                                                    (size_t)(transport->input_buffer.msg_size -
-                                                                              transport->input_buffer.position),
-                                                                   timeout);
+                                                                            transport->input_buffer.position),
+                                                                   timeout,
+                                                                   &errcode);
                 if (0 < bytes_received)
                 {
                     transport->input_buffer.position = (size_t)(transport->input_buffer.position +  bytes_received);
@@ -204,8 +232,11 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 }
                 else
                 {
-                    // TODO (julian).
-                    //uxr_disconnect_tcp_platform(transport->platform);
+                    if (0 < errcode)
+                    {
+                        uxr_disconnect_tcp_platform(transport->platform);
+                    }
+                    error_code = errcode;
                     exit_flag = true;
                 }
                 break;

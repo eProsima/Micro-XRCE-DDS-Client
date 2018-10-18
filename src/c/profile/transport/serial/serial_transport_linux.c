@@ -21,20 +21,24 @@ bool uxr_close_serial_platform(struct uxrSerialPlatform* platform)
     return (0 == close(platform->poll_fd.fd));
 }
 
-size_t uxr_write_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len)
+size_t uxr_write_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, uint8_t* errcode)
 {
     size_t rv = 0;
 
     ssize_t bytes_written = write(platform->poll_fd.fd, (void*)buf, (size_t)len);
-    if ((0 < bytes_written) && ((size_t)bytes_written == len))
+    if (-1 != bytes_written)
     {
         rv = (size_t)bytes_written;
+        *errcode = 0;
     }
-    // TODO (julian): take into account errors.
+    else
+    {
+        *errcode = 1;
+    }
     return rv;
 }
 
-size_t uxr_read_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, int timeout)
+size_t uxr_read_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
 {
     size_t rv = 0;
 
@@ -42,13 +46,20 @@ size_t uxr_read_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, 
     if (0 < poll_rv)
     {
         ssize_t bytes_read = read(platform->poll_fd.fd, buf, len);
-        if (0 < bytes_read)
+        if (-1 != bytes_read)
         {
             rv = (size_t)bytes_read;
+            *errcode = 0;
         }
-        // TODO (julian): take into account errors.
+        else
+        {
+            *errcode = 1;
+        }
     }
-
+    else
+    {
+        *errcode = (0 == poll_rv) ? 0 : 1;
+    }
     return rv;
 }
 

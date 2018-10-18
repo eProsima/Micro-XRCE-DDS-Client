@@ -65,22 +65,24 @@ bool get_next_octet(uxrSerialIO* serial_io, uint8_t* octet);
 bool add_next_octet(uxrSerialIO* serial_io, uint8_t octet);
 
 struct uxrSerialPlatform;
-typedef size_t (*uxr_write_cb)(struct uxrSerialPlatform*, uint8_t*, size_t);
-typedef size_t (*uxr_read_cb)(struct uxrSerialPlatform*, uint8_t*, size_t, int);
+typedef size_t (*uxr_write_cb)(struct uxrSerialPlatform*, uint8_t*, size_t, uint8_t*);
+typedef size_t (*uxr_read_cb)(struct uxrSerialPlatform*, uint8_t*, size_t, int, uint8_t*);
 
 size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
                             uxr_write_cb write_cb,
                             void* cb_arg,
                             const uint8_t* buf,
                             size_t len,
-                            uint8_t remote_addr);
+                            uint8_t remote_addr,
+                            uint8_t* errcode);
 size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                            uxr_read_cb read_cb,
                            void* cb_arg,
                            uint8_t* buf,
                            size_t len,
                            uint8_t* remote_addr,
-                           int timeout);
+                           int timeout,
+                           uint8_t* errcode);
 
 #ifdef __cplusplus
 }

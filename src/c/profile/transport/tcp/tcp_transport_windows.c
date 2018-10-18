@@ -46,30 +46,49 @@ bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform)
     return rv;
 }
 
-size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform, const uint8_t* buf, size_t len)
+size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
+                                   const uint8_t* buf,
+                                   size_t len,
+                                   uint8_t* errcode)
 {
     size_t rv = 0;
     int bytes_sent = send(platform->poll_fd.fd, (const char*)buf, (int)len, 0);
-    if (0 < bytes_sent)
+    if (SOCKET_ERROR != bytes_sent)
     {
-        // TODO (julian): take into account errors.
         rv = (size_t)bytes_sent;
+        *errcode = 0;
+    }
+    else
+    {
+        *errcode = 1;
     }
     return rv;
 }
 
-size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform, uint8_t* buf, size_t len, int timeout)
+size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
+                                  uint8_t* buf,
+                                  size_t len,
+                                  int timeout,
+                                  uint8_t* errcode)
 {
     size_t rv = 0;
     int poll_rv = WSAPoll(&platform->poll_fd, 1, timeout);
     if (0 < poll_rv)
     {
         int bytes_received = recv(platform->poll_fd.fd, (char*)buf, (int)len, 0);
-        if (0 < bytes_received)
+        if (SOCKET_ERROR != bytes_received)
         {
-            // TODO (julian): take into account errors.
             rv = (size_t)bytes_received;
+            *errcode = 0;
         }
+        else
+        {
+            *errcode = 1;
+        }
+    }
+    else
+    {
+        *errcode = (0 == poll_rv) ? 0 : 1;
     }
     return rv;
 }

@@ -3,11 +3,16 @@
 #include <uxr/client/core/util/time.h>
 
 /*******************************************************************************
+ * Static members.
+ *******************************************************************************/
+static uint8_t error_code;
+
+/*******************************************************************************
  * Private function declarations.
  *******************************************************************************/
 static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len);
 static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static int get_serial_error(void);
+static uint8_t get_serial_error(void);
 
 /*******************************************************************************
  * Private function definitions.
@@ -17,15 +22,21 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
+    uint8_t errcode;
     size_t bytes_written = uxr_write_serial_msg(&transport->serial_io,
                                                 uxr_write_serial_data_platform,
                                                 transport->platform,
                                                 buf,
                                                 len,
-                                                transport->remote_addr);
+                                                transport->remote_addr,
+                                                &errcode);
     if ((0 < bytes_written) && (bytes_written == len))
     {
         rv = true;
+    }
+    else
+    {
+        error_code = errcode;
     }
 
     return rv;
@@ -41,18 +52,24 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
     {
         int64_t time_init = uxr_millis();
         uint8_t remote_addr;
+        uint8_t errcode;
         bytes_read = uxr_read_serial_msg(&transport->serial_io,
                                          uxr_read_serial_data_platform,
                                          transport->platform,
                                          transport->buffer,
                                          sizeof(transport->buffer),
                                          &remote_addr,
-                                         timeout);
+                                         timeout,
+                                         &errcode);
         if ((0 < bytes_read) && (remote_addr == transport->remote_addr))
         {
             *len = bytes_read;
             *buf = transport->buffer;
             rv = true;
+        }
+        else
+        {
+            error_code = errcode;
         }
         timeout -= (int)(uxr_millis() - time_init);
     }
@@ -61,9 +78,9 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
     return rv;
 }
 
-static int get_serial_error(void)
+static uint8_t get_serial_error(void)
 {
-    return 0; // TODO (julian).
+    return error_code;
 }
 
 /*******************************************************************************
