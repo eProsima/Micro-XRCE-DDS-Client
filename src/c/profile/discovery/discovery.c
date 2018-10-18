@@ -1,7 +1,7 @@
 #include <uxr/client/profile/discovery/discovery.h>
 #include <uxr/client/core/session/object_id.h>
 #include <uxr/client/core/session/stream/seq_num.h>
-#include <uxr/client/core/util/time.h>
+#include <uxr/client/util/time.h>
 
 #include "../../core/serialization/xrce_protocol_internal.h"
 #include "../../core/serialization/xrce_header_internal.h"
@@ -89,7 +89,7 @@ void write_get_info_message(ucdrBuffer* mb)
     payload.info_mask = INFO_CONFIGURATION | INFO_ACTIVITY;
 
     uxr_serialize_message_header(mb, UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, 0);
-    (void) uxr_write_submessage_header(mb, SUBMESSAGE_ID_GET_INFO, GET_INFO_MSG_SIZE, 0);
+    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_GET_INFO, GET_INFO_MSG_SIZE, 0);
     (void) uxr_serialize_GET_INFO_Payload(mb, &payload);
 }
 

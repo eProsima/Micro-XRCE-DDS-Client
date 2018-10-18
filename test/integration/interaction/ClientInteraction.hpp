@@ -77,37 +77,37 @@ public:
         uint16_t request_id; uint8_t status;
 
         uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
-        request_id = uxr_write_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant", flags);
+        request_id = uxr_buffer_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
-        request_id = uxr_write_create_topic_ref(&session_, output_stream_id, topic_id, participant_id, "helloworld_topic", flags);
+        request_id = uxr_buffer_create_topic_ref(&session_, output_stream_id, topic_id, participant_id, "helloworld_topic", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
-        request_id = uxr_write_configure_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, "", flags);
+        request_id = uxr_buffer_create_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, "", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
-        request_id = uxr_write_create_datawriter_ref(&session_, output_stream_id, datawriter_id, publisher_id, "helloworld_data_writer", flags);
+        request_id = uxr_buffer_create_datawriter_ref(&session_, output_stream_id, datawriter_id, publisher_id, "helloworld_data_writer", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
-        request_id = uxr_write_configure_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, "", flags);
+        request_id = uxr_buffer_create_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, "", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
-        request_id = uxr_write_create_datareader_ref(&session_, output_stream_id, datareader_id, subscriber_id, "helloworld_data_reader", flags);
+        request_id = uxr_buffer_create_datareader_ref(&session_, output_stream_id, datareader_id, subscriber_id, "helloworld_data_reader", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
