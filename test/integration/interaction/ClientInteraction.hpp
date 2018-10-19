@@ -305,13 +305,13 @@ public:
             agent_list[i].port = uint16_t(base_port + i);
         }
 
-        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &choosen_, agent_list, agent_ports_.size()));
+        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &chosen_, agent_list, agent_ports_.size()));
         ASSERT_TRUE(agent_ports_.empty());
     }
 
     void multicast()
     {
-        ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, this, &choosen_));
+        ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, this, &chosen_));
         ASSERT_TRUE(agent_ports_.empty());
     }
 
@@ -345,7 +345,7 @@ private:
     }
 
     std::vector<uint16_t> agent_ports_;
-    uxrAgentAddress choosen_;
+    uxrAgentAddress chosen_;
     int transport_;
 };
 

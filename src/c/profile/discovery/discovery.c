@@ -19,7 +19,7 @@
 
 typedef struct CallbackData
 {
-    uxrAgentAddress* choosen;
+    uxrAgentAddress* chosen;
     uxrOnAgentFound on_agent;
     void* args;
 
@@ -35,16 +35,16 @@ static bool process_info(CallbackData* callback, Time_t timestamp, TransportLoca
 //                             PUBLIC
 //==================================================================
 
-bool uxr_discovery_agents_multicast(uint32_t attemps, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen)
+bool uxr_discovery_agents_multicast(uint32_t attemps, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* chosen)
 {
     uxrAgentAddress multicast = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT};
-    return uxr_discovery_agents_unicast(attemps, period, on_agent_func, args, choosen, &multicast, 1);
+    return uxr_discovery_agents_unicast(attemps, period, on_agent_func, args, chosen, &multicast, 1);
 }
 
-bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen,
+bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* chosen,
                                  const uxrAgentAddress* agent_list, size_t agent_list_size)
 {
-    CallbackData callback = {choosen, on_agent_func, args};
+    CallbackData callback = {chosen, on_agent_func, args};
 
     uint8_t output_buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
     ucdrBuffer mb;
@@ -157,10 +157,10 @@ bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* lo
 
     if(locator->format == ADDRESS_FORMAT_MEDIUM)
     {
-        callback->choosen->port = locator->_.medium_locator.locator_port;
-        uxr_bytes_to_ip(locator->_.medium_locator.address, callback->choosen->ip);
+        callback->chosen->port = locator->_.medium_locator.locator_port;
+        uxr_bytes_to_ip(locator->_.medium_locator.address, callback->chosen->ip);
 
-        consumed = callback->on_agent(callback->choosen, nanoseconds, callback->args);
+        consumed = callback->on_agent(callback->chosen, nanoseconds, callback->args);
     }
 
     return consumed;
