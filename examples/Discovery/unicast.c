@@ -45,11 +45,11 @@ int main(int args, char** argv)
         ++agent_list_size;
     }
 
-    uxrAgentAddress choosen;
-    if(uxr_discovery_agents_unicast(10, 1000, on_agent_found, NULL, &choosen, agent_list, agent_list_size))
+    uxrAgentAddress chosen;
+    if(uxr_discovery_agents_unicast(10, 1000, on_agent_found, NULL, &chosen, agent_list, agent_list_size))
     {
         // The user returns true in the callback.
-        printf("Choosen agent => ip: %s, port: %d\n", choosen.ip, choosen.port);
+        printf("Chosen agent => ip: %s, port: %d\n", chosen.ip, chosen.port);
     }
 
     return 0;

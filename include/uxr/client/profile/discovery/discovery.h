@@ -37,9 +37,9 @@ typedef struct uxrAgentAddress
 typedef bool (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timestamp, void* args);
 
 
-UXRDLLAPI bool uxr_discovery_agents_multicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen);
+UXRDLLAPI bool uxr_discovery_agents_multicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* chosen);
 
-UXRDLLAPI bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* choosen,
+UXRDLLAPI bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* chosen,
                                           const uxrAgentAddress* agent_list, size_t agent_list_size);
 
 #ifdef __cplusplus

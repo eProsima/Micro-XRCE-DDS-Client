@@ -28,11 +28,11 @@ int main(int args, char** argv)
 {
     (void) args; (void) argv;
 
-    uxrAgentAddress choosen;
-    if(uxr_discovery_agents_multicast(10, 1000, on_agent_found, NULL, &choosen))
+    uxrAgentAddress chosen;
+    if(uxr_discovery_agents_multicast(10, 1000, on_agent_found, NULL, &chosen))
     {
         // True -> The user returns true in the callback.
-        printf("Choosen agent => ip: %s, port: %d\n", choosen.ip, choosen.port);
+        printf("Chosen agent => ip: %s, port: %d\n", chosen.ip, chosen.port);
     }
 
     return 0;
