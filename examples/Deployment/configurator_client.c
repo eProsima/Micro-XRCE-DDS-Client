@@ -37,91 +37,92 @@ static void wait_status(uxrSession* session, uint16_t* requests);
 
 int main(int args, char** argv)
 {
-//    // Check args
-//    uint32_t key;
-//    int create_delete = 0;
-//    int pub_sub = 0;
-//    uint16_t ids = 0;
-//
-//    if(args == 7)
-//    {
-//        key = atoi(argv[2]);
-//        if(0 == strcmp(argv[3], "create"))
-//        {
-//            create_delete = ACTION_CREATE;
-//        }
-//        else if(0 == strcmp(argv[3], "delete"))
-//        {
-//            create_delete = ACTION_DELETE;
-//        }
-//
-//        if(0 == strcmp(argv[4], "pub"))
-//        {
-//            pub_sub = TARGET_PUBLISHER;
-//        }
-//        else if(0 == strcmp(argv[4], "sub"))
-//        {
-//            pub_sub = TARGET_SUBSCRIBER;
-//        }
-//        ids = atoi(argv[6]);
-//    }
-//
-//    if(args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
-//                || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[5])
-//                || 0 == atoi(argv[2]) || 0 == atoi(argv[6])
-//                || !create_delete || !pub_sub)
-//    {
-//        printf("usage: program [-h | --help] | --key <number> <'create'/'delete'> <'pub'/'sub'> --id <id>]\n");
-//        return 0;
-//    }
-//
-//    // Transport
-//    uxrUDPTransport transport;
-//    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
-//    {
-//        printf("Error at create transport.\n");
-//        return 1;
-//    }
-//
-//    // Session
-//    uxrSession session;
-//    uxr_init_session(&session, &transport.comm, key);
-//    uxr_set_status_callback(&session, on_status, NULL);
-//    if(!uxr_create_session(&session))
-//    {
-//        printf("Error at create session.\n");
-//        return 1;
-//    }
-//
-//    // Streams
-//    uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-//    uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
-//
-//    uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-//    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
-//
-//    switch(create_delete | pub_sub)
-//    {
-//        case ACTION_CREATE | TARGET_PUBLISHER:
-//            create_publisher(&session, ids);
-//            break;
-//
-//        case ACTION_CREATE | TARGET_SUBSCRIBER:
-//            create_subscriber(&session, ids);
-//            break;
-//
-//        case ACTION_DELETE | TARGET_PUBLISHER:
-//            delete_publisher(&session, ids);
-//            break;
-//
-//        case ACTION_DELETE | TARGET_SUBSCRIBER:
-//            delete_subscriber(&session, ids);
-//            break;
-//    }
-//
-//    uxr_close_udp_transport(&transport);
-//
-//    return 0;
+    // Check args
+    uint32_t key;
+    int create_delete = 0;
+    int pub_sub = 0;
+    uint16_t ids = 0;
+
+    if(args == 7)
+    {
+        key = atoi(argv[2]);
+        if(0 == strcmp(argv[3], "create"))
+        {
+            create_delete = ACTION_CREATE;
+        }
+        else if(0 == strcmp(argv[3], "delete"))
+        {
+            create_delete = ACTION_DELETE;
+        }
+
+        if(0 == strcmp(argv[4], "pub"))
+        {
+            pub_sub = TARGET_PUBLISHER;
+        }
+        else if(0 == strcmp(argv[4], "sub"))
+        {
+            pub_sub = TARGET_SUBSCRIBER;
+        }
+        ids = atoi(argv[6]);
+    }
+
+    if(args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
+                || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[5])
+                || 0 == atoi(argv[2]) || 0 == atoi(argv[6])
+                || !create_delete || !pub_sub)
+    {
+        printf("usage: program [-h | --help] | --key <number> <'create'/'delete'> <'pub'/'sub'> --id <id>]\n");
+        return 0;
+    }
+
+    // Transport
+    uxrUDPTransport transport;
+    uxrUDPPlatform udp_platform;
+    if(!uxr_init_udp_transport(&transport, &udp_platform, "127.0.0.1", 2018))
+    {
+        printf("Error at create transport.\n");
+        return 1;
+    }
+
+    // Session
+    uxrSession session;
+    uxr_init_session(&session, &transport.comm, key);
+    uxr_set_status_callback(&session, on_status, NULL);
+    if(!uxr_create_session(&session))
+    {
+        printf("Error at create session.\n");
+        return 1;
+    }
+
+    // Streams
+    uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
+    uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+
+    uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
+    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+
+    switch(create_delete | pub_sub)
+    {
+      case ACTION_CREATE | TARGET_PUBLISHER:
+            create_publisher(&session, ids);
+            break;
+
+        case ACTION_CREATE | TARGET_SUBSCRIBER:
+            create_subscriber(&session, ids);
+            break;
+
+        case ACTION_DELETE | TARGET_PUBLISHER:
+            delete_publisher(&session, ids);
+            break;
+
+        case ACTION_DELETE | TARGET_SUBSCRIBER:
+            delete_subscriber(&session, ids);
+            break;
+    }
+
+    uxr_close_udp_transport(&transport);
+
+    return 0;
 }
 
 void create_publisher(uxrSession* session, uint16_t id)
@@ -129,19 +130,38 @@ void create_publisher(uxrSession* session, uint16_t id)
     uxrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
     uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
-    const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = uxr_buffer_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
+    const char* participant_xml = "<dds>"
+                                      "<participant>"
+                                          "<rtps>"
+                                              "<name>default_xrce_participant</name>"
+                                          "</rtps>"
+                                      "</participant>"
+                                  "</dds>";
+    uint16_t participant_req = uxr_buffer_create_participant_xml(session, output, participant_id, 0, participant_xml, 0);
 
     uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
-    const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
+    const char* topic_xml = "<dds>"
+                                "<topic>"
+                                    "<name>HelloWorldTopic</name>"
+                                    "<dataType>HelloWorld</dataType>"
+                                "</topic>"
+                            "</dds>";
     uint16_t topic_req = uxr_buffer_create_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
     uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
-    const char* publisher_xml = "<publisher name=\"MyPublisher\">";
+    const char* publisher_xml = "";
     uint16_t publisher_req = uxr_buffer_create_publisher_xml(session, output, publisher_id, participant_id, publisher_xml, 0);
 
     uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
-    const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
+    const char* datawriter_xml = "<dds>"
+                                     "<data_writer>"
+                                         "<topic>"
+                                             "<kind>NO_KEY</kind>"
+                                             "<name>HelloWorldTopic</name>"
+                                             "<dataType>HelloWorld</dataType>"
+                                         "</topic>"
+                                     "</data_writer>"
+                                 "</dds>";
     uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(session, output, datawriter_id, publisher_id, datawriter_xml, 0);
 
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
@@ -153,19 +173,38 @@ void create_subscriber(uxrSession* session, uint16_t id)
     uxrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
     uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
-    const char* participant_ref = "default_xrce_participant_profile";
-    uint16_t participant_req = uxr_buffer_create_participant_ref(session, output, participant_id, 0, participant_ref, 0);
+    const char* participant_xml = "<dds>"
+                                      "<participant>"
+                                          "<rtps>"
+                                              "<name>default_xrce_participant</name>"
+                                          "</rtps>"
+                                      "</participant>"
+                                  "</dds>";
+    uint16_t participant_req = uxr_buffer_create_participant_ref(session, output, participant_id, 0, participant_xml, 0);
 
     uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
-    const char* topic_xml = "<dds><topic><name>HelloWorldTopic</name><dataType>HelloWorld</dataType></topic></dds>";
+    const char* topic_xml = "<dds>"
+                                "<topic>"
+                                    "<name>HelloWorldTopic</name>"
+                                    "<dataType>HelloWorld</dataType>"
+                                "</topic>"
+                            "</dds>";
     uint16_t topic_req = uxr_buffer_create_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
     uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
-    const char* subscriber_xml = "<subscriber name=\"MySubscriber\">";
+    const char* subscriber_xml = "";
     uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(session, output, subscriber_id, participant_id, subscriber_xml, 0);
 
     uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
-    const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>NO_KEY</kind><name>HelloWorldTopic</name><dataType>HelloWorld</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
+    const char* datareader_xml = "<dds>"
+                                     "<data_reader>"
+                                         "<topic>"
+                                             "<kind>NO_KEY</kind>"
+                                             "<name>HelloWorldTopic</name>"
+                                             "<dataType>HelloWorld</dataType>"
+                                         "</topic>"
+                                     "</data_reader>"
+                                 "</dds>";
     uint16_t datareader_req = uxr_buffer_create_datareader_xml(session, output, datareader_id, subscriber_id, datareader_xml, 0);
 
     uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
