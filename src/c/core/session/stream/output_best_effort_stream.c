@@ -9,10 +9,10 @@
 void uxr_init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset)
 {
     stream->buffer = buffer;
-    stream->writer = offset;
-    stream->size = size;
     stream->offset = offset;
-    stream->last_send = UINT16_MAX;
+    stream->size = size;
+
+    uxr_reset_output_best_effort_stream(stream);
 }
 
 void uxr_reset_output_best_effort_stream(uxrOutputBestEffortStream* stream)

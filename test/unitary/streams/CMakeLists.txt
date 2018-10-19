@@ -20,13 +20,33 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 # New project because of the CXX GTest dependency.
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(output_best_effort_stream_test C CXX)
+    project(stream_test C CXX)
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(output_best_effort_stream_test LANGUAGES C CXX)
+    project(stream_test LANGUAGES C CXX)
 endif()
 
-set(SRCS OutputBestEffortStream.cpp)
+set(SRCS_LIB
+    ../../../src/c/core/serialization/xrce_protocol.c
+    ../../../src/c/core/serialization/xrce_header.c
+    ../../../src/c/core/serialization/xrce_subheader.c
+    ../../../src/c/core/session/stream/input_best_effort_stream.c
+    ../../../src/c/core/session/stream/input_reliable_stream.c
+    ../../../src/c/core/session/stream/output_best_effort_stream.c
+    ../../../src/c/core/session/stream/output_reliable_stream.c
+    ../../../src/c/core/session/stream/stream_id.c
+    ../../../src/c/core/session/stream/seq_num.c
+    ../../../src/c/core/session/submessage.c
+    )
+
+set(SRCS
+    ${SRCS_LIB}
+    OutputBestEffortStream.cpp
+    InputBestEffortStream.cpp
+    #OutputReliableStream.cpp
+    #InputReliableStream.cpp
+    )
+
 add_executable(${PROJECT_NAME} ${SRCS})
 set_common_compile_options(${PROJECT_NAME})
 if(MSVC OR MSVC_IDE)
@@ -36,16 +56,18 @@ endif()
 add_gtest(${PROJECT_NAME}
     SOURCES
         ${SRCS}
-    DEPENDENCIES
-        microxrcedds_client
     )
-target_link_libraries(${PROJECT_NAME} microxrcedds_client ${GTEST_BOTH_LIBRARIES})
+
+get_target_property(CLIENT_INCLUDES microxrcedds_client INCLUDE_DIRECTORIES)
+include_directories("${CLIENT_INCLUDES}") #Used to include private includes
+target_link_libraries(${PROJECT_NAME} microcdr ${GTEST_BOTH_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${PROJECT_SOURCE_DIR}
     PRIVATE
         ${GTEST_INCLUDE_DIRS}
     )
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES

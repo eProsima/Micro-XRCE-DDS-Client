@@ -199,7 +199,6 @@ public:
                 break;
             case TCP_TRANSPORT:
                 ASSERT_TRUE(uxr_close_tcp_transport(&tcp_transport_));
-                std::this_thread::sleep_for(std::chrono::milliseconds(100)); //waiting the socket to close
                 break;
         }
     }
