@@ -1,32 +1,27 @@
 #include <gtest/gtest.h>
-#include <micrortps/client/core/session/output_reliable_stream.h>
-#include <microcdr/microcdr.h>
+#include <core/session/stream/output_reliable_stream_internal.h>
+#include <ucdr/microcdr.h>
 
-#define STREAM_BUFFER_SIZE 512
 #define STREAM_HISTORY     4
+#define STREAM_BUFFER_SIZE 512 * STREAM_HISTORY
 #define OFFSET 4
-
-size_t get_output_buffer_length(uint8_t* buffer);
-void set_output_buffer_length(uint8_t* buffer, size_t length);
-uint8_t* get_output_buffer(const mrOutputReliableStream* stream, size_t history_pos);
-size_t get_output_buffer_size(const mrOutputReliableStream* stream);
 
 class OutputReliableStreamTest : public testing::Test
 {
 public:
     OutputReliableStreamTest()
+        : submessage(STREAM_BUFFER_SIZE / (8 * STREAM_HISTORY), 'A')
     {
-        init_output_reliable_stream(&stream, buffer, STREAM_BUFFER_SIZE, STREAM_HISTORY, OFFSET);
+        uxr_init_output_reliable_stream(&stream, buffer, STREAM_BUFFER_SIZE, STREAM_HISTORY, OFFSET);
     }
 
     void write_submessage(bool expected)
     {
-        uint8_t buf[256];
-        size_t previous_writer = get_output_buffer_length(buf + 20);
-/*
-        mcBuffer mb;
-        bool available_to_write = prepare_reliable_buffer_to_write(&stream, submessage.size(), &mb);
-        bool serialized = mc_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
+        size_t previous_writer = uxr_get_output_buffer_length(buffer + 20);
+
+        ucdrBuffer mb;
+        bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, submessage.size(), &mb);
+        bool serialized = ucdr_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
 
         if(expected)
         {
@@ -44,7 +39,6 @@ public:
             ASSERT_FALSE(serialized);
             ASSERT_EQ(previous_writer, stream.writer);
         }
-*/
     }
     void send_message()
     {
@@ -85,9 +79,9 @@ public:
     }
 
 protected:
-    const std::string submessage = "This is a submessage";
+    const std::string submessage;
     uint8_t buffer[STREAM_BUFFER_SIZE];
-    mrOutputReliableStream stream;
+    uxrOutputReliableStream stream;
 };
 
 TEST_F(OutputReliableStreamTest, WriteOneSubmessage)
