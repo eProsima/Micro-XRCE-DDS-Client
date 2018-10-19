@@ -4,7 +4,7 @@
 #include <ucdr/microcdr.h>
 
 #define STREAM_BUFFER_SIZE 512
-#define OFFSET 4
+#define OFFSET size_t(4)
 
 class OutputBestEffortStreamTest : public testing::Test
 {
@@ -21,23 +21,21 @@ public:
 
         ucdrBuffer mb;
         bool available_to_write = uxr_prepare_best_effort_buffer_to_write(&stream, submessage.size(), &mb);
-        bool serialized = ucdr_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
-
-        if(expected)
-        {
-            ASSERT_TRUE(available_to_write);
-            ASSERT_TRUE(serialized);
-            ASSERT_EQ(previous_writer + submessage.size(), stream.writer);
-            for(size_t i = 0; i < submessage.size(); i++)
-            {
-                ASSERT_EQ(submessage[i], buffer[previous_writer + i]);
-            }
-        }
-        else
+        if(!expected)
         {
             ASSERT_FALSE(available_to_write);
-            ASSERT_FALSE(serialized);
             ASSERT_EQ(previous_writer, stream.writer);
+            return;
+        }
+
+        bool serialized = ucdr_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
+
+        ASSERT_TRUE(available_to_write);
+        ASSERT_TRUE(serialized);
+        ASSERT_EQ(previous_writer + submessage.size(), stream.writer);
+        for(size_t i = 0; i < submessage.size(); i++)
+        {
+            ASSERT_EQ(submessage[i], buffer[previous_writer + i]);
         }
     }
 
