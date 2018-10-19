@@ -20,43 +20,15 @@ extern "C"
 {
 #endif
 
-#include <uxr/client/core/communication/communication.h>
-#include <uxr/client/config.h>
-#include <uxr/client/dll.h>
-
 #include <sys/socket.h>
 #include <poll.h>
 
-typedef enum uxrTCPInputBufferState
+typedef struct uxrTCPPlatform
 {
-    UXR_TCP_BUFFER_EMPTY,
-    UXR_TCP_SIZE_INCOMPLETE,
-    UXR_TCP_SIZE_READ,
-    UXR_TCP_MESSAGE_INCOMPLETE,
-    UXR_TCP_MESSAGE_AVAILABLE
-
-} uxrTCPInputBufferState;
-
-typedef struct uxrTCPInputBuffer
-{
-    uint8_t buffer[UXR_CONFIG_TCP_TRANSPORT_MTU];
-    uint16_t position;
-    uxrTCPInputBufferState state;
-    uint16_t msg_size;
-
-} uxrTCPInputBuffer;
-
-typedef struct uxrTCPTransport
-{
-    uxrTCPInputBuffer input_buffer;
     struct sockaddr remote_addr;
     struct pollfd poll_fd;
-    uxrCommunication comm;
 
-} uxrTCPTransport;
-
-UXRDLLAPI bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t port);
-UXRDLLAPI bool uxr_close_tcp_transport(uxrTCPTransport* transport);
+} uxrTCPPlatform;
 
 #ifdef __cplusplus
 }

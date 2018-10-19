@@ -162,7 +162,7 @@ bool uxr_serialize_TransportLocatorMedium(ucdrBuffer* buffer, const TransportLoc
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->address, 4);
-    ret &= ucdr_serialize_uint8_t(buffer, input->locator_port);
+    ret &= ucdr_serialize_uint16_t(buffer, input->locator_port);
     return ret;
 }
 
@@ -170,7 +170,7 @@ bool uxr_deserialize_TransportLocatorMedium(ucdrBuffer* buffer, TransportLocator
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->address, 4);
-    ret &= ucdr_deserialize_uint8_t(buffer, &output->locator_port);
+    ret &= ucdr_deserialize_uint16_t(buffer, &output->locator_port);
     return ret;
 }
 
@@ -178,7 +178,7 @@ bool uxr_serialize_TransportLocatorLarge(ucdrBuffer* buffer, const TransportLoca
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->address, 16);
-    ret &= ucdr_serialize_uint8_t(buffer, input->locator_port);
+    ret &= ucdr_serialize_uint32_t(buffer, input->locator_port);
     return ret;
 }
 
@@ -186,7 +186,7 @@ bool uxr_deserialize_TransportLocatorLarge(ucdrBuffer* buffer, TransportLocatorL
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->address, 16);
-    ret &= ucdr_deserialize_uint8_t(buffer, &output->locator_port);
+    ret &= ucdr_deserialize_uint32_t(buffer, &output->locator_port);
     return ret;
 }
 

@@ -42,13 +42,13 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size);
 
 #if defined(UXR_MESSAGE_LOGS) || defined(UXR_SERIALIZATION_LOGS)
-#define DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) \
+#define UXR_DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) \
     do { \
         if (UXR_MESSAGE_LOGS_AVAILABLE) uxr_print_message(direction, buffer, size, client_key); \
         if (UXR_SERIALIZATION_LOGS_AVAILABLE) uxr_print_serialization(direction, buffer, size); \
     } while (0)
 #else
-#define DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) do {} while(0)
+#define UXR_DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) do {} while(0)
 #endif
 
 #ifdef __cplusplus

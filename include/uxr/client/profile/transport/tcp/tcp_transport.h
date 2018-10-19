@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_TCP_TRANSPORT_WINDOWS_H_
-#define _UXR_CLIENT_TCP_TRANSPORT_WINDOWS_H_
+#ifndef _UXR_CLIENT_TCP_TRANSPORT_H_
+#define _UXR_CLIENT_TCP_TRANSPORT_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -23,9 +23,6 @@ extern "C"
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/config.h>
 #include <uxr/client/dll.h>
-#include <winsock2.h>
-#include <stdint.h>
-#include <stddef.h>
 
 typedef enum uxrTCPInputBufferState
 {
@@ -40,26 +37,43 @@ typedef enum uxrTCPInputBufferState
 typedef struct uxrTCPInputBuffer
 {
     uint8_t buffer[UXR_CONFIG_TCP_TRANSPORT_MTU];
-    uint16_t position;
+    size_t position;
     uxrTCPInputBufferState state;
-    uint16_t msg_size;
+    size_t msg_size;
 
 } uxrTCPInputBuffer;
+
+struct uxrTCPPlatform;
 
 typedef struct uxrTCPTransport
 {
     uxrTCPInputBuffer input_buffer;
-    struct sockaddr remote_addr;
-    WSAPOLLFD poll_fd;
     uxrCommunication comm;
+    struct uxrTCPPlatform* platform;
+
 } uxrTCPTransport;
 
-
-UXRDLLAPI bool uxr_init_tcp_transport(uxrTCPTransport* transport, const char* ip, uint16_t port);
+UXRDLLAPI bool uxr_init_tcp_transport(uxrTCPTransport* transport,
+                                      struct uxrTCPPlatform* platform,
+                                      const char* ip,
+                                      uint16_t port);
 UXRDLLAPI bool uxr_close_tcp_transport(uxrTCPTransport* transport);
+
+bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port);
+bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform);
+size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
+                                   const uint8_t* buf,
+                                   size_t len,
+                                   uint8_t* errcode);
+size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
+                                  uint8_t* buf,
+                                  size_t len,
+                                  int timeout,
+                                  uint8_t* errcode);
+void uxr_disconnect_tcp_platform(struct uxrTCPPlatform* platform);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_UXR_CLIENT_TCP_TRANSPORT_WINDOWS_H_
+#endif //_UXR_CLIENT_TCP_TRANSPORT_H_

@@ -48,7 +48,8 @@ int main(int args, char** argv)
 
     // Transport
     uxrUDPTransport transport;
-    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
+    uxrUDPPlatform udp_platform;
+    if(!uxr_init_udp_transport(&transport, &udp_platform, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;

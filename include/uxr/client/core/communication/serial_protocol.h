@@ -23,40 +23,66 @@ extern "C"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include <uxr/client/config.h>
 
-#define UXR_FRAMING_END_FLAG 0x7E
+#define UXR_FRAMING_BEGIN_FLAG 0x7E
 #define UXR_FRAMING_ESC_FLAG 0x7D
 #define UXR_FRAMING_XOR_FLAG 0x20
 
-#define UXR_SERIAL_MTU          UXR_CONFIG_SERIAL_TRANSPORT_MTU //TODO: Change the name for a generic serial mtu.
-#define UXR_SERIAL_OVERHEAD     5
-#define UXR_SERIAL_BUFFER_SIZE  (2 * (UXR_SERIAL_MTU + UXR_SERIAL_OVERHEAD))
-
-typedef struct uxrSerialInputBuffer
+typedef enum uxrSerialInputState
 {
-    uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
-    uint16_t head;
-    uint16_t marker;
-    uint16_t tail;
-    bool stream_init;
+    UXR_SERIAL_UNINITIALIZED,
+    UXR_SERIAL_READING_SRC_ADDR,
+    UXR_SERIAL_READING_DST_ADDR,
+    UXR_SERIAL_READING_LEN_LSB,
+    UXR_SERIAL_READING_LEN_MSB,
+    UXR_SERIAL_READING_PAYLOAD,
+    UXR_SERIAL_READING_CRC_LSB,
+    UXR_SERIAL_READING_CRC_MSB,
 
-} uxrSerialInputBuffer;
-
-typedef struct uxrSerialOutputBuffer
-{
-    uint8_t buffer[UXR_SERIAL_BUFFER_SIZE];
-
-} uxrSerialOutputBuffer;
+} uxrSerialInputState;
 
 typedef struct uxrSerialIO
 {
-    uxrSerialInputBuffer input;
-    uxrSerialOutputBuffer output;
+    uxrSerialInputState state;
+    uint8_t local_addr;
+    uint8_t rb[42];
+    uint8_t rb_head;
+    uint8_t rb_tail;
+    uint8_t src_addr;
+    uint16_t msg_len;
+    uint16_t msg_pos;
+    uint16_t msg_crc;
+    uint16_t cmp_crc;
+    uint8_t wb[42];
+    uint8_t wb_pos;
 
 } uxrSerialIO;
 
-typedef uint16_t (*uxr_read_cb)(void*, uint8_t*, size_t, int);
+void uxr_init_serial_io(uxrSerialIO* serial_io, uint8_t local_addr);
+
+void update_crc(uint16_t* crc, const uint8_t data);
+bool get_next_octet(uxrSerialIO* serial_io, uint8_t* octet);
+bool add_next_octet(uxrSerialIO* serial_io, uint8_t octet);
+
+struct uxrSerialPlatform;
+typedef size_t (*uxr_write_cb)(struct uxrSerialPlatform*, uint8_t*, size_t, uint8_t*);
+typedef size_t (*uxr_read_cb)(struct uxrSerialPlatform*, uint8_t*, size_t, int, uint8_t*);
+
+size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
+                            uxr_write_cb write_cb,
+                            void* cb_arg,
+                            const uint8_t* buf,
+                            size_t len,
+                            uint8_t remote_addr,
+                            uint8_t* errcode);
+size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
+                           uxr_read_cb read_cb,
+                           void* cb_arg,
+                           uint8_t* buf,
+                           size_t len,
+                           uint8_t* remote_addr,
+                           int timeout,
+                           uint8_t* errcode);
 
 #ifdef __cplusplus
 }

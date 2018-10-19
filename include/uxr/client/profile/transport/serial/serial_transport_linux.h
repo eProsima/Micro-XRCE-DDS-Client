@@ -20,25 +20,13 @@ extern "C"
 {
 #endif
 
-#include <uxr/client/core/communication/communication.h>
-#include <uxr/client/core/communication/serial_protocol.h>
-#include <uxr/client/dll.h>
 #include <poll.h>
 
-typedef struct uxrSerialTransport
+typedef struct uxrSerialPlatform
 {
-    uint8_t buffer[UXR_CONFIG_SERIAL_TRANSPORT_MTU];
-    uint8_t remote_addr;
-    uint8_t local_addr;
     struct pollfd poll_fd;
-    uxrSerialIO serial_io;
-    uxrCommunication comm;
 
-} uxrSerialTransport;
-
-UXRDLLAPI bool uxr_init_serial_transport(uxrSerialTransport* transport, const char* device, uint8_t remote_addr, uint8_t local_addr);
-UXRDLLAPI bool uxr_init_serial_transport_fd(uxrSerialTransport* transport, const int fd, uint8_t remote_addr, uint8_t local_addr);
-UXRDLLAPI bool uxr_close_serial_transport(uxrSerialTransport* transport);
+} uxrSerialPlatform;
 
 #ifdef __cplusplus
 }

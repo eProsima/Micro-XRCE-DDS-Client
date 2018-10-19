@@ -26,7 +26,7 @@ static bool listen_message_reliably(uxrSession* session, int poll_ms);
 static bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, size_t attempts);
 
 static void send_message(const uxrSession* session, uint8_t* buffer, size_t length);
-static bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms);
+static bool recv_message(const uxrSession* session, uint8_t** buffer, size_t* length, int poll_ms);
 
 static void write_submessage_heartbeat(const uxrSession* session, uxrStreamId stream);
 static void write_submessage_acknack(const uxrSession* session, uxrStreamId stream);
@@ -334,7 +334,7 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
 inline void send_message(const uxrSession* session, uint8_t* buffer, size_t length)
 {
     (void) session->comm->send_msg(session->comm->instance, buffer, length);
-    DEBUG_PRINT_MESSAGE(UXR_SEND, buffer, length, session->info.key);
+    UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, buffer, length, session->info.key);
 }
 
 inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
@@ -342,7 +342,7 @@ inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* len
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
     if(received)
     {
-        DEBUG_PRINT_MESSAGE(UXR_RECV, *buffer, *length, session->info.key);
+        UXR_DEBUG_PRINT_MESSAGE(UXR_RECV, *buffer, *length, session->info.key);
     }
     return received;
 }

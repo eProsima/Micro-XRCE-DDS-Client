@@ -12,34 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_CORE_COMMUNICATION_COMMUNICATION_H_
-#define _UXR_CLIENT_CORE_COMMUNICATION_COMMUNICATION_H_
+#ifndef _UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
+#define _UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
+#include <winsock2.h>
 
-typedef bool (*send_msg_func)(void* instance, const uint8_t* buf, size_t len);
-typedef bool (*recv_msg_func)(void* instance, uint8_t** buf, size_t* len, int timeout);
-typedef uint8_t (*comm_error_func)(void);
-
-typedef struct uxrCommunication
+typedef struct uxrUDPPlatform
 {
-    void* instance;
-    send_msg_func send_msg;
-    recv_msg_func recv_msg;
-    comm_error_func comm_error;
-    uint16_t mtu;
+    struct sockaddr remote_addr;
+    WSAPOLLFD poll_fd;
 
-} uxrCommunication;
+} uxrUDPPlatform;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_UXR_CLIENT_CORE_COMMUNICATION_COMMUNICATION_H_
+#endif //_UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_

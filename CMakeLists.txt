@@ -113,18 +113,40 @@ foreach(TRANSPORT_TYPE UDP TCP SERIAL)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             set(PLATFORM_NAME_LINUX ON)
-            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
+            set(${TRANSPORT_TYPE}_SRCS
+                src/c/profile/transport/${TT}/${TT}_transport.c
+                src/c/profile/transport/${TT}/${TT}_transport_linux.c
+                )
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             set(PLATFORM_NAME_WINDOWS ON)
-            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_windows.c)
+            set(${TRANSPORT_TYPE}_SRCS
+                src/c/profile/transport/${TT}/${TT}_transport.c
+                src/c/profile/transport/${TT}/${TT}_transport_windows.c
+                )
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "nuttx")
                 set(PLATFORM_NAME_NUTTX ON)
-                set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
+                set(${TRANSPORT_TYPE}_SRCS
+                    src/c/profile/transport/${TT}/${TT}_transport.c
+                    src/c/profile/transport/${TT}/${TT}_transport_linux.c
+                    )
             endif()
         endif()
     endif()
 endforeach()
+
+# Transport discovery source
+if(PROFILE_DISCOVERY)
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+#    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+#        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_windows_datagram.c)
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
+        if(${PLATFORM_NAME} STREQUAL "nuttx")
+            set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        endif()
+    endif()
+endif()
 
 # Other sources
 set(SRCS
@@ -150,6 +172,8 @@ set(SRCS
     $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
     $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
     $<$<BOOL:${PROFILE_WRITE_ACCESS}>:src/c/profile/session/write_access.c>
+    $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${PROFILE_DISCOVERY}>>:src/c/profile/discovery/discovery.c>
+    ${UDP_DISCOVERY_SRCS}
     ${UDP_SRCS}
     ${TCP_SRCS}
     ${SERIAL_SRCS}
@@ -229,6 +253,9 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
+    if(NOT ${SYSTEM_CMAKE_NAME} STREQUAL "Windows")
+        add_subdirectory(examples/Discovery)
+    endif()
 endif()
 
 ###############################################################################
@@ -244,9 +271,9 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
         add_subdirectory(test/unitary/streams/output_best_effort)
 
         if(NOT WIN32)
-            #add_subdirectory(test/transport/serial_comm)
-            #add_subdirectory(test/integration/interaction)
-            #add_subdirectory(test/integration/cross_serialization)
+            add_subdirectory(test/transport/serial_comm)
+            add_subdirectory(test/integration/interaction)
+            add_subdirectory(test/integration/cross_serialization)
         endif()
     endif()
 endif()

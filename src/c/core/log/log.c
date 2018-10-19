@@ -72,11 +72,11 @@ static const char* request_to_string(const BaseObjectRequest* request);
 static const char* reply_to_string(const BaseObjectReply* reply);
 static void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload);
 static void print_create_submessage(const char* pre, const CREATE_Payload* payload, uint8_t flags);
-//static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload);
+static void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload);
 static void print_delete_submessage(const char* pre, const DELETE_Payload* payload);
 static void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload);
 static void print_status_submessage(const char* pre, const STATUS_Payload* payload);
-//static void print_info_submessage(const char* pre, const INFO_Payload* payload);
+static void print_info_submessage(const char* pre, const INFO_Payload* payload);
 static void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payload);
 static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_Payload_Data* payload);
 static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload);
@@ -137,7 +137,9 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
             case SUBMESSAGE_ID_GET_INFO:
             {
-                printf("%s[GET INFO SUBMESSAGE (not supported)]%s", RED, RESTORE_COLOR);
+                GET_INFO_Payload payload;
+                uxr_deserialize_GET_INFO_Payload(&mb, &payload);
+                print_get_info_submessage(color, &payload);
 
             } break;
 
@@ -166,7 +168,10 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
             case SUBMESSAGE_ID_INFO:
             {
-                printf("%s[INFO SUBMESSAGE (not supported)]%s", RED, RESTORE_COLOR);
+                INFO_Payload payload;
+                uxr_deserialize_INFO_Payload(&mb, &payload);
+                print_info_submessage(color, &payload);
+
             } break;
 
             case SUBMESSAGE_ID_WRITE_DATA:
@@ -223,7 +228,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             } break;
         }
 
-        //avanzar hasta length.
+        //Check if must be force to advance to the length
         submessage_counter++;
     }
     print_tail(initial_log_time);
@@ -403,11 +408,18 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
             RESTORE_COLOR);
 }
 
-/*void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload)
+void print_get_info_submessage(const char* pre, const GET_INFO_Payload* payload)
 {
-    //TODO
-    (void) payload;
-}*/
+    const char* config = (payload->info_mask & 1) ? "CONFIG" : "";
+    const char* activity = (payload->info_mask & 2) ? "ACTIVITY" : "";
+
+    printf("%s[GET INFO | %s | %s | %s]%s",
+            pre,
+            request_to_string(&payload->base),
+            config,
+            activity,
+            RESTORE_COLOR);
+}
 
 void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
 {
@@ -433,11 +445,18 @@ void print_status_submessage(const char* pre, const STATUS_Payload* payload)
             RESTORE_COLOR);
 }
 
-/*void print_info_submessage(const char* pre, const INFO_Payload* payload)
+void print_info_submessage(const char* pre, const INFO_Payload* payload)
 {
-    //TODO
-    (void) payload;
-}*/
+    const uint8_t* ip = payload->object_info.activity._.agent.address_seq.data[0]._.medium_locator.address;
+    uint16_t port = payload->object_info.activity._.agent.address_seq.data[0]._.medium_locator.locator_port;
+
+    printf("%s[INFO | %s | ip: %u.%u.%u.%u | port: %u]%s",
+            pre,
+            reply_to_string(&payload->base),
+            ip[0], ip[1], ip[2], ip[3],
+            port,
+            RESTORE_COLOR);
+}
 
 void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payload)
 {
@@ -543,7 +562,8 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
         stream_id = (uint8_t)seq_num;
     }
 
-    const char* client_key_str = data_to_string(client_key, 4);
+
+    const char* client_key_str = client_key ? data_to_string(client_key, 4) : "-";
     printf("%s%s%3zu: %s(key: %s| %c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, client_key_str, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
 }
 

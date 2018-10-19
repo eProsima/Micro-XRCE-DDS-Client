@@ -33,36 +33,11 @@
 #include <uxr/client/profile/session/write_access.h>
 #endif //PROFILE_WRITE_ACCESS
 
-#ifdef PROFILE_UDP_TRANSPORT
-#if defined(PLATFORM_NAME_LINUX)
-#include <uxr/client/profile/transport/udp_transport_linux.h>
-#elif defined(PLATFORM_NAME_WINDOWS)
-#include <uxr/client/profile/transport/udp_transport_windows.h>
-#elif defined(PLATFORM_NAME_NUTTX)
-#include <uxr/client/profile/transport/udp_transport_linux.h>
-#endif
-#endif //PROFILE_UDP_TRANSPORT
+#ifdef PROFILE_DISCOVERY
+#include <uxr/client/profile/discovery/discovery.h>
+#endif //PROFILE_DISCOVERY
 
-#ifdef PROFILE_TCP_TRANSPORT
-#if defined(PLATFORM_NAME_LINUX)
-#include <uxr/client/profile/transport/tcp_transport_linux.h>
-#elif defined(PLATFORM_NAME_WINDOWS)
-#include <uxr/client/profile/transport/tcp_transport_windows.h>
-#elif defined(PLATFORM_NAME_NUTTX)
-#include <uxr/client/profile/transport/tcp_transport_linux.h>
-#endif
-#endif //PROFILE_TCP_TRANSPORT
-
-#ifdef PROFILE_SERIAL_TRANSPORT
-#if defined(PLATFORM_NAME_LINUX)
-#include <uxr/client/profile/transport/serial_transport_linux.h>
-#elif defined(PLATFORM_NAME_WINDOWS)
-#include <uxr/client/profile/transport/serial_transport_windows.h>
-#elif defined(PLATFORM_NAME_NUTTX)
-#include <uxr/client/profile/transport/serial_transport_linux.h>
-#endif
-#endif //PROFILE_SERIAL_TRANSPORT
-
+#include <uxr/client/transport.h>
 #include <uxr/client/core/session/session.h>
 
 #endif // _UXR_CLIENT_CLIENT_H_
