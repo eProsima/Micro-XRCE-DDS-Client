@@ -25,7 +25,9 @@ if(MSVC OR MSVC_IDE)
     target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
 endif()
 
-target_link_libraries(${PROJECT_NAME} micrortps_client)
+get_target_property(CLIENT_INCLUDES microxrcedds_client INCLUDE_DIRECTORIES)
+include_directories("${CLIENT_INCLUDES}") #Used to include private includes
+target_link_libraries(${PROJECT_NAME} microxrcedds_client)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

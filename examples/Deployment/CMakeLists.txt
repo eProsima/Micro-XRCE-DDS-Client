@@ -18,26 +18,30 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
 endif()
 
 
-if(NOT PROFILE_CREATE_ENTITIES_REF OR NOT PROFILE_CREATE_ENTITIES_XML OR NOT PROFILE_READ_ACCESS OR NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS and PROFILE_UDP_TRANSPORT must be enabled.")
+if(NOT PROFILE_CREATE_ENTITIES_REF OR
+   NOT PROFILE_CREATE_ENTITIES_XML OR
+   NOT PROFILE_READ_ACCESS OR
+   NOT PROFILE_WRITE_ACCESS OR
+   NOT PROFILE_UDP_TRANSPORT)
+    message(WARNING "Can not compile example: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS PROFILE_WRITE_ACCESS and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
 
     #############################################################
     ###                     CONFIGURATOR
     #############################################################
     project(ConfiguratorClient)
-    add_executable(ConfiguratorClient configurator_client.c HelloWorld.c HelloWorldWriter.c)
+    add_executable(ConfiguratorClient configurator_client.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(ConfiguratorClient micrortps_client)
+    target_link_libraries(ConfiguratorClient microxrcedds_client)
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"
@@ -47,18 +51,18 @@ else()
     ###                      PUBLISHER
     #############################################################
     project(PublisherClient)
-    add_executable(PublisherClient publisher.c HelloWorld.c HelloWorldWriter.c)
+    add_executable(PublisherClient publisher.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(PublisherClient micrortps_client)
+    target_link_libraries(PublisherClient microxrcedds_client)
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"
@@ -72,14 +76,14 @@ else()
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(SubscriberClient micrortps_client)
+    target_link_libraries(SubscriberClient microxrcedds_client)
 
     install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/micrortps/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
+        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
         )
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/micrortps/client/${PROJECT_NAME}
+        DESTINATION  examples/uxr/client/${PROJECT_NAME}
         FILES_MATCHING PATTERN "*.h"
                        PATTERN "*.c"
                        PATTERN "*.idl"

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 ###############################################################################
-# CMake build rules for Micro RTPS Client
+# CMake build rules for Micro XRCE-DDS Client
 ###############################################################################
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
@@ -35,14 +35,14 @@ endif()
 # Product information
 ###############################################################################
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(micrortps_client C)
+    project(microxrcedds_client C)
     set(PROJECT_VERSION_MAJOR 1)
     set(PROJECT_VERSION_MINOR 0)
     set(PROJECT_VERSION_PATCH 0)
     set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(micrortps_client VERSION "1.0.0" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.0.0" LANGUAGES C)
 endif()
 
 ###############################################################################
@@ -54,6 +54,9 @@ option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
 option(VERBOSE_SERIALIZATION "Use verbose output" OFF)
 option(VERBOSE_MESSAGE "Use verbose output" OFF)
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Generic"))
+    option(MEMORY_PERFORMANCE "Memory performace test." OFF)
+endif()
 
 if(EPROSIMA_BUILD)
     set(EPROSIMA_BUILD_EXAMPLES ON)
@@ -65,9 +68,11 @@ endif()
 # Client configuration options
 ###############################################################################
 
-# Load client.config.
-if(EXISTS ${PROJECT_SOURCE_DIR}/client.config)
-    configure_file(${PROJECT_SOURCE_DIR}/client.config ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
+# Load configuration file.
+set(CLIENT_CONFIG "${PROJECT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
+
+if(EXISTS ${CLIENT_CONFIG})
+    configure_file(${CLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
     load_cache(${PROJECT_SOURCE_DIR})
     file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
 else()
@@ -108,45 +113,70 @@ foreach(TRANSPORT_TYPE UDP TCP SERIAL)
         string(TOLOWER ${TRANSPORT_TYPE} TT)
         if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             set(PLATFORM_NAME_LINUX ON)
-            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
+            set(${TRANSPORT_TYPE}_SRCS
+                src/c/profile/transport/${TT}/${TT}_transport.c
+                src/c/profile/transport/${TT}/${TT}_transport_linux.c
+                )
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             set(PLATFORM_NAME_WINDOWS ON)
-            set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_windows.c)
+            set(${TRANSPORT_TYPE}_SRCS
+                src/c/profile/transport/${TT}/${TT}_transport.c
+                src/c/profile/transport/${TT}/${TT}_transport_windows.c
+                )
         elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
             if(${PLATFORM_NAME} STREQUAL "nuttx")
                 set(PLATFORM_NAME_NUTTX ON)
-                set(${TRANSPORT_TYPE}_SRCS src/c/profile/transport/${TT}_transport_linux.c)
+                set(${TRANSPORT_TYPE}_SRCS
+                    src/c/profile/transport/${TT}/${TT}_transport.c
+                    src/c/profile/transport/${TT}/${TT}_transport_linux.c
+                    )
             endif()
         endif()
     endif()
 endforeach()
 
+# Transport discovery source
+if(PROFILE_DISCOVERY)
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+#    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+#        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_windows_datagram.c)
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
+        if(${PLATFORM_NAME} STREQUAL "nuttx")
+            set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        endif()
+    endif()
+endif()
+
 # Other sources
 set(SRCS
-    $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
-    $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
-    $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
-    $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
-    ${UDP_SRCS}
-    ${TCP_SRCS}
-    ${SERIAL_SRCS}
     src/c/core/communication/serial_protocol.c
-    src/c/core/session/input_best_effort_stream.c
-    src/c/core/session/input_reliable_stream.c
-    src/c/core/session/output_best_effort_stream.c
-    src/c/core/session/output_reliable_stream.c
+    src/c/core/session/stream/input_best_effort_stream.c
+    src/c/core/session/stream/input_reliable_stream.c
+    src/c/core/session/stream/output_best_effort_stream.c
+    src/c/core/session/stream/output_reliable_stream.c
+    src/c/core/session/stream/stream_storage.c
+    src/c/core/session/stream/stream_id.c
+    src/c/core/session/stream/seq_num.c
     src/c/core/session/session.c
     src/c/core/session/session_info.c
-    src/c/core/session/stream_id.c
-    src/c/core/session/stream_storage.c
     src/c/core/session/submessage.c
-    src/c/core/session/seq_num.c
     src/c/core/session/object_id.c
     src/c/core/serialization/xrce_protocol.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
-    src/c/core/util/time.c
-    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/session/log/message.c>
+    src/c/util/time.c
+    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
+    $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
+    $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
+    $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
+    $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
+    $<$<BOOL:${PROFILE_WRITE_ACCESS}>:src/c/profile/session/write_access.c>
+    $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${PROFILE_DISCOVERY}>>:src/c/profile/discovery/discovery.c>
+    ${UDP_DISCOVERY_SRCS}
+    ${UDP_SRCS}
+    ${TCP_SRCS}
+    ${SERIAL_SRCS}
     )
 
 ###############################################################################
@@ -189,20 +219,19 @@ else()
 endif()
 
 # Create source files with the define
-configure_file(${PROJECT_SOURCE_DIR}/include/micrortps/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
     )
 
 ###############################################################################
 # Compile setting
 ###############################################################################
 
-
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
-        -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:SERIALIZATION_LOGS>
-        -D$<$<BOOL:${VERBOSE_MESSAGE}>:MESSAGE_LOGS>
+        -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:UXR_SERIALIZATION_LOGS>
+        -D$<$<BOOL:${VERBOSE_MESSAGE}>:UXR_MESSAGE_LOGS>
     )
 
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
@@ -224,6 +253,9 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
+    if(NOT ${SYSTEM_CMAKE_NAME} STREQUAL "Windows")
+        add_subdirectory(examples/Discovery)
+    endif()
 endif()
 
 ###############################################################################
@@ -236,13 +268,19 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     include(CTest)
 
     if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-        add_subdirectory(test/integration/interaction)
-        add_subdirectory(test/integration/cross_serialization)
-        add_subdirectory(test/unitary/streams/output_best_effort)
+        add_subdirectory(test/unitary/streams)
 
         if(NOT WIN32)
             add_subdirectory(test/transport/serial_comm)
+            add_subdirectory(test/integration/interaction)
+            add_subdirectory(test/integration/cross_serialization)
         endif()
+    endif()
+endif()
+
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Generic"))
+    if(MEMORY_PERFORMANCE)
+        add_subdirectory(test/memory/consumption)
     endif()
 endif()
 
@@ -260,14 +298,14 @@ install(TARGETS ${PROJECT_NAME}
     )
 
 # Install includes
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/micrortps/client/
-    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/uxr/client/
+    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
     FILES_MATCHING PATTERN "*.h"
     )
 
 # Install config.h
-install(FILES ${PROJECT_BINARY_DIR}/include/micrortps/client/config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/micrortps/client
+install(FILES ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
+    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
     )
 
 # Export library

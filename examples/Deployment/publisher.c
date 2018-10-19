@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "HelloWorldWriter.h"
+#include "HelloWorld.h"
 
-#include <micrortps/client/client.h>
+#include <uxr/client/client.h>
+#include <ucdr/microcdr.h>
+
 #include <stdio.h>
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 int main(int args, char** argv)
 {
@@ -34,17 +36,18 @@ int main(int args, char** argv)
     }
 
     // Transport
-    mrUDPTransport transport;
-    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
+    uxrUDPTransport transport;
+    uxrUDPPlatform udp_platform;
+    if(!uxr_init_udp_transport(&transport, &udp_platform, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
     }
 
     // Session
-    mrSession session;
-    mr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
-    if(!mr_create_session(&session))
+    uxrSession session;
+    uxr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
+    if(!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -52,12 +55,12 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
-    mrObjectId datawriter_id = mr_object_id((uint16_t)atoi(argv[4]), MR_DATAWRITER_ID);
+    uxrObjectId datawriter_id = uxr_object_id((uint16_t)atoi(argv[4]), UXR_DATAWRITER_ID);
 
     // Write topics
     bool connected = true;
@@ -65,9 +68,13 @@ int main(int args, char** argv)
     while(connected)
     {
         HelloWorld topic = {count++, "Hello DDS world!"};
-        (void) mr_write_HelloWorld_topic(&session, reliable_out, datawriter_id, &topic);
 
-        connected = mr_run_session_until_timeout(&session, 1000);
+        ucdrBuffer mb;
+        uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
+        uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
+        HelloWorld_serialize_topic(&mb, &topic);
+
+        connected = uxr_run_session_time(&session, 1000);
         if(connected)
         {
             printf("Sent topic: %s, id: %i\n", topic.message, topic.index);
@@ -75,7 +82,7 @@ int main(int args, char** argv)
     }
 
     // Delete resources
-    mr_close_udp_transport(&transport);
+    uxr_close_udp_transport(&transport);
 
     return 0;
 }

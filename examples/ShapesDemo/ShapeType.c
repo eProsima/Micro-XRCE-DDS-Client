@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file ShapeType.c
  * This source file contains the definition of the described types in the IDL file.
  *
@@ -21,36 +21,45 @@
 
 #include "ShapeType.h"
 
-#include <microcdr/microcdr.h>
+#include <ucdr/microcdr.h>
 #include <string.h>
 
-bool ShapeType_serialize_topic(MicroBuffer* writer, const ShapeType* topic)
+bool ShapeType_serialize_topic(ucdrBuffer* writer, const ShapeType* topic)
 {
-    (void) serialize_sequence_char(writer, topic->color, (uint32_t)strlen(topic->color) + 1);
-    (void) serialize_int32_t(writer, topic->x);
-    (void) serialize_int32_t(writer, topic->y);
-    (void) serialize_int32_t(writer, topic->shapesize);
+    (void) ucdr_serialize_string(writer, topic->color);
 
-    return writer->error == BUFFER_OK;
+    (void) ucdr_serialize_int32_t(writer, topic->x);
+
+    (void) ucdr_serialize_int32_t(writer, topic->y);
+
+    (void) ucdr_serialize_int32_t(writer, topic->shapesize);
+
+    return !writer->error;
 }
 
-bool ShapeType_deserialize_topic(MicroBuffer* reader, ShapeType* topic)
+bool ShapeType_deserialize_topic(ucdrBuffer* reader, ShapeType* topic)
 {
-    uint32_t size_color;
-    (void) deserialize_sequence_char(reader, topic->color, &size_color);
-    (void) deserialize_int32_t(reader, &topic->x);
-    (void) deserialize_int32_t(reader, &topic->y);
-    (void) deserialize_int32_t(reader, &topic->shapesize);
+    (void) ucdr_deserialize_string(reader, topic->color, 255);
 
-    return reader->error == BUFFER_OK;
+    (void) ucdr_deserialize_int32_t(reader, &topic->x);
+
+    (void) ucdr_deserialize_int32_t(reader, &topic->y);
+
+    (void) ucdr_deserialize_int32_t(reader, &topic->shapesize);
+
+    return !reader->error;
 }
 
 uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size)
 {
-    size += 4 + get_alignment(size, 4) + (uint32_t)strlen(topic->color) + 1;
-    size += 4 + get_alignment(size, 4);
-    size += 4 + get_alignment(size, 4);
-    size += 4 + get_alignment(size, 4);
+    uint32_t previousSize = size;
+    size += ucdr_alignment(size, 4) + 4 + (uint32_t)strlen(topic->color) + 1;
 
-    return size;
+    size += ucdr_alignment(size, 4) + 4;
+
+    size += ucdr_alignment(size, 4) + 4;
+
+    size += ucdr_alignment(size, 4) + 4;
+
+    return size - previousSize;
 }
