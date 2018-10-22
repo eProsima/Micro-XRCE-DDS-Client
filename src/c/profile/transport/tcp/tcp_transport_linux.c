@@ -1,10 +1,8 @@
 #include <uxr/client/profile/transport/tcp/tcp_transport_linux.h>
 #include <uxr/client/profile/transport/tcp/tcp_transport.h>
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 

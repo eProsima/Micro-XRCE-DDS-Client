@@ -20,7 +20,8 @@ extern "C"
 {
 #endif
 
-#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <poll.h>
 
 typedef struct uxrUDPPlatform

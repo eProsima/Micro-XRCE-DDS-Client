@@ -28,9 +28,10 @@ extern "C"
 #include <stdbool.h>
 
 #if defined(PLATFORM_NAME_LINUX)
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <poll.h>
-#elif define(PLATFORM_NAME_WINDOWS)
+#elif defined(PLATFORM_NAME_WINDOWS)
 #endif
 
 
@@ -41,7 +42,7 @@ typedef struct uxrUDPTransportDatagram
 #if defined(PLATFORM_NAME_LINUX)
     uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
     struct pollfd poll_fd;
-#elif define(PLATFORM_NAME_WINDOWS)
+#elif defined(PLATFORM_NAME_WINDOWS)
     #error "Windows platform not implemented"
 #endif
 
