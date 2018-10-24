@@ -6,7 +6,7 @@ In *Micro XRCE-DDS* a *Micro XRCE-DDS Client* can communicate with DDS Network a
 Clients can publish and subscribe to data topics in *DDS Global Data Space*. *Micro XRCE-DDS* provides you with a C API to create *Micro XRCE-DDS Clients*.
 
 
-<p align="center"> <img src="docs/client_architecture.svg" alt="Image"/> </p>
+<p align="center"> <img src="docs/client_architecture.png" alt="Image"/> </p>
 
 ## Documentation
 
