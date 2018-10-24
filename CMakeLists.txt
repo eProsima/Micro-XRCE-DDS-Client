@@ -54,7 +54,7 @@ option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
 option(VERBOSE_SERIALIZATION "Use verbose output" OFF)
 option(VERBOSE_MESSAGE "Use verbose output" OFF)
-if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Generic"))
+if(PLATFORM_NAME_LINUX)
     option(MEMORY_PERFORMANCE "Memory performace test." OFF)
 endif()
 
@@ -107,51 +107,49 @@ eprosima_find_package(microcdr)
 # Sources
 ###############################################################################
 
-# Transport source
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(TRANSPORT_TYPES "UDP" "TCP")
-else()
+# Check platform.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(PLATFORM_NAME_LINUX ON)
     set(TRANSPORT_TYPES "UDP" "TCP" "SERIAL")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(PLATFORM_NAME_WINDOWS ON)
+    set(TRANSPORT_TYPES "UDP" "TCP")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
+    if(PLATFORM_NAME STREQUAL "nuttx")
+        set(PLATFORM_NAME_NUTTX ON)
+        set(TRANSPORT_TYPES "UDP" "TCP" "SERIAL")
+    endif()
 endif()
 
-
+# Transport sources.
 foreach(TRANS_TYPE ${TRANSPORT_TYPES})
     if(PROFILE_${TRANS_TYPE}_TRANSPORT)
         string(TOLOWER ${TRANS_TYPE} TT)
-        if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-            set(PLATFORM_NAME_LINUX ON)
+        if(PLATFORM_NAME_LINUX)
             set(${TRANS_TYPE}_SRCS
                 src/c/profile/transport/${TT}/${TT}_transport.c
                 src/c/profile/transport/${TT}/${TT}_transport_linux.c
                 )
-        elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-            set(PLATFORM_NAME_WINDOWS ON)
+        elseif(PLATFORM_NAME_WINDOWS)
             set(${TRANS_TYPE}_SRCS
                 src/c/profile/transport/${TT}/${TT}_transport.c
                 src/c/profile/transport/${TT}/${TT}_transport_windows.c
                 )
-        elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
-            if(${PLATFORM_NAME} STREQUAL "nuttx")
-                set(PLATFORM_NAME_NUTTX ON)
-                set(${TRANS_TYPE}_SRCS
-                    src/c/profile/transport/${TT}/${TT}_transport.c
-                    src/c/profile/transport/${TT}/${TT}_transport_linux.c
-                    )
-            endif()
+        elseif(PLATFORM_NAME_NUTTX)
+            set(${TRANS_TYPE}_SRCS
+                src/c/profile/transport/${TT}/${TT}_transport.c
+                src/c/profile/transport/${TT}/${TT}_transport_linux.c
+                )
         endif()
     endif()
 endforeach()
 
-# Transport discovery source
+# Transport discovery source.
 if(PROFILE_DISCOVERY)
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    if(PLATFORM_NAME_LINUX)
         set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
-#    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-#        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_windows_datagram.c)
-    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Generic")
-        if(${PLATFORM_NAME} STREQUAL "nuttx")
-            set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
-        endif()
+    elseif(PLATFORM_NAME_NUTTX)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
     endif()
 endif()
 
@@ -260,7 +258,7 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
-    if(NOT ${SYSTEM_CMAKE_NAME} STREQUAL "Windows")
+    if(PLATFORM_NAME_LINUX OR PLATFORM_NAME_NUTTX)
         add_subdirectory(examples/Discovery)
     endif()
 endif()
@@ -285,7 +283,7 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     endif()
 endif()
 
-if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Generic"))
+if(PLATFORM_NAME_LINUX OR PLATFORM_NAME_NUTTX)
     if(MEMORY_PERFORMANCE)
         add_subdirectory(test/memory/consumption)
     endif()
