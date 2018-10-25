@@ -274,10 +274,10 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
 
     if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
         add_subdirectory(test/unitary/streams)
+        add_subdirectory(test/integration/interaction)
 
         if(NOT WIN32)
             add_subdirectory(test/transport/serial_comm)
-            add_subdirectory(test/integration/interaction)
             add_subdirectory(test/integration/cross_serialization)
         endif()
     endif()
