@@ -38,19 +38,9 @@ UXRDLLAPI bool uxr_init_udp_transport(uxrUDPTransport* transport,
                                       struct uxrUDPPlatform* platform,
                                       const char* ip,
                                       uint16_t port);
+
 UXRDLLAPI bool uxr_close_udp_transport(uxrUDPTransport* transport);
 
-bool uxr_init_udp_platform(struct uxrUDPPlatform* platform, const char* ip, uint16_t port);
-bool uxr_close_udp_platform(struct uxrUDPPlatform* platform);
-size_t uxr_write_udp_data_platform(struct uxrUDPPlatform* platform,
-                                   const uint8_t* buf,
-                                   size_t len,
-                                   uint8_t* errcode);
-size_t uxr_read_udp_data_platform(struct uxrUDPPlatform* platform,
-                                  uint8_t* buf,
-                                  size_t len,
-                                  int timeout,
-                                  uint8_t* errcode);
 
 #ifdef __cplusplus
 }

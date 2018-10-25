@@ -1,5 +1,5 @@
 #include <uxr/client/profile/transport/tcp/tcp_transport_linux.h>
-#include <uxr/client/profile/transport/tcp/tcp_transport.h>
+#include "tcp_transport_internal.h"
 
 #include <arpa/inet.h>
 #include <unistd.h>
