@@ -54,7 +54,7 @@ option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
 option(THIRDPARTY "Activate the build of thirdparties" OFF)
 option(VERBOSE_SERIALIZATION "Use verbose output" OFF)
 option(VERBOSE_MESSAGE "Use verbose output" OFF)
-if(PLATFORM_NAME_LINUX)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(MEMORY_PERFORMANCE "Memory performace test." OFF)
 endif()
 
@@ -283,10 +283,8 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     endif()
 endif()
 
-if(PLATFORM_NAME_LINUX OR PLATFORM_NAME_NUTTX)
-    if(MEMORY_PERFORMANCE)
-        add_subdirectory(test/memory/consumption)
-    endif()
+if(PLATFORM_NAME_LINUX AND MEMORY_PERFORMANCE)
+    add_subdirectory(test/memory/consumption)
 endif()
 
 ###############################################################################
