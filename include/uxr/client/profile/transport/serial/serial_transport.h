@@ -43,19 +43,8 @@ UXRDLLAPI bool uxr_init_serial_transport(uxrSerialTransport* transport,
                                          const int fd,
                                          uint8_t remote_addr,
                                          uint8_t local_addr);
-UXRDLLAPI bool uxr_close_serial_transport(uxrSerialTransport* transport);
 
-bool uxr_init_serial_platform(struct uxrSerialPlatform* platform, const int fd, uint8_t remote_addr, uint8_t local_addr);
-bool uxr_close_serial_platform(struct uxrSerialPlatform* platform);
-size_t uxr_write_serial_data_platform(struct uxrSerialPlatform* platform,
-                                      uint8_t* buf,
-                                      size_t len,
-                                      uint8_t* errcode);
-size_t uxr_read_serial_data_platform(struct uxrSerialPlatform* platform,
-                                     uint8_t* buf,
-                                     size_t len,
-                                     int timeout,
-                                     uint8_t* errcode);
+UXRDLLAPI bool uxr_close_serial_transport(uxrSerialTransport* transport);
 
 #ifdef __cplusplus
 }

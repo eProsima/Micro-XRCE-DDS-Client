@@ -1,5 +1,5 @@
 #include <uxr/client/profile/transport/serial/serial_transport_linux.h>
-#include <uxr/client/profile/transport/serial/serial_transport.h>
+#include "serial_transport_internal.h"
 
 #include <unistd.h>
 #include <errno.h>

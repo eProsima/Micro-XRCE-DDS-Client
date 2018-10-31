@@ -272,8 +272,7 @@ private:
     uxrUDPPlatform udp_platform_;
     uxrTCPTransport tcp_transport_;
     uxrTCPPlatform tcp_platform_;
-    uxrSerialTransport serial_transport_;
-    uxrSerialPlatform serial_platform_;
+
     int mtu_;
     uxrSession session_;
 

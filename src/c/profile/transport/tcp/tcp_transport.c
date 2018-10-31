@@ -1,4 +1,4 @@
-#include <uxr/client/profile/transport/tcp/tcp_transport.h>
+#include "tcp_transport_internal.h"
 #include <uxr/client/util/time.h>
 
 /*******************************************************************************
