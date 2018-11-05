@@ -77,7 +77,7 @@ int main(int args, char** argv)
         connected = uxr_run_session_time(&session, 1000);
         if(connected)
         {
-            printf("Sent topic: %s, id: %i\n", topic.message, topic.index);
+            printf("Sent topic: %s, index: %i\n", topic.message, topic.index);
         }
     }
 

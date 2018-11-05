@@ -29,7 +29,7 @@ void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, u
     HelloWorld topic;
     HelloWorld_deserialize_topic(mb, &topic);
 
-    printf("Received topic: %s, id: %i\n", topic.message, topic.index);
+    printf("Received topic: %s, index: %i\n", topic.message, topic.index);
 }
 
 int main(int args, char** argv)
