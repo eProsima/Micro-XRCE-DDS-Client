@@ -180,7 +180,7 @@ void create_subscriber(uxrSession* session, uint16_t id)
                                           "</rtps>"
                                       "</participant>"
                                   "</dds>";
-    uint16_t participant_req = uxr_buffer_create_participant_ref(session, output, participant_id, 0, participant_xml, 0);
+    uint16_t participant_req = uxr_buffer_create_participant_xml(session, output, participant_id, 0, participant_xml, 0);
 
     uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
@@ -256,6 +256,6 @@ void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, 
 
     if(status != UXR_STATUS_OK && status != UXR_STATUS_OK_MATCHED)
     {
-        printf("Status error: 0x%02X at entity id %u of type %u\n", status, object_id.id, object_id.type);
+        printf("Status error: 0x%02X at entity id '%u' of object type '%u'\n", status, object_id.id, object_id.type);
     }
 }

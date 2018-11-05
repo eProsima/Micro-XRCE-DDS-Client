@@ -23,7 +23,7 @@ project(PublishHelloWorldClient)
 if(NOT PROFILE_CREATE_ENTITIES_XML OR
    NOT PROFILE_WRITE_ACCESS OR
    NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: The profiles, PROFILE_CREATE_ENTITIES_XML, PROFILE_CREATE_ENTITIES_XML, and PROFILE_UDP_TRANSPORT must be enabled.")
+    message(WARNING "Can not compile example: The profiles, PROFILE_CREATE_ENTITIES_XML, PROFILE_WRITE_ACCESS, and PROFILE_UDP_TRANSPORT must be enabled.")
 else()
     add_executable(${PROJECT_NAME} main.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
