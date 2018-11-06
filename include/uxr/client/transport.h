@@ -44,7 +44,6 @@
 #if defined(PLATFORM_NAME_LINUX)
 #include <uxr/client/profile/transport/serial/serial_transport_linux.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <uxr/client/profile/transport/serial/serial_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
 #include <uxr/client/profile/transport/serial/serial_transport_linux.h>
 #endif

@@ -26,6 +26,7 @@
 
 #ifdef _WIN32
 #include <Winsock2.h>
+#include <conio.h>
 #else
 #include <sys/select.h>
 #endif
@@ -501,10 +502,14 @@ void print_commands(void)
 
 int check_input(void)
 {
+#ifdef _WIN32
+    return _kbhit();
+#else
     struct timeval tv = {0, 0};
     fd_set fds = {0};
     FD_ZERO(&fds);
     FD_SET(0, &fds); //STDIN 0
     select(1, &fds, NULL, NULL, &tv);
     return FD_ISSET(0, &fds);
+#endif
 }

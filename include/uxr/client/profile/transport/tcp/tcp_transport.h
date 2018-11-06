@@ -57,20 +57,8 @@ UXRDLLAPI bool uxr_init_tcp_transport(uxrTCPTransport* transport,
                                       struct uxrTCPPlatform* platform,
                                       const char* ip,
                                       uint16_t port);
-UXRDLLAPI bool uxr_close_tcp_transport(uxrTCPTransport* transport);
 
-bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port);
-bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform);
-size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                   const uint8_t* buf,
-                                   size_t len,
-                                   uint8_t* errcode);
-size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                  uint8_t* buf,
-                                  size_t len,
-                                  int timeout,
-                                  uint8_t* errcode);
-void uxr_disconnect_tcp_platform(struct uxrTCPPlatform* platform);
+UXRDLLAPI bool uxr_close_tcp_transport(uxrTCPTransport* transport);
 
 #ifdef __cplusplus
 }
