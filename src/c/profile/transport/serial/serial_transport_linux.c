@@ -18,7 +18,16 @@ bool uxr_init_serial_platform(struct uxrSerialPlatform* platform, int fd, uint8_
 
 bool uxr_close_serial_platform(struct uxrSerialPlatform* platform)
 {
-    return (0 == close(platform->poll_fd.fd));
+    bool rv = false;
+    if (-1 == platform->poll_fd.fd)
+    {
+        rv = true;
+    }
+    else
+    {
+        rv = (0 == close(platform->poll_fd.fd));
+    }
+    return rv;
 }
 
 size_t uxr_write_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, uint8_t* errcode)

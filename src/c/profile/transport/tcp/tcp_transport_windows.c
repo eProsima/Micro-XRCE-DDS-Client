@@ -40,11 +40,15 @@ bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint
 bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform)
 {
     bool rv = false;
-    if (0 == closesocket(platform->poll_fd.fd))
+    if (INVALID_SOCKET == platform->poll_fd.fd)
     {
-        rv = (0 == WSACleanup());
+        rv = true;
     }
-    return rv;
+    else
+    {
+        rv = (0 == closesocket(platform->poll_fd.fd));
+    }
+    return (0 == WSACleanup()) && rv;
 }
 
 size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
