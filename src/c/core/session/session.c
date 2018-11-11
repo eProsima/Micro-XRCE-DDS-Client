@@ -25,7 +25,7 @@ static bool listen_message_reliably(uxrSession* session, int poll_ms);
 
 static bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, size_t attempts);
 
-static void send_message(const uxrSession* session, uint8_t* buffer, size_t length);
+static bool send_message(const uxrSession* session, uint8_t* buffer, size_t length);
 static bool recv_message(const uxrSession* session, uint8_t** buffer, size_t* length, int poll_ms);
 
 static void write_submessage_heartbeat(const uxrSession* session, uxrStreamId stream);
@@ -331,10 +331,14 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
     return session->info.last_requested_status != UXR_STATUS_NONE;
 }
 
-inline void send_message(const uxrSession* session, uint8_t* buffer, size_t length)
+inline bool send_message(const uxrSession* session, uint8_t* buffer, size_t length)
 {
-    (void) session->comm->send_msg(session->comm->instance, buffer, length);
-    UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, buffer, length, session->info.key);
+    bool sent = session->comm->send_msg(session->comm->instance, buffer, length);
+    if (sent)
+    {
+        UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, buffer, length, session->info.key);
+    }
+    return sent;
 }
 
 inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
