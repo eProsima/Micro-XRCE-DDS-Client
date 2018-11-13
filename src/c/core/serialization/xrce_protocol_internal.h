@@ -977,6 +977,21 @@ typedef struct HEARTBEAT_Payload
 
 } HEARTBEAT_Payload;
 
+#ifdef PERFORMANCE_TESTING
+typedef struct ECHO_Payload
+{
+    BaseObjectRequest base;
+
+} ECHO_Payload;
+
+typedef struct THROUGHPUT_Payload
+{
+    uint8_t* buf;
+    uint32_t len;
+
+} THROUGHPUT_Payload;
+#endif
+
 bool uxr_serialize_Time_t(ucdrBuffer* buffer, const Time_t* input);
 bool uxr_deserialize_Time_t(ucdrBuffer* buffer, Time_t* output);
 
@@ -1252,6 +1267,14 @@ bool uxr_deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output
 
 bool uxr_serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload* input);
 bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* output);
+
+#ifdef PERFORMANCE_TESTING
+bool uxr_serialize_ECHO_Payload(ucdrBuffer* buffer, const ECHO_Payload* input);
+bool uxr_deserialize_ECHO_Payload(ucdrBuffer* buffer, ECHO_Payload* output);
+
+bool uxr_serialize_THROUGHPUT_Payload(ucdrBuffer* buffer, const THROUGHPUT_Payload* input);
+bool uxr_deserialize_THROUGHPUT_Payload(ucdrBuffer* buffer, THROUGHPUT_Payload* output);
+#endif
 
 #ifdef __cplusplus
 }

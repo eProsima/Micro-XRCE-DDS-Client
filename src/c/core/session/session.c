@@ -42,6 +42,9 @@ static void read_submessage_status(uxrSession* session, ucdrBuffer* submessage);
 static void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t length, uxrStreamId stream_id, uint8_t format);
 static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
 static void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
+#ifdef PERFORMANCE_TESTING
+static void read_submessage_echo(uxrSession* session, ucdrBuffer* submessage);
+#endif
 
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
 
@@ -77,6 +80,13 @@ void uxr_set_topic_callback(uxrSession* session, uxrOnTopicFunc on_topic_func, v
     session->on_topic = on_topic_func;
     session->on_topic_args = args;
 }
+
+#ifdef PERFORMANCE_TESTING
+void uxr_set_echo_callback(uxrSession* session, uxrOnEchoFunc on_echo_func)
+{
+    session->on_echo = on_echo_func;
+}
+#endif
 
 bool uxr_create_session(uxrSession* session)
 {
@@ -228,6 +238,44 @@ bool uxr_run_session_until_one_status(uxrSession* session, int timeout_ms, const
 
     return status_confirmed;
 }
+
+#ifdef PERFORMANCE_TESTING
+uint16_t uxr_buffer_echo(uxrSession* session, uxrStreamId stream_id)
+{
+    uint16_t request_id = UXR_INVALID_REQUEST_ID;
+
+    ECHO_Payload payload;
+    ucdrBuffer mb;
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(4 + SUBHEADER_SIZE), &mb))
+    {
+        uxrObjectId object_id = {0, 0};
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_ECHO, (uint16_t)4, 0);
+        request_id = uxr_init_base_object_request(&session->info, object_id, &payload.base);
+        (void) uxr_serialize_ECHO_Payload(&mb, &payload);
+    }
+
+    return request_id;
+}
+
+bool uxr_buffer_throughput(uxrSession* session, uxrStreamId stream_id, uint8_t* buf, uint32_t len)
+{
+    bool rv = false;
+
+    THROUGHPUT_Payload payload;
+    payload.buf = buf;
+    payload.len = len;
+
+    ucdrBuffer mb;
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)len, &mb))
+    {
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_THROUGHPUT, (uint16_t)len, 0);
+        (void) uxr_serialize_THROUGHPUT_Payload(&mb, &payload);
+        rv = true;
+    }
+
+    return rv;
+}
+#endif
 
 void uxr_flash_output_streams(uxrSession* session)
 {
@@ -475,6 +523,12 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
             read_submessage_acknack(session, submessage, stream_id);
             break;
 
+#ifdef PERFORMANCE_TESTING
+        case SUBMESSAGE_ID_ECHO:
+            read_submessage_echo(session, submessage);
+            break;
+#endif
+
         default:
             break;
     }
@@ -484,7 +538,6 @@ void read_submessage_status(uxrSession* session, ucdrBuffer* submessage)
 {
     STATUS_Payload payload;
     uxr_deserialize_STATUS_Payload(submessage, &payload);
-
 
     uxrObjectId object_id; uint16_t request_id;
     uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
@@ -549,6 +602,19 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStr
         }
     }
 }
+
+#ifdef PERFORMANCE_TESTING
+void read_submessage_echo(uxrSession* session, ucdrBuffer* submessage)
+{
+    ECHO_Payload payload;
+    uxr_deserialize_ECHO_Payload(submessage, &payload);
+
+    uxrObjectId object_id; uint16_t request_id;
+    uxr_parse_base_object_request(&payload.base, &object_id, &request_id);
+
+    session->on_echo(session, request_id);
+}
+#endif
 
 void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status)
 {
