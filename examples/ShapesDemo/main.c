@@ -44,6 +44,8 @@
 #define MAX_HISTORY        16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
 
+static int shapes_demo_error = 0;
+
 static bool run_command(const char* command, uxrSession* session, uxrStreamId* stream_id);
 static bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
@@ -210,7 +212,7 @@ int main(int args, char** argv)
     }
 #endif
 
-    return 0;
+    return shapes_demo_error;
 }
 
 bool run_command(const char* command, uxrSession* session, uxrStreamId* stream_id)
@@ -359,6 +361,7 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
     else
     {
         printf("%sUnknown command error, write 'l' or 'list' to show the command list.%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+        shapes_demo_error = 2;
     }
 
     return true;
@@ -450,6 +453,11 @@ void print_status(uint8_t status)
 
     const char* color = (UXR_STATUS_OK == status || UXR_STATUS_OK_MATCHED == status) ? GREEN_CONSOLE_COLOR : RED_CONSOLE_COLOR;
     printf("%sStatus: %s%s\n", color, status_name, RESTORE_COLOR);
+
+    if(UXR_STATUS_OK != status && UXR_STATUS_OK_MATCHED != status)
+    {
+        shapes_demo_error = 2;
+    }
 }
 
 void print_help(void)
