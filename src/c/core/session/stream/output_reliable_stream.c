@@ -50,7 +50,7 @@ void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream)
     stream->send_lost = false;
 }
 
-bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* mb)
+bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* ub)
 {
     bool available_to_write = false;
 
@@ -84,7 +84,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
         size_t current_padding = (current_length % 4 != 0) ? 4 - (current_length % 4) : 0;
         size_t future_length = current_length + current_padding + size;
         uxr_set_output_buffer_length(internal_buffer, future_length);
-        ucdr_init_buffer_offset(mb, internal_buffer, (uint32_t)future_length, (uint32_t)current_length);
+        ucdr_init_buffer_offset(ub, internal_buffer, (uint32_t)future_length, (uint32_t)current_length);
     }
 
     return available_to_write;
@@ -169,14 +169,14 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
     return it_updated;
 }
 
-void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* mb)
+void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* ub)
 {
     HEARTBEAT_Payload payload;
     payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
     payload.last_unacked_seq_nr = stream->last_sent;
 
-    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
-    (void) uxr_serialize_HEARTBEAT_Payload(mb, &payload);
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
+    (void) uxr_serialize_HEARTBEAT_Payload(ub, &payload);
 }
 
 void uxr_read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)

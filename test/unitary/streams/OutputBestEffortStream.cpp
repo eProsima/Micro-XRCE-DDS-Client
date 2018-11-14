@@ -19,8 +19,8 @@ public:
     {
         size_t previous_writer = stream.writer;
 
-        ucdrBuffer mb;
-        bool available_to_write = uxr_prepare_best_effort_buffer_to_write(&stream, submessage.size(), &mb);
+        ucdrBuffer ub;
+        bool available_to_write = uxr_prepare_best_effort_buffer_to_write(&stream, submessage.size(), &ub);
         if(!expected)
         {
             ASSERT_FALSE(available_to_write);
@@ -28,7 +28,7 @@ public:
             return;
         }
 
-        bool serialized = ucdr_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
+        bool serialized = ucdr_serialize_array_char(&ub, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
 
         ASSERT_TRUE(available_to_write);
         ASSERT_TRUE(serialized);

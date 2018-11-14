@@ -17,13 +17,13 @@ uint16_t uxr_buffer_delete_entity(uxrSession* session, uxrStreamId stream_id, ux
     uint16_t payload_length = 0; //DELETE_Payload_size(&payload);
     payload_length = (uint16_t)(payload_length + 4); // delete payload (request id + object_id), no padding.
 
-    ucdrBuffer mb;
-    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
+    ucdrBuffer ub;
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &ub))
     {
-        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_DELETE, payload_length, 0);
+        (void) uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_DELETE, payload_length, 0);
 
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload.base);
-        (void) uxr_serialize_DELETE_Payload(&mb, &payload);
+        (void) uxr_serialize_DELETE_Payload(&ub, &payload);
     }
 
     return request_id;
@@ -46,12 +46,12 @@ uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
     payload_length = (uint16_t)(payload_length + ((object_id.type == OBJK_PARTICIPANT && payload_length % 2 != 0) ? 1 : 0)); // necessary padding
     payload_length = (uint16_t)(payload_length + 2); //object id ref
 
-    ucdrBuffer mb;
-    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
+    ucdrBuffer ub;
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &ub))
     {
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload->base);
-        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_CREATE, payload_length, mode);
-        (void) uxr_serialize_CREATE_Payload(&mb, payload);
+        (void) uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_CREATE, payload_length, mode);
+        (void) uxr_serialize_CREATE_Payload(&ub, payload);
     }
 
     return request_id;

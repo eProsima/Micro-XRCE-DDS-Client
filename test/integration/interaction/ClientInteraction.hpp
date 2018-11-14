@@ -125,11 +125,11 @@ public:
         {
             HelloWorld topic = {static_cast<uint32_t>(i), "Hello DDS world!"};
 
-            ucdrBuffer mb;
+            ucdrBuffer ub;
             uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
-            bool prepared = uxr_prepare_output_stream(&session_, output_stream_id, datawriter_id, &mb, topic_size);
+            bool prepared = uxr_prepare_output_stream(&session_, output_stream_id, datawriter_id, &ub, topic_size);
             ASSERT_TRUE(prepared);
-            bool written = HelloWorld_serialize_topic(&mb, &topic);
+            bool written = HelloWorld_serialize_topic(&ub, &topic);
             ASSERT_TRUE(written);
             bool sent = uxr_run_session_until_confirm_delivery(&session_, 60000);
             ASSERT_TRUE(sent);

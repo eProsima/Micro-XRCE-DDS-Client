@@ -296,10 +296,10 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
         uxrObjectId datawriter_id = uxr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
         uxrStreamId output_stream_id = uxr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
 
-        ucdrBuffer mb;
+        ucdrBuffer ub;
         uint32_t topic_size = ShapeType_size_of_topic(&topic, 0);
-        uxr_prepare_output_stream(session, output_stream_id, datawriter_id, &mb, topic_size);
-        ShapeType_serialize_topic(&mb, &topic);
+        uxr_prepare_output_stream(session, output_stream_id, datawriter_id, &ub, topic_size);
+        ShapeType_serialize_topic(&ub, &topic);
 
         printf("Sending... ");
         print_ShapeType_topic(&topic);

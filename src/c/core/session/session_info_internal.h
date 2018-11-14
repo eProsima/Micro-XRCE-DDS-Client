@@ -27,14 +27,14 @@ struct BaseObjectRequest;
 
 void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key);
 
-void uxr_buffer_create_session(const uxrSessionInfo* info, struct ucdrBuffer* mb, int64_t nanoseconds);
-void uxr_buffer_delete_session(const uxrSessionInfo* info, struct ucdrBuffer* mb);
-void uxr_read_create_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
-void uxr_read_delete_session_status(uxrSessionInfo* info, struct ucdrBuffer* mb);
+void uxr_buffer_create_session(const uxrSessionInfo* info, struct ucdrBuffer* ub, int64_t nanoseconds);
+void uxr_buffer_delete_session(const uxrSessionInfo* info, struct ucdrBuffer* ub);
+void uxr_read_create_session_status(uxrSessionInfo* info, struct ucdrBuffer* ub);
+void uxr_read_delete_session_status(uxrSessionInfo* info, struct ucdrBuffer* ub);
 
 void uxr_stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer);
 void uxr_stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer);
-bool uxr_read_session_header(const uxrSessionInfo* info, struct ucdrBuffer* mb, uint8_t* stream_id_raw, uxrSeqNum* seq_num);
+bool uxr_read_session_header(const uxrSessionInfo* info, struct ucdrBuffer* ub, uint8_t* stream_id_raw, uxrSeqNum* seq_num);
 
 uint8_t uxr_session_header_offset(const uxrSessionInfo* info);
 

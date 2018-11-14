@@ -21,12 +21,12 @@ void uxr_reset_output_best_effort_stream(uxrOutputBestEffortStream* stream)
     stream->last_send = UINT16_MAX;
 }
 
-bool uxr_prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, ucdrBuffer* mb)
+bool uxr_prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, ucdrBuffer* ub)
 {
     bool available_to_write = stream->writer + size <= stream->size;
     if(available_to_write)
     {
-        ucdr_init_buffer_offset(mb, stream->buffer, (uint32_t)(stream->writer + size), (uint32_t)stream->writer);
+        ucdr_init_buffer_offset(ub, stream->buffer, (uint32_t)(stream->writer + size), (uint32_t)stream->writer);
         stream->writer += size;
     }
 

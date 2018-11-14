@@ -31,7 +31,7 @@ struct uxrCommunication;
 typedef void (*uxrOnStatusFunc) (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
                              uint8_t status, void* args);
 typedef void (*uxrOnTopicFunc) (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uxrStreamId stream_id, struct ucdrBuffer* mb, void* args);
+                             uxrStreamId stream_id, struct ucdrBuffer* ub, void* args);
 
 typedef struct uxrSession
 {
