@@ -235,8 +235,8 @@ configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
-        D$<$<BOOL:${VERBOSE_SERIALIZATION}>:UXR_SERIALIZATION_LOGS>
-        D$<$<BOOL:${VERBOSE_MESSAGE}>:UXR_MESSAGE_LOGS>
+        $<$<BOOL:${VERBOSE_SERIALIZATION}>:UXR_SERIALIZATION_LOGS>
+        $<$<BOOL:${VERBOSE_MESSAGE}>:UXR_MESSAGE_LOGS>
     )
 
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
@@ -245,7 +245,7 @@ if(MSVC OR MSVC_IDE)
     if(TARGET_TYPE STREQUAL "SHARED_LIBRARY")
         target_compile_definitions(${PROJECT_NAME}
         PUBLIC
-            D${PROJECT_NAME}_SHARED
+            ${PROJECT_NAME}_SHARED
         )
     endif()
 endif()
@@ -275,7 +275,6 @@ if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
     if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
         add_subdirectory(test/unitary/streams)
         add_subdirectory(test/integration/interaction)
-        message(FATAL_ERROR "Estoy aquiiii!")
 
         if(NOT WIN32)
             add_subdirectory(test/transport/serial_comm)

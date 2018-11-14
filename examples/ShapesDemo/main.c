@@ -85,7 +85,7 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &udp.comm;
-        printf("UDP mode => ip: %s - port: %hu\n", argv[2], port);
+        printf("Running in UDP mode => ip: %s, port: %hu\n", argv[2], port);
         args_index = 4;
     }
     else if(args >= 4 && strcmp(argv[1], "--tcp") == 0)
@@ -98,7 +98,7 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &tcp.comm;
-        printf("<< TCP mode => ip: %s - port: %hu >>\n", argv[2], port);
+        printf("Running TCP mode => ip: %s, port: %hu\n", argv[2], port);
         args_index = 4;
     }
 #if !defined(WIN32)
@@ -112,7 +112,7 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &serial.comm;
-        printf("Serial mode => dev: %s\n", device);
+        printf("Running in serial mode => dev: %s\n", device);
         args_index = 3;
     }
 #endif
@@ -121,8 +121,6 @@ int main(int args, char** argv)
         print_help();
         return 1;
     }
-
-    printf("Running Shapes Demo Client...\n");
 
     uint32_t key = 0xAABBCCDD;
     if(args_index < args && 0 == strcmp(argv[args_index++], "--key"))
