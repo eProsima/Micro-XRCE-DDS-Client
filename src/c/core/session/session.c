@@ -266,7 +266,7 @@ bool uxr_buffer_throughput(uxrSession* session, uxrStreamId stream_id, uint8_t* 
     payload.len = len;
 
     ucdrBuffer mb;
-    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)len, &mb))
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(len + SUBHEADER_SIZE), &mb))
     {
         (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_THROUGHPUT, (uint16_t)len, 0);
         (void) uxr_serialize_THROUGHPUT_Payload(&mb, &payload);
