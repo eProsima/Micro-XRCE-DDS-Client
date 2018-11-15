@@ -25,10 +25,10 @@ typedef struct CallbackData
 
 } CallbackData;
 
-static void write_get_info_message(ucdrBuffer* mb);
+static void write_get_info_message(ucdrBuffer* ub);
 static bool listen_info_message(uxrUDPTransportDatagram* transport, int period, CallbackData* callback);
-static bool read_info_headers(ucdrBuffer* mb);
-static bool read_info_message(ucdrBuffer* mb, CallbackData* callback);
+static bool read_info_headers(ucdrBuffer* ub);
+static bool read_info_message(ucdrBuffer* ub, CallbackData* callback);
 static bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* transport);
 
 //==================================================================
@@ -47,10 +47,10 @@ bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound
     CallbackData callback = {chosen, on_agent_func, args};
 
     uint8_t output_buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
-    ucdrBuffer mb;
-    ucdr_init_buffer(&mb, output_buffer, UXR_UDP_TRANSPORT_MTU_DATAGRAM);
-    write_get_info_message(&mb);
-    size_t message_length = ucdr_buffer_length(&mb);
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, output_buffer, UXR_UDP_TRANSPORT_MTU_DATAGRAM);
+    write_get_info_message(&ub);
+    size_t message_length = ucdr_buffer_length(&ub);
 
     bool consumed = false;
     uxrUDPTransportDatagram transport;
@@ -81,16 +81,16 @@ bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound
 //                             INTERNAL
 //==================================================================
 
-void write_get_info_message(ucdrBuffer* mb)
+void write_get_info_message(ucdrBuffer* ub)
 {
     GET_INFO_Payload payload;
     payload.base.request_id = (RequestId){{0x00, GET_INFO_REQUEST_ID}};
     payload.base.object_id = OBJECTID_AGENT;
     payload.info_mask = INFO_CONFIGURATION | INFO_ACTIVITY;
 
-    uxr_serialize_message_header(mb, UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, 0);
-    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_GET_INFO, GET_INFO_MSG_SIZE, 0);
-    (void) uxr_serialize_GET_INFO_Payload(mb, &payload);
+    uxr_serialize_message_header(ub, UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, 0);
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_GET_INFO, GET_INFO_MSG_SIZE, 0);
+    (void) uxr_serialize_GET_INFO_Payload(ub, &payload);
 }
 
 bool listen_info_message(uxrUDPTransportDatagram* transport, int poll, CallbackData* callback)
@@ -103,26 +103,26 @@ bool listen_info_message(uxrUDPTransportDatagram* transport, int poll, CallbackD
     {
         UXR_DEBUG_PRINT_MESSAGE(UXR_RECV, input_buffer, length, 0);
 
-        ucdrBuffer mb;
-        ucdr_init_buffer(&mb, input_buffer, (uint32_t)length);
-        if(read_info_headers(&mb))
+        ucdrBuffer ub;
+        ucdr_init_buffer(&ub, input_buffer, (uint32_t)length);
+        if(read_info_headers(&ub))
         {
-            consumed = read_info_message(&mb, callback);
+            consumed = read_info_message(&ub, callback);
         }
     }
 
     return consumed;
 }
 
-bool read_info_headers(ucdrBuffer* mb)
+bool read_info_headers(ucdrBuffer* ub)
 {
     bool valid = false;
 
     uint8_t session_id; uint8_t stream_id_raw; uxrSeqNum seq_num; uint8_t key[UXR_CLIENT_KEY_SIZE];
-    uxr_deserialize_message_header(mb, &session_id, &stream_id_raw, &seq_num, key);
+    uxr_deserialize_message_header(ub, &session_id, &stream_id_raw, &seq_num, key);
 
     uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    if(uxr_read_submessage_header(mb, &id, &length, &flags, &payload_it))
+    if(uxr_read_submessage_header(ub, &id, &length, &flags, &payload_it))
     {
         valid = true;
     }
@@ -130,12 +130,12 @@ bool read_info_headers(ucdrBuffer* mb)
     return valid;
 }
 
-bool read_info_message(ucdrBuffer* mb, CallbackData* callback)
+bool read_info_message(ucdrBuffer* ub, CallbackData* callback)
 {
     bool consumed = false;
     INFO_Payload payload;
 
-    if(uxr_deserialize_INFO_Payload(mb, &payload))
+    if(uxr_deserialize_INFO_Payload(ub, &payload))
     {
         XrceVersion* version = &payload.object_info.config._.agent.xrce_version;
         TransportLocator* transport = &payload.object_info.activity._.agent.address_seq.data[0];

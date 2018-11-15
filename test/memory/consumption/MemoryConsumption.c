@@ -24,13 +24,13 @@
 #define STREAM_HISTORY  2
 #define BUFFER_SIZE     UXR_CONFIG_SERIAL_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* mb, void* args)
+void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* ub, void* args)
 {
     (void) session;
     (void) object_id;
     (void) request_id;
     (void) stream_id;
-    (void) mb;
+    (void) ub;
     (void) args;
 }
 

@@ -84,7 +84,7 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
 }
 
 
-bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, ucdrBuffer* mb)
+bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, ucdrBuffer* ub)
 {
     uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
     uint8_t* internal_buffer = get_input_buffer(stream, next % stream->history);
@@ -93,14 +93,14 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
     if(available_to_read)
     {
         stream->last_handled = next;
-        ucdr_init_buffer(mb, internal_buffer, (uint32_t)length);
+        ucdr_init_buffer(ub, internal_buffer, (uint32_t)length);
         set_input_buffer_length(internal_buffer, 0);
     }
 
     return available_to_read;
 }
 
-void uxr_buffer_acknack(const uxrInputReliableStream* stream, ucdrBuffer* mb) {
+void uxr_buffer_acknack(const uxrInputReliableStream* stream, ucdrBuffer* ub) {
     uint16_t nack_bitmap = compute_nack_bitmap(stream);
 
     ACKNACK_Payload payload;
@@ -108,9 +108,9 @@ void uxr_buffer_acknack(const uxrInputReliableStream* stream, ucdrBuffer* mb) {
     payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
     payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
 
-    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
-    (void) uxr_serialize_ACKNACK_Payload(mb, &payload);
-    (void) stream; (void) mb;
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
+    (void) uxr_serialize_ACKNACK_Payload(ub, &payload);
+    (void) stream; (void) ub;
 }
 
 void uxr_read_heartbeat(uxrInputReliableStream* stream, ucdrBuffer* payload)

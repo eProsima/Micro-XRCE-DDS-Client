@@ -111,7 +111,7 @@ uxrInputReliableStream* uxr_get_input_reliable_stream(uxrStreamStorage* storage,
     return NULL;
 }
 
-bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* mb)
+bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* ub)
 {
     bool available = false;
     switch(stream_id.type)
@@ -119,13 +119,13 @@ bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_i
         case UXR_BEST_EFFORT_STREAM:
         {
             uxrOutputBestEffortStream* stream = uxr_get_output_best_effort_stream(storage, stream_id.index);
-            available = stream && uxr_prepare_best_effort_buffer_to_write(stream, size, mb);
+            available = stream && uxr_prepare_best_effort_buffer_to_write(stream, size, ub);
             break;
         }
         case UXR_RELIABLE_STREAM:
         {
             uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(storage, stream_id.index);
-            available = stream && uxr_prepare_reliable_buffer_to_write(stream, size, mb);
+            available = stream && uxr_prepare_reliable_buffer_to_write(stream, size, ub);
             break;
         }
         default:

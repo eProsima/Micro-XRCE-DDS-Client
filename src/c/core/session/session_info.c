@@ -35,7 +35,7 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
-void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* mb, int64_t nanoseconds)
+void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
@@ -52,34 +52,34 @@ void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* mb, int64
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
 
-    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
-    (void) uxr_serialize_CREATE_CLIENT_Payload(mb, &payload);
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) uxr_serialize_CREATE_CLIENT_Payload(ub, &payload);
 }
 
-void uxr_buffer_delete_session(const uxrSessionInfo* info, ucdrBuffer* mb)
+void uxr_buffer_delete_session(const uxrSessionInfo* info, ucdrBuffer* ub)
 {
     (void) info;
     DELETE_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
-    (void) uxr_buffer_submessage_header(mb, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
-    (void) uxr_serialize_DELETE_Payload(mb, &payload);
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) uxr_serialize_DELETE_Payload(ub, &payload);
 }
 
-void uxr_read_create_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
+void uxr_read_create_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     STATUS_AGENT_Payload payload;
-    if(uxr_deserialize_STATUS_AGENT_Payload(mb, &payload))
+    if(uxr_deserialize_STATUS_AGENT_Payload(ub, &payload))
     {
         process_create_session_status(info, payload.base.result.status, &payload.agent_info);
     }
 }
 
-void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
+void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     STATUS_Payload payload;
-    if(uxr_deserialize_STATUS_Payload(mb, &payload))
+    if(uxr_deserialize_STATUS_Payload(ub, &payload))
     {
         process_delete_session_status(info, payload.base.result.status);
     }
@@ -87,27 +87,27 @@ void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* mb)
 
 void uxr_stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer)
 {
-    ucdrBuffer mb;
-    ucdr_init_buffer(&mb, buffer, UXR_MAX_HEADER_SIZE);
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, buffer, UXR_MAX_HEADER_SIZE);
 
-    uxr_serialize_message_header(&mb, info->id & UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
+    uxr_serialize_message_header(&ub, info->id & UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
 void uxr_stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer)
 {
-    ucdrBuffer mb;
-    ucdr_init_buffer(&mb, buffer, UXR_MAX_HEADER_SIZE);
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, buffer, UXR_MAX_HEADER_SIZE);
 
-    uxr_serialize_message_header(&mb, info->id, stream_id_raw, seq_num, info->key);
+    uxr_serialize_message_header(&ub, info->id, stream_id_raw, seq_num, info->key);
 }
 
-bool uxr_read_session_header(const uxrSessionInfo* info, ucdrBuffer* mb, uint8_t* stream_id_raw, uxrSeqNum* seq_num)
+bool uxr_read_session_header(const uxrSessionInfo* info, ucdrBuffer* ub, uint8_t* stream_id_raw, uxrSeqNum* seq_num)
 {
-    bool must_be_read = ucdr_buffer_remaining(mb) > UXR_MAX_HEADER_SIZE;
+    bool must_be_read = ucdr_buffer_remaining(ub) > UXR_MAX_HEADER_SIZE;
     if(must_be_read)
     {
         uint8_t session_id; uint8_t key[UXR_CLIENT_KEY_SIZE];
-        uxr_deserialize_message_header(mb, &session_id, stream_id_raw, seq_num, key);
+        uxr_deserialize_message_header(ub, &session_id, stream_id_raw, seq_num, key);
 
         must_be_read = session_id == info->id;
         if(must_be_read)

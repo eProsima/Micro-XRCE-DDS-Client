@@ -46,7 +46,7 @@ uxrOutputReliableStream* uxr_get_output_reliable_stream(uxrStreamStorage* storag
 uxrInputBestEffortStream* uxr_get_input_best_effort_stream(uxrStreamStorage* storage, uint8_t index);
 uxrInputReliableStream* uxr_get_input_reliable_stream(uxrStreamStorage* storage, uint8_t index);
 
-bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* mb);
+bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* ub);
 bool uxr_output_streams_confirmed(const uxrStreamStorage* storage);
 
 #ifdef __cplusplus

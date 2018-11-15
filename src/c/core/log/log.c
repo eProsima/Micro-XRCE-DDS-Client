@@ -95,17 +95,17 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
     const char* color = (direction == UXR_SEND) ? YELLOW : PURPLE;
 
-    ucdrBuffer mb;
-    ucdr_init_buffer(&mb, buffer, (uint32_t)size);
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, buffer, (uint32_t)size);
 
     uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[UXR_CLIENT_KEY_SIZE];
-    (void) uxr_deserialize_message_header(&mb, &session_id, &stream_id_raw, &seq_num, key);
+    (void) uxr_deserialize_message_header(&ub, &session_id, &stream_id_raw, &seq_num, key);
 
     print_header(size, direction, stream_id_raw, seq_num, client_key);
 
     size_t submessage_counter = 0;
     uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    while(uxr_read_submessage_header(&mb, &submessage_id, &length, &flags, &payload_it))
+    while(uxr_read_submessage_header(&ub, &submessage_id, &length, &flags, &payload_it))
     {
         if(submessage_counter != 0)
         {
@@ -118,7 +118,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             {
                 initial_log_time = uxr_millis();
                 CREATE_CLIENT_Payload payload;
-                uxr_deserialize_CREATE_CLIENT_Payload(&mb, &payload);
+                uxr_deserialize_CREATE_CLIENT_Payload(&ub, &payload);
                 print_create_client_submessage(color, &payload);
 
             } break;
@@ -130,7 +130,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
                 payload.object_representation._.participant.base.representation._.xml_string_represenatation = string_buffer;
                 payload.object_representation._.publisher.base.representation._.string_represenatation = string_buffer;
 
-                uxr_deserialize_CREATE_Payload(&mb, &payload);
+                uxr_deserialize_CREATE_Payload(&ub, &payload);
                 print_create_submessage(color, &payload, flags);
 
             } break;
@@ -138,7 +138,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_GET_INFO:
             {
                 GET_INFO_Payload payload;
-                uxr_deserialize_GET_INFO_Payload(&mb, &payload);
+                uxr_deserialize_GET_INFO_Payload(&ub, &payload);
                 print_get_info_submessage(color, &payload);
 
             } break;
@@ -146,7 +146,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_DELETE:
             {
                 DELETE_Payload payload;
-                uxr_deserialize_DELETE_Payload(&mb, &payload);
+                uxr_deserialize_DELETE_Payload(&ub, &payload);
                 print_delete_submessage(color, &payload);
 
             } break;
@@ -154,14 +154,14 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_STATUS_AGENT:
             {
                 STATUS_AGENT_Payload payload;
-                uxr_deserialize_STATUS_AGENT_Payload(&mb, &payload);
+                uxr_deserialize_STATUS_AGENT_Payload(&ub, &payload);
                 print_status_agent_submessage(color, &payload);
             } break;
 
             case SUBMESSAGE_ID_STATUS:
             {
                 STATUS_Payload payload;
-                uxr_deserialize_STATUS_Payload(&mb, &payload);
+                uxr_deserialize_STATUS_Payload(&ub, &payload);
                 print_status_submessage(color, &payload);
 
             } break;
@@ -169,7 +169,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_INFO:
             {
                 INFO_Payload payload;
-                uxr_deserialize_INFO_Payload(&mb, &payload);
+                uxr_deserialize_INFO_Payload(&ub, &payload);
                 print_info_submessage(color, &payload);
 
             } break;
@@ -177,7 +177,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_WRITE_DATA:
             {
                 WRITE_DATA_Payload_Data payload;
-                uxr_deserialize_WRITE_DATA_Payload_Data(&mb, &payload);
+                uxr_deserialize_WRITE_DATA_Payload_Data(&ub, &payload);
                 print_write_data_data_submessage(color, &payload);
 
             } break;
@@ -188,7 +188,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
                 READ_DATA_Payload payload;
                 payload.read_specification.content_filter_expression = string_buffer;
 
-                uxr_deserialize_READ_DATA_Payload(&mb, &payload);
+                uxr_deserialize_READ_DATA_Payload(&ub, &payload);
                 print_read_data_submessage(color, &payload);
 
             } break;
@@ -196,7 +196,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_HEARTBEAT:
             {
                 HEARTBEAT_Payload payload;
-                uxr_deserialize_HEARTBEAT_Payload(&mb, &payload);
+                uxr_deserialize_HEARTBEAT_Payload(&ub, &payload);
                 print_heartbeat_submessage(color, &payload);
 
             } break;
@@ -204,7 +204,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_ACKNACK:
             {
                 ACKNACK_Payload payload;
-                uxr_deserialize_ACKNACK_Payload(&mb, &payload);
+                uxr_deserialize_ACKNACK_Payload(&ub, &payload);
                 print_acknack_submessage(color, &payload);
 
             } break;
@@ -212,7 +212,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_DATA:
             {
                 DATA_Payload_Data payload;
-                uxr_deserialize_DATA_Payload_Data(&mb, &payload);
+                uxr_deserialize_DATA_Payload_Data(&ub, &payload);
                 print_data_data_submessage(color, &payload);
 
             } break;

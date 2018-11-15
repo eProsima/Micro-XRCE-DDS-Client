@@ -46,13 +46,13 @@ uint16_t uxr_buffer_request_data(uxrSession* session, uxrStreamId stream_id, uxr
     payload_length = (uint16_t)(payload_length + 4); // stream, format, and two optionals.
     payload_length = (uint16_t)(payload_length + ((control != NULL) ? 8 : 0)); // delivery control
 
-    ucdrBuffer mb;
-    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &mb))
+    ucdrBuffer ub;
+    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &ub))
     {
-        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
+        (void) uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
 
         request_id = uxr_init_base_object_request(&session->info, datareader_id, &payload.base);
-        (void) uxr_serialize_READ_DATA_Payload(&mb, &payload);
+        (void) uxr_serialize_READ_DATA_Payload(&ub, &payload);
     }
 
     return request_id;
@@ -104,10 +104,10 @@ inline void read_format_data(uxrSession* session, ucdrBuffer* payload, uint16_t 
     ucdr_deserialize_uint32_t(payload, &offset); //Remove this when data serialization will be according to the XRCE spec.
     length = (uint16_t)(length - 4); //by the offset. Remove too with the future serialization according to XRCE
 
-    ucdrBuffer mb_topic;
-    ucdr_init_buffer(&mb_topic, payload->iterator, length);
-    mb_topic.endianness = payload->endianness;
-    session->on_topic(session, object_id, request_id, stream_id, &mb_topic, session->on_topic_args);
+    ucdrBuffer ub_topic;
+    ucdr_init_buffer(&ub_topic, payload->iterator, length);
+    ub_topic.endianness = payload->endianness;
+    session->on_topic(session, object_id, request_id, stream_id, &ub_topic, session->on_topic_args);
 }
 
 void read_format_sample(uxrSession* session, ucdrBuffer* payload, uint16_t length,

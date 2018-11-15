@@ -19,9 +19,9 @@ public:
     {
         size_t previous_writer = uxr_get_output_buffer_length(buffer + 20);
 
-        ucdrBuffer mb;
-        bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, submessage.size(), &mb);
-        bool serialized = ucdr_serialize_array_char(&mb, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
+        ucdrBuffer ub;
+        bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, submessage.size(), &ub);
+        bool serialized = ucdr_serialize_array_char(&ub, submessage.c_str(), static_cast<uint16_t>(submessage.size()));
 
         if(expected)
         {

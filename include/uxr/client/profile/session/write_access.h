@@ -23,7 +23,7 @@ extern "C"
 #include <uxr/client/core/session/session.h>
 
 UXRDLLAPI bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
-                                       struct ucdrBuffer* mb_topic, uint32_t topic_size);
+                                       struct ucdrBuffer* ub_topic, uint32_t topic_size);
 
 #ifdef __cplusplus
 }
