@@ -319,7 +319,7 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
     }
     else if(0 == strcmp(name, "delete") && 3 == length)
     {
-        uxrObjectId entity_id = uxr_object_id((uint16_t)(arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
+        uxrObjectId entity_id = uxr_object_id((uint16_t)arg1, (uint8_t)arg2);
         (void) uxr_buffer_delete_entity(session, *stream_id, entity_id);
     }
     else if((0 == strcmp(name, "default_output_stream") || 0 == strcmp(name, "stream")) && 2 == length)
