@@ -34,7 +34,7 @@ else()
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
 
-    target_link_libraries(ConfiguratorClient microxrcedds_client $<$<BOOL:${CMAKE_COMPILER_IS_GNUCC}>:-Wl,--gc-section,--no-export-dynamic>)
+    target_link_libraries(ConfiguratorClient microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
@@ -56,7 +56,7 @@ else()
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
 
-    target_link_libraries(PublisherClient microxrcedds_client $<$<BOOL:${CMAKE_COMPILER_IS_GNUCC}>:-Wl,--gc-section,--no-export-dynamic>)
+    target_link_libraries(PublisherClient microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
@@ -78,7 +78,7 @@ else()
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
 
-    target_link_libraries(SubscriberClient microxrcedds_client $<$<BOOL:${CMAKE_COMPILER_IS_GNUCC}>:-Wl,--gc-section,--no-export-dynamic>)
+    target_link_libraries(SubscriberClient microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
