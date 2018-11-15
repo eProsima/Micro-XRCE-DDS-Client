@@ -16,6 +16,20 @@
 #define UDP_TRANSPORT 1
 #define TCP_TRANSPORT 2
 
+inline bool operator == (const uxrObjectId& obj1, const uxrObjectId& obj2)
+{
+    return obj1.id == obj2.id
+        && obj1.type == obj2.type;
+}
+
+inline bool operator == (const uxrStreamId& s1, const uxrStreamId& s2)
+{
+    return s1.raw == s2.raw
+        && s1.index == s2.index
+        && s1.type == s2.type
+        && s1.direction == s2.direction;
+}
+
 class Client
 {
 public:
@@ -81,36 +95,54 @@ public:
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
+        ASSERT_EQ(expected_status, last_status_);
+        ASSERT_EQ(participant_id, last_status_object_id_);
+        ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
         request_id = uxr_buffer_create_topic_ref(&session_, output_stream_id, topic_id, participant_id, "helloworld_topic", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
+        ASSERT_EQ(expected_status, last_status_);
+        ASSERT_EQ(topic_id, last_status_object_id_);
+        ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
         request_id = uxr_buffer_create_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, "", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
+        ASSERT_EQ(expected_status, last_status_);
+        ASSERT_EQ(publisher_id, last_status_object_id_);
+        ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
         request_id = uxr_buffer_create_datawriter_ref(&session_, output_stream_id, datawriter_id, publisher_id, "helloworld_data_writer", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
+        ASSERT_EQ(expected_status, last_status_);
+        ASSERT_EQ(datawriter_id, last_status_object_id_);
+        ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
         request_id = uxr_buffer_create_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, "", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
+        ASSERT_EQ(expected_status, last_status_);
+        ASSERT_EQ(subscriber_id, last_status_object_id_);
+        ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
         request_id = uxr_buffer_create_datareader_ref(&session_, output_stream_id, datareader_id, subscriber_id, "helloworld_data_reader", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
+        ASSERT_EQ(expected_status, last_status_);
+        ASSERT_EQ(datareader_id, last_status_object_id_);
+        ASSERT_EQ(request_id, last_status_request_id_);
     }
 
     void publish(uint8_t id, uint8_t stream_id_raw, size_t number)
@@ -158,8 +190,13 @@ public:
             bool received_ok = uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
             ASSERT_EQ(UXR_STATUS_OK, status);
             ASSERT_TRUE(received_ok);
-            //ASSERT_EQ(last_topic_object_id_, datareader_id);
-            //ASSERT_EQ(last_topic_stream_id_, input_stream_id);
+            ASSERT_EQ(last_topic_object_id_, datareader_id);
+            ASSERT_EQ(last_topic_stream_id_, input_stream_id);
+            ASSERT_EQ(last_topic_request_id_, request_id);
+
+            ASSERT_EQ(UXR_STATUS_OK, last_status_);
+            ASSERT_EQ(datareader_id, last_status_object_id_);
+            ASSERT_EQ(request_id, last_status_request_id_);
         }
     }
 
@@ -208,6 +245,7 @@ private:
     {
         /* Setup callback. */
         uxr_set_topic_callback(&session_, on_topic_dispatcher, this);
+        uxr_set_status_callback(&session_, on_status_dispatcher, this);
 
         /* Create session. */
         ASSERT_TRUE(uxr_create_session(&session_));
@@ -243,16 +281,33 @@ private:
         static_cast<Client*>(args)->on_topic(session_, object_id, request_id, stream_id, serialization);
     }
 
-    void on_topic(uxrSession* /*session_*/, uxrObjectId object_id, uint16_t /*request_id*/, uxrStreamId stream_id, struct ucdrBuffer* serialization)
+    void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization)
     {
+        (void) session;
+
         HelloWorld topic;
         HelloWorld_deserialize_topic(serialization, &topic);
         ASSERT_EQ(topic.index, expected_topic_index_);
         ASSERT_STREQ(topic.message, "Hello DDS world!");
         last_topic_object_id_ = object_id;
         last_topic_stream_id_ = stream_id;
+        last_topic_request_id_ = request_id;
         expected_topic_index_++;
         std::cout << "topic received: " << topic.index << std::endl;
+    }
+
+    static void on_status_dispatcher(uxrSession* session_, uxrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
+    {
+        static_cast<Client*>(args)->on_status(session_, object_id, request_id, status);
+    }
+
+    void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status)
+    {
+        (void) session;
+
+        last_status_ = status;
+        last_status_object_id_ = object_id;
+        last_status_request_id_ = request_id;
     }
 
     static uint32_t next_client_key_;
@@ -280,10 +335,14 @@ private:
     std::unique_ptr<uint8_t> output_reliable_stream_buffer_;
     std::unique_ptr<uint8_t> input_reliable_stream_buffer_;
 
+    uint8_t last_status_;
+    uxrObjectId last_status_object_id_;
+    uint16_t last_status_request_id_;
+
     uxrObjectId last_topic_object_id_;
     uxrStreamId last_topic_stream_id_;
+    uint16_t last_topic_request_id_;
     size_t expected_topic_index_;
-
 };
 
 class Discovery
