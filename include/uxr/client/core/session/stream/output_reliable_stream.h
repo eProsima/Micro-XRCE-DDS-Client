@@ -25,8 +25,6 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-struct ucdrBuffer;
-
 typedef struct uxrOutputReliableStream
 {
     uint8_t* buffer;

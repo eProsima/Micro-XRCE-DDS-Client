@@ -1,13 +1,8 @@
 #include "seq_num_internal.h"
 #include "input_reliable_stream_internal.h"
-#include "../submessage_internal.h"
 #include "../../serialization/xrce_protocol_internal.h"
 
 #include <string.h>
-
-// Remove when Microcdr supports size_of functions
-#define ACKNACK_PAYLOAD_SIZE     4
-//---
 
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
@@ -100,7 +95,10 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
     return available_to_read;
 }
 
-void uxr_buffer_acknack(const uxrInputReliableStream* stream, ucdrBuffer* ub) {
+void uxr_buffer_acknack(const uxrInputReliableStream* stream, ucdrBuffer* ub)
+{
+    (void) stream; (void) ub;
+
     uint16_t nack_bitmap = compute_nack_bitmap(stream);
 
     ACKNACK_Payload payload;
@@ -108,9 +106,7 @@ void uxr_buffer_acknack(const uxrInputReliableStream* stream, ucdrBuffer* ub) {
     payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
     payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
 
-    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_ACKNACK_Payload(ub, &payload);
-    (void) stream; (void) ub;
 }
 
 void uxr_read_heartbeat(uxrInputReliableStream* stream, ucdrBuffer* payload)

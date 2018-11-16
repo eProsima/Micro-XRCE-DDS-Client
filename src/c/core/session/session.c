@@ -355,6 +355,7 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
+    uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
     uxr_buffer_heartbeat(stream, &ub);
     uxr_stamp_session_header(&session->info, 0, id.raw, ub.init);
     send_message(session, heartbeat_buffer, ucdr_buffer_length(&ub));
@@ -368,6 +369,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
+    uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
     uxr_buffer_acknack(stream, &ub);
     uxr_stamp_session_header(&session->info, 0, id.raw, ub.init);
     send_message(session, acknack_buffer, ucdr_buffer_length(&ub));

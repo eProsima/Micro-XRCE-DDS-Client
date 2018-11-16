@@ -26,6 +26,8 @@ extern "C"
 #include <stdbool.h>
 #include <stddef.h>
 
+#define ACKNACK_PAYLOAD_SIZE     4
+
 struct ucdrBuffer;
 
 void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);

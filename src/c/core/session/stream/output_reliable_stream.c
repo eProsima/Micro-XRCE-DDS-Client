@@ -6,10 +6,6 @@
 #include "../submessage_internal.h"
 #include "../../serialization/xrce_protocol_internal.h"
 
-// Remove when Microcdr supports size_of functions
-#define HEARTBEAT_PAYLOAD_SIZE 4
-//---
-
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
 
 #define MAX_HEARTBEAT_TRIES (sizeof(int64_t) * 8 - 1)
@@ -175,7 +171,6 @@ void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* ub)
     payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
     payload.last_unacked_seq_nr = stream->last_sent;
 
-    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_HEARTBEAT_Payload(ub, &payload);
 }
 
