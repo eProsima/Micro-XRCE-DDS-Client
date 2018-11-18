@@ -2129,30 +2129,18 @@ bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* ou
 }
 
 #ifdef PERFORMANCE_TESTING
-bool uxr_serialize_ECHO_Payload(ucdrBuffer* buffer, const ECHO_Payload* input)
+bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input)
 {
     bool ret = true;
-    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
-    return ret;
-}
-
-bool uxr_deserialize_ECHO_Payload(ucdrBuffer* buffer, ECHO_Payload* output)
-{
-    bool ret = true;
-    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
-    return ret;
-}
-
-bool uxr_serialize_THROUGHPUT_Payload(ucdrBuffer* buffer, const THROUGHPUT_Payload* input)
-{
-    bool ret = true;
+    ret &= ucdr_serialize_uint64_t(buffer, input->epoch_time);
     ret &= ucdr_serialize_array_uint8_t(buffer, input->buf, input->len);
     return ret;
 }
 
-bool uxr_deserialize_THROUGHPUT_Payload(ucdrBuffer* buffer, THROUGHPUT_Payload* output)
+bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload* output)
 {
     bool ret = true;
+    ret &= ucdr_deserialize_uint64_t(buffer, &output->epoch_time);
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->buf, output->len);
     return ret;
 }

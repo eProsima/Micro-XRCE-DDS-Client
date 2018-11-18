@@ -34,7 +34,8 @@ typedef void (*uxrOnTopicFunc) (struct uxrSession* session, uxrObjectId object_i
                              uxrStreamId stream_id, struct ucdrBuffer* ub, void* args);
 
 #ifdef PERFORMANCE_TESTING
-typedef void (*uxrOnEchoFunc) (struct uxrSession* session, uint16_t request_id);
+typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, uint64_t epoch_time, uint16_t length,
+                                      struct ucdrBuffer* mb, void* args);
 #endif
 
 typedef struct uxrSession
@@ -54,7 +55,8 @@ typedef struct uxrSession
     void* on_topic_args;
 
 #ifdef PERFORMANCE_TESTING
-    uxrOnEchoFunc on_echo;
+    uxrOnPerformanceFunc on_performance;
+    void* on_performance_args;
 #endif
 
 } uxrSession;
@@ -66,7 +68,7 @@ UXRDLLAPI void uxr_init_session(uxrSession* session, struct uxrCommunication* co
 UXRDLLAPI void uxr_set_status_callback(uxrSession* session, uxrOnStatusFunc on_status_func, void* args);
 UXRDLLAPI void uxr_set_topic_callback(uxrSession* session, uxrOnTopicFunc on_topic_func, void* args);
 #ifdef PERFORMANCE_TESTING
-UXRDLLAPI void uxr_set_echo_callback(uxrSession* session, uxrOnEchoFunc on_echo_func);
+UXRDLLAPI void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_performance_func, void* args);
 #endif
 
 UXRDLLAPI bool uxr_create_session(uxrSession* session);
@@ -85,8 +87,12 @@ UXRDLLAPI bool uxr_run_session_until_all_status(uxrSession* session, int timeout
 UXRDLLAPI bool uxr_run_session_until_one_status(uxrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
 
 #ifdef PERFORMANCE_TESTING
-UXRDLLAPI uint16_t uxr_buffer_echo(uxrSession* session, uxrStreamId stream_id);
-UXRDLLAPI bool uxr_buffer_throughput(uxrSession* session, uxrStreamId stream_id, uint8_t* buf, uint32_t size);
+UXRDLLAPI bool uxr_buffer_performance(uxrSession* session,
+                                      uxrStreamId stream_id,
+                                      uint64_t epoch_time,
+                                      uint8_t* buf,
+                                      uint16_t len,
+                                      bool echo);
 #endif
 
 #ifdef __cplusplus

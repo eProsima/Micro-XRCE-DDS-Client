@@ -47,8 +47,7 @@ typedef enum SubmessageId
     SUBMESSAGE_ID_FRAGMENT      = 13
 #ifdef PERFORMANCE_TESTING
     ,
-    SUBMESSAGE_ID_ECHO          = 14,
-    SUBMESSAGE_ID_THROUGHPUT    = 15
+    SUBMESSAGE_ID_PERFORMANCE   = 14
 #endif
 
 } SubmessageId;

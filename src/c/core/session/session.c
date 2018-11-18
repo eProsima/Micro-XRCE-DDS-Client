@@ -43,7 +43,7 @@ static void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, ui
 static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
 static void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
 #ifdef PERFORMANCE_TESTING
-static void read_submessage_echo(uxrSession* session, ucdrBuffer* submessage);
+static void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, uint16_t length);
 #endif
 
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
@@ -82,9 +82,10 @@ void uxr_set_topic_callback(uxrSession* session, uxrOnTopicFunc on_topic_func, v
 }
 
 #ifdef PERFORMANCE_TESTING
-void uxr_set_echo_callback(uxrSession* session, uxrOnEchoFunc on_echo_func)
+void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_echo_func, void* args)
 {
-    session->on_echo = on_echo_func;
+    session->on_performance = on_echo_func;
+    session->on_performance_args = args;
 }
 #endif
 
@@ -240,39 +241,26 @@ bool uxr_run_session_until_one_status(uxrSession* session, int timeout_ms, const
 }
 
 #ifdef PERFORMANCE_TESTING
-uint16_t uxr_buffer_echo(uxrSession* session, uxrStreamId stream_id)
-{
-    uint16_t request_id = UXR_INVALID_REQUEST_ID;
-
-    ECHO_Payload payload;
-    ucdrBuffer mb;
-    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(4 + SUBHEADER_SIZE), &mb))
-    {
-        uxrObjectId object_id = {0, 0};
-        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_ECHO, (uint16_t)4, 0);
-        request_id = uxr_init_base_object_request(&session->info, object_id, &payload.base);
-        (void) uxr_serialize_ECHO_Payload(&mb, &payload);
-    }
-
-    return request_id;
-}
-
-bool uxr_buffer_throughput(uxrSession* session, uxrStreamId stream_id, uint8_t* buf, uint32_t len)
+bool uxr_buffer_performance(uxrSession *session,
+                            uxrStreamId stream_id,
+                            uint64_t epoch_time,
+                            uint8_t* buf,
+                            uint16_t len,
+                            bool echo)
 {
     bool rv = false;
-
-    THROUGHPUT_Payload payload;
+    PERFORMANCE_Payload payload;
+    payload.epoch_time = epoch_time;
     payload.buf = buf;
     payload.len = len;
-
     ucdrBuffer mb;
-    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(len + SUBHEADER_SIZE), &mb))
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(SUBHEADER_SIZE + 4 + len), &mb))
     {
-        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_THROUGHPUT, (uint16_t)len, 0);
-        (void) uxr_serialize_THROUGHPUT_Payload(&mb, &payload);
+        uint8_t flags = (echo) ? UXR_ECHO : 0;
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_PERFORMANCE, (uint16_t)(4 + len), flags);
+        (void) uxr_serialize_PERFORMANCE_Payload(&mb, &payload);
         rv = true;
     }
-
     return rv;
 }
 #endif
@@ -524,8 +512,8 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
             break;
 
 #ifdef PERFORMANCE_TESTING
-        case SUBMESSAGE_ID_ECHO:
-            read_submessage_echo(session, submessage);
+        case SUBMESSAGE_ID_PERFORMANCE:
+            read_submessage_performance(session, submessage, length);
             break;
 #endif
 
@@ -604,15 +592,14 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStr
 }
 
 #ifdef PERFORMANCE_TESTING
-void read_submessage_echo(uxrSession* session, ucdrBuffer* submessage)
+void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, uint16_t length)
 {
-    ECHO_Payload payload;
-    uxr_deserialize_ECHO_Payload(submessage, &payload);
+    uint64_t epoch_time;
+    ucdr_deserialize_uint64_t(submessage, &epoch_time);
 
-    uxrObjectId object_id; uint16_t request_id;
-    uxr_parse_base_object_request(&payload.base, &object_id, &request_id);
-
-    session->on_echo(session, request_id);
+    ucdrBuffer mb_performance;
+    ucdr_init_buffer(&mb_performance, submessage->iterator, (uint16_t)(length - 4));
+    session->on_performance(session, epoch_time, (uint16_t)(length - 4), &mb_performance, session->on_performance_args);
 }
 #endif
 
