@@ -45,6 +45,12 @@ void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream)
     stream->send_lost = false;
 }
 
+size_t uxr_output_buffer_current_length(uxrOutputReliableStream* stream)
+{
+    uint8_t* internal_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->history);
+    return uxr_get_output_buffer_length(internal_buffer);
+}
+
 bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* ub)
 {
     bool available_to_write = false;

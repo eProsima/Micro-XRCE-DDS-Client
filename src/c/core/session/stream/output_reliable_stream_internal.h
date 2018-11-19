@@ -41,6 +41,7 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
 void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, struct ucdrBuffer* ub);
 void uxr_read_acknack(uxrOutputReliableStream* stream, struct ucdrBuffer* payload);
 
+size_t uxr_output_buffer_current_length(uxrOutputReliableStream* stream);
 bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream);
 
 size_t uxr_get_output_buffer_length(uint8_t* buffer);
