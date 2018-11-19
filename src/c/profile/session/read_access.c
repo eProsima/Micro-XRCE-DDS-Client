@@ -1,6 +1,6 @@
 #include <uxr/client/profile/session/read_access.h>
 
-#include "../../core/session/stream/stream_storage_internal.h"
+#include "../../core/session/session_internal.h"
 #include "../../core/session/session_info_internal.h"
 #include "../../core/session/submessage_internal.h"
 #include "../../core/serialization/xrce_protocol_internal.h"
@@ -41,16 +41,14 @@ uint16_t uxr_buffer_request_data(uxrSession* session, uxrStreamId stream_id, uxr
     }
 
     // Change this when microcdr supports size_of function.
-    uint16_t payload_length = 0; //READ_DATA_Payload_size(&payload);
+    size_t payload_length = 0; //READ_DATA_Payload_size(&payload);
     payload_length = (uint16_t)(payload_length + 4); // (request id + object_id), no padding.
     payload_length = (uint16_t)(payload_length + 4); // stream, format, and two optionals.
     payload_length = (uint16_t)(payload_length + ((control != NULL) ? 8 : 0)); // delivery control
 
     ucdrBuffer ub;
-    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &ub))
+    if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_READ_DATA, 0))
     {
-        (void) uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_READ_DATA, payload_length, 0);
-
         request_id = uxr_init_base_object_request(&session->info, datareader_id, &payload.base);
         (void) uxr_serialize_READ_DATA_Payload(&ub, &payload);
     }

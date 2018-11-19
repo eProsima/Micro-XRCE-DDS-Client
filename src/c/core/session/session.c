@@ -562,3 +562,17 @@ void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request
         }
     }
 }
+
+bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId stream_id, size_t payload_size, ucdrBuffer* ub, uint8_t submessage_id, uint8_t mode)
+{
+    size_t current_stream_length = uxr_output_stream_current_length(&session->streams, stream_id);
+    size_t submessage_size = (uxr_submessage_padding(current_stream_length) + SUBHEADER_SIZE + payload_size);
+    bool prepared = uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)submessage_size, ub);
+    if(prepared)
+    {
+        (void) uxr_buffer_submessage_header(ub, submessage_id, (uint16_t)payload_size, mode);
+    }
+
+    return prepared;
+}
+

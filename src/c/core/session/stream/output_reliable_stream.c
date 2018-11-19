@@ -3,7 +3,6 @@
 
 #include "seq_num_internal.h"
 #include "output_reliable_stream_internal.h"
-#include "../submessage_internal.h"
 #include "../../serialization/xrce_protocol_internal.h"
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
@@ -46,6 +45,12 @@ void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream)
     stream->send_lost = false;
 }
 
+size_t uxr_output_buffer_current_length(uxrOutputReliableStream* stream)
+{
+    uint8_t* internal_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->history);
+    return uxr_get_output_buffer_length(internal_buffer);
+}
+
 bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* ub)
 {
     bool available_to_write = false;
@@ -54,7 +59,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
     size_t length = uxr_get_output_buffer_length(internal_buffer);
 
     /* Check if the message fit in the current buffer */
-    if(length + uxr_submessage_padding(length) + size <= uxr_get_output_buffer_size(stream))
+    if(length + size <= uxr_get_output_buffer_size(stream))
     {
         /* Check if there is space in the stream history to write */
         uxrSeqNum last_available = uxr_seq_num_add(stream->last_acknown, stream->history);
@@ -77,8 +82,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
     if(available_to_write)
     {
         size_t current_length = uxr_get_output_buffer_length(internal_buffer);
-        size_t current_padding = (current_length % 4 != 0) ? 4 - (current_length % 4) : 0;
-        size_t future_length = current_length + current_padding + size;
+        size_t future_length = current_length + size;
         uxr_set_output_buffer_length(internal_buffer, future_length);
         ucdr_init_buffer_offset(ub, internal_buffer, (uint32_t)future_length, (uint32_t)current_length);
     }

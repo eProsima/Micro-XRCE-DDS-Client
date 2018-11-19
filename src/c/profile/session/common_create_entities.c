@@ -1,5 +1,5 @@
 #include "common_create_entities_internal.h"
-#include "../../core/session/stream/stream_storage_internal.h"
+#include "../../core/session/session_internal.h"
 #include "../../core/session/session_info_internal.h"
 #include "../../core/session/submessage_internal.h"
 #include "../../core/serialization/xrce_protocol_internal.h"
@@ -14,14 +14,12 @@ uint16_t uxr_buffer_delete_entity(uxrSession* session, uxrStreamId stream_id, ux
     DELETE_Payload payload;
 
     // Change this when microcdr supports size_of function.
-    uint16_t payload_length = 0; //DELETE_Payload_size(&payload);
+    size_t payload_length = 0; //DELETE_Payload_size(&payload);
     payload_length = (uint16_t)(payload_length + 4); // delete payload (request id + object_id), no padding.
 
     ucdrBuffer ub;
-    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &ub))
+    if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_DELETE, 0))
     {
-        (void) uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_DELETE, payload_length, 0);
-
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload.base);
         (void) uxr_serialize_DELETE_Payload(&ub, &payload);
     }
@@ -36,7 +34,7 @@ uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
     uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     // Change this when microcdr supports size_of function. Currently, DOMAIN_ID is not supported.
-    uint16_t payload_length = 0; //CREATE_Payload_size(&payload);
+    size_t payload_length = 0; //CREATE_Payload_size(&payload);
     payload_length = (uint16_t)(payload_length + 4); // base
     payload_length = (uint16_t)(payload_length + 1); // objk type
     payload_length = (uint16_t)(payload_length + 1); // base3 type => xml
@@ -47,10 +45,9 @@ uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
     payload_length = (uint16_t)(payload_length + 2); //object id ref
 
     ucdrBuffer ub;
-    if(uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(payload_length + SUBHEADER_SIZE), &ub))
+    if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_CREATE, mode))
     {
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload->base);
-        (void) uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_CREATE, payload_length, mode);
         (void) uxr_serialize_CREATE_Payload(&ub, payload);
     }
 

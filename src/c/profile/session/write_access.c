@@ -1,6 +1,6 @@
 #include <uxr/client/profile/session/write_access.h>
 
-#include "../../core/session/stream/stream_storage_internal.h"
+#include "../../core/session/session_internal.h"
 #include "../../core/session/session_info_internal.h"
 #include "../../core/session/submessage_internal.h"
 #include "../../core/serialization/xrce_protocol_internal.h"
@@ -14,12 +14,10 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
                               struct ucdrBuffer* ub_topic, uint32_t topic_size)
 {
     ucdrBuffer ub;
-    size_t submessage_size = SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE + topic_size;
-    if(uxr_prepare_stream_to_write(&session->streams, stream_id, submessage_size, &ub))
+    size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + topic_size;
+    if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size,
+                                              &ub, SUBMESSAGE_ID_WRITE_DATA, FORMAT_DATA))
     {
-        uint16_t payload_size = (uint16_t)(WRITE_DATA_PAYLOAD_SIZE + topic_size);
-        (void) uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_WRITE_DATA, payload_size, FORMAT_DATA);
-
         WRITE_DATA_Payload_Data payload;
         uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);
         (void) uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
