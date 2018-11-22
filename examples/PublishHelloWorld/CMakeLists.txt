@@ -35,7 +35,7 @@ else()
         C_STANDARD_REQUIRED YES
         )
 
-    target_link_libraries(${PROJECT_NAME} microxrcedds_client)
+    target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}

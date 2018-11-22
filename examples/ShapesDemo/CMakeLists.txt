@@ -42,6 +42,7 @@ else()
         PRIVATE
         microxrcedds_client
         $<$<BOOL:${WIN32}>:ws2_32>
+        $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>
         )
 
     install(TARGETS ${PROJECT_NAME}

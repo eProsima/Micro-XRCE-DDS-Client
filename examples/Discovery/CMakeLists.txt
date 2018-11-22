@@ -30,7 +30,8 @@ else()
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(Multicast microxrcedds_client)
+
+    target_link_libraries(Multicast microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
@@ -50,7 +51,8 @@ else()
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
-    target_link_libraries(Unicast microxrcedds_client)
+
+    target_link_libraries(Unicast microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
