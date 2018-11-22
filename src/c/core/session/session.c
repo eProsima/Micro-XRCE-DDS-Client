@@ -254,10 +254,10 @@ bool uxr_buffer_performance(uxrSession *session,
     payload.buf = buf;
     payload.len = len;
     ucdrBuffer mb;
-    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(SUBHEADER_SIZE + 4 + len), &mb))
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(SUBHEADER_SIZE + 8 + len), &mb))
     {
         uint8_t flags = (echo) ? UXR_ECHO : 0;
-        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_PERFORMANCE, (uint16_t)(4 + len), flags);
+        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_PERFORMANCE, (uint16_t)(8 + len), flags);
         (void) uxr_serialize_PERFORMANCE_Payload(&mb, &payload);
         rv = true;
     }
