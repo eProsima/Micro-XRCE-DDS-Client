@@ -8,6 +8,7 @@
 
 static void process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
 static uint16_t compute_nack_bitmap(const uxrInputReliableStream* stream);
+static bool on_finished_buffer(ucdrBuffer* ub, void* args);
 
 static size_t get_input_buffer_length(uint8_t* buffer);
 static void set_input_buffer_length(uint8_t* buffer, size_t length);
@@ -41,6 +42,7 @@ void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream)
 
 bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length)
 {
+    //check if all fragment submessages are currently received.
     bool result = false;
 
     /* Check if the seq_num is valid for the stream state */
@@ -78,6 +80,14 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
     return result;
 }
 
+bool on_finished_buffer(ucdrBuffer* ub, void* args)
+{
+    uxrInputReliableStream* stream = (uxrInputReliableStream*) args;
+    //check the ub->final position, and give the next one if it is possible.
+    //check if the current serialization is fragmentable?
+    (void) stream; (void) ub;
+    return true;
+}
 
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, ucdrBuffer* ub)
 {

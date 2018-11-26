@@ -11,7 +11,7 @@
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
 static void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num);
-
+static bool on_finished_buffer(ucdrBuffer* ub, void* args);
 
 //==================================================================
 //                             PUBLIC
@@ -47,6 +47,7 @@ void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream)
 
 bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, ucdrBuffer* ub)
 {
+    //check if the message need more history slots.
     bool available_to_write = false;
 
     uint8_t* internal_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->history);
@@ -82,6 +83,17 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
     }
 
     return available_to_write;
+}
+
+bool on_finished_buffer(ucdrBuffer* ub, void* args)
+{
+    uxrOutputReliableStream* stream = (uxrOutputReliableStream*) args;
+    //check the ub->finall position, and give the next one if it is possible.
+    //check if the current serialization is fragmentable.
+    //It is not necessary because the init buffer function will not set the callback, an this function have not been reached.
+
+    (void) stream; (void) ub;
+    return true;
 }
 
 bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num)
