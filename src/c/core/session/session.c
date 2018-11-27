@@ -44,6 +44,7 @@ static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessag
 static void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
 
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
+static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, void* args);
 
 //==================================================================
 //                             PUBLIC
@@ -116,7 +117,7 @@ uxrStreamId uxr_create_output_best_effort_stream(uxrSession* session, uint8_t* b
 uxrStreamId uxr_create_output_reliable_stream(uxrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
     uint8_t header_offset = uxr_session_header_offset(&session->info);
-    return uxr_add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
+    return uxr_add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset, on_new_output_reliable_stream_segment);
 }
 
 uxrStreamId uxr_create_input_best_effort_stream(uxrSession* session)
@@ -566,12 +567,39 @@ void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request
 bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId stream_id, size_t payload_size, ucdrBuffer* ub, uint8_t submessage_id, uint8_t mode)
 {
     size_t submessage_size = SUBHEADER_SIZE + payload_size + uxr_submessage_padding(payload_size);
-    bool prepared = uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)submessage_size, ub);
-    if(prepared)
+    bool available = false;
+    switch(stream_id.type)
+    {
+        case UXR_BEST_EFFORT_STREAM:
+        {
+            uxrOutputBestEffortStream* stream = uxr_get_output_best_effort_stream(&session->streams, stream_id.index);
+            available = stream && uxr_prepare_best_effort_buffer_to_write(stream, submessage_size, ub);
+            break;
+        }
+        case UXR_RELIABLE_STREAM:
+        {
+            uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
+            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, SUBHEADER_SIZE, ub);
+            break;
+        }
+        default:
+            break;
+    }
+
+    if(available)
     {
         (void) uxr_buffer_submessage_header(ub, submessage_id, (uint16_t)payload_size, mode);
     }
 
-    return prepared;
+    return available;
 }
 
+void on_new_output_reliable_stream_segment(ucdrBuffer* ub, void* args)
+{
+    uxrOutputReliableStream* stream = (uxrOutputReliableStream*) args;
+
+    uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written);
+    uint8_t last_fragment_flag = FLAG_LAST_FRAGMENT * (last_buffer == ub->init);
+
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_HEARTBEAT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);
+}
