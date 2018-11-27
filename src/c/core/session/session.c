@@ -566,20 +566,27 @@ void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request
 
 bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId stream_id, size_t payload_size, ucdrBuffer* ub, uint8_t submessage_id, uint8_t mode)
 {
-    size_t submessage_size = SUBHEADER_SIZE + payload_size + uxr_submessage_padding(payload_size);
     bool available = false;
+    size_t submessage_size = SUBHEADER_SIZE + payload_size + uxr_submessage_padding(payload_size);
+
     switch(stream_id.type)
     {
         case UXR_BEST_EFFORT_STREAM:
         {
             uxrOutputBestEffortStream* stream = uxr_get_output_best_effort_stream(&session->streams, stream_id.index);
-            available = stream && uxr_prepare_best_effort_buffer_to_write(stream, submessage_size, ub);
-            break;
+            if(stream)
+            {
+                available = uxr_prepare_best_effort_buffer_to_write(stream, submessage_size, ub);
+                break;
+            }
         }
         case UXR_RELIABLE_STREAM:
         {
             uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
-            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, SUBHEADER_SIZE, ub);
+            if(stream)
+            {
+                available = uxr_prepare_reliable_buffer_to_write(stream, submessage_size, SUBHEADER_SIZE, ub);
+            }
             break;
         }
         default:

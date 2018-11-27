@@ -77,22 +77,24 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
         {
             stream->last_written = next;
             uint8_t* buffer = uxr_get_output_buffer(stream, next % stream->history);
-            uxr_set_output_buffer_length(buffer, size);
-            ucdr_init_buffer(ub, buffer, (uint32_t)size);
+            size_t current_length = uxr_get_output_buffer_length(buffer);
+            size_t future_length = current_length + size;
+            uxr_set_output_buffer_length(buffer, future_length);
+            ucdr_init_buffer_offset(ub, buffer, (uint32_t)future_length, (uint32_t)current_length);
         }
     }
     /* Check if the message fit in a fragmented message */
     else
     {
         size_t block_size = uxr_get_output_buffer_size(stream);
-        size_t available_block_size = block_size - fragment_offset;
+        size_t available_block_size = block_size - stream->offset - fragment_offset;
         size_t remaining_size = size - length;
         size_t necesary_blocks = remaining_size / available_block_size;
         size_t remaining_blocks = uxr_seq_num_sub(stream->last_acknown, uxr_seq_num_add(stream->last_written, 1));
         available_to_write = necesary_blocks <= remaining_blocks;
         if(available_to_write)
         {
-            uxrSeqNum initial = (length == block_size) ? uxr_seq_num_add(stream->last_written, 1) : stream->last_written;
+            uxrSeqNum initial = (length == block_size - stream->offset) ? uxr_seq_num_add(stream->last_written, 1) : stream->last_written;
             uxrSeqNum next = initial;
 
             size_t blocks = necesary_blocks + remaining_size % available_block_size;
@@ -100,7 +102,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
             {
                 next = uxr_seq_num_add(next, 1);
                 uint8_t* buffer = uxr_get_output_buffer(stream, next % stream->history);
-                uxr_set_output_buffer_length(buffer, block_size);
+                uxr_set_output_buffer_length(buffer, available_block_size);
             }
 
             uxrSeqNum final = uxr_seq_num_add(next, 1);
@@ -112,6 +114,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
             size_t initial_length = uxr_get_output_buffer_length(initial_buffer);
             ucdr_init_buffer_offset(ub, initial_buffer, (uint32_t)block_size, (uint32_t)initial_length);
             ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
+            stream->last_written = final;
             stream->on_new_fragment(ub, stream);
         }
     }
