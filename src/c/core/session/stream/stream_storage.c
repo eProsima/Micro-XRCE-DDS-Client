@@ -110,28 +110,6 @@ uxrInputReliableStream* uxr_get_input_reliable_stream(uxrStreamStorage* storage,
     return NULL;
 }
 
-size_t uxr_output_stream_current_length(uxrStreamStorage* storage, uxrStreamId stream_id)
-{
-    switch(stream_id.type)
-    {
-        case UXR_BEST_EFFORT_STREAM:
-        {
-            uxrOutputBestEffortStream* stream = uxr_get_output_best_effort_stream(storage, stream_id.index);
-            return stream->writer;
-            break;
-        }
-        case UXR_RELIABLE_STREAM:
-        {
-            uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(storage, stream_id.index);
-            return uxr_output_buffer_current_length(stream);
-            break;
-        }
-        default:
-            return SIZE_MAX; //some kind of error?
-            break;
-    }
-}
-
 bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* ub)
 {
     bool available = false;
