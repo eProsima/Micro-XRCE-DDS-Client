@@ -574,19 +574,13 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
         case UXR_BEST_EFFORT_STREAM:
         {
             uxrOutputBestEffortStream* stream = uxr_get_output_best_effort_stream(&session->streams, stream_id.index);
-            if(stream)
-            {
-                available = uxr_prepare_best_effort_buffer_to_write(stream, submessage_size, ub);
-                break;
-            }
+            available = stream && uxr_prepare_best_effort_buffer_to_write(stream, submessage_size, ub);
+            break;
         }
         case UXR_RELIABLE_STREAM:
         {
             uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
-            if(stream)
-            {
-                available = uxr_prepare_reliable_buffer_to_write(stream, submessage_size, SUBHEADER_SIZE, ub);
-            }
+            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, SUBHEADER_SIZE, ub);
             break;
         }
         default:
