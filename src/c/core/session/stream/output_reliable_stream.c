@@ -207,20 +207,7 @@ void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t 
         uxr_set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
     }
 
-    uint16_t buffers_to_check_clean = uxr_seq_num_sub(stream->last_sent, last_acked_seq_num);
-    for(uint16_t i = 0; i < buffers_to_check_clean; i++)
-    {
-        if(bitmap & (1 << i)) /* message lost */
-        {
-            stream->send_lost = true;
-        }
-        else
-        {
-            uxrSeqNum seq_num = uxr_seq_num_add(last_acked_seq_num, i);
-            uint8_t* internal_buffer = uxr_get_output_buffer(stream, seq_num % stream->history);
-            uxr_set_output_buffer_length(internal_buffer, stream->offset); /* clear buffer */
-        }
-    }
+    stream->send_lost = (0 < bitmap);
 
     /* reset heartbeat interval */
     stream->next_heartbeat_tries = 0;

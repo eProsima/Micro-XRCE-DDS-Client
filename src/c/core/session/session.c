@@ -537,7 +537,7 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStr
 
         uint8_t* buffer; size_t length;
         uxrSeqNum seq_num_it = uxr_begin_output_nack_buffer_it(stream);
-        if(uxr_next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
+        while (uxr_next_reliable_nack_buffer_to_send(stream, &buffer, &length, &seq_num_it))
         {
             send_message(session, buffer, length);
         }

@@ -4,6 +4,7 @@ compile_commands.json
 .ycm_extra_conf.py
 .color_coded
 CMakeLists.txt.user
+tags
 
 # eclipse
 .cproject
