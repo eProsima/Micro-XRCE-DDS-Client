@@ -12,38 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_CORE_SESSION_STREAM_OUTPUT_RELIABLE_STREAM_H_
-#define _UXR_CLIENT_CORE_SESSION_STREAM_OUTPUT_RELIABLE_STREAM_H_
+#ifndef _SRC_C_CORE_SESSION_SESSION_INTERNAL_H_
+#define _SRC_C_CORE_SESSION_SESSION_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <uxr/client/core/session/stream/seq_num.h>
+#include <uxr/client/core/session/session.h>
 
-#include <stddef.h>
-#include <stdbool.h>
+struct ucdrBuffer;
 
-typedef struct uxrOutputReliableStream
-{
-    uint8_t* buffer;
-    size_t size;
-    uint16_t history;
-    uint8_t offset;
-
-    uxrSeqNum last_written;
-    uxrSeqNum last_sent;
-    uxrSeqNum last_acknown;
-
-    int64_t next_heartbeat_timestamp;
-    uint8_t next_heartbeat_tries;
-    bool send_lost;
-
-} uxrOutputReliableStream;
+bool uxr_prepare_stream_to_write_submessage(uxrSession* session,
+                                            uxrStreamId stream_id,
+                                            size_t payload_size,
+                                            struct ucdrBuffer* ub,
+                                            uint8_t submessage_id,
+                                            uint8_t mode);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _UXR_CLIENT_CORE_SESSION_STREAM_OUTPUT_RELIABLE_STREAM_H_
+#endif // _SRC_C_CORE_SESSION_SESSION_INTERNAL_H_
+

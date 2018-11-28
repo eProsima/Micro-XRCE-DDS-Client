@@ -26,6 +26,10 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
+#define HEARTBEAT_PAYLOAD_SIZE 4
+
+struct ucdrBuffer;
+
 void uxr_init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
 void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream);
 bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, struct ucdrBuffer* ub);

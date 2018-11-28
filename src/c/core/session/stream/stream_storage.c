@@ -1,4 +1,3 @@
-
 #include "stream_storage_internal.h"
 #include "input_best_effort_stream_internal.h"
 #include "input_reliable_stream_internal.h"

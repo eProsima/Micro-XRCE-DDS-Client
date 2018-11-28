@@ -355,6 +355,7 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
+    uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
     uxr_buffer_heartbeat(stream, &ub);
     uxr_stamp_session_header(&session->info, 0, id.raw, ub.init);
     send_message(session, heartbeat_buffer, ucdr_buffer_length(&ub));
@@ -368,6 +369,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
+    uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
     uxr_buffer_acknack(stream, &ub);
     uxr_stamp_session_header(&session->info, 0, id.raw, ub.init);
     send_message(session, acknack_buffer, ucdr_buffer_length(&ub));
@@ -560,3 +562,16 @@ void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request
         }
     }
 }
+
+bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId stream_id, size_t payload_size, ucdrBuffer* ub, uint8_t submessage_id, uint8_t mode)
+{
+    size_t submessage_size = SUBHEADER_SIZE + payload_size + uxr_submessage_padding(payload_size);
+    bool prepared = uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)submessage_size, ub);
+    if(prepared)
+    {
+        (void) uxr_buffer_submessage_header(ub, submessage_id, (uint16_t)payload_size, mode);
+    }
+
+    return prepared;
+}
+
