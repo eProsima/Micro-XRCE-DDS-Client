@@ -185,11 +185,9 @@ int main(int args, char** argv)
     bool running = true;
     while (running)
     {
-        if (!check_input())
-        {
-            (void) uxr_run_session_time(&session, 100);
-        }
-        else if (fgets(command_stdin_line, 256, stdin))
+        (void) uxr_run_session_time(&session, 100);
+
+        if (check_input() && fgets(command_stdin_line, 256, stdin))
         {
             running = run_command(command_stdin_line, &session, &default_output);
         }
@@ -321,7 +319,7 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
     }
     else if(0 == strcmp(name, "delete") && 3 == length)
     {
-        uxrObjectId entity_id = uxr_object_id((uint16_t)(arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
+        uxrObjectId entity_id = uxr_object_id((uint16_t)arg1, (uint8_t)arg2);
         (void) uxr_buffer_delete_entity(session, *stream_id, entity_id);
     }
     else if((0 == strcmp(name, "default_output_stream") || 0 == strcmp(name, "stream")) && 2 == length)
@@ -485,7 +483,7 @@ void print_commands(void)
     printf("        Creates a DataWriter on the publisher <publisher id>.\n");
     printf("    create_datareader  <datareader id> <subscriber id>:\n");
     printf("        Creates a DataReader on the subscriber <subscriber id>.\n");
-    printf("    write_data <datawriter id> <stream id> [<x> <y> <size> <color>]:\n");
+    printf("    write_data         <datawriter id> <stream id> [<x> <y> <size> <color>]:\n");
     printf("        Write data into a <stream id> using <data writer id> DataWriter.\n");
     printf("    request_data       <datareader id> <stream id> <samples>:\n");
     printf("        Read <sample> topics from a <stream id> using <datareader id> DataReader.\n");
@@ -499,7 +497,7 @@ void print_commands(void)
     printf("        The streams must be initially configured.\n");
     printf("    exit:\n");
     printf("        Close session and exit.\n");
-    printf("    tree, entity_tree        <id>:\n");
+    printf("    tree, entity_tree  <id>:\n");
     printf("        Create the necessary entities for a complete publisher and subscriber.\n");
     printf("        All entities will have the same <id> as id.\n");
     printf("    h, help:\n");
