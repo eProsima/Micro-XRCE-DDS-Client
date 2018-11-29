@@ -51,37 +51,37 @@ public:
         uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
         request_id = uxr_buffer_create_participant_xml(&session_, output_stream_id, participant_id, 0, participant_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
         request_id = uxr_buffer_create_topic_xml(&session_, output_stream_id, topic_id, participant_id, topic_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
         request_id = uxr_buffer_create_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, publisher_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
         request_id = uxr_buffer_create_datawriter_xml(&session_, output_stream_id, datawriter_id, publisher_id, datawriter_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
         request_id = uxr_buffer_create_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, subscriber_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
 
         uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
         request_id = uxr_buffer_create_datareader_xml(&session_, output_stream_id, datareader_id, subscriber_id, datareader_xml_, flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
     }
 
@@ -93,7 +93,7 @@ public:
         uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
         request_id = uxr_buffer_create_participant_ref(&session_, output_stream_id, participant_id, 0, "default_xrce_participant", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
         ASSERT_EQ(expected_status, last_status_);
         ASSERT_EQ(participant_id, last_status_object_id_);
@@ -102,7 +102,7 @@ public:
         uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
         request_id = uxr_buffer_create_topic_ref(&session_, output_stream_id, topic_id, participant_id, "bighelloworld_topic", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
         ASSERT_EQ(expected_status, last_status_);
         ASSERT_EQ(topic_id, last_status_object_id_);
@@ -111,7 +111,7 @@ public:
         uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
         request_id = uxr_buffer_create_publisher_xml(&session_, output_stream_id, publisher_id, participant_id, "", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
         ASSERT_EQ(expected_status, last_status_);
         ASSERT_EQ(publisher_id, last_status_object_id_);
@@ -120,7 +120,7 @@ public:
         uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
         request_id = uxr_buffer_create_datawriter_ref(&session_, output_stream_id, datawriter_id, publisher_id, "bighelloworld_data_writer", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
         ASSERT_EQ(expected_status, last_status_);
         ASSERT_EQ(datawriter_id, last_status_object_id_);
@@ -129,7 +129,7 @@ public:
         uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
         request_id = uxr_buffer_create_subscriber_xml(&session_, output_stream_id, subscriber_id, participant_id, "", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
         ASSERT_EQ(expected_status, last_status_);
         ASSERT_EQ(subscriber_id, last_status_object_id_);
@@ -138,14 +138,14 @@ public:
         uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
         request_id = uxr_buffer_create_datareader_ref(&session_, output_stream_id, datareader_id, subscriber_id, "bighelloworld_data_reader", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
-        uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+        uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
         ASSERT_EQ(expected_status, last_status_);
         ASSERT_EQ(datareader_id, last_status_object_id_);
         ASSERT_EQ(request_id, last_status_request_id_);
     }
 
-    void publish(uint8_t id, uint8_t stream_id_raw, size_t number, const std::string& message = "Hello DDS world!")
+    void publish(uint8_t id, uint8_t stream_id_raw, size_t number, const std::string& message)
     {
         //Used only for waiting the RTPS subscriber matching
         (void) uxr_run_session_time(&session_, 50);
@@ -165,14 +165,15 @@ public:
             ASSERT_TRUE(prepared);
             bool written = BigHelloWorld_serialize_topic(&ub, &topic);
             ASSERT_TRUE(written);
-            bool sent = uxr_run_session_until_confirm_delivery(&session_, 60000);
+            bool sent = uxr_run_session_until_confirm_delivery(&session_, 3000);
             ASSERT_TRUE(sent);
             std::cout << "topic sent: " << i << std::endl;
         }
     }
 
-    void subscribe(uint8_t id, uint8_t stream_id_raw, size_t number)
+    void subscribe(uint8_t id, uint8_t stream_id_raw, size_t number, const std::string& message)
     {
+        expected_message_ = message;
         expected_topic_index_ = 0;
         last_topic_stream_id_ = uxr_stream_id_from_raw(0, UXR_OUTPUT_STREAM);
         last_topic_object_id_ = uxr_object_id(255, 15);
@@ -189,7 +190,7 @@ public:
         while(expected_topic_index_ < number)
         {
             uint8_t status;
-            bool received_ok = uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
+            bool received_ok = uxr_run_session_until_all_status(&session_, 3000, &request_id, &status, 1);
             ASSERT_EQ(UXR_STATUS_OK, status);
             ASSERT_TRUE(received_ok);
             ASSERT_EQ(last_topic_object_id_, datareader_id);
@@ -295,7 +296,7 @@ private:
         BigHelloWorld topic;
         BigHelloWorld_deserialize_topic(serialization, &topic);
         ASSERT_EQ(topic.index, expected_topic_index_);
-        ASSERT_STREQ(topic.message, "Hello DDS world!");
+        ASSERT_STREQ(topic.message, expected_message_.c_str());
         last_topic_object_id_ = object_id;
         last_topic_stream_id_ = stream_id;
         last_topic_request_id_ = request_id;
@@ -341,6 +342,8 @@ private:
     std::unique_ptr<uint8_t> output_best_effort_stream_buffer_;
     std::unique_ptr<uint8_t> output_reliable_stream_buffer_;
     std::unique_ptr<uint8_t> input_reliable_stream_buffer_;
+
+    std::string expected_message_;
 
     uint8_t last_status_;
     uxrObjectId last_status_object_id_;

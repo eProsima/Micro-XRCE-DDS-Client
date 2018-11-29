@@ -104,16 +104,6 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
         size_t remaining_blocks = uxr_seq_num_sub(stream->last_acknown, stream->last_written) % stream->history;
         available_to_write = necesary_blocks <= remaining_blocks;
 
-        printf("initial_length: %zu\n", initial_length);
-        printf("data: %zu\n", size);
-        printf("block_size: %zu\n", block_size);
-        printf("available_block_size: %zu\n", available_block_size);
-        printf("first_fragment_size: %zu\n", first_fragment_size);
-        printf("remaining_size: %zu\n", remaining_size);
-        printf("last_fragment_size: %zu\n", last_fragment_size);
-        printf("first_fragment_size + initial_length: %zu\n", first_fragment_size + initial_length);
-        printf("%zu %zu\n", necesary_blocks, remaining_blocks);
-
         if(available_to_write)
         {
             for(size_t i = 0; i < necesary_blocks - 1; i++)
