@@ -602,5 +602,5 @@ void on_new_output_reliable_stream_segment(ucdrBuffer* ub, void* args)
     uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written);
     uint8_t last_fragment_flag = FLAG_LAST_FRAGMENT * (last_buffer == ub->init);
 
-    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_HEARTBEAT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);
 }
