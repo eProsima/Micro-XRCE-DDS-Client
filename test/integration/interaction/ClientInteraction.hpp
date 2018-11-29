@@ -1,7 +1,7 @@
 #ifndef IN_TEST_CLIENT_INTERACTION_HPP
 #define IN_TEST_CLIENT_INTERACTION_HPP
 
-#include "HelloWorld.h"
+#include "BigHelloWorld.h"
 #include "Gateway.hpp"
 
 #include <uxr/client/client.h>
@@ -100,7 +100,7 @@ public:
         ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
-        request_id = uxr_buffer_create_topic_ref(&session_, output_stream_id, topic_id, participant_id, "helloworld_topic", flags);
+        request_id = uxr_buffer_create_topic_ref(&session_, output_stream_id, topic_id, participant_id, "bighelloworld_topic", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
@@ -118,7 +118,7 @@ public:
         ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
-        request_id = uxr_buffer_create_datawriter_ref(&session_, output_stream_id, datawriter_id, publisher_id, "helloworld_data_writer", flags);
+        request_id = uxr_buffer_create_datawriter_ref(&session_, output_stream_id, datawriter_id, publisher_id, "bighelloworld_data_writer", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
@@ -136,7 +136,7 @@ public:
         ASSERT_EQ(request_id, last_status_request_id_);
 
         uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
-        request_id = uxr_buffer_create_datareader_ref(&session_, output_stream_id, datareader_id, subscriber_id, "helloworld_data_reader", flags);
+        request_id = uxr_buffer_create_datareader_ref(&session_, output_stream_id, datareader_id, subscriber_id, "bighelloworld_data_reader", flags);
         ASSERT_NE(UXR_INVALID_REQUEST_ID, request_id);
         uxr_run_session_until_all_status(&session_, 60000, &request_id, &status, 1);
         ASSERT_EQ(expected_status, status);
@@ -145,7 +145,7 @@ public:
         ASSERT_EQ(request_id, last_status_request_id_);
     }
 
-    void publish(uint8_t id, uint8_t stream_id_raw, size_t number)
+    void publish(uint8_t id, uint8_t stream_id_raw, size_t number, const std::string& message = "Hello DDS world!")
     {
         //Used only for waiting the RTPS subscriber matching
         (void) uxr_run_session_time(&session_, 50);
@@ -155,13 +155,15 @@ public:
 
         for(size_t i = 0; i < number; ++i)
         {
-            HelloWorld topic = {static_cast<uint32_t>(i), "Hello DDS world!"};
+            BigHelloWorld topic;
+            topic.index = static_cast<uint32_t>(i);
+            strcpy(topic.message, message.c_str());
 
             ucdrBuffer ub;
-            uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
+            uint32_t topic_size = BigHelloWorld_size_of_topic(&topic, 0);
             bool prepared = uxr_prepare_output_stream(&session_, output_stream_id, datawriter_id, &ub, topic_size);
             ASSERT_TRUE(prepared);
-            bool written = HelloWorld_serialize_topic(&ub, &topic);
+            bool written = BigHelloWorld_serialize_topic(&ub, &topic);
             ASSERT_TRUE(written);
             bool sent = uxr_run_session_until_confirm_delivery(&session_, 60000);
             ASSERT_TRUE(sent);
@@ -240,6 +242,11 @@ public:
         }
     }
 
+    size_t get_mtu() const
+    {
+        return mtu_;
+    }
+
 private:
     void init_common()
     {
@@ -255,24 +262,24 @@ private:
         output_best_effort_stream_buffer_.reset(new uint8_t[mtu_ * UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS]{0});
         output_reliable_stream_buffer_.reset(new uint8_t[mtu_ * history_ * UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS]{0});
         input_reliable_stream_buffer_.reset(new uint8_t[mtu_ * history_ * UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS]{0});
-        for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
+        for(size_t i = 0; i < UXR_CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS; ++i)
         {
             uint8_t* buffer = output_best_effort_stream_buffer_.get() + mtu_ * i;
-            (void) uxr_create_output_best_effort_stream(&session_, buffer, size_t(mtu_));
+            (void) uxr_create_output_best_effort_stream(&session_, buffer, mtu_);
         }
-        for(int i = 0; i < UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
+        for(size_t i = 0; i < UXR_CONFIG_MAX_INPUT_BEST_EFFORT_STREAMS; ++i)
         {
             (void) uxr_create_input_best_effort_stream(&session_);
         }
-        for(int i = 0; i < UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
+        for(size_t i = 0; i < UXR_CONFIG_MAX_OUTPUT_RELIABLE_STREAMS; ++i)
         {
             uint8_t* buffer = output_reliable_stream_buffer_.get() + mtu_ * history_ * i;
-            (void) uxr_create_output_reliable_stream(&session_, buffer , static_cast<size_t>(mtu_ * history_), history_);
+            (void) uxr_create_output_reliable_stream(&session_, buffer , mtu_ * history_, history_);
         }
-        for(int i = 0; i < UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
+        for(size_t i = 0; i < UXR_CONFIG_MAX_INPUT_RELIABLE_STREAMS; ++i)
         {
             uint8_t* buffer = input_reliable_stream_buffer_.get() + mtu_ * history_ * i;
-            (void) uxr_create_input_reliable_stream(&session_, buffer, static_cast<size_t>(mtu_ * history_), history_);
+            (void) uxr_create_input_reliable_stream(&session_, buffer, mtu_ * history_, history_);
         }
     }
 
@@ -285,8 +292,8 @@ private:
     {
         (void) session;
 
-        HelloWorld topic;
-        HelloWorld_deserialize_topic(serialization, &topic);
+        BigHelloWorld topic;
+        BigHelloWorld_deserialize_topic(serialization, &topic);
         ASSERT_EQ(topic.index, expected_topic_index_);
         ASSERT_STREQ(topic.message, "Hello DDS world!");
         last_topic_object_id_ = object_id;
@@ -328,7 +335,7 @@ private:
     uxrTCPTransport tcp_transport_;
     uxrTCPPlatform tcp_platform_;
 
-    int mtu_;
+    size_t mtu_;
     uxrSession session_;
 
     std::unique_ptr<uint8_t> output_best_effort_stream_buffer_;

@@ -30,7 +30,7 @@ else()
     set(SRCS
         ClientInteraction.cpp
         Gateway.cpp
-        HelloWorld.c
+        BigHelloWorld.c
         )
 
     add_library(${PROJECT_NAME} STATIC ${SRCS})
