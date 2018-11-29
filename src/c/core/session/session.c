@@ -254,7 +254,8 @@ bool uxr_buffer_performance(uxrSession *session,
     payload.buf = buf;
     payload.len = len;
     ucdrBuffer mb;
-    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (uint16_t)(SUBHEADER_SIZE + 8 + len), &mb))
+    const uint16_t size_to_write = (uint16_t)(SUBHEADER_SIZE + sizeof(epoch_time) + len);
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, size_to_write, &mb))
     {
         uint8_t flags = (echo) ? UXR_ECHO : 0;
         (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_PERFORMANCE, (uint16_t)(8 + len), flags);
@@ -598,8 +599,12 @@ void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, ui
     ucdr_deserialize_uint64_t(submessage, &epoch_time);
 
     ucdrBuffer mb_performance;
-    ucdr_init_buffer(&mb_performance, submessage->iterator, (uint16_t)(length - 4));
-    session->on_performance(session, epoch_time, (uint16_t)(length - 4), &mb_performance, session->on_performance_args);
+    ucdr_init_buffer(&mb_performance, submessage->iterator, (uint16_t)(length - sizeof(epoch_time)));
+    session->on_performance(session,
+                            epoch_time,
+                            (uint16_t)(length - sizeof(epoch_time)),
+                            &mb_performance,
+                            session->on_performance_args);
 }
 #endif
 

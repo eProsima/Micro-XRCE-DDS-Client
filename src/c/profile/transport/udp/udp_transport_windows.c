@@ -36,15 +36,7 @@ bool uxr_init_udp_platform(uxrUDPPlatform* platform, const char* ip, uint16_t po
 
 bool uxr_close_udp_platform(uxrUDPPlatform* platform)
 {
-    bool rv = false;
-    if (INVALID_SOCKET == platform->poll_fd.fd)
-    {
-        rv = true;
-    }
-    else
-    {
-        rv = (0 == closesocket(platform->poll_fd.fd));
-    }
+    bool rv = (INVALID_SOCKET == platform->poll_fd.fd) ? true : (0 == closesocket(platform->poll_fd.fd));
     return (0 == WSACleanup()) && rv;
 }
 

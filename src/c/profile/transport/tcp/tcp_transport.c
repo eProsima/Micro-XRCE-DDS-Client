@@ -39,7 +39,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
         if (0 < send_rv)
         {
             bytes_sent = (size_t)(bytes_sent + send_rv);
-            size_sent = (bytes_sent == 2);
+            size_sent = (sizeof(msg_size_buf) == bytes_sent);
         }
         else
         {
