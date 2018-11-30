@@ -980,7 +980,8 @@ typedef struct HEARTBEAT_Payload
 #ifdef PERFORMANCE_TESTING
 typedef struct PERFORMANCE_Payload
 {
-    uint64_t epoch_time;
+    uint32_t epoch_time_lsb;
+    uint32_t epoch_time_msb;
     uint8_t* buf;
     uint16_t len;
 

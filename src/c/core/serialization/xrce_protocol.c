@@ -2132,7 +2132,8 @@ bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* ou
 bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_uint64_t(buffer, input->epoch_time);
+    ret &= ucdr_serialize_uint32_t(buffer, input->epoch_time_lsb);
+    ret &= ucdr_serialize_uint32_t(buffer, input->epoch_time_msb);
     ret &= ucdr_serialize_array_uint8_t(buffer, input->buf, input->len);
     return ret;
 }
@@ -2140,7 +2141,8 @@ bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Pay
 bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_uint64_t(buffer, &output->epoch_time);
+    ret &= ucdr_deserialize_uint32_t(buffer, &output->epoch_time_lsb);
+    ret &= ucdr_deserialize_uint32_t(buffer, &output->epoch_time_msb);
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->buf, output->len);
     return ret;
 }

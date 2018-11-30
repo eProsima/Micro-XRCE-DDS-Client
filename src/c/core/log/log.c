@@ -39,8 +39,10 @@
 
 #define RESTORE_COLOR  "\x1B[0m"
 
-#define SEND_ARROW       "=>> "
-#define RECV_ARROW       "<<= "
+#define SEND_ARROW       "==> "
+#define ERROR_SEND_ARROW "!=> "
+#define RECV_ARROW       "<== "
+#define ERROR_RECV_ARROW "<=! "
 
 /* Compute output buffer size. */
 #if !defined(UXR_CONFIG_SERIAL_TRANSPORT_MTU)
@@ -93,7 +95,25 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 {
     static int64_t initial_log_time = 0;
 
-    const char* color = (direction == UXR_SEND) ? YELLOW : PURPLE;
+    const char* color;
+    switch (direction)
+    {
+        case UXR_SEND:
+            color = YELLOW;
+            break;
+        case UXR_ERROR_SEND:
+            color = RED;
+            break;
+        case UXR_RECV:
+            color = PURPLE;
+            break;
+        case UXR_ERROR_RECV:
+            color = RED;
+            break;
+        default:
+            color = WHITE;
+            break;
+    }
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, buffer, (uint32_t)size);
@@ -237,7 +257,25 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
 void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size)
 {
-    const char* dir = (direction == UXR_SEND) ? SEND_ARROW : RECV_ARROW;
+    const char* dir;
+    switch (direction)
+    {
+        case UXR_SEND:
+            dir = SEND_ARROW;
+            break;
+        case UXR_ERROR_SEND:
+            dir = ERROR_SEND_ARROW;
+            break;
+        case UXR_RECV:
+            dir = RECV_ARROW;
+            break;
+        case UXR_ERROR_RECV:
+            dir = ERROR_RECV_ARROW;
+            break;
+        default:
+            dir = "";
+            break;
+    }
 
     printf("%s%s<< [%zu]: %s>>%s\n",
             dir,
@@ -535,8 +573,31 @@ void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payloa
 
 void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, const uint8_t* client_key)
 {
-    const char* arrow = (direction == UXR_SEND) ? SEND_ARROW : RECV_ARROW;
-    const char* color = (direction == UXR_SEND) ? YELLOW : PURPLE;
+    const char* arrow;
+    const char* color;
+    switch (direction)
+    {
+        case UXR_SEND:
+            arrow = SEND_ARROW;
+            color = YELLOW;
+            break;
+        case UXR_ERROR_SEND:
+            arrow = ERROR_SEND_ARROW;
+            color = RED;
+            break;
+        case UXR_RECV:
+            arrow = RECV_ARROW;
+            color = PURPLE;
+            break;
+        case UXR_ERROR_RECV:
+            arrow = ERROR_RECV_ARROW;
+            color = RED;
+            break;
+        default:
+            arrow = "";
+            color = WHITE;
+            break;
+    }
 
     char stream_representation;
     if(0 == stream_id)
@@ -561,7 +622,6 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
     {
         stream_id = (uint8_t)seq_num;
     }
-
 
     const char* client_key_str = client_key ? data_to_string(client_key, 4) : "-";
     printf("%s%s%3zu: %s(key: %s| %c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, client_key_str, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);

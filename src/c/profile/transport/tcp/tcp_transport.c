@@ -81,7 +81,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
         while (!payload_sent && n_attemps < UXR_MAX_WRITE_TCP_ATTEMPS);
     }
 
-    if (size_sent && payload_sent)
+    if (payload_sent)
     {
         rv = true;
     }

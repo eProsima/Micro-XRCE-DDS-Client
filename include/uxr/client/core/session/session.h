@@ -34,8 +34,7 @@ typedef void (*uxrOnTopicFunc) (struct uxrSession* session, uxrObjectId object_i
                              uxrStreamId stream_id, struct ucdrBuffer* ub, void* args);
 
 #ifdef PERFORMANCE_TESTING
-typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, uint64_t epoch_time, uint16_t length,
-                                      struct ucdrBuffer* mb, void* args);
+typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, struct ucdrBuffer* mb, void* args);
 #endif
 
 typedef struct uxrSession

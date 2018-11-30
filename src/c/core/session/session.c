@@ -250,15 +250,21 @@ bool uxr_buffer_performance(uxrSession *session,
 {
     bool rv = false;
     PERFORMANCE_Payload payload;
-    payload.epoch_time = epoch_time;
+    payload.epoch_time_lsb = (uint32_t)(epoch_time & UINT32_MAX);
+    payload.epoch_time_msb = (uint32_t)(epoch_time >> 32);
     payload.buf = buf;
     payload.len = len;
     ucdrBuffer mb;
-    const uint16_t size_to_write = (uint16_t)(SUBHEADER_SIZE + sizeof(epoch_time) + len);
-    if (uxr_prepare_stream_to_write(&session->streams, stream_id, size_to_write, &mb))
+    const uint16_t payload_length = (uint16_t)(sizeof(payload.epoch_time_lsb) +
+                                               sizeof(payload.epoch_time_msb) +
+                                               len);
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (size_t)(SUBHEADER_SIZE + payload_length), &mb))
     {
         uint8_t flags = (echo) ? UXR_ECHO : 0;
-        (void) uxr_buffer_submessage_header(&mb, SUBMESSAGE_ID_PERFORMANCE, (uint16_t)(8 + len), flags);
+        (void) uxr_buffer_submessage_header(&mb,
+                                            SUBMESSAGE_ID_PERFORMANCE,
+                                            payload_length,
+                                            flags);
         (void) uxr_serialize_PERFORMANCE_Payload(&mb, &payload);
         rv = true;
     }
@@ -371,10 +377,7 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
 inline bool send_message(const uxrSession* session, uint8_t* buffer, size_t length)
 {
     bool sent = session->comm->send_msg(session->comm->instance, buffer, length);
-    if (sent)
-    {
-        UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, buffer, length, session->info.key);
-    }
+    UXR_DEBUG_PRINT_MESSAGE((sent) ? UXR_SEND : UXR_ERROR_SEND, buffer, length, session->info.key);
     return sent;
 }
 
@@ -595,16 +598,9 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStr
 #ifdef PERFORMANCE_TESTING
 void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, uint16_t length)
 {
-    uint64_t epoch_time;
-    ucdr_deserialize_uint64_t(submessage, &epoch_time);
-
     ucdrBuffer mb_performance;
-    ucdr_init_buffer(&mb_performance, submessage->iterator, (uint16_t)(length - sizeof(epoch_time)));
-    session->on_performance(session,
-                            epoch_time,
-                            (uint16_t)(length - sizeof(epoch_time)),
-                            &mb_performance,
-                            session->on_performance_args);
+    ucdr_init_buffer(&mb_performance, submessage->iterator, length);
+    session->on_performance(session, &mb_performance, session->on_performance_args);
 }
 #endif
 
