@@ -967,6 +967,7 @@ typedef struct ACKNACK_Payload
 {
     uint16_t first_unacked_seq_num;
     uint8_t nack_bitmap[2];
+    uint8_t stream_id;
 
 } ACKNACK_Payload;
 
@@ -974,6 +975,7 @@ typedef struct HEARTBEAT_Payload
 {
     uint16_t first_unacked_seq_nr;
     uint16_t last_unacked_seq_nr;
+    uint8_t stream_id;
 
 } HEARTBEAT_Payload;
 
