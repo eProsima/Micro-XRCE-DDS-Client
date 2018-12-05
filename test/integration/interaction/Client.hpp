@@ -1,5 +1,5 @@
-#ifndef IN_TEST_CLIENT_INTERACTION_HPP
-#define IN_TEST_CLIENT_INTERACTION_HPP
+#ifndef IN_TEST_CLIENT_HPP
+#define IN_TEST_CLIENT_HPP
 
 #include "BigHelloWorld.h"
 #include "Gateway.hpp"
@@ -10,8 +10,6 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <thread>
-
-#define MAX_AGENTS_DISCOVERY 10
 
 #define UDP_TRANSPORT 1
 #define TCP_TRANSPORT 2
@@ -355,66 +353,5 @@ private:
     size_t expected_topic_index_;
 };
 
-class Discovery
-{
-public:
-    Discovery(int transport, std::vector<uint16_t>& agent_ports)
-    : agent_ports_(agent_ports)
-    , transport_(transport)
-    {
-    }
 
-    void unicast(uint16_t base_port)
-    {
-        uxrAgentAddress agent_list[MAX_AGENTS_DISCOVERY];
-        for(size_t i = 0; i < agent_ports_.size(); ++i)
-        {
-            strcpy(agent_list[i].ip, "127.0.0.1");
-            agent_list[i].port = uint16_t(base_port + i);
-        }
-
-        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &chosen_, agent_list, agent_ports_.size()));
-        ASSERT_TRUE(agent_ports_.empty());
-    }
-
-    void multicast()
-    {
-        ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, this, &chosen_));
-        ASSERT_TRUE(agent_ports_.empty());
-    }
-
-private:
-    static bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
-    {
-        static_cast<Discovery*>(args)->on_agent_found_member(address, timestamp);
-        return false;
-    }
-
-    void on_agent_found_member(const uxrAgentAddress* address, int64_t timestamp)
-    {
-        (void) timestamp;
-
-        std::cout << "Agent found on port: " << address->port << std::endl;
-
-        Client client(0.0f, 1);
-        client.init_transport(transport_, address->ip, address->port);
-
-        std::vector<uint16_t>::iterator it = std::find(agent_ports_.begin(), agent_ports_.end(), address->port);
-
-        bool found = it != agent_ports_.end();
-        if(found)
-        {
-            agent_ports_.erase(it);
-        }
-
-        //ASSERT_TRUE(found); //in multicast, it is possible to read agents out of the tests that will not be found.
-
-        client.close_transport(transport_);
-    }
-
-    std::vector<uint16_t> agent_ports_;
-    uxrAgentAddress chosen_;
-    int transport_;
-};
-
-#endif //IN_TEST_CLIENT_INTERACTION_HPP
+#endif //IN_TEST_CLIENT_HPP

@@ -28,7 +28,8 @@ else()
     project(interaction-intest-client CXX)
 
     set(SRCS
-        ClientInteraction.cpp
+        Discovery.cpp
+        Client.cpp
         Gateway.cpp
         BigHelloWorld.c
         )

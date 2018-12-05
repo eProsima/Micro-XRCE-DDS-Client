@@ -1,4 +1,4 @@
-#include "ClientInteraction.hpp"
+#include "Client.hpp"
 
 
 const char* Client::participant_xml_ = "<dds>"
