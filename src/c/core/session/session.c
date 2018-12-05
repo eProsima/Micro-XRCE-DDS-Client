@@ -14,8 +14,8 @@
 #include "../log/log_internal.h"
 
 // Autogenerate these defines by the protocol generator tool?
-#define HEARTBEAT_MAX_MSG_SIZE 16
-#define ACKNACK_MAX_MSG_SIZE 16
+#define HEARTBEAT_MAX_MSG_SIZE      (12 + HEARTBEAT_PAYLOAD_SIZE)
+#define ACKNACK_MAX_MSG_SIZE        (12 + ACKNACK_PAYLOAD_SIZE)
 #define CREATE_SESSION_MAX_MSG_SIZE 38
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
@@ -40,8 +40,8 @@ static void read_submessage(uxrSession* session, ucdrBuffer* submessage,
 static void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id, bool last_fragment);
 static void read_submessage_status(uxrSession* session, ucdrBuffer* submessage);
 static void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t length, uxrStreamId stream_id, uint8_t format);
-static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
-static void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
+static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage);
+static void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage);
 #ifdef PERFORMANCE_TESTING
 static void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, uint16_t length);
 #endif
@@ -401,8 +401,8 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
-    uxr_buffer_heartbeat(stream, &ub);
-    uxr_stamp_session_header(&session->info, 0, id.raw, ub.init);
+    uxr_buffer_heartbeat(id.raw, stream, &ub);
+    uxr_stamp_session_header(&session->info, 0, 0, ub.init);
     send_message(session, heartbeat_buffer, ucdr_buffer_length(&ub));
 }
 
@@ -415,8 +415,8 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
-    uxr_buffer_acknack(stream, &ub);
-    uxr_stamp_session_header(&session->info, 0, id.raw, ub.init);
+    uxr_buffer_acknack(id.raw, stream, &ub);
+    uxr_stamp_session_header(&session->info, 0, 0, ub.init);
     send_message(session, acknack_buffer, ucdr_buffer_length(&ub));
 }
 
@@ -436,7 +436,7 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
     {
         case UXR_NONE_STREAM:
         {
-            stream_id = uxr_stream_id_from_raw((uint8_t)seq_num, UXR_INPUT_STREAM); // The real stream_id is into seq_num
+            stream_id = uxr_stream_id_from_raw(0x00, UXR_INPUT_STREAM); // The real stream_id is into seq_num
             read_submessage_list(session, ub, stream_id);
             break;
         }
@@ -509,11 +509,11 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
             break;
 
         case SUBMESSAGE_ID_HEARTBEAT:
-            read_submessage_heartbeat(session, submessage, stream_id);
+            read_submessage_heartbeat(session, submessage);
             break;
 
         case SUBMESSAGE_ID_ACKNACK:
-            read_submessage_acknack(session, submessage, stream_id);
+            read_submessage_acknack(session, submessage);
             break;
 
 #ifdef PERFORMANCE_TESTING
@@ -570,22 +570,32 @@ void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrSt
     //TODO
 }
 
-void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id)
+void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage)
 {
-    uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, stream_id.index);
+    HEARTBEAT_Payload heartbeat;
+    uxr_deserialize_HEARTBEAT_Payload(submessage, &heartbeat);
+    uxrStreamId id = uxr_stream_id_from_raw(heartbeat.stream_id, UXR_INPUT_STREAM);
+
+    uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, id.index);
     if(stream)
     {
-        uxr_read_heartbeat(stream, submessage);
-        write_submessage_acknack(session, stream_id);
+        uxr_process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
+        write_submessage_acknack(session, id);
     }
 }
 
-void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id)
+void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage)
 {
-    uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
+    ACKNACK_Payload acknack;
+    uxr_deserialize_ACKNACK_Payload(submessage, &acknack);
+    uxrStreamId id = uxr_stream_id_from_raw(acknack.stream_id, UXR_INPUT_STREAM);
+
+    uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, id.index);
     if(stream)
     {
-        uxr_read_acknack(stream, submessage);
+        uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) +
+                                           (uint16_t)acknack.nack_bitmap[1]);
+        uxr_process_acknack(stream, nack_bitmap, acknack.first_unacked_seq_num);
 
         uint8_t* buffer; size_t length;
         uxrSeqNum seq_num_it = uxr_begin_output_nack_buffer_it(stream);
