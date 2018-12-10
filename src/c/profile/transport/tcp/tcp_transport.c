@@ -49,6 +49,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
                 break;
             }
         }
+        ++n_attemps;
     }
     while (!size_sent && n_attemps < UXR_MAX_WRITE_TCP_ATTEMPS);
 
@@ -56,6 +57,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
     bool payload_sent = false;
     if (size_sent)
     {
+        n_attemps = 0;
         bytes_sent = 0;
         do
         {
@@ -77,6 +79,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
                     break;
                 }
             }
+            ++n_attemps;
         }
         while (!payload_sent && n_attemps < UXR_MAX_WRITE_TCP_ATTEMPS);
     }
