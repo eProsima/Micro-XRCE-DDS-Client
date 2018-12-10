@@ -34,8 +34,8 @@ void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buf
 void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream);
 bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, struct ucdrBuffer* ub);
+uint16_t uxr_compute_nack_bitmap(const uxrInputReliableStream* stream);
 
-void uxr_buffer_acknack(uint8_t stream_id, const uxrInputReliableStream* stream, struct ucdrBuffer* ub);
 void uxr_process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num);
 
 bool uxr_is_input_reliable_stream_busy(uxrInputReliableStream* stream);

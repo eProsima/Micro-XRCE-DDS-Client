@@ -1,12 +1,11 @@
 #include "seq_num_internal.h"
 #include "input_reliable_stream_internal.h"
-#include "../../serialization/xrce_protocol_internal.h"
+#include <ucdr/microcdr.h>
 
 #include <string.h>
 
 #define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
 
-static uint16_t compute_nack_bitmap(const uxrInputReliableStream* stream);
 //static bool on_full_buffer(ucdrBuffer* ub, void* args);
 
 static size_t get_input_buffer_length(uint8_t* buffer);
@@ -104,21 +103,6 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
     return available_to_read;
 }
 
-void uxr_buffer_acknack(uint8_t stream_id, const uxrInputReliableStream* stream, ucdrBuffer* ub)
-{
-    (void) stream; (void) ub;
-
-    uint16_t nack_bitmap = compute_nack_bitmap(stream);
-
-    ACKNACK_Payload payload;
-    payload.first_unacked_seq_num = uxr_seq_num_add(stream->last_handled, 1);
-    payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
-    payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
-    payload.stream_id = stream_id;
-
-    (void) uxr_serialize_ACKNACK_Payload(ub, &payload);
-}
-
 void uxr_process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_num, uint16_t last_seq_num)
 {
     if(0 > uxr_seq_num_cmp(uxr_seq_num_add(stream->last_handled, 1), first_seq_num))
@@ -137,10 +121,7 @@ bool uxr_is_input_reliable_stream_busy(uxrInputReliableStream* stream)
     return stream->last_announced != stream->last_handled;
 }
 
-//==================================================================
-//                             PRIVATE
-//==================================================================
-uint16_t compute_nack_bitmap(const uxrInputReliableStream* stream)
+uint16_t uxr_compute_nack_bitmap(const uxrInputReliableStream* stream)
 {
     uint16_t buffers_to_ack = uxr_seq_num_sub(stream->last_announced, stream->last_handled);
     uint16_t nack_bitmap = (buffers_to_ack > 0) ? 1 : 0;
@@ -157,7 +138,9 @@ uint16_t compute_nack_bitmap(const uxrInputReliableStream* stream)
 
     return nack_bitmap;
 }
-
+//==================================================================
+//                             PRIVATE
+//==================================================================
 inline size_t get_input_buffer_length(uint8_t* buffer)
 {
     return (size_t)*(buffer - INTERNAL_BUFFER_OFFSET);

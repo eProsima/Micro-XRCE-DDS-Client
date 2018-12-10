@@ -3,7 +3,7 @@
 
 #include "seq_num_internal.h"
 #include "output_reliable_stream_internal.h"
-#include "../../serialization/xrce_protocol_internal.h"
+#include <ucdr/microcdr.h>
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
 
@@ -218,16 +218,6 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
     }
 
     return it_updated;
-}
-
-void uxr_buffer_heartbeat(uint8_t stream_id, const uxrOutputReliableStream* stream, ucdrBuffer* ub)
-{
-    HEARTBEAT_Payload payload;
-    payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
-    payload.last_unacked_seq_nr = stream->last_sent;
-    payload.stream_id = stream_id;
-
-    (void) uxr_serialize_HEARTBEAT_Payload(ub, &payload);
 }
 
 void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num)

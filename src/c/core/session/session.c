@@ -10,6 +10,7 @@
 #include "stream/input_reliable_stream_internal.h"
 #include "stream/output_best_effort_stream_internal.h"
 #include "stream/output_reliable_stream_internal.h"
+#include "stream/seq_num_internal.h"
 #include "../serialization/xrce_protocol_internal.h"
 #include "../log/log_internal.h"
 
@@ -400,8 +401,17 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
+    /* Buffer submessage header. */
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_HEARTBEAT, HEARTBEAT_PAYLOAD_SIZE, 0);
-    uxr_buffer_heartbeat(id.raw, stream, &ub);
+
+    /* Buffer HEARTBEAT. */
+    HEARTBEAT_Payload payload;
+    payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
+    payload.last_unacked_seq_nr = stream->last_sent;
+    payload.stream_id = id.raw;
+    (void) uxr_serialize_HEARTBEAT_Payload(&ub, &payload);
+
+    /* Stamp message header. */
     uxr_stamp_session_header(&session->info, 0, 0, ub.init);
     send_message(session, heartbeat_buffer, ucdr_buffer_length(&ub));
 }
@@ -414,8 +424,19 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
+    /* Buffer submessage header. */
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_ACKNACK, ACKNACK_PAYLOAD_SIZE, 0);
-    uxr_buffer_acknack(id.raw, stream, &ub);
+
+    /* Buffer ACKNACK. */
+    ACKNACK_Payload payload;
+    payload.first_unacked_seq_num = uxr_seq_num_add(stream->last_handled, 1);
+    uint16_t nack_bitmap = uxr_compute_nack_bitmap(stream);
+    payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
+    payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
+    payload.stream_id = id.raw;
+    (void) uxr_serialize_ACKNACK_Payload(&ub, &payload);
+
+    /* Stamp message header. */
     uxr_stamp_session_header(&session->info, 0, 0, ub.init);
     send_message(session, acknack_buffer, ucdr_buffer_length(&ub));
 }
@@ -593,8 +614,7 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage)
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, id.index);
     if(stream)
     {
-        uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) +
-                                           (uint16_t)acknack.nack_bitmap[1]);
+        uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) + acknack.nack_bitmap[1]);
         uxr_process_acknack(stream, nack_bitmap, acknack.first_unacked_seq_num);
 
         uint8_t* buffer; size_t length;
