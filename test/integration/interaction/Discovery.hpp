@@ -27,7 +27,7 @@ public:
         for(size_t i = 0; i < agent_list.size(); ++i)
         {
             strcpy(agent_list[i].ip, "127.0.0.1");
-            agent_list[i].port = uint16_t(discovery_ports[i] + i);
+            agent_list[i].port = uint16_t(discovery_ports[i]);
         }
 
         ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &chosen_, agent_list.data(), agent_list.size()));
