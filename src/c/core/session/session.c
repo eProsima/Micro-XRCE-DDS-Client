@@ -25,7 +25,7 @@ static bool listen_message_reliably(uxrSession* session, int poll_ms);
 
 static bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, size_t attempts);
 
-static void send_message(const uxrSession* session, uint8_t* buffer, size_t length);
+static bool send_message(const uxrSession* session, uint8_t* buffer, size_t length);
 static bool recv_message(const uxrSession* session, uint8_t** buffer, size_t* length, int poll_ms);
 
 static void write_submessage_heartbeat(const uxrSession* session, uxrStreamId stream);
@@ -42,6 +42,9 @@ static void read_submessage_status(uxrSession* session, ucdrBuffer* submessage);
 static void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t length, uxrStreamId stream_id, uint8_t format);
 static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
 static void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
+#ifdef PERFORMANCE_TESTING
+static void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, uint16_t length);
+#endif
 
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
 
@@ -77,6 +80,14 @@ void uxr_set_topic_callback(uxrSession* session, uxrOnTopicFunc on_topic_func, v
     session->on_topic = on_topic_func;
     session->on_topic_args = args;
 }
+
+#ifdef PERFORMANCE_TESTING
+void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_echo_func, void* args)
+{
+    session->on_performance = on_echo_func;
+    session->on_performance_args = args;
+}
+#endif
 
 bool uxr_create_session(uxrSession* session)
 {
@@ -229,6 +240,38 @@ bool uxr_run_session_until_one_status(uxrSession* session, int timeout_ms, const
     return status_confirmed;
 }
 
+#ifdef PERFORMANCE_TESTING
+bool uxr_buffer_performance(uxrSession *session,
+                            uxrStreamId stream_id,
+                            uint64_t epoch_time,
+                            uint8_t* buf,
+                            uint16_t len,
+                            bool echo)
+{
+    bool rv = false;
+    PERFORMANCE_Payload payload;
+    payload.epoch_time_lsb = (uint32_t)(epoch_time & UINT32_MAX);
+    payload.epoch_time_msb = (uint32_t)(epoch_time >> 32);
+    payload.buf = buf;
+    payload.len = len;
+    ucdrBuffer mb;
+    const uint16_t payload_length = (uint16_t)(sizeof(payload.epoch_time_lsb) +
+                                               sizeof(payload.epoch_time_msb) +
+                                               len);
+    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (size_t)(SUBHEADER_SIZE + payload_length), &mb))
+    {
+        uint8_t flags = (echo) ? UXR_ECHO : 0;
+        (void) uxr_buffer_submessage_header(&mb,
+                                            SUBMESSAGE_ID_PERFORMANCE,
+                                            payload_length,
+                                            flags);
+        (void) uxr_serialize_PERFORMANCE_Payload(&mb, &payload);
+        rv = true;
+    }
+    return rv;
+}
+#endif
+
 void uxr_flash_output_streams(uxrSession* session)
 {
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
@@ -331,10 +374,11 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
     return session->info.last_requested_status != UXR_STATUS_NONE;
 }
 
-inline void send_message(const uxrSession* session, uint8_t* buffer, size_t length)
+inline bool send_message(const uxrSession* session, uint8_t* buffer, size_t length)
 {
-    (void) session->comm->send_msg(session->comm->instance, buffer, length);
-    UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, buffer, length, session->info.key);
+    bool sent = session->comm->send_msg(session->comm->instance, buffer, length);
+    UXR_DEBUG_PRINT_MESSAGE((sent) ? UXR_SEND : UXR_ERROR_SEND, buffer, length, session->info.key);
+    return sent;
 }
 
 inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
@@ -471,6 +515,12 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
             read_submessage_acknack(session, submessage, stream_id);
             break;
 
+#ifdef PERFORMANCE_TESTING
+        case SUBMESSAGE_ID_PERFORMANCE:
+            read_submessage_performance(session, submessage, length);
+            break;
+#endif
+
         default:
             break;
     }
@@ -480,7 +530,6 @@ void read_submessage_status(uxrSession* session, ucdrBuffer* submessage)
 {
     STATUS_Payload payload;
     uxr_deserialize_STATUS_Payload(submessage, &payload);
-
 
     uxrObjectId object_id; uint16_t request_id;
     uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
@@ -545,6 +594,15 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage, uxrStr
         }
     }
 }
+
+#ifdef PERFORMANCE_TESTING
+void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, uint16_t length)
+{
+    ucdrBuffer mb_performance;
+    ucdr_init_buffer(&mb_performance, submessage->iterator, length);
+    session->on_performance(session, &mb_performance, session->on_performance_args);
+}
+#endif
 
 void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status)
 {

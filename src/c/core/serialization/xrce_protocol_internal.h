@@ -977,6 +977,17 @@ typedef struct HEARTBEAT_Payload
 
 } HEARTBEAT_Payload;
 
+#ifdef PERFORMANCE_TESTING
+typedef struct PERFORMANCE_Payload
+{
+    uint32_t epoch_time_lsb;
+    uint32_t epoch_time_msb;
+    uint8_t* buf;
+    uint16_t len;
+
+} PERFORMANCE_Payload;
+#endif
+
 bool uxr_serialize_Time_t(ucdrBuffer* buffer, const Time_t* input);
 bool uxr_deserialize_Time_t(ucdrBuffer* buffer, Time_t* output);
 
@@ -1252,6 +1263,11 @@ bool uxr_deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output
 
 bool uxr_serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload* input);
 bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* output);
+
+#ifdef PERFORMANCE_TESTING
+bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input);
+bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload* input);
+#endif
 
 #ifdef __cplusplus
 }

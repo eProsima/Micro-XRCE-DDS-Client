@@ -24,7 +24,9 @@ extern "C"
 #include <stddef.h>
 
 #define UXR_SEND 1
+#define UXR_ERROR_SEND ~1
 #define UXR_RECV 2
+#define UXR_ERROR_RECV ~2
 
 #ifdef UXR_MESSAGE_LOGS
 #define UXR_MESSAGE_LOGS_AVAILABLE 1

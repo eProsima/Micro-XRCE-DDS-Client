@@ -33,6 +33,10 @@ typedef void (*uxrOnStatusFunc) (struct uxrSession* session, uxrObjectId object_
 typedef void (*uxrOnTopicFunc) (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
                              uxrStreamId stream_id, struct ucdrBuffer* ub, void* args);
 
+#ifdef PERFORMANCE_TESTING
+typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, struct ucdrBuffer* mb, void* args);
+#endif
+
 typedef struct uxrSession
 {
     uxrSessionInfo info;
@@ -49,6 +53,11 @@ typedef struct uxrSession
     uxrOnTopicFunc on_topic;
     void* on_topic_args;
 
+#ifdef PERFORMANCE_TESTING
+    uxrOnPerformanceFunc on_performance;
+    void* on_performance_args;
+#endif
+
 } uxrSession;
 
 //==================================================================
@@ -57,6 +66,9 @@ typedef struct uxrSession
 UXRDLLAPI void uxr_init_session(uxrSession* session, struct uxrCommunication* comm, uint32_t key);
 UXRDLLAPI void uxr_set_status_callback(uxrSession* session, uxrOnStatusFunc on_status_func, void* args);
 UXRDLLAPI void uxr_set_topic_callback(uxrSession* session, uxrOnTopicFunc on_topic_func, void* args);
+#ifdef PERFORMANCE_TESTING
+UXRDLLAPI void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_performance_func, void* args);
+#endif
 
 UXRDLLAPI bool uxr_create_session(uxrSession* session);
 UXRDLLAPI bool uxr_delete_session(uxrSession* session);
@@ -72,6 +84,15 @@ UXRDLLAPI bool uxr_run_session_until_timeout(uxrSession* session, int timeout);
 UXRDLLAPI bool uxr_run_session_until_confirm_delivery(uxrSession* session, int timeout);
 UXRDLLAPI bool uxr_run_session_until_all_status(uxrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
 UXRDLLAPI bool uxr_run_session_until_one_status(uxrSession* session, int timeout, const uint16_t* request_list, uint8_t* status_list, size_t list_size);
+
+#ifdef PERFORMANCE_TESTING
+UXRDLLAPI bool uxr_buffer_performance(uxrSession* session,
+                                      uxrStreamId stream_id,
+                                      uint64_t epoch_time,
+                                      uint8_t* buf,
+                                      uint16_t len,
+                                      bool echo);
+#endif
 
 #ifdef __cplusplus
 }

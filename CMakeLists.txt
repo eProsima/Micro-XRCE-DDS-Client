@@ -56,12 +56,17 @@ option(VERBOSE_SERIALIZATION "Use verbose output" OFF)
 option(VERBOSE_MESSAGE "Use verbose output" OFF)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(MEMORY_PERFORMANCE "Memory performace test." OFF)
+    option(PERFORMANCE_TESTS "Performance testing." OFF)
 endif()
 
 if(EPROSIMA_BUILD)
     set(EPROSIMA_BUILD_EXAMPLES ON)
     set(EPROSIMA_BUILD_TESTS ON)
     set(THIRDPARTY ON)
+endif()
+
+if(EPROSIMA_BUILD_TESTS)
+    set(PERFORMANCE_TESTS ON)
 endif()
 
 ###############################################################################
@@ -236,6 +241,8 @@ configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
 
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
+    PUBLIC
+        $<$<BOOL:${PERFORMANCE_TESTS}>:PERFORMANCE_TESTING>
     PRIVATE
         $<$<BOOL:${VERBOSE_SERIALIZATION}>:UXR_SERIALIZATION_LOGS>
         $<$<BOOL:${VERBOSE_MESSAGE}>:UXR_MESSAGE_LOGS>
