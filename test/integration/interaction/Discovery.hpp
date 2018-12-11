@@ -23,11 +23,10 @@ public:
 
     void unicast(const std::vector<uint16_t>& discovery_ports)
     {
-        std::vector<uxrAgentAddress> agent_list(discovery_ports.size());
-        for(size_t i = 0; i < agent_list.size(); ++i)
+        std::vector<uxrAgentAddress> agent_list;
+        for(uint16_t it : discovery_ports)
         {
-            strcpy(agent_list[i].ip, "127.0.0.1");
-            agent_list[i].port = uint16_t(discovery_ports[i]);
+            agent_list.emplace_back(uxrAgentAddress{"127.0.0.1", it});
         }
 
         ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &chosen_, agent_list.data(), agent_list.size()));
