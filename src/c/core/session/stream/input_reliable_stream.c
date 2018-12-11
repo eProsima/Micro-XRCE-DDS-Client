@@ -38,10 +38,10 @@ void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream)
     stream->last_announced = UINT16_MAX;
 }
 
-bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length)
+bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length, bool* message_stored)
 {
     //check if all fragment submessages are currently received.
-    bool result = false;
+    bool ready_to_read = false;
 
     /* Check if the seq_num is valid for the stream state */
     uxrSeqNum last_history = uxr_seq_num_add(stream->last_handled, stream->history);
@@ -49,14 +49,17 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
     {
         /* Process the message */
         uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
-        if(seq_num == next) //TODO (fragment): ... && is not fragment (except last fragment)
+        FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(buffer, stream->get_fragmentation_info_args);
+
+        if(NO_FRAGMENTED == fragmentation_info && seq_num == next)
         {
             stream->last_handled = next;
             if(0 > uxr_seq_num_cmp(stream->last_announced, stream->last_handled))
             {
                 stream->last_announced = stream->last_handled;
             }
-            result = true;
+            ready_to_read = true;
+            *message_stored = false;
         }
         else
         {
@@ -66,6 +69,23 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
             {
                 memcpy(internal_buffer, buffer, length);
                 set_input_buffer_length(internal_buffer, length);
+
+                if(FINAL_FRAGMENT == fragmentation_info)
+                {
+                    if(/* this unlock a fragmentation message*/)
+                    {
+                        ready_to_read = true;
+                        *message_stored = true;
+                    }
+                }
+                if(INTERMEDIATE_FRAGMENT == fragmentation_info)
+                {
+                    if(/* this unlock a fragmentation message */)
+                    {
+                        ready_to_read = true;
+                        *message_stored = true;
+                    }
+                }
             }
         }
     }
@@ -75,7 +95,7 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
         stream->last_announced = seq_num;
     }
 
-    return result;
+    return ready_to_read;
 }
 
 /*bool on_full_buffer(ucdrBuffer* ub, void* args)
@@ -95,10 +115,23 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
     bool available_to_read = 0 != length;
     if(available_to_read)
     {
-        stream->last_handled = next;
-        ucdr_init_buffer(ub, internal_buffer, (uint32_t)length);
-        set_input_buffer_length(internal_buffer, 0);
+        FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(stream->get_fragmentation_info_args, ub->init);
+        if(NO_FRAGMENTED == fragmentation_info)
+        {
+            stream->last_handled = next;
+            ucdr_init_buffer(ub, internal_buffer, (uint32_t)length);
+            set_input_buffer_length(internal_buffer, 0);
+        }
+        else
+        {
+            //search deep
+                set_input_buffer_length(internal_buffer, 0);
+            stream->last_handled = deep;
+            ucdr_init_buffer(ub, internal_buffer, (uint32_t)length);
+            //set on_full_buffer
+        }
     }
+
 
     return available_to_read;
 }

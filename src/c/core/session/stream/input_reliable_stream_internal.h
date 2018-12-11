@@ -32,7 +32,7 @@ struct ucdrBuffer;
 
 void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);
 void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream);
-bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length);
+bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length, bool* message_stored);
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, struct ucdrBuffer* ub);
 uint16_t uxr_compute_nack_bitmap(const uxrInputReliableStream* stream);
 

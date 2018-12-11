@@ -473,9 +473,14 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
         case UXR_RELIABLE_STREAM:
         {
             uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, stream_id.index);
-            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_size(ub)))
+            bool input_buffer_not_used;
+            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_size(ub), &input_buffer_not_used))
             {
-                read_submessage_list(session, ub, stream_id);
+                if(input_buffer_not_used)
+                {
+                    read_submessage_list(session, ub, stream_id);
+                }
+
                 ucdrBuffer next_mb;
                 while(uxr_next_input_reliable_buffer_available(stream, &next_mb))
                 {
