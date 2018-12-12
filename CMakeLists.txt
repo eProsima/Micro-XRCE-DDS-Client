@@ -15,7 +15,7 @@
 ###############################################################################
 # CMake build rules for Micro XRCE-DDS Client
 ###############################################################################
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
 set(IS_TOP_LEVEL TRUE)
 if(PROJECT_SOURCE_DIR)
@@ -34,16 +34,8 @@ endif()
 ###############################################################################
 # Product information
 ###############################################################################
-if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(microxrcedds_client C)
-    set(PROJECT_VERSION_MAJOR 1)
-    set(PROJECT_VERSION_MINOR 0)
-    set(PROJECT_VERSION_PATCH 0)
-    set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-else()
-    cmake_policy(SET CMP0048 NEW)
-    project(microxrcedds_client VERSION "1.0.0" LANGUAGES C)
-endif()
+cmake_policy(SET CMP0048 NEW)
+project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
 
 ###############################################################################
 # eProsima build options
