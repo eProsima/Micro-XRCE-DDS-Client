@@ -127,20 +127,6 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
     return available_to_write;
 }
 
-bool on_full_output_buffer(ucdrBuffer* ub, void* args)
-{
-    uxrOutputReliableStream* stream = (uxrOutputReliableStream*) args;
-
-    uint8_t* buffer = ub->init + stream->size / stream->history;
-    uint32_t size = (uint32_t)uxr_get_output_buffer_length(buffer);
-    ucdr_init_buffer_offset(ub, buffer, size, stream->offset);
-    ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
-
-    stream->on_new_fragment(ub, stream);
-
-    return false;
-}
-
 bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num)
 {
     *seq_num = uxr_seq_num_add(stream->last_sent, 1);
@@ -245,6 +231,20 @@ bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
 //==================================================================
 //                             PRIVATE
 //==================================================================
+bool on_full_output_buffer(ucdrBuffer* ub, void* args)
+{
+    uxrOutputReliableStream* stream = (uxrOutputReliableStream*) args;
+
+    uint8_t* buffer = ub->init + stream->size / stream->history;
+    uint32_t size = (uint32_t)uxr_get_output_buffer_length(buffer);
+    ucdr_init_buffer_offset(ub, buffer, size, stream->offset);
+    ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
+
+    stream->on_new_fragment(ub, stream);
+
+    return false;
+}
+
 inline size_t uxr_get_output_buffer_length(uint8_t* buffer)
 {
     length_t length;
