@@ -25,6 +25,10 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
+struct ucdrBuffer;
+
+typedef void (*OnNewFragment)(struct ucdrBuffer* ub, void* args);
+
 typedef struct uxrOutputReliableStream
 {
     uint8_t* buffer;
@@ -39,6 +43,8 @@ typedef struct uxrOutputReliableStream
     int64_t next_heartbeat_timestamp;
     uint8_t next_heartbeat_tries;
     bool send_lost;
+
+    OnNewFragment on_new_fragment;
 
 } uxrOutputReliableStream;
 

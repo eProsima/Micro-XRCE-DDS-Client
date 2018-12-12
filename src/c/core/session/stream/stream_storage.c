@@ -47,12 +47,12 @@ uxrStreamId uxr_add_output_best_effort_buffer(uxrStreamStorage* storage, uint8_t
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
 }
 
-uxrStreamId uxr_add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
+uxrStreamId uxr_add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset, OnNewFragment on_new_fragment)
 {
     uint8_t index = storage->output_reliable_size++;
     // assert for index
     uxrOutputReliableStream* stream = &storage->output_reliable[index];
-    uxr_init_output_reliable_stream(stream, buffer, size, history, header_offset);
+    uxr_init_output_reliable_stream(stream, buffer, size, history, header_offset, on_new_fragment);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 }
 
@@ -108,30 +108,6 @@ uxrInputReliableStream* uxr_get_input_reliable_stream(uxrStreamStorage* storage,
         return &storage->input_reliable[index];
     }
     return NULL;
-}
-
-bool uxr_prepare_stream_to_write(uxrStreamStorage* storage, uxrStreamId stream_id, size_t size, struct ucdrBuffer* ub)
-{
-    bool available = false;
-    switch(stream_id.type)
-    {
-        case UXR_BEST_EFFORT_STREAM:
-        {
-            uxrOutputBestEffortStream* stream = uxr_get_output_best_effort_stream(storage, stream_id.index);
-            available = stream && uxr_prepare_best_effort_buffer_to_write(stream, size, ub);
-            break;
-        }
-        case UXR_RELIABLE_STREAM:
-        {
-            uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(storage, stream_id.index);
-            available = stream && uxr_prepare_reliable_buffer_to_write(stream, size, ub);
-            break;
-        }
-        default:
-            break;
-    }
-
-    return available;
 }
 
 bool uxr_output_streams_confirmed(const uxrStreamStorage* storage)

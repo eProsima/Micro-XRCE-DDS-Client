@@ -84,6 +84,7 @@ static void print_write_data_data_submessage(const char* pre, const WRITE_DATA_P
 static void print_data_data_submessage(const char* pre, const DATA_Payload_Data* payload);
 static void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload);
 static void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload);
+static void print_fragment_submessage(const char* pre, uint16_t size, uint8_t flags);
 static void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_num, const uint8_t* client_key);
 static void print_tail(int64_t initial_log_time);
 
@@ -239,7 +240,8 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
             case SUBMESSAGE_ID_FRAGMENT:
             {
-                printf("%s[FRAGMENT SUBMESSAGE (not supported)]%s", RED, RESTORE_COLOR);
+                print_fragment_submessage(color, length, flags);
+
             } break;
 
             default:
@@ -568,6 +570,15 @@ void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payloa
             pre,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,
+            RESTORE_COLOR);
+}
+
+void print_fragment_submessage(const char* pre, uint16_t size, uint8_t flags)
+{
+    printf("%s[FRAGMENT | size: %hu | %s]%s",
+            pre,
+            size,
+            (FLAG_LAST_FRAGMENT & flags) ? "last" : "-",
             RESTORE_COLOR);
 }
 
