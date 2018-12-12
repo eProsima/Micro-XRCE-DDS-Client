@@ -91,7 +91,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
         uxrSeqNum init = stream->last_written;
 
         /* Check if the current buffer free space is too small */
-        if(initial_length + fragment_offset > block_size)
+        if(initial_length + fragment_offset >= block_size)
         {
             init = uxr_seq_num_add(stream->last_written, 1);
             initial_buffer = uxr_get_output_buffer(stream, init % stream->history);
