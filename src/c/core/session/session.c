@@ -48,7 +48,9 @@ static void read_submessage_performance(uxrSession* session, ucdrBuffer* submess
 #endif
 
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
-static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, void* args);
+
+static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* args);
+static FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header);
 
 //==================================================================
 //                             PUBLIC
@@ -139,7 +141,7 @@ uxrStreamId uxr_create_input_best_effort_stream(uxrSession* session)
 
 uxrStreamId uxr_create_input_reliable_stream(uxrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
-    return uxr_add_input_reliable_buffer(&session->streams, buffer, size, history);
+    return uxr_add_input_reliable_buffer(&session->streams, buffer, size, history, on_get_fragmentation_info);
 }
 
 bool uxr_run_session_time(uxrSession* session, int timeout_ms)
@@ -688,12 +690,31 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
     return available;
 }
 
-void on_new_output_reliable_stream_segment(ucdrBuffer* ub, void* args)
+void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* stream)
 {
-    uxrOutputReliableStream* stream = (uxrOutputReliableStream*) args;
-
     uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written);
     uint8_t last_fragment_flag = FLAG_LAST_FRAGMENT * (last_buffer == ub->init);
 
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);
 }
+
+FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header)
+{
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, submessage_header, SUBHEADER_SIZE);
+
+    uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
+    uxr_read_submessage_header(&ub, &id, &length, &flags, &payload_it);
+
+    FragmentationInfo fragmentation_info;
+    if(SUBMESSAGE_ID_FRAGMENT == id)
+    {
+        fragmentation_info = FLAG_LAST_FRAGMENT & flags ? LAST_FRAGMENT : INTERMEDIATE_FRAGMENT;
+    }
+    else
+    {
+        fragmentation_info = NO_FRAGMENTED;
+    }
+    return fragmentation_info;
+}
+

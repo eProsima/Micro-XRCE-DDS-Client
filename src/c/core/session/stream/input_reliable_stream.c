@@ -16,12 +16,13 @@ static size_t get_input_buffer_size(const uxrInputReliableStream* stream);
 //==================================================================
 //                             PUBLIC
 //==================================================================
-void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history)
+void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, OnGetFragmentationInfo on_get_fragmentation_info)
 {
     // assert for history (must be 2^)
     stream->buffer = buffer;
     stream->size = size;
     stream->history = history;
+    stream->on_get_fragmentation_info = on_get_fragmentation_info;
 
     uxr_reset_input_reliable_stream(stream);
 }
@@ -40,7 +41,6 @@ void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream)
 
 bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length, bool* message_stored)
 {
-    //check if all fragment submessages are currently received.
     bool ready_to_read = false;
 
     /* Check if the seq_num is valid for the stream state */
@@ -48,8 +48,8 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
     if(0 > uxr_seq_num_cmp(stream->last_handled, seq_num) && 0 <= uxr_seq_num_cmp(last_history, seq_num))
     {
         /* Process the message */
+        FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(buffer);
         uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
-        FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(buffer, stream->get_fragmentation_info_args);
 
         if(NO_FRAGMENTED == fragmentation_info && seq_num == next)
         {
@@ -70,9 +70,9 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
                 memcpy(internal_buffer, buffer, length);
                 set_input_buffer_length(internal_buffer, length);
 
-                if(FINAL_FRAGMENT == fragmentation_info)
+                if(LAST_FRAGMENT == fragmentation_info)
                 {
-                    if(/* this unlock a fragmentation message*/)
+                    if(false/* this unlock a fragmentation message*/)
                     {
                         ready_to_read = true;
                         *message_stored = true;
@@ -80,7 +80,7 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
                 }
                 if(INTERMEDIATE_FRAGMENT == fragmentation_info)
                 {
-                    if(/* this unlock a fragmentation message */)
+                    if(false/* this unlock a fragmentation message */)
                     {
                         ready_to_read = true;
                         *message_stored = true;
@@ -98,15 +98,6 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
     return ready_to_read;
 }
 
-/*bool on_full_buffer(ucdrBuffer* ub, void* args)
-{
-    uxrInputReliableStream* stream = (uxrInputReliableStream*) args;
-    //check the ub->final position, and give the next one if it is possible.
-    //check if the current serialization is fragmentable?
-    (void) stream; (void) ub;
-    return true;
-}*/
-
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, ucdrBuffer* ub)
 {
     uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
@@ -115,7 +106,7 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
     bool available_to_read = 0 != length;
     if(available_to_read)
     {
-        FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(stream->get_fragmentation_info_args, ub->init);
+        FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(ub->init);
         if(NO_FRAGMENTED == fragmentation_info)
         {
             stream->last_handled = next;
@@ -124,14 +115,13 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
         }
         else
         {
-            //search deep
-                set_input_buffer_length(internal_buffer, 0);
+            uint16_t deep; //search deep
+            set_input_buffer_length(internal_buffer, 0);
             stream->last_handled = deep;
             ucdr_init_buffer(ub, internal_buffer, (uint32_t)length);
             //set on_full_buffer
         }
     }
-
 
     return available_to_read;
 }
@@ -147,6 +137,28 @@ void uxr_process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_nu
     {
         stream->last_announced = last_seq_num;
     }
+}
+
+void uxr_buffer_acknack(const uxrInputReliableStream* stream, ucdrBuffer* ub)
+{
+    (void) stream; (void) ub;
+
+    uint16_t nack_bitmap = compute_nack_bitmap(stream);
+
+    ACKNACK_Payload payload;
+    payload.first_unacked_seq_num = uxr_seq_num_add(stream->last_handled, 1);
+    payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
+    payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
+
+    (void) uxr_serialize_ACKNACK_Payload(ub, &payload);
+}
+
+void uxr_read_heartbeat(uxrInputReliableStream* stream, ucdrBuffer* payload)
+{
+    HEARTBEAT_Payload heartbeat;
+    uxr_deserialize_HEARTBEAT_Payload(payload, &heartbeat);
+
+    process_heartbeat(stream, heartbeat.first_unacked_seq_nr, heartbeat.last_unacked_seq_nr);
 }
 
 bool uxr_is_input_reliable_stream_busy(uxrInputReliableStream* stream)

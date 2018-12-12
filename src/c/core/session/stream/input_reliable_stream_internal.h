@@ -26,11 +26,11 @@ extern "C"
 #include <stdbool.h>
 #include <stddef.h>
 
-#define ACKNACK_PAYLOAD_SIZE     5
+#define ACKNACK_PAYLOAD_SIZE  5
 
 struct ucdrBuffer;
 
-void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history);
+void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, OnGetFragmentationInfo on_get_fragmentation_info);
 void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream);
 bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length, bool* message_stored);
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, struct ucdrBuffer* ub);

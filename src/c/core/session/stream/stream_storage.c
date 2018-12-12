@@ -65,12 +65,12 @@ uxrStreamId uxr_add_input_best_effort_buffer(uxrStreamStorage* storage)
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_INPUT_STREAM);
 }
 
-uxrStreamId uxr_add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history)
+uxrStreamId uxr_add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, OnGetFragmentationInfo on_get_fragmentation_info)
 {
     uint8_t index = storage->input_reliable_size++;
     // assert for index
     uxrInputReliableStream* stream = &storage->input_reliable[index];
-    uxr_init_input_reliable_stream(stream, buffer, size, history);
+    uxr_init_input_reliable_stream(stream, buffer, size, history, on_get_fragmentation_info);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_INPUT_STREAM);
 }
 

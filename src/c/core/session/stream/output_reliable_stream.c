@@ -6,8 +6,8 @@
 #include <ucdr/microcdr.h>
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
-
 #define MAX_HEARTBEAT_TRIES (sizeof(int64_t) * 8 - 1)
+
 typedef uint32_t length_t;
 #define INTERNAL_BUFFER_OFFSET sizeof(length_t)
 
