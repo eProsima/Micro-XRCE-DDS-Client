@@ -3,7 +3,7 @@
 
 #include "seq_num_internal.h"
 #include "output_reliable_stream_internal.h"
-#include "../../serialization/xrce_protocol_internal.h"
+#include <ucdr/microcdr.h>
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
 
@@ -11,7 +11,6 @@
 typedef uint32_t length_t;
 #define INTERNAL_BUFFER_OFFSET sizeof(length_t)
 
-static void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num);
 static bool on_full_output_buffer(ucdrBuffer* ub, void* args);
 
 //==================================================================
@@ -221,35 +220,9 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
     return it_updated;
 }
 
-void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, ucdrBuffer* ub)
+void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num)
 {
-    HEARTBEAT_Payload payload;
-    payload.first_unacked_seq_nr = uxr_seq_num_add(stream->last_acknown, 1);
-    payload.last_unacked_seq_nr = stream->last_sent;
-
-    (void) uxr_serialize_HEARTBEAT_Payload(ub, &payload);
-}
-
-void uxr_read_acknack(uxrOutputReliableStream* stream, ucdrBuffer* payload)
-{
-    ACKNACK_Payload acknack;
-    uxr_deserialize_ACKNACK_Payload(payload, &acknack);
-
-    uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) + (uint16_t)acknack.nack_bitmap[1]);
-
-    process_acknack(stream, nack_bitmap, (uint16_t)uxr_seq_num_sub(acknack.first_unacked_seq_num, 1));
-}
-
-bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
-{
-    return 0 > uxr_seq_num_cmp(stream->last_acknown, stream->last_sent);
-}
-
-//==================================================================
-//                             PUBLIC
-//==================================================================
-void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t last_acked_seq_num)
-{
+    uint16_t last_acked_seq_num = (uint16_t)uxr_seq_num_sub(first_unacked_seq_num, 1);
     size_t buffers_to_clean = uxr_seq_num_sub(last_acked_seq_num, stream->last_acknown);
     for(size_t i = 0; i < buffers_to_clean; i++)
     {
@@ -264,6 +237,14 @@ void process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t 
     stream->next_heartbeat_tries = 0;
 }
 
+bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
+{
+    return 0 > uxr_seq_num_cmp(stream->last_acknown, stream->last_sent);
+}
+
+//==================================================================
+//                             PRIVATE
+//==================================================================
 inline size_t uxr_get_output_buffer_length(uint8_t* buffer)
 {
     length_t length;

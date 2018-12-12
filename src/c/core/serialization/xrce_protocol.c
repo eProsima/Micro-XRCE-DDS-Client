@@ -2101,6 +2101,7 @@ bool uxr_serialize_ACKNACK_Payload(ucdrBuffer* buffer, const ACKNACK_Payload* in
     bool ret = true;
     ret &= ucdr_serialize_uint16_t(buffer, input->first_unacked_seq_num);
     ret &= ucdr_serialize_array_uint8_t(buffer, input->nack_bitmap, 2);
+    ret &= ucdr_serialize_uint8_t(buffer, input->stream_id);
     return ret;
 }
 
@@ -2109,6 +2110,7 @@ bool uxr_deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output
     bool ret = true;
     ret &= ucdr_deserialize_uint16_t(buffer, &output->first_unacked_seq_num);
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->nack_bitmap, 2);
+    ret &= ucdr_deserialize_uint8_t(buffer, &output->stream_id);
     return ret;
 }
 
@@ -2117,6 +2119,7 @@ bool uxr_serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload
     bool ret = true;
     ret &= ucdr_serialize_uint16_t(buffer, input->first_unacked_seq_nr);
     ret &= ucdr_serialize_uint16_t(buffer, input->last_unacked_seq_nr);
+    ret &= ucdr_serialize_uint8_t(buffer, input->stream_id);
     return ret;
 }
 
@@ -2125,6 +2128,7 @@ bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* ou
     bool ret = true;
     ret &= ucdr_deserialize_uint16_t(buffer, &output->first_unacked_seq_nr);
     ret &= ucdr_deserialize_uint16_t(buffer, &output->last_unacked_seq_nr);
+    ret &= ucdr_deserialize_uint8_t(buffer, &output->stream_id);
     return ret;
 }
 

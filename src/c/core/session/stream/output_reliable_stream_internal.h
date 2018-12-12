@@ -26,7 +26,7 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-#define HEARTBEAT_PAYLOAD_SIZE 4
+#define HEARTBEAT_PAYLOAD_SIZE 5
 
 void uxr_init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset, OnNewFragment on_new_fragment);
 void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream);
@@ -36,8 +36,7 @@ bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, u
 bool uxr_update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp);
 uxrSeqNum uxr_begin_output_nack_buffer_it(const uxrOutputReliableStream* stream);
 bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t *length, uxrSeqNum* seq_num_it);
-void uxr_buffer_heartbeat(const uxrOutputReliableStream* stream, struct ucdrBuffer* ub);
-void uxr_read_acknack(uxrOutputReliableStream* stream, struct ucdrBuffer* payload);
+void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num);
 
 bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream);
 
