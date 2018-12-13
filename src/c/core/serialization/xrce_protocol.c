@@ -345,6 +345,7 @@ bool uxr_serialize_CLIENT_Representation(ucdrBuffer* buffer, const CLIENT_Repres
     {
         ret &= uxr_serialize_PropertySeq(buffer, &input->properties);
     }
+    ret &= ucdr_serialize_uint16_t(buffer, input->mtu);
 
     return ret;
 }
@@ -363,6 +364,7 @@ bool uxr_deserialize_CLIENT_Representation(ucdrBuffer* buffer, CLIENT_Representa
     {
             ret &= uxr_deserialize_PropertySeq(buffer, &output->properties);
     }
+    ret &= ucdr_deserialize_uint16_t(buffer, &output->mtu);
 
     return ret;
 }

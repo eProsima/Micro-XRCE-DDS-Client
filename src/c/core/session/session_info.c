@@ -35,7 +35,7 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
-void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds)
+void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds, uint16_t mtu)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
@@ -51,6 +51,7 @@ void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* ub, int64
     payload.client_representation.client_key.data[3] = info->key[3];
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
+    payload.client_representation.mtu = mtu;
 
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_CREATE_CLIENT_Payload(ub, &payload);

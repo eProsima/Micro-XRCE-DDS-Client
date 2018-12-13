@@ -33,7 +33,7 @@ extern "C"
 #define UXR_SAMPLE_DELTA_SEQUENCE_MAX      8
 #define UXR_PACKED_SAMPLES_SEQUENCE_MAX    8
 #define UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX 1
-#define UXR_PROPERTY_SEQUENCE_MAX          8
+#define UXR_PROPERTY_SEQUENCE_MAX          1
 
 typedef struct Time_t
 {
@@ -201,7 +201,7 @@ typedef struct Property
 typedef struct PropertySeq
 {
     uint32_t size;
-    Property* data;
+    Property data[UXR_PROPERTY_SEQUENCE_MAX];
 
 } PropertySeq;
 
@@ -216,6 +216,7 @@ typedef struct CLIENT_Representation
     uint8_t session_id;
     bool optional_properties;
     PropertySeq properties;
+    uint16_t mtu;
 
 } CLIENT_Representation;
 
