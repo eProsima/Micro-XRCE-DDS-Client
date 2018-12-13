@@ -16,11 +16,11 @@ bool uxr_buffer_submessage_header(ucdrBuffer* ub, uint8_t submessage_id, uint16_
     return ucdr_buffer_remaining(ub) >= length;
 }
 
-bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it)
+bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** next_submessage_it)
 {
-    if(*payload_it != NULL)
+    if(*next_submessage_it != NULL)
     {
-        ub->iterator = *payload_it;
+        ub->iterator = *next_submessage_it;
     }
 
     ucdr_align_to(ub, 4);
@@ -34,7 +34,7 @@ bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t
         ub->endianness = endiannes_flag ? UCDR_LITTLE_ENDIANNESS : UCDR_BIG_ENDIANNESS;
 
         ready_to_read = ucdr_buffer_remaining(ub) >= *length;
-        *payload_it = ub->iterator + *length;
+        *next_submessage_it = ub->iterator + *length;
     }
     return ready_to_read;
 }

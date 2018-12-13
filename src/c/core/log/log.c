@@ -125,8 +125,8 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
     print_header(size, direction, stream_id_raw, seq_num, client_key);
 
     size_t submessage_counter = 0;
-    uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    while(uxr_read_submessage_header(&ub, &submessage_id, &length, &flags, &payload_it))
+    uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* next_submessage_it = NULL;
+    while(uxr_read_submessage_header(&ub, &submessage_id, &length, &flags, &next_submessage_it))
     {
         if(submessage_counter != 0)
         {
