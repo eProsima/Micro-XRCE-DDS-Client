@@ -472,10 +472,10 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
         case UXR_RELIABLE_STREAM:
         {
             uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, stream_id.index);
-            bool input_buffer_not_used;
-            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_size(ub), &input_buffer_not_used))
+            bool input_buffer_used;
+            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_size(ub), &input_buffer_used))
             {
-                if(input_buffer_not_used)
+                if(!input_buffer_used)
                 {
                     read_submessage_list(session, ub, stream_id);
                 }
