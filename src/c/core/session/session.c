@@ -17,7 +17,7 @@
 // Autogenerate these defines by the protocol generator tool?
 #define HEARTBEAT_MAX_MSG_SIZE      (12 + HEARTBEAT_PAYLOAD_SIZE)
 #define ACKNACK_MAX_MSG_SIZE        (12 + ACKNACK_PAYLOAD_SIZE)
-#define CREATE_SESSION_MAX_MSG_SIZE 38
+#define CREATE_SESSION_MAX_MSG_SIZE 40
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
 
