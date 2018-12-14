@@ -226,8 +226,8 @@ public:
 
         if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
         {
-            ASSERT_TRUE(deleted);
-            ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
+            EXPECT_TRUE(deleted);
+            EXPECT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
         }
 
         switch(transport)
