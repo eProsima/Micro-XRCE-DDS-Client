@@ -23,7 +23,8 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         (void) uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
         (void) ucdr_serialize_uint32_t(&ub, topic_size); //REMOVE: when topics have not a previous size in the agent.
 
-        ucdr_init_buffer(ub_topic, ub.iterator, topic_size);
+        ucdr_init_buffer(ub_topic, ub.iterator, ucdr_buffer_remaining(&ub));
+        ucdr_set_on_full_buffer_callback(ub_topic, ub.on_full_buffer, ub.args);
     }
     else
     {

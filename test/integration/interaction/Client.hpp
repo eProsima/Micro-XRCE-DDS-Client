@@ -163,6 +163,7 @@ public:
             ASSERT_TRUE(prepared);
             bool written = BigHelloWorld_serialize_topic(&ub, &topic);
             ASSERT_TRUE(written);
+            ASSERT_FALSE(ub.error);
             bool sent = uxr_run_session_until_confirm_delivery(&session_, 3000);
             ASSERT_TRUE(sent);
             std::cout << "topic sent: " << i << std::endl;

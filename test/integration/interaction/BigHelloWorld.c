@@ -37,7 +37,7 @@ bool BigHelloWorld_deserialize_topic(ucdrBuffer* reader, BigHelloWorld* topic)
 {
     (void) ucdr_deserialize_uint32_t(reader, &topic->index);
 
-    (void) ucdr_deserialize_string(reader, topic->message, 2048);
+    (void) ucdr_deserialize_string(reader, topic->message, 4096);
 
     return !reader->error;
 }

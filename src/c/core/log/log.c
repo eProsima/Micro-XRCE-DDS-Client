@@ -247,7 +247,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             default:
             {
                 printf("%s[UNKNOWN SUBMESSAGE]%s", RED, RESTORE_COLOR);
-            } break;
+            } return;
         }
 
         //Check if must be force to advance to the length
