@@ -40,8 +40,6 @@ void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint1
 
 bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream);
 
-size_t uxr_get_output_buffer_length(uint8_t* buffer);
-void uxr_set_output_buffer_length(uint8_t* buffer, size_t length);
 uint8_t* uxr_get_output_buffer(const uxrOutputReliableStream* stream, size_t history_pos);
 size_t uxr_get_output_buffer_size(const uxrOutputReliableStream* stream);
 

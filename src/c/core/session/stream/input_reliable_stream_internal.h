@@ -40,6 +40,9 @@ void uxr_process_heartbeat(uxrInputReliableStream* stream, uint16_t first_seq_nu
 
 bool uxr_is_input_reliable_stream_busy(uxrInputReliableStream* stream);
 
+uint8_t* uxr_get_input_buffer(const uxrInputReliableStream* stream, size_t history_pos);
+size_t uxr_get_input_buffer_size(const uxrInputReliableStream* stream);
+
 #ifdef __cplusplus
 }
 #endif
