@@ -118,7 +118,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
             uint8_t* final_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->history);
             uxr_set_output_buffer_length(final_buffer, stream->offset + fragment_offset + last_fragment_size);
 
-            ucdr_init_buffer_offset(ub, initial_buffer, (uint32_t)(block_size - initial_length), (uint32_t)initial_length);
+            ucdr_init_buffer_offset(ub, initial_buffer, (uint32_t)block_size, (uint32_t)initial_length);
             ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
             stream->on_new_fragment(ub, stream);
         }

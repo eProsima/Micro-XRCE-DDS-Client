@@ -4,7 +4,8 @@
 
 #include <string.h>
 
-#define INTERNAL_BUFFER_OFFSET  sizeof(size_t)
+typedef uint32_t length_t;
+#define INTERNAL_BUFFER_OFFSET  sizeof(length_t)
 
 static bool has_all_fragments(uxrInputReliableStream* stream, uxrSeqNum seq_num_of_fragment, size_t* fragments);
 static bool on_full_input_buffer(ucdrBuffer* ub, void* args);
@@ -221,7 +222,7 @@ inline size_t get_input_buffer_length(uint8_t* buffer)
 
 inline void set_input_buffer_length(uint8_t* buffer, size_t length)
 {
-    memcpy(buffer - INTERNAL_BUFFER_OFFSET, &length, sizeof(size_t));
+    memcpy(buffer - INTERNAL_BUFFER_OFFSET, &length, INTERNAL_BUFFER_OFFSET);
 }
 
 inline uint8_t* get_input_buffer(const uxrInputReliableStream* stream, size_t history_pos)

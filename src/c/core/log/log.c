@@ -578,7 +578,7 @@ void print_fragment_submessage(const char* pre, uint16_t size, uint8_t flags)
     printf("%s[FRAGMENT | size: %hu | %s]%s",
             pre,
             size,
-            (FLAG_LAST_FRAGMENT & flags) ? "last" : "-",
+            (FLAG_LAST_FRAGMENT & flags) ? "last" : "intermediate",
             RESTORE_COLOR);
 }
 
