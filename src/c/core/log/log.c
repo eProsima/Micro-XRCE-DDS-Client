@@ -241,6 +241,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_FRAGMENT:
             {
                 print_fragment_submessage(color, length, flags);
+                ub.iterator += length;
 
             } break;
 

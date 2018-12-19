@@ -217,7 +217,6 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
     uint8_t* next_init = next_buffer + offset;
     size_t next_length = uxr_get_reliable_buffer_length(next_buffer) - offset;
 
-    printf("ON_FULL_BUFFER buffer: %lu, init: %lu, next_buffer: %lu, next_init: %lu, next_length: %lu\n", stream->buffer, ub->init, next_buffer, next_init, next_length);
     ucdr_init_buffer(ub, next_init, (uint32_t)next_length);
     ucdr_set_on_full_buffer_callback(ub, on_full_input_buffer, stream);
 
