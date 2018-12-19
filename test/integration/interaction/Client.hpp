@@ -294,12 +294,14 @@ private:
 
         BigHelloWorld topic;
         BigHelloWorld_deserialize_topic(serialization, &topic);
-        ASSERT_EQ(topic.index, expected_topic_index_);
-        ASSERT_STREQ(topic.message, expected_message_.c_str());
+
+        ASSERT_EQ(expected_topic_index_, topic.index);
+        ASSERT_STREQ(expected_message_.c_str(), topic.message);
         last_topic_object_id_ = object_id;
         last_topic_stream_id_ = stream_id;
         last_topic_request_id_ = request_id;
         expected_topic_index_++;
+
         std::cout << "topic received: " << topic.index << std::endl;
     }
 

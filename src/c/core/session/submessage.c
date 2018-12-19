@@ -21,6 +21,7 @@ bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t
     if(*next_submessage_it != NULL)
     {
         ub->iterator = *next_submessage_it;
+        printf("next_submessage_it: %lu\n", ub->iterator);
     }
 
     ucdr_align_to(ub, 4);
@@ -32,10 +33,10 @@ bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t
         uint8_t endiannes_flag = *flags & FLAG_ENDIANNESS;
         *flags = (uint8_t)(*flags & ~endiannes_flag);
         ub->endianness = endiannes_flag ? UCDR_LITTLE_ENDIANNESS : UCDR_BIG_ENDIANNESS;
-
-        ready_to_read = ucdr_buffer_remaining(ub) >= *length;
-        *next_submessage_it = ub->iterator + *length;
+        *next_submessage_it = ub->iterator + ((ucdr_buffer_remaining(ub) > *length) ? *length : ucdr_buffer_remaining(ub));
+        printf("processing submessage header -> %lu, %lu, remaining: %zu length: %hu ready_to_read: %i id: %i\n", ub->init, ub->iterator, ucdr_buffer_remaining(ub), *length, ready_to_read, *submessage_id);
     }
+
     return ready_to_read;
 }
 

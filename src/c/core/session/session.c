@@ -39,7 +39,7 @@ static void read_submessage_list(uxrSession* session, ucdrBuffer* submessages, u
 static void read_submessage(uxrSession* session, ucdrBuffer* submessage,
                             uint8_t submessage_id, uxrStreamId stream_id, uint16_t length, uint8_t flags);
 
-static void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id, bool last_fragment);
+static void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id);
 static void read_submessage_status(uxrSession* session, ucdrBuffer* submessage);
 static void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t length, uxrStreamId stream_id, uint8_t format);
 static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage);
@@ -429,8 +429,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 
     /* Buffer ACKNACK. */
     ACKNACK_Payload payload;
-    payload.first_unacked_seq_num = uxr_seq_num_add(stream->last_handled, 1);
-    uint16_t nack_bitmap = uxr_compute_nack_bitmap(stream);
+    uint16_t nack_bitmap = uxr_compute_acknack(stream, &payload.first_unacked_seq_num);
     payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
     payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
     payload.stream_id = id.raw;
@@ -474,20 +473,24 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
         {
             uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, stream_id.index);
             bool input_buffer_used;
-            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_size(ub), &input_buffer_used))
+            printf("A\n");
+            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_remaining(ub), &input_buffer_used))
             {
                 if(!input_buffer_used)
                 {
+                    printf("B\n");
                     read_submessage_list(session, ub, stream_id);
                 }
 
                 ucdrBuffer next_mb;
+                printf("D\n");
                 while(uxr_next_input_reliable_buffer_available(stream, &next_mb, SUBHEADER_SIZE))
                 {
+                    printf("C\n");
                     read_submessage_list(session, &next_mb, stream_id);
                 }
-                write_submessage_acknack(session, stream_id);
             }
+            write_submessage_acknack(session, stream_id);
             break;
         }
         default:
@@ -497,9 +500,11 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
 
 void read_submessage_list(uxrSession* session, ucdrBuffer* submessages, uxrStreamId stream_id)
 {
+    printf("submessage_list\n");
     uint8_t id; uint16_t length; uint8_t flags; uint8_t* next_submessage_it = NULL;
     while(uxr_read_submessage_header(submessages, &id, &length, &flags, &next_submessage_it))
     {
+        printf("sub\n");
         read_submessage(session, submessages, id, stream_id, length, flags);
     }
 }
@@ -531,7 +536,7 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
             break;
 
         case SUBMESSAGE_ID_FRAGMENT:
-            read_submessage_fragment(session, submessage, stream_id, 0 != (flags & FLAG_LAST_FRAGMENT));
+            read_submessage_fragment(session, submessage, stream_id);
             break;
 
         case SUBMESSAGE_ID_HEARTBEAT:
@@ -590,10 +595,11 @@ void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t 
 #endif
 }
 
-void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id, bool last_fragment)
+void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id)
 {
-    (void) session; (void) submessage; (void) stream_id; (void) last_fragment;
+    (void) session; (void) submessage; (void) stream_id;
     //TODO
+    printf("FRAGMENT MESSAGE\n");
 }
 
 void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage)
