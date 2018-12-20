@@ -4,6 +4,7 @@
 #include <uxr/client/config.h>
 
 #include "submessage_internal.h"
+#include "session_internal.h"
 #include "session_info_internal.h"
 #include "stream/stream_storage_internal.h"
 #include "stream/common_reliable_stream_internal.h"
@@ -264,7 +265,7 @@ bool uxr_buffer_performance(uxrSession *session,
                                                len);
 
     uint8_t flags = (echo) ? UXR_ECHO : 0;
-    if(uxr_prepare_stream_to_write_submessage(&session, stream_id, payload_length, &mb, SUBMESSAGE_ID_PERFORMANCE, flags))
+    if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &mb, SUBMESSAGE_ID_PERFORMANCE, flags))
     {
         (void) uxr_serialize_PERFORMANCE_Payload(&mb, &payload);
         rv = true;
@@ -678,7 +679,7 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
 
 void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* stream)
 {
-    uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written);
+    uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->history);
     uint8_t last_fragment_flag = FLAG_LAST_FRAGMENT * (last_buffer == ub->init);
 
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);
