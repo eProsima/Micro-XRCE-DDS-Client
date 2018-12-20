@@ -243,9 +243,11 @@ bool on_full_output_buffer(ucdrBuffer* ub, void* args)
 {
     uxrOutputReliableStream* stream = (uxrOutputReliableStream*) args;
 
-    uint8_t* buffer = ub->init + stream->size / stream->history;
-    uint32_t size = (uint32_t)uxr_get_reliable_buffer_length(buffer);
-    ucdr_init_buffer_offset(ub, buffer, size, stream->offset);
+    size_t slot = (size_t)(ub->init - stream->buffer) / (stream->size / stream->history);
+    uint8_t* next_buffer = uxr_get_output_buffer(stream, (slot + 1) % stream->history);
+    size_t next_length = uxr_get_reliable_buffer_length(next_buffer);
+
+    ucdr_init_buffer_offset(ub, next_buffer, (uint32_t)next_length, stream->offset);
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
 
     stream->on_new_fragment(ub, stream);
