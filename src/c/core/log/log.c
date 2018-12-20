@@ -146,7 +146,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
             case SUBMESSAGE_ID_CREATE:
             {
-                char string_buffer[UXR_STRING_SIZE_MAX];
+                char string_buffer[DATA_TO_STRING_BUFFER];
                 CREATE_Payload payload;
                 payload.object_representation._.participant.base.representation._.xml_string_represenatation = string_buffer;
                 payload.object_representation._.publisher.base.representation._.string_represenatation = string_buffer;
@@ -198,14 +198,28 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
             case SUBMESSAGE_ID_WRITE_DATA:
             {
                 WRITE_DATA_Payload_Data payload;
+
+                uint8_t* it = ub.iterator;
                 uxr_deserialize_WRITE_DATA_Payload_Data(&ub, &payload);
                 print_write_data_data_submessage(color, &payload);
+                ub.iterator = it + length;
+
+            } break;
+
+            case SUBMESSAGE_ID_DATA:
+            {
+                DATA_Payload_Data payload;
+
+                uint8_t* it = ub.iterator;
+                uxr_deserialize_DATA_Payload_Data(&ub, &payload);
+                print_data_data_submessage(color, &payload);
+                ub.iterator = it + length;
 
             } break;
 
             case SUBMESSAGE_ID_READ_DATA:
             {
-                char string_buffer[UXR_STRING_SIZE_MAX];
+                char string_buffer[DATA_TO_STRING_BUFFER];
                 READ_DATA_Payload payload;
                 payload.read_specification.content_filter_expression = string_buffer;
 
@@ -227,14 +241,6 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
                 ACKNACK_Payload payload;
                 uxr_deserialize_ACKNACK_Payload(&ub, &payload);
                 print_acknack_submessage(color, &payload);
-
-            } break;
-
-            case SUBMESSAGE_ID_DATA:
-            {
-                DATA_Payload_Data payload;
-                uxr_deserialize_DATA_Payload_Data(&ub, &payload);
-                print_data_data_submessage(color, &payload);
 
             } break;
 

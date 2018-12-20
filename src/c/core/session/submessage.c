@@ -24,7 +24,7 @@ bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t
     {
         if(*next_submessage_it != NULL)
         {
-            ub->iterator = *next_submessage_it;
+            //ub->iterator = *next_submessage_it;
             ucdr_align_to(ub, 4);
         }
 
