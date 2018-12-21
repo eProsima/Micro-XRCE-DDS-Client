@@ -125,8 +125,8 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
     print_header(size, direction, stream_id_raw, seq_num, client_key);
 
     size_t submessage_counter = 0;
-    uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* next_submessage_it = NULL;
-    while(uxr_read_submessage_header(&ub, &submessage_id, &length, &flags, &next_submessage_it))
+    uint8_t submessage_id; uint16_t length; uint8_t flags;
+    while(uxr_read_submessage_header(&ub, &submessage_id, &length, &flags))
     {
         if(submessage_counter != 0)
         {
@@ -564,8 +564,9 @@ void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
         bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
     }
 
-    printf("%s[ACKNACK | seq_num: %hu | bitmap: %s]%s",
+    printf("%s[ACKNACK | stream: 0x%02X | seq_num: %hu | bitmap: %s]%s",
             pre,
+            payload->stream_id,
             payload->first_unacked_seq_num,
             bitmask,
             RESTORE_COLOR);
@@ -573,8 +574,9 @@ void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
 
 void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload)
 {
-    printf("%s[HEARTBEAT | first: %hu | last: %hu]%s",
+    printf("%s[HEARTBEAT | stream: 0x%02X | first: %hu | last: %hu]%s",
             pre,
+            payload->stream_id,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,
             RESTORE_COLOR);

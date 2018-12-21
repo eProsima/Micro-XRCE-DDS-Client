@@ -456,7 +456,7 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
     {
         case UXR_NONE_STREAM:
         {
-            stream_id = uxr_stream_id_from_raw(0x00, UXR_INPUT_STREAM); // The real stream_id is into seq_num
+            stream_id = uxr_stream_id_from_raw(0x00, UXR_INPUT_STREAM);
             read_submessage_list(session, ub, stream_id);
             break;
         }
@@ -496,8 +496,8 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
 
 void read_submessage_list(uxrSession* session, ucdrBuffer* submessages, uxrStreamId stream_id)
 {
-    uint8_t id; uint16_t length; uint8_t flags; uint8_t* next_submessage_it = NULL;
-    while(uxr_read_submessage_header(submessages, &id, &length, &flags, &next_submessage_it))
+    uint8_t id; uint16_t length; uint8_t flags;
+    while(uxr_read_submessage_header(submessages, &id, &length, &flags))
     {
         read_submessage(session, submessages, id, stream_id, length, flags);
     }
@@ -690,8 +690,8 @@ FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header)
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, submessage_header, SUBHEADER_SIZE);
 
-    uint8_t id; uint16_t length; uint8_t flags; uint8_t* next_submessage_it = NULL;
-    uxr_read_submessage_header(&ub, &id, &length, &flags, &next_submessage_it);
+    uint8_t id; uint16_t length; uint8_t flags;
+    uxr_read_submessage_header(&ub, &id, &length, &flags);
 
     FragmentationInfo fragmentation_info;
     if(SUBMESSAGE_ID_FRAGMENT == id)
