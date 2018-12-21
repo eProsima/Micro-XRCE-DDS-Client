@@ -86,7 +86,6 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
 bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, ucdrBuffer* ub, size_t fragment_offset)
 {
     uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
-    printf("Last handled: %hu\n", stream->last_handled);
     uint8_t* internal_buffer = uxr_get_input_buffer(stream, next % stream->history);
     size_t length = uxr_get_reliable_buffer_length(internal_buffer);
     bool available_to_read = 0 != length;
@@ -102,11 +101,14 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
         else
         {
             uxrSeqNum last;
-            (void) check_last_fragment(stream, &last);
-            uxr_set_reliable_buffer_length(internal_buffer, 0);
-            ucdr_init_buffer(ub, internal_buffer + fragment_offset, (uint32_t)(length - fragment_offset));
-            ucdr_set_on_full_buffer_callback(ub, on_full_input_buffer, stream);
-            stream->last_handled = last;
+            available_to_read = check_last_fragment(stream, &last);
+            if(available_to_read)
+            {
+                uxr_set_reliable_buffer_length(internal_buffer, 0);
+                ucdr_init_buffer(ub, internal_buffer + fragment_offset, (uint32_t)(length - fragment_offset));
+                ucdr_set_on_full_buffer_callback(ub, on_full_input_buffer, stream);
+                stream->last_handled = last;
+            }
         }
     }
 
@@ -116,6 +118,7 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
 void uxr_process_heartbeat(uxrInputReliableStream* stream, uxrSeqNum first_seq_num, uxrSeqNum last_seq_num)
 {
     (void)first_seq_num;
+    //Checks the first_seq_num to avoid hacks.
 
     if(0 > uxr_seq_num_cmp(stream->last_announced, last_seq_num))
     {

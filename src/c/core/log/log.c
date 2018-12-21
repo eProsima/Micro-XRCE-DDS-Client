@@ -633,18 +633,17 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
         stream_representation = 'b';
     }
 
-    uint16_t seq_num_to_print = 0;
-    if(stream_id != 0)
-    {
-        seq_num_to_print = seq_num;
-    }
-    else
-    {
-        stream_id = (uint8_t)seq_num;
-    }
-
     const char* client_key_str = client_key ? data_to_string(client_key, 4) : "-";
-    printf("%s%s%3zu: %s(key: %s| %c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, client_key_str, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
+    printf("%s%s%3zu: %s(key: %s| %c:%2X |%3hu) %s",
+            GREY_LIGHT,
+            arrow,
+            size,
+            color,
+            client_key_str,
+            stream_representation,
+            stream_id,
+            seq_num,
+            RESTORE_COLOR);
 }
 
 void print_tail(int64_t initial_log_time)
