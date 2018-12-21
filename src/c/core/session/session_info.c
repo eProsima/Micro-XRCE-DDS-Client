@@ -74,7 +74,9 @@ void uxr_buffer_delete_session(uxrSessionInfo* info, ucdrBuffer* ub)
 void uxr_read_create_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     STATUS_AGENT_Payload payload;
-    if(UXR_REQUEST_LOGIN == info->last_request_id && uxr_deserialize_STATUS_AGENT_Payload(ub, &payload))
+    (void) uxr_deserialize_STATUS_AGENT_Payload(ub, &payload);
+
+    if(UXR_REQUEST_LOGIN == info->last_request_id)
     {
         uxrObjectId object_id; uint16_t request_id;
         uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
@@ -85,7 +87,9 @@ void uxr_read_create_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     STATUS_Payload payload;
-    if(UXR_REQUEST_LOGOUT == info->last_request_id && uxr_deserialize_STATUS_Payload(ub, &payload))
+    (void) uxr_deserialize_STATUS_Payload(ub, &payload);
+
+    if(UXR_REQUEST_LOGOUT == info->last_request_id)
     {
         uxrObjectId object_id; uint16_t request_id;
         uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
