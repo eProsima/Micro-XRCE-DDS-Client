@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
-#define _UXR_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
+#ifndef _UXR_CLIENT_CORE_SESSION_WRITE_ACCESS_H_
+#define _UXR_CLIENT_CORE_SESSION_WRITE_ACCESS_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -22,10 +22,11 @@ extern "C"
 
 #include <uxr/client/core/session/session.h>
 
-UXRDLLAPI uint16_t uxr_buffer_delete_entity(uxrSession* session, uxrStreamId stream_id, uxrObjectId object_id);
+UXRDLLAPI bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
+                                       struct ucdrBuffer* ub_topic, uint32_t topic_size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_UXR_CLIENT_PROFILE_SESSION_COMMON_CREATE_ENTITIES_H_
+#endif //_UXR_CLIENT_CORE_SESSION_WRITE_ACCESS_H_
