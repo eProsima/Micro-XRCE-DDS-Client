@@ -42,9 +42,9 @@ uint16_t uxr_buffer_request_data(uxrSession* session, uxrStreamId stream_id, uxr
 
     // Change this when microcdr supports size_of function.
     size_t payload_length = 0; //READ_DATA_Payload_size(&payload);
-    payload_length = (uint16_t)(payload_length + 4); // (request id + object_id), no padding.
-    payload_length = (uint16_t)(payload_length + 4); // stream, format, and two optionals.
-    payload_length = (uint16_t)(payload_length + ((control != NULL) ? 8 : 0)); // delivery control
+    payload_length += 4; // (request id + object_id), no padding.
+    payload_length += 4; // stream, format, and two optionals.
+    payload_length += (control != NULL) ? 8 : 0; // delivery control
 
     ucdrBuffer ub;
     if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_READ_DATA, 0))
@@ -98,10 +98,7 @@ void read_submessage_format(uxrSession* session, ucdrBuffer* data, uint16_t leng
 inline void read_format_data(uxrSession* session, ucdrBuffer* ub, uint16_t length,
                       uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
-    uint32_t offset;
-    ucdr_deserialize_uint32_t(ub, &offset); //Remove this when data serialization will be according to the XRCE spec.
-    length = (uint16_t)(length - 4); //by the offset. Remove too with the future serialization according to XRCE
-
+    (void) length;
     ub->last_data_size = 0; //reset alignment (as if we were created a new ucdrBuffer)
 
     session->on_topic(session, object_id, request_id, stream_id, ub, session->on_topic_args);

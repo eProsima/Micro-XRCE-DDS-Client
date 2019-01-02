@@ -927,7 +927,6 @@ typedef struct WRITE_DATA_Payload_PackedSamples
 typedef struct DATA_Payload_Data
 {
     BaseObjectRequest base;
-    SampleData data;
 
 } DATA_Payload_Data;
 
