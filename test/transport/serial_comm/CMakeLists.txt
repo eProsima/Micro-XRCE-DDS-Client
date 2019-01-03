@@ -27,7 +27,7 @@ else()
 endif()
 
 if(NOT PROFILE_SERIAL_TRANSPORT)
-    message(WARNING "Can not compile test: The profiles PROFILE_CREATE_ENTITIES_REF, PROFILE_CREATE_ENTITIES_XML and PROFILE_UDP_TRANSPORT must be enabled.")
+    message(WARNING "Can not compile test: The PROFILE_SERIAL_TRANSPORT must be enabled.")
 else()
 
     set(SRCS SerialComm.cpp)
