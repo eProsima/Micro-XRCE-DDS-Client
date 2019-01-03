@@ -139,6 +139,10 @@ foreach(TRANS_TYPE ${TRANSPORT_TYPES})
     endif()
 endforeach()
 
+if(PROFILE_SERIAL_TRANSPORT)
+    set(SERIAL_SRCS ${SERIAL_SRCS} src/c/profile/transport/serial/serial_protocol.c)
+endif()
+
 # Transport discovery source.
 if(PROFILE_DISCOVERY)
     if(PLATFORM_NAME_LINUX)
@@ -150,7 +154,6 @@ endif()
 
 # Other sources
 set(SRCS
-    src/c/core/communication/serial_protocol.c
     src/c/core/session/stream/input_best_effort_stream.c
     src/c/core/session/stream/input_reliable_stream.c
     src/c/core/session/stream/output_best_effort_stream.c

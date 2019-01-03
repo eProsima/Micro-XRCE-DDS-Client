@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #include <uxr/client/core/communication/communication.h>
-#include <uxr/client/core/communication/serial_protocol.h>
+#include <uxr/client/profile/transport/serial/serial_protocol.h>
 #include <uxr/client/config.h>
 #include <uxr/client/dll.h>
 
