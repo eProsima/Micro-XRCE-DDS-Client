@@ -163,6 +163,7 @@ public:
             ASSERT_TRUE(prepared);
             bool written = BigHelloWorld_serialize_topic(&ub, &topic);
             ASSERT_TRUE(written);
+            ASSERT_FALSE(ub.error);
             bool sent = uxr_run_session_until_confirm_delivery(&session_, 3000);
             ASSERT_TRUE(sent);
             std::cout << "topic sent: " << i << std::endl;
@@ -226,8 +227,8 @@ public:
 
         if(0.0f == gateway_.get_lost_value()) //because the agent only send one status to a delete in stream 0.
         {
-            ASSERT_TRUE(deleted);
-            ASSERT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
+            EXPECT_TRUE(deleted);
+            EXPECT_EQ(UXR_STATUS_OK, session_.info.last_requested_status);
         }
 
         switch(transport)
@@ -293,12 +294,14 @@ private:
 
         BigHelloWorld topic;
         BigHelloWorld_deserialize_topic(serialization, &topic);
-        ASSERT_EQ(topic.index, expected_topic_index_);
-        ASSERT_STREQ(topic.message, expected_message_.c_str());
+
+        ASSERT_EQ(expected_topic_index_, topic.index);
+        ASSERT_STREQ(expected_message_.c_str(), topic.message);
         last_topic_object_id_ = object_id;
         last_topic_stream_id_ = stream_id;
         last_topic_request_id_ = request_id;
         expected_topic_index_++;
+
         std::cout << "topic received: " << topic.index << std::endl;
     }
 

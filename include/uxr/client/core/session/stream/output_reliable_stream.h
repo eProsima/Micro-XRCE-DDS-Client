@@ -26,8 +26,9 @@ extern "C"
 #include <stdbool.h>
 
 struct ucdrBuffer;
+struct uxrOutputReliableStream;
 
-typedef void (*OnNewFragment)(struct ucdrBuffer* ub, void* args);
+typedef void (*OnNewFragment)(struct ucdrBuffer* ub, struct uxrOutputReliableStream* stream);
 
 typedef struct uxrOutputReliableStream
 {

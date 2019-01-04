@@ -121,8 +121,8 @@ bool read_info_headers(ucdrBuffer* ub)
     uint8_t session_id; uint8_t stream_id_raw; uxrSeqNum seq_num; uint8_t key[UXR_CLIENT_KEY_SIZE];
     uxr_deserialize_message_header(ub, &session_id, &stream_id_raw, &seq_num, key);
 
-    uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    if(uxr_read_submessage_header(ub, &id, &length, &flags, &payload_it))
+    uint8_t id; uint16_t length; uint8_t flags;
+    if(uxr_read_submessage_header(ub, &id, &length, &flags))
     {
         valid = true;
     }

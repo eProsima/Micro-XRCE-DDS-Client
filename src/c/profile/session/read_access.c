@@ -95,17 +95,16 @@ void read_submessage_format(uxrSession* session, ucdrBuffer* data, uint16_t leng
     }
 }
 
-inline void read_format_data(uxrSession* session, ucdrBuffer* payload, uint16_t length,
+inline void read_format_data(uxrSession* session, ucdrBuffer* ub, uint16_t length,
                       uxrStreamId stream_id, uxrObjectId object_id, uint16_t request_id)
 {
     uint32_t offset;
-    ucdr_deserialize_uint32_t(payload, &offset); //Remove this when data serialization will be according to the XRCE spec.
+    ucdr_deserialize_uint32_t(ub, &offset); //Remove this when data serialization will be according to the XRCE spec.
     length = (uint16_t)(length - 4); //by the offset. Remove too with the future serialization according to XRCE
 
-    ucdrBuffer ub_topic;
-    ucdr_init_buffer(&ub_topic, payload->iterator, length);
-    ub_topic.endianness = payload->endianness;
-    session->on_topic(session, object_id, request_id, stream_id, &ub_topic, session->on_topic_args);
+    ub->last_data_size = 0; //reset alignment (as if we were created a new ucdrBuffer)
+
+    session->on_topic(session, object_id, request_id, stream_id, ub, session->on_topic_args);
 }
 
 void read_format_sample(uxrSession* session, ucdrBuffer* payload, uint16_t length,

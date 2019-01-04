@@ -65,10 +65,6 @@ if(EPROSIMA_BUILD)
     set(THIRDPARTY ON)
 endif()
 
-if(EPROSIMA_BUILD_TESTS)
-    set(PERFORMANCE_TESTS ON)
-endif()
-
 ###############################################################################
 # Client configuration options
 ###############################################################################

@@ -125,8 +125,8 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
     print_header(size, direction, stream_id_raw, seq_num, client_key);
 
     size_t submessage_counter = 0;
-    uint8_t submessage_id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    while(uxr_read_submessage_header(&ub, &submessage_id, &length, &flags, &payload_it))
+    uint8_t submessage_id; uint16_t length; uint8_t flags;
+    while(uxr_read_submessage_header(&ub, &submessage_id, &length, &flags))
     {
         if(submessage_counter != 0)
         {
@@ -141,118 +141,128 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
                 CREATE_CLIENT_Payload payload;
                 uxr_deserialize_CREATE_CLIENT_Payload(&ub, &payload);
                 print_create_client_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_CREATE:
             {
-                char string_buffer[UXR_STRING_SIZE_MAX];
+                char string_buffer[DATA_TO_STRING_BUFFER];
                 CREATE_Payload payload;
                 payload.object_representation._.participant.base.representation._.xml_string_represenatation = string_buffer;
                 payload.object_representation._.publisher.base.representation._.string_represenatation = string_buffer;
 
                 uxr_deserialize_CREATE_Payload(&ub, &payload);
                 print_create_submessage(color, &payload, flags);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_GET_INFO:
             {
                 GET_INFO_Payload payload;
                 uxr_deserialize_GET_INFO_Payload(&ub, &payload);
                 print_get_info_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_DELETE:
             {
                 DELETE_Payload payload;
                 uxr_deserialize_DELETE_Payload(&ub, &payload);
                 print_delete_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_STATUS_AGENT:
             {
                 STATUS_AGENT_Payload payload;
                 uxr_deserialize_STATUS_AGENT_Payload(&ub, &payload);
                 print_status_agent_submessage(color, &payload);
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_STATUS:
             {
                 STATUS_Payload payload;
                 uxr_deserialize_STATUS_Payload(&ub, &payload);
                 print_status_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_INFO:
             {
                 INFO_Payload payload;
                 uxr_deserialize_INFO_Payload(&ub, &payload);
                 print_info_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_WRITE_DATA:
             {
                 WRITE_DATA_Payload_Data payload;
+
+                uint8_t* it = ub.iterator;
                 uxr_deserialize_WRITE_DATA_Payload_Data(&ub, &payload);
                 print_write_data_data_submessage(color, &payload);
+                ub.iterator = it + length;
+                break;
+            }
 
-            } break;
+            case SUBMESSAGE_ID_DATA:
+            {
+                DATA_Payload_Data payload;
+
+                uint8_t* it = ub.iterator;
+                uxr_deserialize_DATA_Payload_Data(&ub, &payload);
+                print_data_data_submessage(color, &payload);
+                ub.iterator = it + length;
+                break;
+            }
 
             case SUBMESSAGE_ID_READ_DATA:
             {
-                char string_buffer[UXR_STRING_SIZE_MAX];
+                char string_buffer[DATA_TO_STRING_BUFFER];
                 READ_DATA_Payload payload;
                 payload.read_specification.content_filter_expression = string_buffer;
 
                 uxr_deserialize_READ_DATA_Payload(&ub, &payload);
                 print_read_data_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_HEARTBEAT:
             {
                 HEARTBEAT_Payload payload;
                 uxr_deserialize_HEARTBEAT_Payload(&ub, &payload);
                 print_heartbeat_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_ACKNACK:
             {
                 ACKNACK_Payload payload;
                 uxr_deserialize_ACKNACK_Payload(&ub, &payload);
                 print_acknack_submessage(color, &payload);
-
-            } break;
-
-            case SUBMESSAGE_ID_DATA:
-            {
-                DATA_Payload_Data payload;
-                uxr_deserialize_DATA_Payload_Data(&ub, &payload);
-                print_data_data_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_FRAGMENT:
             {
                 print_fragment_submessage(color, length, flags);
-
-            } break;
+                ub.iterator += length;
+                break;
+            }
 
             default:
             {
                 printf("%s[UNKNOWN SUBMESSAGE]%s", RED, RESTORE_COLOR);
-            } break;
+                goto tail;
+            }
         }
 
         //Check if must be force to advance to the length
         submessage_counter++;
     }
+tail:
     print_tail(initial_log_time);
     printf(" \n");
 }
@@ -557,8 +567,9 @@ void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
         bitmask[7 - i] = (payload->nack_bitmap[0] & (1 << i)) ? '1' : '0';
     }
 
-    printf("%s[ACKNACK | seq_num: %hu | bitmap: %s]%s",
+    printf("%s[ACKNACK | stream: 0x%02X | seq_num: %hu | bitmap: %s]%s",
             pre,
+            payload->stream_id,
             payload->first_unacked_seq_num,
             bitmask,
             RESTORE_COLOR);
@@ -566,8 +577,9 @@ void print_acknack_submessage(const char* pre, const ACKNACK_Payload* payload)
 
 void print_heartbeat_submessage(const char* pre, const HEARTBEAT_Payload* payload)
 {
-    printf("%s[HEARTBEAT | first: %hu | last: %hu]%s",
+    printf("%s[HEARTBEAT | stream: 0x%02X | first: %hu | last: %hu]%s",
             pre,
+            payload->stream_id,
             payload->first_unacked_seq_nr,
             payload->last_unacked_seq_nr,
             RESTORE_COLOR);
@@ -578,7 +590,7 @@ void print_fragment_submessage(const char* pre, uint16_t size, uint8_t flags)
     printf("%s[FRAGMENT | size: %hu | %s]%s",
             pre,
             size,
-            (FLAG_LAST_FRAGMENT & flags) ? "last" : "-",
+            (FLAG_LAST_FRAGMENT & flags) ? "last" : "intermediate",
             RESTORE_COLOR);
 }
 
@@ -624,18 +636,17 @@ void print_header(size_t size, int direction, uint8_t stream_id, uint16_t seq_nu
         stream_representation = 'b';
     }
 
-    uint16_t seq_num_to_print = 0;
-    if(stream_id != 0)
-    {
-        seq_num_to_print = seq_num;
-    }
-    else
-    {
-        stream_id = (uint8_t)seq_num;
-    }
-
     const char* client_key_str = client_key ? data_to_string(client_key, 4) : "-";
-    printf("%s%s%3zu: %s(key: %s| %c:%2X |%3hu) %s", GREY_LIGHT, arrow, size, color, client_key_str, stream_representation, stream_id, seq_num_to_print, RESTORE_COLOR);
+    printf("%s%s%3zu: %s(key: %s| %c:%2X |%3hu) %s",
+            GREY_LIGHT,
+            arrow,
+            size,
+            color,
+            client_key_str,
+            stream_representation,
+            stream_id,
+            seq_num,
+            RESTORE_COLOR);
 }
 
 void print_tail(int64_t initial_log_time)

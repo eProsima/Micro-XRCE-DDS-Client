@@ -1,6 +1,6 @@
-#include <uxr/client/core/session/session_info.h>
 #include <uxr/client/core/session/object_id.h>
 
+#include "session_info_internal.h"
 #include "submessage_internal.h"
 #include "../serialization/xrce_protocol_internal.h"
 #include "../serialization/xrce_header_internal.h"
@@ -17,8 +17,8 @@
 
 static uint16_t generate_request_id(uxrSessionInfo* info);
 
-static void process_create_session_status(uxrSessionInfo* info, uint8_t status, AGENT_Representation* agent);
-static void process_delete_session_status(uxrSessionInfo* info, uint8_t status);
+static void process_create_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id, AGENT_Representation* agent);
+static void process_delete_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id);
 
 //==================================================================
 //                             PUBLIC
@@ -35,7 +35,7 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
-void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds, uint16_t mtu)
+void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds, uint16_t mtu)
 {
     CREATE_CLIENT_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
@@ -53,16 +53,19 @@ void uxr_buffer_create_session(const uxrSessionInfo* info, ucdrBuffer* ub, int64
     payload.client_representation.optional_properties = false;
     payload.client_representation.mtu = mtu;
 
+    info->last_request_id = UXR_REQUEST_LOGIN;
+
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_CREATE_CLIENT_Payload(ub, &payload);
 }
 
-void uxr_buffer_delete_session(const uxrSessionInfo* info, ucdrBuffer* ub)
+void uxr_buffer_delete_session(uxrSessionInfo* info, ucdrBuffer* ub)
 {
-    (void) info;
     DELETE_Payload payload;
     payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
+
+    info->last_request_id = UXR_REQUEST_LOGOUT;
 
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_DELETE_Payload(ub, &payload);
@@ -71,18 +74,26 @@ void uxr_buffer_delete_session(const uxrSessionInfo* info, ucdrBuffer* ub)
 void uxr_read_create_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     STATUS_AGENT_Payload payload;
-    if(uxr_deserialize_STATUS_AGENT_Payload(ub, &payload))
+    (void) uxr_deserialize_STATUS_AGENT_Payload(ub, &payload);
+
+    if(UXR_REQUEST_LOGIN == info->last_request_id)
     {
-        process_create_session_status(info, payload.base.result.status, &payload.agent_info);
+        uxrObjectId object_id; uint16_t request_id;
+        uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
+        process_create_session_status(info, payload.base.result.status, request_id, &payload.agent_info);
     }
 }
 
 void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     STATUS_Payload payload;
-    if(uxr_deserialize_STATUS_Payload(ub, &payload))
+    (void) uxr_deserialize_STATUS_Payload(ub, &payload);
+
+    if(UXR_REQUEST_LOGOUT == info->last_request_id)
     {
-        process_delete_session_status(info, payload.base.result.status);
+        uxrObjectId object_id; uint16_t request_id;
+        uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
+        process_delete_session_status(info, payload.base.result.status, request_id);
     }
 }
 
@@ -151,7 +162,7 @@ void uxr_parse_base_object_request(const BaseObjectRequest* base, uxrObjectId* o
 //==================================================================
 inline uint16_t generate_request_id(uxrSessionInfo* session)
 {
-    uint16_t last_request_id = (UINT16_MAX == session->last_request_id)
+    uint16_t last_request_id = (UINT16_MAX == session->last_request_id || INITIAL_REQUEST_ID > session->last_request_id)
         ? INITIAL_REQUEST_ID
         : session->last_request_id;
 
@@ -159,13 +170,19 @@ inline uint16_t generate_request_id(uxrSessionInfo* session)
     return last_request_id;
 }
 
-inline void process_create_session_status(uxrSessionInfo* info, uint8_t status, AGENT_Representation* agent)
+inline void process_create_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id, AGENT_Representation* agent)
 {
     (void) agent;
-    info->last_requested_status = status;
+    if(UXR_REQUEST_LOGIN == request_id)
+    {
+        info->last_requested_status = status;
+    }
 }
 
-inline void process_delete_session_status(uxrSessionInfo* info, uint8_t status)
+inline void process_delete_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id)
 {
-    info->last_requested_status = status;
+    if(UXR_REQUEST_LOGOUT == request_id)
+    {
+        info->last_requested_status = status;
+    }
 }

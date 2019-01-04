@@ -57,7 +57,6 @@ typedef struct uxrSession
     uxrOnPerformanceFunc on_performance;
     void* on_performance_args;
 #endif
-
 } uxrSession;
 
 //==================================================================

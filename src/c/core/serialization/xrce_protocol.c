@@ -2022,7 +2022,6 @@ bool uxr_serialize_DATA_Payload_Data(ucdrBuffer* buffer, const DATA_Payload_Data
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= uxr_serialize_SampleData(buffer, &input->data);
     return ret;
 }
 
@@ -2030,7 +2029,6 @@ bool uxr_deserialize_DATA_Payload_Data(ucdrBuffer* buffer, DATA_Payload_Data* ou
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= uxr_deserialize_SampleData(buffer, &output->data);
     return ret;
 }
 

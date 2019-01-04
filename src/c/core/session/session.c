@@ -4,8 +4,10 @@
 #include <uxr/client/config.h>
 
 #include "submessage_internal.h"
+#include "session_internal.h"
 #include "session_info_internal.h"
 #include "stream/stream_storage_internal.h"
+#include "stream/common_reliable_stream_internal.h"
 #include "stream/input_best_effort_stream_internal.h"
 #include "stream/input_reliable_stream_internal.h"
 #include "stream/output_best_effort_stream_internal.h"
@@ -17,7 +19,7 @@
 // Autogenerate these defines by the protocol generator tool?
 #define HEARTBEAT_MAX_MSG_SIZE      (12 + HEARTBEAT_PAYLOAD_SIZE)
 #define ACKNACK_MAX_MSG_SIZE        (12 + ACKNACK_PAYLOAD_SIZE)
-#define CREATE_SESSION_MAX_MSG_SIZE 38
+#define CREATE_SESSION_MAX_MSG_SIZE 40
 #define DELETE_SESSION_MAX_MSG_SIZE 16
 //---
 
@@ -38,7 +40,6 @@ static void read_submessage_list(uxrSession* session, ucdrBuffer* submessages, u
 static void read_submessage(uxrSession* session, ucdrBuffer* submessage,
                             uint8_t submessage_id, uxrStreamId stream_id, uint16_t length, uint8_t flags);
 
-static void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id, bool last_fragment);
 static void read_submessage_status(uxrSession* session, ucdrBuffer* submessage);
 static void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t length, uxrStreamId stream_id, uint8_t format);
 static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage);
@@ -48,7 +49,9 @@ static void read_submessage_performance(uxrSession* session, ucdrBuffer* submess
 #endif
 
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
-static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, void* args);
+
+static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* args);
+static FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header);
 
 //==================================================================
 //                             PUBLIC
@@ -99,7 +102,7 @@ bool uxr_create_session(uxrSession* session)
     ucdrBuffer ub;
     ucdr_init_buffer_offset(&ub, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
-    uxr_buffer_create_session(&session->info, &ub, uxr_millis(), session->comm->mtu);
+    uxr_buffer_create_session(&session->info, &ub, uxr_millis(), (uint16_t)(session->comm->mtu - INTERNAL_RELIABLE_BUFFER_OFFSET));
     uxr_stamp_create_session_header(&session->info, ub.init);
 
     bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&ub), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
@@ -139,7 +142,7 @@ uxrStreamId uxr_create_input_best_effort_stream(uxrSession* session)
 
 uxrStreamId uxr_create_input_reliable_stream(uxrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
-    return uxr_add_input_reliable_buffer(&session->streams, buffer, size, history);
+    return uxr_add_input_reliable_buffer(&session->streams, buffer, size, history, on_get_fragmentation_info);
 }
 
 bool uxr_run_session_time(uxrSession* session, int timeout_ms)
@@ -260,13 +263,10 @@ bool uxr_buffer_performance(uxrSession *session,
     const uint16_t payload_length = (uint16_t)(sizeof(payload.epoch_time_lsb) +
                                                sizeof(payload.epoch_time_msb) +
                                                len);
-    if (uxr_prepare_stream_to_write(&session->streams, stream_id, (size_t)(SUBHEADER_SIZE + payload_length), &mb))
+
+    uint8_t flags = (echo) ? UXR_ECHO : 0;
+    if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &mb, SUBMESSAGE_ID_PERFORMANCE, flags))
     {
-        uint8_t flags = (echo) ? UXR_ECHO : 0;
-        (void) uxr_buffer_submessage_header(&mb,
-                                            SUBMESSAGE_ID_PERFORMANCE,
-                                            payload_length,
-                                            flags);
         (void) uxr_serialize_PERFORMANCE_Payload(&mb, &payload);
         rv = true;
     }
@@ -429,8 +429,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 
     /* Buffer ACKNACK. */
     ACKNACK_Payload payload;
-    payload.first_unacked_seq_num = uxr_seq_num_add(stream->last_handled, 1);
-    uint16_t nack_bitmap = uxr_compute_nack_bitmap(stream);
+    uint16_t nack_bitmap = uxr_compute_acknack(stream, &payload.first_unacked_seq_num);
     payload.nack_bitmap[0] = (uint8_t)(nack_bitmap >> 8);
     payload.nack_bitmap[1] = (uint8_t)((nack_bitmap << 8) >> 8);
     payload.stream_id = id.raw;
@@ -457,7 +456,7 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
     {
         case UXR_NONE_STREAM:
         {
-            stream_id = uxr_stream_id_from_raw(0x00, UXR_INPUT_STREAM); // The real stream_id is into seq_num
+            stream_id = uxr_stream_id_from_raw(0x00, UXR_INPUT_STREAM);
             read_submessage_list(session, ub, stream_id);
             break;
         }
@@ -473,16 +472,21 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
         case UXR_RELIABLE_STREAM:
         {
             uxrInputReliableStream* stream = uxr_get_input_reliable_stream(&session->streams, stream_id.index);
-            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_size(ub)))
+            bool input_buffer_used;
+            if(stream && uxr_receive_reliable_message(stream, seq_num, ub->iterator, ucdr_buffer_remaining(ub), &input_buffer_used))
             {
-                read_submessage_list(session, ub, stream_id);
+                if(!input_buffer_used)
+                {
+                    read_submessage_list(session, ub, stream_id);
+                }
+
                 ucdrBuffer next_mb;
-                while(uxr_next_input_reliable_buffer_available(stream, &next_mb))
+                while(uxr_next_input_reliable_buffer_available(stream, &next_mb, SUBHEADER_SIZE))
                 {
                     read_submessage_list(session, &next_mb, stream_id);
                 }
-                write_submessage_acknack(session, stream_id);
             }
+            write_submessage_acknack(session, stream_id);
             break;
         }
         default:
@@ -492,8 +496,8 @@ void read_stream(uxrSession* session, ucdrBuffer* ub, uxrStreamId stream_id, uxr
 
 void read_submessage_list(uxrSession* session, ucdrBuffer* submessages, uxrStreamId stream_id)
 {
-    uint8_t id; uint16_t length; uint8_t flags; uint8_t* payload_it = NULL;
-    while(uxr_read_submessage_header(submessages, &id, &length, &flags, &payload_it))
+    uint8_t id; uint16_t length; uint8_t flags;
+    while(uxr_read_submessage_header(submessages, &id, &length, &flags))
     {
         read_submessage(session, submessages, id, stream_id, length, flags);
     }
@@ -523,10 +527,6 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
 
         case SUBMESSAGE_ID_DATA:
             read_submessage_data(session, submessage, length, stream_id, flags & FORMAT_MASK);
-            break;
-
-        case SUBMESSAGE_ID_FRAGMENT:
-            read_submessage_fragment(session, submessage, stream_id, 0 != (flags & FLAG_LAST_FRAGMENT));
             break;
 
         case SUBMESSAGE_ID_HEARTBEAT:
@@ -583,12 +583,6 @@ void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t 
 #else
     (void) session; (void) submessage; (void) length; (void) stream_id; (void) format;
 #endif
-}
-
-void read_submessage_fragment(uxrSession* session, ucdrBuffer* submessage, uxrStreamId stream_id, bool last_fragment)
-{
-    (void) session; (void) submessage; (void) stream_id; (void) last_fragment;
-    //TODO
 }
 
 void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage)
@@ -683,12 +677,31 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
     return available;
 }
 
-void on_new_output_reliable_stream_segment(ucdrBuffer* ub, void* args)
+void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* stream)
 {
-    uxrOutputReliableStream* stream = (uxrOutputReliableStream*) args;
-
-    uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written);
+    uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->history);
     uint8_t last_fragment_flag = FLAG_LAST_FRAGMENT * (last_buffer == ub->init);
 
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);
 }
+
+FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header)
+{
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, submessage_header, SUBHEADER_SIZE);
+
+    uint8_t id; uint16_t length; uint8_t flags;
+    uxr_read_submessage_header(&ub, &id, &length, &flags);
+
+    FragmentationInfo fragmentation_info;
+    if(SUBMESSAGE_ID_FRAGMENT == id)
+    {
+        fragmentation_info = FLAG_LAST_FRAGMENT & flags ? LAST_FRAGMENT : INTERMEDIATE_FRAGMENT;
+    }
+    else
+    {
+        fragmentation_info = NO_FRAGMENTED;
+    }
+    return fragmentation_info;
+}
+

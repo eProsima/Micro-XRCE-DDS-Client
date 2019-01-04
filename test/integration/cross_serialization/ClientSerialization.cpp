@@ -25,6 +25,7 @@ std::vector<uint8_t> ClientSerialization::create_client_payload()
     payload.client_representation.client_key = ClientKey{0x89, 0xAB, 0xCD, 0xEF};
     payload.client_representation.session_id = 0x01;
     payload.client_representation.optional_properties = 0x00;
+    payload.client_representation.mtu = 0x2345;
     uxr_serialize_CREATE_CLIENT_Payload(&ub, &payload);
 
     buffer.resize(std::size_t(ub.iterator - ub.init));

@@ -16,13 +16,8 @@ bool uxr_buffer_submessage_header(ucdrBuffer* ub, uint8_t submessage_id, uint16_
     return ucdr_buffer_remaining(ub) >= length;
 }
 
-bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t* length, uint8_t* flags, uint8_t** payload_it)
+bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t* length, uint8_t* flags)
 {
-    if(*payload_it != NULL)
-    {
-        ub->iterator = *payload_it + *length;
-    }
-
     ucdr_align_to(ub, 4);
     bool ready_to_read = ucdr_buffer_remaining(ub) >= SUBHEADER_SIZE;
     if(ready_to_read)
@@ -32,10 +27,8 @@ bool uxr_read_submessage_header(ucdrBuffer* ub, uint8_t* submessage_id, uint16_t
         uint8_t endiannes_flag = *flags & FLAG_ENDIANNESS;
         *flags = (uint8_t)(*flags & ~endiannes_flag);
         ub->endianness = endiannes_flag ? UCDR_LITTLE_ENDIANNESS : UCDR_BIG_ENDIANNESS;
-
-        ready_to_read = ucdr_buffer_remaining(ub) >= *length;
-        *payload_it = ub->iterator;
     }
+
     return ready_to_read;
 }
 
