@@ -52,20 +52,21 @@ private:
 
         std::cout << "Agent found on port: " << address->port << std::endl;
 
-        Client client(0.0f, 1);
-        client.init_transport(transport_, address->ip, address->port);
 
         std::vector<uint16_t>::iterator it = std::find(agent_ports_.begin(), agent_ports_.end(), address->port);
 
         bool found = it != agent_ports_.end();
         if(found)
         {
+            Client client(0.0f, 1);
+            std::cout << "Client connecting to " << address->port << std::endl;
+            client.init_transport(transport_, address->ip, address->port);
+            client.close_transport(transport_);
+
             agent_ports_.erase(it);
         }
 
         //ASSERT_TRUE(found); //in multicast, it is possible to read agents out of the tests that will not be found.
-
-        client.close_transport(transport_);
     }
 
     std::vector<uint16_t> agent_ports_;
