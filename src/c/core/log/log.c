@@ -141,8 +141,8 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
                 CREATE_CLIENT_Payload payload;
                 uxr_deserialize_CREATE_CLIENT_Payload(&ub, &payload);
                 print_create_client_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_CREATE:
             {
@@ -153,47 +153,48 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
                 uxr_deserialize_CREATE_Payload(&ub, &payload);
                 print_create_submessage(color, &payload, flags);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_GET_INFO:
             {
                 GET_INFO_Payload payload;
                 uxr_deserialize_GET_INFO_Payload(&ub, &payload);
                 print_get_info_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_DELETE:
             {
                 DELETE_Payload payload;
                 uxr_deserialize_DELETE_Payload(&ub, &payload);
                 print_delete_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_STATUS_AGENT:
             {
                 STATUS_AGENT_Payload payload;
                 uxr_deserialize_STATUS_AGENT_Payload(&ub, &payload);
                 print_status_agent_submessage(color, &payload);
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_STATUS:
             {
                 STATUS_Payload payload;
                 uxr_deserialize_STATUS_Payload(&ub, &payload);
                 print_status_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_INFO:
             {
                 INFO_Payload payload;
                 uxr_deserialize_INFO_Payload(&ub, &payload);
                 print_info_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_WRITE_DATA:
             {
@@ -203,8 +204,8 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
                 uxr_deserialize_WRITE_DATA_Payload_Data(&ub, &payload);
                 print_write_data_data_submessage(color, &payload);
                 ub.iterator = it + length;
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_DATA:
             {
@@ -214,8 +215,8 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
                 uxr_deserialize_DATA_Payload_Data(&ub, &payload);
                 print_data_data_submessage(color, &payload);
                 ub.iterator = it + length;
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_READ_DATA:
             {
@@ -225,41 +226,43 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
 
                 uxr_deserialize_READ_DATA_Payload(&ub, &payload);
                 print_read_data_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_HEARTBEAT:
             {
                 HEARTBEAT_Payload payload;
                 uxr_deserialize_HEARTBEAT_Payload(&ub, &payload);
                 print_heartbeat_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_ACKNACK:
             {
                 ACKNACK_Payload payload;
                 uxr_deserialize_ACKNACK_Payload(&ub, &payload);
                 print_acknack_submessage(color, &payload);
-
-            } break;
+                break;
+            }
 
             case SUBMESSAGE_ID_FRAGMENT:
             {
                 print_fragment_submessage(color, length, flags);
                 ub.iterator += length;
-
-            } break;
+                break;
+            }
 
             default:
             {
                 printf("%s[UNKNOWN SUBMESSAGE]%s", RED, RESTORE_COLOR);
-            } return;
+                goto tail;
+            }
         }
 
         //Check if must be force to advance to the length
         submessage_counter++;
     }
+tail:
     print_tail(initial_log_time);
     printf(" \n");
 }

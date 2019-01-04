@@ -25,7 +25,7 @@ void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buf
 
 void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream)
 {
-    for(size_t i = 0; i < stream->history; i++)
+    for(size_t i = 0; i < stream->history; ++i)
     {
         uint8_t* internal_buffer = uxr_get_input_buffer(stream, i);
         uxr_set_reliable_buffer_length(internal_buffer, 0);
@@ -47,7 +47,7 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
         FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(buffer);
         uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
 
-        if(NO_FRAGMENTED == fragmentation_info && seq_num == next)
+        if((NO_FRAGMENTED == fragmentation_info) && (seq_num == next))
         {
             stream->last_handled = next;
             ready_to_read = true;
@@ -118,7 +118,7 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
 void uxr_process_heartbeat(uxrInputReliableStream* stream, uxrSeqNum first_seq_num, uxrSeqNum last_seq_num)
 {
     (void)first_seq_num;
-    //Checks the first_seq_num to avoid hacks.
+    //TODO: Checks the first_seq_num to avoid hacks.
 
     if(0 > uxr_seq_num_cmp(stream->last_announced, last_seq_num))
     {
@@ -137,9 +137,9 @@ uint16_t uxr_compute_acknack(const uxrInputReliableStream* stream, uxrSeqNum* fr
     uint16_t buffers_to_ack = uxr_seq_num_sub(stream->last_announced, uxr_seq_num_sub(*from, 1));
     uint16_t nack_bitmap = 0;
 
-    for(size_t i = 0; i < buffers_to_ack; i++)
+    for(size_t i = 0; i < buffers_to_ack; ++i)
     {
-        uxrSeqNum seq_num = uxr_seq_num_add(*from, (uint16_t)i);
+        uxrSeqNum seq_num = uxr_seq_num_add(*from, (uxrSeqNum)i);
         uint8_t* internal_buffer = uxr_get_input_buffer(stream, seq_num % stream->history);
         if(0 == uxr_get_reliable_buffer_length(internal_buffer))
         {
@@ -166,9 +166,9 @@ size_t uxr_get_input_buffer_size(const uxrInputReliableStream* stream)
 bool check_last_fragment(uxrInputReliableStream* stream, uxrSeqNum* last_fragment)
 {
     uxrSeqNum next = stream->last_handled;
-    bool more_messages = true;
+    bool more_messages;
     bool found = false;
-    while(more_messages)
+    do
     {
         next = uxr_seq_num_add(next, 1);
         uint8_t* next_buffer = uxr_get_input_buffer(stream, next % stream->history);
@@ -184,6 +184,7 @@ bool check_last_fragment(uxrInputReliableStream* stream, uxrSeqNum* last_fragmen
             }
         }
     }
+    while(more_messages);
 
     *last_fragment = next;
     return found;
@@ -192,7 +193,7 @@ bool check_last_fragment(uxrInputReliableStream* stream, uxrSeqNum* last_fragmen
 uxrSeqNum uxr_get_first_unacked(const uxrInputReliableStream* stream)
 {
     uxrSeqNum first_unknown = stream->last_handled;
-    for(size_t i = 0; i < stream->history; i++)
+    for(size_t i = 0; i < stream->history; ++i)
     {
         uxrSeqNum seq_num = uxr_seq_num_add(stream->last_handled, (uint16_t)(i + 1));
         uint8_t* buffer = uxr_get_input_buffer(stream, seq_num % stream->history);
@@ -217,6 +218,7 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
 
     uint8_t* next_init = next_buffer + offset;
     size_t next_length = uxr_get_reliable_buffer_length(next_buffer) - offset;
+    uxr_set_reliable_buffer_length(next_buffer, 0);
 
     ucdr_init_buffer(ub, next_init, (uint32_t)next_length);
     ucdr_set_on_full_buffer_callback(ub, on_full_input_buffer, stream);

@@ -41,7 +41,7 @@ void uxr_reset_stream_storage(uxrStreamStorage* storage)
 uxrStreamId uxr_add_output_best_effort_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset)
 {
     uint8_t index = storage->output_best_effort_size++;
-    // assert for index
+    //TODO: assert for index
     uxrOutputBestEffortStream* stream = &storage->output_best_effort[index];
     uxr_init_output_best_effort_stream(stream, buffer, size, header_offset);
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
@@ -50,7 +50,7 @@ uxrStreamId uxr_add_output_best_effort_buffer(uxrStreamStorage* storage, uint8_t
 uxrStreamId uxr_add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset, OnNewFragment on_new_fragment)
 {
     uint8_t index = storage->output_reliable_size++;
-    // assert for index
+    //TODO: assert for index
     uxrOutputReliableStream* stream = &storage->output_reliable[index];
     uxr_init_output_reliable_stream(stream, buffer, size, history, header_offset, on_new_fragment);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
@@ -59,7 +59,7 @@ uxrStreamId uxr_add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* b
 uxrStreamId uxr_add_input_best_effort_buffer(uxrStreamStorage* storage)
 {
     uint8_t index = storage->input_best_effort_size++;
-    // assert for index
+    //TODO: assert for index
     uxrInputBestEffortStream* stream = &storage->input_best_effort[index];
     uxr_init_input_best_effort_stream(stream);
     return uxr_stream_id(index, UXR_BEST_EFFORT_STREAM, UXR_INPUT_STREAM);
@@ -68,7 +68,7 @@ uxrStreamId uxr_add_input_best_effort_buffer(uxrStreamStorage* storage)
 uxrStreamId uxr_add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, OnGetFragmentationInfo on_get_fragmentation_info)
 {
     uint8_t index = storage->input_reliable_size++;
-    // assert for index
+    //TODO: assert for index
     uxrInputReliableStream* stream = &storage->input_reliable[index];
     uxr_init_input_reliable_stream(stream, buffer, size, history, on_get_fragmentation_info);
     return uxr_stream_id(index, UXR_RELIABLE_STREAM, UXR_INPUT_STREAM);
