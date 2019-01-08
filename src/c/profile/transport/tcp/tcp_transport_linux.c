@@ -5,6 +5,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
+
+#ifdef PLATFORM_NAME_LINUX
+static void sigpipe_handler(int fd)
+{
+    (void)fd;
+}
+#endif
 
 bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port)
 {
