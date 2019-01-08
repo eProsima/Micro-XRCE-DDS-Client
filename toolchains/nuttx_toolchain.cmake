@@ -24,6 +24,7 @@ foreach(tool gcc ld ar)
 endforeach()
 
 CMAKE_FORCE_C_COMPILER(${CROSSDEV}gcc GNU)
+CMAKE_FORCE_CXX_COMPILER(${CROSSDEV}g++ GNU)
 
 include_directories(SYSTEM ${CMAKE_SYSROOT}/include)
 add_compile_options(
