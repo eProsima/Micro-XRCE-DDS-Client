@@ -20,7 +20,9 @@ bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint
     platform->poll_fd.fd = socket(PF_INET, SOCK_STREAM, 0);
     if (-1 != platform->poll_fd.fd)
     {
+#ifdef PLATFORM_NAME_LINUX
         signal(SIGPIPE, sigpipe_handler);
+#endif
 
         /* Remote IP setup. */
         struct sockaddr_in temp_addr;
