@@ -24,6 +24,7 @@ project(unitary_session_test LANGUAGES C CXX)
 
 set(SRCS
     Submessage.cpp
+    ObjectId.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SRCS})
