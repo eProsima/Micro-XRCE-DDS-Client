@@ -7,8 +7,7 @@
 
 #include <string.h>
 
-// Remove when Microcdr supports size_of functions
-#define CREATE_CLIENT_PAYLOAD_SIZE 26
+#define CREATE_CLIENT_PAYLOAD_SIZE 28
 #define DELETE_CLIENT_PAYLOAD_SIZE 4
 
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
@@ -186,3 +185,4 @@ inline void process_delete_session_status(uxrSessionInfo* info, uint8_t status, 
         info->last_requested_status = status;
     }
 }
+

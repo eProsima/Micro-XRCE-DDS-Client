@@ -18,14 +18,10 @@
 
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
-
 cmake_policy(SET CMP0048 NEW)
-project(unitary_session_test LANGUAGES C CXX)
+project(unitary_session_submessage_test LANGUAGES C CXX)
 
-set(SRCS
-    Submessage.cpp
-    ObjectId.cpp
-    )
+set(SRCS Submessage.cpp)
 
 add_executable(${PROJECT_NAME} ${SRCS})
 set_common_compile_options(${PROJECT_NAME})
