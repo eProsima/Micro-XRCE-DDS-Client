@@ -21,7 +21,7 @@ TEST(SessionInfoTest, CreateSessionSize)
     uxrSessionInfo info;
     uxr_buffer_create_session(&info, &ub, 0, 512);
     EXPECT_EQ(info.last_request_id, UXR_REQUEST_LOGIN);
-    EXPECT_EQ(SUBHEADER_SIZE + UXR_CREATE_CLIENT_PAYLOAD_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE, ucdr_buffer_length(&ub));
 }
 
 TEST(SessionInfoTest, DeleteSessionSize)
@@ -34,7 +34,7 @@ TEST(SessionInfoTest, DeleteSessionSize)
 
     uxr_buffer_delete_session(&info, &ub);
     EXPECT_EQ(info.last_request_id, UXR_REQUEST_LOGOUT);
-    EXPECT_EQ(SUBHEADER_SIZE + UXR_DELETE_CLIENT_PAYLOAD_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE, ucdr_buffer_length(&ub));
 }
 
 TEST(SessionInfoTest, RequestIdGeneration)
@@ -79,10 +79,10 @@ TEST(SessionInfoTest, SessionHeaderOffset)
 {
     uxrSessionInfo info;
     info.id = 0x79;
-    EXPECT_EQ(uxr_session_header_offset(&info), UXR_MAX_HEADER_SIZE);
+    EXPECT_EQ(uxr_session_header_offset(&info), MAX_HEADER_SIZE);
 
     info.id = 0x80;
-    EXPECT_EQ(uxr_session_header_offset(&info), UXR_MIN_HEADER_SIZE);
+    EXPECT_EQ(uxr_session_header_offset(&info), MIN_HEADER_SIZE);
 }
 
 TEST(SessionInfoTest, WriteReadSessionHeaderWithKey)
@@ -102,7 +102,7 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithKey)
     ASSERT_TRUE(uxr_read_session_header(&info, &ub, &read_stream_id, &read_seq_num));
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
-    EXPECT_EQ(UXR_MAX_HEADER_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(MAX_HEADER_SIZE, ucdr_buffer_length(&ub));
 }
 
 TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
@@ -122,5 +122,5 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
     ASSERT_TRUE(uxr_read_session_header(&info, &ub, &read_stream_id, &read_seq_num));
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
-    EXPECT_EQ(UXR_MIN_HEADER_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(MIN_HEADER_SIZE, ucdr_buffer_length(&ub));
 }

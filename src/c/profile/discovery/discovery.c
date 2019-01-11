@@ -88,7 +88,7 @@ void write_get_info_message(ucdrBuffer* ub)
     payload.base.object_id = OBJECTID_AGENT;
     payload.info_mask = INFO_CONFIGURATION | INFO_ACTIVITY;
 
-    uxr_serialize_message_header(ub, UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, 0);
+    uxr_serialize_message_header(ub, SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, 0);
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_GET_INFO, GET_INFO_MSG_SIZE, 0);
     (void) uxr_serialize_GET_INFO_Payload(ub, &payload);
 }
@@ -118,7 +118,7 @@ bool read_info_headers(ucdrBuffer* ub)
 {
     bool valid = false;
 
-    uint8_t session_id; uint8_t stream_id_raw; uxrSeqNum seq_num; uint8_t key[UXR_CLIENT_KEY_SIZE];
+    uint8_t session_id; uint8_t stream_id_raw; uxrSeqNum seq_num; uint8_t key[CLIENT_KEY_SIZE];
     uxr_deserialize_message_header(ub, &session_id, &stream_id_raw, &seq_num, key);
 
     uint8_t id; uint16_t length; uint8_t flags;

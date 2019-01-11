@@ -23,11 +23,11 @@ extern "C"
 #include <uxr/client/core/session/session_info.h>
 #include "../serialization/xrce_header_internal.h"
 
-#define UXR_CREATE_CLIENT_PAYLOAD_SIZE 28
-#define UXR_DELETE_CLIENT_PAYLOAD_SIZE 4
+#define CREATE_CLIENT_PAYLOAD_SIZE 28
+#define DELETE_CLIENT_PAYLOAD_SIZE 4
 
-#define UXR_MIN_HEADER_SIZE 4
-#define UXR_MAX_HEADER_SIZE (UXR_MIN_HEADER_SIZE + UXR_CLIENT_KEY_SIZE)
+#define MIN_HEADER_SIZE 4
+#define MAX_HEADER_SIZE (MIN_HEADER_SIZE + CLIENT_KEY_SIZE)
 
 struct ucdrBuffer;
 struct BaseObjectRequest;

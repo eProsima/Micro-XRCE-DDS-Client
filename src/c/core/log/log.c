@@ -119,7 +119,7 @@ void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, buffer, (uint32_t)size);
 
-    uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[UXR_CLIENT_KEY_SIZE];
+    uint8_t session_id; uint8_t stream_id_raw; uint16_t seq_num; uint8_t key[CLIENT_KEY_SIZE];
     (void) uxr_deserialize_message_header(&ub, &session_id, &stream_id_raw, &seq_num, key);
 
     print_header(size, direction, stream_id_raw, seq_num, client_key);

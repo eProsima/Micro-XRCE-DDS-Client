@@ -54,6 +54,7 @@ typedef enum SubmessageId
 
 typedef enum SubmessageFlags
 {
+    FLAG_ENDIANNESS  =           0x01,
     FLAG_LAST_FRAGMENT =         0x01 << 1,
     FLAG_FORMAT_DATA =           0x00,
     FLAG_FORMAT_SAMPLE =         0x02,
