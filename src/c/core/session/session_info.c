@@ -7,9 +7,6 @@
 
 #include <string.h>
 
-#define CREATE_CLIENT_PAYLOAD_SIZE 28
-#define DELETE_CLIENT_PAYLOAD_SIZE 4
-
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
 
 #define RESERVED_REQUESTS_ID 9
@@ -54,7 +51,7 @@ void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, int64_t nan
 
     info->last_request_id = UXR_REQUEST_LOGIN;
 
-    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_CREATE_CLIENT, CREATE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_CREATE_CLIENT, UXR_CREATE_CLIENT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_CREATE_CLIENT_Payload(ub, &payload);
 }
 
@@ -66,7 +63,7 @@ void uxr_buffer_delete_session(uxrSessionInfo* info, ucdrBuffer* ub)
 
     info->last_request_id = UXR_REQUEST_LOGOUT;
 
-    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_DELETE, DELETE_CLIENT_PAYLOAD_SIZE, 0);
+    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_DELETE, UXR_DELETE_CLIENT_PAYLOAD_SIZE, 0);
     (void) uxr_serialize_DELETE_Payload(ub, &payload);
 }
 

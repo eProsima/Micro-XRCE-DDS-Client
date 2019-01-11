@@ -16,10 +16,10 @@
 #include "../serialization/xrce_protocol_internal.h"
 #include "../log/log_internal.h"
 
-#define HEARTBEAT_MAX_MSG_SIZE      (12 + HEARTBEAT_PAYLOAD_SIZE)
-#define ACKNACK_MAX_MSG_SIZE        (12 + ACKNACK_PAYLOAD_SIZE)
-#define CREATE_SESSION_MAX_MSG_SIZE 40
-#define DELETE_SESSION_MAX_MSG_SIZE 16
+#define CREATE_SESSION_MAX_MSG_SIZE (UXR_MAX_HEADER_SIZE + SUBHEADER_SIZE + UXR_CREATE_CLIENT_PAYLOAD_SIZE)
+#define DELETE_SESSION_MAX_MSG_SIZE (UXR_MAX_HEADER_SIZE + SUBHEADER_SIZE + UXR_DELETE_CLIENT_PAYLOAD_SIZE)
+#define HEARTBEAT_MAX_MSG_SIZE      (UXR_MAX_HEADER_SIZE + SUBHEADER_SIZE + HEARTBEAT_PAYLOAD_SIZE)
+#define ACKNACK_MAX_MSG_SIZE        (UXR_MAX_HEADER_SIZE + SUBHEADER_SIZE + ACKNACK_PAYLOAD_SIZE)
 
 static bool listen_message(uxrSession* session, int poll_ms);
 static bool listen_message_reliably(uxrSession* session, int poll_ms);
