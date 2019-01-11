@@ -15,9 +15,10 @@
 #include "HelloWorld.h"
 
 #include <uxr/client/client.h>
+
+#include <stdio.h> //printf
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
-#include <stdio.h>
 
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
@@ -37,19 +38,24 @@ void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, u
 
 int main(int args, char** argv)
 {
-    if(args >= 2 && (0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1]) || 0 == atoi(argv[1])))
+    // CLI
+    if(3 > args || 0 == atoi(argv[2]))
     {
-        printf("usage: program [-h | --help | <topics>]\n");
+        printf("usage: program [-h | --help] | ip port [<topics>]\n");
         return 0;
     }
 
+    char* ip = argv[1];
+    uint16_t port = (uint16_t)atoi(argv[2]);
+    uint32_t max_topics = (args == 4) ? (uint32_t)atoi(argv[3]) : UINT32_MAX;
+
+    // State
     uint32_t count = 0;
-    uint32_t max_topics = (args == 2) ? (uint32_t)atoi(argv[1]) : UINT32_MAX;
 
     // Transport
     uxrUDPTransport transport;
     uxrUDPPlatform udp_platform;
-    if(!uxr_init_udp_transport(&transport, &udp_platform, "127.0.0.1", 2018))
+    if(!uxr_init_udp_transport(&transport, &udp_platform, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;
