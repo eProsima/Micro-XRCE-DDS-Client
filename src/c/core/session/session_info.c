@@ -12,7 +12,7 @@
 
 #define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
 
-#define INITIAL_REQUEST_ID 10
+#define RESERVED_REQUESTS_ID 9
 
 static uint16_t generate_request_id(uxrSessionInfo* info);
 
@@ -30,7 +30,7 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
     info->key[1] = (uint8_t)((key << 8) >> 24);
     info->key[2] = (uint8_t)((key << 16) >> 24);
     info->key[3] = (uint8_t)((key << 24) >> 24);
-    info->last_request_id = INITIAL_REQUEST_ID;
+    info->last_request_id = RESERVED_REQUESTS_ID;
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
@@ -161,12 +161,10 @@ void uxr_parse_base_object_request(const BaseObjectRequest* base, uxrObjectId* o
 //==================================================================
 inline uint16_t generate_request_id(uxrSessionInfo* session)
 {
-    uint16_t last_request_id = (UINT16_MAX == session->last_request_id || INITIAL_REQUEST_ID > session->last_request_id)
-        ? INITIAL_REQUEST_ID
-        : session->last_request_id;
+    bool out_of_bounds = (UINT16_MAX == session->last_request_id || RESERVED_REQUESTS_ID >= session->last_request_id);
+    session->last_request_id = (uint16_t)((out_of_bounds ? RESERVED_REQUESTS_ID : session->last_request_id) + 1);
 
-    session->last_request_id = (uint16_t)(last_request_id + 1);
-    return last_request_id;
+    return session->last_request_id;
 }
 
 inline void process_create_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id, AGENT_Representation* agent)
