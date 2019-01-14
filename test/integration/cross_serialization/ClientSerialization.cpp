@@ -210,7 +210,7 @@ std::vector<uint8_t> ClientSerialization::write_data_payload_data()
     payload.base.object_id = ObjectId{0x45, 0x67};
 
     uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
-    ucdr_serialize_sequence_char(&ub, "BYTES", 5);
+    ucdr_serialize_array_char(&ub, "BYTES", 5);
 
     buffer.resize(std::size_t(ub.iterator - ub.init));
 
@@ -253,7 +253,7 @@ std::vector<uint8_t> ClientSerialization::data_payload_data()
     base.object_id = ObjectId{0x45, 0x67};
 
     uxr_serialize_BaseObjectRequest(&ub, &base);
-    ucdr_serialize_sequence_char(&ub, "BYTES", 5);
+    ucdr_serialize_array_char(&ub, "BYTES", 5);
 
     buffer.resize(std::size_t(ub.iterator - ub.init));
 
