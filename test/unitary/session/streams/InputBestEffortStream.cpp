@@ -11,7 +11,7 @@ TEST(InputBestEffortStreamTest, Init)
 {
     uxrInputBestEffortStream stream;
     uxr_init_input_best_effort_stream(&stream);
-    EXPECT_EQ(UINT16_MAX, stream.last_handled);
+    EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
 }
 
 TEST(InputBestEffortStreamTest, Reset)
@@ -19,7 +19,7 @@ TEST(InputBestEffortStreamTest, Reset)
     uxrInputBestEffortStream stream;
     uxr_init_input_best_effort_stream(&stream);
     uxr_reset_input_best_effort_stream(&stream);
-    EXPECT_EQ(UINT16_MAX, stream.last_handled);
+    EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
 }
 
 TEST(InputBestEffortStreamTest, ReceiveExpected)

@@ -17,7 +17,7 @@ TEST(SeqNumTest, AddFromPositive)
 
 TEST(SeqNumTest, AddMax)
 {
-    EXPECT_EQ(0, uxr_seq_num_add(UINT16_MIDSIZE, UINT16_MIDSIZE));
+    EXPECT_EQ(0, uxr_seq_num_add(SEQ_NUM_MIDSIZE, SEQ_NUM_MIDSIZE));
 }
 
 TEST(SeqNumTest, SubToNegative)
@@ -32,7 +32,7 @@ TEST(SeqNumTest, SubToPositive)
 
 TEST(SeqNumTest, SubMax)
 {
-    EXPECT_EQ(0, uxr_seq_num_sub(UINT16_MIDSIZE, UINT16_MIDSIZE));
+    EXPECT_EQ(0, uxr_seq_num_sub(SEQ_NUM_MIDSIZE, SEQ_NUM_MIDSIZE));
 }
 
 TEST(SeqNumTest, CmpEQ)
@@ -52,22 +52,22 @@ TEST(SeqNumTest, CmpGR)
 
 TEST(SeqNumTest, CmpGTMax)
 {
-    EXPECT_EQ(1, uxr_seq_num_cmp(UINT16_MIDSIZE, 0));
+    EXPECT_EQ(1, uxr_seq_num_cmp(SEQ_NUM_MIDSIZE, 0));
 }
 
 TEST(SeqNumTest, CmpGTMaxInverted)
 {
-    EXPECT_EQ(1, uxr_seq_num_cmp(0, UINT16_MIDSIZE));
+    EXPECT_EQ(1, uxr_seq_num_cmp(0, SEQ_NUM_MIDSIZE));
 }
 
 TEST(SeqNumTest, CmpLTMax)
 {
-    EXPECT_EQ(-1, uxr_seq_num_cmp(UINT16_MIDSIZE + 1, 0));
+    EXPECT_EQ(-1, uxr_seq_num_cmp(SEQ_NUM_MIDSIZE + 1, 0));
 }
 
 TEST(SeqNumTest, CmpLTMaxInverted)
 {
-    EXPECT_EQ(-1, uxr_seq_num_cmp(0, UINT16_MIDSIZE - 1));
+    EXPECT_EQ(-1, uxr_seq_num_cmp(0, SEQ_NUM_MIDSIZE - 1));
 }
 
 TEST(SeqNumTest, CmpLTNegative)

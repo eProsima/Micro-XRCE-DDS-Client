@@ -31,8 +31,8 @@ void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream)
         uxr_set_reliable_buffer_length(internal_buffer, 0);
     }
 
-    stream->last_handled = UINT16_MAX;
-    stream->last_announced = UINT16_MAX;
+    stream->last_handled = SEQ_NUM_MAX;
+    stream->last_announced = SEQ_NUM_MAX;
 }
 
 bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length, bool* message_stored)

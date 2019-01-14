@@ -9,7 +9,7 @@
 #include <ucdr/microcdr.h>
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
-#define MAX_HEARTBEAT_TRIES (sizeof(int64_t) * 8 - 1)
+#define MAX_HEARTBEAT_TRIES         (sizeof(int64_t) * 8 - 1)
 
 static bool on_full_output_buffer(ucdrBuffer* ub, void* args);
 
@@ -38,8 +38,8 @@ void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream)
     }
 
     stream->last_written = 0;
-    stream->last_sent = UINT16_MAX;
-    stream->last_acknown = UINT16_MAX;
+    stream->last_sent = SEQ_NUM_MAX;
+    stream->last_acknown = SEQ_NUM_MAX;
 
     stream->next_heartbeat_timestamp = INT64_MAX;
     stream->next_heartbeat_tries = 0;

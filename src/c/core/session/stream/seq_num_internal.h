@@ -20,7 +20,10 @@ extern "C"
 {
 #endif
 
+
 #include <uxr/client/core/session/stream/seq_num.h>
+
+#define SEQ_NUM_MAX       UINT16_MAX
 
 uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uint16_t increment);
 uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uint16_t decrement);
