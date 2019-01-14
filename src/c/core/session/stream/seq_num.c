@@ -6,12 +6,12 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uxrSeqNum increment)
+uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uint16_t increment)
 {
     return (uxrSeqNum)((seq_num + increment) % UINT16_SIZE);
 }
 
-uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uxrSeqNum decrement)
+uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uint16_t decrement)
 {
     return (uxrSeqNum)((decrement > seq_num)
         ? (seq_num + (UINT16_SIZE - decrement)) % UINT16_SIZE

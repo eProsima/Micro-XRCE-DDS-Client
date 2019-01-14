@@ -22,8 +22,8 @@ extern "C"
 
 #include <uxr/client/core/session/stream/seq_num.h>
 
-uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uxrSeqNum increment);
-uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uxrSeqNum decrement);
+uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uint16_t increment);
+uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uint16_t decrement);
 int uxr_seq_num_cmp(uxrSeqNum seq_num_1, uxrSeqNum seq_num_2);
 
 #ifdef __cplusplus

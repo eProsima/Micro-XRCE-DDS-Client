@@ -1,4 +1,37 @@
-add_subdirectory(session/object_id)
-add_subdirectory(session/submessage)
-add_subdirectory(session/session_info)
-add_subdirectory(streams)
+cmake_policy(SET CMP0048 NEW)
+project(unitary_tests LANGUAGES C CXX)
+
+macro(unitary_test TEST_NAME TEST_SOURCE)
+
+    set(SRCS ${TEST_SOURCE})
+
+    add_executable(${TEST_NAME} ${TEST_SOURCE})
+    set_common_compile_options(${TEST_NAME})
+    if(MSVC OR MSVC_IDE)
+        target_compile_options(${TEST_NAME} PRIVATE /wd4996)
+    endif()
+
+    add_gtest(${TEST_NAME} SOURCES ${TEST_SOURCE})
+
+    get_target_property(CLIENT_INCLUDES microxrcedds_client INCLUDE_DIRECTORIES)
+    include_directories(${CLIENT_INCLUDES}) #Used to include private includes
+
+    target_link_libraries(${TEST_NAME} microcdr ${GTEST_BOTH_LIBRARIES})
+    target_include_directories(${TEST_NAME}
+        PUBLIC
+            ${PROJECT_SOURCE_DIR}
+        PRIVATE
+            ${GTEST_INCLUDE_DIRS}
+        )
+
+    set_target_properties(${TEST_NAME} PROPERTIES
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED YES
+        )
+endmacro()
+
+unitary_test(SeqNum session/streams/SeqNum.cpp)
+unitary_test(ObjectId session/ObjectId.cpp)
+unitary_test(Submessage session/Submessage.cpp)
+unitary_test(SessionInfo session/SessionInfo.cpp)
+
