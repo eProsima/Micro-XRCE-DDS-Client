@@ -7,45 +7,48 @@ extern "C"
 #include "../src/c/core/session/stream/input_best_effort_stream.c"
 }
 
-TEST(InputBestEffortStreamTest, Init)
+class InputBestEffortStreamTest : public testing::Test
 {
-    uxrInputBestEffortStream stream;
-    uxr_init_input_best_effort_stream(&stream);
-    EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
-}
+public:
+    InputBestEffortStreamTest()
+    {
+        uxr_init_input_best_effort_stream(&stream);
+        EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
+    }
 
-TEST(InputBestEffortStreamTest, Reset)
-{
+    virtual ~InputBestEffortStreamTest()
+    {
+    }
+
+protected:
     uxrInputBestEffortStream stream;
-    uxr_init_input_best_effort_stream(&stream);
+};
+
+TEST_F(InputBestEffortStreamTest, Reset)
+{
+    uxr_receive_best_effort_message(&stream, 2);
     uxr_reset_input_best_effort_stream(&stream);
     EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
 }
 
-TEST(InputBestEffortStreamTest, ReceiveExpected)
+TEST_F(InputBestEffortStreamTest, ReceiveExpected)
 {
-    uxrInputBestEffortStream stream;
-    uxr_init_input_best_effort_stream(&stream);
     uxrSeqNum expected_seq_num = uxr_seq_num_add(stream.last_handled, 1);
     bool available_to_read = uxr_receive_best_effort_message(&stream, expected_seq_num);
     EXPECT_TRUE(available_to_read);
     EXPECT_EQ(expected_seq_num, stream.last_handled);
 }
 
-TEST(InputBestEffortStreamTest, ReceiveNoExpectedLost)
+TEST_F(InputBestEffortStreamTest, ReceiveNoExpectedLost)
 {
-    uxrInputBestEffortStream stream;
-    uxr_init_input_best_effort_stream(&stream);
     uxrSeqNum expected_seq_num = uxr_seq_num_add(stream.last_handled, 2);
     bool available_to_read = uxr_receive_best_effort_message(&stream, expected_seq_num);
     EXPECT_TRUE(available_to_read);
     EXPECT_EQ(expected_seq_num, stream.last_handled);
 }
 
-TEST(InputBestEffortStreamTest, ReceiveNoExpected)
+TEST_F(InputBestEffortStreamTest, ReceiveNoExpected)
 {
-    uxrInputBestEffortStream stream;
-    uxr_init_input_best_effort_stream(&stream);
     uxrSeqNum expected_seq_num = stream.last_handled;
     bool available_to_read = uxr_receive_best_effort_message(&stream, expected_seq_num);
     EXPECT_FALSE(available_to_read);
