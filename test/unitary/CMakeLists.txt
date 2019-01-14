@@ -30,8 +30,10 @@ macro(unitary_test TEST_NAME TEST_SOURCE)
         )
 endmacro()
 
-unitary_test(SeqNum session/streams/SeqNum.cpp)
-unitary_test(ObjectId session/ObjectId.cpp)
-unitary_test(Submessage session/Submessage.cpp)
+unitary_test(SeqNum                session/streams/SeqNum.cpp)
+unitary_test(InputBestEffortStream session/streams/InputBestEffortStream.cpp)
+
+unitary_test(ObjectId    session/ObjectId.cpp)
+unitary_test(Submessage  session/Submessage.cpp)
 unitary_test(SessionInfo session/SessionInfo.cpp)
 
