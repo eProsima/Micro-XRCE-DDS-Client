@@ -34,6 +34,8 @@ unitary_test(StreamId               session/streams/StreamId.cpp)
 unitary_test(SeqNum                 session/streams/SeqNum.cpp)
 unitary_test(InputBestEffortStream  session/streams/InputBestEffortStream.cpp)
 unitary_test(OutputBestEffortStream session/streams/OutputBestEffortStream.cpp)
+unitary_test(CommonReliableStream   session/streams/CommonReliableStream.cpp)
+unitary_test(InputReliableStream    session/streams/InputReliableStream.cpp)
 
 unitary_test(ObjectId    session/ObjectId.cpp)
 unitary_test(Submessage  session/Submessage.cpp)
