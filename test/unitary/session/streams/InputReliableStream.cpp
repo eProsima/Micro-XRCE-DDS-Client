@@ -17,7 +17,7 @@ bool operator == (const uxrInputReliableStream& stream1, const uxrInputReliableS
     return stream1.buffer == stream2.buffer
         && stream1.size == stream2.size
         && stream1.history == stream2.history
-        && stream1.last_announced == stream2.last_handled
+        && stream1.last_handled == stream2.last_handled
         && stream1.last_announced == stream2.last_announced
         && stream1.on_get_fragmentation_info == stream2.on_get_fragmentation_info;
 }
@@ -39,7 +39,12 @@ public:
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_announced);
         EXPECT_EQ(on_get_fragmentation_info, stream.on_get_fragmentation_info);
-        //checks internal buffers
+
+        for(size_t i = 0; i < HISTORY; ++i)
+        {
+            uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, i);
+            EXPECT_EQ(0, uxr_get_reliable_buffer_length(slot));
+        }
     }
 
     void copy(uxrInputReliableStream* dest, uxrInputReliableStream* source)
@@ -83,6 +88,22 @@ TEST_F(InputReliableStreamTest, InputBufferSize)
     size_t size_from_generic = uxr_get_reliable_buffer_size(BUFFER_SIZE, HISTORY);
     size_t size_from_input = uxr_get_input_buffer_size(&stream);
     EXPECT_EQ(size_from_generic, size_from_input);
+}
+
+TEST_F(InputReliableStreamTest, UpToDate)
+{
+    bool up_to_date = uxr_is_input_up_to_date(&stream);
+    EXPECT_TRUE(up_to_date);
+}
+
+TEST_F(InputReliableStreamTest, NotUpToDate)
+{
+    //PRE
+    bool message_stored;
+    (void) uxr_receive_reliable_message(&stream, 1, message, MAX_MESSAGE_SIZE, &message_stored);
+
+    bool up_to_date = uxr_is_input_up_to_date(&stream);
+    EXPECT_FALSE(up_to_date);
 }
 
 TEST_F(InputReliableStreamTest, ReceiveValidMessage)
@@ -138,22 +159,6 @@ TEST_F(InputReliableStreamTest, GetFirstUnacked)
 {
     uxrSeqNum first_unknown = uxr_get_first_unacked(&stream);
     EXPECT_EQ(uxr_seq_num_add(stream.last_handled, 1), first_unknown);
-}
-
-TEST_F(InputReliableStreamTest, UpToDate)
-{
-    bool up_to_date = uxr_is_up_to_date(&stream);
-    EXPECT_TRUE(up_to_date);
-}
-
-TEST_F(InputReliableStreamTest, NotUpToDate)
-{
-    //PRE
-    bool message_stored;
-    (void) uxr_receive_reliable_message(&stream, 1, message, MAX_MESSAGE_SIZE, &message_stored);
-
-    bool up_to_date = uxr_is_up_to_date(&stream);
-    EXPECT_FALSE(up_to_date);
 }
 
 TEST_F(InputReliableStreamTest, ProcessNewHeartbeat)
@@ -224,6 +229,12 @@ TEST_F(InputReliableStreamTest, Reset)
 
     uxr_reset_input_reliable_stream(&stream);
     EXPECT_EQ(backup, stream);
+
+    for(size_t i = 0; i < HISTORY; ++i)
+    {
+        uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, i);
+        EXPECT_EQ(0, uxr_get_reliable_buffer_length(slot));
+    }
 }
 
 TEST_F(InputReliableStreamTest, FragmentationJumpToNextBuffer)

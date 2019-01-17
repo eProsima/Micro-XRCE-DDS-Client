@@ -115,7 +115,7 @@ bool uxr_output_streams_confirmed(const uxrStreamStorage* storage)
     bool busy = false;
     for(unsigned i = 0; i < storage->output_reliable_size && !busy; ++i)
     {
-        busy = uxr_is_output_reliable_stream_busy(&storage->output_reliable[i]);
+        busy = uxr_is_output_up_to_date(&storage->output_reliable[i]);
     }
     return !busy;
 }

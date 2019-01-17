@@ -206,9 +206,9 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
     return it_updated;
 }
 
-void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint16_t first_unacked_seq_num)
+void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uxrSeqNum first_unacked_seq_num)
 {
-    uint16_t last_acked_seq_num = (uint16_t)uxr_seq_num_sub(first_unacked_seq_num, 1);
+    uxrSeqNum last_acked_seq_num = uxr_seq_num_sub(first_unacked_seq_num, 1);
     size_t buffers_to_clean = uxr_seq_num_sub(last_acked_seq_num, stream->last_acknown);
     for(size_t i = 0; i < buffers_to_clean; i++)
     {
@@ -223,9 +223,9 @@ void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uint1
     stream->next_heartbeat_tries = 0;
 }
 
-bool uxr_is_output_reliable_stream_busy(const uxrOutputReliableStream* stream)
+bool uxr_is_output_up_to_date(const uxrOutputReliableStream* stream)
 {
-    return 0 > uxr_seq_num_cmp(stream->last_acknown, stream->last_sent);
+    return 0 == uxr_seq_num_cmp(stream->last_acknown, stream->last_sent);
 }
 
 uint8_t* uxr_get_output_buffer(const uxrOutputReliableStream* stream, size_t history_pos)

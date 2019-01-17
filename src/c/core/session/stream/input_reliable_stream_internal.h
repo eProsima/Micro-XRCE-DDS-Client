@@ -38,7 +38,7 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, st
 uint16_t uxr_compute_acknack(const uxrInputReliableStream* stream, uxrSeqNum* from);
 void uxr_process_heartbeat(uxrInputReliableStream* stream, uxrSeqNum first_seq_num, uxrSeqNum last_seq_num);
 
-bool uxr_is_up_to_date(const uxrInputReliableStream* stream);
+bool uxr_is_input_up_to_date(const uxrInputReliableStream* stream);
 
 uint8_t* uxr_get_input_buffer(const uxrInputReliableStream* stream, size_t history_pos);
 size_t uxr_get_input_buffer_size(const uxrInputReliableStream* stream);

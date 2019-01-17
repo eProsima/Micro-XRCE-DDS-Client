@@ -126,7 +126,7 @@ void uxr_process_heartbeat(uxrInputReliableStream* stream, uxrSeqNum first_seq_n
     }
 }
 
-bool uxr_is_up_to_date(const uxrInputReliableStream* stream)
+bool uxr_is_input_up_to_date(const uxrInputReliableStream* stream)
 {
     return stream->last_announced == stream->last_handled;
 }
