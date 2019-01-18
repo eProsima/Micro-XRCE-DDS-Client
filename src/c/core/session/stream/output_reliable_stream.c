@@ -160,9 +160,10 @@ bool uxr_update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* strea
         }
         else if(current_timestamp >= stream->next_heartbeat_timestamp)
         {
-            int64_t increment = MIN_HEARTBEAT_TIME_INTERVAL << (++stream->next_heartbeat_tries % MAX_HEARTBEAT_TRIES);
+            int64_t increment = MIN_HEARTBEAT_TIME_INTERVAL << (stream->next_heartbeat_tries % MAX_HEARTBEAT_TRIES);
             int64_t difference = current_timestamp - stream->next_heartbeat_timestamp;
             stream->next_heartbeat_timestamp += (difference > increment) ? difference : increment;
+            stream->next_heartbeat_tries++;
             must_confirm = true;
         }
     }
