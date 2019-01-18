@@ -5,7 +5,7 @@
 #include "../../core/session/submessage_internal.h"
 #include "../../core/serialization/xrce_protocol_internal.h"
 
-#define WRITE_DATA_PAYLOAD_SIZE 8
+#define WRITE_DATA_PAYLOAD_SIZE 4
 
 //==================================================================
 //                             PUBLIC
@@ -20,7 +20,6 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         WRITE_DATA_Payload_Data payload;
         uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);
         (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
-        (void) ucdr_serialize_uint32_t(ub, topic_size); //REMOVE: when topics have not a previous size in the agent.
 
         ub->last_data_size = 0; //reset alignment (as if we were created a new ucdrBuffer)
     }

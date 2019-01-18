@@ -1,10 +1,8 @@
 include(CMakeForceCompiler)
 
-set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_NAME Generic)
+set(PLATFORM_NAME "nuttx")
 
-set(CMAKE_SYSROOT /root/nuttx)
-
-set(CMAKE_FIND_ROOT_PATH root/nuttx)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
@@ -27,8 +25,9 @@ foreach(tool gcc ld ar)
 endforeach()
 
 CMAKE_FORCE_C_COMPILER(${CROSSDEV}gcc GNU)
+CMAKE_FORCE_CXX_COMPILER(${CROSSDEV}g++ GNU)
 
-include_directories(SYSTEM /root/nuttx/include)
+include_directories(SYSTEM ${CMAKE_SYSROOT}/include)
 add_compile_options(
     -std=c99 
     ${ARCH_CPU_FLAGS}
