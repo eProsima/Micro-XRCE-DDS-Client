@@ -112,10 +112,10 @@ uxrInputReliableStream* uxr_get_input_reliable_stream(uxrStreamStorage* storage,
 
 bool uxr_output_streams_confirmed(const uxrStreamStorage* storage)
 {
-    bool busy = false;
-    for(unsigned i = 0; i < storage->output_reliable_size && !busy; ++i)
+    bool up_to_date = true;
+    for(unsigned i = 0; i < storage->output_reliable_size && up_to_date; ++i)
     {
-        busy = uxr_is_output_up_to_date(&storage->output_reliable[i]);
+        up_to_date = uxr_is_output_up_to_date(&storage->output_reliable[i]);
     }
-    return !busy;
+    return up_to_date;
 }
