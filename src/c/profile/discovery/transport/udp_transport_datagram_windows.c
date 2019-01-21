@@ -1,5 +1,6 @@
 #include "udp_transport_datagram_internal.h"
 
+#include <WS2tcpip.h>
 #include <string.h>
 
 bool uxr_init_udp_transport_datagram(uxrUDPTransportDatagram* transport)
@@ -7,6 +8,7 @@ bool uxr_init_udp_transport_datagram(uxrUDPTransportDatagram* transport)
     bool rv = false;
 
     /* WSA initialization. */
+    WSADATA wsa_data;
     if (0 != WSAStartup(MAKEWORD(2, 2), &wsa_data))
     {
         return false;
@@ -33,7 +35,7 @@ bool uxr_udp_send_datagram_to(uxrUDPTransportDatagram* transport, const uint8_t*
     bool rv = false;
 
     struct sockaddr_in remote_addr;
-    if(0 != inet_aton(ip, &remote_addr.sin_addr))
+    if(0 != inet_pton(AF_INET, ip, &remote_addr.sin_addr))
     {
         remote_addr.sin_family = AF_INET;
         remote_addr.sin_port = htons(port);
@@ -72,8 +74,7 @@ bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, si
 void uxr_bytes_to_ip(const uint8_t* bytes, char* ip)
 {
     struct in_addr addr;
-    addr.s_addr = (in_addr_t)(*bytes + (*(bytes + 1) << 8) + (*(bytes + 2) << 16) + (*(bytes + 3) << 24));
-    char* internal_ip = inet_ntoa(addr);
-    strcpy(ip, internal_ip);
+    addr.s_addr = (unsigned long)(*bytes + (*(bytes + 1) << 8) + (*(bytes + 2) << 16) + (*(bytes + 3) << 24));
+    inet_ntop(AF_INET, &(addr.s_addr), ip, INET_ADDRSTRLEN);
 }
 

@@ -178,6 +178,7 @@ set(SRCS
     src/c/core/session/write_access.c
     $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${PROFILE_DISCOVERY}>>:src/c/profile/discovery/discovery.c>
+    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
     ${UDP_DISCOVERY_SRCS}
     ${UDP_SRCS}
     ${TCP_SRCS}
@@ -262,9 +263,9 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
-    if(PLATFORM_NAME_LINUX OR PLATFORM_NAME_NUTTX)
+#    if(PLATFORM_NAME_LINUX OR PLATFORM_NAME_NUTTX)
         add_subdirectory(examples/Discovery)
-    endif()
+#    endif()
 endif()
 
 ###############################################################################

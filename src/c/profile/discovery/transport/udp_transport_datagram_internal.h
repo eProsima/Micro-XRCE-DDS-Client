@@ -32,7 +32,7 @@ extern "C"
 #include <sys/socket.h>
 #include <poll.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 
 
@@ -45,7 +45,7 @@ typedef struct uxrUDPTransportDatagram
     struct pollfd poll_fd;
 #elif defined(PLATFORM_NAME_WINDOWS)
     uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
-    struct pollfd poll_fd;
+    WSAPOLLFD poll_fd;
 #endif
 
 } uxrUDPTransportDatagram;
