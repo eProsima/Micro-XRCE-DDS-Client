@@ -146,9 +146,11 @@ endif()
 # Transport discovery source.
 if(PROFILE_DISCOVERY)
     if(PLATFORM_NAME_LINUX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
+    elseif(PLATFORM_NAME_WINDOWS)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
     elseif(PLATFORM_NAME_NUTTX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
     endif()
 endif()
 

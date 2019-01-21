@@ -1,27 +1,36 @@
 #include "udp_transport_datagram_internal.h"
 
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <errno.h>
 #include <string.h>
 
 bool uxr_init_udp_transport_datagram(uxrUDPTransportDatagram* transport)
 {
-    int fd = socket(PF_INET, SOCK_DGRAM, 0);
-    transport->poll_fd.fd = fd;
-    transport->poll_fd.events = POLLIN;
+    bool rv = false;
 
-    return fd != -1;
+    /* WSA initialization. */
+    if (0 != WSAStartup(MAKEWORD(2, 2), &wsa_data))
+    {
+        return false;
+    }
+
+    /* Socket initialization. */
+    transport->poll_fd.fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (INVALID_SOCKET != transport->poll_fd.fd)
+    {
+        transport->poll_fd.events = POLLIN;
+        rv = true;
+    }
+    return rv;
 }
 
 bool uxr_close_udp_transport_datagram(uxrUDPTransportDatagram* transport)
 {
-    return (0 == close(transport->poll_fd.fd));
+    bool rv = (INVALID_SOCKET == transport->poll_fd.fd) ? true : (0 == closesocket(transport->poll_fd.fd));
+    return (0 == WSACleanup()) && rv;
 }
 
 bool uxr_udp_send_datagram_to(uxrUDPTransportDatagram* transport, const uint8_t* buf, size_t len, const char* ip, uint16_t port)
 {
-    bool rv = true;
+    bool rv = false;
 
     struct sockaddr_in remote_addr;
     if(0 != inet_aton(ip, &remote_addr.sin_addr))
@@ -29,12 +38,9 @@ bool uxr_udp_send_datagram_to(uxrUDPTransportDatagram* transport, const uint8_t*
         remote_addr.sin_family = AF_INET;
         remote_addr.sin_port = htons(port);
 
-        ssize_t bytes_sent = sendto(transport->poll_fd.fd, (void*)buf, len, 0,
+        int bytes_sent = sendto(transport->poll_fd.fd, (const char*)buf, (int)len, 0,
                                     (struct sockaddr*)&remote_addr, sizeof(remote_addr));
-        if (0 > bytes_sent)
-        {
-            rv = false;
-        }
+        rv = (SOCKET_ERROR != bytes_sent);
     }
 
     return rv;
@@ -44,11 +50,11 @@ bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, si
 {
     bool rv = false;
 
-    int poll_rv = poll(&transport->poll_fd, 1, timeout);
+    int poll_rv = WSAPoll(&transport->poll_fd, 1, timeout);
     if (0 < poll_rv)
     {
-        ssize_t bytes_received = recv(transport->poll_fd.fd, (void*)transport->buffer, sizeof(transport->buffer), 0);
-        if (0 < bytes_received)
+        int bytes_received = recv(transport->poll_fd.fd, (char*)transport->buffer, (int)sizeof(transport->buffer), 0);
+        if ( bytes_received)
         {
             *len = (size_t)bytes_received;
             *buf = transport->buffer;
@@ -57,7 +63,7 @@ bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, si
     }
     else if (0 == poll_rv)
     {
-        errno = ETIME;
+        WSASetLastError(WSAETIMEDOUT);
     }
 
     return rv;
