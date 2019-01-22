@@ -348,7 +348,7 @@ bool listen_message_reliably(uxrSession* session, int poll_ms)
             poll_to_next_heartbeat = 1;
         }
 
-        int poll_chosen = (poll_to_next_heartbeat < poll) ? (int)poll_to_next_heartbeat : (int)poll;
+        int poll_chosen = (poll_to_next_heartbeat < poll) ? poll_to_next_heartbeat : poll;
         received = listen_message(session, poll_chosen);
         if(!received)
         {
