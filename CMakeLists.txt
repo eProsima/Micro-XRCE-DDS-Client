@@ -77,10 +77,6 @@ else()
     set(PROFILE_COMMON_CREATE_ENTITIES OFF)
 endif()
 
-if(CONFIG_MACHINE_ENDIANNESS)
-    set(__BIG_ENDIAN__ CONFIG_MACHINE_ENDIANNESS)
-endif()
-
 ###############################################################################
 # Check MSVC architecture
 ###############################################################################
