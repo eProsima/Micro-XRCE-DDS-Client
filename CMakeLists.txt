@@ -80,12 +80,6 @@ else()
     message(FATAL_ERROR "No client.config found.")
 endif()
 
-if(PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
-    set(PROFILE_COMMON_CREATE_ENTITIES ON)
-else()
-    set(PROFILE_COMMON_CREATE_ENTITIES OFF)
-endif()
-
 if(CONFIG_MACHINE_ENDIANNESS)
     set(__BIG_ENDIAN__ CONFIG_MACHINE_ENDIANNESS)
 endif()
@@ -172,12 +166,12 @@ set(SRCS
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/util/time.c
+    src/c/core/session/common_create_entities.c
+    src/c/core/session/create_entities_ref.c
+    src/c/core/session/create_entities_xml.c
+    src/c/core/session/read_access.c
+    src/c/core/session/write_access.c
     $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
-    $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
-    $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
-    $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
-    $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
-    $<$<BOOL:${PROFILE_WRITE_ACCESS}>:src/c/profile/session/write_access.c>
     $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${PROFILE_DISCOVERY}>>:src/c/profile/discovery/discovery.c>
     ${UDP_DISCOVERY_SRCS}
     ${UDP_SRCS}

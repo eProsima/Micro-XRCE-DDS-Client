@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
-#define _UXR_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
+#ifndef _UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
+#define _UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <uxr/client/profile/session/common_create_entities.h>
+#include <uxr/client/core/session/common_create_entities.h>
 
 UXRDLLAPI uint16_t uxr_buffer_create_participant_xml(uxrSession* session, uxrStreamId stream_id,
                                          uxrObjectId object_id, uint16_t domain, const char* xml, uint8_t mode);
@@ -44,4 +44,4 @@ UXRDLLAPI uint16_t uxr_buffer_create_datareader_xml(uxrSession* session, uxrStre
 }
 #endif
 
-#endif //_UXR_CLIENT_PROFILE_SESSION_CREATE_ENTITIES_XML_H_
+#endif //_UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_

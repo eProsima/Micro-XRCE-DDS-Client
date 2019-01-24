@@ -18,11 +18,8 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
 endif()
 
 
-if(NOT PROFILE_CREATE_ENTITIES_XML OR
-   NOT PROFILE_READ_ACCESS OR
-   NOT PROFILE_WRITE_ACCESS OR
-   NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: The profiles, PROFILE_CREATE_ENTITIES_XML, PROFILE_READ_ACCESS, PROFILE_WRITE_ACCESS and PROFILE_UDP_TRANSPORT must be enabled.")
+if(NOT PROFILE_UDP_TRANSPORT)
+    message(WARNING "Can not compile example: The PROFILE_UDP_TRANSPORT must be enabled.")
 else()
 
     #############################################################

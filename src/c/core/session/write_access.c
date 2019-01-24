@@ -1,9 +1,9 @@
-#include <uxr/client/profile/session/write_access.h>
+#include <uxr/client/core/session/write_access.h>
 
-#include "../../core/session/session_internal.h"
-#include "../../core/session/session_info_internal.h"
-#include "../../core/session/submessage_internal.h"
-#include "../../core/serialization/xrce_protocol_internal.h"
+#include "session_internal.h"
+#include "session_info_internal.h"
+#include "submessage_internal.h"
+#include "../serialization/xrce_protocol_internal.h"
 
 #define WRITE_DATA_PAYLOAD_SIZE 4
 

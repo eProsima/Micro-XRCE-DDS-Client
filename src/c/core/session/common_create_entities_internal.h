@@ -12,21 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_PROFILE_SESSION_WRITE_ACCESS_H_
-#define _UXR_CLIENT_PROFILE_SESSION_WRITE_ACCESS_H_
+#ifndef _SRC_C_CORE_SESSION_COMMON_CREATE_ENTITIES_INTERNAL_H_
+#define _SRC_C_CORE_SESSION_COMMON_CREATE_ENTITIES_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <uxr/client/core/session/session.h>
+#include <uxr/client/core/session/common_create_entities.h>
 
-UXRDLLAPI bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
-                                       struct ucdrBuffer* ub_topic, uint32_t topic_size);
+struct CREATE_Payload;
+
+uint16_t uxr_common_create_entity(uxrSession* session, uxrStreamId stream_id,
+                              uxrObjectId object_id, uint16_t xml_ref_size, uint8_t mode,
+                              struct CREATE_Payload* payload);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_UXR_CLIENT_PROFILE_SESSION_WRITE_ACCESS_H_
+#endif //_SRC_C_CORE_SESSION_COMMON_CREATE_ENTITIES_INTERNAL_H_
