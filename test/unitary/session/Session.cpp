@@ -1,3 +1,6 @@
+#include <chrono>
+#include <thread>
+
 extern "C"
 {
 #include "../src/c/core/serialization/xrce_protocol.c"
@@ -16,6 +19,8 @@ extern "C"
 #include "../src/c/core/session/submessage.c"
 #include "../src/c/core/session/session_info.c"
 
+#include "../src/c/util/time.c"
+
 #undef UXR_MESSAGE_LOG
 #undef UXR_SERIALIZATION_LOG
 #include "../src/c/core/session/session.c"
@@ -26,7 +31,7 @@ extern "C"
 
 #define MTU                   64
 #define HISTORY               4
-#define OFFSET                8
+#define OFFSET                4
 
 
 class SessionTest : public testing::Test
@@ -38,7 +43,7 @@ public:
         //Necessary for the mocks
         current = this;
 
-        comm.instance = NULL;
+        comm.instance = this;
         comm.mtu = 32;
         comm.send_msg = send_msg;
         comm.recv_msg = recv_msg;
@@ -89,15 +94,41 @@ public:
     uint8_t output_reliable_buffer[MTU * HISTORY];
     uint8_t input_reliable_buffer[MTU * HISTORY];
 
+    static int listening_counter;
+
     static bool send_msg(void* instance, const uint8_t* buf, size_t len)
     {
-        (void) instance; (void) buf; (void) len;
+        (void) buf;
+        EXPECT_EQ(SessionTest::current, instance);
+        if(std::string("FlashStreams") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            EXPECT_EQ(OFFSET + SUBHEADER_SIZE + 8, len);
+        }
+        else if(std::string("SendMessageOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            EXPECT_EQ(MTU, len);
+        }
+        else if(std::string("SendMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            EXPECT_EQ(MTU, len);
+            return false;
+        }
+        else if(std::string("SendHeartbeat") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            EXPECT_EQ(HEARTBEAT_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET), len);
+        }
+        else if(std::string("SendAcknack") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            EXPECT_EQ(ACKNACK_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET), len);
+        }
+
         return true;
     }
 
     static bool recv_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
     {
-        (void) instance; (void) timeout;
+        EXPECT_EQ(SessionTest::current, instance);
+        (void) timeout;
         static std::array<uint8_t, MTU> input_buffer;
 
         if(std::string("CreateOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
@@ -114,10 +145,9 @@ public:
         }
         else if(std::string("CreateNoOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            (void) buf; (void) len;
             return false;
         }
-        if(std::string("DeleteOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if(std::string("DeleteOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             std::vector<uint8_t> message = {0x81, 0x00, 0x00, 0x00, 0x05, 0x01, 0x06, 0x00,
                                             0x00, 0x02, 0xFF, 0xFE, 0x00, 0x00};
@@ -128,10 +158,42 @@ public:
         }
         else if(std::string("DeleteNoOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            (void) buf; (void) len;
             return false;
         }
-
+        else if(std::string("Listen") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            *len = 0;
+            *buf = NULL;
+            return true;
+        }
+        else if(std::string("ListenTimeout") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            return false;
+        }
+        else if(std::string("ListenReliably") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            *len = 0;
+            *buf = NULL;
+            return true;
+        }
+        else if(std::string("ListenReliablyTimeout") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            return false;
+        }
+        else if(std::string("WaitSessionStatusBad") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            SessionTest::listening_counter++;
+            return false;
+        }
+        else if(std::string("RecvMessageOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            *len = 8;
+            return true;
+        }
+        else if(std::string("RecvMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            return false;
+        }
         return false;
     }
 
@@ -144,6 +206,15 @@ public:
                              uint8_t status, void* args)
     {
         (void) session; (void) object_id; (void) request_id; (void) status; (void) args;
+        if(std::string("ProcessStatus") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            EXPECT_EQ(&SessionTest::current->session, session);
+            EXPECT_EQ(2, object_id.id);
+            EXPECT_EQ(2, object_id.type);
+            EXPECT_EQ(4, request_id);
+            EXPECT_EQ(UXR_STATUS_OK, status);
+            EXPECT_EQ(&SessionTest::current->session, args);
+        }
     }
 
     static void on_topic_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
@@ -154,6 +225,7 @@ public:
 };
 
 SessionTest* SessionTest::current = nullptr;
+int SessionTest::listening_counter;
 
 TEST_F(SessionTest, SetStatusCallback)
 {
@@ -195,41 +267,157 @@ TEST_F(SessionTest, DeleteNoOk)
     ASSERT_FALSE(deleted);
 }
 
-TEST_F(SessionTest, RunTime)
+TEST_F(SessionTest, Listen)
 {
-    //TODO
+    bool must_be_read = listen_message(&session, 1000);
+    ASSERT_TRUE(must_be_read);
 }
 
-TEST_F(SessionTest, RunUntilTimeout)
+TEST_F(SessionTest, ListenTimeout)
 {
-    //TODO
+    bool must_be_read = listen_message(&session, 1000);
+    ASSERT_FALSE(must_be_read);
 }
 
-TEST_F(SessionTest, RunConfirmDelivery)
+TEST_F(SessionTest, ListenReliably)
 {
-    //TODO
+    bool must_be_read = listen_message_reliably(&session, 1000);
+    ASSERT_TRUE(must_be_read);
 }
 
-TEST_F(SessionTest, RunConfirmAllStatus)
+TEST_F(SessionTest, ListenReliablyTimeout)
 {
-    //TODO
+    bool must_be_read = listen_message_reliably(&session, 1000);
+    ASSERT_FALSE(must_be_read);
 }
 
-TEST_F(SessionTest, RunConfirmOneStatus)
+TEST_F(SessionTest, FlashStreams)
 {
-    //TODO
+    ucdrBuffer ub;
+    uxrStreamId output_best_effort = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
+    uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    (void) uxr_prepare_stream_to_write_submessage(&session, output_reliable, 8, &ub, 1, 0);
+    (void) uxr_prepare_stream_to_write_submessage(&session, output_best_effort, 8, &ub, 1, 0);
+    uxr_flash_output_streams(&session);
 }
 
-TEST_F(SessionTest, Flash)
+TEST_F(SessionTest, WaitSessionStatusBad)
 {
-    //TODO
+    // The OK version is already checked with the CreateOk and DeleteOk test versions
+    SessionTest::listening_counter = 0;
+    uint8_t buffer[MTU];
+    size_t length = 0;
+    size_t attempts = 10;
+    bool found = wait_session_status(&session, buffer, length, attempts);
+    EXPECT_FALSE(found);
+    EXPECT_EQ(attempts, SessionTest::listening_counter);
 }
 
-// ****************************************************************************Y
-//                                  MOCKS
-// ****************************************************************************Y
-
-int64_t uxr_millis(void)
+TEST_F(SessionTest, SendMessageOk)
 {
-    return 0;
+    uint8_t buffer[MTU];
+    bool sent = send_message(&session, buffer, MTU);
+    ASSERT_TRUE(sent);
+}
+
+TEST_F(SessionTest, SendMessageError)
+{
+    uint8_t buffer[MTU];
+    bool sent = send_message(&session, buffer, MTU);
+    ASSERT_FALSE(sent);
+}
+
+TEST_F(SessionTest, RecvMessageOk)
+{
+    uint8_t* buffer; size_t length;
+    bool received = recv_message(&session, &buffer, &length, 0);
+    ASSERT_TRUE(received);
+    EXPECT_EQ(8, length);
+}
+
+TEST_F(SessionTest, RecvMessageError)
+{
+    uint8_t* buffer; size_t length;
+    bool received = recv_message(&session, &buffer, &length, 0);
+    ASSERT_FALSE(received);
+}
+
+TEST_F(SessionTest, SendHeartbeat)
+{
+    uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    write_submessage_heartbeat(&session, output_reliable);
+}
+
+TEST_F(SessionTest, SendAcknack)
+{
+    uxrStreamId input_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_INPUT_STREAM);
+    write_submessage_acknack(&session, input_reliable);
+}
+
+TEST_F(SessionTest, ProcessStatus)
+{
+    uxr_set_status_callback(&session, on_status_func, &session);
+    process_status(&session, uxr_object_id(2, 2), 4, UXR_STATUS_OK);
+}
+
+TEST_F(SessionTest, WriteBestEffortOk)
+{
+    ucdrBuffer ub;
+    uxrStreamId output_best_effort = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
+    bool available = uxr_prepare_stream_to_write_submessage(&session, output_best_effort, 8, &ub, 1, 0);
+    ASSERT_TRUE(available);
+}
+
+TEST_F(SessionTest, WriteBestEffortTooLong)
+{
+    ucdrBuffer ub;
+    uxrStreamId output_best_effort = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
+    bool available = uxr_prepare_stream_to_write_submessage(&session, output_best_effort, MTU, &ub, 1, 0);
+    ASSERT_FALSE(available);
+}
+
+TEST_F(SessionTest, WriteReliableOk)
+{
+    ucdrBuffer ub;
+    uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    bool available = uxr_prepare_stream_to_write_submessage(&session, output_reliable, 8, &ub, 1, 0);
+    ASSERT_TRUE(available);
+}
+
+TEST_F(SessionTest, WriteReliableFragment)
+{
+    ucdrBuffer ub;
+    uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    bool available = uxr_prepare_stream_to_write_submessage(&session, output_reliable, MTU, &ub, 1, 0);
+    ASSERT_TRUE(available);
+}
+
+TEST_F(SessionTest, FragmentationInfoNoFragment)
+{
+    ucdrBuffer ub;
+    std::array<uint8_t, SUBHEADER_SIZE> header;
+    ucdr_init_buffer(&ub, header.data(), SUBHEADER_SIZE);
+    uxr_buffer_submessage_header(&ub, 0, 0, 0);
+    FragmentationInfo info = on_get_fragmentation_info(header.data());
+    EXPECT_EQ(NO_FRAGMENTED, info);
+}
+
+TEST_F(SessionTest, FragmentationInfoIntermediateFragment)
+{
+    ucdrBuffer ub;
+    std::array<uint8_t, SUBHEADER_SIZE> header;
+    ucdr_init_buffer(&ub, header.data(), SUBHEADER_SIZE);
+    uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_FRAGMENT, 0, 0);
+    FragmentationInfo info = on_get_fragmentation_info(header.data());
+    EXPECT_EQ(INTERMEDIATE_FRAGMENT, info);
+}
+
+TEST_F(SessionTest, FragmentationInfoLastFragment)
+{
+    ucdrBuffer ub;
+    std::array<uint8_t, SUBHEADER_SIZE> header;
+    ucdr_init_buffer(&ub, header.data(), SUBHEADER_SIZE);
+    uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_FRAGMENT, 0, FLAG_LAST_FRAGMENT);
+    FragmentationInfo info = on_get_fragmentation_info(header.data());
+    EXPECT_EQ(LAST_FRAGMENT, info);
 }
