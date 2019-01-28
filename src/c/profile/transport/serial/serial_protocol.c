@@ -1,4 +1,4 @@
-#include <uxr/client/core/communication/serial_protocol.h>
+#include "serial_protocol_internal.h"
 #include <string.h>
 
 /*******************************************************************************
@@ -43,12 +43,12 @@ static const uint16_t crc16_table[256] = {
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-void update_crc(uint16_t* crc, const uint8_t data)
+void uxr_update_crc(uint16_t* crc, const uint8_t data)
 {
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-bool get_next_octet(uxrSerialIO* serial_io, uint8_t* octet)
+bool uxr_get_next_octet(uxrSerialIO* serial_io, uint8_t* octet)
 {
     bool rv = false;
     *octet = 0;
@@ -78,7 +78,7 @@ bool get_next_octet(uxrSerialIO* serial_io, uint8_t* octet)
     return rv;
 }
 
-bool add_next_octet(uxrSerialIO* serial_io, uint8_t octet)
+bool uxr_add_next_octet(uxrSerialIO* serial_io, uint8_t octet)
 {
     bool rv = false;
 
@@ -126,10 +126,10 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
     serial_io->wb_pos = 1;
 
     /* Buffer header. */
-    add_next_octet(serial_io, serial_io->local_addr);
-    add_next_octet(serial_io, remote_addr);
-    add_next_octet(serial_io, (uint8_t)(len & 0xFF));
-    add_next_octet(serial_io, (uint8_t)(len >> 8));
+    uxr_add_next_octet(serial_io, serial_io->local_addr);
+    uxr_add_next_octet(serial_io, remote_addr);
+    uxr_add_next_octet(serial_io, (uint8_t)(len & 0xFF));
+    uxr_add_next_octet(serial_io, (uint8_t)(len >> 8));
 
     /* Write payload. */
     uint8_t octet = 0;
@@ -139,9 +139,9 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
     while (written_len < len && cond)
     {
         octet = *(buf + written_len);
-        if (add_next_octet(serial_io, octet))
+        if (uxr_add_next_octet(serial_io, octet))
         {
-            update_crc(&crc, octet);
+            uxr_update_crc(&crc, octet);
             ++written_len;
         }
         else
@@ -167,9 +167,9 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
     while (written_len < sizeof(tmp_crc) && cond)
     {
         octet = *(tmp_crc + written_len);
-        if (add_next_octet(serial_io, octet))
+        if (uxr_add_next_octet(serial_io, octet))
         {
-            update_crc(&crc, octet);
+            uxr_update_crc(&crc, octet);
             ++written_len;
         }
         else
@@ -287,7 +287,7 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                 }
                 case UXR_SERIAL_READING_SRC_ADDR:
                 {
-                    if (get_next_octet(serial_io, &serial_io->src_addr))
+                    if (uxr_get_next_octet(serial_io, &serial_io->src_addr))
                     {
                         serial_io->state = UXR_SERIAL_READING_DST_ADDR;
                     }
@@ -301,7 +301,7 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                     break;
                 }
                 case UXR_SERIAL_READING_DST_ADDR:
-                    if (get_next_octet(serial_io, &octet))
+                    if (uxr_get_next_octet(serial_io, &octet))
                     {
                         serial_io->state = (octet == serial_io->local_addr) ? UXR_SERIAL_READING_LEN_LSB :
                                                                               UXR_SERIAL_UNINITIALIZED;
@@ -319,7 +319,7 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                     }
                     break;
                 case UXR_SERIAL_READING_LEN_LSB:
-                    if (get_next_octet(serial_io, &octet))
+                    if (uxr_get_next_octet(serial_io, &octet))
                     {
                         serial_io->msg_len = octet;
                         serial_io->state = UXR_SERIAL_READING_LEN_MSB;
@@ -337,7 +337,7 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                     }
                     break;
                 case UXR_SERIAL_READING_LEN_MSB:
-                    if (get_next_octet(serial_io, &octet))
+                    if (uxr_get_next_octet(serial_io, &octet))
                     {
                         serial_io->msg_len = (uint16_t)(serial_io->msg_len + (octet << 8));
                         serial_io->msg_pos = 0;
@@ -366,11 +366,11 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                     break;
                 case UXR_SERIAL_READING_PAYLOAD:
                 {
-                    while ((serial_io->msg_pos < serial_io->msg_len) && get_next_octet(serial_io, &octet))
+                    while ((serial_io->msg_pos < serial_io->msg_len) && uxr_get_next_octet(serial_io, &octet))
                     {
                         buf[(size_t)serial_io->msg_pos] = octet;
                         serial_io->msg_pos = (uint16_t)(serial_io->msg_pos + 1);
-                        update_crc(&serial_io->cmp_crc, octet);
+                        uxr_update_crc(&serial_io->cmp_crc, octet);
                     }
 
                     if (serial_io->msg_pos == serial_io->msg_len)
@@ -391,7 +391,7 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                     break;
                 }
                 case UXR_SERIAL_READING_CRC_LSB:
-                    if (get_next_octet(serial_io, &octet))
+                    if (uxr_get_next_octet(serial_io, &octet))
                     {
                         serial_io->msg_crc = octet;
                         serial_io->state = UXR_SERIAL_READING_CRC_MSB;
@@ -409,7 +409,7 @@ size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
                     }
                     break;
                 case UXR_SERIAL_READING_CRC_MSB:
-                    if (get_next_octet(serial_io, &octet))
+                    if (uxr_get_next_octet(serial_io, &octet))
                     {
                         serial_io->msg_crc = (uint16_t)(serial_io->msg_crc + (octet << 8));
                         serial_io->state = UXR_SERIAL_UNINITIALIZED;
