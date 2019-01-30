@@ -146,9 +146,11 @@ endif()
 # Transport discovery source.
 if(PROFILE_DISCOVERY)
     if(PLATFORM_NAME_LINUX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
+    elseif(PLATFORM_NAME_WINDOWS)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
     elseif(PLATFORM_NAME_NUTTX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
     endif()
 endif()
 
@@ -175,7 +177,7 @@ set(SRCS
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
     $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
-    $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${PROFILE_DISCOVERY}>>:src/c/profile/discovery/discovery.c>
+    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
     ${UDP_DISCOVERY_SRCS}
     ${UDP_SRCS}
     ${TCP_SRCS}
@@ -260,9 +262,7 @@ if(EPROSIMA_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
-    if(PLATFORM_NAME_LINUX OR PLATFORM_NAME_NUTTX)
-        add_subdirectory(examples/Discovery)
-    endif()
+    add_subdirectory(examples/Discovery)
 endif()
 
 ###############################################################################

@@ -32,6 +32,7 @@ extern "C"
 #include <sys/socket.h>
 #include <poll.h>
 #elif defined(PLATFORM_NAME_WINDOWS)
+#include <winsock2.h>
 #endif
 
 
@@ -43,7 +44,8 @@ typedef struct uxrUDPTransportDatagram
     uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
     struct pollfd poll_fd;
 #elif defined(PLATFORM_NAME_WINDOWS)
-    #error "Windows platform not implemented"
+    uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
+    WSAPOLLFD poll_fd;
 #endif
 
 } uxrUDPTransportDatagram;
