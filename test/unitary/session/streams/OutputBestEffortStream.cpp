@@ -3,8 +3,8 @@
 
 extern "C"
 {
-#include "../src/c/core/session/stream/seq_num.c"
-#include "../src/c/core/session/stream/output_best_effort_stream.c"
+#include <c/core/session/stream/seq_num.c>
+#include <c/core/session/stream/output_best_effort_stream.c>
 }
 
 #define BUFFER_SIZE 32

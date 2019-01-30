@@ -3,8 +3,8 @@
 
 extern "C"
 {
-#include "../src/c/core/session/stream/seq_num.c"
-#include "../src/c/core/session/stream/input_best_effort_stream.c"
+#include <c/core/session/stream/seq_num.c>
+#include <c/core/session/stream/input_best_effort_stream.c>
 }
 
 class InputBestEffortStreamTest : public testing::Test

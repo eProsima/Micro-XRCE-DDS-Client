@@ -2,12 +2,12 @@
 
 extern "C"
 {
-#include "../src/c/core/serialization/xrce_protocol.c"
-#include "../src/c/core/serialization/xrce_header.c"
-#include "../src/c/core/serialization/xrce_subheader.c"
-#include "../src/c/core/session/object_id.c"
-#include "../src/c/core/session/submessage.c"
-#include "../src/c/core/session/session_info.c"
+#include <c/core/serialization/xrce_protocol.c>
+#include <c/core/serialization/xrce_header.c>
+#include <c/core/serialization/xrce_subheader.c>
+#include <c/core/session/object_id.c>
+#include <c/core/session/submessage.c>
+#include <c/core/session/session_info.c>
 }
 
 #define BUFFER_SIZE 512

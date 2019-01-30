@@ -2,7 +2,7 @@
 
 extern "C"
 {
-#include "../src/c/core/session/stream/seq_num.c"
+#include <c/core/session/stream/seq_num.c>
 }
 
 TEST(SeqNumTest, AddFromNegative)

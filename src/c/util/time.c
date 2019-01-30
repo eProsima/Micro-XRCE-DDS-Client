@@ -26,6 +26,6 @@ int64_t uxr_millis(void)
 #else
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    return ((ts.tv_sec) * 1000) + (ts.tv_nsec / 1000000);
+    return (((int64_t)ts.tv_sec) * 1000) + (ts.tv_nsec / 1000000);
 #endif
 }

@@ -3,9 +3,9 @@
 
 extern "C"
 {
-#include "../src/c/core/session/stream/seq_num.c"
-#include "../src/c/core/session/stream/stream_id.c"
-#include "../src/c/core/session/stream/stream_storage.c"
+#include <c/core/session/stream/seq_num.c>
+#include <c/core/session/stream/stream_id.c>
+#include <c/core/session/stream/stream_storage.c>
 }
 
 #define BUFFER_SIZE           128

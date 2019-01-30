@@ -3,27 +3,27 @@
 
 extern "C"
 {
-#include "../src/c/core/serialization/xrce_protocol.c"
-#include "../src/c/core/serialization/xrce_header.c"
-#include "../src/c/core/serialization/xrce_subheader.c"
+#include <c/core/serialization/xrce_protocol.c>
+#include <c/core/serialization/xrce_header.c>
+#include <c/core/serialization/xrce_subheader.c>
 
-#include "../src/c/core/session/stream/seq_num.c"
-#include "../src/c/core/session/stream/stream_id.c"
-#include "../src/c/core/session/stream/stream_storage.c"
-#include "../src/c/core/session/stream/input_best_effort_stream.c"
-#include "../src/c/core/session/stream/output_best_effort_stream.c"
-#include "../src/c/core/session/stream/input_reliable_stream.c"
-#include "../src/c/core/session/stream/output_reliable_stream.c"
+#include <c/core/session/stream/seq_num.c>
+#include <c/core/session/stream/stream_id.c>
+#include <c/core/session/stream/stream_storage.c>
+#include <c/core/session/stream/input_best_effort_stream.c>
+#include <c/core/session/stream/output_best_effort_stream.c>
+#include <c/core/session/stream/input_reliable_stream.c>
+#include <c/core/session/stream/output_reliable_stream.c>
 
-#include "../src/c/core/session/object_id.c"
-#include "../src/c/core/session/submessage.c"
-#include "../src/c/core/session/session_info.c"
+#include <c/core/session/object_id.c>
+#include <c/core/session/submessage.c>
+#include <c/core/session/session_info.c>
 
-#include "../src/c/util/time.c"
+#include <c/util/time.c>
 
 #undef UXR_MESSAGE_LOG
 #undef UXR_SERIALIZATION_LOG
-#include "../src/c/core/session/session.c"
+#include <c/core/session/session.c>
 }
 
 #include <gtest/gtest.h>

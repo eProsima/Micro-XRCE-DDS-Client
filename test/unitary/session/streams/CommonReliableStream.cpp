@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../src/c/core/session/stream/common_reliable_stream_internal.h"
+#include <c/core/session/stream/common_reliable_stream_internal.h>
 
 #define BUFFER_SIZE 512
 #define HISTORY     8

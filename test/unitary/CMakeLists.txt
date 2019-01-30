@@ -2,7 +2,6 @@ cmake_policy(SET CMP0048 NEW)
 project(unitary_tests LANGUAGES C CXX)
 
 macro(unitary_test TEST_NAME TEST_SOURCE)
-
     set(SRCS ${TEST_SOURCE})
 
     add_executable(${TEST_NAME} ${TEST_SOURCE})
@@ -14,7 +13,7 @@ macro(unitary_test TEST_NAME TEST_SOURCE)
     add_gtest(${TEST_NAME} SOURCES ${TEST_SOURCE})
 
     get_target_property(CLIENT_INCLUDES microxrcedds_client INCLUDE_DIRECTORIES)
-    include_directories(${CLIENT_INCLUDES}) #Used to include private includes
+    include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/../../src)
 
     target_link_libraries(${TEST_NAME} microcdr ${GTEST_BOTH_LIBRARIES})
     target_include_directories(${TEST_NAME}
@@ -22,6 +21,7 @@ macro(unitary_test TEST_NAME TEST_SOURCE)
             ${PROJECT_SOURCE_DIR}
         PRIVATE
             ${GTEST_INCLUDE_DIRS}
+            ${CLIENT_INCLUDES}
         )
 
     set_target_properties(${TEST_NAME} PROPERTIES

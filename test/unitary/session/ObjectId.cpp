@@ -2,7 +2,7 @@
 
 extern "C"
 {
-#include "../src/c/core/session/object_id.c"
+#include <c/core/session/object_id.c>
 }
 
 TEST(ObjectIdTest, Initialization)

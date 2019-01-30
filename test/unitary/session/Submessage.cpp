@@ -2,8 +2,8 @@
 
 extern "C"
 {
-#include "../src/c/core/serialization/xrce_subheader.c"
-#include "../src/c/core/session/submessage.c"
+#include <c/core/serialization/xrce_subheader.c>
+#include <c/core/session/submessage.c>
 }
 
 #define BUFFER_SIZE 8

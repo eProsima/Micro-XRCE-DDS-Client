@@ -2,7 +2,7 @@
 
 extern "C"
 {
-#include "../src/c/core/session/stream/stream_id.c"
+#include <c/core/session/stream/stream_id.c>
 }
 
 TEST(StreamIdTest, InitializationNone)
