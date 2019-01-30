@@ -139,7 +139,6 @@ TEST_F(InputReliableStreamTest, ReceiveInvalidMessageAlreadyReceived)
     bool message_stored;
     bool ready_to_read = uxr_receive_reliable_message(&stream, seq_num, message, MAX_MESSAGE_SIZE, &message_stored);
     ASSERT_FALSE(ready_to_read);
-    EXPECT_FALSE(message_stored);
     EXPECT_EQ(backup, stream);
 }
 
@@ -150,7 +149,6 @@ TEST_F(InputReliableStreamTest, ReceiveInvalidMessageTooHigh)
     bool message_stored;
     bool ready_to_read = uxr_receive_reliable_message(&stream, seq_num, message, MAX_MESSAGE_SIZE, &message_stored);
     ASSERT_FALSE(ready_to_read);
-    EXPECT_FALSE(message_stored);
     EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
     EXPECT_EQ(seq_num, stream.last_announced);
 }
