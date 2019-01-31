@@ -2,8 +2,8 @@
 
 #include <c/core/session/stream/common_reliable_stream_internal.h>
 
-#define BUFFER_SIZE 512
-#define HISTORY     8
+#define BUFFER_SIZE size_t(512)
+#define HISTORY     size_t(8)
 
 TEST(CommonReliableStreamTest, GetBufferSize)
 {
@@ -18,7 +18,7 @@ TEST(CommonReliableStreamTest, GetBuffer)
     uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, history_pos);
 
     size_t slot_size = BUFFER_SIZE / HISTORY;
-    EXPECT_EQ(history_pos * slot_size + INTERNAL_RELIABLE_BUFFER_OFFSET, slot - buffer);
+    EXPECT_EQ(history_pos * slot_size + INTERNAL_RELIABLE_BUFFER_OFFSET, size_t(slot - buffer));
 }
 
 TEST(CommonReliableStreamTest, SetGetBufferLength)

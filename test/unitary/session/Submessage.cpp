@@ -6,8 +6,8 @@ extern "C"
 #include <c/core/session/submessage.c>
 }
 
-#define BUFFER_SIZE 8
-#define PAYLOAD_SIZE 4
+#define BUFFER_SIZE     size_t(8)
+#define PAYLOAD_SIZE    size_t(4)
 
 class SubmessageTest : public testing::Test
 {
@@ -54,9 +54,9 @@ TEST_F(SubmessageTest, WriteReadHeaderNoFits)
 
 TEST(SubmessageTest_, PaddingHeader)
 {
-    EXPECT_EQ(0, uxr_submessage_padding(4));
-    EXPECT_EQ(1, uxr_submessage_padding(3));
-    EXPECT_EQ(2, uxr_submessage_padding(2));
-    EXPECT_EQ(3, uxr_submessage_padding(1));
-    EXPECT_EQ(0, uxr_submessage_padding(0));
+    EXPECT_EQ(size_t(0), uxr_submessage_padding(4));
+    EXPECT_EQ(size_t(1), uxr_submessage_padding(3));
+    EXPECT_EQ(size_t(2), uxr_submessage_padding(2));
+    EXPECT_EQ(size_t(3), uxr_submessage_padding(1));
+    EXPECT_EQ(size_t(0), uxr_submessage_padding(0));
 }

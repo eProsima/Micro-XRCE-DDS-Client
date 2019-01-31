@@ -44,7 +44,10 @@ bool uxr_discovery_agents_multicast(uint32_t attemps, int period, uxrOnAgentFoun
 bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* chosen,
                                  const uxrAgentAddress* agent_list, size_t agent_list_size)
 {
-    CallbackData callback = {chosen, on_agent_func, args};
+    CallbackData callback;
+    callback.chosen = chosen;
+    callback.on_agent = on_agent_func;
+    callback.args = args;
 
     uint8_t output_buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
     ucdrBuffer ub;

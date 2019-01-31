@@ -7,8 +7,8 @@ extern "C"
 #include <c/core/session/stream/output_best_effort_stream.c>
 }
 
-#define BUFFER_SIZE 32
-#define OFFSET      8
+#define BUFFER_SIZE     size_t(32)
+#define OFFSET          size_t(8)
 
 class OutputBestEffortStreamTest : public testing::Test
 {
@@ -40,7 +40,7 @@ TEST_F(OutputBestEffortStreamTest, PrepareToWriteOk)
 
     ASSERT_TRUE(available_to_write);
     EXPECT_EQ(OFFSET + message_size, stream.writer);
-    EXPECT_EQ(OFFSET, ub.iterator - buffer);
+    EXPECT_EQ(OFFSET, size_t(ub.iterator - buffer));
     EXPECT_EQ(buffer + OFFSET + message_size, ub.final);
 }
 
@@ -53,7 +53,7 @@ TEST_F(OutputBestEffortStreamTest, PrepareToWriteOk2)
 
     ASSERT_TRUE(available_to_write);
     EXPECT_EQ(OFFSET + message_size * 2, stream.writer);
-    EXPECT_EQ(OFFSET + message_size, ub.iterator - buffer);
+    EXPECT_EQ(OFFSET + message_size, size_t(ub.iterator - buffer));
     EXPECT_EQ(buffer + OFFSET + message_size * 2, ub.final);
 }
 

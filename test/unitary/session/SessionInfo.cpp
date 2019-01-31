@@ -10,7 +10,7 @@ extern "C"
 #include <c/core/session/session_info.c>
 }
 
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE    size_t(512)
 
 TEST(SessionInfoTest, CreateSessionSize)
 {
@@ -21,7 +21,7 @@ TEST(SessionInfoTest, CreateSessionSize)
     uxrSessionInfo info;
     uxr_buffer_create_session(&info, &ub, 0, 512);
     EXPECT_EQ(info.last_request_id, UXR_REQUEST_LOGIN);
-    EXPECT_EQ(SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(size_t(SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE), ucdr_buffer_length(&ub));
 }
 
 TEST(SessionInfoTest, DeleteSessionSize)
@@ -34,7 +34,7 @@ TEST(SessionInfoTest, DeleteSessionSize)
 
     uxr_buffer_delete_session(&info, &ub);
     EXPECT_EQ(info.last_request_id, UXR_REQUEST_LOGOUT);
-    EXPECT_EQ(SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(size_t(SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE), ucdr_buffer_length(&ub));
 }
 
 TEST(SessionInfoTest, RequestIdGeneration)

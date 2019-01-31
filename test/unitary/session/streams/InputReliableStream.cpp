@@ -7,10 +7,10 @@ extern "C"
 #include <c/core/session/stream/input_reliable_stream.c>
 }
 
-#define BUFFER_SIZE           128
-#define HISTORY               4
+#define BUFFER_SIZE           size_t(128)
+#define HISTORY               size_t(4)
 #define MAX_MESSAGE_SIZE      (BUFFER_SIZE / HISTORY - INTERNAL_RELIABLE_BUFFER_OFFSET)
-#define FRAGMENT_OFFSET       4
+#define FRAGMENT_OFFSET       size_t(4)
 
 bool operator == (const uxrInputReliableStream& stream1, const uxrInputReliableStream& stream2)
 {
@@ -38,7 +38,6 @@ public:
         EXPECT_EQ(HISTORY, stream.history);
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_announced);
-        EXPECT_EQ(on_get_fragmentation_info, stream.on_get_fragmentation_info);
 
         for(size_t i = 0; i < HISTORY; ++i)
         {

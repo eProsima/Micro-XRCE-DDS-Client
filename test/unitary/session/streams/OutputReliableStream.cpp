@@ -51,7 +51,6 @@ public:
         EXPECT_EQ(INT64_MAX, stream.next_heartbeat_timestamp);
         EXPECT_EQ(0, stream.next_heartbeat_tries);
         EXPECT_EQ(false, stream.send_lost);
-        EXPECT_EQ(on_new_fragment, stream.on_new_fragment);
 
         for(size_t i = 0; i < HISTORY; ++i)
         {
