@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-#define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
+#define VENDOR_ID_EPROSIMA COMPOUND_LITERAL(XrceVendorId){{0x01, 0x0F}}
 
 #define RESERVED_REQUESTS_ID 9
 
@@ -59,7 +59,7 @@ void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, int64_t nan
 void uxr_buffer_delete_session(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     DELETE_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGOUT}};
+    payload.base.request_id = COMPOUND_LITERAL(RequestId){{0x00, UXR_REQUEST_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
     info->last_request_id = UXR_REQUEST_LOGOUT;

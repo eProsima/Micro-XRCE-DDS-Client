@@ -7,13 +7,13 @@ extern "C"
 #include <c/core/session/stream/output_reliable_stream.c>
 }
 
-#define BUFFER_SIZE           128
-#define HISTORY               4
-#define OFFSET                8
-#define MAX_MESSAGE_SIZE      (BUFFER_SIZE / HISTORY - INTERNAL_RELIABLE_BUFFER_OFFSET)
-#define SUBMESSAGE_SIZE       8
-#define MAX_SUBMESSAGE_SIZE   MAX_MESSAGE_SIZE - OFFSET
-#define FRAGMENT_OFFSET       4
+#define BUFFER_SIZE           size_t(128)
+#define HISTORY               size_t(4)
+#define OFFSET                size_t(8)
+#define MAX_MESSAGE_SIZE      size_t(BUFFER_SIZE / HISTORY - INTERNAL_RELIABLE_BUFFER_OFFSET)
+#define SUBMESSAGE_SIZE       size_t(8)
+#define MAX_SUBMESSAGE_SIZE   size_t(MAX_MESSAGE_SIZE - OFFSET)
+#define FRAGMENT_OFFSET       size_t(4)
 
 bool operator == (const uxrOutputReliableStream& stream1, const uxrOutputReliableStream& stream2)
 {
@@ -132,7 +132,7 @@ TEST_F(OutputReliableStreamTest, WriteOneMessageSameSlot)
     ucdrBuffer ub;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, FRAGMENT_OFFSET, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(0, stream.last_written);
+    EXPECT_EQ(0u, stream.last_written);
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_length(slot_0));
     EXPECT_EQ(slot_0, ub.init);
     EXPECT_EQ(slot_0 + OFFSET, ub.iterator);
@@ -146,7 +146,7 @@ TEST_F(OutputReliableStreamTest, WriteTwoMessagesSameSlot)
     ucdrBuffer ub;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, FRAGMENT_OFFSET, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(0, stream.last_written);
+    EXPECT_EQ(0u, stream.last_written);
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_length(slot_0));
     EXPECT_EQ(slot_0, ub.init);
     EXPECT_EQ(slot_0 + OFFSET, ub.iterator);
@@ -154,7 +154,7 @@ TEST_F(OutputReliableStreamTest, WriteTwoMessagesSameSlot)
 
     available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, FRAGMENT_OFFSET, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(0, stream.last_written);
+    EXPECT_EQ(0u, stream.last_written);
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE * 2, uxr_get_reliable_buffer_length(slot_0));
     EXPECT_EQ(slot_0, ub.init);
     EXPECT_EQ(slot_0 + OFFSET + SUBMESSAGE_SIZE, ub.iterator);
@@ -169,7 +169,7 @@ TEST_F(OutputReliableStreamTest, WriteThreeMessagessTwoSlots)
     ucdrBuffer ub;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, FRAGMENT_OFFSET, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(0, stream.last_written);
+    EXPECT_EQ(0u, stream.last_written);
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_length(slot_0));
     EXPECT_EQ(slot_0, ub.init);
     EXPECT_EQ(slot_0 + OFFSET, ub.iterator);
@@ -177,7 +177,7 @@ TEST_F(OutputReliableStreamTest, WriteThreeMessagessTwoSlots)
 
     available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, FRAGMENT_OFFSET, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(0, stream.last_written);
+    EXPECT_EQ(0u, stream.last_written);
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE * 2, uxr_get_reliable_buffer_length(slot_0));
     EXPECT_EQ(slot_0, ub.init);
     EXPECT_EQ(slot_0 + OFFSET + SUBMESSAGE_SIZE, ub.iterator);
@@ -185,7 +185,7 @@ TEST_F(OutputReliableStreamTest, WriteThreeMessagessTwoSlots)
 
     available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, FRAGMENT_OFFSET, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(1, stream.last_written);
+    EXPECT_EQ(1u, stream.last_written);
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE * 2, uxr_get_reliable_buffer_length(slot_0));
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_length(slot_1));
     EXPECT_EQ(slot_1, ub.init);
@@ -207,14 +207,13 @@ TEST_F(OutputReliableStreamTest, WriteFragmentMessage)
     ucdrBuffer ub;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, message_length, FRAGMENT_OFFSET, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(2, stream.last_written);
+    EXPECT_EQ(2u, stream.last_written);
     EXPECT_EQ(size, uxr_get_reliable_buffer_length(slot_0));
     EXPECT_EQ(size, uxr_get_reliable_buffer_length(slot_1));
     EXPECT_EQ(OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_length(slot_2));
     EXPECT_EQ(slot_0, ub.init);
     EXPECT_EQ(slot_0 + OFFSET + FRAGMENT_OFFSET, ub.iterator);
     EXPECT_EQ(slot_0 + size, ub.final);
-    EXPECT_EQ(on_full_output_buffer, ub.on_full_buffer);
 
     uint8_t message_to_write[message_length];
     EXPECT_TRUE(ucdr_serialize_array_uint8_t(&ub, message_to_write, message_length));
@@ -321,7 +320,7 @@ TEST_F(OutputReliableStreamTest, HeartbeatFirstTry)
     bool must_confirm = uxr_update_output_stream_heartbeat_timestamp(&stream, 0);
     ASSERT_FALSE(must_confirm);
     EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL, stream.next_heartbeat_timestamp);
-    EXPECT_EQ(1, stream.next_heartbeat_tries);
+    EXPECT_EQ(1u, stream.next_heartbeat_tries);
 }
 
 TEST_F(OutputReliableStreamTest, HeartbeatSuccessfulTry)
@@ -335,7 +334,7 @@ TEST_F(OutputReliableStreamTest, HeartbeatSuccessfulTry)
     bool must_confirm = uxr_update_output_stream_heartbeat_timestamp(&stream, MIN_HEARTBEAT_TIME_INTERVAL);
     ASSERT_TRUE(must_confirm);
     EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 3, stream.next_heartbeat_timestamp);
-    EXPECT_EQ(2, stream.next_heartbeat_tries);
+    EXPECT_EQ(2u, stream.next_heartbeat_tries);
 }
 
 TEST_F(OutputReliableStreamTest, HeartbeatTwoSuccessfulTry)
@@ -365,7 +364,7 @@ TEST_F(OutputReliableStreamTest, HeartbeatUnsuccessfulSecondHeartbeat)
     bool must_confirm = uxr_update_output_stream_heartbeat_timestamp(&stream, MIN_HEARTBEAT_TIME_INTERVAL);
     ASSERT_FALSE(must_confirm);
     EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 3, stream.next_heartbeat_timestamp);
-    EXPECT_EQ(2, stream.next_heartbeat_tries);
+    EXPECT_EQ(2u, stream.next_heartbeat_tries);
 }
 
 TEST_F(OutputReliableStreamTest, AcknackProcessNoLost)
@@ -379,8 +378,8 @@ TEST_F(OutputReliableStreamTest, AcknackProcessNoLost)
 
     uxr_process_acknack(&stream, 0, uxrSeqNum(1));
     EXPECT_FALSE(stream.send_lost);
-    EXPECT_EQ(0, stream.last_acknown);
-    EXPECT_EQ(0, stream.next_heartbeat_tries);
+    EXPECT_EQ(0u, stream.last_acknown);
+    EXPECT_EQ(0u, stream.next_heartbeat_tries);
     EXPECT_EQ(OFFSET, uxr_get_reliable_buffer_length(slot_0));
 }
 
@@ -398,7 +397,7 @@ TEST_F(OutputReliableStreamTest, AcknackProcessLost)
     uxr_process_acknack(&stream, 1, uxrSeqNum(0));
     EXPECT_TRUE(stream.send_lost);
     EXPECT_EQ(SEQ_NUM_MAX, stream.last_acknown);
-    EXPECT_EQ(0, stream.next_heartbeat_tries);
+    EXPECT_EQ(0u, stream.next_heartbeat_tries);
     EXPECT_EQ(message_length, uxr_get_reliable_buffer_length(slot_0));
 }
 
@@ -426,7 +425,7 @@ TEST_F(OutputReliableStreamTest, SendMessageLost)
     ASSERT_TRUE(must_send);
     EXPECT_EQ(slot_0, lost_message);
     EXPECT_EQ(OFFSET + SUBMESSAGE_SIZE, lost_length);
-    EXPECT_EQ(0, seq_num_it);
+    EXPECT_EQ(0u, seq_num_it);
 
     must_send = uxr_next_reliable_nack_buffer_to_send(&stream, &lost_message, &lost_length, &seq_num_it);
     ASSERT_FALSE(must_send);
@@ -445,6 +444,5 @@ TEST_F(OutputReliableStreamTest, FragmentedSerialization)
     EXPECT_EQ(slot_1, ub.init);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_length(slot_1), ub.iterator);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_length(slot_1), ub.final);
-    EXPECT_EQ(on_full_output_buffer, ub.on_full_buffer);
 }
 

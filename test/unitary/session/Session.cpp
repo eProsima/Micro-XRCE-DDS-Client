@@ -65,25 +65,25 @@ public:
 
 
         uxrStreamId id = uxr_create_input_best_effort_stream(&session);
-        EXPECT_EQ(0, id.index);
+        EXPECT_EQ(0u, id.index);
         EXPECT_EQ(BEST_EFFORT_STREAM_THRESHOLD, id.raw);
         EXPECT_EQ(UXR_BEST_EFFORT_STREAM, id.type);
         EXPECT_EQ(UXR_INPUT_STREAM, id.direction);
 
         id = uxr_create_output_best_effort_stream(&session, output_best_effort_buffer, MTU);
-        EXPECT_EQ(0, id.index);
+        EXPECT_EQ(0u, id.index);
         EXPECT_EQ(BEST_EFFORT_STREAM_THRESHOLD, id.raw);
         EXPECT_EQ(UXR_BEST_EFFORT_STREAM, id.type);
         EXPECT_EQ(UXR_OUTPUT_STREAM, id.direction);
 
         id = uxr_create_input_reliable_stream(&session, input_reliable_buffer, MTU * HISTORY, HISTORY);
-        EXPECT_EQ(0, id.index);
+        EXPECT_EQ(0u, id.index);
         EXPECT_EQ(RELIABLE_STREAM_THRESHOLD, id.raw);
         EXPECT_EQ(UXR_RELIABLE_STREAM, id.type);
         EXPECT_EQ(UXR_INPUT_STREAM, id.direction);
 
         id = uxr_create_output_reliable_stream(&session, output_reliable_buffer, MTU * HISTORY, HISTORY);
-        EXPECT_EQ(0, id.index);
+        EXPECT_EQ(0u, id.index);
         EXPECT_EQ(RELIABLE_STREAM_THRESHOLD, id.raw);
         EXPECT_EQ(UXR_RELIABLE_STREAM, id.type);
         EXPECT_EQ(UXR_OUTPUT_STREAM, id.direction);
@@ -164,7 +164,7 @@ public:
         }
         else if(std::string("Listen") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            *len = 0;
+            *len = 0u;
             *buf = NULL;
             return true;
         }
@@ -174,7 +174,7 @@ public:
         }
         else if(std::string("ListenReliably") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            *len = 0;
+            *len = 0u;
             *buf = NULL;
             return true;
         }
@@ -201,7 +201,7 @@ public:
 
     static uint8_t comm_error(void)
     {
-        return 0;
+        return 0u;
     }
 
     static void on_status_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
@@ -334,7 +334,7 @@ TEST_F(SessionTest, RecvMessageOk)
     uint8_t* buffer; size_t length;
     bool received = recv_message(&session, &buffer, &length, 0);
     ASSERT_TRUE(received);
-    EXPECT_EQ(8, length);
+    EXPECT_EQ(8u, length);
 }
 
 TEST_F(SessionTest, RecvMessageError)
