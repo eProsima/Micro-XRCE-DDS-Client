@@ -18,7 +18,12 @@
 #ifdef __cplusplus
 extern "C"
 {
+#define INLINE_STRUCT(x) (x)
+#else
+#define INLINE_STRUCT(x)  x
 #endif
+
+#include <uxr/client/defines.h>
 
 #include <ucdr/microcdr.h>
 #include <stdint.h>
@@ -62,7 +67,8 @@ typedef struct ClientKey
 
 } ClientKey;
 
-#define CLIENT_INVALID (ClientKey){{0x00, 0x00, 0x00, 0x00}}
+
+#define CLIENT_INVALID COMPOUND_LITERAL(ClientKey){{0x00, 0x00, 0x00, 0x00}}
 
 typedef uint8_t ObjectKind;
 #define OBJK_INVALID 0x00
@@ -92,10 +98,10 @@ typedef struct ObjectPrefix
     uint8_t data[2];
 
 } ObjectPrefix;
-#define OBJECTID_INVALID (ObjectId){{0x00, 0x00}}
-#define OBJECTID_AGENT (ObjectId){{0xFF, 0xFD}}
-#define OBJECTID_CLIENT (ObjectId){{0xFF, 0xFE}}
-#define OBJECTID_SESSION (ObjectId){{0xFF, 0xFF}}
+#define OBJECTID_INVALID COMPOUND_LITERAL(ObjectId){{0x00, 0x00}}
+#define OBJECTID_AGENT COMPOUND_LITERAL(ObjectId){{0xFF, 0xFD}}
+#define OBJECTID_CLIENT COMPOUND_LITERAL(ObjectId){{0xFF, 0xFE}}
+#define OBJECTID_SESSION COMPOUND_LITERAL(ObjectId){{0xFF, 0xFF}}
 
 
 typedef struct XrceCookie
@@ -103,7 +109,7 @@ typedef struct XrceCookie
     uint8_t data[4];
 
 } XrceCookie;
-#define XRCE_COOKIE (XrceCookie){{0x58, 0x52, 0x43, 0x45}}
+#define XRCE_COOKIE COMPOUND_LITERAL(XrceCookie){{0x58, 0x52, 0x43, 0x45}}
 
 
 typedef struct XrceVersion
@@ -113,7 +119,7 @@ typedef struct XrceVersion
 } XrceVersion;
 #define XRCE_VERSION_MAJOR 0x01
 #define XRCE_VERSION_MINOR 0x00
-#define XRCE_VERSION (XrceVersion){{XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}}
+#define XRCE_VERSION COMPOUND_LITERAL(XrceVersion){{XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}}
 
 
 typedef struct XrceVendorId

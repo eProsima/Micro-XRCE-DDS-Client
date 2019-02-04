@@ -1,3 +1,4 @@
+#include <uxr/client/defines.h>
 #include <uxr/client/core/session/object_id.h>
 
 #include "session_info_internal.h"
@@ -34,7 +35,7 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
 void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds, uint16_t mtu)
 {
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
+    payload.base.request_id = COMPOUND_LITERAL(RequestId){{0x00, UXR_REQUEST_LOGIN}};
     payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
