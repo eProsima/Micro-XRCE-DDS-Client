@@ -33,5 +33,3 @@ add_compile_options(
     ${ARCH_CPU_FLAGS}
     ${ARCH_OPT_FLAGS}
     )
-
-set(__BIG_ENDIAN__ 0)
