@@ -16,7 +16,8 @@ class Discovery
 {
 public:
     Discovery(int transport, const std::vector<uint16_t>& agent_ports)
-    : agent_ports_(agent_ports)
+    : ip_("127.0.0.1")
+    , agent_ports_(agent_ports)
     , transport_(transport)
     {
     }
@@ -26,24 +27,23 @@ public:
         std::vector<uxrAgentAddress> agent_list;
         for(uint16_t it : discovery_ports)
         {
-            agent_list.emplace_back(uxrAgentAddress{"127.0.0.1", it});
+            agent_list.emplace_back(uxrAgentAddress{ip_.c_str(), it});
         }
 
-        ASSERT_FALSE(uxr_discovery_agents_unicast(1, 1000, on_agent_found, this, &chosen_, agent_list.data(), agent_list.size()));
+        uxr_discovery_agents(1, 1000, on_agent_found, this, agent_list.data(), agent_list.size());
         ASSERT_TRUE(agent_ports_.empty());
     }
 
     void multicast()
     {
-        ASSERT_FALSE(uxr_discovery_agents_multicast(1, 1000, on_agent_found, this, &chosen_));
+        uxr_discovery_agents_default(1, 1000, on_agent_found, this);
         ASSERT_TRUE(agent_ports_.empty());
     }
 
 private:
-    static bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
+    static void on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
     {
         static_cast<Discovery*>(args)->on_agent_found_member(address, timestamp);
-        return false;
     }
 
     void on_agent_found_member(const uxrAgentAddress* address, int64_t timestamp)
@@ -69,8 +69,8 @@ private:
         //ASSERT_TRUE(found); //in multicast, it is possible to read agents out of the tests that will not be found.
     }
 
+    std::string ip_;
     std::vector<uint16_t> agent_ports_;
-    uxrAgentAddress chosen_;
     int transport_;
 };
 
