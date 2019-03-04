@@ -564,7 +564,6 @@ extern void read_submessage_format(uxrSession* session, ucdrBuffer* data, uint16
 
 void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t length, uxrStreamId stream_id, uint8_t format)
 {
-#ifdef PROFILE_READ_ACCESS
     BaseObjectRequest base;
     uxr_deserialize_BaseObjectRequest(submessage, &base);
     length = (uint16_t)(length - 4); //CHANGE: by a future size_of_BaseObjectRequest
@@ -578,9 +577,6 @@ void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t 
     {
         read_submessage_format(session, submessage, length, format, stream_id, object_id, request_id);
     }
-#else
-    (void) session; (void) submessage; (void) length; (void) stream_id; (void) format;
-#endif
 }
 
 void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage)
