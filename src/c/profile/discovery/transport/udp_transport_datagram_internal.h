@@ -51,9 +51,23 @@ typedef struct uxrUDPTransportDatagram
 } uxrUDPTransportDatagram;
 
 bool uxr_init_udp_transport_datagram(struct uxrUDPTransportDatagram* transport);
-bool uxr_udp_send_datagram_to(struct uxrUDPTransportDatagram* transport, const uint8_t* buf, size_t len, const char* ip, uint16_t port);
-bool uxr_udp_recv_datagram(struct uxrUDPTransportDatagram* transport, uint8_t** buf, size_t* len, int timeout);
-void uxr_bytes_to_ip(const uint8_t* bytes, char* ip);
+
+bool uxr_udp_send_datagram_to(
+        struct uxrUDPTransportDatagram* transport,
+        const uint8_t* buf,
+        size_t len,
+        const char* ip,
+        uint16_t port);
+
+bool uxr_udp_recv_datagram(
+        struct uxrUDPTransportDatagram* transport,
+        uint8_t** buf,
+        size_t* len,
+        int timeout);
+
+void uxr_bytes_to_ip(
+        const uint8_t* bytes,
+        char* ip);
 
 #ifdef __cplusplus
 }

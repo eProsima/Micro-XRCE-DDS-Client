@@ -37,17 +37,19 @@ typedef struct uxrAgentAddress
 typedef void (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timestamp, void* args);
 
 
-UXRDLLAPI void uxr_discovery_agents_default(uint32_t attempts,
-                                            int period,
-                                            uxrOnAgentFound on_agent_func,
-                                            void* args);
+UXRDLLAPI void uxr_discovery_agents_default(
+        uint32_t attempts,
+        int period,
+        uxrOnAgentFound on_agent_func,
+        void* args);
 
-UXRDLLAPI void uxr_discovery_agents(uint32_t attempts,
-                                    int period,
-                                    uxrOnAgentFound on_agent_func,
-                                    void* args,
-                                    const uxrAgentAddress* agent_list,
-                                    size_t agent_list_size);
+UXRDLLAPI void uxr_discovery_agents(
+        uint32_t attempts,
+        int period,
+        uxrOnAgentFound on_agent_func,
+        void* args,
+        const uxrAgentAddress* agent_list,
+        size_t agent_list_size);
 
 #ifdef __cplusplus
 }

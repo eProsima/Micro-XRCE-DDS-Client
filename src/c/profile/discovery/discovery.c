@@ -25,30 +25,32 @@ typedef struct CallbackData
 } CallbackData;
 
 static void write_get_info_message(ucdrBuffer* ub);
-static void listen_info_message(uxrUDPTransportDatagram* transport, int period, CallbackData* callback);
+static bool listen_info_message(uxrUDPTransportDatagram* transport, int period, CallbackData* callback);
 static bool read_info_headers(ucdrBuffer* ub);
-static void read_info_message(ucdrBuffer* ub, CallbackData* callback);
-static void process_info(CallbackData* callback, Time_t timestamp, TransportLocator* transport);
+static bool read_info_message(ucdrBuffer* ub, CallbackData* callback);
+static bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* transport);
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
 
-void uxr_discovery_agents_default(uint32_t attemps,
-                                  int period,
-                                  uxrOnAgentFound on_agent_func,
-                                  void* args)
+void uxr_discovery_agents_default(
+        uint32_t attempts,
+        int period,
+        uxrOnAgentFound on_agent_func,
+        void* args)
 {
     uxrAgentAddress multicast = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT};
-    uxr_discovery_agents(attemps, period, on_agent_func, args, &multicast, 1);
+    uxr_discovery_agents(attempts, period, on_agent_func, args, &multicast, 1);
 }
 
-void uxr_discovery_agents(uint32_t attempts,
-                          int period,
-                          uxrOnAgentFound on_agent_func,
-                          void* args,
-                          const uxrAgentAddress* agent_list,
-                          size_t agent_list_size)
+void uxr_discovery_agents(
+        uint32_t attempts,
+        int period,
+        uxrOnAgentFound on_agent_func,
+        void* args,
+        const uxrAgentAddress* agent_list,
+        size_t agent_list_size)
 {
     CallbackData callback;
     callback.on_agent = on_agent_func;
@@ -75,7 +77,7 @@ void uxr_discovery_agents(uint32_t attempts,
             int poll = period;
             while(0 < poll)
             {
-                listen_info_message(&transport, poll, &callback);
+                (void) listen_info_message(&transport, poll, &callback);
                 poll -= (int)(uxr_millis() - timestamp);
             }
         }
@@ -98,7 +100,10 @@ void write_get_info_message(ucdrBuffer* ub)
     (void) uxr_serialize_GET_INFO_Payload(ub, &payload);
 }
 
-void listen_info_message(uxrUDPTransportDatagram* transport, int poll, CallbackData* callback)
+bool listen_info_message(
+        uxrUDPTransportDatagram* transport,
+        int poll,
+        CallbackData* callback)
 {
     uint8_t* input_buffer; size_t length;
 
@@ -111,29 +116,27 @@ void listen_info_message(uxrUDPTransportDatagram* transport, int poll, CallbackD
         ucdr_init_buffer(&ub, input_buffer, (uint32_t)length);
         if(read_info_headers(&ub))
         {
-            read_info_message(&ub, callback);
+            (void) read_info_message(&ub, callback);
         }
     }
+
+    return received;
 }
 
 bool read_info_headers(ucdrBuffer* ub)
 {
-    bool valid = false;
-
     uint8_t session_id; uint8_t stream_id_raw; uxrSeqNum seq_num; uint8_t key[CLIENT_KEY_SIZE];
     uxr_deserialize_message_header(ub, &session_id, &stream_id_raw, &seq_num, key);
 
     uint8_t id; uint16_t length; uint8_t flags;
-    if(uxr_read_submessage_header(ub, &id, &length, &flags))
-    {
-        valid = true;
-    }
-
-    return valid;
+    return uxr_read_submessage_header(ub, &id, &length, &flags);
 }
 
-void read_info_message(ucdrBuffer* ub, CallbackData* callback)
+bool read_info_message(
+        ucdrBuffer* ub,
+        CallbackData* callback)
 {
+    bool well_read = false;
     INFO_Payload payload;
 
     if(uxr_deserialize_INFO_Payload(ub, &payload))
@@ -144,13 +147,20 @@ void read_info_message(ucdrBuffer* ub, CallbackData* callback)
 
         if(0 == memcmp(version->data, XRCE_VERSION.data, sizeof(XRCE_VERSION.data)))
         {
-            process_info(callback, timestamp, transport);
+            (void) process_info(callback, timestamp, transport);
+            well_read = true;
         }
     }
+
+    return well_read;
 }
 
-void process_info(CallbackData* callback, Time_t timestamp, TransportLocator* locator)
+bool process_info(
+        CallbackData* callback,
+        Time_t timestamp,
+        TransportLocator* locator)
 {
+    bool processed = false;
     int64_t nanoseconds = (int64_t)timestamp.seconds + (int64_t)timestamp.nanoseconds * 1000000000L;
 
     if(locator->format == ADDRESS_FORMAT_MEDIUM)
@@ -161,6 +171,10 @@ void process_info(CallbackData* callback, Time_t timestamp, TransportLocator* lo
         uxrAgentAddress address = {ip, locator->_.medium_locator.locator_port};
 
         callback->on_agent(&address, nanoseconds, callback->args);
+
+        processed = true;
     }
+
+    return processed;
 }
 
