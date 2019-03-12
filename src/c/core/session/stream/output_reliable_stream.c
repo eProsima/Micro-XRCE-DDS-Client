@@ -1,3 +1,5 @@
+#include "output_reliable_stream_internal.h"
+
 #include <uxr/client/config.h>
 #include <string.h>
 
