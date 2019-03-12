@@ -15,7 +15,7 @@ uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uint16_t increment)
 uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uint16_t decrement)
 {
     return (uxrSeqNum)((decrement > seq_num)
-        ? (seq_num + (SEQ_NUM_SIZE - decrement)) % SEQ_NUM_SIZE
+        ? seq_num + (SEQ_NUM_SIZE - decrement)
         : seq_num - decrement);
 }
 

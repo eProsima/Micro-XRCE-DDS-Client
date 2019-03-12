@@ -71,7 +71,7 @@ TEST_F(OutputBestEffortStreamTest, PrepareToWriteOkFit)
 
 TEST_F(OutputBestEffortStreamTest, PrepareToWriteFails)
 {
-    size_t message_size = 32;
+    size_t message_size = BUFFER_SIZE - OFFSET + 1;
     ucdrBuffer ub;
     bool available_to_write = uxr_prepare_best_effort_buffer_to_write(&stream, message_size, &ub);
 

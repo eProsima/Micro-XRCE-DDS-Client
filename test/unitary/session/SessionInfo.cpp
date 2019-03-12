@@ -92,7 +92,8 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithKey)
     ucdr_init_buffer(&ub, buffer, BUFFER_SIZE);
 
     uxrSessionInfo info;
-    uxr_init_session_info(&info, 0x00, 0xAABBCCDD);
+    uint8_t id = 0x01;
+    uxr_init_session_info(&info, id, 0xAABBCCDD);
     uint8_t stream_id = 1;
     uxrSeqNum seq_num = 2;
     uxr_stamp_session_header(&info, stream_id, seq_num, buffer);
@@ -100,6 +101,7 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithKey)
     uint8_t read_stream_id = 0;
     uxrSeqNum read_seq_num = 0;
     ASSERT_TRUE(uxr_read_session_header(&info, &ub, &read_stream_id, &read_seq_num));
+    EXPECT_EQ(&info.id, id);
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
     EXPECT_EQ(MAX_HEADER_SIZE, ucdr_buffer_length(&ub));
@@ -112,7 +114,8 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
     ucdr_init_buffer(&ub, buffer, BUFFER_SIZE);
 
     uxrSessionInfo info;
-    uxr_init_session_info(&info, 0x80, 0xAABBCCDD);
+    uint8_t id = 0x01;
+    uxr_init_session_info(&info, id, 0xAABBCCDD);
     uint8_t stream_id = 1;
     uxrSeqNum seq_num = 2;
     uxr_stamp_session_header(&info, stream_id, seq_num, buffer);
@@ -120,6 +123,7 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
     uint8_t read_stream_id = 0;
     uxrSeqNum read_seq_num = 0;
     ASSERT_TRUE(uxr_read_session_header(&info, &ub, &read_stream_id, &read_seq_num));
+    EXPECT_EQ(&info.id, id);
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
     EXPECT_EQ(MIN_HEADER_SIZE, ucdr_buffer_length(&ub));

@@ -7,7 +7,7 @@ extern "C"
 
 TEST(SeqNumTest, AddFromNegative)
 {
-    EXPECT_EQ(0, uxr_seq_num_add(uxrSeqNum(-1), 1));
+    EXPECT_EQ(0, uxr_seq_num_add(uxrSeqNum(~0u), 1));
 }
 
 TEST(SeqNumTest, AddFromPositive)
@@ -22,7 +22,7 @@ TEST(SeqNumTest, AddMax)
 
 TEST(SeqNumTest, SubToNegative)
 {
-    EXPECT_EQ(uxrSeqNum(-1), uxr_seq_num_sub(0, 1));
+    EXPECT_EQ(uxrSeqNum(~0u), uxr_seq_num_sub(0, 1));
 }
 
 TEST(SeqNumTest, SubToPositive)
@@ -72,10 +72,10 @@ TEST(SeqNumTest, CmpLTMaxInverted)
 
 TEST(SeqNumTest, CmpLTNegative)
 {
-    EXPECT_EQ(-1, uxr_seq_num_cmp(uxrSeqNum(-1), 0));
+    EXPECT_EQ(-1, uxr_seq_num_cmp(uxrSeqNum(~0u), 0));
 }
 
 TEST(SeqNumTest, CmpGRNegative)
 {
-    EXPECT_EQ(1, uxr_seq_num_cmp(0, uxrSeqNum(-1)));
+    EXPECT_EQ(1, uxr_seq_num_cmp(0, uxrSeqNum(~0u)));
 }

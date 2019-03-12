@@ -397,29 +397,29 @@ TEST_F(SessionTest, WriteReliableFragment)
 TEST_F(SessionTest, FragmentationInfoNoFragment)
 {
     ucdrBuffer ub;
-    std::array<uint8_t, SUBHEADER_SIZE> header;
-    ucdr_init_buffer(&ub, header.data(), SUBHEADER_SIZE);
+    std::array<uint8_t, SUBHEADER_SIZE> frag_header;
+    ucdr_init_buffer(&ub, frag_header.data(), SUBHEADER_SIZE);
     uxr_buffer_submessage_header(&ub, 0, 0, 0);
-    FragmentationInfo info = on_get_fragmentation_info(header.data());
+    FragmentationInfo info = on_get_fragmentation_info(frag_header.data());
     EXPECT_EQ(NO_FRAGMENTED, info);
 }
 
 TEST_F(SessionTest, FragmentationInfoIntermediateFragment)
 {
     ucdrBuffer ub;
-    std::array<uint8_t, SUBHEADER_SIZE> header;
-    ucdr_init_buffer(&ub, header.data(), SUBHEADER_SIZE);
+    std::array<uint8_t, SUBHEADER_SIZE> frag_header;
+    ucdr_init_buffer(&ub, frag_header.data(), SUBHEADER_SIZE);
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_FRAGMENT, 0, 0);
-    FragmentationInfo info = on_get_fragmentation_info(header.data());
+    FragmentationInfo info = on_get_fragmentation_info(frag_header.data());
     EXPECT_EQ(INTERMEDIATE_FRAGMENT, info);
 }
 
 TEST_F(SessionTest, FragmentationInfoLastFragment)
 {
     ucdrBuffer ub;
-    std::array<uint8_t, SUBHEADER_SIZE> header;
-    ucdr_init_buffer(&ub, header.data(), SUBHEADER_SIZE);
+    std::array<uint8_t, SUBHEADER_SIZE> frag_header;
+    ucdr_init_buffer(&ub, frag_header.data(), SUBHEADER_SIZE);
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_FRAGMENT, 0, FLAG_LAST_FRAGMENT);
-    FragmentationInfo info = on_get_fragmentation_info(header.data());
+    FragmentationInfo info = on_get_fragmentation_info(frag_header.data());
     EXPECT_EQ(LAST_FRAGMENT, info);
 }

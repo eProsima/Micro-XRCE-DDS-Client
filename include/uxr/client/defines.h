@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_CLIENT_H_
-#define _UXR_CLIENT_CLIENT_H_
+#ifndef _UXR_CLIENT_DEFINES_H_
+#define _UXR_CLIENT_DEFINES_H_
 
 #ifdef __cplusplus
 #define COMPOUND_LITERAL(x)  x
@@ -21,4 +21,4 @@
 #define COMPOUND_LITERAL(x) (x)
 #endif
 
-#endif // _UXR_CLIENT_CLIENT_H_
+#endif // _UXR_CLIENT_DEFINES_H_

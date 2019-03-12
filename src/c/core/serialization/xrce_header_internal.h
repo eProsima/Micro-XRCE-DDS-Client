@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_CORE_SERIALIZATION_HEADER_INTERNAL_H_
-#define _SRC_C_CORE_SERIALIZATION_HEADER_INTERNAL_H_
+#ifndef _SRC_C_CORE_SERIALIZATION_XRCE_HEADER_INTERNAL_H_
+#define _SRC_C_CORE_SERIALIZATION_XRCE_HEADER_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -36,4 +36,4 @@ void uxr_deserialize_message_header(ucdrBuffer* ub, uint8_t* session_id, uint8_t
 }
 #endif
 
-#endif // _SRC_C_CORE_SERIALIZATION_HEADER_INTERNAL_H_
+#endif // _SRC_C_CORE_SERIALIZATION_XRCE_HEADER_INTERNAL_H_
