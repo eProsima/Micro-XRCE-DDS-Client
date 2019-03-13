@@ -35,10 +35,17 @@ typedef struct uxrDeliveryControl
 
 } uxrDeliveryControl;
 
-UXRDLLAPI uint16_t uxr_buffer_request_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id,
-                               uxrStreamId data_stream_id, uxrDeliveryControl* delivery_control);
+UXRDLLAPI uint16_t uxr_buffer_request_data(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId datareader_id,
+        uxrStreamId data_stream_id,
+        const uxrDeliveryControl * const delivery_control);
 
-UXRDLLAPI uint16_t uxr_buffer_cancel_data(uxrSession* session, uxrStreamId stream_id, uxrObjectId datareader_id);
+UXRDLLAPI uint16_t uxr_buffer_cancel_data(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId datareader_id);
 
 #ifdef __cplusplus
 }

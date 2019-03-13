@@ -42,8 +42,8 @@ typedef struct uxrStreamId
 {
     uint8_t raw;
     uint8_t index;
-    uxrStreamType type;
-    uxrStreamDirection direction;
+    uint8_t type;
+    uint8_t direction;
 
 } uxrStreamId;
 
