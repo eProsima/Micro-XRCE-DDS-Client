@@ -67,7 +67,7 @@ TEST_F(OutputBestEffortStreamTest, PrepareToWriteOkFit)
 
     ASSERT_TRUE(available_to_write);
     EXPECT_EQ(OFFSET + message_size, stream.writer);
-    EXPECT_EQ(OFFSET, ub.iterator - buffer);
+    EXPECT_EQ(OFFSET, size_t(ub.iterator - buffer));
     EXPECT_EQ(buffer + OFFSET + message_size, ub.final);
 }
 
