@@ -18,6 +18,7 @@ extern "C"
 #include <c/core/session/object_id.c>
 #include <c/core/session/submessage.c>
 #include <c/core/session/session_info.c>
+#include <c/core/session/read_access.c>
 
 #include <c/util/time.c>
 

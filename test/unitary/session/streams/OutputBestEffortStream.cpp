@@ -5,6 +5,8 @@ extern "C"
 {
 #include <c/core/session/stream/seq_num.c>
 #include <c/core/session/stream/output_best_effort_stream.c>
+#include <c/core/session/submessage.c>
+#include <c/core/serialization/xrce_subheader.c>
 }
 
 #define BUFFER_SIZE     size_t(32)

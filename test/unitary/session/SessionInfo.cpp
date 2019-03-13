@@ -114,7 +114,7 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
     ucdr_init_buffer(&ub, buffer, BUFFER_SIZE);
 
     uxrSessionInfo info;
-    uint8_t id = 0x01;
+    uint8_t id = 0x81;
     uxr_init_session_info(&info, id, 0xAABBCCDD);
     uint8_t stream_id = 1;
     uxrSeqNum seq_num = 2;
