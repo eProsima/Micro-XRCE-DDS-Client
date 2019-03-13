@@ -101,7 +101,7 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithKey)
     uint8_t read_stream_id = 0;
     uxrSeqNum read_seq_num = 0;
     ASSERT_TRUE(uxr_read_session_header(&info, &ub, &read_stream_id, &read_seq_num));
-    EXPECT_EQ(&info.id, id);
+    EXPECT_EQ(info.id, id);
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
     EXPECT_EQ(MAX_HEADER_SIZE, ucdr_buffer_length(&ub));
@@ -123,7 +123,7 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
     uint8_t read_stream_id = 0;
     uxrSeqNum read_seq_num = 0;
     ASSERT_TRUE(uxr_read_session_header(&info, &ub, &read_stream_id, &read_seq_num));
-    EXPECT_EQ(&info.id, id);
+    EXPECT_EQ(info.id, id);
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
     EXPECT_EQ(MIN_HEADER_SIZE, ucdr_buffer_length(&ub));
