@@ -17,6 +17,7 @@ const char* Client::topic_xml_ = "<dds>"
                                  "</dds>";
 
 const char* Client::publisher_xml_  = "";
+
 const char* Client::datawriter_xml_ = "<dds>"
                                           "<data_writer>"
                                               "<topic>"
@@ -27,15 +28,17 @@ const char* Client::datawriter_xml_ = "<dds>"
                                                       "<kind>KEEP_LAST</kind>"
                                                       "<depth>10</depth>"
                                                   "</historyQos>"
+                                              "</topic>"
+                                              "<qos>"
                                                   "<durability>"
                                                       "<kind>TRANSIENT_LOCAL</kind>"
                                                   "</durability>"
-                                              "</topic>"
+                                              "</qos>"
                                           "</data_writer>"
                                       "</dds>";
 
-
 const char* Client::subscriber_xml_ = "";
+
 const char* Client::datareader_xml_ = "<dds>"
                                           "<data_reader>"
                                               "<topic>"
@@ -46,10 +49,12 @@ const char* Client::datareader_xml_ = "<dds>"
                                                       "<kind>KEEP_LAST</kind>"
                                                       "<depth>10</depth>"
                                                   "</historyQos>"
+                                              "</topic>"
+                                              "<qos>"
                                                   "<durability>"
                                                       "<kind>TRANSIENT_LOCAL</kind>"
                                                   "</durability>"
-                                              "</topic>"
+                                              "</qos>"
                                           "</data_reader>"
                                       "</dds>";
 

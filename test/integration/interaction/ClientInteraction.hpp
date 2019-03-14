@@ -116,7 +116,7 @@ public:
     void publish(uint8_t id, uint8_t stream_id_raw, size_t number)
     {
         //Used only for waiting the RTPS subscriber matching
-        (void) uxr_run_session_time(&session_, 50);
+        (void) uxr_run_session_time(&session_, 500);
 
         uxrStreamId output_stream_id = uxr_stream_id_from_raw(stream_id_raw, UXR_OUTPUT_STREAM);
         uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
