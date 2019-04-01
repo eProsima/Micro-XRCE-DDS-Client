@@ -184,8 +184,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     C_STANDARD_REQUIRED YES
     )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC microcdr
-    $<$<BOOL:${WIN32}>:ws2_32>
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:GNU>:-fdata-sections -ffunction-sections>)
+
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+        microcdr
+        $<$<BOOL:$<PLATFORM_ID:Windows>>:ws2_32>
+    PRIVATE
+        $<$<BOOL:$<PLATFORM_ID:Linux>>:rt>
     )
 target_include_directories(${PROJECT_NAME}
     PUBLIC
