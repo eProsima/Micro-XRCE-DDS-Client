@@ -1,3 +1,4 @@
+#include <uxr/client/defines.h>
 #include <uxr/client/core/session/object_id.h>
 
 #include "session_info_internal.h"
@@ -7,13 +8,9 @@
 
 #include <string.h>
 
-// Remove when Microcdr supports size_of functions
-#define CREATE_CLIENT_PAYLOAD_SIZE 26
-#define DELETE_CLIENT_PAYLOAD_SIZE 4
+#define VENDOR_ID_EPROSIMA COMPOUND_LITERAL(XrceVendorId){{0x01, 0x0F}}
 
-#define VENDOR_ID_EPROSIMA (XrceVendorId){{0x01, 0x0F}}
-
-#define INITIAL_REQUEST_ID 10
+#define RESERVED_REQUESTS_ID 9
 
 static uint16_t generate_request_id(uxrSessionInfo* info);
 
@@ -31,14 +28,14 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
     info->key[1] = (uint8_t)((key << 8) >> 24);
     info->key[2] = (uint8_t)((key << 16) >> 24);
     info->key[3] = (uint8_t)((key << 24) >> 24);
-    info->last_request_id = INITIAL_REQUEST_ID;
+    info->last_request_id = RESERVED_REQUESTS_ID;
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
 void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds, uint16_t mtu)
 {
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGIN}};
+    payload.base.request_id = COMPOUND_LITERAL(RequestId){{0x00, UXR_REQUEST_LOGIN}};
     payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
@@ -62,7 +59,7 @@ void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, int64_t nan
 void uxr_buffer_delete_session(uxrSessionInfo* info, ucdrBuffer* ub)
 {
     DELETE_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, UXR_REQUEST_LOGOUT}};
+    payload.base.request_id = COMPOUND_LITERAL(RequestId){{0x00, UXR_REQUEST_LOGOUT}};
     payload.base.object_id = OBJECTID_CLIENT;
 
     info->last_request_id = UXR_REQUEST_LOGOUT;
@@ -100,33 +97,33 @@ void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 void uxr_stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer)
 {
     ucdrBuffer ub;
-    ucdr_init_buffer(&ub, buffer, UXR_MAX_HEADER_SIZE);
+    ucdr_init_buffer(&ub, buffer, MAX_HEADER_SIZE);
 
-    uxr_serialize_message_header(&ub, info->id & UXR_SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
+    uxr_serialize_message_header(&ub, info->id & SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, info->key);
 }
 
 void uxr_stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer)
 {
     ucdrBuffer ub;
-    ucdr_init_buffer(&ub, buffer, UXR_MAX_HEADER_SIZE);
+    ucdr_init_buffer(&ub, buffer, MAX_HEADER_SIZE);
 
     uxr_serialize_message_header(&ub, info->id, stream_id_raw, seq_num, info->key);
 }
 
 bool uxr_read_session_header(const uxrSessionInfo* info, ucdrBuffer* ub, uint8_t* stream_id_raw, uxrSeqNum* seq_num)
 {
-    bool must_be_read = ucdr_buffer_remaining(ub) > UXR_MAX_HEADER_SIZE;
+    bool must_be_read = ucdr_buffer_remaining(ub) > MAX_HEADER_SIZE;
     if(must_be_read)
     {
-        uint8_t session_id; uint8_t key[UXR_CLIENT_KEY_SIZE];
+        uint8_t session_id; uint8_t key[CLIENT_KEY_SIZE];
         uxr_deserialize_message_header(ub, &session_id, stream_id_raw, seq_num, key);
 
         must_be_read = session_id == info->id;
         if(must_be_read)
         {
-            if (UXR_SESSION_ID_WITHOUT_CLIENT_KEY > info->id)
+            if (SESSION_ID_WITHOUT_CLIENT_KEY > info->id)
             {
-                must_be_read = (0 == memcmp(key, info->key, UXR_CLIENT_KEY_SIZE));
+                must_be_read = (0 == memcmp(key, info->key, CLIENT_KEY_SIZE));
             }
         }
     }
@@ -136,7 +133,7 @@ bool uxr_read_session_header(const uxrSessionInfo* info, ucdrBuffer* ub, uint8_t
 
 uint8_t uxr_session_header_offset(const uxrSessionInfo* info)
 {
-    return (UXR_SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? UXR_MAX_HEADER_SIZE : UXR_MIN_HEADER_SIZE;
+    return (SESSION_ID_WITHOUT_CLIENT_KEY > info->id) ? MAX_HEADER_SIZE : MIN_HEADER_SIZE;
 }
 
 uint16_t uxr_init_base_object_request(uxrSessionInfo* info, uxrObjectId object_id, BaseObjectRequest* base)
@@ -162,12 +159,10 @@ void uxr_parse_base_object_request(const BaseObjectRequest* base, uxrObjectId* o
 //==================================================================
 inline uint16_t generate_request_id(uxrSessionInfo* session)
 {
-    uint16_t last_request_id = (UINT16_MAX == session->last_request_id || INITIAL_REQUEST_ID > session->last_request_id)
-        ? INITIAL_REQUEST_ID
-        : session->last_request_id;
+    bool out_of_bounds = (UINT16_MAX == session->last_request_id || RESERVED_REQUESTS_ID >= session->last_request_id);
+    session->last_request_id = (uint16_t)((out_of_bounds ? RESERVED_REQUESTS_ID : session->last_request_id) + 1);
 
-    session->last_request_id = (uint16_t)(last_request_id + 1);
-    return last_request_id;
+    return session->last_request_id;
 }
 
 inline void process_create_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id, AGENT_Representation* agent)
@@ -186,3 +181,4 @@ inline void process_delete_session_status(uxrSessionInfo* info, uint8_t status, 
         info->last_requested_status = status;
     }
 }
+

@@ -31,8 +31,8 @@ void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream)
         uxr_set_reliable_buffer_length(internal_buffer, 0);
     }
 
-    stream->last_handled = UINT16_MAX;
-    stream->last_announced = UINT16_MAX;
+    stream->last_handled = SEQ_NUM_MAX;
+    stream->last_announced = SEQ_NUM_MAX;
 }
 
 bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_num, uint8_t* buffer, size_t length, bool* message_stored)
@@ -61,6 +61,7 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
             {
                 memcpy(internal_buffer, buffer, length);
                 uxr_set_reliable_buffer_length(internal_buffer, length);
+                *message_stored = true;
 
                 if(NO_FRAGMENTED != fragmentation_info)
                 {
@@ -68,7 +69,6 @@ bool uxr_receive_reliable_message(uxrInputReliableStream* stream, uint16_t seq_n
                     if(check_last_fragment(stream, &last))
                     {
                         ready_to_read = true;
-                        *message_stored = true;
                     }
                 }
             }
@@ -126,9 +126,9 @@ void uxr_process_heartbeat(uxrInputReliableStream* stream, uxrSeqNum first_seq_n
     }
 }
 
-bool uxr_is_input_reliable_stream_busy(uxrInputReliableStream* stream)
+bool uxr_is_input_up_to_date(const uxrInputReliableStream* stream)
 {
-    return stream->last_announced != stream->last_handled;
+    return stream->last_announced == stream->last_handled;
 }
 
 uint16_t uxr_compute_acknack(const uxrInputReliableStream* stream, uxrSeqNum* from)
@@ -211,9 +211,9 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
 {
     uxrInputReliableStream* stream = (uxrInputReliableStream*) args;
 
-    size_t slot = (size_t)(ub->init - stream->buffer) / (stream->size / stream->history);
-    uint8_t* buffer = uxr_get_input_buffer(stream, slot % stream->history);
-    uint8_t* next_buffer = uxr_get_input_buffer(stream, (slot + 1) % stream->history);
+    size_t slot_pos = (size_t)(ub->init - stream->buffer) / (stream->size / stream->history);
+    uint8_t* buffer = uxr_get_input_buffer(stream, slot_pos % stream->history);
+    uint8_t* next_buffer = uxr_get_input_buffer(stream, (slot_pos + 1) % stream->history);
     size_t offset = (size_t)(ub->init - buffer);
 
     uint8_t* next_init = next_buffer + offset;

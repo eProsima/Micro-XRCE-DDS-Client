@@ -16,10 +16,10 @@
 #include "../serialization/xrce_protocol_internal.h"
 #include "../log/log_internal.h"
 
-#define HEARTBEAT_MAX_MSG_SIZE      (12 + HEARTBEAT_PAYLOAD_SIZE)
-#define ACKNACK_MAX_MSG_SIZE        (12 + ACKNACK_PAYLOAD_SIZE)
-#define CREATE_SESSION_MAX_MSG_SIZE 40
-#define DELETE_SESSION_MAX_MSG_SIZE 16
+#define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE)
+#define DELETE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE)
+#define HEARTBEAT_MAX_MSG_SIZE      (MAX_HEADER_SIZE + SUBHEADER_SIZE + HEARTBEAT_PAYLOAD_SIZE)
+#define ACKNACK_MAX_MSG_SIZE        (MAX_HEADER_SIZE + SUBHEADER_SIZE + ACKNACK_PAYLOAD_SIZE)
 
 static bool listen_message(uxrSession* session, int poll_ms);
 static bool listen_message_reliably(uxrSession* session, int poll_ms);
@@ -348,7 +348,7 @@ bool listen_message_reliably(uxrSession* session, int poll_ms)
             poll_to_next_heartbeat = 1;
         }
 
-        int poll_chosen = (poll_to_next_heartbeat < poll) ? (int)poll_to_next_heartbeat : (int)poll;
+        int poll_chosen = (poll_to_next_heartbeat < poll) ? poll_to_next_heartbeat : poll;
         received = listen_message(session, poll_chosen);
         if(!received)
         {

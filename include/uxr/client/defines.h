@@ -1,4 +1,4 @@
-// Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_CORE_SESSION_STREAM_SEQ_NUM_INTERNAL_H_
-#define _SRC_C_CORE_SESSION_STREAM_SEQ_NUM_INTERNAL_H_
+#ifndef _UXR_CLIENT_DEFINES_H_
+#define _UXR_CLIENT_DEFINES_H_
 
 #ifdef __cplusplus
-extern "C"
-{
+#define COMPOUND_LITERAL(x)  x
+#else
+#define COMPOUND_LITERAL(x) (x)
 #endif
 
-
-#include <uxr/client/core/session/stream/seq_num.h>
-
-#define SEQ_NUM_MAX       UINT16_MAX
-
-uxrSeqNum uxr_seq_num_add(uxrSeqNum seq_num, uint16_t increment);
-uxrSeqNum uxr_seq_num_sub(uxrSeqNum seq_num, uint16_t decrement);
-int uxr_seq_num_cmp(uxrSeqNum seq_num_1, uxrSeqNum seq_num_2);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // _SRC_C_CORE_SESSION_STREAM_SEQ_NUM_INTERNAL_H_
+#endif // _UXR_CLIENT_DEFINES_H_

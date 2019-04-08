@@ -20,7 +20,7 @@ void uxr_init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8
 void uxr_reset_output_best_effort_stream(uxrOutputBestEffortStream* stream)
 {
     stream->writer = stream->offset;
-    stream->last_send = UINT16_MAX;
+    stream->last_send = SEQ_NUM_MAX;
 }
 
 bool uxr_prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, ucdrBuffer* ub)
