@@ -19,7 +19,12 @@ bool uxr_close_udp_transport_datagram(uxrUDPTransportDatagram* transport)
     return (0 == close(transport->poll_fd.fd));
 }
 
-bool uxr_udp_send_datagram_to(uxrUDPTransportDatagram* transport, const uint8_t* buf, size_t len, const char* ip, uint16_t port)
+bool uxr_udp_send_datagram_to(
+        uxrUDPTransportDatagram* transport,
+        const uint8_t* buf,
+        size_t len,
+        const char* ip,
+        uint16_t port)
 {
     bool rv = true;
 
@@ -40,7 +45,11 @@ bool uxr_udp_send_datagram_to(uxrUDPTransportDatagram* transport, const uint8_t*
     return rv;
 }
 
-bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, size_t* len, int timeout)
+bool uxr_udp_recv_datagram(
+        uxrUDPTransportDatagram* transport,
+        uint8_t** buf,
+        size_t* len,
+        int timeout)
 {
     bool rv = false;
 
@@ -63,7 +72,9 @@ bool uxr_udp_recv_datagram(uxrUDPTransportDatagram* transport, uint8_t** buf, si
     return rv;
 }
 
-void uxr_bytes_to_ip(const uint8_t* bytes, char* ip)
+void uxr_bytes_to_ip(
+        const uint8_t* bytes,
+        char* ip)
 {
     struct in_addr addr;
     addr.s_addr = (in_addr_t)(*bytes + (*(bytes + 1) << 8) + (*(bytes + 2) << 16) + (*(bytes + 3) << 24));

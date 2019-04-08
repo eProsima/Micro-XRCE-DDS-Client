@@ -17,23 +17,42 @@
 #include <string.h>
 #include <stdlib.h>
 
-bool on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
+#define MAX_AGENTS 10
+
+void on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
 {
     (void) timestamp; (void) args;
     printf("Found agent => ip: %s, port: %d\n", address->ip, address->port);
-    return false;
 }
 
 int main(int args, char** argv)
 {
-    (void) args; (void) argv;
-
-    uxrAgentAddress chosen;
-    if(uxr_discovery_agents_multicast(10, 1000, on_agent_found, NULL, &chosen))
+    if(args < 1 || (args >= 2 && (0 == strcmp("-h", argv[1]) ||
+                                 0 == strcmp("--help", argv[1]) ||
+                                 0 == args % 2 ||
+                                 MAX_AGENTS * 2 < args + 2)))
     {
-        // True -> The user returns true in the callback.
-        printf("Chosen agent => ip: %s, port: %d\n", chosen.ip, chosen.port);
+        printf("usage: program [ -h | --help | [<ip> <port> ...] ]\n");
+        return 0;
+    }
+
+    if (args == 1)
+    {
+        uxr_discovery_agents_default(10, 1000, on_agent_found, NULL);
+    }
+    else
+    {
+        size_t size = 0;
+        uxrAgentAddress agent_list[MAX_AGENTS];
+        for(int i = 1; i < args; i += 2, size++)
+        {
+            agent_list[size].ip = argv[i];
+            agent_list[size++].port = atoi(argv[i + 1]);
+        }
+
+        uxr_discovery_agents(10, 1000, on_agent_found, NULL, agent_list, size);
     }
 
     return 0;
 }
+

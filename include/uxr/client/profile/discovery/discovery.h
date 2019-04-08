@@ -29,18 +29,27 @@ extern "C"
 
 typedef struct uxrAgentAddress
 {
-    char ip[16]; //xxx.xxx.xxx.xxx\0
+    const char* ip;
     uint16_t port;
 
 } uxrAgentAddress;
 
-typedef bool (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timestamp, void* args);
+typedef void (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timestamp, void* args);
 
 
-UXRDLLAPI bool uxr_discovery_agents_multicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* chosen);
+UXRDLLAPI void uxr_discovery_agents_default(
+        uint32_t attempts,
+        int period,
+        uxrOnAgentFound on_agent_func,
+        void* args);
 
-UXRDLLAPI bool uxr_discovery_agents_unicast(uint32_t attempts, int period, uxrOnAgentFound on_agent_func, void* args, uxrAgentAddress* chosen,
-                                          const uxrAgentAddress* agent_list, size_t agent_list_size);
+UXRDLLAPI void uxr_discovery_agents(
+        uint32_t attempts,
+        int period,
+        uxrOnAgentFound on_agent_func,
+        void* args,
+        const uxrAgentAddress* agent_list,
+        size_t agent_list_size);
 
 #ifdef __cplusplus
 }
