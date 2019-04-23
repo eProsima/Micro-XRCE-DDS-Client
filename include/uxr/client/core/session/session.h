@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_CORE_SESSION_SESSION_H_
-#define _UXR_CLIENT_CORE_SESSION_SESSION_H_
+#ifndef UXR_CLIENT_CORE_SESSION_SESSION_H_
+#define UXR_CLIENT_CORE_SESSION_SESSION_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -286,4 +286,4 @@ UXRDLLAPI bool uxr_buffer_performance(uxrSession* session,
 }
 #endif
 
-#endif // _UXR_CLIENT_CORE_SESSION_SESSION_H
+#endif // UXR_CLIENT_CORE_SESSION_SESSION_H

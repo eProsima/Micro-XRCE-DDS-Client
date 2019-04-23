@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
-#define _UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
+#ifndef UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
+#define UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -23,24 +23,104 @@ extern "C"
 
 #include <uxr/client/core/session/common_create_entities.h>
 
-UXRDLLAPI uint16_t uxr_buffer_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
-                                                  uxrObjectId object_id, int16_t domain_id,
-                                                  const char* ref, uint8_t mode);
+/**
+ * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Participant payload.
+ *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
+ *        As a result of the reception of this submessage, the Agent will create an XRCE Participant using according to
+ *        the reference provides in the CREATE submessage.
+ * @param session       A uxrSession structure previously initialized.
+ * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
+ * @param object_id     The identifier of the XRCE Participant.
+ * @param domain_id     The identifier of the Domain to which the XRCE Participant belongs.
+ * @param ref           The reference of the XRCE Participant.
+ * @param mode          The set of flags that determines the entity creation mode.
+ *                      The Creation Mode Table describes the entities creation behaviour according to the
+ *                      `UXR_REUSE` and `UXR_REPLACE` flags.
+ * @return A `request_id` that identifies the request made by the Client.
+ *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ */
+UXRDLLAPI uint16_t uxr_buffer_create_participant_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        int16_t domain_id,
+        const char* ref,
+        uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
-                                            uxrObjectId object_id, uxrObjectId participant_id,
-                                            const char* ref, uint8_t mode);
+/**
+ * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Topic payload.
+ *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
+ *        As a result of the reception of this submessage, the Agent will create an XRCE Topic using according to
+ *        the reference provides in the CREATE submessage.
+ * @param session           A uxrSession structure previously initialized.
+ * @param stream_id         The output stream identifier where the CREATE submessage will be buffered.
+ * @param object_id         The identifier of the XRCE Topic.
+ * @param participant_id    The identifier of the associated XRCE Participant.
+ * @param ref               The reference of the XRCE Topic.
+ * @param mode              The set of flags that determines the entity creation mode.
+ *                          The Creation Mode Table describes the entities creation behaviour according to the
+ *                          `UXR_REUSE` and `UXR_REPLACE` flags.
+ * @return A `request_id` that identifies the request made by the Client.
+ *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ */
+UXRDLLAPI uint16_t uxr_buffer_create_topic_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* ref,
+        uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
-                                                 uxrObjectId object_id, uxrObjectId publisher_id,
-                                                 const char* ref, uint8_t mode);
+/**
+ * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE DataWriter payload.
+ *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
+ *        As a result of the reception of this submessage, the Agent will create an XRCE DataWriter using according to
+ *        the reference provides in the CREATE submessage.
+ * @param session       A uxrSession structure previously initialized.
+ * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
+ * @param object_id     The identifier of the XRCE DataWriter.
+ * @param publisher_id  The identifier of the associated XRCE Publisher.
+ * @param ref           The reference of the XRCE DataWriter.
+ * @param mode          The set of flags that determines the entity creation mode.
+ *                      The Creation Mode Table describes the entities creation behaviour according to the
+ *                      `UXR_REUSE` and `UXR_REPLACE` flags.
+ * @return A `request_id` that identifies the request made by the Client.
+ *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ */
+UXRDLLAPI uint16_t uxr_buffer_create_datawriter_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId publisher_id,
+        const char* ref,
+        uint8_t mode);
 
-UXRDLLAPI uint16_t uxr_buffer_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
-                                                 uxrObjectId object_id, uxrObjectId subscriber_id,
-                                                 const char* ref, uint8_t mode);
+/**
+ * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE DataReader payload.
+ *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
+ *        As a result of the reception of this submessage, the Agent will create an XRCE DataReader using according to
+ *        the reference provides in the CREATE submessage.
+ * @param session       A uxrSession structure previously initialized.
+ * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
+ * @param object_id     The identifier of the XRCE DataReader.
+ * @param subscriber_id The identifier of the associated XRCE Subscriber.
+ * @param ref           The reference of the XRCE DataReader.
+ * @param mode          The set of flags that determines the entity creation mode.
+ *                      The Creation Mode Table describes the entities creation behaviour according to the
+ *                      `UXR_REUSE` and `UXR_REPLACE` flags.
+ * @return A `request_id` that identifies the request made by the Client.
+ *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ */
+UXRDLLAPI uint16_t uxr_buffer_create_datareader_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId subscriber_id,
+        const char* ref,
+        uint8_t mode);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
+#endif // UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
