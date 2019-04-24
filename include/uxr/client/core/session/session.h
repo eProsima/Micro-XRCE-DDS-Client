@@ -59,9 +59,6 @@ typedef struct uxrSession
 #endif
 } uxrSession;
 
-//==================================================================
-//                         PUBLIC FUNCTIONS
-//==================================================================
 /**
  * @brief Initializes a uxrSession structure.
  * @param session   The structure where the session data is stored.
