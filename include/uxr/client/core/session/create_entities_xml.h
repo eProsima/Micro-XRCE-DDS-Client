@@ -36,7 +36,7 @@ extern "C"
  *                      The Creation Mode Table describes the entities creation behaviour according to the
  *                      `UXR_REUSE` and `UXR_REPLACE` flags.
  * @return A `request_id` that identifies the request made by the Client.
- *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  */
 UXRDLLAPI uint16_t uxr_buffer_create_participant_xml(
         uxrSession* session,
@@ -60,7 +60,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_participant_xml(
  *                          The Creation Mode Table describes the entities creation behaviour according to the
  *                          `UXR_REUSE` and `UXR_REPLACE` flags.
  * @return A `request_id` that identifies the request made by the Client.
- *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  */
 UXRDLLAPI uint16_t uxr_buffer_create_topic_xml(
         uxrSession* session,
@@ -84,7 +84,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_topic_xml(
  *                          The Creation Mode Table describes the entities creation behaviour according to the
  *                          `UXR_REUSE` and `UXR_REPLACE` flags.
  * @return A `request_id` that identifies the request made by the Client.
- *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  */
 UXRDLLAPI uint16_t uxr_buffer_create_publisher_xml(
         uxrSession* session,
@@ -108,7 +108,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_publisher_xml(
  *                          The Creation Mode Table describes the entities creation behaviour according to the
  *                          `UXR_REUSE` and `UXR_REPLACE` flags.
  * @return A `request_id` that identifies the request made by the Client.
- *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  */
 UXRDLLAPI uint16_t uxr_buffer_create_subscriber_xml(
         uxrSession* session,
@@ -132,7 +132,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_subscriber_xml(
  *                      The Creation Mode Table describes the entities creation behaviour according to the
  *                      `UXR_REUSE` and `UXR_REPLACE` flags.
  * @return A `request_id` that identifies the request made by the Client.
- *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  */
 UXRDLLAPI uint16_t uxr_buffer_create_datawriter_xml(
         uxrSession* session,
@@ -156,7 +156,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datawriter_xml(
  *                      The Creation Mode Table describes the entities creation behaviour according to the
  *                      `UXR_REUSE` and `UXR_REPLACE` flags.
  * @return A `request_id` that identifies the request made by the Client.
- *         This could be use in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  */
 UXRDLLAPI uint16_t uxr_buffer_create_datareader_xml(
         uxrSession* session,
