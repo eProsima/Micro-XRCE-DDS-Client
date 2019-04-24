@@ -337,7 +337,6 @@ bool uxr_serialize_CLIENT_Representation(ucdrBuffer* buffer, const CLIENT_Repres
     ret &= uxr_serialize_XrceCookie(buffer, &input->xrce_cookie);
     ret &= uxr_serialize_XrceVersion(buffer, &input->xrce_version);
     ret &= uxr_serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
-    ret &= uxr_serialize_Time_t(buffer, &input->client_timestamp);
     ret &= uxr_serialize_ClientKey(buffer, &input->client_key);
     ret &= ucdr_serialize_uint8_t(buffer, input->session_id);
     ret &= ucdr_serialize_bool(buffer, input->optional_properties);
@@ -356,7 +355,6 @@ bool uxr_deserialize_CLIENT_Representation(ucdrBuffer* buffer, CLIENT_Representa
     ret &= uxr_deserialize_XrceCookie(buffer, &output->xrce_cookie);
     ret &= uxr_deserialize_XrceVersion(buffer, &output->xrce_version);
     ret &= uxr_deserialize_XrceVendorId(buffer, &output->xrce_vendor_id);
-    ret &= uxr_deserialize_Time_t(buffer, &output->client_timestamp);
     ret &= uxr_deserialize_ClientKey(buffer, &output->client_key);
     ret &= ucdr_deserialize_uint8_t(buffer, &output->session_id);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_properties);
@@ -375,7 +373,6 @@ bool uxr_serialize_AGENT_Representation(ucdrBuffer* buffer, const AGENT_Represen
     ret &= uxr_serialize_XrceCookie(buffer, &input->xrce_cookie);
     ret &= uxr_serialize_XrceVersion(buffer, &input->xrce_version);
     ret &= uxr_serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
-    ret &= uxr_serialize_Time_t(buffer, &input->agent_timestamp);
     ret &= ucdr_serialize_bool(buffer, input->optional_properties);
     if(input->optional_properties == true)
     {
@@ -391,13 +388,12 @@ bool uxr_deserialize_AGENT_Representation(ucdrBuffer* buffer, AGENT_Representati
     ret &= uxr_deserialize_XrceCookie(buffer, &output->xrce_cookie);
     ret &= uxr_deserialize_XrceVersion(buffer, &output->xrce_version);
     ret &= uxr_deserialize_XrceVendorId(buffer, &output->xrce_vendor_id);
-    ret &= uxr_deserialize_Time_t(buffer, &output->agent_timestamp);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_properties);
-    // TODO (julian): modified with the new Micro ROS API.
-//    if(output->optional_properties == true)
-//    {
-//            ret &= uxr_deserialize_PropertySeq(buffer, &output->properties);
-//    }
+    // TODO
+    //if(output->optional_properties == true)
+    //{
+    //        ret &= uxr_deserialize_PropertySeq(buffer, &output->properties);
+    //}
 
     return ret;
 }
@@ -1819,7 +1815,6 @@ bool uxr_deserialize_DataRepresentation(ucdrBuffer* buffer, DataRepresentation* 
 bool uxr_serialize_CREATE_CLIENT_Payload(ucdrBuffer* buffer, const CREATE_CLIENT_Payload* input)
 {
     bool ret = true;
-    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
     ret &= uxr_serialize_CLIENT_Representation(buffer, &input->client_representation);
     return ret;
 }
@@ -1827,7 +1822,6 @@ bool uxr_serialize_CREATE_CLIENT_Payload(ucdrBuffer* buffer, const CREATE_CLIENT
 bool uxr_deserialize_CREATE_CLIENT_Payload(ucdrBuffer* buffer, CREATE_CLIENT_Payload* output)
 {
     bool ret = true;
-    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
     ret &= uxr_deserialize_CLIENT_Representation(buffer, &output->client_representation);
     return ret;
 }
@@ -1881,7 +1875,6 @@ bool uxr_deserialize_DELETE_Payload(ucdrBuffer* buffer, DELETE_Payload* output)
 bool uxr_serialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, const STATUS_AGENT_Payload* input)
 {
     bool ret = true;
-    ret &= uxr_serialize_BaseObjectReply(buffer, &input->base);
     ret &= uxr_serialize_AGENT_Representation(buffer, &input->agent_info);
     return ret;
 }
@@ -1889,7 +1882,6 @@ bool uxr_serialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, const STATUS_AGENT_P
 bool uxr_deserialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, STATUS_AGENT_Payload* output)
 {
     bool ret = true;
-    ret &= uxr_deserialize_BaseObjectReply(buffer, &output->base);
     ret &= uxr_deserialize_AGENT_Representation(buffer, &output->agent_info);
     return ret;
 }

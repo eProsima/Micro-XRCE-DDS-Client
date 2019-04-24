@@ -34,7 +34,7 @@ typedef struct uxrAgentAddress
 
 } uxrAgentAddress;
 
-typedef void (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timestamp, void* args);
+typedef void (*uxrOnAgentFound) (const uxrAgentAddress* address, void* args);
 
 /**
  * @brief Discovers Agents within the network using UDP/IP multicast with address "239.255.0.2" and port 7400.

@@ -100,7 +100,7 @@ bool uxr_create_session(uxrSession* session)
     ucdrBuffer ub;
     ucdr_init_buffer_offset(&ub, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
 
-    uxr_buffer_create_session(&session->info, &ub, uxr_millis(), (uint16_t)(session->comm->mtu - INTERNAL_RELIABLE_BUFFER_OFFSET));
+    uxr_buffer_create_session(&session->info, &ub, (uint16_t)(session->comm->mtu - INTERNAL_RELIABLE_BUFFER_OFFSET));
     uxr_stamp_create_session_header(&session->info, ub.init);
 
     bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&ub), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);

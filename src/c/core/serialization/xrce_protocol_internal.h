@@ -217,7 +217,6 @@ typedef struct CLIENT_Representation
     XrceCookie xrce_cookie;
     XrceVersion xrce_version;
     XrceVendorId xrce_vendor_id;
-    Time_t client_timestamp;
     ClientKey client_key;
     uint8_t session_id;
     bool optional_properties;
@@ -232,7 +231,6 @@ typedef struct AGENT_Representation
     XrceCookie xrce_cookie;
     XrceVersion xrce_version;
     XrceVendorId xrce_vendor_id;
-    Time_t agent_timestamp;
     bool optional_properties;
     PropertySeq properties;
 
@@ -831,7 +829,6 @@ typedef struct DataRepresentation
 
 typedef struct CREATE_CLIENT_Payload
 {
-    BaseObjectRequest base;
     CLIENT_Representation client_representation;
 
 } CREATE_CLIENT_Payload;
@@ -862,7 +859,6 @@ typedef struct DELETE_Payload
 
 typedef struct STATUS_AGENT_Payload
 {
-    BaseObjectReply base;
     AGENT_Representation agent_info;
 
 } STATUS_AGENT_Payload;

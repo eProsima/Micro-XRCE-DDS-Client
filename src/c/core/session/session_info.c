@@ -14,7 +14,6 @@
 
 static uint16_t generate_request_id(uxrSessionInfo* info);
 
-static void process_create_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id, AGENT_Representation* agent);
 static void process_delete_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id);
 
 //==================================================================
@@ -32,16 +31,12 @@ void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key)
     info->last_requested_status = UXR_STATUS_NONE;
 }
 
-void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, int64_t nanoseconds, uint16_t mtu)
+void uxr_buffer_create_session(uxrSessionInfo* info, ucdrBuffer* ub, uint16_t mtu)
 {
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = COMPOUND_LITERAL(RequestId){{0x00, UXR_REQUEST_LOGIN}};
-    payload.base.object_id = OBJECTID_CLIENT;
     payload.client_representation.xrce_cookie = XRCE_COOKIE;
     payload.client_representation.xrce_version = XRCE_VERSION;
     payload.client_representation.xrce_vendor_id = VENDOR_ID_EPROSIMA;
-    payload.client_representation.client_timestamp.seconds = (int32_t)(nanoseconds / 1000000000);
-    payload.client_representation.client_timestamp.nanoseconds = (uint32_t)nanoseconds % 1000000000;
     payload.client_representation.client_key.data[0] = info->key[0];
     payload.client_representation.client_key.data[1] = info->key[1];
     payload.client_representation.client_key.data[2] = info->key[2];
@@ -70,15 +65,9 @@ void uxr_buffer_delete_session(uxrSessionInfo* info, ucdrBuffer* ub)
 
 void uxr_read_create_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
+    (void) info;
     STATUS_AGENT_Payload payload;
     (void) uxr_deserialize_STATUS_AGENT_Payload(ub, &payload);
-
-    if(UXR_REQUEST_LOGIN == info->last_request_id)
-    {
-        uxrObjectId object_id; uint16_t request_id;
-        uxr_parse_base_object_request(&payload.base.related_request, &object_id, &request_id);
-        process_create_session_status(info, payload.base.result.status, request_id, &payload.agent_info);
-    }
 }
 
 void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
@@ -163,15 +152,6 @@ inline uint16_t generate_request_id(uxrSessionInfo* session)
     session->last_request_id = (uint16_t)((out_of_bounds ? RESERVED_REQUESTS_ID : session->last_request_id) + 1);
 
     return session->last_request_id;
-}
-
-inline void process_create_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id, AGENT_Representation* agent)
-{
-    (void) agent;
-    if(UXR_REQUEST_LOGIN == request_id)
-    {
-        info->last_requested_status = status;
-    }
 }
 
 inline void process_delete_session_status(uxrSessionInfo* info, uint8_t status, uint16_t request_id)
