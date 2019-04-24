@@ -1,4 +1,4 @@
-// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2019 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
-#define _UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
+#ifndef UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
+#define UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -36,13 +36,28 @@ typedef struct uxrAgentAddress
 
 typedef void (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timestamp, void* args);
 
-
+/**
+ * @brief Discovers Agents within the network using UDP/IP multicast with address "239.255.0.2" and port 7400.
+ * @param attempts      The number of time a discovery message is sent across the network.
+ * @param period        The period using to send multicast messages through the network.
+ * @param on_agent_func The callback function that will calleed when an Agent is discovered.
+ * @param args          The user argument provided to the callback function.
+ */
 UXRDLLAPI void uxr_discovery_agents_default(
         uint32_t attempts,
         int period,
         uxrOnAgentFound on_agent_func,
         void* args);
 
+/**
+ * @brief Discovers Agents within the network using UDP/IP unicast with the address and port set by the user.
+ * @param attempts          The number of time a discovery message is sent across the network.
+ * @param period            The period using to send multicast messages through the network.
+ * @param on_agent_func     The callback function that will calleed when an Agent is discovered.
+ * @param args              The user argument provided to the callback function.
+ * @param agent_list        The list of addresses using for discovering Agents.
+ * @param agent_list_size   The size of the address list.
+ */
 UXRDLLAPI void uxr_discovery_agents(
         uint32_t attempts,
         int period,
@@ -55,4 +70,4 @@ UXRDLLAPI void uxr_discovery_agents(
 }
 #endif
 
-#endif //_UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
+#endif // UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
