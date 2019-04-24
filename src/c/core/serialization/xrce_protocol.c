@@ -2132,6 +2132,38 @@ bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* ou
     return ret;
 }
 
+bool uxr_serialize_TIMESTAMP_Payload(ucdrBuffer* buffer, const TIMESTAMP_Payload* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_Time_t(buffer, &input->transmit_timestamp);
+    return ret;
+}
+
+bool uxr_deserialize_TIMESTAMP_Payload(ucdrBuffer* buffer, TIMESTAMP_Payload* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_Time_t(buffer, &output->transmit_timestamp);
+    return ret;
+}
+
+bool uxr_serialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, const TIMESTAMP_REPLY_Payload* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_Time_t(buffer, &input->transmit_timestamp);
+    ret &= uxr_serialize_Time_t(buffer, &input->receive_timestamp);
+    ret &= uxr_serialize_Time_t(buffer, &input->originate_timestamp);
+    return ret;
+}
+
+bool uxr_deserialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, TIMESTAMP_REPLY_Payload* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_Time_t(buffer, &output->transmit_timestamp);
+    ret &= uxr_deserialize_Time_t(buffer, &output->receive_timestamp);
+    ret &= uxr_deserialize_Time_t(buffer, &output->originate_timestamp);
+    return ret;
+}
+
 #ifdef PERFORMANCE_TESTING
 bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input)
 {

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
-#define _SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
+#ifndef SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
+#define SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -985,6 +985,19 @@ typedef struct HEARTBEAT_Payload
 
 } HEARTBEAT_Payload;
 
+typedef struct TIMESTAMP_Payload
+{
+    Time_t transmit_timestamp;
+
+} TIMESTAMP_Payload;
+
+typedef struct TIMESTAMP_REPLY_Payload
+{
+    Time_t transmit_timestamp;
+    Time_t receive_timestamp;
+    Time_t originate_timestamp;
+} TIMESTAMP_REPLY_Payload;
+
 #ifdef PERFORMANCE_TESTING
 typedef struct PERFORMANCE_Payload
 {
@@ -1272,6 +1285,12 @@ bool uxr_deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output
 bool uxr_serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload* input);
 bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* output);
 
+bool uxr_serialize_TIMESTAMP_Payload(ucdrBuffer* buffer, const TIMESTAMP_Payload* input);
+bool uxr_deserialize_TIMESTAMP_Payload(ucdrBuffer* buffer, TIMESTAMP_Payload* output);
+
+bool uxr_serialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, const TIMESTAMP_REPLY_Payload* input);
+bool uxr_deserialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, TIMESTAMP_REPLY_Payload* output);
+
 #ifdef PERFORMANCE_TESTING
 bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input);
 bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload* input);
@@ -1281,4 +1300,4 @@ bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload
 }
 #endif
 
-#endif //_SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_H_
+#endif // SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_H_
