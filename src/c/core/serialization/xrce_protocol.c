@@ -1451,7 +1451,7 @@ bool uxr_deserialize_DataDeliveryControl(ucdrBuffer* buffer, DataDeliveryControl
 bool uxr_serialize_ReadSpecification(ucdrBuffer* buffer, const ReadSpecification* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_uint8_t(buffer, input->input_stream_id);
+    ret &= ucdr_serialize_uint8_t(buffer, input->preferred_stream_id);
     ret &= ucdr_serialize_uint8_t(buffer, input->data_format);
     ret &= ucdr_serialize_bool(buffer, input->optional_content_filter_expression);
     if(input->optional_content_filter_expression == true)
@@ -1471,7 +1471,7 @@ bool uxr_serialize_ReadSpecification(ucdrBuffer* buffer, const ReadSpecification
 bool uxr_deserialize_ReadSpecification(ucdrBuffer* buffer, ReadSpecification* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_uint8_t(buffer, &output->input_stream_id);
+    ret &= ucdr_deserialize_uint8_t(buffer, &output->preferred_stream_id);
     ret &= ucdr_deserialize_uint8_t(buffer, &output->data_format);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_content_filter_expression);
     if(output->optional_content_filter_expression == true)

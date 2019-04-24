@@ -672,7 +672,7 @@ typedef struct DataDeliveryControl
 
 typedef struct ReadSpecification
 {
-    uint8_t input_stream_id;
+    uint8_t preferred_stream_id;
     uint8_t data_format;
     bool optional_content_filter_expression;
     char* content_filter_expression;
