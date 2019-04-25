@@ -19,7 +19,7 @@ TEST(SessionInfoTest, CreateSessionSize)
     ucdr_init_buffer(&ub, buffer, BUFFER_SIZE);
 
     uxrSessionInfo info;
-    uxr_buffer_create_session(&info, &ub, 0, 512);
+    uxr_buffer_create_session(&info, &ub, 512);
     EXPECT_EQ(info.last_request_id, UXR_REQUEST_LOGIN);
     EXPECT_EQ(size_t(SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE), ucdr_buffer_length(&ub));
 }

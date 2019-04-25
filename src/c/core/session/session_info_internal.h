@@ -23,7 +23,7 @@ extern "C"
 #include <uxr/client/core/session/session_info.h>
 #include "../serialization/xrce_header_internal.h"
 
-#define CREATE_CLIENT_PAYLOAD_SIZE 28
+#define CREATE_CLIENT_PAYLOAD_SIZE 16
 #define DELETE_CLIENT_PAYLOAD_SIZE 4
 
 #define MIN_HEADER_SIZE 4
