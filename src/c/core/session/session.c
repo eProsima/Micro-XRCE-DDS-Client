@@ -85,6 +85,12 @@ void uxr_set_topic_callback(uxrSession* session, uxrOnTopicFunc on_topic_func, v
     session->on_topic_args = args;
 }
 
+void uxr_set_time_callback(uxrSession* session, uxrOnTimeFunc on_time_func, void* args)
+{
+    session->on_time = on_time_func;
+    session->on_time_args = args;
+}
+
 #ifdef PERFORMANCE_TESTING
 void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_echo_func, void* args)
 {

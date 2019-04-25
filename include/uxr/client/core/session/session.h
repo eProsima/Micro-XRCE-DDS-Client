@@ -28,10 +28,25 @@ extern "C"
 struct uxrSession;
 struct uxrCommunication;
 
-typedef void (*uxrOnStatusFunc) (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uint8_t status, void* args);
-typedef void (*uxrOnTopicFunc) (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uxrStreamId stream_id, struct ucdrBuffer* ub, void* args);
+typedef void (*uxrOnStatusFunc) (struct uxrSession* session,
+                                 uxrObjectId object_id,
+                                 uint16_t request_id,
+                                 uint8_t status,
+                                 void* args);
+
+typedef void (*uxrOnTopicFunc) (struct uxrSession* session,
+                                uxrObjectId object_id,
+                                uint16_t request_id,
+                                uxrStreamId stream_id,
+                                struct ucdrBuffer* ub,
+                                void* args);
+
+typedef void (*uxrOnTimeFunc) (struct uxrSession* session,
+                               int64_t current_timestamp,
+                               int64_t transmit_timestamp,
+                               int64_t received_timestamp,
+                               int64_t originate_timestamp,
+                               void* args);
 
 #ifdef PERFORMANCE_TESTING
 typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, struct ucdrBuffer* mb, void* args);
@@ -52,6 +67,9 @@ typedef struct uxrSession
 
     uxrOnTopicFunc on_topic;
     void* on_topic_args;
+
+    uxrOnTimeFunc on_time;
+    void* on_time_args;
 
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;
@@ -96,6 +114,9 @@ UXRDLLAPI void uxr_set_topic_callback(
         uxrSession* session,
         uxrOnTopicFunc on_topic_func,
         void* args);
+
+UXRDLLAPI void uxr_set_time_callback(uxrSession* session, uxrOnTimeFunc on_time_func, void* args);
+
 #ifdef PERFORMANCE_TESTING
 UXRDLLAPI void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_performance_func, void* args);
 #endif
