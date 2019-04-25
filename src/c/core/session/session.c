@@ -710,15 +710,14 @@ void process_timestamp_reply(uxrSession* session, TIMESTAMP_REPLY_Payload* times
     }
     else
     {
-        int64_t t4 = uxr_nanos();
-        int64_t t1 = uxr_convert_to_nanos(timestamp->originate_timestamp.seconds,
+        int64_t t3 = uxr_nanos();
+        int64_t t0 = uxr_convert_to_nanos(timestamp->originate_timestamp.seconds,
                                           timestamp->originate_timestamp.nanoseconds);
-        int64_t t2 = uxr_convert_to_nanos(timestamp->receive_timestamp.seconds,
+        int64_t t1 = uxr_convert_to_nanos(timestamp->receive_timestamp.seconds,
                                           timestamp->receive_timestamp.nanoseconds);
-        int64_t t3 = uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds,
+        int64_t t2 = uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds,
                                           timestamp->transmit_timestamp.nanoseconds);
-        int64_t delay = ((t2 - t1) + (t4 - t3)) / 2;
-        session->time_offset = t1 + delay - t2;
+        session->time_offset = ((t0 + t3) - (t1 + t2)) / 2;
     }
     session->synchronized = true;
 }

@@ -27,7 +27,7 @@ UXRDLLAPI int64_t uxr_millis(void);
 
 UXRDLLAPI int64_t uxr_nanos(void);
 
-UXRDLLAPI inline int64_t uxr_convert_to_nanos(int32_t sec, uint32_t nsec)
+UXRDLLAPI static inline int64_t uxr_convert_to_nanos(int32_t sec, uint32_t nsec)
 {
     return ((int64_t)sec * 1000000000) + nsec;
 }
