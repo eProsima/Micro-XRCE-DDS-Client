@@ -20,6 +20,8 @@
 #define DELETE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE)
 #define HEARTBEAT_MAX_MSG_SIZE      (MAX_HEADER_SIZE + SUBHEADER_SIZE + HEARTBEAT_PAYLOAD_SIZE)
 #define ACKNACK_MAX_MSG_SIZE        (MAX_HEADER_SIZE + SUBHEADER_SIZE + ACKNACK_PAYLOAD_SIZE)
+#define TIMESTAMP_PAYLOAD_SIZE      8
+#define TIMESTAMP_MAX_MSG_SIZE      (MAX_HEADER_SIZE + SUBHEADER_SIZE + TIMESTAMP_PAYLOAD_SIZE)
 
 static bool listen_message(uxrSession* session, int poll_ms);
 static bool listen_message_reliably(uxrSession* session, int poll_ms);
@@ -53,6 +55,8 @@ static void process_timestamp_reply(uxrSession* session, TIMESTAMP_REPLY_Payload
 static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* args);
 static FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header);
 
+static bool run_session_until_sync(uxrSession* session, int timeout);
+
 //==================================================================
 //                             PUBLIC
 //==================================================================
@@ -69,6 +73,11 @@ void uxr_init_session(uxrSession* session, uxrCommunication* comm, uint32_t key)
     session->on_status_args = NULL;
     session->on_topic = NULL;
     session->on_topic_args = NULL;
+
+    session->on_time = NULL;
+    session->on_time_args = NULL;
+    session->time_offset = 0;
+    session->synchronized = false;
 
     uxr_init_session_info(&session->info, 0x81, key);
     uxr_init_stream_storage(&session->streams);
@@ -249,6 +258,34 @@ bool uxr_run_session_until_one_status(uxrSession* session, int timeout_ms, const
     session->request_status_list_size = 0;
 
     return status_confirmed;
+}
+
+bool uxr_sync_session(uxrSession* session, int time)
+{
+    uint8_t timestamp_buffer[TIMESTAMP_MAX_MSG_SIZE];
+    ucdrBuffer ub;
+    ucdr_init_buffer_offset(&ub, timestamp_buffer, sizeof(timestamp_buffer), uxr_session_header_offset(&session->info));
+    uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_TIMESTAMP, TIMESTAMP_PAYLOAD_SIZE, 0);
+
+    TIMESTAMP_Payload timestamp;
+    int64_t nanos = uxr_nanos();
+    timestamp.transmit_timestamp.seconds = (int32_t)(nanos / 1000000000);
+    timestamp.transmit_timestamp.nanoseconds = (uint32_t)(nanos % 1000000000);
+    (void) uxr_serialize_TIMESTAMP_Payload(&ub, &timestamp);
+
+    uxr_stamp_session_header(&session->info, 0, 0, ub.init);
+    send_message(session, timestamp_buffer, ucdr_buffer_length(&ub));
+    return run_session_until_sync(session, time);
+}
+
+int64_t uxr_epoch_millis(uxrSession* session)
+{
+    return uxr_epoch_nanos(session) / 1000000;
+}
+
+int64_t uxr_epoch_nanos(uxrSession* session)
+{
+    return uxr_nanos() - session->time_offset;
 }
 
 #ifdef PERFORMANCE_TESTING
@@ -671,6 +708,19 @@ void process_timestamp_reply(uxrSession* session, TIMESTAMP_REPLY_Payload* times
             uxr_convert_to_nanos(timestamp->originate_timestamp.seconds, timestamp->originate_timestamp.nanoseconds),
             session->on_time_args);
     }
+    else
+    {
+        int64_t t4 = uxr_nanos();
+        int64_t t1 = uxr_convert_to_nanos(timestamp->originate_timestamp.seconds,
+                                          timestamp->originate_timestamp.nanoseconds);
+        int64_t t2 = uxr_convert_to_nanos(timestamp->receive_timestamp.seconds,
+                                          timestamp->receive_timestamp.nanoseconds);
+        int64_t t3 = uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds,
+                                          timestamp->transmit_timestamp.nanoseconds);
+        int64_t delay = ((t2 - t1) + (t4 - t3)) / 2;
+        session->time_offset = t1 + delay - t2;
+    }
+    session->synchronized = true;
 }
 
 bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId stream_id, size_t payload_size, ucdrBuffer* ub, uint8_t submessage_id, uint8_t mode)
@@ -732,3 +782,13 @@ FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header)
     return fragmentation_info;
 }
 
+bool run_session_until_sync(uxrSession* session, int timeout)
+{
+    session->synchronized = false;
+    bool timeout_exceeded = false;
+    while(!timeout_exceeded && !session->synchronized)
+    {
+        timeout_exceeded = !listen_message_reliably(session, timeout);
+    }
+    return session->synchronized;
+}

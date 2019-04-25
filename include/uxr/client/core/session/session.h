@@ -70,6 +70,8 @@ typedef struct uxrSession
 
     uxrOnTimeFunc on_time;
     void* on_time_args;
+    int64_t time_offset;
+    bool synchronized;
 
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;
@@ -292,6 +294,10 @@ UXRDLLAPI bool uxr_run_session_until_one_status(
         const uint16_t* request_list,
         uint8_t* status_list,
         size_t list_size);
+
+UXRDLLAPI bool uxr_sync_session(uxrSession* session, int time);
+UXRDLLAPI int64_t uxr_epoch_millis(uxrSession* session);
+UXRDLLAPI int64_t uxr_epoch_nanos(uxrSession* session);
 
 #ifdef PERFORMANCE_TESTING
 UXRDLLAPI bool uxr_buffer_performance(uxrSession* session,
