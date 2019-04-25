@@ -241,7 +241,7 @@ TEST_F(SessionTest, SetStatusCallback)
 {
     int user_data;
     uxr_set_status_callback(&session, on_status_func, &user_data);
-    EXPECT_EQ(session.on_status, on_status_func);
+    EXPECT_EQ(reinterpret_cast<void*>(session.on_status), reinterpret_cast<void*>(on_status_func));
     EXPECT_EQ(session.on_status_args, &user_data);
 }
 
@@ -249,7 +249,7 @@ TEST_F(SessionTest, SetTopicCallback)
 {
     int user_data;
     uxr_set_topic_callback(&session, on_topic_func, &user_data);
-    EXPECT_EQ(session.on_topic, on_topic_func);
+    EXPECT_EQ(reinterpret_cast<void*>(session.on_topic), reinterpret_cast<void*>(on_topic_func));
     EXPECT_EQ(session.on_topic_args, &user_data);
 }
 
@@ -257,7 +257,7 @@ TEST_F(SessionTest, SetTimeCallback)
 {
     int user_data;
     uxr_set_time_callback(&session, on_time_func, &user_data);
-    EXPECT_EQ(session.on_time, on_time_func);
+    EXPECT_EQ(reinterpret_cast<void*>(session.on_time), reinterpret_cast<void*>(on_time_func));
     EXPECT_EQ(session.on_time_args, &user_data);
 }
 
