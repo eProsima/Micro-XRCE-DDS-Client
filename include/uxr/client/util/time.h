@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_UTIL_TIME_H_
-#define _UXR_CLIENT_UTIL_TIME_H_
+#ifndef UXR_CLIENT_UTIL_TIME_H_
+#define UXR_CLIENT_UTIL_TIME_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -25,8 +25,15 @@ extern "C"
 
 UXRDLLAPI int64_t uxr_millis(void);
 
+UXRDLLAPI int64_t uxr_nanos(void);
+
+UXRDLLAPI inline int64_t uxr_convert_to_nanos(int32_t sec, uint32_t nsec)
+{
+    return ((int64_t)sec * 1000000000) + nsec;
+}
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _UXR_CLIENT_UTIL_TIME_H_
+#endif // UXR_CLIENT_UTIL_TIME_H_

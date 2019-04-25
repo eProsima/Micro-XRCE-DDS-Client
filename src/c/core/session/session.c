@@ -48,6 +48,7 @@ static void read_submessage_performance(uxrSession* session, ucdrBuffer* submess
 #endif
 
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
+static void process_timestamp_reply(uxrSession* session, TIMESTAMP_REPLY_Payload* timestamp);
 
 static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* args);
 static FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header);
@@ -630,8 +631,7 @@ void read_submessage_timestamp_reply(uxrSession* session, ucdrBuffer* submessage
     TIMESTAMP_REPLY_Payload timestamp_reply;
     uxr_deserialize_TIMESTAMP_REPLY_Payload(submessage, &timestamp_reply);
 
-    // TODO
-    //process_timestamp_reply(session, &timestamp_reply);
+    process_timestamp_reply(session, &timestamp_reply);
 }
 
 #ifdef PERFORMANCE_TESTING
@@ -657,6 +657,19 @@ void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request
             session->status_list[i] = status;
             break;
         }
+    }
+}
+
+void process_timestamp_reply(uxrSession* session, TIMESTAMP_REPLY_Payload* timestamp)
+{
+    if(session->on_time != NULL)
+    {
+        session->on_time(session,
+            uxr_nanos(),
+            uxr_convert_to_nanos(timestamp->receive_timestamp.seconds, timestamp->receive_timestamp.nanoseconds),
+            uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds, timestamp->transmit_timestamp.nanoseconds),
+            uxr_convert_to_nanos(timestamp->originate_timestamp.seconds, timestamp->originate_timestamp.nanoseconds),
+            session->on_time_args);
     }
 }
 
