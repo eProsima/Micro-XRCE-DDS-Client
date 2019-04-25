@@ -42,6 +42,7 @@ static void read_submessage_status(uxrSession* session, ucdrBuffer* submessage);
 static void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t length, uxrStreamId stream_id, uint8_t format);
 static void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage);
 static void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage);
+static void read_submessage_timestamp_reply(uxrSession* session, ucdrBuffer* submessage);
 #ifdef PERFORMANCE_TESTING
 static void read_submessage_performance(uxrSession* session, ucdrBuffer* submessage, uint16_t length);
 #endif
@@ -535,6 +536,10 @@ void read_submessage(uxrSession* session, ucdrBuffer* submessage, uint8_t submes
             read_submessage_acknack(session, submessage);
             break;
 
+        case SUBMESSAGE_ID_TIMESTAMP_REPLY:
+            read_submessage_timestamp_reply(session, submessage);
+            break;
+
 #ifdef PERFORMANCE_TESTING
         case SUBMESSAGE_ID_PERFORMANCE:
             read_submessage_performance(session, submessage, length);
@@ -612,6 +617,15 @@ void read_submessage_acknack(uxrSession* session, ucdrBuffer* submessage)
             send_message(session, buffer, length);
         }
     }
+}
+
+void read_submessage_timestamp_reply(uxrSession* session, ucdrBuffer* submessage)
+{
+    TIMESTAMP_REPLY_Payload timestamp_reply;
+    uxr_deserialize_TIMESTAMP_REPLY_Payload(submessage, &timestamp_reply);
+
+    // TODO
+    //process_timestamp_reply(session, &timestamp_reply);
 }
 
 #ifdef PERFORMANCE_TESTING
