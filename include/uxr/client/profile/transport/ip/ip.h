@@ -20,12 +20,12 @@ extern "C"
 {
 #endif
 
-typedef enum IpProtocol
+typedef enum uxrIpProtocol
 {
     UXR_IPv4,
     UXR_IPv6
 
-} IpProtocol;
+} uxrIpProtocol;
 
 #ifdef __cplusplus
 }

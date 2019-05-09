@@ -65,11 +65,25 @@ static uint8_t get_udp_error(void)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool uxr_init_udp_transport(uxrUDPTransport* transport, struct uxrUDPPlatform* platform, const char* ip, uint16_t port)
+bool uxr_init_udp_transport(
+        uxrUDPTransport* transport,
+        struct uxrUDPPlatform* platform,
+        uxrIpProtocol ip_protocol,
+        const char* ip,
+        uint16_t port)
 {
     bool rv = false;
 
-    if (uxr_init_udp_platform(platform, ip, port))
+    switch (ip_protocol)
+    {
+        case UXR_IPv4:
+            rv = uxr_init_udp4_platform(platform, ip, port);
+            break;
+        case UXR_IPv6:
+            break;
+    }
+
+    if (rv)
     {
         /* Setup platform. */
         transport->platform = platform;

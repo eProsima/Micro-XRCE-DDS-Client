@@ -1,7 +1,10 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_windows.h>
 #include "udp_transport_internal.h"
 
-bool uxr_init_udp_platform(uxrUDPPlatform* platform, const char* ip, uint16_t port)
+bool uxr_init_udp4_platform(
+        uxrUDPPlatform* platform,
+        const char* ip,
+        uint16_t port)
 {
     bool rv = false;
 
@@ -34,13 +37,18 @@ bool uxr_init_udp_platform(uxrUDPPlatform* platform, const char* ip, uint16_t po
     return rv;
 }
 
-bool uxr_close_udp_platform(uxrUDPPlatform* platform)
+bool uxr_close_udp_platform(
+        uxrUDPPlatform* platform)
 {
     bool rv = (INVALID_SOCKET == platform->poll_fd.fd) ? true : (0 == closesocket(platform->poll_fd.fd));
     return (0 == WSACleanup()) && rv;
 }
 
-size_t uxr_write_udp_data_platform(uxrUDPPlatform* platform, const uint8_t* buf, size_t len, uint8_t* errcode)
+size_t uxr_write_udp_data_platform(
+        uxrUDPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     int bytes_sent = send(platform->poll_fd.fd, (const char*)buf, (int)len, 0);
@@ -56,7 +64,12 @@ size_t uxr_write_udp_data_platform(uxrUDPPlatform* platform, const uint8_t* buf,
     return rv;
 }
 
-size_t uxr_read_udp_data_platform(uxrUDPPlatform* platform, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
+size_t uxr_read_udp_data_platform(
+        uxrUDPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     int poll_rv = WSAPoll(&platform->poll_fd, 1, timeout);

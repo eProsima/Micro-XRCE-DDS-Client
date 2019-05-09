@@ -6,7 +6,10 @@
 #include <string.h>
 #include <errno.h>
 
-bool uxr_init_udp_platform(uxrUDPPlatform* platform, const char* ip, uint16_t port)
+bool uxr_init_udp4_platform(
+        uxrUDPPlatform* platform,
+        const char* ip,
+        uint16_t port)
 {
     bool rv = false;
 
@@ -31,12 +34,17 @@ bool uxr_init_udp_platform(uxrUDPPlatform* platform, const char* ip, uint16_t po
     return rv;
 }
 
-bool uxr_close_udp_platform(uxrUDPPlatform* platform)
+bool uxr_close_udp_platform(
+        uxrUDPPlatform* platform)
 {
     return (-1 == platform->poll_fd.fd) ? true : (0 == close(platform->poll_fd.fd));
 }
 
-size_t uxr_write_udp_data_platform(uxrUDPPlatform* platform, const uint8_t* buf, size_t len, uint8_t* errcode)
+size_t uxr_write_udp_data_platform(
+        uxrUDPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     ssize_t bytes_sent = send(platform->poll_fd.fd, (void*)buf, len, 0);
@@ -52,7 +60,12 @@ size_t uxr_write_udp_data_platform(uxrUDPPlatform* platform, const uint8_t* buf,
     return rv;
 }
 
-size_t uxr_read_udp_data_platform(uxrUDPPlatform* platform, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
+size_t uxr_read_udp_data_platform(
+        uxrUDPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     int poll_rv = poll(&platform->poll_fd, 1, timeout);

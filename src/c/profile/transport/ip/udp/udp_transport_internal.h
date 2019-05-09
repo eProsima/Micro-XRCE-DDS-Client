@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_PROFILE_TRANSPORT_UDP_UDP_TRANSPORT_INTERNAL_H_
-#define _SRC_C_PROFILE_TRANSPORT_UDP_UDP_TRANSPORT_INTERNAL_H_
+#ifndef SRC_C_PROFILE_TRANSPORT_UDP_UDP_TRANSPORT_INTERNAL_H_
+#define SRC_C_PROFILE_TRANSPORT_UDP_UDP_TRANSPORT_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -22,22 +22,29 @@ extern "C"
 
 #include <uxr/client/profile/transport/ip/udp/udp_transport.h>
 
-bool uxr_init_udp_platform(struct uxrUDPPlatform* platform, const char* ip, uint16_t port);
-bool uxr_close_udp_platform(struct uxrUDPPlatform* platform);
+bool uxr_init_udp4_platform(
+        struct uxrUDPPlatform* platform,
+        const char* ip,
+        uint16_t port);
 
-size_t uxr_write_udp_data_platform(struct uxrUDPPlatform* platform,
-                                   const uint8_t* buf,
-                                   size_t len,
-                                   uint8_t* errcode);
+bool uxr_close_udp_platform(
+        struct uxrUDPPlatform* platform);
 
-size_t uxr_read_udp_data_platform(struct uxrUDPPlatform* platform,
-                                  uint8_t* buf,
-                                  size_t len,
-                                  int timeout,
-                                  uint8_t* errcode);
+size_t uxr_write_udp_data_platform(
+        struct uxrUDPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode);
+
+size_t uxr_read_udp_data_platform(
+        struct uxrUDPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_SRC_C_PROFILE_TRANSPORT_UDP_UDP_TRANSPORT_INTERNAL_H_
+#endif // SRC_C_PROFILE_TRANSPORT_UDP_UDP_TRANSPORT_INTERNAL_H_

@@ -79,7 +79,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_udp_transport(&udp, &udp_platform, ip, port))
+        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv4, ip, port))
         {
             printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
