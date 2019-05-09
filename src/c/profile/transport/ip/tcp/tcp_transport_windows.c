@@ -3,7 +3,11 @@
 
 #include <uxr/client/util/time.h>
 
-bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port)
+bool uxr_init_tcp_platform(
+        struct uxrTCPPlatform* platform,
+        uxrIpProtocol ip_protocol,
+        const char* ip,
+        uint16_t port)
 {
     bool rv = false;
 

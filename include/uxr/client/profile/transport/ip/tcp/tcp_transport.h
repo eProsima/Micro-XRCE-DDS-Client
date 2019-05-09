@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+#include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/config.h>
 #include <uxr/client/visibility.h>
@@ -65,6 +66,7 @@ typedef struct uxrTCPTransport
 UXRDLLAPI bool uxr_init_tcp_transport(
         uxrTCPTransport* transport,
         struct uxrTCPPlatform* platform,
+        uxrIpProtocol ip_protocol,
         const char* ip,
         uint16_t port);
 

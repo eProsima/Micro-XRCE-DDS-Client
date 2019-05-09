@@ -92,7 +92,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, ip, port))
+        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, UXR_IPv4, ip, port))
         {
             printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;

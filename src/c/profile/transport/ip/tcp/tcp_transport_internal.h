@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_PROFILE_TRANSPORT_TCP_TCP_TRANSPORT_INTERNAL_H_
-#define _SRC_C_PROFILE_TRANSPORT_TCP_TCP_TRANSPORT_INTERNAL_H_
+#ifndef SRC_C_PROFILE_TRANSPORT_TCP_TCP_TRANSPORT_INTERNAL_H_
+#define SRC_C_PROFILE_TRANSPORT_TCP_TCP_TRANSPORT_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -22,24 +22,33 @@ extern "C"
 
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
 
-bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port);
-bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform);
+bool uxr_init_tcp_platform(
+        struct uxrTCPPlatform* platform,
+        uxrIpProtocol ip_protocol,
+        const char* ip,
+        uint16_t port);
 
-size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                   const uint8_t* buf,
-                                   size_t len,
-                                   uint8_t* errcode);
+bool uxr_close_tcp_platform(
+        struct uxrTCPPlatform* platform);
 
-size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                  uint8_t* buf,
-                                  size_t len,
-                                  int timeout,
-                                  uint8_t* errcode);
+size_t uxr_write_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode);
 
-void uxr_disconnect_tcp_platform(struct uxrTCPPlatform* platform);
+size_t uxr_read_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode);
+
+void uxr_disconnect_tcp_platform(
+        struct uxrTCPPlatform* platform);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_SRC_C_PROFILE_TRANSPORT_TCP_TCP_TRANSPORT_INTERNAL_H_
+#endif // SRC_C_PROFILE_TRANSPORT_TCP_TCP_TRANSPORT_INTERNAL_H_

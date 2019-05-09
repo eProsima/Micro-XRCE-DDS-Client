@@ -14,12 +14,25 @@ static void sigpipe_handler(int fd)
 }
 #endif
 
-bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port)
+bool uxr_init_tcp_platform(
+        struct uxrTCPPlatform* platform,
+        uxrIpProtocol ip_protocol,
+        const char* ip,
+        uint16_t port)
 {
     bool rv = false;
 
     /* Socket initialization. */
-    platform->poll_fd.fd = socket(PF_INET, SOCK_STREAM, 0);
+    switch (ip_protocol)
+    {
+        case UXR_IPv4:
+            platform->poll_fd.fd = socket(AF_INET, SOCK_STREAM, 0);
+            break;
+        case UXR_IPv6:
+            platform->poll_fd.fd = socket(AF_INET6, SOCK_STREAM, 0);
+            break;
+    }
+
     if (-1 != platform->poll_fd.fd)
     {
 #ifdef PLATFORM_NAME_LINUX
@@ -27,11 +40,27 @@ bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint
 #endif
 
         /* Remote IP setup. */
-        struct sockaddr_in temp_addr;
-        temp_addr.sin_family = AF_INET;
-        temp_addr.sin_port = htons(port);
-        temp_addr.sin_addr.s_addr = inet_addr(ip);
-        platform->remote_addr = *((struct sockaddr *) &temp_addr);
+        switch (ip_protocol)
+        {
+            case UXR_IPv4:
+            {
+                struct sockaddr_in temp_addr;
+                temp_addr.sin_family = AF_INET;
+                temp_addr.sin_port = htons(port);
+                temp_addr.sin_addr.s_addr = inet_addr(ip);
+                platform->remote_addr = *((struct sockaddr *) &temp_addr);
+                break;
+            }
+            case UXR_IPv6:
+            {
+                struct sockaddr_in6 temp_addr;
+                temp_addr.sin6_family = AF_INET6;
+                temp_addr.sin6_port = htons(port);
+                inet_pton(AF_INET6, ip, &(temp_addr.sin6_addr));
+                platform->remote_addr = *((struct sockaddr *) &temp_addr);
+                break;
+            }
+        }
 
         /* Poll setup. */
         platform->poll_fd.events = POLLIN;
@@ -45,15 +74,17 @@ bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint
     return rv;
 }
 
-bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform)
+bool uxr_close_tcp_platform(
+        struct uxrTCPPlatform* platform)
 {
     return (-1 == platform->poll_fd.fd) ? true : (0 == close(platform->poll_fd.fd));
 }
 
-size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                   const uint8_t* buf,
-                                   size_t len,
-                                   uint8_t* errcode)
+size_t uxr_write_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     ssize_t bytes_sent = send(platform->poll_fd.fd, (void*)buf, len, 0);
@@ -69,11 +100,12 @@ size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
     return rv;
 }
 
-size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                  uint8_t* buf,
-                                  size_t len,
-                                  int timeout,
-                                  uint8_t* errcode)
+size_t uxr_read_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     int poll_rv = poll(&platform->poll_fd, 1, timeout);
@@ -97,7 +129,8 @@ size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
     return rv;
 }
 
-void uxr_disconnect_tcp_platform(struct uxrTCPPlatform* platform)
+void uxr_disconnect_tcp_platform(
+        struct uxrTCPPlatform* platform)
 {
     close(platform->poll_fd.fd);
     platform->poll_fd.fd = -1;
