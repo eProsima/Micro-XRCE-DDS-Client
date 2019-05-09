@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_TCP_TRANSPORT_H_
-#define _UXR_CLIENT_TCP_TRANSPORT_H_
+#ifndef UXR_CLIENT_TCP_TRANSPORT_H_
+#define UXR_CLIENT_TCP_TRANSPORT_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -73,10 +73,11 @@ UXRDLLAPI bool uxr_init_tcp_transport(
  * @param transport The transport structure.
  * @return `true` in case of successful closing. `false` in other case.
  */
-UXRDLLAPI bool uxr_close_tcp_transport(uxrTCPTransport* transport);
+UXRDLLAPI bool uxr_close_tcp_transport(
+        uxrTCPTransport* transport);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_UXR_CLIENT_TCP_TRANSPORT_H_
+#endif // UXR_CLIENT_TCP_TRANSPORT_H_

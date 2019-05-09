@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <uxr/client/profile/transport/tcp/tcp_transport.h>
+#include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
 
 bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, const char* ip, uint16_t port);
 bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform);

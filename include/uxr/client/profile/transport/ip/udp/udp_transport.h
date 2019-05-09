@@ -54,7 +54,8 @@ UXRDLLAPI bool uxr_init_udp_transport(
  * @param transport The transport structure.
  * @return `true` in case of successful closing. `false` in other case.
  */
-UXRDLLAPI bool uxr_close_udp_transport(uxrUDPTransport* transport);
+UXRDLLAPI bool uxr_close_udp_transport(
+        uxrUDPTransport* transport);
 
 
 #ifdef __cplusplus

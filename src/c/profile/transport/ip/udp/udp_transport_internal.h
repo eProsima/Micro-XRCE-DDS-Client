@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <uxr/client/profile/transport/udp/udp_transport.h>
+#include <uxr/client/profile/transport/ip/udp/udp_transport.h>
 
 bool uxr_init_udp_platform(struct uxrUDPPlatform* platform, const char* ip, uint16_t port);
 bool uxr_close_udp_platform(struct uxrUDPPlatform* platform);
