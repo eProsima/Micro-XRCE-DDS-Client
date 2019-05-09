@@ -74,16 +74,7 @@ bool uxr_init_udp_transport(
 {
     bool rv = false;
 
-    switch (ip_protocol)
-    {
-        case UXR_IPv4:
-            rv = uxr_init_udp4_platform(platform, ip, port);
-            break;
-        case UXR_IPv6:
-            break;
-    }
-
-    if (rv)
+    if (uxr_init_udp_platform(platform, ip_protocol, ip, port))
     {
         /* Setup platform. */
         transport->platform = platform;

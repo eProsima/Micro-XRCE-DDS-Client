@@ -1,8 +1,9 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_windows.h>
 #include "udp_transport_internal.h"
 
-bool uxr_init_udp4_platform(
+bool uxr_init_udp_platform(
         uxrUDPPlatform* platform,
+        uxrIpProtocol ip_protocol,
         const char* ip,
         uint16_t port)
 {

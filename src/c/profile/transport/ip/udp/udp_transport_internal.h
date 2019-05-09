@@ -22,8 +22,9 @@ extern "C"
 
 #include <uxr/client/profile/transport/ip/udp/udp_transport.h>
 
-bool uxr_init_udp4_platform(
+bool uxr_init_udp_platform(
         struct uxrUDPPlatform* platform,
+        uxrIpProtocol ip_protocol,
         const char* ip,
         uint16_t port);
 
