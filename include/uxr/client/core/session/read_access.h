@@ -34,11 +34,11 @@ typedef struct uxrDeliveryControl
 {
     /** The maximum number of topics that the Agent shall send to the Client. */
     uint16_t max_samples;
-    /** The maximum amount of time in second that shall be spent the Agent delivering the topic. */
+    /** The maximum amount of time in seconds that shall be spent by the Agent delivering the topic. */
     uint16_t max_elapsed_time;
     /** The maximum transfer rate, in bytes per second, that the Agent shall use. */
     uint16_t max_bytes_per_second;
-    /** The minimum elapsed time, in milliseconds, between two topic delivering. */
+    /** The minimum elapsed time, in milliseconds, between two topics deliveries. */
     uint16_t min_pace_period;
 
 } uxrDeliveryControl;
@@ -46,12 +46,12 @@ typedef struct uxrDeliveryControl
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE READ_DATA submessage.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
- *        As a result of the reception of this submessage, the Agent will start to read topic from the
+ *        As a result of the reception of this submessage, the Agent will start to read a topic from the
  *        DDS Global-Data-Space.
- *        Each time the Agent read a topic, it will be sent to the Client according to the uxrDeliveryControl set
+ *        Each time the Agent reads a message from the topic, it will be sent to the Client according to the uxrDeliveryControl set
  *        by the Client.
- *        Each time the Client received a topic from the Agent, it will call the `on_topic_callback` set by the user.
- *        This callback provided the `request_id` returned by this function in order to identify the topic.
+ *        Each time the Client receives a topic message from the Agent, it will call the `on_topic_callback` set by the user.
+ *        This callback provides the `request_id` returned by this function in order to identify the topic.
  *        In case of error at the Agent side, it will send an XRCE STATUS submessage with the error code.
  *        When the STATUS submessage is received by the Client, it will call the `on_status_callback` with the
  *        `request_id` returned by this function.
