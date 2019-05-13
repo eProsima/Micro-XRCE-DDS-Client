@@ -50,7 +50,7 @@ typedef enum uxrStreamType
 
 /**
  * The enum that identifies the direction of a stream.
- * There are two different direction: output (Client to Agent) and input (Agent to Client).
+ * There are two different directions: output (Client to Agent) and input (Agent to Client).
  */
 typedef enum uxrStreamDirection
 {
