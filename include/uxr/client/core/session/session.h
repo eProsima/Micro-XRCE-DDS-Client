@@ -132,7 +132,7 @@ UXRDLLAPI uxrStreamId uxr_create_output_best_effort_stream(
         size_t size);
 
 /**
- * @brief Creates and initializes an output best-effort stream.
+ * @brief Creates and initializes an output reliable stream.
  *        The maximum number of output reliable streams is set by the `CONFIG_MAX_OUTPUT_RELIABLE_STREAMS`
  *        variable at `client.config` file.
  * @param session   A uxrSession structure previously initialized.
