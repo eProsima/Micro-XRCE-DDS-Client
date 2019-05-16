@@ -110,7 +110,7 @@ UXRDLLAPI bool uxr_create_session(uxrSession* session);
 
 /**
  * @brief Deletes a session previously created.
- *        All XRCE entities created with the session will be removed.
+ *        All XRCE entities created within the session will be removed.
  *        This function logs out a session, disabling any other XRCE communication with the Agent.
  * @param session   A uxrSession structure previously initialized.
  * @return  true in case of successful session deletion, and false in other case.
@@ -132,8 +132,8 @@ UXRDLLAPI uxrStreamId uxr_create_output_best_effort_stream(
         size_t size);
 
 /**
- * @brief Creates and initializes an output best-effort stream.
- *        The maximum number of output reliable streams is set by the `CONFIG_MAX_OUTPUT_BEST_EFFORT_STREAMS`
+ * @brief Creates and initializes an output reliable stream.
+ *        The maximum number of output reliable streams is set by the `CONFIG_MAX_OUTPUT_RELIABLE_STREAMS`
  *        variable at `client.config` file.
  * @param session   A uxrSession structure previously initialized.
  * @param buffer    The memory block where the messages will be written.
@@ -160,6 +160,8 @@ UXRDLLAPI uxrStreamId uxr_create_input_best_effort_stream(uxrSession* session);
 
 /**
  * @brief Creates and initializes an input reliable stream.
+ *        The maximum number of input reliable streams is set by the `CONFIG_MAX_INPUT_RELIABLE_STREAMS`
+ *        variable at `client.config` file.
  * @param session   A uxrSession structure previously initialized.
  * @param buffer    The memory block where the messages will be written.
  * @param size      The buffer size.
@@ -184,7 +186,7 @@ UXRDLLAPI void uxr_flash_output_streams(uxrSession* session);
  * @brief  Keeps communication between the Client and the Agent.
  *         This function involves the following actions:
  *          1. flashing all the output streams sending the data through the transport,
- *          2. listening messages from the Agent calling the associated callback (topic and status) in case,
+ *          2. listening messages from the Agent calling the associated callback (topic and status).
  *        The aforementioned actions will be performed in a loop until the waiting time for a new message
  *        exceeds the `time`.
  * @param session   A uxrSession structure previously initialized.
@@ -199,7 +201,7 @@ UXRDLLAPI bool uxr_run_session_time(
  * @brief  Keeps communication between the Client and the Agent.
  *         This function involves the following actions:
  *          1. flashing all the output streams sending the data through the transport,
- *          2. listening messages from the Agent calling the associated callback (topic and status) in case,
+ *          2. listening messages from the Agent calling the associated callback (topic and status).
  *        The aforementioned actions will be performed in a loop until a message is received
  *        or the `timeout` is exceeded.
  * @param session   A uxrSession structure previously initialized.
@@ -214,7 +216,7 @@ UXRDLLAPI bool uxr_run_session_until_timeout(
  * @brief  Keeps communication between the Client and the Agent.
  *         This function involves the following actions:
  *          1. flashing all the output streams sending the data through the transport,
- *          2. listening messages from the Agent calling the associated callback (topic and status) in case,
+ *          2. listening messages from the Agent calling the associated callback (topic and status).
  *        The aforementioned actions will be performed in a loop until a the `timeout` is exceeded
  *        or the output reliable streams confirm the delivery of all their messages.
  * @param session   A uxrSession structure previously initialized.
@@ -229,7 +231,7 @@ UXRDLLAPI bool uxr_run_session_until_confirm_delivery(
  * @brief  Keeps communication between the Client and the Agent.
  *         This function involves the following actions:
  *          1. flashing all the output streams sending the data through the transport,
- *          2. listening messages from the Agent calling the associated callback (topic and status) in case,
+ *          2. listening messages from the Agent calling the associated callback (topic and status).
  *        The aforementioned actions will be performed in a loop until a the `timeout` is exceeded
  *        or all the requested status are received.
  * @param session       A uxrSession structure previously initialized.
@@ -251,7 +253,7 @@ UXRDLLAPI bool uxr_run_session_until_all_status(
  * @brief  Keeps communication between the Client and the Agent.
  *         This function involves the following actions:
  *          1. flashing all the output streams sending the data through the transport,
- *          2. listening messages from the Agent calling the associated callback (topic and status) in case,
+ *          2. listening messages from the Agent calling the associated callback (topic and status).
  *        The aforementioned actions will be performed in a loop until a the `timeout` is exceeded
  *        or one of the requested status is received.
  * @param session       A uxrSession structure previously initialized.

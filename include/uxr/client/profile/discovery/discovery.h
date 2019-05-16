@@ -38,9 +38,9 @@ typedef void (*uxrOnAgentFound) (const uxrAgentAddress* address, int64_t timesta
 
 /**
  * @brief Discovers Agents within the network using UDP/IP multicast with address "239.255.0.2" and port 7400.
- * @param attempts      The number of time a discovery message is sent across the network.
+ * @param attempts      The times a discovery message is sent across the network.
  * @param period        The period using to send multicast messages through the network.
- * @param on_agent_func The callback function that will calleed when an Agent is discovered.
+ * @param on_agent_func The callback function that will be called when an Agent is discovered.
  * @param args          The user argument provided to the callback function.
  */
 UXRDLLAPI void uxr_discovery_agents_default(
@@ -51,11 +51,11 @@ UXRDLLAPI void uxr_discovery_agents_default(
 
 /**
  * @brief Discovers Agents within the network using UDP/IP unicast with the address and port set by the user.
- * @param attempts          The number of time a discovery message is sent across the network.
- * @param period            The period using to send multicast messages through the network.
- * @param on_agent_func     The callback function that will calleed when an Agent is discovered.
+ * @param attempts          The times a discovery message is sent across the network.
+ * @param period            The period using to send unicast messages through the network.
+ * @param on_agent_func     The callback function that will called when an Agent is discovered.
  * @param args              The user argument provided to the callback function.
- * @param agent_list        The list of addresses using for discovering Agents.
+ * @param agent_list        The list of addresses used for discovering Agents.
  * @param agent_list_size   The size of the address list.
  */
 UXRDLLAPI void uxr_discovery_agents(

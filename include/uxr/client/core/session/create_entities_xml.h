@@ -25,7 +25,7 @@ extern "C"
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Participant payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
- *        As a result of the reception of this submessage, the Agent will create an XRCE Participant using according to
+ *        As a result of the reception of this submessage, the Agent will create an XRCE Participant according to
  *        the XML provides in the CREATE submessage.
  * @param session       A uxrSession structure previously initialized.
  * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
@@ -49,7 +49,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_participant_xml(
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Topic payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
- *        As a result of the reception of this submessage, the Agent will create an XRCE Topic using according to
+ *        As a result of the reception of this submessage, the Agent will create an XRCE Topic according to
  *        the XML provides in the CREATE submessage.
  * @param session           A uxrSession structure previously initialized.
  * @param stream_id         The output stream identifier where the CREATE submessage will be buffered.
@@ -73,7 +73,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_topic_xml(
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Subscriber payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
- *        As a result of the reception of this submessage, the Agent will create an XRCE Publisher using according to
+ *        As a result of the reception of this submessage, the Agent will create an XRCE Publisher according to
  *        the XML provides in the CREATE submessage.
  * @param session           A uxrSession structure previously initialized.
  * @param stream_id         The output stream identifier where the CREATE submessage will be buffered.
@@ -97,7 +97,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_publisher_xml(
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Subscriber payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
- *        As a result of the reception of this submessage, the Agent will create an XRCE Subscriber using according to
+ *        As a result of the reception of this submessage, the Agent will create an XRCE Subscriber according to
  *        the XML provides in the CREATE submessage.
  * @param session           A uxrSession structure previously initialized.
  * @param stream_id         The output stream identifier where the CREATE submessage will be buffered.
@@ -121,7 +121,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_subscriber_xml(
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE DataWriter payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
- *        As a result of the reception of this submessage, the Agent will create an XRCE DataWriter using according to
+ *        As a result of the reception of this submessage, the Agent will create an XRCE DataWriter according to
  *        the XML provides in the CREATE submessage.
  * @param session       A uxrSession structure previously initialized.
  * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
@@ -145,7 +145,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datawriter_xml(
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE DataReader payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
- *        As a result of the reception of this submessage, the Agent will create an XRCE DataReader using according to
+ *        As a result of the reception of this submessage, the Agent will create an XRCE DataReader according to
  *        the XML provides in the CREATE submessage.
  * @param session       A uxrSession structure previously initialized.
  * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
