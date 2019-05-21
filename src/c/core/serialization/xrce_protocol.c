@@ -1875,6 +1875,7 @@ bool uxr_deserialize_DELETE_Payload(ucdrBuffer* buffer, DELETE_Payload* output)
 bool uxr_serialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, const STATUS_AGENT_Payload* input)
 {
     bool ret = true;
+    ret &= uxr_serialize_ResultStatus(buffer, &input->result);
     ret &= uxr_serialize_AGENT_Representation(buffer, &input->agent_info);
     return ret;
 }
@@ -1882,6 +1883,7 @@ bool uxr_serialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, const STATUS_AGENT_P
 bool uxr_deserialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, STATUS_AGENT_Payload* output)
 {
     bool ret = true;
+    ret &= uxr_deserialize_ResultStatus(buffer, &output->result);
     ret &= uxr_deserialize_AGENT_Representation(buffer, &output->agent_info);
     return ret;
 }

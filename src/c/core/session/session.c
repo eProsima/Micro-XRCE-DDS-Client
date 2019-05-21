@@ -15,6 +15,7 @@
 #include "stream/seq_num_internal.h"
 #include "../serialization/xrce_protocol_internal.h"
 #include "../log/log_internal.h"
+#include "../../util/time_internal.h"
 
 #define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE)
 #define DELETE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE)

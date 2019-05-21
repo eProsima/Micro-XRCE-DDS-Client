@@ -94,6 +94,8 @@ std::vector<uint8_t> ClientSerialization::status_agent_payload()
     ucdr_init_buffer(&ub, &buffer.front(), uint32_t(buffer.capacity()));
 
     STATUS_AGENT_Payload payload;
+    payload.result.status = {0x01};
+    payload.result.implementation_status = {0x23};
     payload.agent_info.xrce_cookie = XrceCookie{0x89, 0xAB, 0xCD, 0xEF};
     payload.agent_info.xrce_version = XrceVersion{0x01, 0x23};
     payload.agent_info.xrce_vendor_id = XrceVendorId{0x45, 0x67};
@@ -171,6 +173,7 @@ std::vector<uint8_t> ClientSerialization::read_data_payload()
     READ_DATA_Payload payload;
     payload.base.request_id = RequestId{0x01, 0x23};
     payload.base.object_id = ObjectId{0x45, 0x67};
+    payload.read_specification.preferred_stream_id = 0x80;
     payload.read_specification.data_format = 0x89;
     payload.read_specification.optional_content_filter_expression = 0x01;
     payload.read_specification.optional_delivery_control = 0x01;

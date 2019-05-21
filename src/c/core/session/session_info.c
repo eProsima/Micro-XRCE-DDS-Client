@@ -65,10 +65,9 @@ void uxr_buffer_delete_session(uxrSessionInfo* info, ucdrBuffer* ub)
 
 void uxr_read_create_session_status(uxrSessionInfo* info, ucdrBuffer* ub)
 {
-    (void) info;
     STATUS_AGENT_Payload payload;
     (void) uxr_deserialize_STATUS_AGENT_Payload(ub, &payload);
-    info->last_requested_status = UXR_STATUS_OK;
+    info->last_requested_status = payload.result.status;
 }
 
 void uxr_read_delete_session_status(uxrSessionInfo* info, ucdrBuffer* ub)

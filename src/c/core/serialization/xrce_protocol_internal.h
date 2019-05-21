@@ -859,6 +859,7 @@ typedef struct DELETE_Payload
 
 typedef struct STATUS_AGENT_Payload
 {
+    ResultStatus result;
     AGENT_Representation agent_info;
 
 } STATUS_AGENT_Payload;
@@ -992,6 +993,7 @@ typedef struct TIMESTAMP_REPLY_Payload
     Time_t transmit_timestamp;
     Time_t receive_timestamp;
     Time_t originate_timestamp;
+
 } TIMESTAMP_REPLY_Payload;
 
 #ifdef PERFORMANCE_TESTING
