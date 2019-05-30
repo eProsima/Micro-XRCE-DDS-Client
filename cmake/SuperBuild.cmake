@@ -24,8 +24,10 @@ if(NOT microcdr_FOUND)
             ${PROJECT_BINARY_DIR}/ucdr
         SOURCE_DIR
             ${PROJECT_SOURCE_DIR}/thirdparty/microcdr
+        INSTALL_DIR
+            ${PROJECT_BINARY_DIR}/temp_install
         CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+            -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         )
     LIST(APPEND _deps ucdr)
 endif()
