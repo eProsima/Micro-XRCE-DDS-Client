@@ -30,6 +30,12 @@ if(NOT microcdr_FOUND)
             ${PROJECT_BINARY_DIR}/temp_install
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+            -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+            "-DARCH_CPU_FLAGS:STRING="${ARCH_CPU_FLAGS}""
+            "-DARCH_OPT_FLAGS:STRING="${ARCH_OPT_FLAGS}""
+            "-DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}"
+            "-DCROSSDEV:STRING=${CROSSDEV}"
+            "-DCHECK_ENDIANNESS:BOOL=${CHECK_ENDIANNESS}"
         )
     LIST(APPEND _deps ucdr)
 endif()
