@@ -42,7 +42,7 @@ public:
         for(size_t i = 0; i < HISTORY; ++i)
         {
             uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, i);
-            EXPECT_EQ(0, uxr_get_reliable_buffer_length(slot));
+            EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot));
         }
     }
 
@@ -230,7 +230,7 @@ TEST_F(InputReliableStreamTest, Reset)
     for(size_t i = 0; i < HISTORY; ++i)
     {
         uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, i);
-        EXPECT_EQ(0, uxr_get_reliable_buffer_length(slot));
+        EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot));
     }
 }
 
@@ -251,7 +251,7 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBuffer)
     ASSERT_FALSE(ub.error);
     EXPECT_EQ(slot_1, ub.init);
     EXPECT_EQ(slot_1 + size / 2, ub.final);
-    EXPECT_EQ(0, uxr_get_reliable_buffer_length(slot_1));
+    EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot_1));
 }
 
 TEST_F(InputReliableStreamTest, FragmentationJumpToNextBufferLastPosition)
@@ -271,5 +271,5 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBufferLastPosition)
     ASSERT_FALSE(ub.error);
     EXPECT_EQ(slot_0, ub.init);
     EXPECT_EQ(slot_0 + size / 2, ub.final);
-    EXPECT_EQ(0, uxr_get_reliable_buffer_length(slot_0));
+    EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot_0));
 }

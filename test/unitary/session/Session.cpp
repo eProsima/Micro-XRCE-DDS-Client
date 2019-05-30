@@ -57,7 +57,7 @@ public:
         EXPECT_EQ(&comm, session.comm);
         EXPECT_EQ(NULL, session.request_list);
         EXPECT_EQ(NULL, session.status_list);
-        EXPECT_EQ(NULL, session.request_status_list_size);
+        EXPECT_EQ(size_t(0), session.request_status_list_size);
 
         EXPECT_EQ(NULL, session.on_status);
         EXPECT_EQ(NULL, session.on_status_args);
@@ -105,24 +105,24 @@ public:
         EXPECT_EQ(SessionTest::current, instance);
         if(std::string("FlashStreams") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            EXPECT_EQ(OFFSET + SUBHEADER_SIZE + 8, len);
+            EXPECT_EQ(size_t(OFFSET + SUBHEADER_SIZE + 8), len);
         }
         else if(std::string("SendMessageOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            EXPECT_EQ(MTU, len);
+            EXPECT_EQ(size_t(MTU), len);
         }
         else if(std::string("SendMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            EXPECT_EQ(MTU, len);
+            EXPECT_EQ(size_t(MTU), len);
             return false;
         }
         else if(std::string("SendHeartbeat") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            EXPECT_EQ(HEARTBEAT_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET), len);
+            EXPECT_EQ(size_t(HEARTBEAT_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET)), len);
         }
         else if(std::string("SendAcknack") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
-            EXPECT_EQ(ACKNACK_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET), len);
+            EXPECT_EQ(size_t(ACKNACK_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET)), len);
         }
 
         return true;
@@ -313,7 +313,7 @@ TEST_F(SessionTest, WaitSessionStatusBad)
     size_t attempts = 10;
     bool found = wait_session_status(&session, buffer, length, attempts);
     EXPECT_FALSE(found);
-    EXPECT_EQ(attempts, SessionTest::listening_counter);
+    EXPECT_EQ(attempts, size_t(SessionTest::listening_counter));
 }
 
 TEST_F(SessionTest, SendMessageOk)

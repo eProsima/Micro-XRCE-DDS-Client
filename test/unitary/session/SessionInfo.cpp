@@ -104,7 +104,7 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithKey)
     EXPECT_EQ(info.id, id);
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
-    EXPECT_EQ(MAX_HEADER_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(size_t(MAX_HEADER_SIZE), ucdr_buffer_length(&ub));
 }
 
 TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
@@ -126,5 +126,5 @@ TEST(SessionInfoTest, WriteReadSessionHeaderWithoutKey)
     EXPECT_EQ(info.id, id);
     EXPECT_EQ(stream_id, read_stream_id);
     EXPECT_EQ(seq_num, read_seq_num);
-    EXPECT_EQ(MIN_HEADER_SIZE, ucdr_buffer_length(&ub));
+    EXPECT_EQ(size_t(MIN_HEADER_SIZE), ucdr_buffer_length(&ub));
 }
