@@ -36,6 +36,8 @@ endif()
 
 # Client project.
 ExternalProject_Add(uclient
+    UPDATE_COMMAND
+        ""
     SOURCE_DIR
         ${PROJECT_SOURCE_DIR}
     BINARY_DIR
