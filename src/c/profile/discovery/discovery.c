@@ -28,7 +28,7 @@ static void write_get_info_message(ucdrBuffer* ub);
 static bool listen_info_message(uxrUDPTransportDatagram* transport, int period, CallbackData* callback);
 static bool read_info_headers(ucdrBuffer* ub);
 static bool read_info_message(ucdrBuffer* ub, CallbackData* callback);
-static bool process_info(CallbackData* callback, Time_t timestamp, TransportLocator* transport);
+static bool process_info(CallbackData* callback, TransportLocator* transport);
 
 //==================================================================
 //                             PUBLIC
@@ -143,11 +143,10 @@ bool read_info_message(
     {
         XrceVersion* version = &payload.object_info.config._.agent.xrce_version;
         TransportLocator* transport = &payload.object_info.activity._.agent.address_seq.data[0];
-        Time_t timestamp = payload.object_info.config._.agent.agent_timestamp;
 
         if(0 == memcmp(version->data, XRCE_VERSION.data, sizeof(XRCE_VERSION.data)))
         {
-            (void) process_info(callback, timestamp, transport);
+            (void) process_info(callback, transport);
             well_read = true;
         }
     }
@@ -157,11 +156,9 @@ bool read_info_message(
 
 bool process_info(
         CallbackData* callback,
-        Time_t timestamp,
         TransportLocator* locator)
 {
     bool processed = false;
-    int64_t nanoseconds = (int64_t)timestamp.seconds + (int64_t)timestamp.nanoseconds * 1000000000L;
 
     if(locator->format == ADDRESS_FORMAT_MEDIUM)
     {
@@ -170,7 +167,7 @@ bool process_info(
 
         uxrAgentAddress address = {ip, locator->_.medium_locator.locator_port};
 
-        callback->on_agent(&address, nanoseconds, callback->args);
+        callback->on_agent(&address, callback->args);
 
         processed = true;
     }

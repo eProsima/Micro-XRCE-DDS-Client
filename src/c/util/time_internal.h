@@ -1,4 +1,4 @@
-// Copyright 2017 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2019 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UXR_CLIENT_UTIL_TIME_H_
-#define UXR_CLIENT_UTIL_TIME_H_
+#ifndef SRC_C_UTIL_TIME_H_
+#define SRC_C_UTIL_TIME_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -23,12 +23,13 @@ extern "C"
 #include <uxr/client/dll.h>
 #include <stdint.h>
 
-UXRDLLAPI int64_t uxr_millis(void);
-
-UXRDLLAPI int64_t uxr_nanos(void);
+UXRDLLAPI static inline int64_t uxr_convert_to_nanos(int32_t sec, uint32_t nsec)
+{
+    return ((int64_t)sec * 1000000000) + nsec;
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // UXR_CLIENT_UTIL_TIME_H_
+#endif // SRC_C_UTIL_TIME_H_

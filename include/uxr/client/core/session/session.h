@@ -28,10 +28,25 @@ extern "C"
 struct uxrSession;
 struct uxrCommunication;
 
-typedef void (*uxrOnStatusFunc) (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uint8_t status, void* args);
-typedef void (*uxrOnTopicFunc) (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uxrStreamId stream_id, struct ucdrBuffer* ub, void* args);
+typedef void (*uxrOnStatusFunc) (struct uxrSession* session,
+                                 uxrObjectId object_id,
+                                 uint16_t request_id,
+                                 uint8_t status,
+                                 void* args);
+
+typedef void (*uxrOnTopicFunc) (struct uxrSession* session,
+                                uxrObjectId object_id,
+                                uint16_t request_id,
+                                uxrStreamId stream_id,
+                                struct ucdrBuffer* ub,
+                                void* args);
+
+typedef void (*uxrOnTimeFunc) (struct uxrSession* session,
+                               int64_t current_timestamp,
+                               int64_t transmit_timestamp,
+                               int64_t received_timestamp,
+                               int64_t originate_timestamp,
+                               void* args);
 
 #ifdef PERFORMANCE_TESTING
 typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, struct ucdrBuffer* mb, void* args);
@@ -52,6 +67,11 @@ typedef struct uxrSession
 
     uxrOnTopicFunc on_topic;
     void* on_topic_args;
+
+    uxrOnTimeFunc on_time;
+    void* on_time_args;
+    int64_t time_offset;
+    bool synchronized;
 
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;
@@ -76,7 +96,7 @@ UXRDLLAPI void uxr_init_session(
  * @brief Sets the status callback.
  *        This is called when a status message is received from the Agent.
  * @param session           A uxrSession structure previously initialized.
- * @param on_status_func    The function that will be called when a valid status message comes from the Agent.
+ * @param on_status_func    The function that will be called when a valid status message arrives from the Agent.
  * @param args              User pointer data. The args will be provided to `on_status_func` function.
  */
 UXRDLLAPI void uxr_set_status_callback(
@@ -89,13 +109,27 @@ UXRDLLAPI void uxr_set_status_callback(
  *        This is called when a topic is received from the Agent.
  *        The topics will be received only if a `request_data` function has been called.
  * @param session           A uxrSession structure previously initialized.
- * @param on_topic_func     The function that will be called when a valid data message comes from the Agent.
+ * @param on_topic_func     The function that will be called when a valid data message arrives from the Agent.
  * @param args              User pointer data. The args will be provided to `on_topic_func` function.
  */
 UXRDLLAPI void uxr_set_topic_callback(
         uxrSession* session,
         uxrOnTopicFunc on_topic_func,
         void* args);
+
+/**
+ * @brief Sets the time synchronization callback.
+ *        The callback is called when a TIMESTAMP_REPLY submessage is received from the Agent.
+ *        The user could use this callback to implement her/his own time synchronization protocol.
+ * @param session       A uxrSession structure previously initialized.
+ * @param on_time_func  The function that will be called when a TIMESTAMP_REPLY submessage arrives from the Agent.
+ * @param args          A user pointer data. The args will be provided to `on_time_func` function.
+ */
+UXRDLLAPI void uxr_set_time_callback(
+        uxrSession* session,
+        uxrOnTimeFunc on_time_func,
+        void* args);
+
 #ifdef PERFORMANCE_TESTING
 UXRDLLAPI void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_performance_func, void* args);
 #endif
@@ -271,6 +305,30 @@ UXRDLLAPI bool uxr_run_session_until_one_status(
         const uint16_t* request_list,
         uint8_t* status_list,
         size_t list_size);
+
+/**
+ * @brief Synchronizes the session time using by default the NTP protocol.
+ * @param session   A uxrSession structure previously initialized.
+ * @param time      The waiting time in milliseconds.
+ * @return  `true` in case of successful synchronization. `false` in other case.
+ */
+UXRDLLAPI bool uxr_sync_session(
+        uxrSession* session,
+        int time);
+
+/**
+ * @brief Returns the epoch time in milliseconds taking into account the offset computed during the time synchronization.
+ * @param session   A uxrSession structure previosly initialized.
+ * @return The epoch time in milliseconds.
+ */
+UXRDLLAPI int64_t uxr_epoch_millis(uxrSession* session);
+
+/**
+ * @brief Returns the epoch time in nanoseconds taking into account the offset computed during the time synchronization.
+ * @param session   A uxrSession structure previosly initialized.
+ * @return The epoch time in nanoseconds.
+ */
+UXRDLLAPI int64_t uxr_epoch_nanos(uxrSession* session);
 
 #ifdef PERFORMANCE_TESTING
 UXRDLLAPI bool uxr_buffer_performance(uxrSession* session,

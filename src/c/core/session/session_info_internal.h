@@ -23,7 +23,7 @@ extern "C"
 #include <uxr/client/core/session/session_info.h>
 #include "../serialization/xrce_header_internal.h"
 
-#define CREATE_CLIENT_PAYLOAD_SIZE 28
+#define CREATE_CLIENT_PAYLOAD_SIZE 16
 #define DELETE_CLIENT_PAYLOAD_SIZE 4
 
 #define MIN_HEADER_SIZE 4
@@ -34,7 +34,7 @@ struct BaseObjectRequest;
 
 void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key);
 
-void uxr_buffer_create_session(uxrSessionInfo* info, struct ucdrBuffer* ub, int64_t nanoseconds, uint16_t mtu);
+void uxr_buffer_create_session(uxrSessionInfo* info, struct ucdrBuffer* ub, uint16_t mtu);
 void uxr_buffer_delete_session(uxrSessionInfo* info, struct ucdrBuffer* ub);
 void uxr_read_create_session_status(uxrSessionInfo* info, struct ucdrBuffer* ub);
 void uxr_read_delete_session_status(uxrSessionInfo* info, struct ucdrBuffer* ub);

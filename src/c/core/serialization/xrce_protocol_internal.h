@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
-#define _SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
+#ifndef SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
+#define SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_INTERNAL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -217,7 +217,6 @@ typedef struct CLIENT_Representation
     XrceCookie xrce_cookie;
     XrceVersion xrce_version;
     XrceVendorId xrce_vendor_id;
-    Time_t client_timestamp;
     ClientKey client_key;
     uint8_t session_id;
     bool optional_properties;
@@ -232,7 +231,6 @@ typedef struct AGENT_Representation
     XrceCookie xrce_cookie;
     XrceVersion xrce_version;
     XrceVendorId xrce_vendor_id;
-    Time_t agent_timestamp;
     bool optional_properties;
     PropertySeq properties;
 
@@ -672,7 +670,7 @@ typedef struct DataDeliveryControl
 
 typedef struct ReadSpecification
 {
-    uint8_t input_stream_id;
+    uint8_t preferred_stream_id;
     uint8_t data_format;
     bool optional_content_filter_expression;
     char* content_filter_expression;
@@ -831,7 +829,6 @@ typedef struct DataRepresentation
 
 typedef struct CREATE_CLIENT_Payload
 {
-    BaseObjectRequest base;
     CLIENT_Representation client_representation;
 
 } CREATE_CLIENT_Payload;
@@ -862,7 +859,7 @@ typedef struct DELETE_Payload
 
 typedef struct STATUS_AGENT_Payload
 {
-    BaseObjectReply base;
+    ResultStatus result;
     AGENT_Representation agent_info;
 
 } STATUS_AGENT_Payload;
@@ -984,6 +981,20 @@ typedef struct HEARTBEAT_Payload
     uint8_t stream_id;
 
 } HEARTBEAT_Payload;
+
+typedef struct TIMESTAMP_Payload
+{
+    Time_t transmit_timestamp;
+
+} TIMESTAMP_Payload;
+
+typedef struct TIMESTAMP_REPLY_Payload
+{
+    Time_t transmit_timestamp;
+    Time_t receive_timestamp;
+    Time_t originate_timestamp;
+
+} TIMESTAMP_REPLY_Payload;
 
 #ifdef PERFORMANCE_TESTING
 typedef struct PERFORMANCE_Payload
@@ -1272,6 +1283,12 @@ bool uxr_deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output
 bool uxr_serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload* input);
 bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* output);
 
+bool uxr_serialize_TIMESTAMP_Payload(ucdrBuffer* buffer, const TIMESTAMP_Payload* input);
+bool uxr_deserialize_TIMESTAMP_Payload(ucdrBuffer* buffer, TIMESTAMP_Payload* output);
+
+bool uxr_serialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, const TIMESTAMP_REPLY_Payload* input);
+bool uxr_deserialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, TIMESTAMP_REPLY_Payload* output);
+
 #ifdef PERFORMANCE_TESTING
 bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input);
 bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload* input);
@@ -1281,4 +1298,4 @@ bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload
 }
 #endif
 
-#endif //_SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_H_
+#endif // SRC_C_CORE_SERIALIZATION_XRCE_PROTOCOL_H_

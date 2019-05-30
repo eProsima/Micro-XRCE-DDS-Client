@@ -15,13 +15,9 @@ std::vector<uint8_t> ClientSerialization::create_client_payload()
     ucdr_init_buffer(&ub, &buffer.front(), uint32_t(buffer.capacity()));
 
     CREATE_CLIENT_Payload payload;
-    payload.base.request_id = RequestId{0x01, 0x23};
-    payload.base.object_id = ObjectId{0x45, 0x67};
     payload.client_representation.xrce_cookie = XrceCookie{0x89, 0xAB, 0xCD, 0xEF};
     payload.client_representation.xrce_version = XrceVersion{0x01, 0x23};
     payload.client_representation.xrce_vendor_id = XrceVendorId{0x45, 0x67};
-    payload.client_representation.client_timestamp.seconds = int32_t(0x89ABCDEF);
-    payload.client_representation.client_timestamp.nanoseconds = 0x01234567;
     payload.client_representation.client_key = ClientKey{0x89, 0xAB, 0xCD, 0xEF};
     payload.client_representation.session_id = 0x01;
     payload.client_representation.optional_properties = 0x00;
@@ -98,13 +94,11 @@ std::vector<uint8_t> ClientSerialization::status_agent_payload()
     ucdr_init_buffer(&ub, &buffer.front(), uint32_t(buffer.capacity()));
 
     STATUS_AGENT_Payload payload;
-    payload.base.related_request.request_id = RequestId{0x01, 0x23};
-    payload.base.related_request.object_id = ObjectId{0x45, 0x67};
+    payload.result.status = {0x01};
+    payload.result.implementation_status = {0x23};
     payload.agent_info.xrce_cookie = XrceCookie{0x89, 0xAB, 0xCD, 0xEF};
     payload.agent_info.xrce_version = XrceVersion{0x01, 0x23};
     payload.agent_info.xrce_vendor_id = XrceVendorId{0x45, 0x67};
-    payload.agent_info.agent_timestamp.seconds = int32_t(0x89ABCDEF);
-    payload.agent_info.agent_timestamp.nanoseconds = 0x01234567;
     payload.agent_info.optional_properties = 0x00;
 
     uxr_serialize_STATUS_AGENT_Payload(&ub, &payload);
@@ -148,8 +142,6 @@ std::vector<uint8_t> ClientSerialization::info_payload()
     payload.object_info.optional_activity = 0x01;
     payload.object_info.optional_config = 0x01;
     payload.object_info.config.kind = OBJK_AGENT;
-    payload.object_info.config._.agent.agent_timestamp.seconds = int32_t(0x89ABCDEF);
-    payload.object_info.config._.agent.agent_timestamp.nanoseconds = 0x01234567;
     payload.object_info.config._.agent.optional_properties = 0x00;
     payload.object_info.config._.agent.xrce_cookie = XrceCookie{0x89, 0xAB, 0xCD, 0xEF};
     payload.object_info.config._.agent.xrce_version = XrceVersion{0x01, 0x23};
@@ -181,7 +173,7 @@ std::vector<uint8_t> ClientSerialization::read_data_payload()
     READ_DATA_Payload payload;
     payload.base.request_id = RequestId{0x01, 0x23};
     payload.base.object_id = ObjectId{0x45, 0x67};
-    payload.read_specification.input_stream_id = 0x80;
+    payload.read_specification.preferred_stream_id = 0x80;
     payload.read_specification.data_format = 0x89;
     payload.read_specification.optional_content_filter_expression = 0x01;
     payload.read_specification.optional_delivery_control = 0x01;

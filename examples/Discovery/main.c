@@ -19,9 +19,9 @@
 
 #define MAX_AGENTS 10
 
-void on_agent_found(const uxrAgentAddress* address, int64_t timestamp, void* args)
+void on_agent_found(const uxrAgentAddress* address, void* args)
 {
-    (void) timestamp; (void) args;
+    (void) args;
     printf("Found agent => ip: %s, port: %d\n", address->ip, address->port);
 }
 

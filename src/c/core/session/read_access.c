@@ -67,7 +67,7 @@ uint16_t uxr_buffer_request_data(
     uint16_t request_id = UXR_INVALID_REQUEST_ID;
 
     READ_DATA_Payload payload;
-    payload.read_specification.input_stream_id = data_stream_id.raw;
+    payload.read_specification.preferred_stream_id = data_stream_id.raw;
     payload.read_specification.data_format = FORMAT_DATA;
     payload.read_specification.optional_content_filter_expression = false; //not supported yet
     payload.read_specification.optional_delivery_control = (control != NULL);
