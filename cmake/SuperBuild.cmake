@@ -20,6 +20,8 @@ unset(_deps)
 find_package(microcdr "1.0.1" EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
+        DOWNLOAD_COMMAND
+            git submodule update --init ${PROJECT_SOURCE_DIR}/thirdparty/microcdr/
         PREFIX
             ${PROJECT_BINARY_DIR}/ucdr
         SOURCE_DIR
