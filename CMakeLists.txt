@@ -1,4 +1,4 @@
-# Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+# Copyright 2019 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-###############################################################################
-# CMake build rules for Micro XRCE-DDS Client
-###############################################################################
+################################################################################
+## CMake build rules for Micro XRCE-DDS Client
+################################################################################
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-set(IS_TOP_LEVEL TRUE)
-if(PROJECT_SOURCE_DIR)
-    set(IS_TOP_LEVEL FALSE)
+option(SUPERBUILD "Active super build" ON)
+
+if(SUPERBUILD)
+    project(superbuild NONE)
+    set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/install")
+    include(cmake/SuperBuild.cmake)
+    return()
+else()
+    project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
+    set(CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/install")
 endif()
+
+find_package(microcdr 1.0.1 EXACT REQUIRED)
 
 # Set CMAKE_BUILD_TYPE to Release by default.
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -30,15 +39,15 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-
+#
+################################################################################
+## Product information
+################################################################################
+#cmake_policy(SET CMP0048 NEW)
+#project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
+#
 ###############################################################################
-# Product information
-###############################################################################
-cmake_policy(SET CMP0048 NEW)
-project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
-
-###############################################################################
-# eProsima build options
+# Build options
 ###############################################################################
 option(EPROSIMA_BUILD "Activate internal building" OFF)
 option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
@@ -60,7 +69,6 @@ endif()
 ###############################################################################
 # Client configuration options
 ###############################################################################
-
 # Load configuration file.
 set(CLIENT_CONFIG "${PROJECT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
@@ -83,13 +91,13 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
-eprosima_find_package(microcdr)
+#include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
+#eprosima_find_package(microcdr)
+find_package(microcdr 1.0.1 EXACT REQUIRED)
 
 ###############################################################################
 # Sources
 ###############################################################################
-
 # Check platform.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(PLATFORM_NAME_LINUX ON)
@@ -201,7 +209,6 @@ target_include_directories(${PROJECT_NAME}
 ###############################################################################
 # Config
 ###############################################################################
-
 # Install path
 set(BIN_INSTALL_DIR bin/ CACHE PATH "Installation directory for binaries")
 set(INCLUDE_INSTALL_DIR include/ CACHE PATH "Installation directory for C headers")
@@ -221,7 +228,6 @@ configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
 ###############################################################################
 # Compile setting
 ###############################################################################
-
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
@@ -316,3 +322,4 @@ configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/packaging/Config.cmake
 install(FILES ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Config.cmake
     DESTINATION ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
     )
+
