@@ -50,7 +50,7 @@ ExternalProject_Add(uclient
     BINARY_DIR
         ${CMAKE_CURRENT_BINARY_DIR}
     CMAKE_ARGS
-        -DSUPERBUILD=OFF
+        -DUCLIENT_SUPERBUILD=OFF
     INSTALL_COMMAND
         ""
     DEPENDS

@@ -17,11 +17,11 @@
 ################################################################################
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-option(SUPERBUILD "Active super build" ON)
+option(UCLIENT_SUPERBUILD "Active super build" ON)
 
-if(SUPERBUILD)
-    project(superbuild NONE)
-    include(cmake/SuperBuild.cmake)
+if(UCLIENT_SUPERBUILD)
+    project(uclient_superbuild NONE)
+    include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
 else()
     project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
