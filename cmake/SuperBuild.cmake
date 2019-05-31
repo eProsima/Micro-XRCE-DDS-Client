@@ -17,6 +17,7 @@ include(ExternalProject)
 unset(_deps)
 
 # Micro CDR.
+unset(microcdr_DIR CACHE)
 find_package(microcdr "1.0.1" EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
@@ -50,7 +51,6 @@ ExternalProject_Add(uclient
         ${CMAKE_CURRENT_BINARY_DIR}
     CMAKE_ARGS
         -DSUPERBUILD=OFF
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     INSTALL_COMMAND
         ""
     DEPENDS
