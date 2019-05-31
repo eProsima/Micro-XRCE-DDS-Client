@@ -21,6 +21,7 @@ find_package(microcdr "1.0.1" EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
         DOWNLOAD_COMMAND
+            cd ${PROJECT_SOURCE_DIR}
             git submodule update --init ${PROJECT_SOURCE_DIR}/thirdparty/microcdr/
         PREFIX
             ${PROJECT_BINARY_DIR}/ucdr
@@ -29,21 +30,20 @@ if(NOT microcdr_FOUND)
         INSTALL_DIR
             ${PROJECT_BINARY_DIR}/temp_install
         CMAKE_ARGS
+            -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-            "-DARCH_CPU_FLAGS:STRING="${ARCH_CPU_FLAGS}""
-            "-DARCH_OPT_FLAGS:STRING="${ARCH_OPT_FLAGS}""
+            "-DARCH_CPU_FLAGS:STRING=\"${ARCH_CPU_FLAGS}\""
+            "-DARCH_OPT_FLAGS:STRING=\"${ARCH_OPT_FLAGS}\""
             "-DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}"
             "-DCROSSDEV:STRING=${CROSSDEV}"
             "-DCHECK_ENDIANNESS:BOOL=${CHECK_ENDIANNESS}"
         )
-    LIST(APPEND _deps ucdr)
+    list(APPEND _deps ucdr)
 endif()
 
 # Client project.
 ExternalProject_Add(uclient
-    UPDATE_COMMAND
-        ""
     SOURCE_DIR
         ${PROJECT_SOURCE_DIR}
     BINARY_DIR
