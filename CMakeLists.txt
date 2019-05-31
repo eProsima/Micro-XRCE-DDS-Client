@@ -63,11 +63,6 @@ else()
     set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
 endif()
 
-# Generate config.h
-configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
-    )
-
 ###############################################################################
 # Client configuration options
 ###############################################################################
@@ -314,6 +309,11 @@ install(
         ${INCLUDE_INSTALL_DIR}/uxr/client
     FILES_MATCHING
         PATTERN "*.h"
+    )
+
+# Generate config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
     )
 
 # Install config.h
