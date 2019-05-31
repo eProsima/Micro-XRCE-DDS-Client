@@ -49,6 +49,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 ###############################################################################
+# Config
+###############################################################################
+# Install path
+include(GNUInstallDirs)
+set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+if(WIN32)
+    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
+else()
+    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
+endif()
+
+# Generate config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
+    )
+
+###############################################################################
 # Client configuration options
 ###############################################################################
 # Load configuration file.
@@ -73,10 +93,7 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-find_package(microcdr 1.0.1 EXACT REQUIRED
-    HINTS
-        ${PROJECT_BINARY_DIR}/temp_install
-    )
+find_package(microcdr 1.0.1 EXACT REQUIRED HINTS ${PROJECT_BINARY_DIR}/temp_install)
 
 ###############################################################################
 # Sources
@@ -217,26 +234,6 @@ target_include_directories(${PROJECT_NAME}
     )
 
 ###############################################################################
-# Config
-###############################################################################
-# Install path
-include(GNUInstallDirs)
-set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
-if(WIN32)
-    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
-else()
-    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
-endif()
-
-# Generate config.h
-configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
-    )
-
-###############################################################################
 # Compile setting
 ###############################################################################
 # Definitions
@@ -279,14 +276,11 @@ if(UCLIENT_BUILD_TESTS)
     enable_testing()
     include(CTest)
 
-    if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-        add_subdirectory(test/unitary)
-        add_subdirectory(test/integration/interaction)
-
-        if(NOT WIN32)
-            add_subdirectory(test/transport/serial_comm)
-            add_subdirectory(test/integration/cross_serialization)
-        endif()
+    add_subdirectory(test/unitary)
+    add_subdirectory(test/integration/interaction)
+    if(PLATFORM_NAME_LINUX)
+        add_subdirectory(test/transport/serial_comm)
+        add_subdirectory(test/integration/cross_serialization)
     endif()
 endif()
 
