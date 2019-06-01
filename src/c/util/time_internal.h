@@ -23,7 +23,7 @@ extern "C"
 #include <uxr/client/dll.h>
 #include <stdint.h>
 
-UXRDLLAPI static inline int64_t uxr_convert_to_nanos(int32_t sec, uint32_t nsec)
+static inline int64_t uxr_convert_to_nanos(int32_t sec, uint32_t nsec)
 {
     return ((int64_t)sec * 1000000000) + nsec;
 }
