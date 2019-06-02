@@ -88,7 +88,7 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-find_package(microcdr 1.0.1 EXACT REQUIRED HINTS ${PROJECT_BINARY_DIR}/temp_install)
+find_package(microcdr 1.0.1 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
 
 ###############################################################################
 # Sources
