@@ -17,7 +17,19 @@
 ################################################################################
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-option(UCLIENT_SUPERBUILD "Active super build" ON)
+###############################################################################
+# Build options
+###############################################################################
+option(UCLIENT_SUPERBUILD "Enable superbuild compilation." ON)
+option(UCLIENT_BUILD_TESTS "Build tests" OFF)
+option(UCLIENT_BUILD_EXAMPLES "Build examples" OFF)
+option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity" OFF)
+option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity" OFF)
+option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    option(UCLIENT_MEMORY_TESTS "Build memory tests" OFF)
+    option(UCLIENT_PERFORMANCE_TESTS "Build performance tests" OFF)
+endif()
 
 if(UCLIENT_SUPERBUILD)
     project(uclient_superbuild NONE)
@@ -34,18 +46,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
         FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
-
-###############################################################################
-# Build options
-###############################################################################
-option(UCLIENT_BUILD_TESTS "Build tests" OFF)
-option(UCLIENT_BUILD_EXAMPLES "Build examples" OFF)
-option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity" OFF)
-option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity" OFF)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    option(UCLIENT_MEMORY_TESTS "Build memory tests" OFF)
-    option(UCLIENT_PERFORMANCE_TESTS "Build performance tests" OFF)
 endif()
 
 ###############################################################################
