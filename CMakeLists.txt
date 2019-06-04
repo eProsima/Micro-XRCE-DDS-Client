@@ -272,10 +272,8 @@ if(UCLIENT_BUILD_TESTS)
     include(CTest)
 
     add_subdirectory(test/unitary)
-    add_subdirectory(test/integration/interaction)
     if(PLATFORM_NAME_LINUX)
         add_subdirectory(test/transport/serial_comm)
-        add_subdirectory(test/integration/cross_serialization)
     endif()
 endif()
 
