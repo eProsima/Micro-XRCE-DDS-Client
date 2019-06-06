@@ -12,4 +12,5 @@ set(ARCH_OPT_FLAGS "" CACHE STRING "Makefile optimization flags.")
 # Generate toolchain
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nuttx_toolchain.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/nuttx_toolchain.cmake
+    @ONLY
     )
