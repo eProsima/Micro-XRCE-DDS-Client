@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <uxr/client/dll.h>
+#include <uxr/client/visibility.h>
 #include <stdint.h>
 
 static inline int64_t uxr_convert_to_nanos(int32_t sec, uint32_t nsec)

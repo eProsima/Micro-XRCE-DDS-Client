@@ -13,8 +13,8 @@
 // limitations under the License.
 
 
-#ifndef _UXR_CLIENT_DLL_H_
-#define _UXR_CLIENT_DLL_H_
+#ifndef _UXR_CLIENT_VISIBILITY_H_
+#define _UXR_CLIENT_VISIBILITY_H_
 
 #if defined(_WIN32)
 #if defined(microxrcedds_client_SHARED)
@@ -30,4 +30,4 @@
 #define UXRDLLAPI
 #endif // _WIN32
 
-#endif // _UXR_CLIENT_DLL_H_
+#endif // _UXR_CLIENT_VISIBILITY_H_
