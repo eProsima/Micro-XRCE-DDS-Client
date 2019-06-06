@@ -36,7 +36,7 @@ if(UCLIENT_SUPERBUILD)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
 else()
-    project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.1.0" LANGUAGES C)
 endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
@@ -88,7 +88,7 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-find_package(microcdr 1.0.1 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
+find_package(microcdr 1.1.0 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
 
 ###############################################################################
 # Sources
