@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #include <uxr/client/config.h>
-#include <uxr/client/dll.h>
+#include <uxr/client/visibility.h>
 
 #include <stdint.h>
 #include <stdbool.h>

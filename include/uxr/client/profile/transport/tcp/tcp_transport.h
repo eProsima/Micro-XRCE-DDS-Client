@@ -22,7 +22,7 @@ extern "C"
 
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/config.h>
-#include <uxr/client/dll.h>
+#include <uxr/client/visibility.h>
 
 typedef enum uxrTCPInputBufferState
 {

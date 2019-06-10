@@ -20,7 +20,7 @@ extern "C"
 {
 #endif
 
-#include <uxr/client/dll.h>
+#include <uxr/client/visibility.h>
 #include <uxr/client/config.h>
 
 #include <stdint.h>

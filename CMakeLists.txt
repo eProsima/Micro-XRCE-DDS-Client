@@ -17,14 +17,26 @@
 ################################################################################
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-option(SUPERBUILD "Active super build" ON)
+###############################################################################
+# Build options
+###############################################################################
+option(UCLIENT_SUPERBUILD "Enable superbuild compilation." ON)
+option(UCLIENT_BUILD_TESTS "Build tests" OFF)
+option(UCLIENT_BUILD_EXAMPLES "Build examples" OFF)
+option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity" OFF)
+option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity" OFF)
+option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    option(UCLIENT_MEMORY_TESTS "Build memory tests" OFF)
+    option(UCLIENT_PERFORMANCE_TESTS "Build performance tests" OFF)
+endif()
 
-if(SUPERBUILD)
-    project(superbuild NONE)
-    include(cmake/SuperBuild.cmake)
+if(UCLIENT_SUPERBUILD)
+    project(uclient_superbuild NONE)
+    include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
 else()
-    project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.1.0" LANGUAGES C)
 endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
@@ -37,15 +49,18 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 ###############################################################################
-# Build options
+# Config
 ###############################################################################
-option(UCLIENT_BUILD_TESTS "Build tests" OFF)
-option(UCLIENT_BUILD_EXAMPLES "Build examples" OFF)
-option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity" OFF)
-option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity" OFF)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    option(UCLIENT_MEMORY_TESTS "Build memory tests" OFF)
-    option(UCLIENT_PERFORMANCE_TESTS "Build performance tests" OFF)
+# Install path
+include(GNUInstallDirs)
+set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+if(WIN32)
+    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
+else()
+    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
 endif()
 
 ###############################################################################
@@ -73,10 +88,7 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-find_package(microcdr 1.0.1 EXACT REQUIRED
-    HINTS
-        ${PROJECT_BINARY_DIR}/temp_install
-    )
+find_package(microcdr 1.1.0 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
 
 ###############################################################################
 # Sources
@@ -217,26 +229,6 @@ target_include_directories(${PROJECT_NAME}
     )
 
 ###############################################################################
-# Config
-###############################################################################
-# Install path
-include(GNUInstallDirs)
-set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
-if(WIN32)
-    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
-else()
-    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
-endif()
-
-# Generate config.h
-configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
-    )
-
-###############################################################################
 # Compile setting
 ###############################################################################
 # Definitions
@@ -279,14 +271,9 @@ if(UCLIENT_BUILD_TESTS)
     enable_testing()
     include(CTest)
 
-    if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-        add_subdirectory(test/unitary)
-        add_subdirectory(test/integration/interaction)
-
-        if(NOT WIN32)
-            add_subdirectory(test/transport/serial_comm)
-            add_subdirectory(test/integration/cross_serialization)
-        endif()
+    add_subdirectory(test/unitary)
+    if(PLATFORM_NAME_LINUX)
+        add_subdirectory(test/transport/serial_comm)
     endif()
 endif()
 
@@ -320,6 +307,11 @@ install(
         ${INCLUDE_INSTALL_DIR}/uxr/client
     FILES_MATCHING
         PATTERN "*.h"
+    )
+
+# Generate config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
     )
 
 # Install config.h

@@ -17,11 +17,12 @@ include(ExternalProject)
 unset(_deps)
 
 # Micro CDR.
-find_package(microcdr "1.0.1" EXACT QUIET)
+unset(microcdr_DIR CACHE)
+find_package(microcdr "1.1.0" EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
         DOWNLOAD_COMMAND
-            git submodule update --init ${PROJECT_SOURCE_DIR}/thirdparty/microcdr/
+            cd ${PROJECT_SOURCE_DIR} && git submodule update --init thirdparty/microcdr/
         PREFIX
             ${PROJECT_BINARY_DIR}/ucdr
         SOURCE_DIR
@@ -29,28 +30,23 @@ if(NOT microcdr_FOUND)
         INSTALL_DIR
             ${PROJECT_BINARY_DIR}/temp_install
         CMAKE_ARGS
+            -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-            "-DARCH_CPU_FLAGS:STRING="${ARCH_CPU_FLAGS}""
-            "-DARCH_OPT_FLAGS:STRING="${ARCH_OPT_FLAGS}""
-            "-DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}"
-            "-DCROSSDEV:STRING=${CROSSDEV}"
-            "-DCHECK_ENDIANNESS:BOOL=${CHECK_ENDIANNESS}"
+            -DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}
+            -DCHECK_ENDIANNESS:BOOL=${CHECK_ENDIANNESS}
         )
-    LIST(APPEND _deps ucdr)
+    list(APPEND _deps ucdr)
 endif()
 
 # Client project.
 ExternalProject_Add(uclient
-    UPDATE_COMMAND
-        ""
     SOURCE_DIR
         ${PROJECT_SOURCE_DIR}
     BINARY_DIR
         ${CMAKE_CURRENT_BINARY_DIR}
-    CMAKE_ARGS
-        -DSUPERBUILD=OFF
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    CMAKE_CACHE_ARGS
+        -DUCLIENT_SUPERBUILD:BOOL=OFF
     INSTALL_COMMAND
         ""
     DEPENDS
