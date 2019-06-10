@@ -1,4 +1,4 @@
-# Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+# Copyright 2019 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-###############################################################################
-# CMake build rules for Micro XRCE-DDS Client
-###############################################################################
+################################################################################
+## CMake build rules for Micro XRCE-DDS Client
+################################################################################
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-set(IS_TOP_LEVEL TRUE)
-if(PROJECT_SOURCE_DIR)
-    set(IS_TOP_LEVEL FALSE)
+###############################################################################
+# Build options
+###############################################################################
+option(UCLIENT_SUPERBUILD "Enable superbuild compilation." ON)
+option(UCLIENT_BUILD_TESTS "Build tests" OFF)
+option(UCLIENT_BUILD_EXAMPLES "Build examples" OFF)
+option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity" OFF)
+option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity" OFF)
+option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    option(UCLIENT_MEMORY_TESTS "Build memory tests" OFF)
+    option(UCLIENT_PERFORMANCE_TESTS "Build performance tests" OFF)
+endif()
+
+if(UCLIENT_SUPERBUILD)
+    project(uclient_superbuild NONE)
+    include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
+    return()
+else()
+    project(microxrcedds_client VERSION "1.1.0" LANGUAGES C)
 endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
@@ -32,34 +49,23 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 ###############################################################################
-# Product information
+# Config
 ###############################################################################
-cmake_policy(SET CMP0048 NEW)
-project(microxrcedds_client VERSION "1.0.1" LANGUAGES C)
-
-###############################################################################
-# eProsima build options
-###############################################################################
-option(EPROSIMA_BUILD "Activate internal building" OFF)
-option(EPROSIMA_BUILD_EXAMPLES "Compile examples" OFF)
-option(EPROSIMA_BUILD_TESTS "Activate the building tests" OFF)
-option(THIRDPARTY "Activate the build of thirdparties" OFF)
-option(VERBOSE_SERIALIZATION "Use verbose output" OFF)
-option(VERBOSE_MESSAGE "Use verbose output" OFF)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    option(MEMORY_PERFORMANCE "Memory performace test." OFF)
-endif()
-
-if(EPROSIMA_BUILD)
-    set(EPROSIMA_BUILD_EXAMPLES ON)
-    set(EPROSIMA_BUILD_TESTS ON)
-    set(THIRDPARTY ON)
+# Install path
+include(GNUInstallDirs)
+set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+if(WIN32)
+    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
+else()
+    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
 endif()
 
 ###############################################################################
 # Client configuration options
 ###############################################################################
-
 # Load configuration file.
 set(CLIENT_CONFIG "${PROJECT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
@@ -69,12 +75,6 @@ if(EXISTS ${CLIENT_CONFIG})
     file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
 else()
     message(FATAL_ERROR "No client.config found.")
-endif()
-
-if(PROFILE_CREATE_ENTITIES_REF OR PROFILE_CREATE_ENTITIES_XML)
-    set(PROFILE_COMMON_CREATE_ENTITIES ON)
-else()
-    set(PROFILE_COMMON_CREATE_ENTITIES OFF)
 endif()
 
 ###############################################################################
@@ -88,13 +88,11 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-include(${PROJECT_SOURCE_DIR}/cmake/common/eprosima_libraries.cmake)
-eprosima_find_package(microcdr)
+find_package(microcdr 1.1.0 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
 
 ###############################################################################
 # Sources
 ###############################################################################
-
 # Check platform.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(PLATFORM_NAME_LINUX ON)
@@ -132,18 +130,23 @@ foreach(TRANS_TYPE ${TRANSPORT_TYPES})
     endif()
 endforeach()
 
+if(PROFILE_SERIAL_TRANSPORT)
+    set(SERIAL_SRCS ${SERIAL_SRCS} src/c/profile/transport/serial/serial_protocol.c)
+endif()
+
 # Transport discovery source.
 if(PROFILE_DISCOVERY)
     if(PLATFORM_NAME_LINUX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
+    elseif(PLATFORM_NAME_WINDOWS)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
     elseif(PLATFORM_NAME_NUTTX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_linux_datagram.c)
+        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
     endif()
 endif()
 
 # Other sources
 set(SRCS
-    src/c/core/communication/serial_protocol.c
     src/c/core/session/stream/input_best_effort_stream.c
     src/c/core/session/stream/input_reliable_stream.c
     src/c/core/session/stream/output_best_effort_stream.c
@@ -159,13 +162,13 @@ set(SRCS
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/util/time.c
-    $<$<OR:$<BOOL:${VERBOSE_MESSAGE}>,$<BOOL:${VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
-    $<$<BOOL:${PROFILE_COMMON_CREATE_ENTITIES}>:src/c/profile/session/common_create_entities.c>
-    $<$<BOOL:${PROFILE_CREATE_ENTITIES_REF}>:src/c/profile/session/create_entities_ref.c>
-    $<$<BOOL:${PROFILE_CREATE_ENTITIES_XML}>:src/c/profile/session/create_entities_xml.c>
-    $<$<BOOL:${PROFILE_READ_ACCESS}>:src/c/profile/session/read_access.c>
-    $<$<BOOL:${PROFILE_WRITE_ACCESS}>:src/c/profile/session/write_access.c>
-    $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${PROFILE_DISCOVERY}>>:src/c/profile/discovery/discovery.c>
+    src/c/core/session/common_create_entities.c
+    src/c/core/session/create_entities_ref.c
+    src/c/core/session/create_entities_xml.c
+    src/c/core/session/read_access.c
+    src/c/core/session/write_access.c
+    $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
+    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
     ${UDP_DISCOVERY_SRCS}
     ${UDP_SRCS}
     ${TCP_SRCS}
@@ -173,18 +176,43 @@ set(SRCS
     )
 
 ###############################################################################
-# Target
+# Targets
 ###############################################################################
+# Library
 add_library(${PROJECT_NAME} ${SRCS})
 
 set_common_compile_options(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    VERSION ${PROJECT_VERSION}
-    C_STANDARD 99
-    C_STANDARD_REQUIRED YES
+    VERSION
+        ${PROJECT_VERSION}
+    C_STANDARD
+        99
+    C_STANDARD_REQUIRED
+        YES
     )
 
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:GNU>:-fdata-sections -ffunction-sections>)
+target_compile_options(${PROJECT_NAME}
+    PRIVATE
+        $<$<C_COMPILER_ID:GNU>:-fdata-sections -ffunction-sections>
+    )
+
+# Set Windows shared libraries name
+get_target_property(UCLIENT_TARGET_TYPE ${PROJECT_NAME} TYPE)
+if((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (UCLIENT_TARGET_TYPE STREQUAL "SHARED_LIBRARY"))
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        RELEASE_POSTFIX
+            -${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        RELWITHDEBINFO_POSTFIX
+            -${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        DEBUG_POSTFIX
+            d-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        )
+
+    target_compile_definitions(${PROJECT_NAME}
+        PUBLIC
+            ${PROJECT_NAME}_SHARED
+        )
+endif()
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
@@ -203,34 +231,15 @@ target_include_directories(${PROJECT_NAME}
     )
 
 ###############################################################################
-# Config
-###############################################################################
-
-# Install path
-set(BIN_INSTALL_DIR bin/ CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR include/ CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR lib/ CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR share/ CACHE PATH "Installation directory for data")
-if(WIN32)
-    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
-else()
-    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
-endif()
-
-# Create source files with the define
-configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
-    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
-    )
-
-###############################################################################
 # Compile setting
 ###############################################################################
-
 # Definitions
 target_compile_definitions(${PROJECT_NAME}
+    PUBLIC
+        $<$<BOOL:${UCLIENT_PERFORMANCE_TESTS}>:PERFORMANCE_TESTING>
     PRIVATE
-        -D$<$<BOOL:${VERBOSE_SERIALIZATION}>:UXR_SERIALIZATION_LOGS>
-        -D$<$<BOOL:${VERBOSE_MESSAGE}>:UXR_MESSAGE_LOGS>
+        $<$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>:UXR_SERIALIZATION_LOGS>
+        $<$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>:UXR_MESSAGE_LOGS>
     )
 
 get_target_property(TARGET_TYPE ${PROJECT_NAME} TYPE)
@@ -239,7 +248,7 @@ if(MSVC OR MSVC_IDE)
     if(TARGET_TYPE STREQUAL "SHARED_LIBRARY")
         target_compile_definitions(${PROJECT_NAME}
         PUBLIC
-            -D${PROJECT_NAME}_SHARED
+            ${PROJECT_NAME}_SHARED
         )
     endif()
 endif()
@@ -247,76 +256,119 @@ endif()
 ###############################################################################
 # Examples
 ###############################################################################
-if(EPROSIMA_BUILD_EXAMPLES)
+if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/PublishHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
-    if(PLATFORM_NAME_LINUX OR PLATFORM_NAME_NUTTX)
-        add_subdirectory(examples/Discovery)
-    endif()
+    add_subdirectory(examples/Discovery)
 endif()
 
 ###############################################################################
-# Test
+# Tests
 ###############################################################################
-if(EPROSIMA_BUILD_TESTS AND IS_TOP_LEVEL)
+if(UCLIENT_BUILD_TESTS)
     include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
     check_gtest()
     enable_testing()
     include(CTest)
 
-    if(NOT ((MSVC OR MSVC_IDE) AND EPROSIMA_INSTALLER))
-        add_subdirectory(test/unitary/streams)
-        add_subdirectory(test/integration/interaction)
-
-        if(NOT WIN32)
-            add_subdirectory(test/transport/serial_comm)
-            add_subdirectory(test/integration/cross_serialization)
-        endif()
+    add_subdirectory(test/unitary)
+    if(PLATFORM_NAME_LINUX)
+        add_subdirectory(test/transport/serial_comm)
     endif()
 endif()
 
-if(PLATFORM_NAME_LINUX AND MEMORY_PERFORMANCE)
+if(PLATFORM_NAME_LINUX AND UCLIENT_MEMORY_TESTS)
     add_subdirectory(test/memory/consumption)
 endif()
 
 ###############################################################################
 # Packaging
 ###############################################################################
-
 # Install library
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}Targets
-    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
-    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+install(
+    TARGETS
+        ${PROJECT_NAME}
+    EXPORT
+        ${PROJECT_NAME}Targets
+    RUNTIME DESTINATION
+        ${BIN_INSTALL_DIR}
+    LIBRARY DESTINATION
+        ${LIB_INSTALL_DIR}
+    ARCHIVE DESTINATION
+        ${LIB_INSTALL_DIR}
     COMPONENT libraries
     )
 
 # Install includes
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/uxr/client/
-    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
-    FILES_MATCHING PATTERN "*.h"
+install(
+    DIRECTORY
+        ${PROJECT_SOURCE_DIR}/include/uxr/client/
+    DESTINATION
+        ${INCLUDE_INSTALL_DIR}/uxr/client
+    FILES_MATCHING
+        PATTERN "*.h"
+    )
+
+# Generate config.h
+configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
+    ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
     )
 
 # Install config.h
-install(FILES ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
-    DESTINATION ${INCLUDE_INSTALL_DIR}/uxr/client
+install(
+    FILES
+        ${PROJECT_BINARY_DIR}/include/uxr/client/config.h
+    DESTINATION
+        ${INCLUDE_INSTALL_DIR}/uxr/client
     )
 
 # Export library
-install(EXPORT ${PROJECT_NAME}Targets
-    DESTINATION ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
+install(
+    EXPORT
+        ${PROJECT_NAME}Targets
+    DESTINATION
+        ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
     )
 
 # Package configuration
 include(CMakePackageConfigHelpers)
-configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/packaging/Config.cmake.in
-    ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Config.cmake
-    INSTALL_DESTINATION ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
-    PATH_VARS BIN_INSTALL_DIR INCLUDE_INSTALL_DIR LIB_INSTALL_DIR DATA_INSTALL_DIR
+
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/cmake/packaging/Config.cmake.in
+        ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION
+        ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
+    PATH_VARS
+        BIN_INSTALL_DIR
+        INCLUDE_INSTALL_DIR
+        LIB_INSTALL_DIR
+        DATA_INSTALL_DIR
     )
-install(FILES ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Config.cmake
-    DESTINATION ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
+
+write_basic_package_version_file(
+    ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION
+        ${PROJECT_VERSION}
+    COMPATIBILITY
+        SameMajorVersion
     )
+
+install(
+    FILES
+        ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}Config.cmake
+        ${PROJECT_BINARY_DIR}/cmake/config/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION
+        ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
+    )
+
+# Install dependencies
+if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
+    install(
+        DIRECTORY
+            ${CMAKE_BINARY_DIR}/temp_install/
+        DESTINATION
+            ${CMAKE_INSTALL_PREFIX}
+        )
+endif()

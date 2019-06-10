@@ -20,10 +20,8 @@ endif()
 project(PublishHelloWorldClient)
 
 
-if(NOT PROFILE_CREATE_ENTITIES_XML OR
-   NOT PROFILE_WRITE_ACCESS OR
-   NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: The profiles, PROFILE_CREATE_ENTITIES_XML, PROFILE_WRITE_ACCESS, and PROFILE_UDP_TRANSPORT must be enabled.")
+if(NOT PROFILE_UDP_TRANSPORT)
+    message(WARNING "Can not compile example: The PROFILE_UDP_TRANSPORT must be enabled.")
 else()
     add_executable(${PROJECT_NAME} main.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
@@ -35,7 +33,7 @@ else()
         C_STANDARD_REQUIRED YES
         )
 
-    target_link_libraries(${PROJECT_NAME} microxrcedds_client)
+    target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}

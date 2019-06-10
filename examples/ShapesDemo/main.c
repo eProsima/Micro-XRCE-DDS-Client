@@ -44,6 +44,8 @@
 #define MAX_HISTORY        16
 #define MAX_BUFFER_SIZE    MAX_TRANSPORT_MTU * MAX_HISTORY
 
+static int shapes_demo_error = 0;
+
 static bool run_command(const char* command, uxrSession* session, uxrStreamId* stream_id);
 static bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
@@ -83,7 +85,7 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &udp.comm;
-        printf("UDP mode => ip: %s - port: %hu\n", argv[2], port);
+        printf("Running in UDP mode => ip: %s, port: %hu\n", argv[2], port);
         args_index = 4;
     }
     else if(args >= 4 && strcmp(argv[1], "--tcp") == 0)
@@ -96,7 +98,7 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &tcp.comm;
-        printf("<< TCP mode => ip: %s - port: %hu >>\n", argv[2], port);
+        printf("Running TCP mode => ip: %s, port: %hu\n", argv[2], port);
         args_index = 4;
     }
 #if !defined(WIN32)
@@ -110,7 +112,7 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &serial.comm;
-        printf("Serial mode => dev: %s\n", device);
+        printf("Running in serial mode => dev: %s\n", device);
         args_index = 3;
     }
 #endif
@@ -119,8 +121,6 @@ int main(int args, char** argv)
         print_help();
         return 1;
     }
-
-    printf("Running Shapes Demo Client...\n");
 
     uint32_t key = 0xAABBCCDD;
     if(args_index < args && 0 == strcmp(argv[args_index++], "--key"))
@@ -185,11 +185,9 @@ int main(int args, char** argv)
     bool running = true;
     while (running)
     {
-        if (!check_input())
-        {
-            (void) uxr_run_session_time(&session, 100);
-        }
-        else if (fgets(command_stdin_line, 256, stdin))
+        (void) uxr_run_session_time(&session, 100);
+
+        if (check_input() && fgets(command_stdin_line, 256, stdin))
         {
             running = run_command(command_stdin_line, &session, &default_output);
         }
@@ -210,7 +208,7 @@ int main(int args, char** argv)
     }
 #endif
 
-    return 0;
+    return shapes_demo_error;
 }
 
 bool run_command(const char* command, uxrSession* session, uxrStreamId* stream_id)
@@ -294,10 +292,10 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
         uxrObjectId datawriter_id = uxr_object_id((uint16_t)arg1, UXR_DATAWRITER_ID);
         uxrStreamId output_stream_id = uxr_stream_id_from_raw((uint8_t)arg2, UXR_INPUT_STREAM);
 
-        ucdrBuffer mb;
+        ucdrBuffer ub;
         uint32_t topic_size = ShapeType_size_of_topic(&topic, 0);
-        uxr_prepare_output_stream(session, output_stream_id, datawriter_id, &mb, topic_size);
-        ShapeType_serialize_topic(&mb, &topic);
+        uxr_prepare_output_stream(session, output_stream_id, datawriter_id, &ub, topic_size);
+        ShapeType_serialize_topic(&ub, &topic);
 
         printf("Sending... ");
         print_ShapeType_topic(&topic);
@@ -321,7 +319,7 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
     }
     else if(0 == strcmp(name, "delete") && 3 == length)
     {
-        uxrObjectId entity_id = uxr_object_id((uint16_t)(arg1 & 0xFFF0) >> 4, arg1 & 0x0F);
+        uxrObjectId entity_id = uxr_object_id((uint16_t)arg1, (uint8_t)arg2);
         (void) uxr_buffer_delete_entity(session, *stream_id, entity_id);
     }
     else if((0 == strcmp(name, "default_output_stream") || 0 == strcmp(name, "stream")) && 2 == length)
@@ -359,6 +357,7 @@ bool compute_command(uxrSession* session, uxrStreamId* stream_id, int length, co
     else
     {
         printf("%sUnknown command error, write 'l' or 'list' to show the command list.%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+        shapes_demo_error = 2;
     }
 
     return true;
@@ -450,6 +449,11 @@ void print_status(uint8_t status)
 
     const char* color = (UXR_STATUS_OK == status || UXR_STATUS_OK_MATCHED == status) ? GREEN_CONSOLE_COLOR : RED_CONSOLE_COLOR;
     printf("%sStatus: %s%s\n", color, status_name, RESTORE_COLOR);
+
+    if(UXR_STATUS_OK != status && UXR_STATUS_OK_MATCHED != status)
+    {
+        shapes_demo_error = 2;
+    }
 }
 
 void print_help(void)
@@ -479,7 +483,7 @@ void print_commands(void)
     printf("        Creates a DataWriter on the publisher <publisher id>.\n");
     printf("    create_datareader  <datareader id> <subscriber id>:\n");
     printf("        Creates a DataReader on the subscriber <subscriber id>.\n");
-    printf("    write_data <datawriter id> <stream id> [<x> <y> <size> <color>]:\n");
+    printf("    write_data         <datawriter id> <stream id> [<x> <y> <size> <color>]:\n");
     printf("        Write data into a <stream id> using <data writer id> DataWriter.\n");
     printf("    request_data       <datareader id> <stream id> <samples>:\n");
     printf("        Read <sample> topics from a <stream id> using <datareader id> DataReader.\n");
@@ -493,7 +497,7 @@ void print_commands(void)
     printf("        The streams must be initially configured.\n");
     printf("    exit:\n");
     printf("        Close session and exit.\n");
-    printf("    tree, entity_tree        <id>:\n");
+    printf("    tree, entity_tree  <id>:\n");
     printf("        Create the necessary entities for a complete publisher and subscriber.\n");
     printf("        All entities will have the same <id> as id.\n");
     printf("    h, help:\n");

@@ -17,7 +17,7 @@
 #include <uxr/client/client.h>
 #include <ucdr/microcdr.h>
 
-#include <stdio.h>
+#include <stdio.h> //printf
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
 
@@ -26,18 +26,21 @@
 
 int main(int args, char** argv)
 {
-    if(args >= 2 && (0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1]) || 0 == atoi(argv[1])))
+    // CLI
+    if(3 > args || 0 == atoi(argv[2]))
     {
-        printf("usage: program [-h | --help | <topics>]\n");
+        printf("usage: program [-h | --help] | ip port [<max_topics>]\n");
         return 0;
     }
 
-    uint32_t max_topics = (args == 2) ? (uint32_t)atoi(argv[1]) : UINT32_MAX;
+    char* ip = argv[1];
+    uint16_t port = (uint16_t)atoi(argv[2]);
+    uint32_t max_topics = (args == 4) ? (uint32_t)atoi(argv[3]) : UINT32_MAX;
 
     // Transport
     uxrUDPTransport transport;
     uxrUDPPlatform udp_platform;
-    if(!uxr_init_udp_transport(&transport, &udp_platform, "127.0.0.1", 2018))
+    if(!uxr_init_udp_transport(&transport, &udp_platform, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -111,10 +114,10 @@ int main(int args, char** argv)
     {
         HelloWorld topic = {++count, "Hello DDS world!"};
 
-        ucdrBuffer mb;
+        ucdrBuffer ub;
         uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
-        uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
-        HelloWorld_serialize_topic(&mb, &topic);
+        uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &ub, topic_size);
+        HelloWorld_serialize_topic(&ub, &topic);
 
         printf("Send topic: %s, id: %i\n", topic.message, topic.index);
         connected = uxr_run_session_time(&session, 1000);
