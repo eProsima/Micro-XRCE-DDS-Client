@@ -217,7 +217,9 @@ endif()
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         microcdr
-        $<$<BOOL:${WIN32}>:ws2_32>
+        $<$<BOOL:$<PLATFORM_ID:Windows>>:ws2_32>
+    PRIVATE
+        $<$<BOOL:$<PLATFORM_ID:Linux>>:rt>
     )
 target_include_directories(${PROJECT_NAME}
     PUBLIC

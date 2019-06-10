@@ -112,18 +112,15 @@ int main(int args, char** argv)
     uint32_t count = 0;
     while(connected && count < max_topics)
     {
-        HelloWorld topic = {count++, "Hello DDS world!"};
+        HelloWorld topic = {++count, "Hello DDS world!"};
 
         ucdrBuffer ub;
         uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
         uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &ub, topic_size);
         HelloWorld_serialize_topic(&ub, &topic);
 
+        printf("Send topic: %s, id: %i\n", topic.message, topic.index);
         connected = uxr_run_session_time(&session, 1000);
-        if(connected)
-        {
-            printf("Sent topic: %s, id: %i\n", topic.message, topic.index);
-        }
     }
 
     // Delete resources
