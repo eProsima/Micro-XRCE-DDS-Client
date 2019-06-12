@@ -483,6 +483,8 @@ TEST_F(SessionTest, WriteUint64)
     ucdrBuffer expected_ub;
     ucdr_init_buffer(&expected_ub, written_ub.init, size_t(written_ub.iterator - written_ub.init));
 
+    uxr_run_session_time(&session, 1);
+
     uint8_t session_id; uint8_t stream_id; uint16_t seq_num; uint8_t key[4];
     uxr_deserialize_message_header(&expected_ub, &session_id, &stream_id, &seq_num, key);
 
