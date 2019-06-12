@@ -33,6 +33,10 @@ endif()
 option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)" OFF)
 set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
+###############################################################################
+# Project
+###############################################################################
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(UCLIENT_SUPERBUILD)
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
@@ -269,7 +273,9 @@ endif()
 ###############################################################################
 if(UCLIENT_BUILD_TESTS)
     include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
-    check_gtest()
+    find_package(GTest REQUIRED)
+    find_package(GMock REQUIRED)
+    find_package(Threads REQUIRED)
     enable_testing()
     include(CTest)
 

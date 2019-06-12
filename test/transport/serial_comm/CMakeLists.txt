@@ -31,8 +31,11 @@ if(NOT PROFILE_SERIAL_TRANSPORT)
 else()
 
     set(SRCS SerialComm.cpp)
+
     add_executable(${PROJECT_NAME} ${SRCS})
+
     set_common_compile_options(${PROJECT_NAME})
+
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
@@ -43,15 +46,25 @@ else()
         DEPENDENCIES
             microxrcedds_client
         )
-    target_link_libraries(${PROJECT_NAME} microxrcedds_client ${GTEST_BOTH_LIBRARIES})
+
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+            microxrcedds_client
+            ${GTEST_BOTH_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT}
+        )
+
     target_include_directories(${PROJECT_NAME}
         PUBLIC
             ${PROJECT_SOURCE_DIR}
         PRIVATE
             ${GTEST_INCLUDE_DIRS}
         )
+
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        CXX_STANDARD 11
-        CXX_STANDARD_REQUIRED YES
+        CXX_STANDARD
+            11
+        CXX_STANDARD_REQUIRED
+            YES
         )
 endif()
