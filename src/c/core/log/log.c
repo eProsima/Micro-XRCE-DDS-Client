@@ -23,6 +23,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #define YELLOW_DARK    "\x1B[0;33m"
 #define PURPLE_DARK    "\x1B[0;35m"
@@ -375,9 +376,8 @@ const char* reply_to_string(const BaseObjectReply* reply)
 
 void print_create_client_submessage(const char* pre, const CREATE_CLIENT_Payload* payload)
 {
-    printf("%s[CREATE CLIENT | %s | session: 0x%02X | key: %s]%s",
+    printf("%s[CREATE CLIENT | session: 0x%02X | key: %s]%s",
             pre,
-            request_to_string(&payload->base),
             payload->client_representation.session_id,
             data_to_string(payload->client_representation.client_key.data, 4),
             RESTORE_COLOR);
@@ -481,9 +481,9 @@ void print_delete_submessage(const char* pre, const DELETE_Payload* payload)
 
 void print_status_agent_submessage(const char* pre, const STATUS_AGENT_Payload* payload)
 {
-    printf("%s[STATUS AGENT | %s]%s",
+    (void) payload;
+    printf("%s[STATUS AGENT]%s",
             pre,
-            reply_to_string(&payload->base),
             RESTORE_COLOR);
 }
 
@@ -536,7 +536,7 @@ void print_read_data_submessage(const char* pre, const READ_DATA_Payload* payloa
     printf("%s[READ DATA | format: %s | istream: 0x%02X | %s | dc: %s]%s",
             pre,
             format,
-            payload->read_specification.input_stream_id,
+            payload->read_specification.preferred_stream_id,
             request_to_string(&payload->base),
             (payload->read_specification.optional_delivery_control) ? "yes" : "no",
             RESTORE_COLOR);
@@ -655,7 +655,7 @@ void print_tail(int64_t initial_log_time)
 #ifdef WIN32
     printf(" %st: %I64ims%s", BLUE, ms, RESTORE_COLOR);
 #else
-    printf(" %st: %lims%s", BLUE, ms, RESTORE_COLOR);
+    printf(" %st: %" PRId64 "ms%s", BLUE, ms, RESTORE_COLOR);
 #endif
 }
 

@@ -5,7 +5,9 @@ macro(unitary_test TEST_NAME TEST_SOURCE)
     set(SRCS ${TEST_SOURCE})
 
     add_executable(${TEST_NAME} ${TEST_SOURCE})
+
     set_common_compile_options(${TEST_NAME})
+
     if(MSVC OR MSVC_IDE)
         target_compile_options(${TEST_NAME} PRIVATE /wd4996)
     endif()
@@ -15,7 +17,13 @@ macro(unitary_test TEST_NAME TEST_SOURCE)
     get_target_property(CLIENT_INCLUDES microxrcedds_client INCLUDE_DIRECTORIES)
     include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/../../src)
 
-    target_link_libraries(${TEST_NAME} microcdr ${GTEST_BOTH_LIBRARIES})
+    target_link_libraries(${TEST_NAME}
+        PRIVATE
+            microcdr
+            ${GTEST_BOTH_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT}
+        )
+
     target_include_directories(${TEST_NAME}
         PUBLIC
             ${PROJECT_SOURCE_DIR}
@@ -25,9 +33,12 @@ macro(unitary_test TEST_NAME TEST_SOURCE)
         )
 
     set_target_properties(${TEST_NAME} PROPERTIES
-        CXX_STANDARD 11
-        CXX_STANDARD_REQUIRED YES
+        CXX_STANDARD
+            11
+        CXX_STANDARD_REQUIRED
+            YES
         )
+
 endmacro()
 
 unitary_test(StreamId               session/streams/StreamId.cpp)

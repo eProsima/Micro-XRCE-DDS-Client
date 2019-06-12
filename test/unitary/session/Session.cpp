@@ -19,6 +19,7 @@ extern "C"
 #include <c/core/session/submessage.c>
 #include <c/core/session/session_info.c>
 #include <c/core/session/read_access.c>
+#include <c/core/session/write_access.c>
 
 #include <c/util/time.c>
 
@@ -35,6 +36,7 @@ extern "C"
 #define MTU                   64
 #define HISTORY               4
 #define OFFSET                4
+#define DATA_PAYLOAD_SIZE     4
 
 
 class SessionTest : public testing::Test
@@ -223,7 +225,13 @@ public:
     static void on_topic_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
                              uxrStreamId stream_id, struct ucdrBuffer* ub, void* args)
     {
-        (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) ub; (void) args;
+        (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
+        if (std::string("ReadUint64") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            uint64_t data;
+            ucdr_deserialize_uint64_t(ub, &data);
+            EXPECT_EQ(data, UINT64_MAX);
+        }
     }
 
     static void on_time_func (struct uxrSession* session, int64_t current_timestamp, int64_t transmit_timestamp,
@@ -438,4 +446,56 @@ TEST_F(SessionTest, FragmentationInfoLastFragment)
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_FRAGMENT, 0, FLAG_LAST_FRAGMENT);
     FragmentationInfo info = on_get_fragmentation_info(frag_header.data());
     EXPECT_EQ(LAST_FRAGMENT, info);
+}
+
+TEST_F(SessionTest, ReadUint64)
+{
+    uxr_set_topic_callback(&session, on_topic_func, nullptr);
+
+    std::array<uint8_t, 32> buffer;
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, buffer.data(), buffer.size());
+    uxr_serialize_message_header(&ub, session.info.id, UXR_NONE_STREAM, 0x00, session.info.key);
+    uxr_serialize_submessage_header(
+        &ub,
+        SUBMESSAGE_ID_DATA,
+        UCDR_MACHINE_ENDIANNESS,
+        DATA_PAYLOAD_SIZE + sizeof(uint64_t));
+
+    DATA_Payload_Data payload{};
+    uxr_serialize_DATA_Payload_Data(&ub, &payload);
+
+    ub.last_data_size = 8; // reset buffer alignment.
+    ucdr_serialize_uint64_t(&ub, UINT64_MAX);
+
+    ucdr_init_buffer(&ub, buffer.data(), size_t(ub.iterator - ub.init));
+    read_message(&session, &ub);
+}
+
+TEST_F(SessionTest, WriteUint64)
+{
+    ucdrBuffer written_ub;
+    uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
+    uxr_prepare_output_stream(&session, output_reliable, datawriter_id, &written_ub, sizeof(uint64_t));
+    ucdr_serialize_uint64_t(&written_ub, UINT64_MAX);
+
+    ucdrBuffer expected_ub;
+    ucdr_init_buffer(&expected_ub, written_ub.init, size_t(written_ub.iterator - written_ub.init));
+
+    uxr_run_session_time(&session, 1);
+
+    uint8_t session_id; uint8_t stream_id; uint16_t seq_num; uint8_t key[4];
+    uxr_deserialize_message_header(&expected_ub, &session_id, &stream_id, &seq_num, key);
+
+    uint8_t id; uint8_t flags; uint16_t lenght;
+    uxr_deserialize_submessage_header(&expected_ub, &id, &flags, &lenght);
+
+    WRITE_DATA_Payload_Data payload;
+    uxr_deserialize_WRITE_DATA_Payload_Data(&expected_ub, &payload);
+
+    expected_ub.last_data_size = 8; // reset buffer alignment.
+    uint64_t data;
+    ucdr_deserialize_uint64_t(&expected_ub, &data);
+    EXPECT_EQ(data, UINT64_MAX);
 }

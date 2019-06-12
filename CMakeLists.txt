@@ -26,11 +26,17 @@ option(UCLIENT_BUILD_EXAMPLES "Build examples" OFF)
 option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity" OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity" OFF)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if((CMAKE_SYSTEM_NAME STREQUAL "") AND (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux"))
     option(UCLIENT_MEMORY_TESTS "Build memory tests" OFF)
     option(UCLIENT_PERFORMANCE_TESTS "Build performance tests" OFF)
 endif()
+option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)" OFF)
+set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
+###############################################################################
+# Project
+###############################################################################
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(UCLIENT_SUPERBUILD)
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
@@ -67,10 +73,8 @@ endif()
 # Client configuration options
 ###############################################################################
 # Load configuration file.
-set(CLIENT_CONFIG "${PROJECT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
-
-if(EXISTS ${CLIENT_CONFIG})
-    configure_file(${CLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
+if(EXISTS ${UCLIENT_CONFIG})
+    configure_file(${UCLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
     load_cache(${PROJECT_SOURCE_DIR})
     file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
 else()
@@ -269,7 +273,9 @@ endif()
 ###############################################################################
 if(UCLIENT_BUILD_TESTS)
     include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
-    check_gtest()
+    find_package(GTest REQUIRED)
+    find_package(GMock REQUIRED)
+    find_package(Threads REQUIRED)
     enable_testing()
     include(CTest)
 
