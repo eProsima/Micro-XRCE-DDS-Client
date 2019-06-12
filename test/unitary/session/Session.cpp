@@ -478,7 +478,7 @@ TEST_F(SessionTest, WriteUint64)
     uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     uxr_prepare_output_stream(&session, output_reliable, datawriter_id, &written_ub, sizeof(uint64_t));
-    ucdr_serialize_uint64_t(&written_ub, UINT64_MAX);
+    ucdr_serialize_uint64_t(&written_ub, uint64_t(UINT64_MAX));
 
     ucdrBuffer expected_ub;
     ucdr_init_buffer(&expected_ub, written_ub.init, size_t(written_ub.iterator - written_ub.init));
