@@ -26,7 +26,7 @@ extern "C"
 
 typedef struct uxrUDPPlatform
 {
-    struct sockaddr remote_addr;
+    struct sockaddr_storage remote_addr;
     struct pollfd poll_fd;
 
 } uxrUDPPlatform;

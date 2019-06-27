@@ -36,7 +36,7 @@ bool uxr_init_udp_platform(
                 temp_addr.sin_family = AF_INET;
                 temp_addr.sin_port = htons(port);
                 temp_addr.sin_addr.s_addr = inet_addr(ip);
-                platform->remote_addr = *((struct sockaddr *) &temp_addr);
+                platform->remote_addr = *((struct sockaddr_storage *) &temp_addr);
                 break;
             }
             case UXR_IPv6:
@@ -45,7 +45,7 @@ bool uxr_init_udp_platform(
                 temp_addr.sin6_family = AF_INET6;
                 temp_addr.sin6_port = htons(port);
                 inet_pton(AF_INET6, ip, &(temp_addr.sin6_addr));
-                platform->remote_addr = *((struct sockaddr *) &temp_addr);
+                platform->remote_addr = *((struct sockaddr_storage *) &temp_addr);
                 break;
             }
         }
@@ -54,7 +54,9 @@ bool uxr_init_udp_platform(
         platform->poll_fd.events = POLLIN;
 
         /* Remote address filter. */
-        int connected = connect(platform->poll_fd.fd, &platform->remote_addr, sizeof(platform->remote_addr));
+        int connected = connect(platform->poll_fd.fd,
+                                (struct sockaddr*)&platform->remote_addr,
+                                sizeof(platform->remote_addr));
         rv = (0 == connected);
     }
     return rv;

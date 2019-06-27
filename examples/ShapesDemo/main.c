@@ -75,7 +75,7 @@ int main(int args, char** argv)
 
     int args_index = 0;
 
-    if(args >= 4 && strcmp(argv[1], "--udp") == 0)
+    if(args >= 4 && strcmp(argv[1], "--udp4") == 0)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
@@ -85,7 +85,20 @@ int main(int args, char** argv)
             return 1;
         }
         comm = &udp.comm;
-        printf("Running in UDP mode => ip: %s, port: %hu\n", argv[2], port);
+        printf("Running in UDP/IPv4 mode => ip: %s, port: %hu\n", argv[2], port);
+        args_index = 4;
+    }
+    if(args >= 4 && strcmp(argv[1], "--udp6") == 0)
+    {
+        char* ip = argv[2];
+        uint16_t port = (uint16_t)atoi(argv[3]);
+        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv6, ip, port))
+        {
+            printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+            return 1;
+        }
+        comm = &udp.comm;
+        printf("Running in UDP/IPv6 mode => ip: %s, port: %hu\n", argv[2], port);
         args_index = 4;
     }
     else if(args >= 4 && strcmp(argv[1], "--tcp") == 0)
