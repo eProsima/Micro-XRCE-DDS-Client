@@ -88,7 +88,7 @@ int main(int args, char** argv)
         printf("Running in UDP/IPv4 mode => ip: %s, port: %hu\n", argv[2], port);
         args_index = 4;
     }
-    if(args >= 4 && strcmp(argv[1], "--udp6") == 0)
+    else if(args >= 4 && strcmp(argv[1], "--udp6") == 0)
     {
         char* ip = argv[2];
         uint16_t port = (uint16_t)atoi(argv[3]);
@@ -475,7 +475,8 @@ void print_help(void)
     printf("       program <transport> [--key <number>] [--history <number>]\n");
     printf("List of available transports:\n");
     printf("    --serial <device>\n");
-    printf("    --udp <agent-ip> <agent-port>\n");
+    printf("    --udp4 <agent-ip> <agent-port>\n");
+    printf("    --udp6 <agent-ip> <agent-port>\n");
     printf("    --tcp <agent-ip> <agent-port>\n");
 }
 
