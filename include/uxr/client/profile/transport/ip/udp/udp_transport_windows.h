@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
-#define _UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
+#ifndef UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
+#define UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -24,7 +24,6 @@ extern "C"
 
 typedef struct uxrUDPPlatform
 {
-    struct sockaddr remote_addr;
     WSAPOLLFD poll_fd;
 
 } uxrUDPPlatform;
@@ -33,4 +32,4 @@ typedef struct uxrUDPPlatform
 }
 #endif
 
-#endif //_UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
+#endif // UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_

@@ -5,35 +5,56 @@ bool uxr_init_udp_platform(
         uxrUDPPlatform* platform,
         uxrIpProtocol ip_protocol,
         const char* ip,
-        uint16_t port)
+        const char* port)
 {
     bool rv = false;
 
-    /* WSA initialization. */
     WSADATA wsa_data;
     if (0 != WSAStartup(MAKEWORD(2, 2), &wsa_data))
     {
         return false;
     }
 
-    /* Socket initialization */
+    switch (ip_protocol)
+    {
+        case UXR_IPv4:
+            platform->poll_fd.fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+            break;
+        case UXR_IPv6:
+            platform->poll_fd.fd = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+            break;
+    }
+
     platform->poll_fd.fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (INVALID_SOCKET != platform->poll_fd.fd)
     {
-        /* Remote IP setup. */
-        struct sockaddr_in temp_addr;
-        temp_addr.sin_family = AF_INET;
-        temp_addr.sin_port = htons(port);
-        temp_addr.sin_addr.s_addr = inet_addr(ip);
-        memset(temp_addr.sin_zero, '\0', sizeof(temp_addr.sin_zero));
-        platform->remote_addr = *((struct sockaddr *) &temp_addr);
+        struct addrinfo hints, *servinfo, *p;
 
-        /* Poll setup. */
-        platform->poll_fd.events = POLLIN;
+        ZeroMemory(&hints, sizeof(hints));
+        switch (ip_protocol)
+        {
+            case UXR_IPv4:
+                hints.ai_family = AF_INET;
+                break;
+            case UXR_IPv6:
+                hints.ai_family = AF_INET6;
+                break;
+        }
+        hints.ai_socktype = SOCK_DGRAM;
 
-        /* Remote address filter. */
-        int connected = connect(platform->poll_fd.fd, &platform->remote_addr, sizeof(platform->remote_addr));
-        rv = (0 == connected);
+        if (0 == getaddrinfo(ip, port, &hints, &result))
+        {
+            for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
+            {
+                if (0 == connect(platform->poll_fd.fd, ptr->ai_addr, ptr->ai_addrlen))
+                {
+                    platform->poll_fd.events = POLLIN;
+                    rv = true;
+                    break;
+                }
+            }
+        }
+        freeaddrinfo(result);
     }
     return rv;
 }

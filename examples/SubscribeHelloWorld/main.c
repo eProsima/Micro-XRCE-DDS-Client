@@ -46,7 +46,7 @@ int main(int args, char** argv)
     }
 
     char* ip = argv[1];
-    uint16_t port = (uint16_t)atoi(argv[2]);
+    char* port =  argv[2];
     uint32_t max_topics = (args == 4) ? (uint32_t)atoi(argv[3]) : UINT32_MAX;
 
     // State

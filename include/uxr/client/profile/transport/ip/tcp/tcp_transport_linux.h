@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
-#define _UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
+#ifndef UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
+#define UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -26,7 +26,6 @@ extern "C"
 
 typedef struct uxrTCPPlatform
 {
-    struct sockaddr_storage remote_addr;
     struct pollfd poll_fd;
 
 } uxrTCPPlatform;
@@ -35,4 +34,4 @@ typedef struct uxrTCPPlatform
 }
 #endif
 
-#endif //_UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
+#endif // UXR_CLIENT_TCP_TRANSPORT_LINUX_H_

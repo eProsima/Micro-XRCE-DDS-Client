@@ -286,7 +286,7 @@ bool uxr_init_tcp_transport(
         struct uxrTCPPlatform* platform,
         uxrIpProtocol ip_protocol,
         const char* ip,
-        uint16_t port)
+        const char* port)
 {
     bool rv = false;
 

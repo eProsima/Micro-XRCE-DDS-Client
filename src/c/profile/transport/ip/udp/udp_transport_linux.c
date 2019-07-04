@@ -6,17 +6,15 @@
 #include <string.h>
 #include <errno.h>
 #include <netdb.h>
-#include <stdio.h>
 
 bool uxr_init_udp_platform(
         uxrUDPPlatform* platform,
         uxrIpProtocol ip_protocol,
         const char* ip,
-        uint16_t port)
+        const char* port)
 {
     bool rv = false;
 
-    /* Socket initialization */
     switch (ip_protocol)
     {
         case UXR_IPv4:
@@ -29,59 +27,35 @@ bool uxr_init_udp_platform(
 
     if (-1 != platform->poll_fd.fd)
     {
-        struct addrinfo hints, *servinfo, *p;
-        int rv_getaddr;
+        struct addrinfo hints;
+        struct addrinfo* result;
+        struct addrinfo* ptr;
 
-        hints.ai_socktype = SOCK_DGRAM;
-
-        /* Remote IP setup. */
+        memset(&hints, 0, sizeof(hints));
         switch (ip_protocol)
         {
             case UXR_IPv4:
-            {
-//                struct sockaddr_in temp_addr;
-//                temp_addr.sin_family = AF_INET;
-//                temp_addr.sin_port = htons(port);
-//                temp_addr.sin_addr.s_addr = inet_addr(ip);
-//                platform->remote_addr = *((struct sockaddr_storage *) &temp_addr);
                 hints.ai_family = AF_INET;
                 break;
-            }
             case UXR_IPv6:
-            {
                 hints.ai_family = AF_INET6;
-//                struct sockaddr_in6 temp_addr;
-//                temp_addr.sin6_family = AF_INET6;
-//                temp_addr.sin6_port = htons(port);
-//                inet_pton(AF_INET6, ip, &(temp_addr.sin6_addr));
-//                platform->remote_addr = *((struct sockaddr_storage *) &temp_addr);
                 break;
-            }
         }
+        hints.ai_socktype = SOCK_DGRAM;
 
-        if (0 != (rv_getaddr = getaddrinfo(ip, "2000", &hints, &servinfo)))
+        if (0 == getaddrinfo(ip, port, &hints, &result))
         {
-            fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        }
-        else
-        {
-            /* Poll setup. */
-            platform->poll_fd.events = POLLIN;
-
-            /* Remote address filter. */
-            for (p = servinfo; p != NULL; p = p->ai_next)
+            for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
             {
-                if (0 == connect(platform->poll_fd.fd, p->ai_addr, p->ai_addrlen))
+                if (0 == connect(platform->poll_fd.fd, ptr->ai_addr, ptr->ai_addrlen))
                 {
+                    platform->poll_fd.events = POLLIN;
                     rv = true;
                     break;
                 }
             }
-//            int connected = connect(platform->poll_fd.fd,
-//                                    (struct sockaddr*)&platform->remote_addr,
-//                                    sizeof(platform->remote_addr));
-//            rv = (0 == connected);
         }
+        freeaddrinfo(result);
     }
     return rv;
 }
