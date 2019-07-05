@@ -1,4 +1,4 @@
-#include <uxr/client/profile/transport/tcp/ip/tcp_transport_windows.h>
+#include <uxr/client/profile/transport/ip/tcp/tcp_transport_windows.h>
 #include "tcp_transport_internal.h"
 
 #include <uxr/client/util/time.h>
@@ -30,8 +30,8 @@ bool uxr_init_tcp_platform(
     if (INVALID_SOCKET != platform->poll_fd.fd)
     {
         struct addrinfo hints;
-        struct addrinfo result;
-        struct addrinfo ptr;
+        struct addrinfo* result;
+        struct addrinfo* ptr;
 
         ZeroMemory(&hints, sizeof(hints));
         switch (ip_protocol)

@@ -144,8 +144,8 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
-    $<$<BOOL:${PROFILE_SERIAL_TRANSPORT}>:src/c/profile/transport/serial/serial_transport.c>
-    $<$<BOOL:${PROFILE_SERIAL_TRANSPORT}>:src/c/profile/transport/serial/serial_protocol.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_protocol.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
     )

@@ -28,7 +28,9 @@ bool uxr_init_udp_platform(
     platform->poll_fd.fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (INVALID_SOCKET != platform->poll_fd.fd)
     {
-        struct addrinfo hints, *servinfo, *p;
+        struct addrinfo hints;
+        struct addrinfo* result;
+        struct addrinfo* ptr;
 
         ZeroMemory(&hints, sizeof(hints));
         switch (ip_protocol)
