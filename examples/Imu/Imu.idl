@@ -1,0 +1,34 @@
+struct SensorMsgImu
+{
+    // header
+    long            sec;
+	unsigned long   nsec;
+	string          frame_id;
+
+    // orientation
+    double          orientation_x;
+    double          orientation_y;
+    double          orientation_z;
+    double          orientation_w;
+
+    // orientation covariance
+    double          orientation_covariance[9];
+
+    // angular velocity
+    double          angular_velocity_x;
+    double          angular_velocity_y;
+    double          angular_velocity_z;
+    double          angular_velocity_w;
+
+    // angular velocity covariance
+    double          angular_velocity_covariance[9];
+
+    // linear acceleration
+    double          linear_acceleration_x;
+    double          linear_acceleration_y;
+    double          linear_acceleration_z;
+    double          linear_acceleration_w;
+
+    // linear acceleration covariance
+    double          linear_acceleration_covariance[9];
+};
