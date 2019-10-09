@@ -35,7 +35,7 @@ if(NOT microcdr_FOUND)
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
             -DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}
             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-            -DCONFIG_BIG_ENDIANNESS:BOOL=${UCLIENT_BIG_ENDIANNESS}
+            -DCONFIG_BIG_ENDIANNESS=${UCLIENT_BIG_ENDIANNESS}
         )
     list(APPEND _deps ucdr)
 endif()
@@ -59,7 +59,6 @@ if(UCLIENT_BUILD_TESTS)
                 ${PROJECT_BINARY_DIR}/temp_install
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                 $<$<PLATFORM_ID:Windows>:-Dgtest_force_shared_crt:BOOL=ON>
             BUILD_COMMAND
                 COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config Release --target install

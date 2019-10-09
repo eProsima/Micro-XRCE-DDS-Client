@@ -10,9 +10,9 @@ extern "C"
 #define BUFFER_SIZE           size_t(128)
 #define HISTORY               size_t(4)
 #define OFFSET                size_t(8)
-#define MAX_MESSAGE_SIZE      size_t(BUFFER_SIZE / HISTORY - INTERNAL_RELIABLE_BUFFER_OFFSET)
+#define MAX_MESSAGE_SIZE      (BUFFER_SIZE / HISTORY - INTERNAL_RELIABLE_BUFFER_OFFSET)
 #define SUBMESSAGE_SIZE       size_t(8)
-#define MAX_SUBMESSAGE_SIZE   size_t(MAX_MESSAGE_SIZE - OFFSET)
+#define MAX_SUBMESSAGE_SIZE   (MAX_MESSAGE_SIZE - OFFSET)
 #define FRAGMENT_OFFSET       size_t(4)
 
 bool operator == (const uxrOutputReliableStream& stream1, const uxrOutputReliableStream& stream2)

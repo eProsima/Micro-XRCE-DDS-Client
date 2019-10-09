@@ -46,8 +46,8 @@ int main(int args, char** argv)
         uxrAgentAddress agent_list[MAX_AGENTS];
         for(int i = 1; i < args; i += 2, size++)
         {
-            agent_list[size].ip = argv[i];
-            agent_list[size++].port = atoi(argv[i + 1]);
+            strcpy(agent_list[size].ip, argv[i]);
+            agent_list[size++].port = (uint8_t)atoi(argv[i + 1]);
         }
 
         uxr_discovery_agents(10, 1000, on_agent_found, NULL, agent_list, size);
