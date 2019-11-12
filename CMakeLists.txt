@@ -185,6 +185,8 @@ set_common_compile_options(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION
         ${PROJECT_VERSION}
+    SOVERSION
+        ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     C_STANDARD
         99
     C_STANDARD_REQUIRED
