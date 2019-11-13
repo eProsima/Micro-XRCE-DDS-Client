@@ -104,6 +104,9 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
         set(PLATFORM_NAME_NUTTX ON)
         set(TRANSPORT_TYPES "UDP" "TCP" "SERIAL")
+    else()
+        set(PLATFORM_NAME_EXTERNAL ON)
+        set(TRANSPORT_TYPES ${CMAKE_TRANSPORT_DEFINE})
     endif()
 endif()
 
@@ -126,9 +129,17 @@ foreach(TRANS_TYPE ${TRANSPORT_TYPES})
                 src/c/profile/transport/${TT}/${TT}_transport.c
                 src/c/profile/transport/${TT}/${TT}_transport_linux.c
                 )
+        elseif(PLATFORM_NAME_EXTERNAL)
+            file(COPY ../Micro-XRCE-DDS-Vendors/Crazyflie/transport/${TT}_transport_external.h  DESTINATION ../include/uxr/client/profile/transport/${TT})
+            file(COPY ../Micro-XRCE-DDS-Vendors/Crazyflie/transport/${TT}_transport_external.c  DESTINATION ../src/c/profile/transport/${TT})
+          set(${TRANS_TYPE}_SRCS
+                src/c/profile/transport/${TT}/${TT}_transport.c
+                src/c/profile/transport/${TT}/${TT}_transport_external.c
+                )
         endif()
     endif()
 endforeach()
+
 
 if(PROFILE_SERIAL_TRANSPORT)
     set(SERIAL_SRCS ${SERIAL_SRCS} src/c/profile/transport/serial/serial_protocol.c)
@@ -143,6 +154,15 @@ if(PROFILE_DISCOVERY)
     elseif(PLATFORM_NAME_NUTTX)
         set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
     endif()
+endif()
+
+
+if(PLATFORM_NAME_EXTERNAL)
+    message(STATUS ${CMAKE_EXTERNAL_FILES})
+    #set(TIME_SRC $(CMAKE_EXTERNAL_FILES)/time/time_external.c)
+    set(TIME_SRC ../Micro-XRCE-DDS-Vendors/Crazyflie/time/time_external.c)
+else()
+    set(TIME_SRC src/c/util/time.c)
 endif()
 
 # Other sources
@@ -161,7 +181,7 @@ set(SRCS
     src/c/core/serialization/xrce_protocol.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
-    src/c/util/time.c
+    ${TIME_SRC}
     src/c/core/session/common_create_entities.c
     src/c/core/session/create_entities_ref.c
     src/c/core/session/create_entities_xml.c
