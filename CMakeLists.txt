@@ -49,10 +49,12 @@ endif()
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(UCLIENT_SUPERBUILD)
+    message(STATUS "*****Superbuild")
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
 else()
+    message(STATUS "Normal")
     project(microxrcedds_client VERSION "1.1.0" LANGUAGES C)
 endif()
 
@@ -88,6 +90,7 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
 find_package(microcdr 1.1.0 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
 
 ###############################################################################
@@ -158,8 +161,6 @@ endif()
 
 
 if(PLATFORM_NAME_EXTERNAL)
-    message(STATUS ${CMAKE_EXTERNAL_FILES})
-    #set(TIME_SRC $(CMAKE_EXTERNAL_FILES)/time/time_external.c)
     set(TIME_SRC ../Micro-XRCE-DDS-Vendors/Crazyflie/time/time_external.c)
 else()
     set(TIME_SRC src/c/util/time.c)

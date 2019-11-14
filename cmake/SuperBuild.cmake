@@ -19,7 +19,7 @@ unset(_deps)
 # Micro CDR.
 unset(microcdr_DIR CACHE)
 find_package(microcdr "1.1.0" EXACT QUIET)
-if(NOT microcdr_FOUND OR NOT PACKAGE_VERSION_COMPATIBLE)
+if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
         DOWNLOAD_COMMAND
             cd ${PROJECT_SOURCE_DIR} && git submodule update --init thirdparty/microcdr/
