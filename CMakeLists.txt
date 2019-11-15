@@ -49,7 +49,6 @@ endif()
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(UCLIENT_SUPERBUILD)
-    message(STATUS "*****Superbuild")
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
@@ -133,8 +132,8 @@ foreach(TRANS_TYPE ${TRANSPORT_TYPES})
                 src/c/profile/transport/${TT}/${TT}_transport_linux.c
                 )
         elseif(PLATFORM_NAME_EXTERNAL)
-            file(COPY ../Micro-XRCE-DDS-Vendors/Crazyflie/transport/${TT}_transport_external.h  DESTINATION ../include/uxr/client/profile/transport/${TT})
-            file(COPY ../Micro-XRCE-DDS-Vendors/Crazyflie/transport/${TT}_transport_external.c  DESTINATION ../src/c/profile/transport/${TT})
+            file(COPY ${CMAKE_VENDOR_PATH}/transport/${TT}_transport_external.h  DESTINATION ${PROJECT_SOURCE_DIR}/include/uxr/client/profile/transport/${TT})
+            file(COPY ${CMAKE_VENDOR_PATH}/transport/${TT}_transport_external.c  DESTINATION ${PROJECT_SOURCE_DIR}/src/c/profile/transport/${TT})
           set(${TRANS_TYPE}_SRCS
                 src/c/profile/transport/${TT}/${TT}_transport.c
                 src/c/profile/transport/${TT}/${TT}_transport_external.c
@@ -159,7 +158,7 @@ if(PROFILE_DISCOVERY)
     endif()
 endif()
 
-
+# Time Sources
 if(PLATFORM_NAME_EXTERNAL)
     set(TIME_SRC ../Micro-XRCE-DDS-Vendors/Crazyflie/time/time_external.c)
 else()
