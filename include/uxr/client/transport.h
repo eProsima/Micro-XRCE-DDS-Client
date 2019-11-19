@@ -25,6 +25,8 @@
 #include <uxr/client/profile/transport/udp/udp_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
 #include <uxr/client/profile/transport/udp/udp_transport_linux.h>
+#elif defined(PLATFORM_NAME_EXTERNAL)
+#include <uxr/client/profile/transport/udp/udp_transport_external.h>
 #endif
 #endif //PROFILE_UDP_TRANSPORT
 
@@ -36,6 +38,8 @@
 #include <uxr/client/profile/transport/tcp/tcp_transport_windows.h>
 #elif defined(PLATFORM_NAME_NUTTX)
 #include <uxr/client/profile/transport/tcp/tcp_transport_linux.h>
+#elif defined(PLATFORM_NAME_EXTERNAL)
+#include <uxr/client/profile/transport/tcp/tcp_transport_external.h>
 #endif
 #endif //PROFILE_TCP_TRANSPORT
 
@@ -46,7 +50,8 @@
 #elif defined(PLATFORM_NAME_WINDOWS)
 #elif defined(PLATFORM_NAME_NUTTX)
 #include <uxr/client/profile/transport/serial/serial_transport_linux.h>
+#elif defined(PLATFORM_NAME_EXTERNAL)
+#include <uxr/client/profile/transport/serial/serial_transport_external.h>
 #endif
 #endif //PROFILE_SERIAL_TRANSPORT
-
 #endif // _UXR_CLIENT_TRANSPORT_H_
