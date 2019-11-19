@@ -53,7 +53,6 @@ if(UCLIENT_SUPERBUILD)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
 else()
-    message(STATUS "Normal")
     project(microxrcedds_client VERSION "1.1.0" LANGUAGES C)
 endif()
 
