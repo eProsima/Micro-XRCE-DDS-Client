@@ -42,7 +42,7 @@ if(UCLIENT_SUPERBUILD)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
 else()
-    project(microxrcedds_client VERSION "1.1.0" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.2.0" LANGUAGES C)
 endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
