@@ -1,6 +1,8 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_windows.h>
 #include "udp_transport_internal.h"
 
+#include <ws2tcpip.h>
+
 bool uxr_init_udp_platform(
         uxrUDPPlatform* platform,
         uxrIpProtocol ip_protocol,
@@ -47,7 +49,7 @@ bool uxr_init_udp_platform(
         {
             for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
             {
-                if (0 == connect(platform->poll_fd.fd, ptr->ai_addr, ptr->ai_addrlen))
+                if (0 == connect(platform->poll_fd.fd, ptr->ai_addr, (int)ptr->ai_addrlen))
                 {
                     platform->poll_fd.events = POLLIN;
                     rv = true;
