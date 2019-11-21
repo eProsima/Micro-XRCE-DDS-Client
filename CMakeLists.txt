@@ -53,7 +53,7 @@ if(UCLIENT_SUPERBUILD)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
 else()
-    project(microxrcedds_client VERSION "1.1.0" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.2.0" LANGUAGES C)
 endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
@@ -96,52 +96,11 @@ find_package(microcdr 1.1.0 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_inst
 # Check platform.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(PLATFORM_NAME_LINUX ON)
-    set(TRANSPORT_TYPES "UDP" "TCP" "SERIAL")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(PLATFORM_NAME_WINDOWS ON)
-    set(TRANSPORT_TYPES "UDP" "TCP")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
         set(PLATFORM_NAME_NUTTX ON)
-        set(TRANSPORT_TYPES "UDP" "TCP" "SERIAL")
-    endif()
-endif()
-
-# Transport sources.
-foreach(TRANS_TYPE ${TRANSPORT_TYPES})
-    if(PROFILE_${TRANS_TYPE}_TRANSPORT)
-        string(TOLOWER ${TRANS_TYPE} TT)
-        if(PLATFORM_NAME_LINUX)
-            set(${TRANS_TYPE}_SRCS
-                src/c/profile/transport/${TT}/${TT}_transport.c
-                src/c/profile/transport/${TT}/${TT}_transport_linux.c
-                )
-        elseif(PLATFORM_NAME_WINDOWS)
-            set(${TRANS_TYPE}_SRCS
-                src/c/profile/transport/${TT}/${TT}_transport.c
-                src/c/profile/transport/${TT}/${TT}_transport_windows.c
-                )
-        elseif(PLATFORM_NAME_NUTTX)
-            set(${TRANS_TYPE}_SRCS
-                src/c/profile/transport/${TT}/${TT}_transport.c
-                src/c/profile/transport/${TT}/${TT}_transport_linux.c
-                )
-        endif()
-    endif()
-endforeach()
-
-if(PROFILE_SERIAL_TRANSPORT)
-    set(SERIAL_SRCS ${SERIAL_SRCS} src/c/profile/transport/serial/serial_protocol.c)
-endif()
-
-# Transport discovery source.
-if(PROFILE_DISCOVERY)
-    if(PLATFORM_NAME_LINUX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
-    elseif(PLATFORM_NAME_WINDOWS)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
-    elseif(PLATFORM_NAME_NUTTX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
     endif()
 endif()
 
@@ -169,10 +128,22 @@ set(SRCS
     src/c/core/session/write_access.c
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
-    ${UDP_DISCOVERY_SRCS}
-    ${UDP_SRCS}
-    ${TCP_SRCS}
-    ${SERIAL_SRCS}
+    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/transport/ip/udp/udp_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Linux>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
+    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
+    $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
+    $<$<BOOL:${PROFILE_TCP_TRANSPORT}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
+    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_protocol.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
     )
 
 ###############################################################################

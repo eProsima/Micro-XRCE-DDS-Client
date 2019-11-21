@@ -12,22 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_UDP_TRANSPORT_LINUX_H_
-#define _UXR_CLIENT_UDP_TRANSPORT_LINUX_H_
+#ifndef UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
+#define UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <poll.h>
+#include <winsock2.h>
 
 typedef struct uxrUDPPlatform
 {
-    struct sockaddr remote_addr;
-    struct pollfd poll_fd;
+    WSAPOLLFD poll_fd;
 
 } uxrUDPPlatform;
 
@@ -35,4 +32,4 @@ typedef struct uxrUDPPlatform
 }
 #endif
 
-#endif //_UXR_CLIENT_UDP_TRANSPORT_LINUX_H_
+#endif // UXR_CLIENT_UDP_TRANSPORT_WINDOWS_H_

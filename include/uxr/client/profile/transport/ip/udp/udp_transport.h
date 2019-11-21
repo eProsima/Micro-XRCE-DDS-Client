@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+#include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/config.h>
 #include <uxr/client/visibility.h>
@@ -36,25 +37,28 @@ typedef struct uxrUDPTransport
 
 /**
  * @brief Initializes a UDP transport.
- * @param transport The uninitialized transport structure used for managing the transport.
- *                  This structure must be accesible during the connection.
- * @param platform  A structure that contains the platform dependencies.
- * @param ip        The IP address of the Agent.
- * @param port      The port of the Agent.
+ * @param transport     The uninitialized transport structure used for managing the transport.
+ *                      This structure must be accesible during the connection.
+ * @param platform      A structure that contains the platform dependencies.
+ * @param ip_protocol   The IP protocol, it could be UXR_IPv4 or UXR_IPv6.
+ * @param ip            The IP address of the Agent.
+ * @param port          The port of the Agent.
  * @return `true` in case of successful initialization. `false` in other case.
  */
 UXRDLLAPI bool uxr_init_udp_transport(
         uxrUDPTransport* transport,
         struct uxrUDPPlatform* platform,
+        uxrIpProtocol ip_protocol,
         const char* ip,
-        uint16_t port);
+        const char* port);
 
 /**
  * @brief Closes a UDP transport.
  * @param transport The transport structure.
  * @return `true` in case of successful closing. `false` in other case.
  */
-UXRDLLAPI bool uxr_close_udp_transport(uxrUDPTransport* transport);
+UXRDLLAPI bool uxr_close_udp_transport(
+        uxrUDPTransport* transport);
 
 
 #ifdef __cplusplus

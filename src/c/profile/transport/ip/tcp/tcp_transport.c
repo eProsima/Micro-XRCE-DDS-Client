@@ -281,11 +281,16 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
 /*******************************************************************************
  * Public function definitions.
  *******************************************************************************/
-bool uxr_init_tcp_transport(uxrTCPTransport* transport, struct uxrTCPPlatform* platform, const char* ip, uint16_t port)
+bool uxr_init_tcp_transport(
+        uxrTCPTransport* transport,
+        struct uxrTCPPlatform* platform,
+        uxrIpProtocol ip_protocol,
+        const char* ip,
+        const char* port)
 {
     bool rv = false;
 
-    if(uxr_init_tcp_platform(platform, ip, port))
+    if(uxr_init_tcp_platform(platform, ip_protocol, ip, port))
     {
         /* Setup platform. */
         transport->platform = platform;

@@ -75,30 +75,56 @@ int main(int args, char** argv)
 
     int args_index = 0;
 
-    if(args >= 4 && strcmp(argv[1], "--udp") == 0)
+    if(args >= 4 && strcmp(argv[1], "--udp4") == 0)
     {
         char* ip = argv[2];
-        uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_udp_transport(&udp, &udp_platform, ip, port))
+        char* port = argv[3];
+        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv4, ip, port))
         {
             printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
         comm = &udp.comm;
-        printf("Running in UDP mode => ip: %s, port: %hu\n", argv[2], port);
+        printf("Running in UDP/IPv4 mode => ip: %s, port: %s\n", ip, port);
         args_index = 4;
     }
-    else if(args >= 4 && strcmp(argv[1], "--tcp") == 0)
+    else if(args >= 4 && strcmp(argv[1], "--udp6") == 0)
     {
         char* ip = argv[2];
-        uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, ip, port))
+        char* port = argv[3];
+        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv6, ip, port))
+        {
+            printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+            return 1;
+        }
+        comm = &udp.comm;
+        printf("Running in UDP/IPv6 mode => ip: %s, port: %s\n", ip, port);
+        args_index = 4;
+    }
+    else if(args >= 4 && strcmp(argv[1], "--tcp4") == 0)
+    {
+        char* ip = argv[2];
+        char* port = argv[3];
+        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, UXR_IPv4, ip, port))
         {
             printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
         comm = &tcp.comm;
-        printf("Running TCP mode => ip: %s, port: %hu\n", argv[2], port);
+        printf("Running TCP mode => ip: %s, port: %s\n", ip, port);
+        args_index = 4;
+    }
+    else if(args >= 4 && strcmp(argv[1], "--tcp6") == 0)
+    {
+        char* ip = argv[2];
+        char* port = argv[3];
+        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, UXR_IPv6, ip, port))
+        {
+            printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+            return 1;
+        }
+        comm = &tcp.comm;
+        printf("Running TCP mode => ip: %s, port: %s\n", ip, port);
         args_index = 4;
     }
 #if !defined(WIN32)
@@ -462,8 +488,10 @@ void print_help(void)
     printf("       program <transport> [--key <number>] [--history <number>]\n");
     printf("List of available transports:\n");
     printf("    --serial <device>\n");
-    printf("    --udp <agent-ip> <agent-port>\n");
-    printf("    --tcp <agent-ip> <agent-port>\n");
+    printf("    --udp4 <agent-ip> <agent-port>\n");
+    printf("    --udp6 <agent-ip> <agent-port>\n");
+    printf("    --tcp4 <agent-ip> <agent-port>\n");
+    printf("    --tcp6 <agent-ip> <agent-port>\n");
 }
 
 void print_commands(void)

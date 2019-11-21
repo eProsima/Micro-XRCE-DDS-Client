@@ -1,4 +1,4 @@
-// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2019 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
-#define _UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
+#ifndef UXR_CLIENT_PROFILE_TRANSPORT_IP_IP_H_
+#define UXR_CLIENT_PROFILE_TRANSPORT_IP_IP_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <poll.h>
-
-typedef struct uxrTCPPlatform
+typedef enum uxrIpProtocol
 {
-    struct sockaddr remote_addr;
-    struct pollfd poll_fd;
+    UXR_IPv4,
+    UXR_IPv6
 
-} uxrTCPPlatform;
+} uxrIpProtocol;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
+#endif // UXR_CLIENT_PROFILE_TRANSPORT_IP_IP_H_
