@@ -21,16 +21,17 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 # Build options
 ###############################################################################
 option(UCLIENT_SUPERBUILD "Enable superbuild compilation." ON)
-option(UCLIENT_BUILD_TESTS "Build tests" OFF)
-option(UCLIENT_BUILD_EXAMPLES "Build examples" OFF)
-option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity" OFF)
-option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity" OFF)
+option(UCLIENT_BUILD_TESTS "Build tests." OFF)
+option(UCLIENT_BUILD_EXAMPLES "Build examples." OFF)
+option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
+option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
+option(UCLIENT_PIC "Control Position Independent Code." ON)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
 if((CMAKE_SYSTEM_NAME STREQUAL "") AND (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux"))
-    option(UCLIENT_MEMORY_TESTS "Build memory tests" OFF)
-    option(UCLIENT_PERFORMANCE_TESTS "Build performance tests" OFF)
+    option(UCLIENT_MEMORY_TESTS "Build memory tests." OFF)
+    option(UCLIENT_PERFORMANCE_TESTS "Build performance tests." OFF)
 endif()
-option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)" OFF)
+option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)." OFF)
 set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
 include(GNUInstallDirs)
@@ -48,12 +49,12 @@ endif()
 # Project
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
-if(UCLIENT_SUPERBUILD)
+if(NOT UCLIENT_SUPERBUILD)
+    project(microxrcedds_client VERSION "1.2.0" LANGUAGES C)
+else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
     return()
-else()
-    project(microxrcedds_client VERSION "1.2.0" LANGUAGES C)
 endif()
 
 # Set CMAKE_BUILD_TYPE to Release by default.
@@ -162,6 +163,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         99
     C_STANDARD_REQUIRED
         YES
+    POSITION_INDEPENDENT_CODE
+	${UCLIENT_PIC}
     )
 
 target_compile_options(${PROJECT_NAME}
