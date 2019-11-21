@@ -156,6 +156,8 @@ set_common_compile_options(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION
         ${PROJECT_VERSION}
+    SOVERSION
+        ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     C_STANDARD
         99
     C_STANDARD_REQUIRED
@@ -230,6 +232,8 @@ endif()
 if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/PublishHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorld)
+    add_subdirectory(examples/PublishHelloWorldP2P)
+    add_subdirectory(examples/SubscribeHelloWorldP2P)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
     add_subdirectory(examples/Discovery)
