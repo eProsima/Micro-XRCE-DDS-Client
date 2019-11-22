@@ -36,6 +36,7 @@ if(NOT microcdr_FOUND)
             -DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}
             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
             -DCONFIG_BIG_ENDIANNESS=${UCLIENT_BIG_ENDIANNESS}
+            -DUCDR_PIC=${UCLIENT_PIC}
         )
     list(APPEND _deps ucdr)
 endif()
