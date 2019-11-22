@@ -18,7 +18,7 @@ unset(_deps)
 
 # Micro CDR.
 unset(microcdr_DIR CACHE)
-find_package(microcdr "1.1.0" EXACT QUIET)
+find_package(microcdr "1.1.1" EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
         DOWNLOAD_COMMAND
