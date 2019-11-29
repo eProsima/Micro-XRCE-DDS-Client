@@ -21,12 +21,12 @@ unset(microcdr_DIR CACHE)
 find_package(microcdr "1.1.1" EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
-        DOWNLOAD_COMMAND
-            cd ${PROJECT_SOURCE_DIR} && git submodule update --init thirdparty/microcdr/
+        GIT_REPOSITORY
+            https://github.com/eProsima/Micro-CDR.git
+        GIT_TAG
+            v1.1.1
         PREFIX
             ${PROJECT_BINARY_DIR}/ucdr
-        SOURCE_DIR
-            ${PROJECT_SOURCE_DIR}/thirdparty/microcdr
         INSTALL_DIR
             ${PROJECT_BINARY_DIR}/temp_install
         CMAKE_ARGS
