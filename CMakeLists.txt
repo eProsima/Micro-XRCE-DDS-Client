@@ -60,6 +60,9 @@ endif()
 set(_microcdr_version 1.1.1)
 set(_microcdr_tag v1.1.1)
 
+set(_deps "")
+list(APPEND _deps "microcdr\;${_microcdr_version}")
+
 ###############################################################################
 # Project
 ###############################################################################
@@ -106,7 +109,11 @@ endif()
 ###############################################################################
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_BINARY_DIR}/temp_install)
 
-find_package(microcdr ${_microcdr_version} EXACT REQUIRED)
+foreach(d ${_deps})
+    list(GET d 0 _name)
+    list(GET d 1 _version)
+    find_package(${_name} ${_version} EXACT REQUIRED)
+endforeach()
 
 ###############################################################################
 # Sources
