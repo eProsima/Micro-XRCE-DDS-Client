@@ -18,13 +18,13 @@ unset(_deps)
 
 # Micro CDR.
 unset(microcdr_DIR CACHE)
-find_package(microcdr "1.1.1" EXACT QUIET)
+find_package(microcdr ${_microcdr_version} EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
         GIT_REPOSITORY
             https://github.com/eProsima/Micro-CDR.git
         GIT_TAG
-            v1.1.1
+            ${_microcdr_tag}
         PREFIX
             ${PROJECT_BINARY_DIR}/ucdr
         INSTALL_DIR

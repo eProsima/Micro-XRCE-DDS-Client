@@ -46,11 +46,17 @@ else()
 endif()
 
 ###############################################################################
+# Dependencies
+###############################################################################
+set(_microcdr_version 1.1.1)
+set(_microcdr_tag v1.1.1)
+
+###############################################################################
 # Project
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(NOT UCLIENT_SUPERBUILD)
-    project(microxrcedds_client VERSION "1.1.3" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.1.4" LANGUAGES C)
 else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
@@ -89,7 +95,9 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-find_package(microcdr 1.1.1 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_BINARY_DIR}/temp_install)
+
+find_package(microcdr ${_microcdr_version} EXACT REQUIRED)
 
 ###############################################################################
 # Sources
