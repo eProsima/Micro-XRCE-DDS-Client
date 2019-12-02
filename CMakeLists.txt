@@ -27,11 +27,20 @@ option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+
+option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
+if(UCLIENT_BUILD_CI_TESTS)
+    set(UCLIENT_BUILD_TESTS ON)
+    set(UCLIENT_BUILD_EXAMPLES ON)
+endif()
+
 if((CMAKE_SYSTEM_NAME STREQUAL "") AND (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux"))
     option(UCLIENT_MEMORY_TESTS "Build memory tests." OFF)
     option(UCLIENT_PERFORMANCE_TESTS "Build performance tests." OFF)
 endif()
+
 option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)." OFF)
+
 set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
 include(GNUInstallDirs)
@@ -282,6 +291,10 @@ endif()
 ###############################################################################
 # Tests
 ###############################################################################
+if(UCLIENT_BUILD_CI_TESTS)
+    include(CTest)
+endif()
+
 if(UCLIENT_BUILD_TESTS)
     include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
     find_package(GTest REQUIRED)
