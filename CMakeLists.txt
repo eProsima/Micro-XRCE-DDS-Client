@@ -293,6 +293,7 @@ endif()
 ###############################################################################
 if(UCLIENT_BUILD_CI_TESTS)
     include(CTest)
+    add_subdirectory(test/case)
 endif()
 
 if(UCLIENT_BUILD_TESTS)
