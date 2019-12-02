@@ -724,6 +724,38 @@ bool uxr_deserialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, OBJK_TOPIC_Re
     return ret;
 }
 
+bool uxr_serialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, const OBJK_REQUESTER_Representation* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
+    ret &= uxr_serialize_ObjectId(buffer, &input->participant_id);
+    return ret;
+}
+
+bool uxr_deserialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, OBJK_REQUESTER_Representation* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
+    ret &= uxr_deserialize_ObjectId(buffer, &output->participant_id);
+    return ret;
+}
+
+bool uxr_serialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, const OBJK_REPLIER_Representation* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
+    ret &= uxr_serialize_ObjectId(buffer, &input->participant_id);
+    return ret;
+}
+
+bool uxr_deserialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, OBJK_REPLIER_Representation* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
+    ret &= uxr_deserialize_ObjectId(buffer, &output->participant_id);
+    return ret;
+}
+
 bool uxr_serialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, const OBJK_DomainParticipant_Binary* input)
 {
     bool ret = true;

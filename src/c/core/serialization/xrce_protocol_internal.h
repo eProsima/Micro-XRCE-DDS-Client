@@ -78,6 +78,8 @@ typedef uint8_t ObjectKind;
 #define OBJK_SUBSCRIBER 0x04
 #define OBJK_DATAWRITER 0x05
 #define OBJK_DATAREADER 0x06
+#define OBJK_REQUESTER 0x07
+#define OBJK_REPLIER 0x08
 #define OBJK_TYPE 0x0A
 #define OBJK_QOSPROFILE 0x0B
 #define OBJK_APPLICATION 0x0C
@@ -389,6 +391,22 @@ typedef struct OBJK_TOPIC_Representation
 } OBJK_TOPIC_Representation;
 
 
+typedef struct OBJK_REQUESTER_Representation
+{
+    OBJK_Representation3_Base base;
+    ObjectId participant_id;
+
+} OBJK_REQUESTER_Representation;
+
+
+typedef struct OBJK_REPLIER_Representation
+{
+    OBJK_Representation3_Base base;
+    ObjectId participant_id;
+
+} OBJK_REPLIER_Representation;
+
+
 typedef struct OBJK_DomainParticipant_Binary
 {
     bool optional_domain_reference;
@@ -526,6 +544,8 @@ typedef union ObjectVariantU
     OBJK_TOPIC_Representation topic;
     OBJK_PUBLISHER_Representation publisher;
     OBJK_SUBSCRIBER_Representation subscriber;
+    OBJK_REQUESTER_Representation requester;
+    OBJK_REPLIER_Representation replier;
     DATAWRITER_Representation data_writer;
     DATAREADER_Representation data_reader;
 
@@ -1111,6 +1131,12 @@ bool uxr_deserialize_OBJK_PARTICIPANT_Representation(ucdrBuffer* buffer, OBJK_PA
 
 bool uxr_serialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, const OBJK_TOPIC_Representation* input);
 bool uxr_deserialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, OBJK_TOPIC_Representation* output);
+
+bool uxr_serialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, const OBJK_REQUESTER_Representation* input);
+bool uxr_deserialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, OBJK_REQUESTER_Representation* output);
+
+bool uxr_serialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, const OBJK_REPLIER_Representation* input);
+bool uxr_deserialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, OBJK_REPLIER_Representation* output);
 
 bool uxr_serialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, const OBJK_DomainParticipant_Binary* input);
 bool uxr_deserialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, OBJK_DomainParticipant_Binary* output);
