@@ -43,6 +43,8 @@ ExternalProject_Add(microxrcedds_client
         COMMAND ${CMAKE_CTEST_COMMAND} -VV -T MemCheck -E "test-case*"
         COMMAND ${CMAKE_CTEST_COMMAND} -VV -T Coverage -E "test-case*"
     CMAKE_CACHE_ARGS
+        -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
         -DCMAKE_C_FLAGS:STRING=${_c_flags}
         -DCMAKE_CXX_FLAGS:STRING=${_cxx_flags}
