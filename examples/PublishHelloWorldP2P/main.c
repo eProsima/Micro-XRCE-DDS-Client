@@ -34,13 +34,13 @@ int main(int args, char** argv)
     }
 
     char* ip = argv[1];
-    uint16_t port = (uint16_t)atoi(argv[2]);
+    char* port = argv[2];
     uint32_t max_topics = (args == 4) ? (uint32_t)atoi(argv[3]) : UINT32_MAX;
 
     // Transport
     uxrUDPTransport transport;
     uxrUDPPlatform udp_platform;
-    if(!uxr_init_udp_transport(&transport, &udp_platform, ip, port))
+    if(!uxr_init_udp_transport(&transport, &udp_platform, UXR_IPv4, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;
