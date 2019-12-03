@@ -105,6 +105,17 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     endif()
 endif()
 
+# Check external transport.
+SET(EXTERNAL_TRANSPORT_HEADER ""   CACHE PATH "External transports header file")
+SET(EXTERNAL_TRANSPORT ""          CACHE PATH "External transports code file")
+
+if(EXTERNAL_TRANSPORT)
+    set(EXTERNAL ON)
+    get_filename_component(EXTERNAL_TRANSPORT_HEADER_FILENAME ${EXTERNAL_TRANSPORT_HEADER} NAME)
+    get_filename_component(EXTERNAL_TRANSPORT_FILENAME ${EXTERNAL_TRANSPORT} NAME)
+    get_filename_component(EXTERNAL_TRANSPORT_HEADER_DIRECTORY ${EXTERNAL_TRANSPORT_HEADER} DIRECTORY)
+endif()
+
 # Other sources
 set(SRCS
     src/c/core/session/stream/input_best_effort_stream.c
@@ -133,18 +144,22 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Linux>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
-    $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>
+    
+    $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>   
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
+    
     $<$<BOOL:${PROFILE_TCP_TRANSPORT}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_protocol.c>
+
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${EXTERNAL}>>:${EXTERNAL_TRANSPORT}>
     )
 
 ###############################################################################
@@ -202,6 +217,8 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
+        $<$<BOOL:${EXTERNAL}>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
+        $<$<BOOL:${EXTERNAL}>:${PROJECT_SOURCE_DIR}/src/c/profile/transport/serial>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     )
@@ -290,6 +307,16 @@ install(
     FILES_MATCHING
         PATTERN "*.h"
     )
+
+# Install external transport header
+if(EXTERNAL)
+    install(
+        FILES
+            ${EXTERNAL_TRANSPORT_HEADER}
+        DESTINATION
+            ${INCLUDE_INSTALL_DIR}/uxr/client/profile/transport/serial
+    )
+endif()
 
 # Generate config.h
 configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
