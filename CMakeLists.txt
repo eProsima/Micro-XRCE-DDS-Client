@@ -27,11 +27,20 @@ option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+
+option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
+if(UCLIENT_BUILD_CI_TESTS)
+    set(UCLIENT_BUILD_TESTS ON)
+    set(UCLIENT_BUILD_EXAMPLES ON)
+endif()
+
 if((CMAKE_SYSTEM_NAME STREQUAL "") AND (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux"))
     option(UCLIENT_MEMORY_TESTS "Build memory tests." OFF)
     option(UCLIENT_PERFORMANCE_TESTS "Build performance tests." OFF)
 endif()
+
 option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)." OFF)
+
 set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
 include(GNUInstallDirs)
@@ -44,6 +53,15 @@ if(WIN32)
 else()
     set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
 endif()
+
+###############################################################################
+# Dependencies
+###############################################################################
+set(_microcdr_version 1.1.1)
+set(_microcdr_tag v1.1.1)
+
+set(_deps "")
+list(APPEND _deps "microcdr\;${_microcdr_version}")
 
 ###############################################################################
 # Project
@@ -89,7 +107,13 @@ endif()
 ###############################################################################
 # Load external eProsima projects.
 ###############################################################################
-find_package(microcdr 1.1.0 EXACT REQUIRED PATHS ${PROJECT_BINARY_DIR}/temp_install)
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_BINARY_DIR}/temp_install)
+
+foreach(d ${_deps})
+    list(GET d 0 _name)
+    list(GET d 1 _version)
+    find_package(${_name} ${_version} EXACT REQUIRED)
+endforeach()
 
 ###############################################################################
 # Sources
@@ -164,7 +188,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     C_STANDARD_REQUIRED
         YES
     POSITION_INDEPENDENT_CODE
-	${UCLIENT_PIC}
+	    ${UCLIENT_PIC}
     )
 
 target_compile_options(${PROJECT_NAME}
@@ -245,6 +269,11 @@ endif()
 ###############################################################################
 # Tests
 ###############################################################################
+if(UCLIENT_BUILD_CI_TESTS)
+    include(CTest)
+    add_subdirectory(test/case)
+endif()
+
 if(UCLIENT_BUILD_TESTS)
     include(${PROJECT_SOURCE_DIR}/cmake/common/gtest.cmake)
     find_package(GTest REQUIRED)

@@ -18,15 +18,15 @@ unset(_deps)
 
 # Micro CDR.
 unset(microcdr_DIR CACHE)
-find_package(microcdr "1.1.0" EXACT QUIET)
+find_package(microcdr ${_microcdr_version} EXACT QUIET)
 if(NOT microcdr_FOUND)
     ExternalProject_Add(ucdr
-        DOWNLOAD_COMMAND
-            cd ${PROJECT_SOURCE_DIR} && git submodule update --init thirdparty/microcdr/
+        GIT_REPOSITORY
+            https://github.com/eProsima/Micro-CDR.git
+        GIT_TAG
+            ${_microcdr_tag}
         PREFIX
             ${PROJECT_BINARY_DIR}/ucdr
-        SOURCE_DIR
-            ${PROJECT_SOURCE_DIR}/thirdparty/microcdr
         INSTALL_DIR
             ${PROJECT_BINARY_DIR}/temp_install
         CMAKE_ARGS
@@ -36,6 +36,7 @@ if(NOT microcdr_FOUND)
             -DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}
             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
             -DCONFIG_BIG_ENDIANNESS=${UCLIENT_BIG_ENDIANNESS}
+            -DUCDR_PIC=${UCLIENT_PIC}
         )
     list(APPEND _deps ucdr)
 endif()
