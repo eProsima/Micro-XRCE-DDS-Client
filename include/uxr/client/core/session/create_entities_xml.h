@@ -208,12 +208,12 @@ UXRDLLAPI uint16_t uxr_buffer_create_requester_xml(
  * @return A `request_id` that identifies the request made by the Client.
  *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  */
-UXRDLLAPI uint16_t uxr_buffer_create_replier_ref(
+UXRDLLAPI uint16_t uxr_buffer_create_replier_xml(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        const char* ref,
+        const char* xml,
         uint8_t mode);
 
 #ifdef __cplusplus

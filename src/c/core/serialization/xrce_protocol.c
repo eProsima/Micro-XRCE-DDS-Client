@@ -1193,6 +1193,12 @@ bool uxr_serialize_ObjectVariant(ucdrBuffer* buffer, const ObjectVariant* input)
             case OBJK_DATAREADER:
                 ret &= uxr_serialize_DATAREADER_Representation(buffer, &input->_.data_reader);
                 break;
+            case OBJK_REQUESTER:
+                ret &= uxr_serialize_OBJK_REQUESTER_Representation(buffer, &input->_.requester);
+                break;
+            case OBJK_REPLIER:
+                ret &= uxr_serialize_OBJK_REPLIER_Representation(buffer, &input->_.replier);
+                break;
             default:
                 break;
         }
@@ -1240,6 +1246,12 @@ bool uxr_deserialize_ObjectVariant(ucdrBuffer* buffer, ObjectVariant* output)
                 break;
             case OBJK_DATAREADER:
                 ret &= uxr_deserialize_DATAREADER_Representation(buffer, &output->_.data_reader);
+                break;
+            case OBJK_REQUESTER:
+                ret &= uxr_deserialize_OBJK_REQUESTER_Representation(buffer, &output->_.requester);
+                break;
+            case OBJK_REPLIER:
+                ret &= uxr_deserialize_OBJK_REPLIER_Representation(buffer, &output->_.replier);
                 break;
             default:
                 break;
