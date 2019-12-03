@@ -144,17 +144,14 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Linux>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
-    
     $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>   
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
-    
     $<$<BOOL:${PROFILE_TCP_TRANSPORT}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
-
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
