@@ -17,11 +17,17 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 project(microxrcedds_client_ci LANGUAGES C CXX)
 
 include(ExternalProject)
+include(CheckCXXCompilerFlag)
 
 set(_c_flags "-fwrapv -fprofile-arcs -ftest-coverage")
 set(_cxx_flags "-fwrapv -fprofile-arcs -ftest-coverage")
 set(_exe_linker_flags "-fprofile-arcs -ftest-coverage")
 set(_shared_linker_flags "-fprofile-arcs -ftest-coverage")
+
+check_cxx_compiler_flag("-fprofile-abs-path" have_fprofile_abs_path)
+if(have_fprofile_abs_path)
+    set(_cxx_flags "${_cxx_flags} -fprofile-abs-path")
+endif()
 
 ExternalProject_Add(microxrcedds_client
     SOURCE_DIR
