@@ -16,6 +16,10 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
 project(microxrcedds_client_ci LANGUAGES C CXX)
 
+if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(FATAL_ERROR "Unsupported compiler")
+endif()
+
 include(ExternalProject)
 include(CheckCXXCompilerFlag)
 
