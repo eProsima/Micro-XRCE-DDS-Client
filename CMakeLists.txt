@@ -106,13 +106,13 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
 endif()
 
 # Check external transport.
-SET(EXTERNAL_TRANSPORT_HEADER ""   CACHE PATH "External transports header file")
-SET(EXTERNAL_TRANSPORT ""          CACHE PATH "External transports code file")
+set(EXTERNAL_TRANSPORT_HEADER ""    CACHE PATH "External transports header file")
+set(EXTERNAL_TRANSPORT_SRC ""       CACHE PATH "External transports code file")
 
-if(EXTERNAL_TRANSPORT)
-    set(EXTERNAL ON)
+if(EXTERNAL_TRANSPORT_SRC AND EXTERNAL_TRANSPORT_HEADER)
+    set(external ON)
     get_filename_component(EXTERNAL_TRANSPORT_HEADER_FILENAME ${EXTERNAL_TRANSPORT_HEADER} NAME)
-    get_filename_component(EXTERNAL_TRANSPORT_FILENAME ${EXTERNAL_TRANSPORT} NAME)
+    get_filename_component(EXTERNAL_TRANSPORT_FILENAME ${EXTERNAL_TRANSPORT_SRC} NAME)
     get_filename_component(EXTERNAL_TRANSPORT_HEADER_DIRECTORY ${EXTERNAL_TRANSPORT_HEADER} DIRECTORY)
 endif()
 
@@ -144,7 +144,7 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Linux>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
-    $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>   
+    $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
@@ -156,7 +156,7 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${EXTERNAL}>>:${EXTERNAL_TRANSPORT}>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${external}>>:${EXTERNAL_TRANSPORT_SRC}>
     )
 
 ###############################################################################
@@ -214,8 +214,8 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
-        $<$<BOOL:${EXTERNAL}>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
-        $<$<BOOL:${EXTERNAL}>:${PROJECT_SOURCE_DIR}/src/c/profile/transport/serial>
+        $<$<AND:$<BOOL:${BUILD_INTERFACE}>,$<BOOL:${external}>>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
+        $<$<AND:$<BOOL:${BUILD_INTERFACE}>,$<BOOL:${external}>>:${PROJECT_SOURCE_DIR}/src/c/profile/transport/serial>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     )
@@ -306,7 +306,7 @@ install(
     )
 
 # Install external transport header
-if(EXTERNAL)
+if(external)
     install(
         FILES
             ${EXTERNAL_TRANSPORT_HEADER}
