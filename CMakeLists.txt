@@ -110,7 +110,7 @@ set(EXTERNAL_TRANSPORT_HEADER ""    CACHE PATH "External transports header file"
 set(EXTERNAL_TRANSPORT_SRC ""       CACHE PATH "External transports code file")
 
 if(EXTERNAL_TRANSPORT_SRC AND EXTERNAL_TRANSPORT_HEADER)
-    set(external ON)
+    set(_external_transport ON)
     get_filename_component(EXTERNAL_TRANSPORT_HEADER_FILENAME ${EXTERNAL_TRANSPORT_HEADER} NAME)
     get_filename_component(EXTERNAL_TRANSPORT_FILENAME ${EXTERNAL_TRANSPORT_SRC} NAME)
     get_filename_component(EXTERNAL_TRANSPORT_HEADER_DIRECTORY ${EXTERNAL_TRANSPORT_HEADER} DIRECTORY)
@@ -156,7 +156,7 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${external}>>:${EXTERNAL_TRANSPORT_SRC}>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_SRC}>
     )
 
 ###############################################################################
@@ -214,8 +214,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
-        $<$<AND:$<BOOL:${BUILD_INTERFACE}>,$<BOOL:${external}>>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
-        $<$<AND:$<BOOL:${BUILD_INTERFACE}>,$<BOOL:${external}>>:${PROJECT_SOURCE_DIR}/src/c/profile/transport/serial>
+        $<$<AND:$<BOOL:${INSTALL_INTERFACE}>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     )
@@ -306,13 +305,13 @@ install(
     )
 
 # Install external transport header
-if(external)
+if(_external_transport)
     install(
         FILES
             ${EXTERNAL_TRANSPORT_HEADER}
         DESTINATION
             ${INCLUDE_INSTALL_DIR}/uxr/client/profile/transport/serial
-    )
+        )
 endif()
 
 # Generate config.h

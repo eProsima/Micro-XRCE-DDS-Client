@@ -46,7 +46,7 @@
 #elif defined(PLATFORM_NAME_WINDOWS)
 #elif defined(PLATFORM_NAME_NUTTX)
 #include <uxr/client/profile/transport/serial/serial_transport_linux.h>
-#elif defined(EXTERNAL)
+#elif defined(_external_transport)
 #include EXTERNAL_TRANSPORT_HEADER_FILENAME
 #endif
 #endif //PROFILE_SERIAL_TRANSPORT

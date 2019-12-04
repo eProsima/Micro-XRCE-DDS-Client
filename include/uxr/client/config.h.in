@@ -29,7 +29,7 @@
 #cmakedefine PLATFORM_NAME_LINUX
 #cmakedefine PLATFORM_NAME_WINDOWS
 #cmakedefine PLATFORM_NAME_NUTTX
-#cmakedefine EXTERNAL
+#cmakedefine _external_transport
 
 #cmakedefine EXTERNAL_TRANSPORT_HEADER_FILENAME <uxr/client/profile/transport/serial/@EXTERNAL_TRANSPORT_HEADER_FILENAME@>
 
