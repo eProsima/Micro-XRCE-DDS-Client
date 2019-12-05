@@ -19,6 +19,10 @@ endif()
 
 project(ShapeDemoClient)
 
+if(NOT UCLIENT_BUILD_EXAMPLES)
+    find_package(microxrcedds_client REQUIRED)
+endif()
+
 if(NOT PROFILE_UDP_TRANSPORT OR
    NOT PROFILE_TCP_TRANSPORT OR
    NOT PROFILE_SERIAL_TRANSPORT)
