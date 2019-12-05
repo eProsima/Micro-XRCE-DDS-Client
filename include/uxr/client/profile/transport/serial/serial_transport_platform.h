@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SRC_C_PROFILE_TRANSPORT_SERIAL_SERIAL_TRANSPORT_INTERNAL_H_
-#define _SRC_C_PROFILE_TRANSPORT_SERIAL_SERIAL_TRANSPORT_INTERNAL_H_
+#ifndef _SRC_C_PROFILE_TRANSPORT_SERIAL_SERIAL_TRANSPORT_PLATFORM_H_
+#define _SRC_C_PROFILE_TRANSPORT_SERIAL_SERIAL_TRANSPORT_PLATFORM_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -40,4 +40,4 @@ size_t uxr_read_serial_data_platform(struct uxrSerialPlatform* platform,
 }
 #endif
 
-#endif //_SRC_C_PROFILE_TRANSPORT_SERIAL_SERIAL_TRANSPORT_INTERNAL_H_
+#endif //_SRC_C_PROFILE_TRANSPORT_SERIAL_SERIAL_TRANSPORT_PLATFORM_H_

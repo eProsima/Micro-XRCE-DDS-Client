@@ -129,6 +129,17 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     endif()
 endif()
 
+# Check external transport.
+set(EXTERNAL_TRANSPORT_HEADER ""    CACHE PATH "External transports header file")
+set(EXTERNAL_TRANSPORT_SRC ""       CACHE PATH "External transports code file")
+
+if(EXTERNAL_TRANSPORT_SRC AND EXTERNAL_TRANSPORT_HEADER)
+    set(_external_transport ON)
+    get_filename_component(EXTERNAL_TRANSPORT_HEADER_FILENAME ${EXTERNAL_TRANSPORT_HEADER} NAME)
+    get_filename_component(EXTERNAL_TRANSPORT_FILENAME ${EXTERNAL_TRANSPORT_SRC} NAME)
+    get_filename_component(EXTERNAL_TRANSPORT_HEADER_DIRECTORY ${EXTERNAL_TRANSPORT_HEADER} DIRECTORY)
+endif()
+
 # Other sources
 set(SRCS
     src/c/core/session/stream/input_best_effort_stream.c
@@ -165,10 +176,11 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_protocol.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_SRC}>
     )
 
 ###############################################################################
@@ -226,6 +238,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
+        $<$<AND:$<BOOL:${INSTALL_INTERFACE}>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     )
@@ -319,6 +332,16 @@ install(
     FILES_MATCHING
         PATTERN "*.h"
     )
+
+# Install external transport header
+if(_external_transport)
+    install(
+        FILES
+            ${EXTERNAL_TRANSPORT_HEADER}
+        DESTINATION
+            ${INCLUDE_INSTALL_DIR}/uxr/client/profile/transport/serial
+        )
+endif()
 
 # Generate config.h
 configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
