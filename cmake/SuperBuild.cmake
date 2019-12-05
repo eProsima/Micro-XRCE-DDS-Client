@@ -16,6 +16,9 @@ include(ExternalProject)
 
 unset(_deps)
 
+enable_language(C)
+enable_language(CXX)
+
 # Micro CDR.
 unset(microcdr_DIR CACHE)
 find_package(microcdr ${_microcdr_version} EXACT QUIET)
@@ -29,9 +32,10 @@ if(NOT microcdr_FOUND)
             ${PROJECT_BINARY_DIR}/ucdr
         INSTALL_DIR
             ${PROJECT_BINARY_DIR}/temp_install
+        CMAKE_CACHE_ARGS
+            -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+            -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
         CMAKE_ARGS
-            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
