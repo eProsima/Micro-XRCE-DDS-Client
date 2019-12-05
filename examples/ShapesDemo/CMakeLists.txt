@@ -26,7 +26,7 @@ endif()
 if(NOT PROFILE_UDP_TRANSPORT OR
    NOT PROFILE_TCP_TRANSPORT OR
    NOT PROFILE_SERIAL_TRANSPORT)
-    message(WARNING "Can not compile test: The PROFILE_UDP_TRANSPORT, PROFILE_TCP_PROFILE and PROFILE_SERIAL_TRANSPORT must be enabled.")
+    message(WARNING "Can not compile example: The PROFILE_UDP_TRANSPORT, PROFILE_TCP_TRANSPORT and PROFILE_SERIAL_TRANSPORT must be enabled.")
 else()
     add_executable(${PROJECT_NAME} main.c ShapeType.c)
     if(MSVC OR MSVC_IDE)
