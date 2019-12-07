@@ -26,6 +26,11 @@ else()
     ###                       DISCOVERY
     #############################################################
     project(Discovery)
+
+    if(NOT UCLIENT_BUILD_EXAMPLES)
+        find_package(microxrcedds_client REQUIRED)
+    endif()
+
     add_executable(Discovery main.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)

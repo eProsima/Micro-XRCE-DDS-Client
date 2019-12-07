@@ -19,6 +19,10 @@ endif()
 
 project(SubscribeHelloWorldClient)
 
+if(NOT UCLIENT_BUILD_EXAMPLES)
+    find_package(microxrcedds_client REQUIRED)
+endif()
+
 if(NOT PROFILE_UDP_TRANSPORT)
     message(WARNING "Can not compile example: The PROFILE_UDP_TRANSPORT must be enabled.")
 else()
