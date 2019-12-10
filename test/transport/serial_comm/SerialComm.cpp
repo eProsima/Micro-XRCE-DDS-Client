@@ -119,7 +119,7 @@ TEST_F(SerialComm, WorstStuffingTest)
     memset(output_msg, UXR_FRAMING_BEGIN_FLAG, sizeof(output_msg));
     ASSERT_TRUE(master_.comm.send_msg(&master_, output_msg, sizeof(output_msg)));
 
-    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 10));
+    ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 100));
     ASSERT_EQ(memcmp(output_msg, input_msg, sizeof(output_msg)), 0);
 }
 
