@@ -22,6 +22,13 @@ extern "C"
 
 #include <uxr/client/core/session/session.h>
 
+uint16_t uxr_buffer_request(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId request_id,
+        uint8_t* buffer,
+        size_t len);
+
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE WRITE_DATA submessage.
  *        The submessage will be sent when `uxr_flash_output_stream` or `uxr_run_session` function are called.
