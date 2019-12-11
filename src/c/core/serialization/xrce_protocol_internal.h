@@ -1016,6 +1016,40 @@ typedef struct TIMESTAMP_REPLY_Payload
 
 } TIMESTAMP_REPLY_Payload;
 
+typedef struct GuidPrefix
+{
+    uint8_t data[12];
+
+} GuidPrefix_t;
+
+typedef struct EntityId_t
+{
+    uint8_t entityKey[3];
+    uint8_t entityKind;
+
+} EntityId_t;
+
+typedef struct GUID_t
+{
+    GuidPrefix_t guidPrefix;
+    EntityId_t entityId;
+
+} GUID_t;
+
+typedef struct SequenceNumber_t
+{
+    int32_t high;
+    uint32_t low;
+
+} SequenceNumber_t;
+
+typedef struct SampleIdentity
+{
+    GUID_t writer_guid;
+    SequenceNumber_t sequence_number;
+
+} SampleIdentity;
+
 #ifdef PERFORMANCE_TESTING
 typedef struct PERFORMANCE_Payload
 {
@@ -1314,6 +1348,21 @@ bool uxr_deserialize_TIMESTAMP_Payload(ucdrBuffer* buffer, TIMESTAMP_Payload* ou
 
 bool uxr_serialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, const TIMESTAMP_REPLY_Payload* input);
 bool uxr_deserialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, TIMESTAMP_REPLY_Payload* output);
+
+bool uxr_serialize_GuidPrefix_t(ucdrBuffer* buffer, const GuidPrefix_t* input);
+bool uxr_deserialize_GuidPrefix_t(ucdrBuffer* buffer, GuidPrefix_t* output);
+
+bool uxr_serialize_EntityId_t(ucdrBuffer* buffer, const EntityId_t* input);
+bool uxr_deserialize_EntityId_t(ucdrBuffer* buffer, EntityId_t* output);
+
+bool uxr_serialize_GUID_t(ucdrBuffer* buffer, const GUID_t* input);
+bool uxr_deserialize_GUID_t(ucdrBuffer* buffer, GUID_t* output);
+
+bool uxr_serialize_SequenceNumber_t(ucdrBuffer* buffer, const SequenceNumber_t* input);
+bool uxr_deserialize_SequenceNumber_t(ucdrBuffer* buffer, SequenceNumber_t* output);
+
+bool uxr_serialize_SampleIdentity(ucdrBuffer* buffer, const SampleIdentity* input);
+bool uxr_deserialize_SampleIdentity(ucdrBuffer* buffer, SampleIdentity* output);
 
 #ifdef PERFORMANCE_TESTING
 bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input);

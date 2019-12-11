@@ -48,6 +48,14 @@ typedef void (*uxrOnTimeFunc) (struct uxrSession* session,
                                int64_t originate_timestamp,
                                void* args);
 
+typedef void (*uxrOnRequestFunc) (
+        struct uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uxrStreamId stream_id,
+        struct ucdrBuffer* ub,
+        void* args);
+
 #ifdef PERFORMANCE_TESTING
 typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, struct ucdrBuffer* mb, void* args);
 #endif

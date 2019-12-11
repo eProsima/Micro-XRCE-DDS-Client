@@ -2202,6 +2202,84 @@ bool uxr_deserialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, TIMESTAMP_REPLY
     return ret;
 }
 
+bool uxr_serialize_GuidPrefix_t(ucdrBuffer* buffer, const GuidPrefix_t* input)
+{
+    bool ret = true;
+    ret &= ucdr_serialize_array_uint8_t(buffer, input->data, sizeof(GuidPrefix_t));
+    return ret;
+}
+
+bool uxr_deserialize_GuidPrefix_t(ucdrBuffer* buffer, GuidPrefix_t* output)
+{
+    bool ret = true;
+    ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, sizeof(GuidPrefix_t));
+    return ret;
+}
+
+bool uxr_serialize_EntityId_t(ucdrBuffer* buffer, const EntityId_t* input)
+{
+    bool ret = true;
+    ret &= ucdr_serialize_array_uint8_t(buffer, input->entityKey, sizeof(((EntityId_t *)0)->entityKey));
+    ret &= ucdr_serialize_uint8_t(buffer, input->entityKind);
+    return ret;
+}
+
+bool uxr_deserialize_EntityId_t(ucdrBuffer* buffer, EntityId_t* output)
+{
+    bool ret = true;
+    ret &= ucdr_deserialize_array_uint8_t(buffer, output->entityKey, sizeof(((EntityId_t *)0)->entityKey));
+    ret &= ucdr_deserialize_uint8_t(buffer, &output->entityKind);
+    return ret;
+}
+
+bool uxr_serialize_GUID_t(ucdrBuffer* buffer, const GUID_t* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_GuidPrefix_t(buffer, &input->guidPrefix);
+    ret &= uxr_serialize_EntityId_t(buffer, &input->entityId);
+    return ret;
+}
+
+bool uxr_deserialize_GUID_t(ucdrBuffer* buffer, GUID_t* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_GuidPrefix_t(buffer, &output->guidPrefix);
+    ret &= uxr_deserialize_EntityId_t(buffer, &output->entityId);
+    return ret;
+}
+
+bool uxr_serialize_SequenceNumber_t(ucdrBuffer* buffer, const SequenceNumber_t* input)
+{
+    bool ret = true;
+    ret &= ucdr_serialize_int32_t(buffer, input->high);
+    ret &= ucdr_serialize_uint32_t(buffer, input->low);
+    return ret;
+}
+
+bool uxr_deserialize_SequenceNumber_t(ucdrBuffer* buffer, SequenceNumber_t* output)
+{
+    bool ret = true;
+    ret &= ucdr_deserialize_int32_t(buffer, &output->high);
+    ret &= ucdr_deserialize_uint32_t(buffer, &output->low);
+    return ret;
+}
+
+bool uxr_serialize_SampleIdentity(ucdrBuffer* buffer, const SampleIdentity* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_GUID_t(buffer, &input->writer_guid);
+    ret &= uxr_serialize_SequenceNumber_t(buffer, &input->sequence_number);
+    return ret;
+}
+
+bool uxr_deserialize_SampleIdentity(ucdrBuffer* buffer, SampleIdentity* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_GUID_t(buffer, &output->writer_guid);
+    ret &= uxr_deserialize_SequenceNumber_t(buffer, &output->sequence_number);
+    return ret;
+}
+
 #ifdef PERFORMANCE_TESTING
 bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input)
 {
