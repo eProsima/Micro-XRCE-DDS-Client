@@ -65,7 +65,8 @@ void uxr_discovery_agents(
     uxrUDPTransportDatagram transport;
     if(uxr_init_udp_transport_datagram(&transport))
     {
-        for(uint32_t a = 0; a < attempts; ++a)
+        bool is_agent_found = false;
+        for(uint32_t a = 0; a < attempts && !is_agent_found; ++a)
         {
             for(size_t i = 0; i < agent_list_size; ++i)
             {
@@ -75,9 +76,9 @@ void uxr_discovery_agents(
 
             int64_t timestamp = uxr_millis();
             int poll = period;
-            while(0 < poll)
+            while(0 < poll && !is_agent_found)
             {
-                (void) listen_info_message(&transport, poll, &callback);
+                is_agent_found = listen_info_message(&transport, poll, &callback);
                 poll -= (int)(uxr_millis() - timestamp);
             }
         }
@@ -107,6 +108,7 @@ bool listen_info_message(
 {
     uint8_t* input_buffer; size_t length;
 
+    bool is_succeed = false;
     bool received = uxr_udp_recv_datagram(transport, &input_buffer, &length, poll);
     if(received)
     {
@@ -116,11 +118,11 @@ bool listen_info_message(
         ucdr_init_buffer(&ub, input_buffer, (uint32_t)length);
         if(read_info_headers(&ub))
         {
-            (void) read_info_message(&ub, callback);
+            is_succeed = read_info_message(&ub, callback);
         }
     }
 
-    return received;
+    return is_succeed;
 }
 
 bool read_info_headers(ucdrBuffer* ub)
@@ -136,7 +138,7 @@ bool read_info_message(
         ucdrBuffer* ub,
         CallbackData* callback)
 {
-    bool well_read = false;
+    bool is_succeed = false;
     INFO_Payload payload;
 
     if(uxr_deserialize_INFO_Payload(ub, &payload))
@@ -146,12 +148,11 @@ bool read_info_message(
 
         if(0 == memcmp(version->data, XRCE_VERSION.data, sizeof(XRCE_VERSION.data)))
         {
-            (void) process_info(callback, transport);
-            well_read = true;
+            is_succeed = process_info(callback, transport);
         }
     }
 
-    return well_read;
+    return is_succeed;
 }
 
 bool process_info(
