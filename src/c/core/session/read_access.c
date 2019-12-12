@@ -187,6 +187,29 @@ inline void read_format_data(
                 }
             }
             ub->iterator += length;
+            break;
+        }
+        case UXR_REQUESTER_ID:
+        {
+            if (NULL != session->on_reply)
+            {
+                ucdrBuffer temp_buffer;
+                BaseObjectRequest request;
+
+                ucdr_init_buffer(&temp_buffer, ub->iterator, length);
+                if (uxr_deserialize_BaseObjectRequest(&temp_buffer, &request))
+                {
+                    size_t remainig_length = ucdr_buffer_remaining(&temp_buffer);
+                    session->on_reply(
+                        session,
+                        (request.request_id.data[0] << 8) + request.request_id.data[1],
+                        temp_buffer.iterator,
+                        remainig_length,
+                        session->on_reply_args);
+                }
+            }
+            ub->iterator += length;
+            break;
         }
         default:
             break;

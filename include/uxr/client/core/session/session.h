@@ -57,6 +57,13 @@ typedef void (*uxrOnRequestFunc) (
         size_t len,
         void* args);
 
+typedef void (*uxrOnReplyFunc) (
+        struct uxrSession* session,
+        uint16_t reply_id,
+        uint8_t* buffer,
+        size_t len,
+        void* args);
+
 #ifdef PERFORMANCE_TESTING
 typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, struct ucdrBuffer* mb, void* args);
 #endif
@@ -84,6 +91,9 @@ typedef struct uxrSession
 
     uxrOnRequestFunc on_request;
     void* on_request_args;
+
+    uxrOnReplyFunc on_reply;
+    void* on_reply_args;
 
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;
@@ -145,6 +155,11 @@ UXRDLLAPI void uxr_set_time_callback(
 UXRDLLAPI void uxr_set_request_callback(
         uxrSession* session,
         uxrOnRequestFunc on_request_func,
+        void* args);
+
+UXRDLLAPI void uxr_set_reply_callback(
+        uxrSession* session,
+        uxrOnReplyFunc on_reply_func,
         void* args);
 
 #ifdef PERFORMANCE_TESTING

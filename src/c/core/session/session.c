@@ -108,6 +108,12 @@ void uxr_set_request_callback(uxrSession* session, uxrOnRequestFunc on_request_f
     session->on_request_args = args;
 }
 
+void uxr_set_reply_callback(uxrSession* session, uxrOnReplyFunc on_reply_func, void* args)
+{
+    session->on_reply = on_reply_func;
+    session->on_reply_args = args;
+}
+
 #ifdef PERFORMANCE_TESTING
 void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_echo_func, void* args)
 {
