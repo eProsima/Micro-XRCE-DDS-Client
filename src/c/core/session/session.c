@@ -1,6 +1,7 @@
 #include <uxr/client/core/session/session.h>
 #include <uxr/client/util/time.h>
 #include <uxr/client/core/communication/communication.h>
+#include <uxr/client/core/type/xrce_types.h>
 #include <uxr/client/config.h>
 
 #include "submessage_internal.h"
@@ -13,7 +14,6 @@
 #include "stream/output_best_effort_stream_internal.h"
 #include "stream/output_reliable_stream_internal.h"
 #include "stream/seq_num_internal.h"
-#include "../serialization/xrce_protocol_internal.h"
 #include "../log/log_internal.h"
 #include "../../util/time_internal.h"
 
@@ -100,6 +100,12 @@ void uxr_set_time_callback(uxrSession* session, uxrOnTimeFunc on_time_func, void
 {
     session->on_time = on_time_func;
     session->on_time_args = args;
+}
+
+void uxr_set_request_callback(uxrSession* session, uxrOnRequestFunc on_request_func, void* args)
+{
+    session->on_request = on_request_func;
+    session->on_request_args = args;
 }
 
 #ifdef PERFORMANCE_TESTING
@@ -618,15 +624,12 @@ void read_submessage_data(uxrSession* session, ucdrBuffer* submessage, uint16_t 
     uxr_deserialize_BaseObjectRequest(submessage, &base);
     length = (uint16_t)(length - 4); //CHANGE: by a future size_of_BaseObjectRequest
 
-    uxrObjectId object_id; uint16_t request_id;
+    uxrObjectId object_id;
+    uint16_t request_id;
     uxr_parse_base_object_request(&base, &object_id, &request_id);
 
     process_status(session, object_id, request_id, UXR_STATUS_OK);
-
-    if(session->on_topic != NULL)
-    {
-        read_submessage_format(session, submessage, length, format, stream_id, object_id, request_id);
-    }
+    read_submessage_format(session, submessage, length, format, stream_id, object_id, request_id);
 }
 
 void read_submessage_heartbeat(uxrSession* session, ucdrBuffer* submessage)

@@ -1,9 +1,9 @@
 #include <uxr/client/core/session/read_access.h>
+#include <uxr/client/core/type/xrce_types.h>
 
 #include "session_internal.h"
 #include "session_info_internal.h"
 #include "submessage_internal.h"
-#include "../serialization/xrce_protocol_internal.h"
 
 extern void read_submessage_format(
         uxrSession* session,
@@ -156,7 +156,42 @@ inline void read_format_data(
     (void) length;
     ub->last_data_size = 8; //reset alignment (as if we were created a new ucdrBuffer)
 
-    session->on_topic(session, object_id, request_id, stream_id, ub, session->on_topic_args);
+    switch (object_id.type)
+    {
+        case UXR_DATAREADER_ID:
+        {
+            if (NULL != session->on_topic)
+            {
+                session->on_topic(session, object_id, request_id, stream_id, ub, session->on_topic_args);
+            }
+            break;
+        }
+        case UXR_REPLIER_ID:
+        {
+            if (NULL != session->on_request)
+            {
+                ucdrBuffer temp_buffer;
+                SampleIdentity sample_id;
+
+                ucdr_init_buffer(&temp_buffer, ub->iterator, length);
+                if (uxr_deserialize_SampleIdentity(&temp_buffer, &sample_id))
+                {
+                    size_t remaining_length = ucdr_buffer_remaining(&temp_buffer);
+                    session->on_request(
+                        session,
+                        request_id,
+                        &sample_id,
+                        temp_buffer.iterator,
+                        remaining_length,
+                        session->on_request_args);
+                }
+            }
+            ub->iterator += length;
+        }
+        default:
+            break;
+    }
+
 }
 
 void read_format_sample(

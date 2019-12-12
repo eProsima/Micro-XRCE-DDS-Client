@@ -142,7 +142,7 @@ set(SRCS
     src/c/core/session/session_info.c
     src/c/core/session/submessage.c
     src/c/core/session/object_id.c
-    src/c/core/serialization/xrce_protocol.c
+    src/c/core/serialization/xrce_types.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/util/time.c

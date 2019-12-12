@@ -1,7 +1,7 @@
 #include <uxr/client/core/session/create_entities_ref.h>
+#include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
-#include "../serialization/xrce_protocol_internal.h"
 
 #include <string.h>
 

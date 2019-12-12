@@ -22,6 +22,7 @@ extern "C"
 
 #include <uxr/client/core/session/session_info.h>
 #include <uxr/client/core/session/stream/stream_storage.h>
+#include <uxr/client/core/type/xrce_types.h>
 
 #define UXR_TIMEOUT_INF       -1
 
@@ -50,10 +51,10 @@ typedef void (*uxrOnTimeFunc) (struct uxrSession* session,
 
 typedef void (*uxrOnRequestFunc) (
         struct uxrSession* session,
-        uxrObjectId object_id,
         uint16_t request_id,
-        uxrStreamId stream_id,
-        struct ucdrBuffer* ub,
+        SampleIdentity* sample_id,
+        uint8_t* buffer,
+        size_t len,
         void* args);
 
 #ifdef PERFORMANCE_TESTING
@@ -80,6 +81,9 @@ typedef struct uxrSession
     void* on_time_args;
     int64_t time_offset;
     bool synchronized;
+
+    uxrOnRequestFunc on_request;
+    void* on_request_args;
 
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;
@@ -136,6 +140,11 @@ UXRDLLAPI void uxr_set_topic_callback(
 UXRDLLAPI void uxr_set_time_callback(
         uxrSession* session,
         uxrOnTimeFunc on_time_func,
+        void* args);
+
+UXRDLLAPI void uxr_set_request_callback(
+        uxrSession* session,
+        uxrOnRequestFunc on_request_func,
         void* args);
 
 #ifdef PERFORMANCE_TESTING
