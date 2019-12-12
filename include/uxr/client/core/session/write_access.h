@@ -29,6 +29,14 @@ uint16_t uxr_buffer_request(
         uint8_t* buffer,
         size_t len);
 
+uint16_t uxr_buffer_reply(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId replier_id,
+        SampleIdentity* sample_id,
+        uint8_t* buffer,
+        size_t len);
+
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE WRITE_DATA submessage.
  *        The submessage will be sent when `uxr_flash_output_stream` or `uxr_run_session` function are called.
