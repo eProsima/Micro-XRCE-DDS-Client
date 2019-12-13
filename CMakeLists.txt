@@ -57,8 +57,8 @@ endif()
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 1.1.1)
-set(_microcdr_tag v1.1.1)
+set(_microcdr_version 1.1.2)
+set(_microcdr_tag v1.1.2)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
