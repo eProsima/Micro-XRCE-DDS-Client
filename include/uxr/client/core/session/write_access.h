@@ -25,7 +25,7 @@ extern "C"
 uint16_t uxr_buffer_request(
         uxrSession* session,
         uxrStreamId stream_id,
-        uxrObjectId request_id,
+        uxrObjectId requester_id,
         uint8_t* buffer,
         size_t len);
 

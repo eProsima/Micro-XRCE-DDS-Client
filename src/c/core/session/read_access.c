@@ -179,6 +179,7 @@ inline void read_format_data(
                     size_t remaining_length = ucdr_buffer_remaining(&temp_buffer);
                     session->on_request(
                         session,
+                        object_id,
                         request_id,
                         &sample_id,
                         temp_buffer.iterator,
@@ -202,6 +203,8 @@ inline void read_format_data(
                     size_t remainig_length = ucdr_buffer_remaining(&temp_buffer);
                     session->on_reply(
                         session,
+                        object_id,
+                        request_id,
                         (uint16_t)((request.request_id.data[0] << 8) + request.request_id.data[1]),
                         temp_buffer.iterator,
                         remainig_length,

@@ -51,6 +51,7 @@ typedef void (*uxrOnTimeFunc) (struct uxrSession* session,
 
 typedef void (*uxrOnRequestFunc) (
         struct uxrSession* session,
+        uxrObjectId object_id,
         uint16_t request_id,
         SampleIdentity* sample_id,
         uint8_t* buffer,
@@ -59,6 +60,8 @@ typedef void (*uxrOnRequestFunc) (
 
 typedef void (*uxrOnReplyFunc) (
         struct uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
         uint16_t reply_id,
         uint8_t* buffer,
         size_t len,
