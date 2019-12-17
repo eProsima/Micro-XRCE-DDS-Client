@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
@@ -48,7 +49,11 @@ void on_request(uxrSession* session, uxrObjectId object_id, uint16_t request_id,
 
     uxr_buffer_reply(session, reliable_out, replier_id, sample_id, reply_buffer, sizeof(reply_buffer));
 
-    printf("Reply send: %ld\n", (uint64_t)(rhs + lhs));
+#ifdef WIN32
+    printf("Reply send: %I64u\n", (uint64_t)(rhs + lhs));
+#else
+    printf("Reply send: %" PRIu64 "\n", (uint64_t)(rhs + lhs));
+#endif
 }
 
 int main(int args, char** argv)
