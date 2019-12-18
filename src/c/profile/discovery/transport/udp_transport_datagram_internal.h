@@ -27,9 +27,9 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-#if defined(PLATFORM_NAME_LINUX)
+#if defined(UCLIENT_PLATFORM_LINUX)
 #define PLATFORM_TYPE_POSIX
-#elif defined(PLATFORM_NAME_NUTTX)
+#elif defined(UCLIENT_PLATFORM_NUTTX)
 #define PLATFORM_TYPE_POSIX
 #endif
 
@@ -37,7 +37,7 @@ extern "C"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <poll.h>
-#elif defined(PLATFORM_NAME_WINDOWS)
+#elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <winsock2.h>
 #endif
 
@@ -49,7 +49,7 @@ typedef struct uxrUDPTransportDatagram
     uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
 #if defined(PLATFORM_TYPE_POSIX)
     struct pollfd poll_fd;
-#elif defined(PLATFORM_NAME_WINDOWS)
+#elif defined(UCLIENT_PLATFORM_WINDOWS)
     WSAPOLLFD poll_fd;
 #endif
 

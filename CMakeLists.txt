@@ -120,12 +120,12 @@ endforeach()
 ###############################################################################
 # Check platform.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(PLATFORM_NAME_LINUX ON)
+    set(UCLIENT_PLATFORM_LINUX ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(PLATFORM_NAME_WINDOWS ON)
+    set(UCLIENT_PLATFORM_WINDOWS ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
-        set(PLATFORM_NAME_NUTTX ON)
+        set(UCLIENT_PLATFORM_NUTTX ON)
     endif()
 endif()
 
@@ -296,12 +296,12 @@ if(UCLIENT_BUILD_TESTS)
     include(CTest)
 
     add_subdirectory(test/unitary)
-    if(PLATFORM_NAME_LINUX)
+    if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/serial_comm)
     endif()
 endif()
 
-if(PLATFORM_NAME_LINUX AND UCLIENT_MEMORY_TESTS)
+if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
     add_subdirectory(test/memory/consumption)
 endif()
 

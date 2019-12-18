@@ -19,32 +19,32 @@
 
 #ifdef PROFILE_UDP_TRANSPORT
 #include <uxr/client/profile/transport/ip/udp/udp_transport.h>
-#if defined(PLATFORM_NAME_LINUX)
+#if defined(UCLIENT_PLATFORM_LINUX)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_linux.h>
-#elif defined(PLATFORM_NAME_WINDOWS)
+#elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_windows.h>
-#elif defined(PLATFORM_NAME_NUTTX)
+#elif defined(UCLIENT_PLATFORM_NUTTX)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_linux.h>
 #endif
 #endif //PROFILE_UDP_TRANSPORT
 
 #ifdef PROFILE_TCP_TRANSPORT
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
-#if defined(PLATFORM_NAME_LINUX)
+#if defined(UCLIENT_PLATFORM_LINUX)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_linux.h>
-#elif defined(PLATFORM_NAME_WINDOWS)
+#elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_windows.h>
-#elif defined(PLATFORM_NAME_NUTTX)
+#elif defined(UCLIENT_PLATFORM_NUTTX)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_linux.h>
 #endif
 #endif //PROFILE_TCP_TRANSPORT
 
 #ifdef PROFILE_SERIAL_TRANSPORT
 #include <uxr/client/profile/transport/serial/serial_transport.h>
-#if defined(PLATFORM_NAME_LINUX)
+#if defined(UCLIENT_PLATFORM_LINUX)
 #include <uxr/client/profile/transport/serial/serial_transport_linux.h>
-#elif defined(PLATFORM_NAME_WINDOWS)
-#elif defined(PLATFORM_NAME_NUTTX)
+#elif defined(UCLIENT_PLATFORM_WINDOWS)
+#elif defined(UCLIENT_PLATFORM_NUTTX)
 #include <uxr/client/profile/transport/serial/serial_transport_linux.h>
 #elif defined(_external_transport)
 #include EXTERNAL_TRANSPORT_HEADER_FILENAME
