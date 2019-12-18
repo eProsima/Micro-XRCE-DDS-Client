@@ -87,7 +87,7 @@ endif()
 
 ###############################################################################
 # Check MSVC architecture
-#############################################install###########################
+###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/common/check_configuration.cmake)
 if(MSVC OR MSVC_IDE)
     check_msvc_arch()
