@@ -43,17 +43,6 @@ option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by 
 
 set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
-include(GNUInstallDirs)
-set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
-if(WIN32)
-    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
-else()
-    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
-endif()
-
 ###############################################################################
 # Dependencies
 ###############################################################################
@@ -98,7 +87,7 @@ endif()
 
 ###############################################################################
 # Check MSVC architecture
-###############################################################################
+#############################################install###########################
 include(${PROJECT_SOURCE_DIR}/cmake/common/check_configuration.cmake)
 if(MSVC OR MSVC_IDE)
     check_msvc_arch()
@@ -182,6 +171,20 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_SRC}>
     )
+
+###############################################################################
+# Set install directories
+###############################################################################
+include(GNUInstallDirs)
+set(BIN_INSTALL_DIR     ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+if(WIN32)
+    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
+else()
+    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
+endif()
 
 ###############################################################################
 # Targets
@@ -395,12 +398,18 @@ install(
         ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
     )
 
-# Install dependencies
+# Install dependencies.
 if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
-    install(
-        DIRECTORY
-            ${CMAKE_BINARY_DIR}/temp_install/
-        DESTINATION
-            ${CMAKE_INSTALL_PREFIX}
+   foreach(dependency ${_deps})
+        list(GET dependency 0 _name)
+        list(GET dependency 1 _version)
+        install(
+            DIRECTORY
+                ${CMAKE_BINARY_DIR}/temp_install/${_name}_${_version}
+            DESTINATION .
+            USE_SOURCE_PERMISSIONS
+            COMPONENT
+                ${_name}
         )
+    endforeach()
 endif()
