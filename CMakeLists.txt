@@ -176,10 +176,10 @@ set(SRCS
 # Set install directories
 ###############################################################################
 include(GNUInstallDirs)
-set(BIN_INSTALL_DIR     ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR     ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR    ${PROJECT_NAME}_${PROJECT_VERSION}/${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+set(BIN_INSTALL_DIR     ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
 if(WIN32)
     set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
 else()
@@ -240,7 +240,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
         $<$<AND:$<BOOL:${INSTALL_INTERFACE}>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
@@ -405,7 +405,7 @@ if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
         list(GET dependency 1 _version)
         install(
             DIRECTORY
-                ${CMAKE_BINARY_DIR}/temp_install/${_name}_${_version}
+                ${CMAKE_BINARY_DIR}/temp_install/${_name}-${_version}
             DESTINATION .
             USE_SOURCE_PERMISSIONS
             COMPONENT

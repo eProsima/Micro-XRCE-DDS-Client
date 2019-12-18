@@ -31,7 +31,7 @@ if(NOT microcdr_FOUND)
         PREFIX
             ${PROJECT_BINARY_DIR}/microcdr
         INSTALL_DIR
-            ${PROJECT_BINARY_DIR}/temp_install/microcdr_${_microcdr_version}
+            ${PROJECT_BINARY_DIR}/temp_install/microcdr-${_microcdr_version}
         CMAKE_CACHE_ARGS
             -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
             -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
