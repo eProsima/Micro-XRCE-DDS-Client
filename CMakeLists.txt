@@ -400,12 +400,10 @@ install(
 
 # Install dependencies.
 if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
-   foreach(dependency ${_deps})
-        list(GET dependency 0 _name)
-        list(GET dependency 1 _version)
+   foreach(dependency ${UCLIENT_DEPENDS})
         install(
             DIRECTORY
-                ${CMAKE_BINARY_DIR}/temp_install/${_name}-${_version}
+                ${CMAKE_BINARY_DIR}/temp_install/${dependency}
             DESTINATION .
             USE_SOURCE_PERMISSIONS
             COMPONENT
