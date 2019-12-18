@@ -18,7 +18,9 @@ add_test(
     COMMAND
         ${CMAKE_COMMAND} 
             -DINSTALL_PATH=${CMAKE_INSTALL_PREFIX}
-            -DLIBRARY_NAME=$<TARGET_FILE_NAME:${PROJECT_NAME}> 
+            -DINSTALL_SUFFIX=${PROJECT_NAME}-${PROJECT_VERSION}
+            -DLIBRARY_NAME=$<TARGET_FILE_NAME:${PROJECT_NAME}>
+            -DREQUIRED_VERSION=${PROJECT_VERSION}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/installation/InstallationTest.cmake
     )
 

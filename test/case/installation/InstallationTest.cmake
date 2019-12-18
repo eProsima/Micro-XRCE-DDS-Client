@@ -15,12 +15,12 @@
 # Check directories.
 set(_directories "lib" "include" "share")
 foreach(_dir ${_directories})
-    if(NOT EXISTS ${INSTALL_PATH}/${_dir})
+    if(NOT EXISTS ${INSTALL_PATH}/${INSTALL_SUFFIX}/${_dir})
         message(FATAL_ERROR "Directory ${_dir} not found.")
     endif()
 endforeach()
 
 # Check library.
-if(NOT EXISTS ${INSTALL_PATH}/lib/${LIBRARY_NAME})
+if(NOT EXISTS ${INSTALL_PATH}/${INSTALL_SUFFIX}/lib/${LIBRARY_NAME})
     message(FATAL_ERROR "Library lib/${LIBRARY_NAME} not found.")
 endif()
