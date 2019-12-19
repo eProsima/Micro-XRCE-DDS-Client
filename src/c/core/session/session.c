@@ -196,7 +196,7 @@ bool uxr_run_session_timeout(uxrSession* session, int timeout_ms)
     while(remaining_time > 0)
     {
         listen_message_reliably(session, remaining_time);
-        remaining_time = timeout_ms - (uxr_millis() - start_timestamp);
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
     return uxr_output_streams_confirmed(&session->streams);
 }
