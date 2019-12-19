@@ -186,6 +186,19 @@ bool uxr_run_session_time(uxrSession* session, int timeout_ms)
     return uxr_output_streams_confirmed(&session->streams);
 }
 
+bool uxr_run_session_timeout(uxrSession* session, int timeout_ms)
+{
+    int64_t start_timestamp = uxr_millis();
+
+    uxr_flash_output_streams(session);
+
+    while(uxr_millis() - start_timestamp < timeout_ms)
+    {
+        listen_message_reliably(session, timeout_ms);
+    }
+    return uxr_output_streams_confirmed(&session->streams);
+}
+
 bool uxr_run_session_until_timeout(uxrSession* session, int timeout_ms)
 {
     uxr_flash_output_streams(session);
