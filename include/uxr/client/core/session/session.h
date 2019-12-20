@@ -122,7 +122,7 @@ UXRDLLAPI void uxr_init_session(
  *        This is called when a status message is received from the Agent.
  * @param session           A uxrSession structure previously initialized.
  * @param on_status_func    The function that will be called when a valid status message arrives from the Agent.
- * @param args              User pointer data. The args will be provided to `on_status_func` function.
+ * @param args              User pointer data. The args will be provided to the `on_status_func` callback.
  */
 UXRDLLAPI void uxr_set_status_callback(
         uxrSession* session,
@@ -132,10 +132,10 @@ UXRDLLAPI void uxr_set_status_callback(
 /**
  * @brief Sets the topic callback.
  *        This is called when a topic is received from the Agent.
- *        The topics will be received only if a `request_data` function has been called.
+ *        The topics will be received only if a `request_data` function has been called with a `DataReader` object id.
  * @param session           A uxrSession structure previously initialized.
  * @param on_topic_func     The function that will be called when a valid data message arrives from the Agent.
- * @param args              User pointer data. The args will be provided to `on_topic_func` function.
+ * @param args              User pointer data. The args will be provided to the `on_topic_func` callback.
  */
 UXRDLLAPI void uxr_set_topic_callback(
         uxrSession* session,
@@ -148,18 +148,37 @@ UXRDLLAPI void uxr_set_topic_callback(
  *        The user could use this callback to implement her/his own time synchronization protocol.
  * @param session       A uxrSession structure previously initialized.
  * @param on_time_func  The function that will be called when a TIMESTAMP_REPLY submessage arrives from the Agent.
- * @param args          A user pointer data. The args will be provided to `on_time_func` function.
+ * @param args          A user pointer data. The args will be provided to the `on_time_func` callback.
  */
 UXRDLLAPI void uxr_set_time_callback(
         uxrSession* session,
         uxrOnTimeFunc on_time_func,
         void* args);
 
+/**
+ * @brief Sets the request callback.
+ *        It will be called when a request is received from the Agent.
+ *        The requests will be received only if a `request_data` function has been called with a `Requester` object id.
+ * 
+ * @param session               A uxrSession structure previously initialized.
+ * @param on_request_func       The function that will be called when a valid request message arrives from the Agent.
+ * @param args                  User pointer data. The args will be provided to the `on_request_func` callback.
+ */
 UXRDLLAPI void uxr_set_request_callback(
         uxrSession* session,
         uxrOnRequestFunc on_request_func,
         void* args);
 
+/**
+ * @brief Sets the reply callback.
+ *        It will be called when a reply is received from the Agent.
+ *        The reply will be received only if a `request_data` function has been called with a `Replier` object id.
+ * 
+ * @param session               A uxrSession structure previosly initialized.
+ * @param on_reply_func         The function that will be called when a valid reply message arrives from the Agent.
+ * @param args                  User pointer data. The args will be provided to the `on_reply_func` callback.
+ * @return UXRDLLAPI uxr_set_reply_callback 
+ */
 UXRDLLAPI void uxr_set_reply_callback(
         uxrSession* session,
         uxrOnReplyFunc on_reply_func,
