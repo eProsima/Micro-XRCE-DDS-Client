@@ -1,9 +1,9 @@
 #include <uxr/client/defines.h>
 #include <uxr/client/core/session/object_id.h>
+#include <uxr/client/core/type/xrce_types.h>
 
 #include "session_info_internal.h"
 #include "submessage_internal.h"
-#include "../serialization/xrce_protocol_internal.h"
 #include "../serialization/xrce_header_internal.h"
 
 #include <string.h>

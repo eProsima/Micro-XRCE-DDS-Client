@@ -142,7 +142,7 @@ set(SRCS
     src/c/core/session/session_info.c
     src/c/core/session/submessage.c
     src/c/core/session/object_id.c
-    src/c/core/serialization/xrce_protocol.c
+    src/c/core/serialization/xrce_types.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/util/time.c
@@ -275,11 +275,13 @@ endif()
 if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/PublishHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorld)
-    add_subdirectory(examples/PublishHelloWorldP2P)
-    add_subdirectory(examples/SubscribeHelloWorldP2P)
+#    add_subdirectory(examples/PublishHelloWorldP2P)
+#    add_subdirectory(examples/SubscribeHelloWorldP2P)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
     add_subdirectory(examples/Discovery)
+    add_subdirectory(examples/RequestAdder)
+    add_subdirectory(examples/ReplyAdder)
 endif()
 
 ###############################################################################

@@ -1,7 +1,7 @@
 #include <uxr/client/core/session/create_entities_xml.h>
+#include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
-#include "../serialization/xrce_protocol_internal.h"
 
 #include <string.h>
 
@@ -80,6 +80,36 @@ uint16_t uxr_buffer_create_datareader_xml(uxrSession* session, uxrStreamId strea
     CREATE_Payload payload;
     payload.object_representation.kind = OBJK_DATAREADER;
     uxr_object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
+
+    return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
+}
+
+uint16_t uxr_buffer_create_requester_xml(
+    uxrSession* session,
+    uxrStreamId stream_id,
+    uxrObjectId object_id,
+    uxrObjectId participant_id,
+    const char* xml,
+    uint8_t mode)
+{
+    CREATE_Payload payload;
+    payload.object_representation.kind = OBJK_REQUESTER;
+    uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
+
+    return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
+}
+
+uint16_t uxr_buffer_create_replier_xml(
+    uxrSession* session,
+    uxrStreamId stream_id,
+    uxrObjectId object_id,
+    uxrObjectId participant_id,
+    const char* xml,
+    uint8_t mode)
+{
+    CREATE_Payload payload;
+    payload.object_representation.kind = OBJK_REPLIER;
+    uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }

@@ -1,9 +1,9 @@
 #include <uxr/client/profile/discovery/discovery.h>
 #include <uxr/client/core/session/object_id.h>
 #include <uxr/client/core/session/stream/seq_num.h>
+#include <uxr/client/core/type/xrce_types.h>
 #include <uxr/client/util/time.h>
 
-#include "../../core/serialization/xrce_protocol_internal.h"
 #include "../../core/serialization/xrce_header_internal.h"
 #include "../../core/session/submessage_internal.h"
 #include "../../core/log/log_internal.h"
