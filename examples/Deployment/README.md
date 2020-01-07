@@ -7,9 +7,6 @@ This implies that the publisher and subscriber will be configured previously wit
 The configurator client will create the necessary entities in the agent for a specific session.
 In order to compile this example, it is necessary to have the following profiles enabled in `client.config` file:
 
-- `PROFILE_CREATE_ENTITIES_XML`
-- `PROFILE_READ_ACCESS`
-- `PROFILE_WRITE_ACCESS`
 - `PROFILE_UDP_TRANSPORT`
 
 ## Usage
