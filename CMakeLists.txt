@@ -293,6 +293,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
     add_subdirectory(examples/Discovery)
+    add_subdirectory(examples/TimeSync)
 endif()
 
 ###############################################################################
