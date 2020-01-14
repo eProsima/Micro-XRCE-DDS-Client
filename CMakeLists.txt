@@ -26,6 +26,7 @@ option(UCLIENT_BUILD_EXAMPLES "Build examples." OFF)
 option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
+option(UCLIENT_MERGE_INSTALL "Install dependencies and Client into the same prefix." OFF)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
 
 option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
@@ -175,11 +176,17 @@ set(SRCS
 ###############################################################################
 # Set install directories
 ###############################################################################
+if(UCLIENT_MERGE_INSTALL)
+    set(_install_prefix "")
+else()
+    set(_install_prefix ${PROJECT_NAME}-${PROJECT_VERSION}/)
+endif()
+
 include(GNUInstallDirs)
-set(BIN_INSTALL_DIR     ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR     ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR    ${PROJECT_NAME}-${PROJECT_VERSION}/${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+set(BIN_INSTALL_DIR     ${_install_prefix}${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${_install_prefix}${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${_install_prefix}${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${_install_prefix}${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
 if(WIN32)
     set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
 else()
@@ -401,15 +408,22 @@ install(
     )
 
 # Install dependencies.
+if(UCLIENT_MERGE_INSTALL)
+    set(_install_suffix /)
+else()
+    set(_install_suffix "")
+endif()
+
 if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
    foreach(dependency ${UCLIENT_DEPENDS})
         install(
             DIRECTORY
-                ${CMAKE_BINARY_DIR}/temp_install/${dependency}
-            DESTINATION .
-            USE_SOURCE_PERMISSIONS
+                ${CMAKE_BINARY_DIR}/temp_install/${dependency}${_install_suffix}
+            DESTINATION
+                ${CMAKE_INSTALL_PREFIX}
             COMPONENT
-                ${_name}
+                ${dependency}
+            USE_SOURCE_PERMISSIONS
         )
     endforeach()
 endif()
