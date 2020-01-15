@@ -282,6 +282,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/Discovery)
     add_subdirectory(examples/RequestAdder)
     add_subdirectory(examples/ReplyAdder)
+    add_subdirectory(examples/MultiSessionHelloWorld)
 endif()
 
 ###############################################################################
