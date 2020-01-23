@@ -61,5 +61,6 @@ ExternalProject_Add(microxrcedds_client
         -DCMAKE_SHARED_LINKER_FLAGS:STRING=${_shared_linker_flags}
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DUCLIENT_BUILD_CI_TESTS:BOOL=ON
+        -DUCLIENT_MERGE_INSTALL:BOOL=ON
         -DGTEST_INDIVIDUAL:BOOL=ON
     )

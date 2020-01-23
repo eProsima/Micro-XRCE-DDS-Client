@@ -176,17 +176,15 @@ set(SRCS
 ###############################################################################
 # Set install directories
 ###############################################################################
-if(UCLIENT_MERGE_INSTALL)
-    set(_install_prefix "")
-else()
-    set(_install_prefix ${PROJECT_NAME}-${PROJECT_VERSION}/)
+if(NOT UCLIENT_MERGE_INSTALL)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-${PROJECT_VERSION}")
 endif()
 
 include(GNUInstallDirs)
-set(BIN_INSTALL_DIR     ${_install_prefix}${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR ${_install_prefix}${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR     ${_install_prefix}${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR    ${_install_prefix}${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
 if(WIN32)
     set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
 else()
@@ -409,21 +407,16 @@ install(
     )
 
 # Install dependencies.
-if(UCLIENT_MERGE_INSTALL)
-    set(_install_suffix /)
-else()
-    set(_install_suffix "")
-endif()
-
 if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
-   foreach(dependency ${UCLIENT_DEPENDS})
+    file(GLOB _deps RELATIVE ${CMAKE_BINARY_DIR}/temp_install ${CMAKE_BINARY_DIR}/temp_install/*)
+    foreach(_d ${_deps})
         install(
             DIRECTORY
-                ${CMAKE_BINARY_DIR}/temp_install/${dependency}${_install_suffix}
+                ${CMAKE_BINARY_DIR}/temp_install/${_d}$<IF:$<BOOL:${UCLIENT_MERGE_INSTALL}>,/,>
             DESTINATION
-                ${CMAKE_INSTALL_PREFIX}
+                ${CMAKE_INSTALL_PREFIX}$<IF:$<BOOL:${UCLIENT_MERGE_INSTALL}>,,/../>
             COMPONENT
-                ${dependency}
+                ${_d}
             USE_SOURCE_PERMISSIONS
         )
     endforeach()
