@@ -49,8 +49,35 @@ ExternalProject_Add(microxrcedds_client
         TRUE
     TEST_COMMAND
         COMMAND ${CMAKE_CTEST_COMMAND} -VV -T Test
-        COMMAND ${CMAKE_CTEST_COMMAND} -VV -T MemCheck -E "test-case*"
-        COMMAND ${CMAKE_CTEST_COMMAND} -VV -T Coverage -E "test-case*"
+#        COMMAND ${CMAKE_CTEST_COMMAND} -VV -T MemCheck -E "test-case*"
+#        COMMAND ${CMAKE_CTEST_COMMAND} -VV -T Coverage -E "test-case*"
+    CMAKE_CACHE_ARGS
+        -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+        -DCMAKE_C_FLAGS:STRING=${_c_flags}
+        -DCMAKE_CXX_FLAGS:STRING=${_cxx_flags}
+        -DCMAKE_EXE_LINKER_FLAGS:STRING=${_exe_linker_flags}
+        -DCMAKE_SHARED_LINKER_FLAGS:STRING=${_shared_linker_flags}
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DUCLIENT_BUILD_CI_TESTS:BOOL=ON
+        -DUCLIENT_MERGE_INSTALL:BOOL=OFF
+        -DGTEST_INDIVIDUAL:BOOL=ON
+    )
+
+ExternalProject_Add(microxrcedds_client_merge
+    SOURCE_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../
+    BINARY_DIR
+        ${PROJECT_BINARY_DIR}/microxrcedds_client-build
+    INSTALL_DIR
+        ${PROJECT_BINARY_DIR}/temp_install_merge
+    TEST_AFTER_INSTALL
+        TRUE
+    BUILD_COMMAND
+        ""
+    TEST_COMMAND
+        COMMAND ${CMAKE_CTEST_COMMAND} -VV -T Test -R "test-case*"
     CMAKE_CACHE_ARGS
         -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
@@ -63,4 +90,6 @@ ExternalProject_Add(microxrcedds_client
         -DUCLIENT_BUILD_CI_TESTS:BOOL=ON
         -DUCLIENT_MERGE_INSTALL:BOOL=ON
         -DGTEST_INDIVIDUAL:BOOL=ON
+    DEPENDS
+        microxrcedds_client
     )
