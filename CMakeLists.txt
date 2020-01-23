@@ -26,7 +26,7 @@ option(UCLIENT_BUILD_EXAMPLES "Build examples." OFF)
 option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
-option(UCLIENT_MERGE_INSTALL "Install dependencies and Client into the same prefix." OFF)
+option(UCLIENT_ISOLATED_INSTALL "Install the project and dependencies into separeted folders with version control." ON)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
 
 option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
@@ -48,7 +48,7 @@ set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Confi
 # Dependencies
 ###############################################################################
 set(_microcdr_version 1.1.2)
-set(_microcdr_tag v1.1.2)
+set(_microcdr_tag feature/prefix)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
@@ -176,7 +176,7 @@ set(SRCS
 ###############################################################################
 # Set install directories
 ###############################################################################
-if(NOT UCLIENT_MERGE_INSTALL)
+if(UCLIENT_ISOLATED_INSTALL)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-${PROJECT_VERSION}")
 endif()
 
@@ -412,9 +412,9 @@ if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
     foreach(_d ${_deps})
         install(
             DIRECTORY
-                ${CMAKE_BINARY_DIR}/temp_install/${_d}$<IF:$<BOOL:${UCLIENT_MERGE_INSTALL}>,/,>
+                ${CMAKE_BINARY_DIR}/temp_install/${_d}$<IF:$<BOOL:${UCLIENT_ISOLATED_INSTALL}>,,/>
             DESTINATION
-                ${CMAKE_INSTALL_PREFIX}$<IF:$<BOOL:${UCLIENT_MERGE_INSTALL}>,,/../>
+                ${CMAKE_INSTALL_PREFIX}$<IF:$<BOOL:${UCLIENT_ISOLATED_INSTALL}>,/../,>
             COMPONENT
                 ${_d}
             USE_SOURCE_PERMISSIONS
