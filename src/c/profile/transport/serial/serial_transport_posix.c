@@ -1,4 +1,4 @@
-#include <uxr/client/profile/transport/serial/serial_transport_linux.h>
+#include <uxr/client/profile/transport/serial/serial_transport_posix.h>
 #include <uxr/client/profile/transport/serial/serial_transport_platform.h>
 
 #include <unistd.h>

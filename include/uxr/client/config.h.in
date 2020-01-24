@@ -26,10 +26,14 @@
 #cmakedefine PROFILE_TCP_TRANSPORT
 #cmakedefine PROFILE_SERIAL_TRANSPORT
 
-#cmakedefine PLATFORM_NAME_LINUX
-#cmakedefine PLATFORM_NAME_WINDOWS
-#cmakedefine PLATFORM_NAME_NUTTX
+#cmakedefine UCLIENT_PLATFORM_LINUX
+#cmakedefine UCLIENT_PLATFORM_WINDOWS
+#cmakedefine UCLIENT_PLATFORM_NUTTX
 #cmakedefine _external_transport
+
+#if defined(UCLIENT_PLATFORM_LINUX) || defined(UCLIENT_PLATFORM_NUTTX)
+#define UCLIENT_PLATFORM_POSIX
+#endif
 
 #cmakedefine EXTERNAL_TRANSPORT_HEADER_FILENAME <uxr/client/profile/transport/serial/@EXTERNAL_TRANSPORT_HEADER_FILENAME@>
 

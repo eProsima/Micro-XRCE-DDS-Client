@@ -110,13 +110,17 @@ endforeach()
 ###############################################################################
 # Check platform.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(PLATFORM_NAME_LINUX ON)
+    set(UCLIENT_PLATFORM_LINUX ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(PLATFORM_NAME_WINDOWS ON)
+    set(UCLIENT_PLATFORM_WINDOWS ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
-        set(PLATFORM_NAME_NUTTX ON)
+        set(UCLIENT_PLATFORM_NUTTX ON)
     endif()
+endif()
+
+if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX)
+    set(UCLIENT_PLATFORM_POSIX ON)
 endif()
 
 # Check external transport.
@@ -155,21 +159,17 @@ set(SRCS
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
     $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/transport/ip/udp/udp_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Linux>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/discovery/transport/udp_transport_datagram_posix.c>
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
-    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/discovery/transport/udp_transport_datagram_linux.c>
     $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/udp/udp_transport_posix.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
-    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/udp/udp_transport_linux.c>
     $<$<BOOL:${PROFILE_TCP_TRANSPORT}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/tcp/tcp_transport_posix.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
-    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/ip/tcp/tcp_transport_linux.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Linux>>:src/c/profile/transport/serial/serial_transport_linux.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<STREQUAL:${PLATFORM_NAME},nuttx>>:src/c/profile/transport/serial/serial_transport_linux.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/serial/serial_transport_posix.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_SRC}>
     )
 
@@ -309,12 +309,12 @@ if(UCLIENT_BUILD_TESTS)
     include(CTest)
 
     add_subdirectory(test/unitary)
-    if(PLATFORM_NAME_LINUX)
+    if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/serial_comm)
     endif()
 endif()
 
-if(PLATFORM_NAME_LINUX AND UCLIENT_MEMORY_TESTS)
+if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
     add_subdirectory(test/memory/consumption)
 endif()
 

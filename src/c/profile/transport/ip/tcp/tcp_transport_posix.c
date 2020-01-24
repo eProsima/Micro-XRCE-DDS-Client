@@ -1,4 +1,4 @@
-#include <uxr/client/profile/transport/ip/tcp/tcp_transport_linux.h>
+#include <uxr/client/profile/transport/ip/tcp/tcp_transport_posix.h>
 #include "tcp_transport_internal.h"
 
 #include <arpa/inet.h>
@@ -8,7 +8,7 @@
 #include <signal.h>
 #include <netdb.h>
 
-#ifdef PLATFORM_NAME_LINUX
+#ifdef UCLIENT_PLATFORM_LINUX
 static void sigpipe_handler(int fd)
 {
     (void)fd;
@@ -35,7 +35,7 @@ bool uxr_init_tcp_platform(
 
     if (-1 != platform->poll_fd.fd)
     {
-#ifdef PLATFORM_NAME_LINUX
+#ifdef UCLIENT_PLATFORM_LINUX
         signal(SIGPIPE, sigpipe_handler);
 #endif
         struct addrinfo hints;

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
-#define UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
+#ifndef UXR_CLIENT_PROFILE_TRANSPORT_IP_TCP_TCPTRANSPORTPOSIX_H_
+#define UXR_CLIENT_PROFILE_TRANSPORT_IP_TCP_TCPTRANSPORTPOSIX_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -34,4 +34,4 @@ typedef struct uxrTCPPlatform
 }
 #endif
 
-#endif // UXR_CLIENT_TCP_TRANSPORT_LINUX_H_
+#endif // UXR_CLIENT_PROFILE_TRANSPORT_IP_TCP_TCPTRANSPORTPOSIX_H_
