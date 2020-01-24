@@ -3,8 +3,6 @@
 This example will show how to subscribe to data creating a client subscriber.
 It is necessary to have the following profiles enabled in `client.config` file to compile this example:
 
-- `PROFILE_CREATE_ENTITIES_XML`
-- `PROFILE_READ_ACCESS`
 - `PROFILE_UDP_TRANSPORT`
 
 ## Usage

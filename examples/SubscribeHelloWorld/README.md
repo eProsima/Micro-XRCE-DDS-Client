@@ -3,8 +3,6 @@
 This example will show how to receive data from the DDS World creating a client subscriber.
 In order to compile this example, it is necessary to have the following profiles enabled in `client.config` file:
 
-- `PROFILE_CREATE_ENTITIES_XML`
-- `PROFILE_READ_ACCESS`
 - `PROFILE_UDP_TRANSPORT`
 
 ## Usage
