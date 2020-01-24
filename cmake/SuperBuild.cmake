@@ -15,7 +15,6 @@
 include(ExternalProject)
 
 unset(_deps)
-unset(_versioned_deps)
 
 enable_language(C)
 enable_language(CXX)
@@ -32,7 +31,7 @@ if(NOT microcdr_FOUND)
         PREFIX
             ${PROJECT_BINARY_DIR}/microcdr
         INSTALL_DIR
-            ${PROJECT_BINARY_DIR}/temp_install/microcdr-${_microcdr_version}
+            ${PROJECT_BINARY_DIR}/temp_install
         CMAKE_CACHE_ARGS
             -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
             -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
@@ -46,7 +45,6 @@ if(NOT microcdr_FOUND)
             -DUCDR_PIC=${UCLIENT_PIC}
         )
     list(APPEND _deps microcdr)
-    list(APPEND _versioned_deps microcdr-${_microcdr_version})
 endif()
 
 if(UCLIENT_BUILD_TESTS)
@@ -78,7 +76,6 @@ if(UCLIENT_BUILD_TESTS)
         set(GTEST_ROOT ${PROJECT_BINARY_DIR}/temp_install/googletest CACHE PATH "" FORCE)
         set(GMOCK_ROOT ${PROJECT_BINARY_DIR}/temp_install/googletest CACHE PATH "" FORCE)
         list(APPEND _deps googletest)
-        list(APPEND _versioned_deps googletest)
     endif()
 endif()
 
@@ -95,5 +92,3 @@ ExternalProject_Add(uclient
     DEPENDS
         ${_deps}
     )
-
- set(UCLIENT_DEPENDS "${_versioned_deps}" CACHE INTERNAL "")

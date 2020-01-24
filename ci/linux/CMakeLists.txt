@@ -38,13 +38,13 @@ if(_have_c_fprofile_abs_path)
     set(_c_flags "${_c_flags} -fprofile-abs-path")
 endif()
 
-ExternalProject_Add(microxrcedds_client
+ExternalProject_Add(microxrcedds_client_isolated
     SOURCE_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/../../
     BINARY_DIR
         ${PROJECT_BINARY_DIR}/microxrcedds_client-build
     INSTALL_DIR
-        ${PROJECT_BINARY_DIR}/temp_install
+        ${PROJECT_BINARY_DIR}/temp_install/isolated
     TEST_AFTER_INSTALL
         TRUE
     TEST_COMMAND
@@ -61,5 +61,35 @@ ExternalProject_Add(microxrcedds_client
         -DCMAKE_SHARED_LINKER_FLAGS:STRING=${_shared_linker_flags}
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DUCLIENT_BUILD_CI_TESTS:BOOL=ON
+        -DUCLIENT_ISOLATED_INSTALL:BOOL=ON
         -DGTEST_INDIVIDUAL:BOOL=ON
+    )
+
+ExternalProject_Add(microxrcedds_client_non-isolated
+    SOURCE_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../
+    BINARY_DIR
+        ${PROJECT_BINARY_DIR}/microxrcedds_client-build
+    INSTALL_DIR
+        ${PROJECT_BINARY_DIR}/temp_install/non-isolated
+    TEST_AFTER_INSTALL
+        TRUE
+    BUILD_COMMAND
+        ""
+    TEST_COMMAND
+        COMMAND ${CMAKE_CTEST_COMMAND} -VV -T Test -R "test-case*"
+    CMAKE_CACHE_ARGS
+        -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+        -DCMAKE_C_FLAGS:STRING=${_c_flags}
+        -DCMAKE_CXX_FLAGS:STRING=${_cxx_flags}
+        -DCMAKE_EXE_LINKER_FLAGS:STRING=${_exe_linker_flags}
+        -DCMAKE_SHARED_LINKER_FLAGS:STRING=${_shared_linker_flags}
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DUCLIENT_BUILD_CI_TESTS:BOOL=ON
+        -DUCLIENT_ISOLATED_INSTALL:BOOL=OFF
+        -DGTEST_INDIVIDUAL:BOOL=ON
+    DEPENDS
+        microxrcedds_client_isolated
     )
