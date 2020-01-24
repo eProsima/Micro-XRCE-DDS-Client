@@ -61,7 +61,7 @@ ExternalProject_Add(microxrcedds_client_isolated
         -DCMAKE_SHARED_LINKER_FLAGS:STRING=${_shared_linker_flags}
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DUCLIENT_BUILD_CI_TESTS:BOOL=ON
-        -DUCLIENT_MERGE_INSTALL:BOOL=OFF
+        -DUCLIENT_ISOLATED_INSTALL:BOOL=ON
         -DGTEST_INDIVIDUAL:BOOL=ON
     )
 
@@ -88,7 +88,7 @@ ExternalProject_Add(microxrcedds_client_non-isolated
         -DCMAKE_SHARED_LINKER_FLAGS:STRING=${_shared_linker_flags}
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DUCLIENT_BUILD_CI_TESTS:BOOL=ON
-        -DUCLIENT_MERGE_INSTALL:BOOL=ON
+        -DUCLIENT_ISOLATED_INSTALL:BOOL=OFF
         -DGTEST_INDIVIDUAL:BOOL=ON
     DEPENDS
         microxrcedds_client_isolated
