@@ -294,6 +294,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/Deployment)
     add_subdirectory(examples/Discovery)
     add_subdirectory(examples/TimeSync)
+    add_subdirectory(examples/TimeSyncWithCb)
 endif()
 
 ###############################################################################
