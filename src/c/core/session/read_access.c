@@ -161,8 +161,12 @@ inline void read_format_data(
         case UXR_DATAREADER_ID:
         {
             if (NULL != session->on_topic)
-            {
-                session->on_topic(session, object_id, request_id, stream_id, ub, session->on_topic_args);
+            {   
+                ucdrBuffer temp_buffer;
+
+                ucdr_init_buffer(&temp_buffer, ub->iterator, length);
+                session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, session->on_topic_args);
+                ub->iterator += length;
             }
             break;
         }
