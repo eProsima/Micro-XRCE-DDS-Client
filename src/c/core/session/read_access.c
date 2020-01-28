@@ -161,7 +161,7 @@ inline void read_format_data(
         case UXR_DATAREADER_ID:
         {
             if (NULL != session->on_topic)
-            {   
+            {
                 ucdrBuffer temp_buffer;
 
                 ucdr_init_buffer(&temp_buffer, ub->iterator, length);
