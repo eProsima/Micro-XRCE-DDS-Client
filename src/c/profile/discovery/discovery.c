@@ -92,7 +92,7 @@ void write_get_info_message(ucdrBuffer* ub)
 {
     GET_INFO_Payload payload;
     payload.base.request_id = (RequestId){{0x00, GET_INFO_REQUEST_ID}};
-    payload.base.object_id = OBJECTID_AGENT;
+    payload.base.object_id = DDS_XRCE_OBJECTID_AGENT;
     payload.info_mask = INFO_CONFIGURATION | INFO_ACTIVITY;
 
     uxr_serialize_message_header(ub, SESSION_ID_WITHOUT_CLIENT_KEY, 0, 0, 0);
@@ -144,7 +144,7 @@ bool read_info_message(
         XrceVersion* version = &payload.object_info.config._.agent.xrce_version;
         TransportLocator* transport = &payload.object_info.activity._.agent.address_seq.data[0];
 
-        if(0 == memcmp(version->data, XRCE_VERSION.data, sizeof(XRCE_VERSION.data)))
+        if(0 == memcmp(version->data, DDS_XRCE_XRCE_VERSION.data, sizeof(DDS_XRCE_XRCE_VERSION.data)))
         {
             (void) process_info(callback, transport);
             well_read = true;
