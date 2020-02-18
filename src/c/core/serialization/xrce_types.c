@@ -406,13 +406,13 @@ bool uxr_serialize_OBJK_Representation3Formats(ucdrBuffer* buffer, const OBJK_Re
     {
         switch(input->format)
         {
-            case REPRESENTATION_BY_REFERENCE:
+            case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_serialize_string(buffer, input->_.object_reference);
                 break;
-            case REPRESENTATION_AS_XML_STRING:
+            case DDS_XRCE_REPRESENTATION_AS_XML_STRING:
                 ret &= ucdr_serialize_string(buffer, input->_.xml_string_represenatation);
                 break;
-            case REPRESENTATION_IN_BINARY:
+            case DDS_XRCE_REPRESENTATION_IN_BINARY:
                 ret &= uxr_serialize_BinarySequence_t(buffer, &input->_.binary_representation);
                 break;
             default:
@@ -430,13 +430,13 @@ bool uxr_deserialize_OBJK_Representation3Formats(ucdrBuffer* buffer, OBJK_Repres
     {
         switch(output->format)
         {
-            case REPRESENTATION_BY_REFERENCE:
+            case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_deserialize_string(buffer, output->_.object_reference, UXR_STRING_SIZE_MAX);
                 break;
-            case REPRESENTATION_AS_XML_STRING:
+            case DDS_XRCE_REPRESENTATION_AS_XML_STRING:
                 ret &= ucdr_deserialize_string(buffer, output->_.xml_string_represenatation, UXR_STRING_SIZE_MAX);
                 break;
-            case REPRESENTATION_IN_BINARY:
+            case DDS_XRCE_REPRESENTATION_IN_BINARY:
                 ret &= uxr_deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
                 break;
             default:
@@ -454,10 +454,10 @@ bool uxr_serialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, const
     {
         switch(input->format)
         {
-            case REPRESENTATION_BY_REFERENCE:
+            case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_serialize_string(buffer, input->_.object_name);
                 break;
-            case REPRESENTATION_AS_XML_STRING:
+            case DDS_XRCE_REPRESENTATION_AS_XML_STRING:
                 ret &= ucdr_serialize_string(buffer, input->_.xml_string_represenatation);
                 break;
             default:
@@ -475,10 +475,10 @@ bool uxr_deserialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, OBJ
     {
         switch(output->format)
         {
-            case REPRESENTATION_BY_REFERENCE:
+            case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_deserialize_string(buffer, output->_.object_name, UXR_STRING_SIZE_MAX);
                 break;
-            case REPRESENTATION_AS_XML_STRING:
+            case DDS_XRCE_REPRESENTATION_AS_XML_STRING:
                 ret &= ucdr_deserialize_string(buffer, output->_.xml_string_represenatation, UXR_STRING_SIZE_MAX);
                 break;
             default:
@@ -496,10 +496,10 @@ bool uxr_serialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, const
     {
         switch(input->format)
         {
-            case REPRESENTATION_IN_BINARY:
+            case DDS_XRCE_REPRESENTATION_IN_BINARY:
                 ret &= uxr_serialize_BinarySequence_t(buffer, &input->_.binary_representation);
                 break;
-            case REPRESENTATION_AS_XML_STRING:
+            case DDS_XRCE_REPRESENTATION_AS_XML_STRING:
                 ret &= ucdr_serialize_string(buffer, input->_.string_represenatation);
                 break;
             default:
@@ -517,10 +517,10 @@ bool uxr_deserialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, OBJ
     {
         switch(output->format)
         {
-            case REPRESENTATION_IN_BINARY:
+            case DDS_XRCE_REPRESENTATION_IN_BINARY:
                 ret &= uxr_deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
                 break;
-            case REPRESENTATION_AS_XML_STRING:
+            case DDS_XRCE_REPRESENTATION_AS_XML_STRING:
                 ret &= ucdr_deserialize_string(buffer, output->_.string_represenatation, UXR_STRING_SIZE_MAX);
                 break;
             default:
@@ -1160,43 +1160,43 @@ bool uxr_serialize_ObjectVariant(ucdrBuffer* buffer, const ObjectVariant* input)
     {
         switch(input->kind)
         {
-            case OBJK_AGENT:
+            case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_serialize_AGENT_Representation(buffer, &input->_.agent);
                 break;
-            case OBJK_CLIENT:
+            case DDS_XRCE_OBJK_CLIENT:
                 ret &= uxr_serialize_CLIENT_Representation(buffer, &input->_.client);
                 break;
-            case OBJK_APPLICATION:
+            case DDS_XRCE_OBJK_APPLICATION:
                 ret &= uxr_serialize_OBJK_APPLICATION_Representation(buffer, &input->_.application);
                 break;
-            case OBJK_PARTICIPANT:
+            case DDS_XRCE_OBJK_PARTICIPANT:
                 ret &= uxr_serialize_OBJK_PARTICIPANT_Representation(buffer, &input->_.participant);
                 break;
-            case OBJK_QOSPROFILE:
+            case DDS_XRCE_OBJK_QOSPROFILE:
                 ret &= uxr_serialize_OBJK_QOSPROFILE_Representation(buffer, &input->_.qos_profile);
                 break;
-            case OBJK_TYPE:
+            case DDS_XRCE_OBJK_TYPE:
                 ret &= uxr_serialize_OBJK_TYPE_Representation(buffer, &input->_.type);
                 break;
-            case OBJK_TOPIC:
+            case DDS_XRCE_OBJK_TOPIC:
                 ret &= uxr_serialize_OBJK_TOPIC_Representation(buffer, &input->_.topic);
                 break;
-            case OBJK_PUBLISHER:
+            case DDS_XRCE_OBJK_PUBLISHER:
                 ret &= uxr_serialize_OBJK_PUBLISHER_Representation(buffer, &input->_.publisher);
                 break;
-            case OBJK_SUBSCRIBER:
+            case DDS_XRCE_OBJK_SUBSCRIBER:
                 ret &= uxr_serialize_OBJK_SUBSCRIBER_Representation(buffer, &input->_.subscriber);
                 break;
-            case OBJK_DATAWRITER:
+            case DDS_XRCE_OBJK_DATAWRITER:
                 ret &= uxr_serialize_DATAWRITER_Representation(buffer, &input->_.data_writer);
                 break;
-            case OBJK_DATAREADER:
+            case DDS_XRCE_OBJK_DATAREADER:
                 ret &= uxr_serialize_DATAREADER_Representation(buffer, &input->_.data_reader);
                 break;
-            case OBJK_REQUESTER:
+            case DDS_XRCE_OBJK_REQUESTER:
                 ret &= uxr_serialize_OBJK_REQUESTER_Representation(buffer, &input->_.requester);
                 break;
-            case OBJK_REPLIER:
+            case DDS_XRCE_OBJK_REPLIER:
                 ret &= uxr_serialize_OBJK_REPLIER_Representation(buffer, &input->_.replier);
                 break;
             default:
@@ -1214,43 +1214,43 @@ bool uxr_deserialize_ObjectVariant(ucdrBuffer* buffer, ObjectVariant* output)
     {
         switch(output->kind)
         {
-            case OBJK_AGENT:
+            case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_deserialize_AGENT_Representation(buffer, &output->_.agent);
                 break;
-            case OBJK_CLIENT:
+            case DDS_XRCE_OBJK_CLIENT:
                 ret &= uxr_deserialize_CLIENT_Representation(buffer, &output->_.client);
                 break;
-            case OBJK_APPLICATION:
+            case DDS_XRCE_OBJK_APPLICATION:
                 ret &= uxr_deserialize_OBJK_APPLICATION_Representation(buffer, &output->_.application);
                 break;
-            case OBJK_PARTICIPANT:
+            case DDS_XRCE_OBJK_PARTICIPANT:
                 ret &= uxr_deserialize_OBJK_PARTICIPANT_Representation(buffer, &output->_.participant);
                 break;
-            case OBJK_QOSPROFILE:
+            case DDS_XRCE_OBJK_QOSPROFILE:
                 ret &= uxr_deserialize_OBJK_QOSPROFILE_Representation(buffer, &output->_.qos_profile);
                 break;
-            case OBJK_TYPE:
+            case DDS_XRCE_OBJK_TYPE:
                 ret &= uxr_deserialize_OBJK_TYPE_Representation(buffer, &output->_.type);
                 break;
-            case OBJK_TOPIC:
+            case DDS_XRCE_OBJK_TOPIC:
                 ret &= uxr_deserialize_OBJK_TOPIC_Representation(buffer, &output->_.topic);
                 break;
-            case OBJK_PUBLISHER:
+            case DDS_XRCE_OBJK_PUBLISHER:
                 ret &= uxr_deserialize_OBJK_PUBLISHER_Representation(buffer, &output->_.publisher);
                 break;
-            case OBJK_SUBSCRIBER:
+            case DDS_XRCE_OBJK_SUBSCRIBER:
                 ret &= uxr_deserialize_OBJK_SUBSCRIBER_Representation(buffer, &output->_.subscriber);
                 break;
-            case OBJK_DATAWRITER:
+            case DDS_XRCE_OBJK_DATAWRITER:
                 ret &= uxr_deserialize_DATAWRITER_Representation(buffer, &output->_.data_writer);
                 break;
-            case OBJK_DATAREADER:
+            case DDS_XRCE_OBJK_DATAREADER:
                 ret &= uxr_deserialize_DATAREADER_Representation(buffer, &output->_.data_reader);
                 break;
-            case OBJK_REQUESTER:
+            case DDS_XRCE_OBJK_REQUESTER:
                 ret &= uxr_deserialize_OBJK_REQUESTER_Representation(buffer, &output->_.requester);
                 break;
-            case OBJK_REPLIER:
+            case DDS_XRCE_OBJK_REPLIER:
                 ret &= uxr_deserialize_OBJK_REPLIER_Representation(buffer, &output->_.replier);
                 break;
             default:
@@ -1376,13 +1376,13 @@ bool uxr_serialize_ActivityInfoVariant(ucdrBuffer* buffer, const ActivityInfoVar
     {
         switch(input->kind)
         {
-            case OBJK_AGENT:
+            case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_serialize_AGENT_ActivityInfo(buffer, &input->_.agent);
                 break;
-            case OBJK_DATAWRITER:
+            case DDS_XRCE_OBJK_DATAWRITER:
                 ret &= uxr_serialize_DATAWRITER_ActivityInfo(buffer, &input->_.data_writer);
                 break;
-            case OBJK_DATAREADER:
+            case DDS_XRCE_OBJK_DATAREADER:
                 ret &= uxr_serialize_DATAREADER_ActivityInfo(buffer, &input->_.data_reader);
                 break;
             default:
@@ -1400,13 +1400,13 @@ bool uxr_deserialize_ActivityInfoVariant(ucdrBuffer* buffer, ActivityInfoVariant
     {
         switch(output->kind)
         {
-            case OBJK_AGENT:
+            case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_deserialize_AGENT_ActivityInfo(buffer, &output->_.agent);
                 break;
-            case OBJK_DATAWRITER:
+            case DDS_XRCE_OBJK_DATAWRITER:
                 ret &= uxr_deserialize_DATAWRITER_ActivityInfo(buffer, &output->_.data_writer);
                 break;
-            case OBJK_DATAREADER:
+            case DDS_XRCE_OBJK_DATAREADER:
                 ret &= uxr_deserialize_DATAREADER_ActivityInfo(buffer, &output->_.data_reader);
                 break;
             default:

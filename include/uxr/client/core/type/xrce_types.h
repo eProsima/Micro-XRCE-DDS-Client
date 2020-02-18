@@ -68,24 +68,24 @@ typedef struct ClientKey
 } ClientKey;
 
 
-#define CLIENT_INVALID COMPOUND_LITERAL(ClientKey){{0x00, 0x00, 0x00, 0x00}}
+#define DDS_XRCE_CLIENT_INVALID COMPOUND_LITERAL(ClientKey){{0x00, 0x00, 0x00, 0x00}}
 
 typedef uint8_t ObjectKind;
-#define OBJK_INVALID 0x00
-#define OBJK_PARTICIPANT 0x01
-#define OBJK_TOPIC 0x02
-#define OBJK_PUBLISHER 0x03
-#define OBJK_SUBSCRIBER 0x04
-#define OBJK_DATAWRITER 0x05
-#define OBJK_DATAREADER 0x06
-#define OBJK_REQUESTER 0x07
-#define OBJK_REPLIER 0x08
-#define OBJK_TYPE 0x0A
-#define OBJK_QOSPROFILE 0x0B
-#define OBJK_APPLICATION 0x0C
-#define OBJK_AGENT 0x0D
-#define OBJK_CLIENT 0x0E
-#define OBJK_OTHER 0x0F
+#define DDS_XRCE_OBJK_INVALID 0x00
+#define DDS_XRCE_OBJK_PARTICIPANT 0x01
+#define DDS_XRCE_OBJK_TOPIC 0x02
+#define DDS_XRCE_OBJK_PUBLISHER 0x03
+#define DDS_XRCE_OBJK_SUBSCRIBER 0x04
+#define DDS_XRCE_OBJK_DATAWRITER 0x05
+#define DDS_XRCE_OBJK_DATAREADER 0x06
+#define DDS_XRCE_OBJK_REQUESTER 0x07
+#define DDS_XRCE_OBJK_REPLIER 0x08
+#define DDS_XRCE_OBJK_TYPE 0x0A
+#define DDS_XRCE_OBJK_QOSPROFILE 0x0B
+#define DDS_XRCE_OBJK_APPLICATION 0x0C
+#define DDS_XRCE_OBJK_AGENT 0x0D
+#define DDS_XRCE_OBJK_CLIENT 0x0E
+#define DDS_XRCE_OBJK_OTHER 0x0F
 
 
 typedef struct ObjectId
@@ -100,10 +100,10 @@ typedef struct ObjectPrefix
     uint8_t data[2];
 
 } ObjectPrefix;
-#define OBJECTID_INVALID COMPOUND_LITERAL(ObjectId){{0x00, 0x00}}
-#define OBJECTID_AGENT COMPOUND_LITERAL(ObjectId){{0xFF, 0xFD}}
-#define OBJECTID_CLIENT COMPOUND_LITERAL(ObjectId){{0xFF, 0xFE}}
-#define OBJECTID_SESSION COMPOUND_LITERAL(ObjectId){{0xFF, 0xFF}}
+#define DDS_XRCE_OBJECTID_INVALID COMPOUND_LITERAL(ObjectId){{0x00, 0x00}}
+#define DDS_XRCE_OBJECTID_AGENT COMPOUND_LITERAL(ObjectId){{0xFF, 0xFD}}
+#define DDS_XRCE_OBJECTID_CLIENT COMPOUND_LITERAL(ObjectId){{0xFF, 0xFE}}
+#define DDS_XRCE_OBJECTID_SESSION COMPOUND_LITERAL(ObjectId){{0xFF, 0xFF}}
 
 
 typedef struct XrceCookie
@@ -111,7 +111,7 @@ typedef struct XrceCookie
     uint8_t data[4];
 
 } XrceCookie;
-#define XRCE_COOKIE COMPOUND_LITERAL(XrceCookie){{0x58, 0x52, 0x43, 0x45}}
+#define DDS_XRCE_XRCE_COOKIE COMPOUND_LITERAL(XrceCookie){{0x58, 0x52, 0x43, 0x45}}
 
 
 typedef struct XrceVersion
@@ -119,9 +119,9 @@ typedef struct XrceVersion
     uint8_t data[2];
 
 } XrceVersion;
-#define XRCE_VERSION_MAJOR 0x01
-#define XRCE_VERSION_MINOR 0x00
-#define XRCE_VERSION COMPOUND_LITERAL(XrceVersion){{XRCE_VERSION_MAJOR, XRCE_VERSION_MINOR}}
+#define DDS_XRCE_XRCE_VERSION_MAJOR 0x01
+#define DDS_XRCE_XRCE_VERSION_MINOR 0x00
+#define DDS_XRCE_XRCE_VERSION COMPOUND_LITERAL(XrceVersion){{DDS_XRCE_XRCE_VERSION_MAJOR, DDS_XRCE_XRCE_VERSION_MINOR}}
 
 
 typedef struct XrceVendorId
@@ -129,7 +129,7 @@ typedef struct XrceVendorId
     uint8_t data[2];
 
 } XrceVendorId;
-#define XRCE_VENDOR_INVALID {0x00, 0x00}
+#define DDS_XRCE_XRCE_VENDOR_INVALID {0x00, 0x00}
 
 typedef enum TransportLocatorFormat
 {
@@ -239,10 +239,10 @@ typedef struct AGENT_Representation
 } AGENT_Representation;
 
 typedef uint8_t RepresentationFormat;
-#define REPRESENTATION_BY_REFERENCE 0x01
-#define REPRESENTATION_AS_XML_STRING 0x02
-#define REPRESENTATION_IN_BINARY 0x03
-#define REFERENCE_MAX_LEN 128
+#define DDS_XRCE_REPRESENTATION_BY_REFERENCE 0x01
+#define DDS_XRCE_REPRESENTATION_AS_XML_STRING 0x02
+#define DDS_XRCE_REPRESENTATION_IN_BINARY 0x03
+#define DDS_XRCE_REFERENCE_MAX_LEN 128
 
 
 typedef union OBJK_Representation3FormatsU
@@ -591,14 +591,6 @@ typedef struct BaseObjectRequest
 } BaseObjectRequest;
 
 typedef BaseObjectRequest RelatedObjectRequest;
-#define STATUS_LAST_OP_NONE 0x00
-#define STATUS_LAST_OP_CREATE 0x01
-#define STATUS_LAST_OP_UPDATE 0x02
-#define STATUS_LAST_OP_DELETE 0x03
-#define STATUS_LAST_OP_LOOKUP 0x04
-#define STATUS_LAST_OP_READ 0x05
-#define STATUS_LAST_OP_WRITE 0x06
-
 
 typedef enum InfoMask
 {
