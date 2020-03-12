@@ -1,0 +1,29 @@
+#include <uxr/client/profile/transport/serial/serial_transport_external.h>
+#include <uxr/client/profile/transport/serial/serial_transport_platform.h>
+
+// Place here your includes
+
+bool uxr_init_serial_platform(struct uxrSerialPlatform* platform, int fd, uint8_t remote_addr, uint8_t local_addr)
+{
+    // Place here your initialization platform code
+    // Return true if success
+}
+
+bool uxr_close_serial_platform(struct uxrSerialPlatform* platform)
+{
+    // Place here your close platform code
+    // Return true if success
+}
+
+size_t uxr_write_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, uint8_t* errcode)
+{
+    // Place here your write bytes platform code
+    // Return number of wrote bytes
+}
+
+size_t uxr_read_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
+{
+    // Place here your read bytes platform code
+    // Return number of read bytes (max bytes: len)
+}
+
