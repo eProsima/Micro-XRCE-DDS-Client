@@ -116,6 +116,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
         set(UCLIENT_PLATFORM_NUTTX ON)
+    elseif(PLATFORM_NAME STREQUAL "LwIP")
+        set(UCLIENT_PLATFORM_POSIX_NOPOLL ON)
     endif()
 endif()
 
@@ -163,6 +165,7 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
     $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/udp/udp_transport_posix.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c>
     $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
     $<$<BOOL:${PROFILE_TCP_TRANSPORT}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
     $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/tcp/tcp_transport_posix.c>

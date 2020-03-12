@@ -29,6 +29,7 @@
 #cmakedefine UCLIENT_PLATFORM_LINUX
 #cmakedefine UCLIENT_PLATFORM_WINDOWS
 #cmakedefine UCLIENT_PLATFORM_NUTTX
+#cmakedefine UCLIENT_PLATFORM_POSIX_NOPOLL
 #cmakedefine _external_transport
 
 #if defined(UCLIENT_PLATFORM_LINUX) || defined(UCLIENT_PLATFORM_NUTTX)
