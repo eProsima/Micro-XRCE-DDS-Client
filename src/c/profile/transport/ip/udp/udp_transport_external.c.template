@@ -16,7 +16,7 @@ bool uxr_init_udp_platform(
 bool uxr_close_udp_platform(
         uxrUDPPlatform* platform)
 {
-    // Place here your close platform code
+    // Place here your closing platform code
     // Return true if success
 }
 
@@ -26,8 +26,8 @@ size_t uxr_write_udp_data_platform(
         size_t len,
         uint8_t* errcode)
 {
-    // Place here your write bytes platform code
-    // Return number of wrote bytes
+    // Place here your writing bytes platform code
+    // Return number of bytes written
 }
 
 size_t uxr_read_udp_data_platform(
@@ -37,6 +37,6 @@ size_t uxr_read_udp_data_platform(
         int timeout,
         uint8_t* errcode)
 {
-    // Place here your read bytes platform code
-    // Return number of read bytes (max bytes: len)
+    // Place here your reading bytes platform code
+    // Return number of bytes read (max bytes: len)
 }

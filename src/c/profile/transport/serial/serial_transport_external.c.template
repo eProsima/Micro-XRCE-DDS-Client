@@ -11,19 +11,18 @@ bool uxr_init_serial_platform(struct uxrSerialPlatform* platform, int fd, uint8_
 
 bool uxr_close_serial_platform(struct uxrSerialPlatform* platform)
 {
-    // Place here your close platform code
+    // Place here your closing platform code
     // Return true if success
 }
 
 size_t uxr_write_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, uint8_t* errcode)
 {
-    // Place here your write bytes platform code
-    // Return number of wrote bytes
+    // Place here your writing bytes platform code
+    // Return number of bytes written
 }
 
 size_t uxr_read_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
 {
-    // Place here your read bytes platform code
-    // Return number of read bytes (max bytes: len)
+    // Place here your reading bytes platform code
+    // Return number of bytes read (max bytes: len)
 }
-
