@@ -19,7 +19,9 @@
 
 #ifdef PROFILE_UDP_TRANSPORT
 #include <uxr/client/profile/transport/ip/udp/udp_transport.h>
-#if defined(UCLIENT_PLATFORM_POSIX)
+#if defined(UCLIENT_EXTERNAL_UDP)
+#include <uxr/client/profile/transport/ip/udp/udp_transport_external.h>
+#elif defined(UCLIENT_PLATFORM_POSIX)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_posix.h>
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_windows.h>
@@ -28,7 +30,9 @@
 
 #ifdef PROFILE_TCP_TRANSPORT
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
-#if defined(UCLIENT_PLATFORM_POSIX)
+#if defined(UCLIENT_EXTERNAL_TCP)
+#include <uxr/client/profile/transport/ip/tcp/tcp_transport_external.h>
+#elif defined(UCLIENT_PLATFORM_POSIX)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_posix.h>
 #elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_posix_nopoll.h>
@@ -39,11 +43,11 @@
 
 #ifdef PROFILE_SERIAL_TRANSPORT
 #include <uxr/client/profile/transport/serial/serial_transport.h>
-#if defined(UCLIENT_PLATFORM_POSIX)
+#if defined(UCLIENT_EXTERNAL_SERIAL)
+#include <uxr/client/profile/transport/serial/serial_transport_external.h>
+#elif defined(UCLIENT_PLATFORM_POSIX)
 #include <uxr/client/profile/transport/serial/serial_transport_posix.h>
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
-#elif defined(_external_transport)
-#include EXTERNAL_TRANSPORT_HEADER_FILENAME
 #endif
 #endif //PROFILE_SERIAL_TRANSPORT
 

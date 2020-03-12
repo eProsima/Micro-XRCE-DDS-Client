@@ -126,15 +126,9 @@ if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX)
 endif()
 
 # Check external transport.
-set(EXTERNAL_TRANSPORT_HEADER ""    CACHE PATH "External transports header file")
-set(EXTERNAL_TRANSPORT_SRC ""       CACHE PATH "External transports code file")
-
-if(EXTERNAL_TRANSPORT_SRC AND EXTERNAL_TRANSPORT_HEADER)
-    set(_external_transport ON)
-    get_filename_component(EXTERNAL_TRANSPORT_HEADER_FILENAME ${EXTERNAL_TRANSPORT_HEADER} NAME)
-    get_filename_component(EXTERNAL_TRANSPORT_FILENAME ${EXTERNAL_TRANSPORT_SRC} NAME)
-    get_filename_component(EXTERNAL_TRANSPORT_HEADER_DIRECTORY ${EXTERNAL_TRANSPORT_HEADER} DIRECTORY)
-endif()
+option(UCLIENT_EXTERNAL_TCP "Enable external serial transport." OFF)
+option(UCLIENT_EXTERNAL_UDP "Enable external serial transport." OFF)
+option(UCLIENT_EXTERNAL_SERIAL "Enable external serial transport." OFF)
 
 # Other sources
 set(SRCS
@@ -173,7 +167,9 @@ set(SRCS
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
     $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/serial/serial_transport_posix.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<PLATFORM_ID:Generic>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_SRC}>
+    $<$<BOOL:${UCLIENT_EXTERNAL_TCP}>:src/c/profile/transport/ip/tcp/tcp_transport_external.c>
+    $<$<BOOL:${UCLIENT_EXTERNAL_UDP}>:src/c/profile/transport/ip/udp/udp_transport_external.c>
+    $<$<BOOL:${UCLIENT_EXTERNAL_SERIAL}>:src/c/profile/transport/serial/serial_transport_external.c>
     )
 
 ###############################################################################
@@ -249,7 +245,6 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
-        $<$<AND:$<BOOL:${INSTALL_INTERFACE}>,$<BOOL:${_external_transport}>>:${EXTERNAL_TRANSPORT_HEADER_DIRECTORY}>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     )
@@ -346,16 +341,6 @@ install(
     FILES_MATCHING
         PATTERN "*.h"
     )
-
-# Install external transport header
-if(_external_transport)
-    install(
-        FILES
-            ${EXTERNAL_TRANSPORT_HEADER}
-        DESTINATION
-            ${INCLUDE_INSTALL_DIR}/uxr/client/profile/transport/serial
-        )
-endif()
 
 # Generate config.h
 configure_file(${PROJECT_SOURCE_DIR}/include/uxr/client/config.h.in
