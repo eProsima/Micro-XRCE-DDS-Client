@@ -25,23 +25,20 @@ bool uxr_udp_send_datagram_to(
         uxrUDPTransportDatagram* transport,
         const uint8_t* buf,
         size_t len,
-        const char* ip,
-        uint16_t port)
+        const TransportLocatorMedium* locator)
 {
     bool rv = true;
 
     struct sockaddr_in remote_addr;
-    if(0 != inet_aton(ip, &remote_addr.sin_addr))
-    {
-        remote_addr.sin_family = AF_INET;
-        remote_addr.sin_port = htons(port);
+    memcpy(&remote_addr.sin_addr, locator->address, sizeof(remote_addr.sin_addr));
+    remote_addr.sin_family = AF_INET;
+    remote_addr.sin_port = htons(locator->locator_port);
 
-        ssize_t bytes_sent = sendto(transport->poll_fd.fd, (const void*)buf, len, 0,
-                                    (struct sockaddr*)&remote_addr, sizeof(remote_addr));
-        if (0 > bytes_sent)
-        {
-            rv = false;
-        }
+    ssize_t bytes_sent = sendto(transport->poll_fd.fd, (const void*)buf, len, 0,
+                                (struct sockaddr*)&remote_addr, sizeof(remote_addr));
+    if (0 > bytes_sent)
+    {
+        rv = false;
     }
 
     return rv;

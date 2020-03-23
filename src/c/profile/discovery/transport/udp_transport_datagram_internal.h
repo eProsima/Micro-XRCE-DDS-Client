@@ -22,6 +22,7 @@ extern "C"
 
 #include <uxr/client/visibility.h>
 #include <uxr/client/config.h>
+#include <uxr/client/core/type/xrce_types.h>
 
 #include <stdint.h>
 #include <stddef.h>
@@ -36,7 +37,8 @@ extern "C"
 #endif
 
 
-#define UXR_UDP_TRANSPORT_MTU_DATAGRAM 52 //Adjusted to the minimun necessary buffer for discovery messages.
+// TODO (julibert): move this to CMake flag.
+#define UXR_UDP_TRANSPORT_MTU_DATAGRAM 200 //Adjusted to the minimun necessary buffer for discovery messages.
 
 typedef struct uxrUDPTransportDatagram
 {
@@ -55,9 +57,8 @@ bool uxr_init_udp_transport_datagram(
 bool uxr_udp_send_datagram_to(
         struct uxrUDPTransportDatagram* transport,
         const uint8_t* buf,
-        size_t len,
-        const char* ip,
-        uint16_t port);
+        size_t length,
+        const TransportLocatorMedium* locator);
 
 bool uxr_udp_recv_datagram(
         struct uxrUDPTransportDatagram* transport,

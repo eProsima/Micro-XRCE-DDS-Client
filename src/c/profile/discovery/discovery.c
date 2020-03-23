@@ -14,7 +14,7 @@
 #define GET_INFO_MSG_SIZE   8
 #define GET_INFO_REQUEST_ID 9
 
-#define MULTICAST_DEFAULT_IP   "239.255.0.2"
+#define MULTICAST_DEFAULT_IP   {239, 255, 0, 2}
 #define MULTICAST_DEFAULT_PORT 7400
 
 typedef struct CallbackData
@@ -28,7 +28,6 @@ static void write_get_info_message(ucdrBuffer* ub);
 static bool listen_info_message(uxrUDPTransportDatagram* transport, int period, CallbackData* callback);
 static bool read_info_headers(ucdrBuffer* ub);
 static bool read_info_message(ucdrBuffer* ub, CallbackData* callback);
-static bool process_info(CallbackData* callback, TransportLocator* transport);
 
 //==================================================================
 //                             PUBLIC
@@ -40,7 +39,7 @@ void uxr_discovery_agents_default(
         uxrOnAgentFound on_agent_func,
         void* args)
 {
-    uxrAgentAddress multicast = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT};
+    TransportLocatorMedium multicast = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT};
     uxr_discovery_agents(attempts, period, on_agent_func, args, &multicast, 1);
 }
 
@@ -49,7 +48,7 @@ void uxr_discovery_agents(
         int period,
         uxrOnAgentFound on_agent_func,
         void* args,
-        const uxrAgentAddress* agent_list,
+        const TransportLocatorMedium* agent_list,
         size_t agent_list_size)
 {
     CallbackData callback;
@@ -69,7 +68,7 @@ void uxr_discovery_agents(
         {
             for(size_t i = 0; i < agent_list_size; ++i)
             {
-                (void) uxr_udp_send_datagram_to(&transport, output_buffer, message_length, agent_list[i].ip, agent_list[i].port);
+                (void) uxr_udp_send_datagram_to(&transport, output_buffer, message_length, &agent_list[i]);
                 UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, output_buffer, message_length, 0);
             }
 
@@ -146,31 +145,10 @@ bool read_info_message(
 
         if(0 == memcmp(version->data, DDS_XRCE_XRCE_VERSION.data, sizeof(DDS_XRCE_XRCE_VERSION.data)))
         {
-            (void) process_info(callback, transport);
+            callback->on_agent(transport, callback->args);
             well_read = true;
         }
     }
 
     return well_read;
 }
-
-bool process_info(
-        CallbackData* callback,
-        TransportLocator* locator)
-{
-    bool processed = false;
-
-    if(locator->format == ADDRESS_FORMAT_MEDIUM)
-    {
-        uxrAgentAddress address;
-        uxr_bytes_to_ip(locator->_.medium_locator.address, address.ip);
-        address.port = locator->_.medium_locator.locator_port;
-
-        callback->on_agent(&address, callback->args);
-
-        processed = true;
-    }
-
-    return processed;
-}
-
