@@ -128,7 +128,7 @@ bool uxr_create_session(uxrSession* session)
 
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     uxr_buffer_create_session(&session->info, &ub, (uint16_t)(session->comm->mtu - INTERNAL_RELIABLE_BUFFER_OFFSET));
     uxr_stamp_create_session_header(&session->info, ub.init);
@@ -142,7 +142,7 @@ bool uxr_delete_session(uxrSession* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     uxr_buffer_delete_session(&session->info, &ub);
     uxr_stamp_session_header(&session->info, 0, 0, ub.init);
@@ -292,7 +292,7 @@ bool uxr_sync_session(uxrSession* session, int time)
 {
     uint8_t timestamp_buffer[TIMESTAMP_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, timestamp_buffer, sizeof(timestamp_buffer), uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, timestamp_buffer, sizeof(timestamp_buffer), 0u, uxr_session_header_offset(&session->info));
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_TIMESTAMP, TIMESTAMP_PAYLOAD_SIZE, 0);
 
     TIMESTAMP_Payload timestamp;
@@ -468,7 +468,7 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
@@ -491,7 +491,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, acknack_buffer, ACKNACK_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, acknack_buffer, ACKNACK_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 

@@ -64,7 +64,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
         {
             size_t final_buffer_size = buffer_size + length;
             uxr_set_reliable_buffer_size(&stream->base, seq_num, final_buffer_size);
-            ucdr_init_buffer_offset(ub, buffer, (uint32_t)final_buffer_size, (uint32_t)buffer_size);
+            ucdr_init_buffer_origin_offset(ub, buffer, (uint32_t)final_buffer_size, 0u, (uint32_t)buffer_size);
         }
     }
     /* Check if the message fit in a new empty buffer */
@@ -79,7 +79,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
             buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
             size_t final_buffer_size = stream->offset + length;
             uxr_set_reliable_buffer_size(&stream->base, seq_num, final_buffer_size);
-            ucdr_init_buffer_offset(ub, buffer, (uint32_t)final_buffer_size, stream->offset);
+            ucdr_init_buffer_origin_offset(ub, buffer, (uint32_t)final_buffer_size, 0u, stream->offset);
             stream->last_written = seq_num;
         }
     }
@@ -114,7 +114,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
 
             uxr_set_reliable_buffer_size(&stream->base, seq_num, stream->offset + (size_t)(SUBHEADER_SIZE) + last_fragment_size);
 
-            ucdr_init_buffer_offset(ub, buffer, (uint32_t)buffer_capacity, (uint32_t)buffer_size);
+            ucdr_init_buffer_origin_offset(ub, buffer, (uint32_t)buffer_capacity, 0u, (uint32_t)buffer_size);
             ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
             stream->last_written = seq_num;
             stream->on_new_fragment(ub, stream);
@@ -237,7 +237,7 @@ bool on_full_output_buffer(ucdrBuffer* ub, void* args)
     uint8_t* next_buffer = uxr_get_reliable_buffer(&stream->base, (uint16_t)(slot + 1));
     size_t next_length = uxr_get_reliable_buffer_size(&stream->base, (uint16_t)(slot + 1));
 
-    ucdr_init_buffer_offset(ub, next_buffer, (uint32_t)next_length, stream->offset);
+    ucdr_init_buffer_origin_offset(ub, next_buffer, (uint32_t)next_length, 0u, stream->offset);
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
 
     stream->on_new_fragment(ub, stream);
