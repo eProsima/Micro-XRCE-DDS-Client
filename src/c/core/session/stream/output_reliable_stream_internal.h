@@ -30,7 +30,7 @@ extern "C"
 
 void uxr_init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset, OnNewFragment on_new_fragment);
 void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream);
-bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, size_t fragment_offset, struct ucdrBuffer* ub);
+bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_t size, struct ucdrBuffer* ub);
 bool uxr_prepare_next_reliable_buffer_to_send(uxrOutputReliableStream* stream, uint8_t** buffer, size_t* length, uxrSeqNum* seq_num);
 
 bool uxr_update_output_stream_heartbeat_timestamp(uxrOutputReliableStream* stream, int64_t current_timestamp);

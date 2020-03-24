@@ -763,7 +763,7 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
         case UXR_RELIABLE_STREAM:
         {
             uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
-            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, SUBHEADER_SIZE, ub);
+            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, ub);
             break;
         }
         default:
