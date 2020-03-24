@@ -5,6 +5,8 @@ extern "C"
 {
 #include <c/core/session/stream/seq_num.c>
 #include <c/core/session/stream/output_reliable_stream.c>
+#include <c/core/serialization/xrce_subheader.c>
+#include <c/core/session/submessage.c>
 }
 
 #define BUFFER_SIZE           size_t(128)
@@ -26,8 +28,7 @@ bool operator == (const uxrOutputReliableStream& stream1, const uxrOutputReliabl
         && stream1.last_acknown == stream2.last_acknown
         && stream1.next_heartbeat_timestamp == stream2.next_heartbeat_timestamp
         && stream1.next_heartbeat_tries == stream2.next_heartbeat_tries
-        && stream1.send_lost == stream2.send_lost
-        && stream1.on_new_fragment == stream2.on_new_fragment;
+        && stream1.send_lost == stream2.send_lost;
 }
 
 bool operator != (const uxrOutputReliableStream& stream1, const uxrOutputReliableStream& stream2)
@@ -40,7 +41,7 @@ class OutputReliableStreamTest : public testing::Test
 public:
     OutputReliableStreamTest()
     {
-        uxr_init_output_reliable_stream(&stream, buffer, BUFFER_SIZE, HISTORY, OFFSET, on_new_fragment);
+        uxr_init_output_reliable_stream(&stream, buffer, BUFFER_SIZE, HISTORY, OFFSET);
         EXPECT_EQ(buffer, stream.base.buffer);
         EXPECT_EQ(BUFFER_SIZE, stream.base.size);
         EXPECT_EQ(HISTORY, stream.base.history);
@@ -72,8 +73,6 @@ public:
         dest->next_heartbeat_timestamp = source->next_heartbeat_timestamp;
         dest->next_heartbeat_tries = source->next_heartbeat_tries;
         dest->send_lost = source->send_lost;
-
-        dest->on_new_fragment = source->on_new_fragment;
     }
 
     virtual ~OutputReliableStreamTest()
@@ -83,13 +82,6 @@ public:
 protected:
     uxrOutputReliableStream stream;
     uint8_t buffer[BUFFER_SIZE];
-
-    static void on_new_fragment(ucdrBuffer* ub, uxrOutputReliableStream* stream)
-    {
-        (void) stream;
-        uint8_t fragment_header[FRAGMENT_OFFSET];
-        ucdr_serialize_array_uint8_t(ub, fragment_header, FRAGMENT_OFFSET);
-    }
 };
 
 
@@ -424,4 +416,3 @@ TEST_F(OutputReliableStreamTest, FragmentedSerialization)
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.iterator);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.final);
 }
-

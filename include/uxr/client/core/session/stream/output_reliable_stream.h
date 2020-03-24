@@ -43,8 +43,6 @@ typedef struct uxrOutputReliableStream
     uint8_t next_heartbeat_tries;
     bool send_lost;
 
-    OnNewFragment on_new_fragment;
-
 } uxrOutputReliableStream;
 
 #ifdef __cplusplus
