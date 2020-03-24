@@ -80,8 +80,8 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
             size_t final_buffer_size = stream->offset + length;
             uxr_set_reliable_buffer_size(&stream->base, seq_num, final_buffer_size);
             ucdr_init_buffer_offset(ub, buffer, (uint32_t)final_buffer_size, stream->offset);
+            stream->last_written = seq_num;
         }
-        stream->last_written = seq_num;
     }
     /* Check if the message fit in a fragmented message */
     else
@@ -116,9 +116,9 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
 
             ucdr_init_buffer_offset(ub, buffer, (uint32_t)buffer_capacity, (uint32_t)buffer_size);
             ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
+            stream->last_written = seq_num;
             stream->on_new_fragment(ub, stream);
         }
-        stream->last_written = seq_num;
     }
 
     return available_to_write;
