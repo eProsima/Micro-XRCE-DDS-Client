@@ -70,7 +70,10 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);
         (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
 
-        ub->last_data_size = 8; //reset alignment (as if we were created a new ucdrBuffer)
+        OnFullBuffer on_full_buffer = ub->on_full_buffer;
+        void* args = ub->args;
+        ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
+        ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
     }
 
     return !ub->error;

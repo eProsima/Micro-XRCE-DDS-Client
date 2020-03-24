@@ -187,13 +187,12 @@ TEST_F(OutputReliableStreamTest, WriteFragmentMessage)
     EXPECT_EQ(capacity, uxr_get_reliable_buffer_size(&stream.base, 0));
     EXPECT_EQ(capacity, uxr_get_reliable_buffer_size(&stream.base, 1));
     EXPECT_EQ(OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, 2));
-    EXPECT_EQ(slot_0, ub.init);
+    EXPECT_EQ(slot_0 + OFFSET + FRAGMENT_OFFSET, ub.init);
     EXPECT_EQ(slot_0 + OFFSET + FRAGMENT_OFFSET, ub.iterator);
     EXPECT_EQ(slot_0 + capacity, ub.final);
 
     uint8_t message_to_write[message_length];
     EXPECT_TRUE(ucdr_serialize_array_uint8_t(&ub, message_to_write, message_length));
-    EXPECT_EQ(slot_2, ub.init);
     EXPECT_EQ(slot_2 + OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, ub.iterator);
     EXPECT_EQ(slot_2 + OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, ub.final);
 }
@@ -412,7 +411,6 @@ TEST_F(OutputReliableStreamTest, FragmentedSerialization)
     bool serialize = ucdr_serialize_array_uint8_t(&ub, message, MAX_SUBMESSAGE_SIZE + 4);
 
     ASSERT_TRUE(serialize);
-    EXPECT_EQ(slot_1, ub.init);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.iterator);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.final);
 }

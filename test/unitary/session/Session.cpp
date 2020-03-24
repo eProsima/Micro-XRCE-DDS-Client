@@ -485,16 +485,6 @@ TEST_F(SessionTest, WriteUint64)
 
     uxr_run_session_time(&session, 1);
 
-    uint8_t session_id; uint8_t stream_id; uint16_t seq_num; uint8_t key[4];
-    uxr_deserialize_message_header(&expected_ub, &session_id, &stream_id, &seq_num, key);
-
-    uint8_t id; uint8_t flags; uint16_t lenght;
-    uxr_deserialize_submessage_header(&expected_ub, &id, &flags, &lenght);
-
-    WRITE_DATA_Payload_Data payload;
-    uxr_deserialize_WRITE_DATA_Payload_Data(&expected_ub, &payload);
-
-    expected_ub.last_data_size = 8; // reset buffer alignment.
     uint64_t data;
     ucdr_deserialize_uint64_t(&expected_ub, &data);
     EXPECT_EQ(data, UINT64_MAX);
