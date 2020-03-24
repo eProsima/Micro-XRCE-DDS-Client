@@ -780,7 +780,7 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
 
 void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* stream)
 {
-    uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->base.history);
+    uint8_t* last_buffer = uxr_get_reliable_buffer(&stream->base, stream->last_written);
     uint8_t last_fragment_flag = FLAG_LAST_FRAGMENT * (last_buffer == ub->init);
 
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);

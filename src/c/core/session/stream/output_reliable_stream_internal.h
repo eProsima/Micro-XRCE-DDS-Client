@@ -40,9 +40,6 @@ void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uxrSe
 
 bool uxr_is_output_up_to_date(const uxrOutputReliableStream* stream);
 
-uint8_t* uxr_get_output_buffer(const uxrOutputReliableStream* stream, size_t history_pos);
-size_t uxr_get_output_buffer_size(const uxrOutputReliableStream* stream);
-
 #ifdef __cplusplus
 }
 #endif
