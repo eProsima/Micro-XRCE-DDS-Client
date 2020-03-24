@@ -87,7 +87,7 @@ bool uxr_next_input_reliable_buffer_available(uxrInputReliableStream* stream, uc
     uxrSeqNum next = uxr_seq_num_add(stream->last_handled, 1);
     uint8_t* internal_buffer = uxr_get_reliable_buffer(&stream->base, next);
     size_t length = uxr_get_reliable_buffer_size(&stream->base, next);
-    bool available_to_read = 0 != length;
+    bool available_to_read = (0 != length);
     if(available_to_read)
     {
         FragmentationInfo fragmentation_info = stream->on_get_fragmentation_info(internal_buffer);

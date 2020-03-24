@@ -14,9 +14,9 @@ extern "C"
 
 bool operator == (const uxrInputReliableStream& stream1, const uxrInputReliableStream& stream2)
 {
-    return stream1.buffer == stream2.buffer
-        && stream1.size == stream2.size
-        && stream1.history == stream2.history
+    return stream1.base.buffer == stream2.base.buffer
+        && stream1.base.size == stream2.base.size
+        && stream1.base.history == stream2.base.history
         && stream1.last_handled == stream2.last_handled
         && stream1.last_announced == stream2.last_announced
         && stream1.on_get_fragmentation_info == stream2.on_get_fragmentation_info;
@@ -33,24 +33,23 @@ public:
     InputReliableStreamTest()
     {
         uxr_init_input_reliable_stream(&stream, buffer, BUFFER_SIZE, HISTORY, on_get_fragmentation_info);
-        EXPECT_EQ(buffer, stream.buffer);
-        EXPECT_EQ(BUFFER_SIZE, stream.size);
-        EXPECT_EQ(HISTORY, stream.history);
+        EXPECT_EQ(buffer, stream.base.buffer);
+        EXPECT_EQ(BUFFER_SIZE, stream.base.size);
+        EXPECT_EQ(HISTORY, stream.base.history);
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_announced);
 
-        for(size_t i = 0; i < HISTORY; ++i)
+        for(uint16_t i = 0; i < HISTORY; ++i)
         {
-            uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, i);
-            EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot));
+            EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_size(&stream.base, i));
         }
     }
 
     void copy(uxrInputReliableStream* dest, uxrInputReliableStream* source)
     {
-        dest->buffer = source->buffer;
-        dest->size = source->size;
-        dest->history = source->history;
+        dest->base.buffer = source->base.buffer;
+        dest->base.size = source->base.size;
+        dest->base.history = source->base.history;
 
         dest->last_handled = source->last_handled;
         dest->last_announced = source->last_announced;
@@ -73,21 +72,6 @@ protected:
         return NO_FRAGMENTED;
     }
 };
-
-
-TEST_F(InputReliableStreamTest, InputBuffer)
-{
-    uint8_t* buffer_from_generic = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, 2);
-    uint8_t* buffer_from_input = uxr_get_input_buffer(&stream, 2);
-    EXPECT_EQ(buffer_from_generic, buffer_from_input);
-}
-
-TEST_F(InputReliableStreamTest, InputBufferSize)
-{
-    size_t size_from_generic = uxr_get_reliable_buffer_size(BUFFER_SIZE, HISTORY);
-    size_t size_from_input = uxr_get_input_buffer_size(&stream);
-    EXPECT_EQ(size_from_generic, size_from_input);
-}
 
 TEST_F(InputReliableStreamTest, UpToDate)
 {
@@ -227,49 +211,48 @@ TEST_F(InputReliableStreamTest, Reset)
     uxr_reset_input_reliable_stream(&stream);
     EXPECT_EQ(backup, stream);
 
-    for(size_t i = 0; i < HISTORY; ++i)
+    for(uint16_t i = 0; i < HISTORY; ++i)
     {
-        uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, i);
-        EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot));
+        EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_size(&stream.base, i));
     }
 }
 
 TEST_F(InputReliableStreamTest, FragmentationJumpToNextBuffer)
 {
-    size_t size = uxr_get_reliable_buffer_size(BUFFER_SIZE, HISTORY);
-    uint8_t* slot_0 = uxr_get_input_buffer(&stream, 0);
-    uint8_t* slot_1 = uxr_get_input_buffer(&stream, 1);
-    uxr_set_reliable_buffer_length(slot_0, size);
-    uxr_set_reliable_buffer_length(slot_1, size / 2);
+    size_t capacity = uxr_get_reliable_buffer_capacity(&stream.base);
+    uint8_t* slot_0 = uxr_get_reliable_buffer(&stream.base, 0);
+    uint8_t* slot_1 = uxr_get_reliable_buffer(&stream.base, 1);
+    uxr_set_reliable_buffer_size(&stream.base, 0, capacity);
+    uxr_set_reliable_buffer_size(&stream.base, 1, capacity / 2);
 
     ucdrBuffer ub;
-    ucdr_init_buffer(&ub, slot_0, uint32_t(size));
+    ucdr_init_buffer(&ub, slot_0, uint32_t(capacity));
     ucdr_set_on_full_buffer_callback(&ub, on_full_input_buffer, &stream);
 
     uint8_t array[BUFFER_SIZE];
-    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(size + size / 2));
+    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(capacity + capacity / 2));
     ASSERT_FALSE(ub.error);
     EXPECT_EQ(slot_1, ub.init);
-    EXPECT_EQ(slot_1 + size / 2, ub.final);
-    EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot_1));
+    EXPECT_EQ(slot_1 + capacity / 2, ub.final);
+    EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_size(&stream.base, 1));
 }
 
 TEST_F(InputReliableStreamTest, FragmentationJumpToNextBufferLastPosition)
 {
-    size_t size = uxr_get_reliable_buffer_size(BUFFER_SIZE, HISTORY);
-    uint8_t* slot_history_1 = uxr_get_input_buffer(&stream, HISTORY - 1);
-    uint8_t* slot_0 = uxr_get_input_buffer(&stream, 0);
-    uxr_set_reliable_buffer_length(slot_history_1, size);
-    uxr_set_reliable_buffer_length(slot_0, size / 2);
+    size_t capacity = uxr_get_reliable_buffer_capacity(&stream.base);
+    uint8_t* slot_history_1 = uxr_get_reliable_buffer(&stream.base, HISTORY - 1);
+    uint8_t* slot_0 = uxr_get_reliable_buffer(&stream.base, 0);
+    uxr_set_reliable_buffer_size(&stream.base, HISTORY -1, capacity);
+    uxr_set_reliable_buffer_size(&stream.base, 0, capacity / 2);
 
     ucdrBuffer ub;
-    ucdr_init_buffer(&ub, slot_history_1, uint32_t(size));
+    ucdr_init_buffer(&ub, slot_history_1, uint32_t(capacity));
     ucdr_set_on_full_buffer_callback(&ub, on_full_input_buffer, &stream);
 
     uint8_t array[BUFFER_SIZE];
-    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(size + size / 2));
+    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(capacity + capacity / 2));
     ASSERT_FALSE(ub.error);
     EXPECT_EQ(slot_0, ub.init);
-    EXPECT_EQ(slot_0 + size / 2, ub.final);
-    EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_length(slot_0));
+    EXPECT_EQ(slot_0 + capacity / 2, ub.final);
+    EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_size(&stream.base, 0));
 }

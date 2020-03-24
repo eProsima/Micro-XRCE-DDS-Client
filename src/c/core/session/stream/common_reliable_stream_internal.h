@@ -71,7 +71,7 @@ static inline void uxr_set_reliable_buffer_size(
 {
     length_t temp_length = (length_t)length;
     memcpy(
-        uxr_get_reliable_buffer(stream, (seq_num & stream->history)) - sizeof(length_t),
+        uxr_get_reliable_buffer(stream, (seq_num % stream->history)) - sizeof(length_t),
         &temp_length,
         sizeof(length_t));
 }
