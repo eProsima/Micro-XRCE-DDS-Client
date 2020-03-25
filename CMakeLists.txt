@@ -171,6 +171,7 @@ set(SRCS
     $<$<BOOL:${UCLIENT_EXTERNAL_UDP}>:src/c/profile/transport/ip/udp/udp_transport_external.c>
     $<$<BOOL:${UCLIENT_EXTERNAL_SERIAL}>:src/c/profile/transport/serial/serial_transport_external.c>
     $<$<OR:$<BOOL:${UCLIENT_PLATFORM_POSIX}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/ip_posix.c>
+    $<$<BOOL:$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/ip_windows.c>
     )
 
 ###############################################################################
