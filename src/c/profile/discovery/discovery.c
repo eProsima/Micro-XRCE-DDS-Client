@@ -39,7 +39,10 @@ void uxr_discovery_agents_default(
         uxrOnAgentFound on_agent_func,
         void* args)
 {
-    TransportLocatorMedium multicast = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT};
+    TransportLocator multicast = {
+        .format = ADDRESS_FORMAT_MEDIUM,
+        ._ = {.medium_locator = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT}}
+    };
     uxr_discovery_agents(attempts, period, on_agent_func, args, &multicast, 1);
 }
 
@@ -48,7 +51,7 @@ void uxr_discovery_agents(
         int period,
         uxrOnAgentFound on_agent_func,
         void* args,
-        const TransportLocatorMedium* agent_list,
+        const TransportLocator* agent_list,
         size_t agent_list_size)
 {
     CallbackData callback;

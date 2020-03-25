@@ -57,7 +57,7 @@ UXRDLLAPI void uxr_discovery_agents(
         int period,
         uxrOnAgentFound on_agent_func,
         void* args,
-        const TransportLocatorMedium* agent_list,
+        const TransportLocator* agent_list,
         size_t agent_list_size);
 
 #ifdef __cplusplus

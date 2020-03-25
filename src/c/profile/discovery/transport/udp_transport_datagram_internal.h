@@ -58,7 +58,7 @@ bool uxr_udp_send_datagram_to(
         struct uxrUDPTransportDatagram* transport,
         const uint8_t* buf,
         size_t length,
-        const TransportLocatorMedium* locator);
+        const TransportLocator* locator);
 
 bool uxr_udp_recv_datagram(
         struct uxrUDPTransportDatagram* transport,
