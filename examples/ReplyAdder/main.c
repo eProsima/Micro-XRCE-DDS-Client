@@ -28,17 +28,24 @@ static uxrStreamId reliable_in;
 static uxrObjectId participant_id;
 static uxrObjectId replier_id;
 
-void on_request(uxrSession* session, uxrObjectId object_id, uint16_t request_id, SampleIdentity* sample_id, uint8_t* request_buffer, size_t request_len, void* args)
+void on_request(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        SampleIdentity* sample_id,
+        ucdrBuffer* ub,
+        size_t len,
+        void* args)
 {
     (void) object_id;
     (void) request_id;
+    (void) len;
 
     uint32_t rhs;
     uint32_t lhs;
     ucdrBuffer request_ub;
-    ucdr_init_buffer(&request_ub, request_buffer, request_len);
-    ucdr_deserialize_uint32_t(&request_ub, &rhs);
-    ucdr_deserialize_uint32_t(&request_ub, &lhs);
+    ucdr_deserialize_uint32_t(ub, &rhs);
+    ucdr_deserialize_uint32_t(ub, &lhs);
 
     printf("Request received: (%d + %d)\n", rhs, lhs);
 

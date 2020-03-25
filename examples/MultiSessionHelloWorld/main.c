@@ -24,9 +24,16 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* ub, void* args)
+void on_topic(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uxrStreamId stream_id,
+        struct ucdrBuffer* ub,
+        uint16_t length,
+        void* args)
 {
-    (void) session; (void) object_id; (void) request_id; (void) stream_id;
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length;
 
     HelloWorld topic;
     HelloWorld_deserialize_topic(ub, &topic);
