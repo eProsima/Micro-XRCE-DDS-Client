@@ -46,6 +46,8 @@ typedef struct uxrInputReliableStream
 
     OnGetFragmentationInfo on_get_fragmentation_info;
 
+    bool cleanup_flag;
+
 } uxrInputReliableStream;
 
 #ifdef __cplusplus

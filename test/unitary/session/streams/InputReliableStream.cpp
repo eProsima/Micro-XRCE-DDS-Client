@@ -19,7 +19,8 @@ bool operator == (const uxrInputReliableStream& stream1, const uxrInputReliableS
         && stream1.base.history == stream2.base.history
         && stream1.last_handled == stream2.last_handled
         && stream1.last_announced == stream2.last_announced
-        && stream1.on_get_fragmentation_info == stream2.on_get_fragmentation_info;
+        && stream1.on_get_fragmentation_info == stream2.on_get_fragmentation_info
+        && stream1.cleanup_flag == stream2.cleanup_flag;
 }
 
 bool operator != (const uxrInputReliableStream& stream1, const uxrInputReliableStream& stream2)
@@ -38,6 +39,7 @@ public:
         EXPECT_EQ(HISTORY, stream.base.history);
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_handled);
         EXPECT_EQ(SEQ_NUM_MAX, stream.last_announced);
+        EXPECT_EQ(false, stream.cleanup_flag);
 
         for(uint16_t i = 0; i < HISTORY; ++i)
         {
@@ -55,6 +57,8 @@ public:
         dest->last_announced = source->last_announced;
 
         dest->on_get_fragmentation_info = source->on_get_fragmentation_info;
+
+        dest->cleanup_flag = source->cleanup_flag;
     }
 
     virtual ~InputReliableStreamTest()
@@ -228,6 +232,7 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBuffer)
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, slot_0, uint32_t(capacity));
     ucdr_set_on_full_buffer_callback(&ub, on_full_input_buffer, &stream);
+    stream.cleanup_flag = true;
 
     uint8_t array[BUFFER_SIZE];
     (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(capacity + capacity / 2));
@@ -248,6 +253,7 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBufferLastPosition)
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, slot_history_1, uint32_t(capacity));
     ucdr_set_on_full_buffer_callback(&ub, on_full_input_buffer, &stream);
+    stream.cleanup_flag = true;
 
     uint8_t array[BUFFER_SIZE];
     (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(capacity + capacity / 2));

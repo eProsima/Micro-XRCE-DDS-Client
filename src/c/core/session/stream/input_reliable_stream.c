@@ -19,6 +19,7 @@ void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buf
     stream->base.size = size;
     stream->base.history = history;
     stream->on_get_fragmentation_info = on_get_fragmentation_info;
+    stream->cleanup_flag = false;
 
     uxr_reset_input_reliable_stream(stream);
 }
@@ -206,7 +207,11 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
 
     uint8_t* next_init = next_buffer + offset;
     size_t next_length = uxr_get_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1)) - offset;
-    uxr_set_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1), 0);
+
+    if (stream->cleanup_flag)
+    {
+        uxr_set_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1), 0);
+    }
 
     ucdr_init_buffer_origin(
         ub,

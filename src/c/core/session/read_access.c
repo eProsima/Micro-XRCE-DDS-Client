@@ -154,7 +154,6 @@ inline void read_format_data(
         uint16_t request_id)
 {
     (void) length;
-//    ub->last_data_size = 8; //reset alignment (as if we were created a new ucdrBuffer)
 
     switch (object_id.type)
     {
@@ -162,17 +161,12 @@ inline void read_format_data(
         {
             if (NULL != session->on_topic)
             {
-//                ucdrBuffer temp_buffer;
-//
-//                ucdr_init_buffer(&temp_buffer, ub->iterator, length);
-//                session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, session->on_topic_args);
-//                ub->iterator += length;
-
-//                session->on_topic(session, object_id, request_id, stream_id, ub, session->on_topic_args);
-
                 ucdrBuffer temp_buffer;
                 ucdr_copy_buffer(&temp_buffer, ub);
+                uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
+                stream->cleanup_flag = false;
                 session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, session->on_topic_args);
+                stream->cleanup_flag = true;
                 ucdr_advance_buffer(ub, length);
             }
             break;
