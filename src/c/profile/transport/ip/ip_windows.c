@@ -28,12 +28,12 @@ bool uxr_ip_to_locator(
         case UXR_IPv4:
             locator->format = ADDRESS_FORMAT_MEDIUM;
             locator->_.medium_locator.locator_port = port;
-            result = (1 == InetPtonW(AF_INET, ip, locator->_.medium_locator.address));
+            result = (1 == inet_pton(AF_INET, ip, locator->_.medium_locator.address));
             break;
         case UXR_IPv6:
             locator->format = ADDRESS_FORMAT_LARGE;
             locator->_.large_locator.locator_port = port;
-            result = (1 == InetPtonW(AF_INET6, ip, locator->_.large_locator.address));
+            result = (1 == inet_pton(AF_INET6, ip, locator->_.large_locator.address));
             break;
         default:
             break;
@@ -54,12 +54,12 @@ bool uxr_locator_to_ip(
         case ADDRESS_FORMAT_MEDIUM:
             *port = locator->_.medium_locator.locator_port;
             *ip_protocol = UXR_IPv4;
-            result = (NULL != InetNtopW(AF_INET, locator->_.medium_locator.address, ip, (socklen_t)size));
+            result = (NULL != inet_ntop(AF_INET, locator->_.medium_locator.address, ip, (socklen_t)size));
             break;
         case ADDRESS_FORMAT_LARGE:
             *port = (uint16_t)locator->_.large_locator.locator_port;
             *ip_protocol = UXR_IPv6;
-            result = (NULL != InetNtopW(AF_INET6, locator->_.large_locator.address, ip, (socklen_t)size));
+            result = (NULL != inet_ntop(AF_INET6, locator->_.large_locator.address, ip, (socklen_t)size));
             break;
         default:
             break;
