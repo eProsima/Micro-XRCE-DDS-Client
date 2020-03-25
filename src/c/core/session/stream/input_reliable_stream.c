@@ -208,7 +208,11 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
     size_t next_length = uxr_get_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1)) - offset;
     uxr_set_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1), 0);
 
-    ucdr_init_buffer(ub, next_init, (uint32_t)next_length);
+    ucdr_init_buffer_origin(
+        ub,
+        next_init,
+        (uint32_t)next_length,
+        ub->offset);
     ucdr_set_on_full_buffer_callback(ub, on_full_input_buffer, stream);
 
     return false;
