@@ -55,7 +55,7 @@ typedef void (*uxrOnRequestFunc) (
         uxrObjectId object_id,
         uint16_t request_id,
         SampleIdentity* sample_id,
-        uint8_t* buffer,
+        struct ucdrBuffer* ub,
         size_t len,
         void* args);
 
@@ -64,7 +64,7 @@ typedef void (*uxrOnReplyFunc) (
         uxrObjectId object_id,
         uint16_t request_id,
         uint16_t reply_id,
-        uint8_t* buffer,
+        struct ucdrBuffer* ub,
         size_t len,
         void* args);
 

@@ -155,19 +155,19 @@ inline void read_format_data(
 {
     (void) length;
 
+    ucdrBuffer temp_buffer;
+    uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
+    stream->cleanup_flag = false;
+    ucdr_init_buffer(&temp_buffer, ub->iterator, (size_t)(ub->final - ub->iterator));
+    ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
+
     switch (object_id.type)
     {
         case UXR_DATAREADER_ID:
         {
             if (NULL != session->on_topic)
             {
-                ucdrBuffer temp_buffer;
-                ucdr_copy_buffer(&temp_buffer, ub);
-                uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
-                stream->cleanup_flag = false;
                 session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, length, session->on_topic_args);
-                stream->cleanup_flag = true;
-                ucdr_advance_buffer(ub, length);
             }
             break;
         }
@@ -175,44 +175,47 @@ inline void read_format_data(
         {
             if (NULL != session->on_request)
             {
-                ucdrBuffer temp_buffer;
                 SampleIdentity sample_id;
+                size_t offset = temp_buffer.offset;
 
-                ucdr_init_buffer(&temp_buffer, ub->iterator, length);
                 if (uxr_deserialize_SampleIdentity(&temp_buffer, &sample_id))
                 {
-                    size_t remaining_length = ucdr_buffer_remaining(&temp_buffer);
+                    length = (uint16_t)(length - (temp_buffer.offset - offset));
+                    ucdr_init_buffer(&temp_buffer, temp_buffer.iterator, (size_t)(temp_buffer.final - temp_buffer.iterator));
+                    ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
+
                     session->on_request(
                         session,
                         object_id,
                         request_id,
                         &sample_id,
-                        temp_buffer.iterator,
-                        remaining_length,
+                        &temp_buffer,
+                        (size_t)length,
                         session->on_request_args);
                 }
             }
-            ub->iterator += length;
             break;
         }
         case UXR_REQUESTER_ID:
         {
             if (NULL != session->on_reply)
             {
-                ucdrBuffer temp_buffer;
                 BaseObjectRequest request;
+                size_t offset = temp_buffer.offset;
 
-                ucdr_init_buffer(&temp_buffer, ub->iterator, length);
                 if (uxr_deserialize_BaseObjectRequest(&temp_buffer, &request))
                 {
-                    size_t remainig_length = ucdr_buffer_remaining(&temp_buffer);
+                    length = (uint16_t)(length - (temp_buffer.offset - offset));
+                    ucdr_init_buffer(&temp_buffer, temp_buffer.iterator, (size_t)(temp_buffer.final - temp_buffer.iterator));
+                    ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
+
                     session->on_reply(
                         session,
                         object_id,
                         request_id,
                         (uint16_t)((request.request_id.data[0] << 8) + request.request_id.data[1]),
-                        temp_buffer.iterator,
-                        remainig_length,
+                        &temp_buffer,
+                        (size_t)length,
                         session->on_reply_args);
                 }
             }
@@ -223,6 +226,8 @@ inline void read_format_data(
             break;
     }
 
+    stream->cleanup_flag = true;
+    ucdr_advance_buffer(ub, length);
 }
 
 void read_format_sample(

@@ -227,7 +227,7 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBuffer)
     uint8_t* slot_0 = uxr_get_reliable_buffer(&stream.base, 0);
     uint8_t* slot_1 = uxr_get_reliable_buffer(&stream.base, 1);
     uxr_set_reliable_buffer_size(&stream.base, 0, capacity);
-    uxr_set_reliable_buffer_size(&stream.base, 1, capacity / 2);
+    uxr_set_reliable_buffer_size(&stream.base, 1, capacity - 1);
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, slot_0, uint32_t(capacity));
@@ -235,10 +235,10 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBuffer)
     stream.cleanup_flag = true;
 
     uint8_t array[BUFFER_SIZE];
-    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(capacity + capacity / 2));
+    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t((capacity + capacity - 1) - 2 * (sizeof(length_t) + SUBHEADER_SIZE)));
     ASSERT_FALSE(ub.error);
-    EXPECT_EQ(slot_1, ub.init);
-    EXPECT_EQ(slot_1 + capacity / 2, ub.final);
+    EXPECT_EQ(slot_1 + SUBHEADER_SIZE, ub.init);
+    EXPECT_EQ(slot_1 + capacity - 1, ub.final);
     EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_size(&stream.base, 1));
 }
 
@@ -248,7 +248,7 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBufferLastPosition)
     uint8_t* slot_history_1 = uxr_get_reliable_buffer(&stream.base, HISTORY - 1);
     uint8_t* slot_0 = uxr_get_reliable_buffer(&stream.base, 0);
     uxr_set_reliable_buffer_size(&stream.base, HISTORY -1, capacity);
-    uxr_set_reliable_buffer_size(&stream.base, 0, capacity / 2);
+    uxr_set_reliable_buffer_size(&stream.base, 0, capacity - 1);
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, slot_history_1, uint32_t(capacity));
@@ -256,9 +256,9 @@ TEST_F(InputReliableStreamTest, FragmentationJumpToNextBufferLastPosition)
     stream.cleanup_flag = true;
 
     uint8_t array[BUFFER_SIZE];
-    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t(capacity + capacity / 2));
+    (void) ucdr_serialize_array_uint8_t(&ub, array, uint32_t((capacity + capacity - 1) - 2 * (sizeof(length_t) + SUBHEADER_SIZE)));
     ASSERT_FALSE(ub.error);
-    EXPECT_EQ(slot_0, ub.init);
-    EXPECT_EQ(slot_0 + capacity / 2, ub.final);
+    EXPECT_EQ(slot_0 + SUBHEADER_SIZE, ub.init);
+    EXPECT_EQ(slot_0 + capacity - 1, ub.final);
     EXPECT_EQ(size_t(0), uxr_get_reliable_buffer_size(&stream.base, 0));
 }

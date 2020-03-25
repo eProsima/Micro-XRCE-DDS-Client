@@ -1,7 +1,9 @@
-#include "seq_num_internal.h"
-#include "input_reliable_stream_internal.h"
-#include "common_reliable_stream_internal.h"
 #include <ucdr/microcdr.h>
+
+#include "./seq_num_internal.h"
+#include "./input_reliable_stream_internal.h"
+#include "./common_reliable_stream_internal.h"
+#include "../submessage_internal.h"
 
 #include <string.h>
 
@@ -203,7 +205,7 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
 
     uint8_t* buffer = uxr_get_reliable_buffer(&stream->base, slot_pos);
     uint8_t* next_buffer = uxr_get_reliable_buffer(&stream->base, (uint16_t)(slot_pos + 1));
-    size_t offset = (size_t)(ub->init - buffer);
+    size_t offset = SUBHEADER_SIZE;
 
     uint8_t* next_init = next_buffer + offset;
     size_t next_length = uxr_get_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1)) - offset;

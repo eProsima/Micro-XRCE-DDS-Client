@@ -465,7 +465,7 @@ TEST_F(SessionTest, ReadUint64)
     DATA_Payload_Data payload{};
     uxr_serialize_DATA_Payload_Data(&ub, &payload);
 
-    ub.last_data_size = 8; // reset buffer alignment.
+    ucdr_init_buffer(&ub, ub.iterator, size_t(ub.final - ub.iterator));
     ucdr_serialize_uint64_t(&ub, UINT64_MAX);
 
     ucdr_init_buffer(&ub, buffer.data(), size_t(ub.iterator - ub.init));
