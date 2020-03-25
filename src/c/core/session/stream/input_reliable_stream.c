@@ -201,24 +201,19 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
 {
     uxrInputReliableStream* stream = (uxrInputReliableStream*) args;
 
-    uint16_t slot_pos = uxr_get_reliable_buffer_history_position(&stream->base, ub->init);
-
-    uint8_t* buffer = uxr_get_reliable_buffer(&stream->base, slot_pos);
-    uint8_t* next_buffer = uxr_get_reliable_buffer(&stream->base, (uint16_t)(slot_pos + 1));
-    size_t offset = SUBHEADER_SIZE;
-
-    uint8_t* next_init = next_buffer + offset;
-    size_t next_length = uxr_get_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1)) - offset;
+    uint16_t history_position = (uint16_t)(1 + uxr_get_reliable_buffer_history_position(&stream->base, ub->init));
+    uint8_t * buffer = uxr_get_reliable_buffer(&stream->base, history_position);
+    size_t buffer_size = uxr_get_reliable_buffer_size(&stream->base, history_position);
 
     if (stream->cleanup_flag)
     {
-        uxr_set_reliable_buffer_size(&stream->base, (uint16_t)(slot_pos + 1), 0);
+        uxr_set_reliable_buffer_size(&stream->base, history_position, 0);
     }
 
     ucdr_init_buffer_origin(
         ub,
-        next_init,
-        (uint32_t)next_length,
+        buffer + SUBHEADER_SIZE,
+        (uint32_t)(buffer_size - SUBHEADER_SIZE),
         ub->offset);
     ucdr_set_on_full_buffer_callback(ub, on_full_input_buffer, stream);
 
