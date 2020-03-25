@@ -24,26 +24,26 @@ void on_agent_found(const TransportLocator* locator, void* args)
     (void) args;
     switch (locator->format)
     {
-    case ADDRESS_FORMAT_MEDIUM:
-    {
-        char ip[16];
-        uint16_t port;
-        uxrIpProtocol ip_protocol;
-        uxr_locator_to_ip(locator, ip, sizeof(ip), &port, &ip_protocol);
-        printf("Agent found => ip: %s, port: %d\n", ip, port);
-        break;
-    }
-    case ADDRESS_FORMAT_LARGE:
-    {
-        char ip[46];
-        uint16_t port;
-        uxrIpProtocol ip_protocol;
-        uxr_locator_to_ip(locator, ip, sizeof(ip), &port, &ip_protocol);
-        printf("Agent found => ip: %s, port: %d\n", ip, port);
-        break;
-    }
-    default:
-        break;
+        case ADDRESS_FORMAT_MEDIUM:
+        {
+            char ip[16];
+            uint16_t port;
+            uxrIpProtocol ip_protocol;
+            uxr_locator_to_ip(locator, ip, sizeof(ip), &port, &ip_protocol);
+            printf("Agent found => ip: %s, port: %d\n", ip, port);
+            break;
+        }
+        case ADDRESS_FORMAT_LARGE:
+        {
+            char ip[46];
+            uint16_t port;
+            uxrIpProtocol ip_protocol;
+            uxr_locator_to_ip(locator, ip, sizeof(ip), &port, &ip_protocol);
+            printf("Agent found => ip: %s, port: %d\n", ip, port);
+            break;
+        }
+        default:
+            break;
     }
 }
 

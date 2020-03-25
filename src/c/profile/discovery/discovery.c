@@ -1,4 +1,5 @@
 #include <uxr/client/profile/discovery/discovery.h>
+#include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/core/session/object_id.h>
 #include <uxr/client/core/session/stream/seq_num.h>
 #include <uxr/client/core/type/xrce_types.h>
@@ -14,7 +15,7 @@
 #define GET_INFO_MSG_SIZE   8
 #define GET_INFO_REQUEST_ID 9
 
-#define MULTICAST_DEFAULT_IP   {239, 255, 0, 2}
+#define MULTICAST_DEFAULT_IP   "239.255.0.2"
 #define MULTICAST_DEFAULT_PORT 7400
 
 typedef struct CallbackData
@@ -39,10 +40,8 @@ void uxr_discovery_agents_default(
         uxrOnAgentFound on_agent_func,
         void* args)
 {
-    TransportLocator multicast = {
-        .format = ADDRESS_FORMAT_MEDIUM,
-        ._ = {.medium_locator = {MULTICAST_DEFAULT_IP, MULTICAST_DEFAULT_PORT}}
-    };
+    TransportLocator multicast;
+    uxr_ip_to_locator(MULTICAST_DEFAULT_IP, (uint16_t)MULTICAST_DEFAULT_PORT, UXR_IPv4, &multicast);
     uxr_discovery_agents(attempts, period, on_agent_func, args, &multicast, 1);
 }
 
