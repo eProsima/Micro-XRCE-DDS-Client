@@ -43,7 +43,6 @@ void on_request(
 
     uint32_t rhs;
     uint32_t lhs;
-    ucdrBuffer request_ub;
     ucdr_deserialize_uint32_t(ub, &rhs);
     ucdr_deserialize_uint32_t(ub, &lhs);
 
