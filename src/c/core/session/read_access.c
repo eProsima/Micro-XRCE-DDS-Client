@@ -156,10 +156,13 @@ inline void read_format_data(
     (void) length;
 
     ucdrBuffer temp_buffer;
-    uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
-    stream->cleanup_flag = false;
     ucdr_init_buffer(&temp_buffer, ub->iterator, (size_t)(ub->final - ub->iterator));
     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
+    if (ub->args)
+    {
+        uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
+        stream->cleanup_flag = false;
+    }
 
     switch (object_id.type)
     {
@@ -226,7 +229,11 @@ inline void read_format_data(
             break;
     }
 
-    stream->cleanup_flag = true;
+    if (ub->args)
+    {
+        uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
+        stream->cleanup_flag = true;
+    }
     ucdr_advance_buffer(ub, length);
 }
 
