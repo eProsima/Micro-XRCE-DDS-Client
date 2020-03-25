@@ -223,9 +223,9 @@ public:
     }
 
     static void on_topic_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uxrStreamId stream_id, struct ucdrBuffer* ub, void* args)
+                             uxrStreamId stream_id, struct ucdrBuffer* ub, uint16_t length, void* args)
     {
-        (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
+        (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length; (void) args;
         if (std::string("ReadUint64") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             uint64_t data;

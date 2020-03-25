@@ -165,7 +165,7 @@ inline void read_format_data(
                 ucdr_copy_buffer(&temp_buffer, ub);
                 uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
                 stream->cleanup_flag = false;
-                session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, session->on_topic_args);
+                session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, length, session->on_topic_args);
                 stream->cleanup_flag = true;
                 ucdr_advance_buffer(ub, length);
             }

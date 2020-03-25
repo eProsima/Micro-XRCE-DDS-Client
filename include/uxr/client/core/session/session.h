@@ -40,6 +40,7 @@ typedef void (*uxrOnTopicFunc) (struct uxrSession* session,
                                 uint16_t request_id,
                                 uxrStreamId stream_id,
                                 struct ucdrBuffer* ub,
+                                uint16_t length,
                                 void* args);
 
 typedef void (*uxrOnTimeFunc) (struct uxrSession* session,
