@@ -19,10 +19,32 @@
 
 #define MAX_AGENTS 10
 
-void on_agent_found(const uxrAgentAddress* address, void* args)
+void on_agent_found(const TransportLocator* locator, void* args)
 {
     (void) args;
-    printf("Found agent => ip: %s, port: %d\n", address->ip, address->port);
+    switch (locator->format)
+    {
+        case ADDRESS_FORMAT_MEDIUM:
+        {
+            char ip[16];
+            uint16_t port;
+            uxrIpProtocol ip_protocol;
+            uxr_locator_to_ip(locator, ip, sizeof(ip), &port, &ip_protocol);
+            printf("Agent found => ip: %s, port: %d\n", ip, port);
+            break;
+        }
+        case ADDRESS_FORMAT_LARGE:
+        {
+            char ip[46];
+            uint16_t port;
+            uxrIpProtocol ip_protocol;
+            uxr_locator_to_ip(locator, ip, sizeof(ip), &port, &ip_protocol);
+            printf("Agent found => ip: %s, port: %d\n", ip, port);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 int main(int args, char** argv)
@@ -43,11 +65,10 @@ int main(int args, char** argv)
     else
     {
         size_t size = 0;
-        uxrAgentAddress agent_list[MAX_AGENTS];
+        TransportLocator agent_list[MAX_AGENTS];
         for(int i = 1; i < args; i += 2, size++)
         {
-            strcpy(agent_list[size].ip, argv[i]);
-            agent_list[size++].port = (uint8_t)atoi(argv[i + 1]);
+            uxr_ip_to_locator(argv[i], (uint16_t)atoi(argv[i + 1]), UXR_IPv4, &agent_list[i++]);
         }
 
         uxr_discovery_agents(10, 1000, on_agent_found, NULL, agent_list, size);

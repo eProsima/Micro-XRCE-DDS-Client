@@ -20,12 +20,51 @@ extern "C"
 {
 #endif
 
+#include <uxr/client/core/type/xrce_types.h>
+
 typedef enum uxrIpProtocol
 {
     UXR_IPv4,
     UXR_IPv6
 
 } uxrIpProtocol;
+
+/**
+ * @brief Converts IPv4/IPv6 address + port to a TransportLocator.
+ *
+ * @param ip            The IP address to convert.
+ *                      It could be IPv4 or IPv6 address.
+ * @param port          The port to convert.
+ * @param ip_protocol   The IP protocol of the IP address.
+ * @param locator       The TransportLocator resulted from the conversion.
+ *                      In case of error it will be NULL.
+ * @return true         In case of successful conversion.
+ * @return false        In other case.
+ */
+bool uxr_ip_to_locator(
+        char const * ip,
+        uint16_t port,
+        uxrIpProtocol ip_protocol,
+        TransportLocator * locator);
+
+/**
+ * @brief Converts a TrasnportLocator to an IPv4/IPv6 address + port.
+ *
+ * @param locator       The TransportLocator resulted from the conversion.
+ *                      In case of error it will be NULL.
+ * @param ip            A char buffer there the address will be copied.
+ * @param size          The size of the IP buffer.
+ * @param port          The resulted port.
+ * @param ip_protocol   The resulted IP protocol of the IP address.
+ * @return true         In case of successful conversion.
+ * @return false        In other case.
+ */
+bool uxr_locator_to_ip(
+        TransportLocator const * locator,
+        char * ip,
+        size_t size,
+        uint16_t * port,
+        uxrIpProtocol * ip_protocol);
 
 #ifdef __cplusplus
 }

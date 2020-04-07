@@ -29,6 +29,7 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
+// TODO (julibert): move this configuration to CMake flags.
 #define UXR_STRING_SIZE_MAX                512
 #define UXR_SAMPLE_DATA_SIZE_MAX           512
 #define UXR_STRING_SEQUENCE_MAX            8
@@ -37,7 +38,7 @@ extern "C"
 #define UXR_SAMPLE_DATA_SEQUENCE_MAX       8
 #define UXR_SAMPLE_DELTA_SEQUENCE_MAX      8
 #define UXR_PACKED_SAMPLES_SEQUENCE_MAX    8
-#define UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX 1
+#define UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX 4
 #define UXR_PROPERTY_SEQUENCE_MAX          1
 
 typedef struct Time_t
