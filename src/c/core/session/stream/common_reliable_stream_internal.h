@@ -36,13 +36,13 @@ static inline uint8_t * uxr_get_reliable_buffer(
 {
     return stream->buffer
             + ((seq_num % stream->history) * (stream->size / stream->history))
-            + sizeof(length_t);
+            + INTERNAL_RELIABLE_BUFFER_OFFSET;
 }
 
 static inline size_t uxr_get_reliable_buffer_capacity(
         uxrReliableStream const * stream)
 {
-    return stream->size / stream->history - sizeof(length_t);
+    return stream->size / stream->history - INTERNAL_RELIABLE_BUFFER_OFFSET;
 }
 
 static inline uint16_t uxr_get_reliable_buffer_history_position(
@@ -59,7 +59,7 @@ static inline size_t uxr_get_reliable_buffer_size(
     length_t length;
     memcpy(
         &length,
-        uxr_get_reliable_buffer(stream, (seq_num % stream->history)) - sizeof(length_t),
+        uxr_get_reliable_buffer(stream, (seq_num % stream->history)) - INTERNAL_RELIABLE_BUFFER_OFFSET,
         sizeof(length_t));
     return (size_t)length;
 }
@@ -71,9 +71,9 @@ static inline void uxr_set_reliable_buffer_size(
 {
     length_t temp_length = (length_t)length;
     memcpy(
-        uxr_get_reliable_buffer(stream, (seq_num % stream->history)) - sizeof(length_t),
+        uxr_get_reliable_buffer(stream, (seq_num % stream->history)) - INTERNAL_RELIABLE_BUFFER_OFFSET,
         &temp_length,
-        sizeof(length_t));
+       INTERNAL_RELIABLE_BUFFER_OFFSET);
 }
 
 #ifdef __cplusplus
