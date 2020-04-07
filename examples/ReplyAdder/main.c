@@ -34,12 +34,12 @@ void on_request(
         uint16_t request_id,
         SampleIdentity* sample_id,
         ucdrBuffer* ub,
-        size_t len,
+        uint16_t length,
         void* args)
 {
     (void) object_id;
     (void) request_id;
-    (void) len;
+    (void) length;
 
     uint32_t rhs;
     uint32_t lhs;

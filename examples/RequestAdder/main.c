@@ -28,12 +28,12 @@ void on_reply(
         uint16_t request_id,
         uint16_t reply_id,
         ucdrBuffer* ub,
-        size_t len,
+        uint16_t length,
         void* args)
 {
     (void) object_id;
     (void) request_id;
-    (void) len;
+    (void) length;
 
     uint64_t result;
     ucdr_deserialize_uint64_t(ub, &result);

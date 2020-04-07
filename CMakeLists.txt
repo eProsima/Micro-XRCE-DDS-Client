@@ -48,7 +48,7 @@ set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Confi
 # Dependencies
 ###############################################################################
 set(_microcdr_version 1.1.2)
-set(_microcdr_tag fix/fragment)
+set(_microcdr_tag develop)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
