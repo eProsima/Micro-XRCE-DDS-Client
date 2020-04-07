@@ -223,9 +223,9 @@ public:
     }
 
     static void on_topic_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uxrStreamId stream_id, struct ucdrBuffer* ub, void* args)
+                             uxrStreamId stream_id, struct ucdrBuffer* ub, uint16_t length, void* args)
     {
-        (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
+        (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length; (void) args;
         if (std::string("ReadUint64") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             uint64_t data;
@@ -465,7 +465,7 @@ TEST_F(SessionTest, ReadUint64)
     DATA_Payload_Data payload{};
     uxr_serialize_DATA_Payload_Data(&ub, &payload);
 
-    ub.last_data_size = 8; // reset buffer alignment.
+    ucdr_init_buffer(&ub, ub.iterator, size_t(ub.final - ub.iterator));
     ucdr_serialize_uint64_t(&ub, UINT64_MAX);
 
     ucdr_init_buffer(&ub, buffer.data(), size_t(ub.iterator - ub.init));
@@ -485,16 +485,6 @@ TEST_F(SessionTest, WriteUint64)
 
     uxr_run_session_time(&session, 1);
 
-    uint8_t session_id; uint8_t stream_id; uint16_t seq_num; uint8_t key[4];
-    uxr_deserialize_message_header(&expected_ub, &session_id, &stream_id, &seq_num, key);
-
-    uint8_t id; uint8_t flags; uint16_t lenght;
-    uxr_deserialize_submessage_header(&expected_ub, &id, &flags, &lenght);
-
-    WRITE_DATA_Payload_Data payload;
-    uxr_deserialize_WRITE_DATA_Payload_Data(&expected_ub, &payload);
-
-    expected_ub.last_data_size = 8; // reset buffer alignment.
     uint64_t data;
     ucdr_deserialize_uint64_t(&expected_ub, &data);
     EXPECT_EQ(data, UINT64_MAX);

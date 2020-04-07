@@ -29,33 +29,37 @@ extern "C"
 struct uxrSession;
 struct uxrCommunication;
 
-typedef void (*uxrOnStatusFunc) (struct uxrSession* session,
-                                 uxrObjectId object_id,
-                                 uint16_t request_id,
-                                 uint8_t status,
-                                 void* args);
+typedef void (*uxrOnStatusFunc) (
+        struct uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uint8_t status,
+        void* args);
 
-typedef void (*uxrOnTopicFunc) (struct uxrSession* session,
-                                uxrObjectId object_id,
-                                uint16_t request_id,
-                                uxrStreamId stream_id,
-                                struct ucdrBuffer* ub,
-                                void* args);
+typedef void (*uxrOnTopicFunc) (
+        struct uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uxrStreamId stream_id,
+        struct ucdrBuffer* ub,
+        uint16_t length,
+        void* args);
 
-typedef void (*uxrOnTimeFunc) (struct uxrSession* session,
-                               int64_t current_timestamp,
-                               int64_t transmit_timestamp,
-                               int64_t received_timestamp,
-                               int64_t originate_timestamp,
-                               void* args);
+typedef void (*uxrOnTimeFunc) (
+        struct uxrSession* session,
+        int64_t current_timestamp,
+        int64_t transmit_timestamp,
+        int64_t received_timestamp,
+        int64_t originate_timestamp,
+        void* args);
 
 typedef void (*uxrOnRequestFunc) (
         struct uxrSession* session,
         uxrObjectId object_id,
         uint16_t request_id,
         SampleIdentity* sample_id,
-        uint8_t* buffer,
-        size_t len,
+        struct ucdrBuffer* ub,
+        uint16_t length,
         void* args);
 
 typedef void (*uxrOnReplyFunc) (
@@ -63,8 +67,8 @@ typedef void (*uxrOnReplyFunc) (
         uxrObjectId object_id,
         uint16_t request_id,
         uint16_t reply_id,
-        uint8_t* buffer,
-        size_t len,
+        struct ucdrBuffer* ub,
+        uint16_t length,
         void* args);
 
 #ifdef PERFORMANCE_TESTING

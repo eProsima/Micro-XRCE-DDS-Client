@@ -53,7 +53,6 @@ static void read_submessage_performance(uxrSession* session, ucdrBuffer* submess
 static void process_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status);
 static void process_timestamp_reply(uxrSession* session, TIMESTAMP_REPLY_Payload* timestamp);
 
-static void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* args);
 static FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header);
 
 static bool run_session_until_sync(uxrSession* session, int timeout);
@@ -128,7 +127,7 @@ bool uxr_create_session(uxrSession* session)
 
     uint8_t create_session_buffer[CREATE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, create_session_buffer, CREATE_SESSION_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     uxr_buffer_create_session(&session->info, &ub, (uint16_t)(session->comm->mtu - INTERNAL_RELIABLE_BUFFER_OFFSET));
     uxr_stamp_create_session_header(&session->info, ub.init);
@@ -142,7 +141,7 @@ bool uxr_delete_session(uxrSession* session)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     uxr_buffer_delete_session(&session->info, &ub);
     uxr_stamp_session_header(&session->info, 0, 0, ub.init);
@@ -160,7 +159,7 @@ uxrStreamId uxr_create_output_best_effort_stream(uxrSession* session, uint8_t* b
 uxrStreamId uxr_create_output_reliable_stream(uxrSession* session, uint8_t* buffer, size_t size, uint16_t history)
 {
     uint8_t header_offset = uxr_session_header_offset(&session->info);
-    return uxr_add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset, on_new_output_reliable_stream_segment);
+    return uxr_add_output_reliable_buffer(&session->streams, buffer, size, history, header_offset);
 }
 
 uxrStreamId uxr_create_input_best_effort_stream(uxrSession* session)
@@ -292,7 +291,7 @@ bool uxr_sync_session(uxrSession* session, int time)
 {
     uint8_t timestamp_buffer[TIMESTAMP_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, timestamp_buffer, sizeof(timestamp_buffer), uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, timestamp_buffer, sizeof(timestamp_buffer), 0u, uxr_session_header_offset(&session->info));
     uxr_buffer_submessage_header(&ub, SUBMESSAGE_ID_TIMESTAMP, TIMESTAMP_PAYLOAD_SIZE, 0);
 
     TIMESTAMP_Payload timestamp;
@@ -468,7 +467,7 @@ void write_submessage_heartbeat(const uxrSession* session, uxrStreamId id)
 {
     uint8_t heartbeat_buffer[HEARTBEAT_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, heartbeat_buffer, HEARTBEAT_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     const uxrOutputReliableStream* stream = &session->streams.output_reliable[id.index];
 
@@ -491,7 +490,7 @@ void write_submessage_acknack(const uxrSession* session, uxrStreamId id)
 {
     uint8_t acknack_buffer[ACKNACK_MAX_MSG_SIZE];
     ucdrBuffer ub;
-    ucdr_init_buffer_offset(&ub, acknack_buffer, ACKNACK_MAX_MSG_SIZE, uxr_session_header_offset(&session->info));
+    ucdr_init_buffer_origin_offset(&ub, acknack_buffer, ACKNACK_MAX_MSG_SIZE, 0u, uxr_session_header_offset(&session->info));
 
     const uxrInputReliableStream* stream = &session->streams.input_reliable[id.index];
 
@@ -763,7 +762,7 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
         case UXR_RELIABLE_STREAM:
         {
             uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
-            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, SUBHEADER_SIZE, ub);
+            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, ub);
             break;
         }
         default:
@@ -776,14 +775,6 @@ bool uxr_prepare_stream_to_write_submessage(uxrSession* session, uxrStreamId str
     }
 
     return available;
-}
-
-void on_new_output_reliable_stream_segment(ucdrBuffer* ub, uxrOutputReliableStream* stream)
-{
-    uint8_t* last_buffer = uxr_get_output_buffer(stream, stream->last_written % stream->history);
-    uint8_t last_fragment_flag = FLAG_LAST_FRAGMENT * (last_buffer == ub->init);
-
-    (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)(ucdr_buffer_remaining(ub) - SUBHEADER_SIZE), last_fragment_flag);
 }
 
 FragmentationInfo on_get_fragmentation_info(uint8_t* submessage_header)

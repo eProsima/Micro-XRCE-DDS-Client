@@ -143,12 +143,15 @@ bool read_info_message(
     if(uxr_deserialize_INFO_Payload(ub, &payload))
     {
         XrceVersion* version = &payload.object_info.config._.agent.xrce_version;
-        TransportLocator* transport = &payload.object_info.activity._.agent.address_seq.data[0];
-
-        if(0 == memcmp(version->data, DDS_XRCE_XRCE_VERSION.data, sizeof(DDS_XRCE_XRCE_VERSION.data)))
+        TransportLocatorSeq * locators = &payload.object_info.activity._.agent.address_seq;
+        for (size_t i = 0; i < (size_t)locators->size; ++i)
         {
-            callback->on_agent(transport, callback->args);
-            well_read = true;
+            TransportLocator* transport = &locators->data[i];
+            if(0 == memcmp(version->data, DDS_XRCE_XRCE_VERSION.data, sizeof(DDS_XRCE_XRCE_VERSION.data)))
+            {
+                callback->on_agent(transport, callback->args);
+                well_read = true;
+            }
         }
     }
 

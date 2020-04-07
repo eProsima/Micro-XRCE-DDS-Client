@@ -22,16 +22,21 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_reply(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint16_t reply_id, uint8_t* buffer, size_t len, void* args)
+void on_reply(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uint16_t reply_id,
+        ucdrBuffer* ub,
+        uint16_t length,
+        void* args)
 {
     (void) object_id;
     (void) request_id;
-
-    ucdrBuffer ub;
-    ucdr_init_buffer(&ub, buffer, len);
+    (void) length;
 
     uint64_t result;
-    ucdr_deserialize_uint64_t(&ub, &result);
+    ucdr_deserialize_uint64_t(ub, &result);
 
 #ifdef WIN32
     printf("Reply received: %I64u [id: %d]\n", result, reply_id);

@@ -51,7 +51,7 @@ static bool compute_command(uxrSession* session, uxrStreamId* stream_id, int len
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
 static bool compute_print_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
-static void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args);
+static void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, uint16_t length, void* args);
 static void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
 static void print_ShapeType_topic(const ShapeType* topic);
 static void print_status(uint8_t status);
@@ -403,9 +403,16 @@ void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, 
     print_status(status);
 }
 
-void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args)
+void on_topic(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uxrStreamId stream_id,
+        struct ucdrBuffer* serialization,
+        uint16_t length,
+        void* args)
 {
-    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args;
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args; (void) length;
 
     ShapeType topic;
     ShapeType_deserialize_topic(serialization, &topic);
