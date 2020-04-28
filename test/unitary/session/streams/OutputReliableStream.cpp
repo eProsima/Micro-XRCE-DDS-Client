@@ -205,17 +205,6 @@ TEST_F(OutputReliableStreamTest, WriteMaxSubmessageSize)
     ASSERT_TRUE(available_to_write);
     EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, 0));
     EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, 1));
-//
-//    uxrOutputReliableStream backup;
-//    copy(&backup, &stream);
-//    bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub);
-//    ASSERT_FALSE(available_to_write);
-//    EXPECT_EQ(backup, stream);
-//
-//    for(uint16_t i = 0; i < HISTORY; ++i)
-//    {
-//        EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, i));
-//    }
 }
 
 TEST_F(OutputReliableStreamTest, WriteMessagesUntilFullBuffer)
