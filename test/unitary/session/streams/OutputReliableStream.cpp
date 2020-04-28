@@ -16,6 +16,7 @@ extern "C"
 #define SUBMESSAGE_SIZE       size_t(8)
 #define MAX_SUBMESSAGE_SIZE   (MAX_MESSAGE_SIZE - OFFSET)
 #define FRAGMENT_OFFSET       size_t(4)
+#define MAX_FRAGMENT_SIZE     (MAX_MESSAGE_SIZE - OFFSET - FRAGMENT_OFFSET)
 
 bool operator == (const uxrOutputReliableStream& stream1, const uxrOutputReliableStream& stream2)
 {
@@ -195,6 +196,26 @@ TEST_F(OutputReliableStreamTest, WriteFragmentMessage)
     EXPECT_TRUE(ucdr_serialize_array_uint8_t(&ub, message_to_write, message_length));
     EXPECT_EQ(slot_2 + OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, ub.iterator);
     EXPECT_EQ(slot_2 + OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, ub.final);
+}
+
+TEST_F(OutputReliableStreamTest, WriteMaxSubmessageSize)
+{
+    ucdrBuffer ub;
+    bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, 2 * MAX_FRAGMENT_SIZE, &ub);
+    ASSERT_TRUE(available_to_write);
+    EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, 0));
+    EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, 1));
+//
+//    uxrOutputReliableStream backup;
+//    copy(&backup, &stream);
+//    bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub);
+//    ASSERT_FALSE(available_to_write);
+//    EXPECT_EQ(backup, stream);
+//
+//    for(uint16_t i = 0; i < HISTORY; ++i)
+//    {
+//        EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, i));
+//    }
 }
 
 TEST_F(OutputReliableStreamTest, WriteMessagesUntilFullBuffer)
