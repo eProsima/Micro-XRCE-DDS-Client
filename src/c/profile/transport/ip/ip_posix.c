@@ -13,8 +13,13 @@
 // limitations under the License.
 
 #include <uxr/client/profile/transport/ip/ip.h>
+#include <uxr/client/config.h>
 
+#if defined(UCLIENT_PLATFORM_POSIX)
 #include <arpa/inet.h>
+#elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
+#include <sys/socket.h>
+#endif
 
 bool uxr_ip_to_locator(
         char const * ip,
