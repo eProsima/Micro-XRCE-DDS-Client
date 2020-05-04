@@ -18,5 +18,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(MEMORYCHECK_COMMAND_OPTIONS "${MEMORYCHECK_COMMAND_OPTIONS} --quiet --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=50 --xml=yes --xml-file=test_%p_memcheck.xml \"--suppressions=${CMAKE_CURRENT_SOURCE_DIR}/ci/valgrind.supp\"")
 
     # Coverage configuration.
-    find_program(COVERAGE_COMMAND NAMES gcov)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        find_program(COVERAGE_COMMAND NAMES gcov)
+    endif()
 endif()

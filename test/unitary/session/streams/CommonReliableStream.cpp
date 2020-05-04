@@ -5,29 +5,29 @@
 #define BUFFER_SIZE size_t(512)
 #define HISTORY     size_t(8)
 
+uint8_t stream_buffer[BUFFER_SIZE];
+uxrReliableStream stream{stream_buffer, BUFFER_SIZE, HISTORY};
+
 TEST(CommonReliableStreamTest, GetBufferSize)
 {
-    size_t buffer_size = uxr_get_reliable_buffer_size(BUFFER_SIZE, HISTORY);
-    EXPECT_EQ(BUFFER_SIZE / HISTORY - INTERNAL_RELIABLE_BUFFER_OFFSET, buffer_size);
+    size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream);
+    EXPECT_EQ(BUFFER_SIZE / HISTORY - INTERNAL_RELIABLE_BUFFER_OFFSET, buffer_capacity);
 }
 
 TEST(CommonReliableStreamTest, GetBuffer)
 {
-    size_t history_pos = 3;
-    uint8_t buffer[BUFFER_SIZE];
-    uint8_t* slot = uxr_get_reliable_buffer(buffer, BUFFER_SIZE, HISTORY, history_pos);
+    uint16_t history_pos = 3;
+    uint8_t * buffer = uxr_get_reliable_buffer(&stream, history_pos);
 
     size_t slot_size = BUFFER_SIZE / HISTORY;
-    EXPECT_EQ(history_pos * slot_size + INTERNAL_RELIABLE_BUFFER_OFFSET, size_t(slot - buffer));
+    EXPECT_EQ(history_pos * slot_size + INTERNAL_RELIABLE_BUFFER_OFFSET, size_t(buffer - stream_buffer));
 }
 
 TEST(CommonReliableStreamTest, SetGetBufferLength)
 {
     size_t input_length = 0xFFFF;
-    uint8_t buffer[BUFFER_SIZE];
-    uint8_t* slot = buffer + INTERNAL_RELIABLE_BUFFER_OFFSET;
-    uxr_set_reliable_buffer_length(slot, input_length);
-    size_t output_length = uxr_get_reliable_buffer_length(slot);
+    uxr_set_reliable_buffer_size(&stream, 0, input_length);
+    size_t output_length = uxr_get_reliable_buffer_size(&stream, 0);
     EXPECT_EQ(input_length, output_length);
 }
 

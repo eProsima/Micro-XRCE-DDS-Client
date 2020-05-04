@@ -2,7 +2,7 @@
 
 extern "C"
 {
-#include <c/core/serialization/xrce_protocol.c>
+#include <c/core/serialization/xrce_types.c>
 #include <c/core/serialization/xrce_header.c>
 #include <c/core/serialization/xrce_subheader.c>
 #include <c/core/session/object_id.c>

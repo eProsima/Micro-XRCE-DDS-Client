@@ -35,12 +35,6 @@ protected:
     uint8_t or_buffer[BUFFER_SIZE];
     uint8_t ir_buffer[BUFFER_SIZE];
 
-    static void on_new_fragment(struct ucdrBuffer* ub, struct uxrOutputReliableStream* stream)
-    {
-        (void) ub;
-        (void) stream;
-    }
-
     static FragmentationInfo on_get_fragmentation_info(uint8_t* buffer)
     {
         (void) buffer;
@@ -82,7 +76,7 @@ TEST_F(StreamStorageTest, Reset)
     (void) uxr_add_input_best_effort_buffer(&storage);
     (void) uxr_add_output_best_effort_buffer(&storage, ob_buffer, BUFFER_SIZE / HISTORY, OFFSET);
     (void) uxr_add_input_reliable_buffer(&storage, ir_buffer, BUFFER_SIZE, HISTORY, on_get_fragmentation_info);
-    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET, on_new_fragment);
+    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET);
 
     uxr_reset_stream_storage(&storage);
 
@@ -128,7 +122,7 @@ TEST_F(StreamStorageTest, InputReliableInitialization)
 TEST_F(StreamStorageTest, OutputReliableInitialization)
 {
     output_reliable_initialized = false;
-    uxrStreamId id = uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET, on_new_fragment);
+    uxrStreamId id = uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET);
     EXPECT_TRUE(output_reliable_initialized);
     EXPECT_EQ(0, id.index);
     EXPECT_EQ(128, id.raw);
@@ -141,7 +135,7 @@ TEST_F(StreamStorageTest, GetOk)
     (void) uxr_add_input_best_effort_buffer(&storage);
     (void) uxr_add_output_best_effort_buffer(&storage, ob_buffer, BUFFER_SIZE / HISTORY, OFFSET);
     (void) uxr_add_input_reliable_buffer(&storage, ir_buffer, BUFFER_SIZE, HISTORY, on_get_fragmentation_info);
-    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET, on_new_fragment);
+    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET);
 
     EXPECT_NE(nullptr, uxr_get_input_best_effort_stream(&storage, 0));
     EXPECT_NE(nullptr, uxr_get_output_best_effort_stream(&storage, 0));
@@ -160,14 +154,14 @@ TEST_F(StreamStorageTest, GetNoOk)
 TEST_F(StreamStorageTest, OutputStreamConfirmed)
 {
     output_reliable_up_to_date = true;
-    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET, on_new_fragment);
+    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET);
     EXPECT_TRUE(uxr_output_streams_confirmed(&storage));
 }
 
 TEST_F(StreamStorageTest, OutputStreamNoConfirmed)
 {
     output_reliable_up_to_date = false;
-    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET, on_new_fragment);
+    (void) uxr_add_output_reliable_buffer(&storage, or_buffer, BUFFER_SIZE, HISTORY, OFFSET);
     EXPECT_FALSE(uxr_output_streams_confirmed(&storage));
 }
 // ****************************************************************************Y
@@ -215,9 +209,9 @@ void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buf
     StreamStorageTest::input_reliable_initialized = true;
 }
 
-void uxr_init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset, OnNewFragment on_new_fragment)
+void uxr_init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
 {
-    (void) stream; (void) buffer; (void) size; (void) history; (void) header_offset; (void) on_new_fragment;
+    (void) stream; (void) buffer; (void) size; (void) history; (void) header_offset;
     StreamStorageTest::output_reliable_initialized = true;
 }
 

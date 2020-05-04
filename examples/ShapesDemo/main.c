@@ -51,7 +51,7 @@ static bool compute_command(uxrSession* session, uxrStreamId* stream_id, int len
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
 static bool compute_print_command(uxrSession* session, uxrStreamId* stream_id, int length, const char* name,
                             uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, const char* topic_color);
-static void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args);
+static void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, uint16_t length, void* args);
 static void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
 static void print_ShapeType_topic(const ShapeType* topic);
 static void print_status(uint8_t status);
@@ -75,30 +75,56 @@ int main(int args, char** argv)
 
     int args_index = 0;
 
-    if(args >= 4 && strcmp(argv[1], "--udp") == 0)
+    if(args >= 4 && strcmp(argv[1], "--udp4") == 0)
     {
         char* ip = argv[2];
-        uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_udp_transport(&udp, &udp_platform, ip, port))
+        char* port = argv[3];
+        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv4, ip, port))
         {
             printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
         comm = &udp.comm;
-        printf("Running in UDP mode => ip: %s, port: %hu\n", argv[2], port);
+        printf("Running in UDP/IPv4 mode => ip: %s, port: %s\n", ip, port);
         args_index = 4;
     }
-    else if(args >= 4 && strcmp(argv[1], "--tcp") == 0)
+    else if(args >= 4 && strcmp(argv[1], "--udp6") == 0)
     {
         char* ip = argv[2];
-        uint16_t port = (uint16_t)atoi(argv[3]);
-        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, ip, port))
+        char* port = argv[3];
+        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv6, ip, port))
+        {
+            printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+            return 1;
+        }
+        comm = &udp.comm;
+        printf("Running in UDP/IPv6 mode => ip: %s, port: %s\n", ip, port);
+        args_index = 4;
+    }
+    else if(args >= 4 && strcmp(argv[1], "--tcp4") == 0)
+    {
+        char* ip = argv[2];
+        char* port = argv[3];
+        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, UXR_IPv4, ip, port))
         {
             printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
         }
         comm = &tcp.comm;
-        printf("Running TCP mode => ip: %s, port: %hu\n", argv[2], port);
+        printf("Running TCP mode => ip: %s, port: %s\n", ip, port);
+        args_index = 4;
+    }
+    else if(args >= 4 && strcmp(argv[1], "--tcp6") == 0)
+    {
+        char* ip = argv[2];
+        char* port = argv[3];
+        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, UXR_IPv6, ip, port))
+        {
+            printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
+            return 1;
+        }
+        comm = &tcp.comm;
+        printf("Running TCP mode => ip: %s, port: %s\n", ip, port);
         args_index = 4;
     }
 #if !defined(WIN32)
@@ -377,9 +403,16 @@ void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, 
     print_status(status);
 }
 
-void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* serialization, void* args)
+void on_topic(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uxrStreamId stream_id,
+        struct ucdrBuffer* serialization,
+        uint16_t length,
+        void* args)
 {
-    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args;
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) serialization; (void) args; (void) length;
 
     ShapeType topic;
     ShapeType_deserialize_topic(serialization, &topic);
@@ -462,8 +495,10 @@ void print_help(void)
     printf("       program <transport> [--key <number>] [--history <number>]\n");
     printf("List of available transports:\n");
     printf("    --serial <device>\n");
-    printf("    --udp <agent-ip> <agent-port>\n");
-    printf("    --tcp <agent-ip> <agent-port>\n");
+    printf("    --udp4 <agent-ip> <agent-port>\n");
+    printf("    --udp6 <agent-ip> <agent-port>\n");
+    printf("    --tcp4 <agent-ip> <agent-port>\n");
+    printf("    --tcp6 <agent-ip> <agent-port>\n");
 }
 
 void print_commands(void)
