@@ -19,7 +19,7 @@
 
 #define MAX_AGENTS 10
 
-void on_agent_found(const TransportLocator* locator, void* args)
+bool on_agent_found(const TransportLocator* locator, void* args)
 {
     (void) args;
     switch (locator->format)
@@ -45,6 +45,7 @@ void on_agent_found(const TransportLocator* locator, void* args)
         default:
             break;
     }
+    return false;
 }
 
 int main(int args, char** argv)

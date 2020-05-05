@@ -28,7 +28,7 @@ extern "C"
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef void (*uxrOnAgentFound) (const TransportLocator* locator, void* args);
+typedef bool (*uxrOnAgentFound) (const TransportLocator* locator, void* args);
 
 /**
  * @brief Discovers Agents within the network using UDP/IP multicast with address "239.255.0.2" and port 7400.

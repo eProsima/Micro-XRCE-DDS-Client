@@ -151,8 +151,7 @@ bool read_info_message(
             TransportLocator* transport = &locators->data[i];
             if(0 == memcmp(version->data, DDS_XRCE_XRCE_VERSION.data, sizeof(DDS_XRCE_XRCE_VERSION.data)))
             {
-                callback->on_agent(transport, callback->args);
-                is_succeed = true;
+                is_succeed = callback->on_agent(transport, callback->args);
             }
         }
     }
