@@ -26,6 +26,7 @@ option(UCLIENT_BUILD_EXAMPLES "Build examples." OFF)
 option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
+option(UCLIENT_ISOLATED_INSTALL "Install the project and dependencies into separeted folders with version control." ON)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
 
 option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
@@ -43,22 +44,11 @@ option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by 
 
 set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
 
-include(GNUInstallDirs)
-set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
-set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
-set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
-if(WIN32)
-    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
-else()
-    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
-endif()
-
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 1.1.2)
-set(_microcdr_tag v1.1.2)
+set(_microcdr_version 1.2.0)
+set(_microcdr_tag v1.2.0)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
@@ -68,7 +58,7 @@ list(APPEND _deps "microcdr\;${_microcdr_version}")
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(NOT UCLIENT_SUPERBUILD)
-    project(microxrcedds_client VERSION "1.1.6" LANGUAGES C)
+    project(microxrcedds_client VERSION "1.2.1" LANGUAGES C)
 else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
@@ -120,55 +110,25 @@ endforeach()
 ###############################################################################
 # Check platform.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(PLATFORM_NAME_LINUX ON)
-    set(TRANSPORT_TYPES "UDP" "TCP" "SERIAL")
+    set(UCLIENT_PLATFORM_LINUX ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(PLATFORM_NAME_WINDOWS ON)
-    set(TRANSPORT_TYPES "UDP" "TCP")
+    set(UCLIENT_PLATFORM_WINDOWS ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
-        set(PLATFORM_NAME_NUTTX ON)
-        set(TRANSPORT_TYPES "UDP" "TCP" "SERIAL")
+        set(UCLIENT_PLATFORM_NUTTX ON)
+    elseif(PLATFORM_NAME STREQUAL "LwIP")
+        set(UCLIENT_PLATFORM_POSIX_NOPOLL ON)
     endif()
 endif()
 
-# Transport sources.
-foreach(TRANS_TYPE ${TRANSPORT_TYPES})
-    if(PROFILE_${TRANS_TYPE}_TRANSPORT)
-        string(TOLOWER ${TRANS_TYPE} TT)
-        if(PLATFORM_NAME_LINUX)
-            set(${TRANS_TYPE}_SRCS
-                src/c/profile/transport/${TT}/${TT}_transport.c
-                src/c/profile/transport/${TT}/${TT}_transport_linux.c
-                )
-        elseif(PLATFORM_NAME_WINDOWS)
-            set(${TRANS_TYPE}_SRCS
-                src/c/profile/transport/${TT}/${TT}_transport.c
-                src/c/profile/transport/${TT}/${TT}_transport_windows.c
-                )
-        elseif(PLATFORM_NAME_NUTTX)
-            set(${TRANS_TYPE}_SRCS
-                src/c/profile/transport/${TT}/${TT}_transport.c
-                src/c/profile/transport/${TT}/${TT}_transport_linux.c
-                )
-        endif()
-    endif()
-endforeach()
-
-if(PROFILE_SERIAL_TRANSPORT)
-    set(SERIAL_SRCS ${SERIAL_SRCS} src/c/profile/transport/serial/serial_protocol.c)
+if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX)
+    set(UCLIENT_PLATFORM_POSIX ON)
 endif()
 
-# Transport discovery source.
-if(PROFILE_DISCOVERY)
-    if(PLATFORM_NAME_LINUX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
-    elseif(PLATFORM_NAME_WINDOWS)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
-    elseif(PLATFORM_NAME_NUTTX)
-        set(UDP_DISCOVERY_SRCS src/c/profile/discovery/transport/udp_transport_datagram_linux.c)
-    endif()
-endif()
+# Check external transport.
+option(UCLIENT_EXTERNAL_TCP "Enable external serial transport." OFF)
+option(UCLIENT_EXTERNAL_UDP "Enable external serial transport." OFF)
+option(UCLIENT_EXTERNAL_SERIAL "Enable external serial transport." OFF)
 
 # Other sources
 set(SRCS
@@ -183,7 +143,7 @@ set(SRCS
     src/c/core/session/session_info.c
     src/c/core/session/submessage.c
     src/c/core/session/object_id.c
-    src/c/core/serialization/xrce_protocol.c
+    src/c/core/serialization/xrce_types.c
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/util/time.c
@@ -194,11 +154,43 @@ set(SRCS
     src/c/core/session/write_access.c
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
-    ${UDP_DISCOVERY_SRCS}
-    ${UDP_SRCS}
-    ${TCP_SRCS}
-    ${SERIAL_SRCS}
+    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/transport/ip/udp/udp_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/discovery/transport/udp_transport_datagram_posix.c>
+    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
+    $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/udp/udp_transport_posix.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c>
+    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
+    $<$<BOOL:${PROFILE_TCP_TRANSPORT}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/tcp/tcp_transport_posix.c>
+    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
+    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/serial/serial_transport_posix.c>
+    $<$<BOOL:${UCLIENT_EXTERNAL_TCP}>:src/c/profile/transport/ip/tcp/tcp_transport_external.c>
+    $<$<BOOL:${UCLIENT_EXTERNAL_UDP}>:src/c/profile/transport/ip/udp/udp_transport_external.c>
+    $<$<BOOL:${UCLIENT_EXTERNAL_SERIAL}>:src/c/profile/transport/serial/serial_transport_external.c>
+    $<$<OR:$<BOOL:${UCLIENT_PLATFORM_POSIX}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/ip_posix.c>
+    $<$<BOOL:$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/ip_windows.c>
     )
+
+###############################################################################
+# Set install directories
+###############################################################################
+if(UCLIENT_ISOLATED_INSTALL)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-${PROJECT_VERSION}")
+endif()
+
+include(GNUInstallDirs)
+set(BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Installation directory for binaries")
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for C headers")
+set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation directory for libraries")
+set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
+if(WIN32)
+    set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
+else()
+    set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
+endif()
 
 ###############################################################################
 # Targets
@@ -254,7 +246,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/c>
     )
@@ -293,8 +285,9 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/Deployment)
     add_subdirectory(examples/Discovery)
-    add_subdirectory(examples/TimeSync)
-    add_subdirectory(examples/TimeSyncWithCb)
+    add_subdirectory(examples/RequestAdder)
+    add_subdirectory(examples/ReplyAdder)
+    add_subdirectory(examples/MultiSessionHelloWorld)
 endif()
 
 ###############################################################################
@@ -314,12 +307,12 @@ if(UCLIENT_BUILD_TESTS)
     include(CTest)
 
     add_subdirectory(test/unitary)
-    if(PLATFORM_NAME_LINUX)
+    if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/serial_comm)
     endif()
 endif()
 
-if(PLATFORM_NAME_LINUX AND UCLIENT_MEMORY_TESTS)
+if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
     add_subdirectory(test/memory/consumption)
 endif()
 
@@ -403,12 +396,18 @@ install(
         ${DATA_INSTALL_DIR}/${PROJECT_NAME}/cmake
     )
 
-# Install dependencies
+# Install dependencies.
 if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
-    install(
-        DIRECTORY
-            ${CMAKE_BINARY_DIR}/temp_install/
-        DESTINATION
-            ${CMAKE_INSTALL_PREFIX}
+    file(GLOB _deps RELATIVE ${CMAKE_BINARY_DIR}/temp_install ${CMAKE_BINARY_DIR}/temp_install/*)
+    foreach(_d ${_deps})
+        install(
+            DIRECTORY
+                ${CMAKE_BINARY_DIR}/temp_install/${_d}$<IF:$<BOOL:${UCLIENT_ISOLATED_INSTALL}>,,/>
+            DESTINATION
+                ${CMAKE_INSTALL_PREFIX}$<IF:$<BOOL:${UCLIENT_ISOLATED_INSTALL}>,/../,>
+            COMPONENT
+                ${_d}
+            USE_SOURCE_PERMISSIONS
         )
+    endforeach()
 endif()

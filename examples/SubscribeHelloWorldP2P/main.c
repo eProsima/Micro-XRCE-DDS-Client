@@ -23,9 +23,16 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
-void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* ub, void* args)
+void on_topic(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uxrStreamId stream_id,
+        struct ucdrBuffer* ub,
+        uint16_t length,
+        void* args)
 {
-    (void) session; (void) object_id; (void) request_id; (void) stream_id;
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length;
 
     HelloWorld topic;
     HelloWorld_deserialize_topic(ub, &topic);
@@ -46,7 +53,7 @@ int main(int args, char** argv)
     }
 
     char* ip = argv[1];
-    uint16_t port = (uint16_t)atoi(argv[2]);
+    char* port = argv[2];
     uint32_t max_topics = (args == 4) ? (uint32_t)atoi(argv[3]) : UINT32_MAX;
 
     // State
@@ -55,7 +62,7 @@ int main(int args, char** argv)
     // Transport
     uxrUDPTransport transport;
     uxrUDPPlatform udp_platform;
-    if(!uxr_init_udp_transport(&transport, &udp_platform, ip, port))
+    if(!uxr_init_udp_transport(&transport, &udp_platform, UXR_IPv4, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;

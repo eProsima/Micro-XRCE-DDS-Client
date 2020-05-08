@@ -16,19 +16,25 @@ include(ExternalProject)
 
 unset(_deps)
 
+enable_language(C)
+enable_language(CXX)
+
 # Micro CDR.
 unset(microcdr_DIR CACHE)
 find_package(microcdr ${_microcdr_version} EXACT QUIET)
 if(NOT microcdr_FOUND)
-    ExternalProject_Add(ucdr
+    ExternalProject_Add(microcdr
         GIT_REPOSITORY
             https://github.com/eProsima/Micro-CDR.git
         GIT_TAG
             ${_microcdr_tag}
         PREFIX
-            ${PROJECT_BINARY_DIR}/ucdr
+            ${PROJECT_BINARY_DIR}/microcdr
         INSTALL_DIR
             ${PROJECT_BINARY_DIR}/temp_install
+        CMAKE_CACHE_ARGS
+            -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+            -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
         CMAKE_ARGS
             -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
@@ -38,7 +44,7 @@ if(NOT microcdr_FOUND)
             -DCONFIG_BIG_ENDIANNESS=${UCLIENT_BIG_ENDIANNESS}
             -DUCDR_PIC=${UCLIENT_PIC}
         )
-    list(APPEND _deps ucdr)
+    list(APPEND _deps microcdr)
 endif()
 
 if(UCLIENT_BUILD_TESTS)
@@ -57,7 +63,7 @@ if(UCLIENT_BUILD_TESTS)
             PREFIX
                 ${PROJECT_BINARY_DIR}/googletest
             INSTALL_DIR
-                ${PROJECT_BINARY_DIR}/temp_install
+                ${PROJECT_BINARY_DIR}/temp_install/googletest
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
                 $<$<PLATFORM_ID:Windows>:-Dgtest_force_shared_crt:BOOL=ON>
@@ -67,8 +73,8 @@ if(UCLIENT_BUILD_TESTS)
             INSTALL_COMMAND
                 ""
             )
-        set(GTEST_ROOT ${PROJECT_BINARY_DIR}/temp_install CACHE PATH "" FORCE)
-        set(GMOCK_ROOT ${PROJECT_BINARY_DIR}/temp_install CACHE PATH "" FORCE)
+        set(GTEST_ROOT ${PROJECT_BINARY_DIR}/temp_install/googletest CACHE PATH "" FORCE)
+        set(GMOCK_ROOT ${PROJECT_BINARY_DIR}/temp_install/googletest CACHE PATH "" FORCE)
         list(APPEND _deps googletest)
     endif()
 endif()
