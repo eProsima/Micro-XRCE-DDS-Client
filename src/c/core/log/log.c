@@ -304,7 +304,7 @@ void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size)
 char* print_array_2(const uint8_t* array_2)
 {
     static char buffer[256];
-    sprintf(buffer, "%02X%02X", array_2[0], array_2[1]);
+    snprintf(buffer, "%02X%02X", array_2[0], array_2[1]);
     return buffer;
 }
 
@@ -312,7 +312,7 @@ const char* data_to_string(const uint8_t* data, uint32_t size)
 {
     static char buffer[DATA_TO_STRING_BUFFER];
     for(uint32_t i = 0; i < size; i++)
-        sprintf(buffer + 3 * i, "%02X ", data[i]);
+        snprintf(buffer + 3 * i, "%02X ", data[i]);
     buffer[3 * size] = '\0';
     return buffer;
 }
@@ -320,8 +320,8 @@ const char* data_to_string(const uint8_t* data, uint32_t size)
 const char* request_to_string(const BaseObjectRequest* request)
 {
     static char buffer[256];
-    int pos = sprintf(buffer, "req: 0x%s", print_array_2(request->request_id.data));
-    sprintf(buffer + pos, " | obj: 0x%s", print_array_2(request->object_id.data));
+    int pos = snprintf(buffer, "req: 0x%s", print_array_2(request->request_id.data));
+    snprintf(buffer + pos, " | obj: 0x%s", print_array_2(request->object_id.data));
 
     return buffer;
 }
@@ -367,7 +367,7 @@ const char* reply_to_string(const BaseObjectReply* reply)
             sprintf(status, "UNKNOWN");
     }
 
-    sprintf(buffer, "%s | %s",
+    snprintf(buffer, "%s | %s",
             request_to_string(&reply->related_request),
             status);
 
@@ -406,36 +406,36 @@ void print_create_submessage(const char* pre, const CREATE_Payload* payload, uin
     switch(payload->object_representation.kind)
     {
         case DDS_XRCE_OBJK_PARTICIPANT:
-            sprintf(content, "PARTICIPANT | %s: %zu",
+            snprintf(content, "PARTICIPANT | %s: %zu",
                     type,
                     strlen(payload->object_representation._.participant.base.representation._.xml_string_represenatation) + 1);
             break;
         case DDS_XRCE_OBJK_TOPIC:
-            sprintf(content, "TOPIC | obj: 0x%s | %s: %zu",
+            snprintf(content, "TOPIC | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     type,
                     strlen(payload->object_representation._.topic.base.representation._.xml_string_represenatation) + 1);
             break;
         case DDS_XRCE_OBJK_PUBLISHER:
-            sprintf(content, "PUBLISHER | obj: 0x%s | %s: %zu",
+            snprintf(content, "PUBLISHER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.publisher.participant_id.data),
                     type,
                     strlen(payload->object_representation._.publisher.base.representation._.string_represenatation) + 1);
             break;
         case DDS_XRCE_OBJK_SUBSCRIBER:
-            sprintf(content, "SUBSCRIBER | obj: 0x%s | %s: %zu",
+            snprintf(content, "SUBSCRIBER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.subscriber.participant_id.data),
                     type,
                     strlen(payload->object_representation._.subscriber.base.representation._.string_represenatation) + 1);
             break;
         case DDS_XRCE_OBJK_DATAWRITER:
-            sprintf(content, "DATAWRITER | obj: 0x%s | %s: %zu",
+            snprintf(content, "DATAWRITER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.data_writer.publisher_id.data),
                     type,
                     strlen(payload->object_representation._.data_writer.base.representation._.xml_string_represenatation) + 1);
              break;
         case DDS_XRCE_OBJK_DATAREADER:
-            sprintf(content, "DATAREADER | obj: 0x%s | %s: %zu",
+            snprintf(content, "DATAREADER | obj: 0x%s | %s: %zu",
                     print_array_2(payload->object_representation._.data_reader.subscriber_id.data),
                     type,
                     strlen(payload->object_representation._.data_reader.base.representation._.xml_string_represenatation) + 1);
