@@ -41,8 +41,20 @@ if((CMAKE_SYSTEM_NAME STREQUAL "") AND (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)." OFF)
-
-set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
+option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
+option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
+option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
+option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
+set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
+set(UCLIENT_MAX_OUTPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of output reliable streams for session.")
+set(UCLIENT_MAX_INPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of input best-effort streams for session.")
+set(UCLIENT_MAX_INPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of input reliable streams for session.")
+set(UCLIENT_MAX_SESSION_CONNECTION_ATTEMPTS 10 CACHE STRING "Set the number of connection attemps.")
+set(UCLIENT_MIN_SESSION_CONNECTION_INTERVAL 25 CACHE STRING "Set the connection interval in milliseconds.")
+set(UCLIENT_MIN_HEARTBEAT_TIME_INTERVAL 1 CACHE STRING "Set the time interval between heartbeats in milliseconds.")
+set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
+set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
+set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
 
 ###############################################################################
 # Dependencies
@@ -72,18 +84,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
         FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
-
-###############################################################################
-# Client configuration options
-###############################################################################
-# Load configuration file.
-if(EXISTS ${UCLIENT_CONFIG})
-    configure_file(${UCLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
-    load_cache(${PROJECT_SOURCE_DIR})
-    file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
-else()
-    message(FATAL_ERROR "No client.config found.")
 endif()
 
 ###############################################################################
