@@ -38,14 +38,12 @@ else()
 
     target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
-    install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
-        )
-
-    install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/uxr/client/${PROJECT_NAME}
-        FILES_MATCHING PATTERN "*.h"
-                       PATTERN "*.c"
-        )
-
+    if(UCLIENT_INSTALL_EXAMPLES)
+        install(
+            TARGETS
+                ${PROJECT_NAME}
+            RUNTIME DESTINATION
+                ${BIN_INSTALL_DIR}
+            )
+    endif()
 endif()

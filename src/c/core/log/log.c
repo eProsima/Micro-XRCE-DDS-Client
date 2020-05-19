@@ -303,7 +303,7 @@ void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size)
 //==================================================================
 char* print_array_2(const uint8_t* array_2)
 {
-    static char buffer[256];
+    static char buffer[249];
     sprintf(buffer, "%02X%02X", array_2[0], array_2[1]);
     return buffer;
 }
