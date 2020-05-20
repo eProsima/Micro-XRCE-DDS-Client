@@ -23,10 +23,10 @@ if(NOT UCLIENT_BUILD_EXAMPLES)
     find_package(microxrcedds_client REQUIRED)
 endif()
 
-if(NOT PROFILE_UDP_TRANSPORT OR
-   NOT PROFILE_TCP_TRANSPORT OR
-   NOT PROFILE_SERIAL_TRANSPORT)
-    message(WARNING "Can not compile example: The PROFILE_UDP_TRANSPORT, PROFILE_TCP_TRANSPORT and PROFILE_SERIAL_TRANSPORT must be enabled.")
+if(NOT UCLIENT_PROFILE_UDP OR
+   NOT UCLIENT_PROFILE_TCP OR
+   NOT UCLIENT_PROFILE_SERIAL)
+    message(WARNING "Can not compile example: The UCLIENT_PROFILE_UDP, UCLIENT_PROFILE_TCP and UCLIENT_PROFILE_SERIAL must be enabled.")
 else()
     add_executable(${PROJECT_NAME} main.c ShapeType.c)
     if(MSVC OR MSVC_IDE)

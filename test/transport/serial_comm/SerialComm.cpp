@@ -95,7 +95,7 @@ TEST_F(SerialComm, SingleOctetTest)
 
     /* Receive message. */
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 10));
-    ASSERT_EQ(input_msg_len, 1);
+    ASSERT_EQ(input_msg_len, size_t(1));
     ASSERT_EQ(*input_msg, 0);
 }
 
@@ -184,7 +184,7 @@ TEST_F(SerialComm, SplitMessageTest)
     }
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 10));
-    ASSERT_EQ(input_msg_len, 1);
+    ASSERT_EQ(input_msg_len, size_t(1));
     ASSERT_EQ(*input_msg, 0);
 }
 
