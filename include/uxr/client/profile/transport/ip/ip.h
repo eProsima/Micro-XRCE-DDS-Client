@@ -21,6 +21,7 @@ extern "C"
 #endif
 
 #include <uxr/client/core/type/xrce_types.h>
+#include <uxr/client/visibility.h>
 
 typedef enum uxrIpProtocol
 {
@@ -41,7 +42,7 @@ typedef enum uxrIpProtocol
  * @return true         In case of successful conversion.
  * @return false        In other case.
  */
-bool uxr_ip_to_locator(
+UXRDLLAPI bool uxr_ip_to_locator(
         char const * ip,
         uint16_t port,
         uxrIpProtocol ip_protocol,
@@ -59,7 +60,7 @@ bool uxr_ip_to_locator(
  * @return true         In case of successful conversion.
  * @return false        In other case.
  */
-bool uxr_locator_to_ip(
+UXRDLLAPI bool uxr_locator_to_ip(
         TransportLocator const * locator,
         char * ip,
         size_t size,
