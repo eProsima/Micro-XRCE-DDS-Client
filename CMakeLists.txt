@@ -116,13 +116,21 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
         set(UCLIENT_PLATFORM_NUTTX ON)
+    elseif(PLATFORM_NAME STREQUAL "zephyr")
+        set(UCLIENT_PLATFORM_ZEPHYR ON)
     elseif(PLATFORM_NAME STREQUAL "LwIP")
         set(UCLIENT_PLATFORM_POSIX_NOPOLL ON)
     endif()
 endif()
 
-if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX)
+if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX OR UCLIENT_PLATFORM_ZEPHYR)
     set(UCLIENT_PLATFORM_POSIX ON)
+endif()
+
+if(UCLIENT_PROFILE_DISCOVERY OR UCLIENT_PROFILE_UDP OR UCLIENT_PROFILE_TCP)
+    set(UCLIENT_IP_TRANSPORT ON)
+else()
+    set(UCLIENT_IP_TRANSPORT OFF)
 endif()
 
 # Check external transport.
@@ -170,8 +178,8 @@ set(SRCS
     $<$<BOOL:${UCLIENT_EXTERNAL_TCP}>:src/c/profile/transport/ip/tcp/tcp_transport_external.c>
     $<$<BOOL:${UCLIENT_EXTERNAL_UDP}>:src/c/profile/transport/ip/udp/udp_transport_external.c>
     $<$<BOOL:${UCLIENT_EXTERNAL_SERIAL}>:src/c/profile/transport/serial/serial_transport_external.c>
-    $<$<OR:$<BOOL:${UCLIENT_PLATFORM_POSIX}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/ip_posix.c>
-    $<$<BOOL:$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/ip_windows.c>
+    $<$<AND:$<BOOL:${UCLIENT_IP_TRANSPORT}>,$<OR:$<BOOL:${UCLIENT_PLATFORM_POSIX}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>>:src/c/profile/transport/ip/ip_posix.c>
+    $<$<AND:$<BOOL:${UCLIENT_IP_TRANSPORT}>,$<BOOL:$<PLATFORM_ID:Windows>>>:src/c/profile/transport/ip/ip_windows.c>
     )
 
 ###############################################################################
