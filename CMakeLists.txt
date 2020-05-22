@@ -127,16 +127,73 @@ if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX OR UCLIENT_PLATFORM_ZEPHYR)
     set(UCLIENT_PLATFORM_POSIX ON)
 endif()
 
-if(UCLIENT_PROFILE_DISCOVERY OR UCLIENT_PROFILE_UDP OR UCLIENT_PROFILE_TCP)
-    set(UCLIENT_IP_TRANSPORT ON)
-else()
-    set(UCLIENT_IP_TRANSPORT OFF)
-endif()
-
 # Check external transport.
 option(UCLIENT_EXTERNAL_TCP "Enable external serial transport." OFF)
 option(UCLIENT_EXTERNAL_UDP "Enable external serial transport." OFF)
 option(UCLIENT_EXTERNAL_SERIAL "Enable external serial transport." OFF)
+
+# Transport sources.
+set(_transport_src)
+
+if(UCLIENT_PROFILE_UDP)
+    list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport.c)
+    if(UCLIENT_EXTERNAL_UDP)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_external.c)
+    else()
+        if(UCLIENT_PLATFORM_POSIX)
+            list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix.c)
+        elseif(UCLIENT_PLATFORM_POSIX_NOPOLL)
+            list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c)
+        elseif(UCLIENT_PLATFORM_WINDOWS)
+            list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_windows.c)
+        endif()
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_TCP)
+    list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport.c)
+    if(UCLIENT_EXTERNAL_TCP)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_external.c)
+    else()
+        if(UCLIENT_PLATFORM_POSIX)
+            list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_posix.c)
+        elseif(UCLIENT_PLATFORM_WINDOWS)
+            list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_windows.c)
+        endif()
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_SERIAL)
+    list(APPEND _transport_src src/c/profile/transport/serial/serial_transport.c)
+    list(APPEND _transport_src src/c/profile/transport/serial/serial_protocol.c)
+    if(UCLIENT_EXTERNAL_SERIAL)
+        list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_external.c)
+    else()
+        if(UCLIENT_PLATFORM_POSIX)
+            list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_posix.c)
+        endif()
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_DISCOVERY OR UCLIENT_PROFILE_UDP OR UCLIENT_PROFILE_TCP)
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_posix.c)
+    elseif(UCLIENT_PLATFORM_POSIX_NOPOLL)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_posix.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_windows.c)
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_DISCOVERY)
+    list(APPEND _transport_src src/c/profile/discovery/discovery.c)
+    list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport.c)
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_posix.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
+    endif()
+endif()
 
 # Other sources
 set(SRCS
@@ -161,25 +218,7 @@ set(SRCS
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
-    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
-    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/transport/ip/udp/udp_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/discovery/transport/udp_transport_datagram_posix.c>
-    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
-    $<$<BOOL:${UCLIENT_PROFILE_UDP}>:src/c/profile/transport/ip/udp/udp_transport.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_UDP}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/udp/udp_transport_posix.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_UDP}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_UDP}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
-    $<$<BOOL:${UCLIENT_PROFILE_TCP}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_TCP}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/tcp/tcp_transport_posix.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_TCP}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_SERIAL}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_SERIAL}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
-    $<$<AND:$<BOOL:${UCLIENT_PROFILE_SERIAL}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/serial/serial_transport_posix.c>
-    $<$<BOOL:${UCLIENT_EXTERNAL_TCP}>:src/c/profile/transport/ip/tcp/tcp_transport_external.c>
-    $<$<BOOL:${UCLIENT_EXTERNAL_UDP}>:src/c/profile/transport/ip/udp/udp_transport_external.c>
-    $<$<BOOL:${UCLIENT_EXTERNAL_SERIAL}>:src/c/profile/transport/serial/serial_transport_external.c>
-    $<$<AND:$<BOOL:${UCLIENT_IP_TRANSPORT}>,$<OR:$<BOOL:${UCLIENT_PLATFORM_POSIX}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>>:src/c/profile/transport/ip/ip_posix.c>
-    $<$<AND:$<BOOL:${UCLIENT_IP_TRANSPORT}>,$<BOOL:$<PLATFORM_ID:Windows>>>:src/c/profile/transport/ip/ip_windows.c>
+    ${_transport_src}
     )
 
 ###############################################################################
