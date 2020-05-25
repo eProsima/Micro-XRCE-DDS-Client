@@ -6,7 +6,7 @@ In order to compile this example, it is necessary to have the following profiles
 
 - `PROFILE_CREATE_ENTITIES_XML`
 - `PROFILE_WRITE_ACCESS`
-- `PROFILE_UDP_TRANSPORT`
+- `UCLIENT_PROFILE_UDP`
 
 ## Usage
 1. Run an agent in port *2018*.

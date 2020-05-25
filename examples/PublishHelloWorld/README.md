@@ -3,7 +3,7 @@
 This example will show how to send data to the DDS World creating a client publisher.
 In order to compile this example, it is necessary to have the following profiles enabled in `client.config` file:
 
-- `PROFILE_UDP_TRANSPORT`
+- `UCLIENT_PROFILE_UDP`
 
 ## Usage
 1. Run an agent in port *2018*.

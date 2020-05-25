@@ -3,7 +3,7 @@
 This example will show how to publish data creating a client publisher.
 It is necessary to have the following profiles enabled in `client.config` file to compile this example:
 
-- `PROFILE_UDP_TRANSPORT`
+- `UCLIENT_PROFILE_UDP`
 
 ## Usage
 1. Run an agent in port *2018*.

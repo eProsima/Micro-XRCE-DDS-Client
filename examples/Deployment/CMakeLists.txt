@@ -18,8 +18,8 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
 endif()
 
 
-if(NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: The PROFILE_UDP_TRANSPORT must be enabled.")
+if(NOT UCLIENT_PROFILE_UDP)
+    message(WARNING "Can not compile example: The UCLIENT_PROFILE_UDP must be enabled.")
 else()
 
     #############################################################
