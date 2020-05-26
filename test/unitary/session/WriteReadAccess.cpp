@@ -105,21 +105,21 @@ TEST_F(WriteReadAccessTest, PrepareStreamToWriteSubmessage)
 
     // stream_id:   no valid
     // data_length: fitted
-    // extected:    false
+    // expected:    false
     stream_id = uxr_stream_id(1, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(TOPIC_FITTED_SIZE);
     ASSERT_FALSE(uxr_prepare_output_stream(&session_, stream_id, data_writer_id_, &ub, data_length));
 
     // stream_id:   valid
     // data_length: no fitted
-    // extected:    false
+    // expected:    false
     stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(1 + TOPIC_FITTED_SIZE);
     ASSERT_FALSE(uxr_prepare_output_stream(&session_, stream_id, data_writer_id_, &ub, data_length));
 
     // stream_id:   valid
     // data_length: fitted
-    // extected:    true
+    // expected:    true
     stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(TOPIC_FITTED_SIZE);
     ASSERT_TRUE(uxr_prepare_output_stream(&session_, stream_id, data_writer_id_, &ub, data_length));
@@ -133,21 +133,21 @@ TEST_F(WriteReadAccessTest, BufferRequest)
 
     // stream_id:   no valid
     // data_length: fitted
-    // extected:    false
+    // expected:    false
     stream_id = uxr_stream_id(1, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(REQUEST_FITTED_SIZE);
     ASSERT_FALSE(uxr_buffer_request(&session_, stream_id, requester_id_, buffer, data_length));
 
     // stream_id:   valid
     // data_length: no fitted
-    // extected:    false
+    // expected:    false
     stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(1 + REQUEST_FITTED_SIZE);
     ASSERT_FALSE(uxr_buffer_request(&session_, stream_id, requester_id_, buffer, data_length));
 
     // stream_id:   valid
     // data_length: fitted
-    // extected:    true
+    // expected:    true
     stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(REQUEST_FITTED_SIZE);
     ASSERT_TRUE(uxr_buffer_request(&session_, stream_id, requester_id_, buffer, data_length));
@@ -163,14 +163,14 @@ TEST_F(WriteReadAccessTest, BufferReply)
 
     // stream_id:   no valid
     // data_length: fitted
-    // extected:    false
+    // expected:    false
     stream_id = uxr_stream_id(1, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(REPLY_FITTED_SIZE);
     ASSERT_FALSE(uxr_buffer_reply(&session_, stream_id, requester_id_, &sample_id, buffer, data_length));
 
     // stream_id:   valid
     // data_length: no fitted
-    // extected:    false
+    // expected:    false
     stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(1 + REPLY_FITTED_SIZE);
     ASSERT_FALSE(uxr_buffer_reply(&session_, stream_id, requester_id_, &sample_id, buffer, data_length));
@@ -178,7 +178,7 @@ TEST_F(WriteReadAccessTest, BufferReply)
 
     // stream_id:   valid
     // data_length: fitted
-    // extected:    true
+    // expected:    true
     stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     data_length = uint16_t(REPLY_FITTED_SIZE);
     ASSERT_TRUE(uxr_buffer_reply(&session_, stream_id, replier_id_, &sample_id, buffer, data_length));

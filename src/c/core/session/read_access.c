@@ -17,7 +17,7 @@ extern void read_submessage_format(
 static void read_format_data(
         uxrSession* session,
         ucdrBuffer* payload,
-        uint16_t length,
+        const uint16_t length,
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uint16_t request_id);
@@ -148,13 +148,11 @@ void read_submessage_format(
 inline void read_format_data(
         uxrSession* session,
         ucdrBuffer* ub,
-        uint16_t length,
+        const uint16_t length,
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uint16_t request_id)
 {
-    (void) length;
-
     ucdrBuffer temp_buffer;
     ucdr_init_buffer(&temp_buffer, ub->iterator, (size_t)(ub->final - ub->iterator));
     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
