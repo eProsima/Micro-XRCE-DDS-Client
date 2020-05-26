@@ -50,8 +50,9 @@ unitary_test(InputReliableStream    session/streams/InputReliableStream.cpp)
 unitary_test(OutputReliableStream   session/streams/OutputReliableStream.cpp)
 unitary_test(StreamStorage          session/streams/StreamStorage.cpp)
 
-unitary_test(ObjectId    session/ObjectId.cpp)
-unitary_test(Submessage  session/Submessage.cpp)
-unitary_test(SessionInfo session/SessionInfo.cpp)
-unitary_test(Session     session/Session.cpp)
+unitary_test(ObjectId           session/ObjectId.cpp)
+unitary_test(Submessage         session/Submessage.cpp)
+unitary_test(SessionInfo        session/SessionInfo.cpp)
+unitary_test(Session            session/Session.cpp)
+unitary_test(WriteReadAccess    session/WriteReadAccess.cpp)
 
