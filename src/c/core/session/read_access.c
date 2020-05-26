@@ -17,7 +17,7 @@ extern void read_submessage_format(
 static void read_format_data(
         uxrSession* session,
         ucdrBuffer* payload,
-        uint16_t length,
+        const uint16_t length,
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uint16_t request_id);
@@ -148,13 +148,11 @@ void read_submessage_format(
 inline void read_format_data(
         uxrSession* session,
         ucdrBuffer* ub,
-        uint16_t length,
+        const uint16_t length,
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uint16_t request_id)
 {
-    (void) length;
-
     ucdrBuffer temp_buffer;
     ucdr_init_buffer(&temp_buffer, ub->iterator, (size_t)(ub->final - ub->iterator));
     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
@@ -183,7 +181,7 @@ inline void read_format_data(
 
                 if (uxr_deserialize_SampleIdentity(&temp_buffer, &sample_id))
                 {
-                    length = (uint16_t)(length - (temp_buffer.offset - offset));
+                    uint16_t request_length = (uint16_t)(length - (temp_buffer.offset - offset));
                     ucdr_init_buffer(&temp_buffer, temp_buffer.iterator, (size_t)(temp_buffer.final - temp_buffer.iterator));
                     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
 
@@ -193,7 +191,7 @@ inline void read_format_data(
                         request_id,
                         &sample_id,
                         &temp_buffer,
-                        (size_t)length,
+                        (size_t)request_length,
                         session->on_request_args);
                 }
             }
@@ -208,7 +206,7 @@ inline void read_format_data(
 
                 if (uxr_deserialize_BaseObjectRequest(&temp_buffer, &request))
                 {
-                    length = (uint16_t)(length - (temp_buffer.offset - offset));
+                    uint16_t reply_length = (uint16_t)(length - (temp_buffer.offset - offset));
                     ucdr_init_buffer(&temp_buffer, temp_buffer.iterator, (size_t)(temp_buffer.final - temp_buffer.iterator));
                     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
 
@@ -218,7 +216,7 @@ inline void read_format_data(
                         request_id,
                         (uint16_t)((request.request_id.data[0] << 8) + request.request_id.data[1]),
                         &temp_buffer,
-                        (size_t)length,
+                        (size_t)reply_length,
                         session->on_reply_args);
                 }
             }
