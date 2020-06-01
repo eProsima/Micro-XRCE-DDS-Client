@@ -27,7 +27,7 @@ option(UCLIENT_INSTALL_EXAMPLES "Install examples." OFF)
 option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
-option(UCLIENT_ISOLATED_INSTALL "Install the project and dependencies into separeted folders with version control." ON)
+option(UCLIENT_ISOLATED_INSTALL "Install the project and dependencies into separeted folders with version control." OFF)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
 
 option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
