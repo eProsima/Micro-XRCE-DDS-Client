@@ -169,6 +169,7 @@ inline void read_format_data(
             if (NULL != session->on_topic)
             {
                 session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, length, session->on_topic_args);
+                session->on_data_flag = true;
             }
             break;
         }
@@ -193,6 +194,8 @@ inline void read_format_data(
                         &temp_buffer,
                         (size_t)request_length,
                         session->on_request_args);
+                    
+                    session->on_data_flag = true;
                 }
             }
             break;
@@ -218,6 +221,8 @@ inline void read_format_data(
                         &temp_buffer,
                         (size_t)reply_length,
                         session->on_reply_args);
+                    
+                    session->on_data_flag = true;
                 }
             }
             ub->iterator += length;
