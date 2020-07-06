@@ -148,6 +148,7 @@ int main(
     const char* topic_ref = "profiling_topic";
     uint16_t topic_req = uxr_buffer_create_topic_ref(&session, stream_out, topic_id, participant_id, topic_ref, UXR_REPLACE);
 
+#ifdef UCLIENT_PROFILING_RELIABLE
     uint8_t status[2];
     uint16_t requests[2] = {participant_req, topic_req};
     if (!uxr_run_session_until_all_status(&session, 1000, requests, status, 2))
@@ -155,6 +156,12 @@ int main(
         return 1;
     }
     uxr_run_session_time(&session, 5);
+#endif
+#ifdef UCLIENT_PROFILING_BEST_EFFORT
+    uxr_flash_output_streams(&session);
+    usleep(10000);
+#endif
+
     for (size_t i = 0; i < pub_number; i++)
     {
         uxrObjectId publisher_id = uxr_object_id(i + 1, UXR_PUBLISHER_ID);
