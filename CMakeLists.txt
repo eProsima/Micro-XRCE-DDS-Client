@@ -360,6 +360,7 @@ if(UCLIENT_BUILD_TESTS)
         add_subdirectory(test/transport/serial_comm)
     endif()
     add_subdirectory(test/profiling/publisher)
+    add_subdirectory(test/profiling/subscriber)
 endif()
 
 if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
