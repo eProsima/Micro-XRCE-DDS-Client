@@ -359,6 +359,7 @@ if(UCLIENT_BUILD_TESTS)
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/serial_comm)
     endif()
+    add_subdirectory(test/profiling/publisher)
 endif()
 
 if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)

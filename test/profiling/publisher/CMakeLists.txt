@@ -26,8 +26,6 @@ configure_file(${PROJECT_SOURCE_DIR}/../resources/config.h.in
     ${PROJECT_BINARY_DIR}/include/profiling/ref_rel/profile_config.h
     )
 
-find_package(microxrcedds_client)
-
 add_executable(pub_ref_rel
         main.c
         ../resources/ByteArray.c
