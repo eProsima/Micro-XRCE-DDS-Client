@@ -23,6 +23,7 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 option(UCLIENT_SUPERBUILD "Enable superbuild compilation." ON)
 option(UCLIENT_BUILD_TESTS "Build tests." OFF)
 option(UCLIENT_BUILD_EXAMPLES "Build examples." OFF)
+option(UCLIENT_BUILD_PROFILING "Build publisher and subscriber applications, used for profiling purposes" OFF)
 option(UCLIENT_INSTALL_EXAMPLES "Install examples." OFF)
 option(UCLIENT_VERBOSE_SERIALIZATION "Build with serialization verbosity." OFF)
 option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
@@ -359,12 +360,17 @@ if(UCLIENT_BUILD_TESTS)
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/serial_comm)
     endif()
-    add_subdirectory(test/profiling/publisher)
-    add_subdirectory(test/profiling/subscriber)
 endif()
 
 if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
     add_subdirectory(test/memory/consumption)
+endif()
+
+###############################################################################
+# Memory profiling
+###############################################################################
+if(UCLIENT_BUILD_PROFILING OR UCLIENT_BUILD_TESTS)
+    add_subdirectory(test/profiling)
 endif()
 
 ###############################################################################

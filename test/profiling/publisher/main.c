@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "../resources/ByteArray.h"
+#include "ByteArray.h"
 #include <uxr/client/client.h>
 #include <ucdr/microcdr.h>
 #include "profile_config.h"
@@ -67,7 +67,7 @@ int main(
     uxr_init_session(&session, &transport.comm, 0xAAAABBBB);
     if(!uxr_create_session(&session))
     {
-        printf("Error create uXRCE session!\n");
+        printf("Error creating uXRCE session!\n");
         return 1;
     }
 
@@ -113,6 +113,20 @@ int main(
                             "</dds>";
     uint16_t topic_req = uxr_buffer_create_topic_xml(&session, stream_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
+#ifdef UCLIENT_PROFILING_RELIABLE
+    uint8_t status[2];
+    uint16_t requests[2] = {participant_req, topic_req};
+    if (!uxr_run_session_until_all_status(&session, 1000, requests, status, 2))
+    {
+        return 1;
+    }
+    uxr_run_session_time(&session, 5);
+#endif
+#ifdef UCLIENT_PROFILING_BEST_EFFORT
+    uxr_flash_output_streams(&session);
+    usleep(10000);
+#endif
+
     for (size_t i = 0; i < pub_number; i++)
     {
         uxrObjectId publisher_id = uxr_object_id(i + 1, UXR_PUBLISHER_ID);
@@ -122,6 +136,7 @@ int main(
         uxrObjectId datawriter_id = uxr_object_id(i + 1, UXR_DATAWRITER_ID);
         const char* datawriter_xml = "<dds>"
                                         "<data_writer>"
+                                            "<historyMemoryPolicy>PREALLOCATED_WITH_REALLOC</historyMemoryPolicy>"
                                             "<topic>"
                                                 "<kind>NO_KEY</kind>"
                                                 "<name>ByteArrayTopic</name>"
@@ -132,7 +147,20 @@ int main(
 
         datawriter_ids[i] = datawriter_id;
         uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, stream_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
+
+#ifdef UCLIENT_PROFILING_RELIABLE
+        uint8_t status[2];
+        uint16_t requests[2] = {publisher_req, datawriter_req};
+        if (!uxr_run_session_until_all_status(&session, 1000, requests, status, 2))
+        {
+            return 1;
+        }
+        uxr_run_session_time(&session, 5);
+#endif
+#ifdef UCLIENT_PROFILING_BEST_EFFORT
         uxr_flash_output_streams(&session);
+        usleep(10000);
+#endif
     }
 #endif
 #ifdef UCLIENT_PROFILING_REF
@@ -193,7 +221,11 @@ int main(
     topic.message[topic_size] = '\0';
 
     uint8_t count = 0;
-    while (count++ < 50)
+#ifdef UCLIENT_PROFILING_INFINITE_LOOP
+    while (true)
+#else
+    while (50 > count++)
+#endif
     {
         for (size_t i = 0; i < pub_number; i++)
         {
