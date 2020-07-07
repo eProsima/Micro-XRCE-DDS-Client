@@ -21,8 +21,6 @@
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
 
-#define OUTPUT_BUFFER_LENGTH    UXR_CONFIG_UDP_TRANSPORT_MTU
-
 #ifdef UCLIENT_PROFILING_XML
 #define PROFILING_PUB_MIN_OUTPUT_BUFFER_SIZE  400
 #endif
@@ -231,8 +229,10 @@ int main(
         {
             ucdrBuffer ub;
             uint32_t ba_topic_size = ByteArray_size_of_topic(&topic, 0);
-            uxr_prepare_output_stream(&session, stream_out, datawriter_ids[i], &ub, ba_topic_size);
-            ByteArray_serialize_topic(&ub, &topic);
+            if (uxr_prepare_output_stream(&session, stream_out, datawriter_ids[i], &ub, ba_topic_size))
+            {
+                ByteArray_serialize_topic(&ub, &topic);
+            }
 
 #ifdef UCLIENT_PROFILING_BEST_EFFORT
             uxr_flash_output_streams(&session);

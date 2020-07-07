@@ -33,7 +33,7 @@ bool ByteArray_serialize_topic(ucdrBuffer* writer, const ByteArray* topic)
 
 bool ByteArray_deserialize_topic(ucdrBuffer* reader, ByteArray* topic)
 {
-    (void) ucdr_deserialize_string(reader, topic->message, 255);
+    (void) ucdr_deserialize_string(reader, topic->message, 10240);
 
     return !reader->error;
 }

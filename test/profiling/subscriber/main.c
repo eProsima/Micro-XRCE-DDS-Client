@@ -115,8 +115,9 @@ int main(
     uint8_t* output_reliable_stream_buffer = (uint8_t*)malloc(PROFILING_SUB_MIN_OUTPUT_BUFFER_SIZE * sizeof(uint8_t));
     uxrStreamId stream_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, PROFILING_SUB_MIN_OUTPUT_BUFFER_SIZE, 1);
 
-    uint8_t* input_reliable_stream_buffer = (uint8_t*)malloc(buffer_length * sizeof(uint8_t));
-    uxrStreamId stream_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, buffer_length, 1);
+    uint32_t stream_history = buffer_length/UXR_CONFIG_UDP_TRANSPORT_MTU + 2;
+    uint8_t* input_reliable_stream_buffer = (uint8_t*)malloc(stream_history * UXR_CONFIG_UDP_TRANSPORT_MTU * sizeof(uint8_t));
+    uxrStreamId stream_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, stream_history * UXR_CONFIG_UDP_TRANSPORT_MTU, stream_history);
 #endif
 
     uxrObjectId* datareader_ids = (uxrObjectId*)malloc(sub_number * sizeof(uxrObjectId));
