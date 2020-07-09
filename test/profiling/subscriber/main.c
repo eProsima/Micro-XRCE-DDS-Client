@@ -261,7 +261,7 @@ int main(
     for (size_t i = 0; i < sub_number; i++)
     {
         bool connected = true;
-        while(connected && 50 > count)
+        while(connected && 30 > count)
         {
 #ifdef UCLIENT_PROFILING_RELIABLE
             uint8_t read_data_status;

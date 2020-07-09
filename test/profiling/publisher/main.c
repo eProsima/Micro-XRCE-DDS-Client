@@ -222,7 +222,7 @@ int main(
 #ifdef UCLIENT_PROFILING_INFINITE_LOOP
     while (true)
 #else
-    while (50 > count++)
+    while (30 > count++)
 #endif
     {
         for (size_t i = 0; i < pub_number; i++)
