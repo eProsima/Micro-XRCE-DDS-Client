@@ -95,6 +95,8 @@ size_t uxr_read_udp_data_platform(
 {
     size_t rv = 0;
 
+    timeout = (timeout <= 0) ? 1 : timeout;
+
     struct timeval tv;
     tv.tv_sec = timeout / 1000;
 	tv.tv_usec = (timeout % 1000) * 1000;
