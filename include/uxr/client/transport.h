@@ -27,6 +27,8 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_posix.h>
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_windows.h>
+#elif defined(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP_PLUS_TCP)
+#include <uxr/client/profile/transport/ip/udp/udp_transport_freertos_plus_tcp.h>
 #endif
 #endif //UCLIENT_PROFILE_UDP
 
