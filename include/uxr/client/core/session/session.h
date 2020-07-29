@@ -102,6 +102,8 @@ typedef struct uxrSession
     uxrOnReplyFunc on_reply;
     void* on_reply_args;
 
+    bool on_data_flag;
+
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;
     void* on_performance_args;
@@ -300,6 +302,21 @@ UXRDLLAPI bool uxr_run_session_time(
  * @return  `true` in case of the Agent confirms the reception of all the output messages. `false` in other case.
  */
 UXRDLLAPI bool uxr_run_session_timeout(
+        uxrSession* session,
+        int timeout);
+
+/**
+ * @brief  Keeps communication between the Client and the Agent.
+ *         This function involves the following actions:
+ *          1. flashing all the output streams sending the data through the transport,
+ *          2. listening messages from the Agent calling the associated callback (topic, status, request and replies).
+ *        The aforementioned actions will be performed in a loop until a data message is received 
+ *        or the `timeout` is exceeded.
+ * @param session   A uxrSession structure previously initialized.
+ * @param timeout   The waiting time in milliseconds.
+ * @return  `true` in case of a data message is received before the timeout. `false` in other case.
+ */
+UXRDLLAPI bool uxr_run_session_until_data(
         uxrSession* session,
         int timeout);
 

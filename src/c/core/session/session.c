@@ -200,6 +200,25 @@ bool uxr_run_session_timeout(uxrSession* session, int timeout_ms)
     return uxr_output_streams_confirmed(&session->streams);
 }
 
+bool uxr_run_session_until_data(uxrSession* session, int timeout_ms)
+{
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
+    uxr_flash_output_streams(session);
+
+    session->on_data_flag = false;
+    while(remaining_time > 0)
+    {
+        listen_message_reliably(session, remaining_time);
+        if (session->on_data_flag){
+            break;
+        }
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
+    }
+    return session->on_data_flag;
+}
+
 bool uxr_run_session_until_timeout(uxrSession* session, int timeout_ms)
 {
     uxr_flash_output_streams(session);
