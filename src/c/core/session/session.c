@@ -370,6 +370,21 @@ bool uxr_buffer_performance(uxrSession *session,
 
 void uxr_flash_output_streams(uxrSession* session)
 {
+    // HERE WE CAN HAVE:
+    // - THE POINTER TO THE SERIALIZED DATA
+    // - THE SERIALIZED DATA LEN (THIS CAN BE INFERED FROM THE UDP MESSAGE)
+    // - THE NAME AND TYPE (SHOULD WE HASH THEM?)
+    // SO WE CAN SERIALIZE A NEW BUFFER USING UCDR AND SEND IT USING UDP BROADCAST
+
+    // typedef struct {
+    //     uint8_t *data;
+    //     uint32_t lenght;
+    //     uxrObjectId id; 
+    // } blMessage;
+
+    // An static list of blMessage must be sent completely at this point
+    // HASH IS RETRIEVED FROM A POOL OF blEntityHash
+
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
         uxrOutputBestEffortStream* stream = &session->streams.output_best_effort[i];
@@ -480,6 +495,7 @@ inline bool send_message(const uxrSession* session, uint8_t* buffer, size_t leng
 inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
 {
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
+    //LISTEN P2P PROPOSAL
     if(received)
     {
         UXR_DEBUG_PRINT_MESSAGE(UXR_RECV, *buffer, *length, session->info.key);

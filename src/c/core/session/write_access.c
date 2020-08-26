@@ -74,6 +74,15 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         void* args = ub->args;
         ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
         ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
+
+        //HERE WE CAN CATCH THE POINTER TO THE BUFFER WHERE THE DATA IS GOING TO BE SERIALIZED AND WE ALSO HAVE THE TOPIC NAME/TYPE ALONG WITH THE NUMBER
+
+        // FILL AND SAVE IN A STATIC ARRAY MESSAGE DATA:
+        // typedef struct {
+        //     uint8_t *data;    <-  ub->iterator;
+        //     uint32_t lenght;  <-  topic_size
+        //     uxrObjectId id;   <-  datawriter_id
+        // } blMessage;
     }
 
     return !ub->error;
