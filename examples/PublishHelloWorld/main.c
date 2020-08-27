@@ -52,7 +52,7 @@ int main(int args, char** argv)
     if(!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
-        return 1;
+        // return 1;
     }
 
     // Streams
@@ -96,21 +96,22 @@ int main(int args, char** argv)
                                          "</topic>"
                                      "</data_writer>"
                                  "</dds>";
-    uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
-
+    // uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
+    uint16_t datawriter_req = uxr_buffer_create_datawriter_ref(&session, reliable_out, datawriter_id, publisher_id, "prueba1", UXR_REPLACE);
+    
     // Send create entities message and wait its status
     uint8_t status[4];
     uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
     if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i publisher: %i darawriter: %i\n", status[0], status[1], status[2], status[3]);
-        return 1;
+        // return 1;
     }
 
     // Write topics
     bool connected = true;
     uint32_t count = 0;
-    while(connected && count < max_topics)
+    while(1)
     {
         HelloWorld topic = {++count, "Hello DDS world!"};
 
@@ -120,7 +121,7 @@ int main(int args, char** argv)
         HelloWorld_serialize_topic(&ub, &topic);
 
         printf("Send topic: %s, id: %i\n", topic.message, topic.index);
-        connected = uxr_run_session_time(&session, 1000);
+        connected = uxr_run_session_time(&session, 100);
     }
 
     // Delete resources

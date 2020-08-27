@@ -16,6 +16,7 @@
 #include "stream/seq_num_internal.h"
 #include "../log/log_internal.h"
 #include "../../util/time_internal.h"
+#include "../../brokerless/brokerless_internal.h"
 
 #define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE)
 #define DELETE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE)
@@ -81,6 +82,7 @@ void uxr_init_session(uxrSession* session, uxrCommunication* comm, uint32_t key)
 
     uxr_init_session_info(&session->info, 0x81, key);
     uxr_init_stream_storage(&session->streams);
+    init_brokerless();
 }
 
 void uxr_set_status_callback(uxrSession* session, uxrOnStatusFunc on_status_func, void* args)
@@ -370,20 +372,7 @@ bool uxr_buffer_performance(uxrSession *session,
 
 void uxr_flash_output_streams(uxrSession* session)
 {
-    // HERE WE CAN HAVE:
-    // - THE POINTER TO THE SERIALIZED DATA
-    // - THE SERIALIZED DATA LEN (THIS CAN BE INFERED FROM THE UDP MESSAGE)
-    // - THE NAME AND TYPE (SHOULD WE HASH THEM?)
-    // SO WE CAN SERIALIZE A NEW BUFFER USING UCDR AND SEND IT USING UDP BROADCAST
-
-    // typedef struct {
-    //     uint8_t *data;
-    //     uint32_t lenght;
-    //     uxrObjectId id; 
-    // } blMessage;
-
-    // An static list of blMessage must be sent completely at this point
-    // HASH IS RETRIEVED FROM A POOL OF blEntityHash
+    flush_brokerless_queues();
 
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -424,6 +413,21 @@ bool listen_message(uxrSession* session, int poll_ms)
         ucdrBuffer ub;
         ucdr_init_buffer(&ub, data, (uint32_t)length);
         read_message(session, &ub);
+    }
+
+    uint8_t* data_brokerless; size_t length_brokerless; uxrObjectId* object_id;
+    bool must_be_read_brokerless = listen_brokerless(&data_brokerless, &length_brokerless, poll_ms, &object_id);
+    if(must_be_read_brokerless)
+    {   
+        ucdrBuffer temp_buffer;
+        ucdr_init_buffer(&temp_buffer, data_brokerless, length_brokerless);
+
+        //CALL CALLBACK
+        // object_id is the datareader (or service equivalent) that can be used to identify which topic should the callback must handle
+        // request_id is related to the uxr_buffer_request_data request, so it can determine some limitations imposed into the communication -> NOT IMPLEMENTED BY NOW
+        // stream_id should point to a new type of Brokerless stream -> NOT IMPLEMENTED BY NOW
+        uxrStreamId aux;
+        session->on_topic(session, *object_id, 0, aux, &temp_buffer, length_brokerless, session->on_topic_args);
     }
 
     return must_be_read;

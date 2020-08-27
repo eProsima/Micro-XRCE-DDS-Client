@@ -23,6 +23,7 @@
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
+uint32_t last_index = -1;
 void on_topic(
         uxrSession* session,
         uxrObjectId object_id,
@@ -38,6 +39,13 @@ void on_topic(
     HelloWorld_deserialize_topic(ub, &topic);
 
     printf("Received topic: %s, id: %i\n", topic.message, topic.index);
+
+    if (last_index != topic.index-1)
+    {
+        printf("LOST PACKAGE!!");
+    }
+    
+    last_index = topic.index;
 
     uint32_t* count_ptr = (uint32_t*) args;
     (*count_ptr)++;
@@ -75,7 +83,7 @@ int main(int args, char** argv)
     if(!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
-        return 1;
+        // return 1;
     }
 
     // Streams
@@ -119,7 +127,8 @@ int main(int args, char** argv)
                                          "</topic>"
                                      "</data_reader>"
                                  "</dds>";
-    uint16_t datareader_req = uxr_buffer_create_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
+    // uint16_t datareader_req = uxr_buffer_create_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
+    uint16_t datareader_req = uxr_buffer_create_datareader_ref(&session, reliable_out, datareader_id, subscriber_id, "prueba1", UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[4];
@@ -127,7 +136,7 @@ int main(int args, char** argv)
     if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 4))
     {
         printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
-        return 1;
+        // return 1;
     }
 
     // Request topics
@@ -137,10 +146,11 @@ int main(int args, char** argv)
 
     // Read topics
     bool connected = true;
-    while(connected && count < max_topics)
+    while(true)
     {
-        uint8_t read_data_status;
-        connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        // uint8_t read_data_status;
+        // connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        connected = uxr_run_session_time(&session, 10);
     }
 
     // Delete resources

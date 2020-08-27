@@ -7,22 +7,38 @@
 #include <errno.h>
 #include <string.h>
 
-#define MULTICAST_DEFAULT_IP   "239.255.0.2"
-#define MULTICAST_DEFAULT_PORT 7400
+#define MULTICAST_DEFAULT_IP   "127.255.255.255"
+#define MULTICAST_DEFAULT_PORT 9090
 
 int fd;
-const TransportLocator multicast;
+struct sockaddr_in send_addr, recv_addr;
 
 bool init_udp_broadcast_transport_datagram()
 {
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    int trueflag = 1, count = 0;
+    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+        printf("socket");
 
-    int broadcastEnable=1;
-    setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &broadcastEnable, sizeof(broadcastEnable));
+    if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &trueflag, sizeof trueflag) < 0)
+        printf("setsockopt");
 
-    uxr_ip_to_locator(MULTICAST_DEFAULT_IP, (uint16_t)MULTICAST_DEFAULT_PORT, UXR_IPv4, &multicast);
+    memset(&send_addr, 0, sizeof send_addr);
+    send_addr.sin_family = AF_INET;
+    send_addr.sin_port = (in_port_t) htons(MULTICAST_DEFAULT_PORT);
+    inet_aton(MULTICAST_DEFAULT_IP, &send_addr.sin_addr);
 
-    return fd != -1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &trueflag, sizeof trueflag) < 0)
+        printf("setsockopt");
+
+    memset(&recv_addr, 0, sizeof recv_addr);
+    recv_addr.sin_family = AF_INET;
+    recv_addr.sin_port = (in_port_t) htons(MULTICAST_DEFAULT_PORT);
+    recv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if (bind(fd, (struct sockaddr*) &recv_addr, sizeof recv_addr) < 0)
+        printf("bind");
+
+    return true;
 }
 
 bool close_udp_broadcast_transport_datagram()
@@ -30,34 +46,29 @@ bool close_udp_broadcast_transport_datagram()
     return (0 == close(fd));
 }
 
-bool udp_broadcast_send_datagram(
+size_t udp_broadcast_send_datagram(
         const uint8_t* buf,
         size_t len)
 {
-    bool rv = true;
+    size_t rv = 0;
     
-    printf("Sending %d bytes brokerless\n",len);
-    struct sockaddr_in remote_addr;
-    memcpy(&remote_addr.sin_addr, multicast._.medium_locator.address, sizeof(remote_addr.sin_addr));
-    remote_addr.sin_family = AF_INET;
-    remote_addr.sin_port = htons(multicast._.medium_locator.locator_port);
-
-    ssize_t bytes_sent = sendto(fd, (const void*)buf, len, 0, (struct sockaddr*)&remote_addr, sizeof(remote_addr));
-    if (0 > bytes_sent)
-    {
-        rv = false;
+    // printf("Sending %d bytes brokerless\n\t",len);
+   
+    ssize_t bytes_sent = sendto(fd, buf, len, 0, (struct sockaddr*) &send_addr, sizeof send_addr);
+    if (0 > bytes_sent) {
+        rv = 0;
+    } else {
+        rv = bytes_sent;
     }
 
     return rv;
 }
 
-bool udp_broadcast_recv_datagram(
+size_t udp_broadcast_recv_datagram(
         uint8_t* buf,
-        size_t* len,
+        size_t len,
         int timeout)
 {   
-
-    size_t rv = 0;
 
     timeout = (timeout <= 0) ? 1 : timeout;
 
@@ -67,10 +78,10 @@ bool udp_broadcast_recv_datagram(
 
     setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
-    ssize_t bytes_received = recv(fd, (void*)buf, len, 0);
+    ssize_t readed_bytes = recv(fd, (void*)buf, len, 0);
 
-    printf("Received %d bytes brokerless. Timeout %d\n", bytes_received, timeout);
+    // printf("Received %d/%d bytes brokerless. Timeout %d\n", readed_bytes, len, timeout);
     
-    return rv;
+    return (readed_bytes > 0) ? readed_bytes : 0;
 }
 

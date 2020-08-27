@@ -69,12 +69,7 @@ uint16_t uxr_buffer_create_datawriter_xml(uxrSession* session, uxrStreamId strea
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
     uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
 
-    // HERE WE CAN CATCH THE TYPE AND THE NAME OR REFERENCE AND ASSOCIATE IT WITH ITS NUMBER
-
-    // typedef struct {
-    //     char hash[XRCE_BL_HASH_SIZE];
-    //     uxrObjectId id;
-    // } blEntityHash;
+    // TODO (pablogs9): ALERT! Is not possible to parse the XML here for extracting the name/type;
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }

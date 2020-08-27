@@ -4,6 +4,7 @@
 #include "session_internal.h"
 #include "session_info_internal.h"
 #include "submessage_internal.h"
+#include "../../brokerless/brokerless_internal.h"
 
 #define WRITE_DATA_PAYLOAD_SIZE 4
 #define SAMPLE_IDENTITY_SIZE    24
@@ -75,14 +76,7 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
         ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
 
-        //HERE WE CAN CATCH THE POINTER TO THE BUFFER WHERE THE DATA IS GOING TO BE SERIALIZED AND WE ALSO HAVE THE TOPIC NAME/TYPE ALONG WITH THE NUMBER
-
-        // FILL AND SAVE IN A STATIC ARRAY MESSAGE DATA:
-        // typedef struct {
-        //     uint8_t *data;    <-  ub->iterator;
-        //     uint32_t lenght;  <-  topic_size
-        //     uxrObjectId id;   <-  datawriter_id
-        // } blMessage;
+        add_brokerless_message(ub, topic_size, datawriter_id);
     }
 
     return !ub->error;

@@ -2,6 +2,7 @@
 #include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
+#include "../../brokerless/brokerless_internal.h"
 
 #include <string.h>
 
@@ -43,6 +44,8 @@ uint16_t uxr_buffer_create_datawriter_ref(uxrSession* session, uxrStreamId strea
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
     uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
 
+    add_brokerless_entity_hash(ref, object_id);
+
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
@@ -53,6 +56,8 @@ uint16_t uxr_buffer_create_datareader_ref(uxrSession* session, uxrStreamId strea
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAREADER;
     uxr_object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
+
+    add_brokerless_entity_hash(ref, object_id);
 
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
