@@ -21,6 +21,8 @@
 // - Implement hash function for "topic recognition"
 // - How can we match using XML instead of references?
 // - Control flow of datareaders using the API of uxr_buffer_request_data
+// - If we implement binary XML entities it would be really nice to the Brokerless architecture
+//       Not all QoS can be sended in Binary Format p29 s7.7.3.2 https://www.omg.org/spec/DDS-XRCE/1.0/PDF
 
 #include "./brokerless_internal.h"
 
@@ -35,18 +37,17 @@ uint8_t brokerlessBuffer[BROKERLESS_BUFFER_SIZE];
 //==================================================================
 
 // djb2 by Dan Bernstein: http://www.cse.yorku.ca/~oz/hash.html
-void hash_brokerless(unsigned char *str, char* hash_out)
+void hash_brokerless(unsigned char *str, char* hash)
 {
-    unsigned long hash = 5381;
+    hash_int_t int_hash = 5381;
     int c;    
 
     while (c = *str++)
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+        int_hash = ((int_hash << 5) + int_hash) + c; /* hash * 33 + c */
 
-    for (size_t i = 0; i < sizeof(unsigned long); i++){
-       hash_out = ((char*)&hash)[i];
-    }
-     
+    for (size_t i = 0; i < BROKERLESS_HASH_SIZE; i++){
+       hash[i] = ((char*)&int_hash)[i];
+    }     
 }
 
 void init_brokerless()
@@ -79,8 +80,6 @@ bool add_brokerless_entity_hash(char* ref, uxrObjectId id)
 {
     if (brokerlessEntityMap.index < BROKERLESS_ENTITY_MAP_LEN - 1)
     {   
-        // memcpy(&brokerlessEntityMap.queue[brokerlessEntityMap.index].hash, ref, BROKERLESS_HASH_SIZE);
-
         hash_brokerless(ref, brokerlessEntityMap.queue[brokerlessEntityMap.index].hash);
 
         brokerlessEntityMap.queue[brokerlessMessageQueue.index].id =  id;

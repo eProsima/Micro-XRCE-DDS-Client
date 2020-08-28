@@ -7,43 +7,43 @@
 #include <errno.h>
 #include <string.h>
 
-#define MULTICAST_DEFAULT_IP   "127.255.255.255"
-#define MULTICAST_DEFAULT_PORT 9090
+#define BROADCAST_DEFAULT_IP   "255.255.255.255"
+#define BROADCAST_DEFAULT_PORT 9000
 
-int fd;
+int fd_recv;
+int fd_send;
 struct sockaddr_in send_addr, recv_addr;
 
 bool init_udp_broadcast_transport_datagram()
 {
-    int trueflag = 1, count = 0;
-    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-        printf("socket");
+    int trueflag = 1;
+    fd_recv = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    fd_send = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-    if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &trueflag, sizeof trueflag) < 0)
-        printf("setsockopt");
+    setsockopt(fd_recv, SOL_SOCKET, SO_BROADCAST, &trueflag, sizeof trueflag);
+    setsockopt(fd_send, SOL_SOCKET, SO_BROADCAST, &trueflag, sizeof trueflag);
+
+    setsockopt(fd_recv, SOL_SOCKET, SO_REUSEADDR, &trueflag, sizeof trueflag);
+    setsockopt(fd_send, SOL_SOCKET, SO_REUSEADDR, &trueflag, sizeof trueflag);
 
     memset(&send_addr, 0, sizeof send_addr);
     send_addr.sin_family = AF_INET;
-    send_addr.sin_port = (in_port_t) htons(MULTICAST_DEFAULT_PORT);
-    inet_aton(MULTICAST_DEFAULT_IP, &send_addr.sin_addr);
-
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &trueflag, sizeof trueflag) < 0)
-        printf("setsockopt");
+    send_addr.sin_port = (in_port_t) htons(BROADCAST_DEFAULT_PORT);
+    inet_aton(BROADCAST_DEFAULT_IP, &send_addr.sin_addr);
 
     memset(&recv_addr, 0, sizeof recv_addr);
     recv_addr.sin_family = AF_INET;
-    recv_addr.sin_port = (in_port_t) htons(MULTICAST_DEFAULT_PORT);
+    recv_addr.sin_port = (in_port_t) htons(BROADCAST_DEFAULT_PORT);
     recv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if (bind(fd, (struct sockaddr*) &recv_addr, sizeof recv_addr) < 0)
-        printf("bind");
+    bind(fd_recv, (struct sockaddr*) &recv_addr, sizeof recv_addr);
 
     return true;
 }
 
 bool close_udp_broadcast_transport_datagram()
 {
-    return (0 == close(fd));
+    return ((0 == close(fd_recv)) && 0 == close(fd_send));
 }
 
 size_t udp_broadcast_send_datagram(
@@ -52,9 +52,9 @@ size_t udp_broadcast_send_datagram(
 {
     size_t rv = 0;
     
-    // printf("Sending %d bytes brokerless\n\t",len);
+    // printf("Sending %d bytes brokerless\n",len);
    
-    ssize_t bytes_sent = sendto(fd, buf, len, 0, (struct sockaddr*) &send_addr, sizeof send_addr);
+    ssize_t bytes_sent = sendto(fd_send, buf, len, 0, (struct sockaddr*) &send_addr, sizeof(send_addr));
     if (0 > bytes_sent) {
         rv = 0;
     } else {
@@ -76,11 +76,16 @@ size_t udp_broadcast_recv_datagram(
     tv.tv_sec = timeout / 1000;
 	tv.tv_usec = (timeout % 1000) * 1000;
 
-    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    setsockopt(fd_recv, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
-    ssize_t readed_bytes = recv(fd, (void*)buf, len, 0);
+    struct sockaddr_in from;
+    int fromlen;
+    fromlen = sizeof(from);
 
-    // printf("Received %d/%d bytes brokerless. Timeout %d\n", readed_bytes, len, timeout);
+    ssize_t readed_bytes =  recvfrom(fd_recv, (void*)buf, len, 0, &from, &fromlen);
+
+    // if(readed_bytes != -1)
+    //     printf("Received %d/%d bytes brokerless from %s:%d Timeout %d\n", readed_bytes, len, inet_ntoa(from.sin_addr), ntohs(from.sin_port), timeout);
     
     return (readed_bytes > 0) ? readed_bytes : 0;
 }

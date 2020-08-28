@@ -26,9 +26,11 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef unsigned long hash_int_t; 
+
 #define BROKERLESS_MESSAGE_QUEUE_LEN 100
 #define BROKERLESS_ENTITY_MAP_LEN 10
-#define BROKERLESS_HASH_SIZE sizeof(unsigned long)
+#define BROKERLESS_HASH_SIZE sizeof(hash_int_t)
 #define BROKERLESS_BUFFER_SIZE 1000
 
 // Outcomming message queue
