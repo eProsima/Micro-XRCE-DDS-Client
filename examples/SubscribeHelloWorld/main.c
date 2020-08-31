@@ -150,7 +150,7 @@ int main(int args, char** argv)
     {
         // uint8_t read_data_status;
         // connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
-        connected = uxr_run_session_time(&session, 10);
+        connected = uxr_run_session_timeout(&session, 1);
     }
 
     // Delete resources

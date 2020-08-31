@@ -57,7 +57,7 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId be_out = uxr_create_output_best_effort_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
     uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
@@ -71,7 +71,7 @@ int main(int args, char** argv)
                                           "</rtps>"
                                       "</participant>"
                                   "</dds>";
-    uint16_t participant_req = uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0, participant_xml, UXR_REPLACE);
+    uint16_t participant_req = uxr_buffer_create_participant_xml(&session, be_out, participant_id, 0, participant_xml, UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
@@ -80,11 +80,11 @@ int main(int args, char** argv)
                                     "<dataType>HelloWorld</dataType>"
                                 "</topic>"
                             "</dds>";
-    uint16_t topic_req = uxr_buffer_create_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
+    uint16_t topic_req = uxr_buffer_create_topic_xml(&session, be_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml = "";
-    uint16_t publisher_req = uxr_buffer_create_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
+    uint16_t publisher_req = uxr_buffer_create_publisher_xml(&session, be_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<dds>"
@@ -96,8 +96,8 @@ int main(int args, char** argv)
                                          "</topic>"
                                      "</data_writer>"
                                  "</dds>";
-    // uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
-    uint16_t datawriter_req = uxr_buffer_create_datawriter_ref(&session, reliable_out, datawriter_id, publisher_id, "prueba1", UXR_REPLACE);
+    // uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, be_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
+    uint16_t datawriter_req = uxr_buffer_create_datawriter_ref(&session, be_out, datawriter_id, publisher_id, "prueba2", UXR_REPLACE);
     
     // Send create entities message and wait its status
     uint8_t status[4];
@@ -117,11 +117,12 @@ int main(int args, char** argv)
 
         ucdrBuffer ub;
         uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
-        uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &ub, topic_size);
+        uxr_prepare_output_stream(&session, be_out, datawriter_id, &ub, topic_size);
         HelloWorld_serialize_topic(&ub, &topic);
 
         printf("Send topic: %s, id: %i\n", topic.message, topic.index);
-        connected = uxr_run_session_time(&session, 100);
+        connected = uxr_run_session_time(&session, 1000);
+        sleep(1);
     }
 
     // Delete resources

@@ -72,7 +72,7 @@ int main(int args, char** argv)
 
     char* ip = argv[1];
     char* port = argv[2];
-    uint32_t key = (args == 4) ? (uint32_t)atoi(argv[3]) : 0xCCCCDDDD;
+    uint32_t key = 0xCCCCDDDD;
 
     // Transport
     uxrUDPTransport transport;
@@ -90,7 +90,7 @@ int main(int args, char** argv)
     if (!uxr_create_session(&session))
     {
         printf("Error at init session.\n");
-        return 1;
+        // return 1;
     }
 
     // Streams
@@ -119,7 +119,7 @@ int main(int args, char** argv)
                                          "reply_type=\"reply_type\">"
                                 "</replier>"
                                 "</dds>";
-    uint16_t replier_req = uxr_buffer_create_replier_xml(&session, reliable_out, replier_id, participant_id, replier_xml, UXR_REPLACE);
+    uint16_t replier_req = uxr_buffer_create_replier_ref(&session, reliable_out, replier_id, participant_id, "repli1", UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[2];
@@ -127,7 +127,7 @@ int main(int args, char** argv)
     if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 2))
     {
         printf("Error at create entities: participant: %i requester: %i\n", status[0], status[1]);
-        return 1;
+        // return 1;
     }
 
     // Request  requests
@@ -137,10 +137,11 @@ int main(int args, char** argv)
 
     // Read request
     bool connected = true;
-    while (connected)
+    while (1)
     {
         uint8_t read_data_status;
-        connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        // connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+        connected = uxr_run_session_time(&session, 100);
     }
 
     return 0;
