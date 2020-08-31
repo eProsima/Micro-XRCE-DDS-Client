@@ -44,7 +44,9 @@ typedef enum uxrStreamType
     /** Identifies a best-effort stream. */
     UXR_BEST_EFFORT_STREAM,
     /** Identifies a reliable stream. */
-    UXR_RELIABLE_STREAM
+    UXR_RELIABLE_STREAM,
+    /** Identifies a brokerless stream. */
+    UXR_BROKERLESS
 
 } uxrStreamType;
 

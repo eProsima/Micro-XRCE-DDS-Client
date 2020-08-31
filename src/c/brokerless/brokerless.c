@@ -20,17 +20,27 @@
 // - What happen when uCDR buffer fragments?
 // - Implement hash function for "topic recognition"
 // - How can we match using XML instead of references?
-// - Control flow of datareaders using the API of uxr_buffer_request_data
+// - Control flow of datareaders using the API of uxr_buffer_request_data and pass the request_id to the callbacks
 // - If we implement binary XML entities it would be really nice to the Brokerless architecture
 //       Not all QoS can be sended in Binary Format p29 s7.7.3.2 https://www.omg.org/spec/DDS-XRCE/1.0/PDF
+// - Should we simplify the approach of uxr_prepare_output_stream -> serialize to something similar to the request/reply where buffer is available in uxr_buffer_request?
+// - Explore cases when multiple datawriters/datareaders/requesters/repliers coexists
+// - sample identity inside brokerlessMessage_t can be optimized because it is a big member
+
+// IDEAS:
+// - A P2P system that has a node with some services for create entities in the real agent.
+// - A P2P system that has a node acting as a gateware to DDS. We need a P2P standart QoS which only fill type and topic to always match.
+
 
 #include "./brokerless_internal.h"
+#include "./brokerless_transport.h"
 
 #include <string.h>
 
-brokerlessMessageQueue_t brokerlessMessageQueue;
-brokerlessEntityMap_t brokerlessEntityMap;
-uint8_t brokerlessBuffer[BROKERLESS_BUFFER_SIZE];
+static uint32_t client_key;
+static brokerlessMessageQueue_t brokerlessMessageQueue;
+static brokerlessEntityMap_t brokerlessEntityMap;
+static uint8_t brokerlessBuffer[BROKERLESS_BUFFER_SIZE];
 
 //==================================================================
 //                             PRIVATE
@@ -50,23 +60,34 @@ void hash_brokerless(unsigned char *str, char* hash)
     }     
 }
 
-void init_brokerless()
+void init_brokerless(uint32_t key)
 {
     brokerlessMessageQueue.index = 0;
     brokerlessEntityMap.index = 0;
     brokerlessEntityMap.datareaders = 0;
     brokerlessEntityMap.datawriters = 0;
+    brokerlessEntityMap.requesters = 0;
+    brokerlessEntityMap.repliers = 0;
 
-    init_udp_broadcast_transport_datagram();
+    client_key = key;
+
+    brokerless_init_transport();
 }
 
 bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id)
+{   
+    SampleIdentity sample_id = {0};
+    return add_brokerless_message_with_sample_id(ub, lenght, id, sample_id);
+}
+
+bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id, SampleIdentity sample_id)
 {
     if (brokerlessMessageQueue.index < BROKERLESS_MESSAGE_QUEUE_LEN - 1)
     {
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].data =  ub->iterator;
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].lenght =  lenght;
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].id =  id;
+        brokerlessMessageQueue.queue[brokerlessMessageQueue.index].sample_id = sample_id;
 
         brokerlessMessageQueue.index++;
 
@@ -80,17 +101,20 @@ bool add_brokerless_entity_hash(char* ref, uxrObjectId id)
 {
     if (brokerlessEntityMap.index < BROKERLESS_ENTITY_MAP_LEN - 1)
     {   
-        hash_brokerless(ref, brokerlessEntityMap.queue[brokerlessEntityMap.index].hash);
+        hash_brokerless((unsigned char*) ref, brokerlessEntityMap.queue[brokerlessEntityMap.index].hash);
 
         brokerlessEntityMap.queue[brokerlessMessageQueue.index].id =  id;
-
+        
         if (id.type == UXR_DATAREADER_ID){
             brokerlessEntityMap.datareaders++;
         }else if (id.type == UXR_DATAWRITER_ID){
             brokerlessEntityMap.datawriters++;
+        }else if (id.type == UXR_REQUESTER_ID){
+            brokerlessEntityMap.requesters++;
+        }else if (id.type == UXR_REPLIER_ID){
+            brokerlessEntityMap.repliers++;
         }
         
-
         brokerlessEntityMap.index++;
 
         return true;
@@ -106,7 +130,7 @@ int32_t find_brokerless_hash_from_id(uxrObjectId id)
         if (brokerlessEntityMap.queue[i].id.id == id.id &&
             brokerlessEntityMap.queue[i].id.type == id.type)
         {
-            return i;
+            return (int32_t) i;
         }
     }
     return -1;
@@ -118,10 +142,28 @@ int32_t find_brokerless_hash_from_hash(char* hash)
     {   
         if (0 == memcmp((void*) hash, (void*) brokerlessEntityMap.queue[i].hash, BROKERLESS_HASH_SIZE))
         {
-            return i;
+            return (int32_t) i;
         }
     }
     return -1;
+}
+
+bool check_brokerless_sample_id(SampleIdentity sample_id)
+{
+    // TODO (pablogs9): Check if requester id stored in the sample_id still exists
+    
+      return  !memcmp(&sample_id.writer_guid.entityId.entityKey, (uint8_t*)(&client_key), 3) &&
+            !memcmp(&sample_id.writer_guid.entityId.entityKind, (uint8_t*)(&client_key) + 3, 1);
+}
+
+void fill_brokerless_sample_id(SampleIdentity* sample_id, uxrObjectId id)
+{
+    // TODO (pablogs9): Improve this in order to take into account the endianness
+
+    memcpy(&sample_id->writer_guid.entityId.entityKey, (uint8_t*)(&client_key), 3);
+    memcpy(&sample_id->writer_guid.entityId.entityKind, (uint8_t*)(&client_key) + 3, 1);
+
+    memcpy(&sample_id->writer_guid.guidPrefix.data, (uint8_t*)(&id.id), 2);
 }
 
 bool flush_brokerless_queues()
@@ -134,11 +176,23 @@ bool flush_brokerless_queues()
         {
             ucdrBuffer writer;
             ucdr_init_buffer(&writer, brokerlessBuffer, BROKERLESS_BUFFER_SIZE);
-
             ucdr_serialize_array_char(&writer, brokerlessEntityMap.queue[hash_index].hash, BROKERLESS_HASH_SIZE);
-            ucdr_serialize_sequence_char(&writer, brokerlessMessageQueue.queue[i].data, brokerlessMessageQueue.queue[i].lenght);
 
-            udp_broadcast_send_datagram(writer.init, ucdr_buffer_length(&writer));
+            if (brokerlessMessageQueue.queue[i].id.type == UXR_REQUESTER_ID || brokerlessMessageQueue.queue[i].id.type == UXR_REPLIER_ID){
+
+                ucdr_serialize_bool(&writer, brokerlessMessageQueue.queue[i].id.type == UXR_REQUESTER_ID);
+
+                if (brokerlessMessageQueue.queue[i].id.type == UXR_REQUESTER_ID)
+                {
+                    fill_brokerless_sample_id(&brokerlessMessageQueue.queue[i].sample_id, brokerlessMessageQueue.queue[i].id);
+                }
+                
+                uxr_serialize_SampleIdentity(&writer, &brokerlessMessageQueue.queue[i].sample_id);
+            }
+
+            ucdr_serialize_sequence_char(&writer, (char*) brokerlessMessageQueue.queue[i].data, brokerlessMessageQueue.queue[i].lenght);
+
+            brokerless_broadcast_send(writer.init, ucdr_buffer_length(&writer));
         }
     }
 
@@ -147,11 +201,11 @@ bool flush_brokerless_queues()
     return false;
 }
 
-bool listen_brokerless(uint8_t** data, size_t* length, int timeout, uxrObjectId** id)
+bool listen_brokerless(uint8_t** data, int timeout, uxrObjectId** id)
 {       
     size_t readed_bytes = 0;
-    if (0 != brokerlessEntityMap.datareaders){
-        readed_bytes = udp_broadcast_recv_datagram(&brokerlessBuffer, BROKERLESS_BUFFER_SIZE, timeout);
+    if (brokerlessEntityMap.datareaders || brokerlessEntityMap.requesters || brokerlessEntityMap.repliers){
+        readed_bytes = brokerless_broadcast_recv(brokerlessBuffer, BROKERLESS_BUFFER_SIZE, timeout);
     }
     
     if(0 != readed_bytes){
@@ -162,15 +216,11 @@ bool listen_brokerless(uint8_t** data, size_t* length, int timeout, uxrObjectId*
         char hash[BROKERLESS_HASH_SIZE];
         ucdr_deserialize_array_char(&reader, hash, BROKERLESS_HASH_SIZE);
 
-
         int32_t hash_index = find_brokerless_hash_from_hash(hash);
 
-        if (-1 != hash_index && brokerlessEntityMap.queue[hash_index].id.type == UXR_DATAREADER_ID)
+        if (-1 != hash_index && brokerlessEntityMap.queue[hash_index].id.type != UXR_DATAWRITER_ID)
         {   
-            *id = &brokerlessEntityMap.queue[hash_index];
-            uint32_t aux;
-            ucdr_deserialize_uint32_t(&reader, &aux);
-            *length = aux;
+            *id = &brokerlessEntityMap.queue[hash_index].id;
             *data = reader.iterator;
             return true;
         }

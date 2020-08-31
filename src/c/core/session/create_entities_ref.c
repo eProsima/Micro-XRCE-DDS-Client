@@ -74,6 +74,8 @@ uint16_t uxr_buffer_create_requester_ref(
     payload.object_representation.kind = DDS_XRCE_OBJK_REQUESTER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
 
+    add_brokerless_entity_hash(ref, object_id);
+
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
@@ -88,6 +90,8 @@ uint16_t uxr_buffer_create_replier_ref(
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REPLIER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);
+
+    add_brokerless_entity_hash(ref, object_id);
 
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }

@@ -39,6 +39,7 @@ typedef struct {
     uint8_t *data;
     uint32_t lenght;
     uxrObjectId id;
+    SampleIdentity sample_id;
 } brokerlessMessage_t;
 
 typedef struct {
@@ -59,14 +60,20 @@ typedef struct {
     uint8_t index;
     uint8_t datawriters;
     uint8_t datareaders;
+    uint8_t requesters;
+    uint8_t repliers;
 } brokerlessEntityMap_t;
 
 // Internal API
 
+// TODO(Pablogs9): Complete this header list
+
 void init_brokerless();
 bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id);
+bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id, SampleIdentity sample_id);
 bool add_brokerless_entity_hash(char* hash, uxrObjectId id);
 bool flush_brokerless_queues();
+
 
 #ifdef __cplusplus
 }

@@ -29,6 +29,11 @@ uint16_t uxr_buffer_request(
         WRITE_DATA_Payload_Data payload;
         rv = uxr_init_base_object_request(&session->info, requester_id, &payload.base);
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
+
+        SampleIdentity sample_id;
+        sample_id.sequence_number.low = rv;
+        add_brokerless_message_with_sample_id(&ub, len, requester_id, sample_id);
+
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
 
@@ -54,6 +59,9 @@ uint16_t uxr_buffer_reply(
         rv = uxr_init_base_object_request(&session->info, replier_id, &payload.base);
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
         uxr_serialize_SampleIdentity(&ub, sample_id);
+
+        add_brokerless_message_with_sample_id(&ub, len, replier_id, *sample_id);
+
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
 

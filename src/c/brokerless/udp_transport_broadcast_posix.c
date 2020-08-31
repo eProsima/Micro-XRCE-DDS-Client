@@ -14,7 +14,7 @@ int fd_recv;
 int fd_send;
 struct sockaddr_in send_addr, recv_addr;
 
-bool init_udp_broadcast_transport_datagram()
+bool brokerless_init_transport()
 {
     int trueflag = 1;
     fd_recv = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -41,12 +41,12 @@ bool init_udp_broadcast_transport_datagram()
     return true;
 }
 
-bool close_udp_broadcast_transport_datagram()
+bool brokerless_close_transport()
 {
     return ((0 == close(fd_recv)) && 0 == close(fd_send));
 }
 
-size_t udp_broadcast_send_datagram(
+size_t brokerless_broadcast_send(
         const uint8_t* buf,
         size_t len)
 {
@@ -64,7 +64,7 @@ size_t udp_broadcast_send_datagram(
     return rv;
 }
 
-size_t udp_broadcast_recv_datagram(
+size_t brokerless_broadcast_recv(
         uint8_t* buf,
         size_t len,
         int timeout)
