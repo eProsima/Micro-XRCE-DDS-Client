@@ -53,7 +53,7 @@ set(UCLIENT_MAX_INPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of
 set(UCLIENT_MAX_SESSION_CONNECTION_ATTEMPTS 10 CACHE STRING "Set the number of connection attemps.")
 set(UCLIENT_MIN_SESSION_CONNECTION_INTERVAL 25 CACHE STRING "Set the connection interval in milliseconds.")
 set(UCLIENT_MIN_HEARTBEAT_TIME_INTERVAL 1 CACHE STRING "Set the time interval between heartbeats in milliseconds.")
-set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
+set(UCLIENT_UDP_TRANSPORT_MTU 10000 CACHE STRING "Set the UDP transport MTU.")
 set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
 set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
 
@@ -325,6 +325,10 @@ endif()
 ###############################################################################
 # Examples
 ###############################################################################
+
+add_subdirectory(test/throughput/SimpleArrayPublisher)
+add_subdirectory(test/throughput/TroughputRegister)
+
 if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/Deployment)
     add_subdirectory(examples/Discovery)
