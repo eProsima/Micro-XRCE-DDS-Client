@@ -1,0 +1,47 @@
+<profiles>
+    <participant profile_name="default_xrce_participant">
+        <rtps>
+            <name>default_xrce_participant</name>
+        </rtps>
+    </participant>
+
+
+
+    <data_writer profile_name="datawriter">
+        <topic>
+            <name>SimpleArrayTopic</name>
+            <dataType>SimpleArrayType</dataType>
+        </topic>
+    </data_writer>
+
+
+    <data_reader profile_name="datareader">
+        <topic>
+            <name>SimpleArrayTopic</name>
+            <dataType>SimpleArrayType</dataType>
+        </topic>
+    </data_reader>
+
+
+
+
+
+    <topic profile_name="topic">
+        <name>SimpleArrayTopic</name>
+        <dataType>SimpleArrayType</dataType>
+    </topic>
+
+
+    <requester profile_name="shapetype_requester"
+               service_name="shapetype_service"
+               request_type="request_type"
+               reply_type="reply_type">
+    </requester>
+
+    
+    <replier profile_name="shapetype_replier"
+             service_name="shapetype_service"
+             request_type="request_type"
+             reply_type="reply_type">
+    </replier>
+</profiles>

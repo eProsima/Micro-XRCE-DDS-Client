@@ -19,6 +19,9 @@
 #include <stdlib.h> //atoi
 #include <pthread.h> 
 
+#define TEST_TIME 10
+uint32_t test_count = 0;
+float samples[TEST_TIME];
 
 // State
 uint32_t count = 0;
@@ -26,18 +29,23 @@ uint32_t topic_size = 0;
 
 pthread_mutex_t lock;
 
+
 void *troughputCalc(void *vargp) 
 { 
-    while (1)
+    sleep(2);
+    count=0;
+    sleep(1);
+    while (test_count < TEST_TIME)
     {
         pthread_mutex_lock(&lock);
         float rate = (count*topic_size*8)/1e6;
         uint32_t aux_count = count;
         count = 0;
         pthread_mutex_unlock(&lock);
-
-        printf("Count %d, Size: %d, Rate %0.8f Mbps\n", aux_count, topic_size, rate);
-
+        samples[test_count] = rate;
+        fprintf(stderr,"Count %d, Size: %d, Rate %0.8f Mbps\n", aux_count, topic_size, rate);
+        
+        test_count++;
         sleep(1);
     }
 } 
@@ -104,47 +112,20 @@ int main(int args, char** argv)
     
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
-    const char* participant_xml = "<dds>"
-                                      "<participant>"
-                                          "<rtps>"
-                                              "<name>default_xrce_participant</name>"
-                                          "</rtps>"
-                                      "</participant>"
-                                  "</dds>";
-    uint16_t participant_req = uxr_buffer_create_participant_xml(&session, best_effort_out, participant_id, 0, participant_xml, UXR_REPLACE);
+    uint16_t participant_req = uxr_buffer_create_participant_ref(&session, best_effort_out, participant_id, 0, "default_xrce_participant", UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
-    const char* topic_xml = "<dds>"
-                                "<topic>"
-                                    "<name>SimpleArrayTopic</name>"
-                                    "<dataType>SimpleArrayType</dataType>"
-                                "</topic>"
-                            "</dds>";
-    uint16_t topic_req = uxr_buffer_create_topic_xml(&session, best_effort_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
+    uint16_t topic_req = uxr_buffer_create_topic_ref(&session, best_effort_out, topic_id, participant_id, "topic", UXR_REPLACE);
 
     uxrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
     const char* subscriber_xml = "";
     uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(&session, best_effort_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
 
     uxrObjectId datareader_id = uxr_object_id(0x01, UXR_DATAREADER_ID);
-    const char* datareader_xml = "<dds>"
-                                     "<data_reader>"
-                                        "<qos>"
-                                            "<reliability>"
-                                            "<kind>BEST_EFFORT</kind>"
-                                            "</reliability>"
-                                        "</qos>"
-                                         "<topic>"
-                                             "<kind>NO_KEY</kind>"
-                                             "<name>SimpleArrayTopic</name>"
-                                             "<dataType>SimpleArrayType</dataType>"
-                                         "</topic>"
-                                     "</data_reader>"
-                                 "</dds>";
-    uint16_t datareader_req = uxr_buffer_create_datareader_xml(&session, best_effort_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
+    uint16_t datareader_req = uxr_buffer_create_datareader_ref(&session, best_effort_out, datareader_id, subscriber_id, "topic", UXR_REPLACE);
 
     // Send create entities message and wait its status
-    uxr_flash_output_streams(&session);
+    uxr_run_session_until_timeout(&session, 100);
 
     // Request topics
     uxrDeliveryControl delivery_control = {0};
@@ -155,9 +136,9 @@ int main(int args, char** argv)
     pthread_create(&thread_id, NULL, troughputCalc, NULL); 
     
     // Read topics
-    while(1)
+    while(test_count < TEST_TIME)
     {
-        uxr_run_session_until_timeout(&session, 1);
+        uxr_run_session_until_timeout(&session, 1000);
     }
 
     // Delete resources
@@ -165,5 +146,11 @@ int main(int args, char** argv)
     uxr_close_udp_transport(&transport);
     pthread_join(thread_id, NULL);
 
+    float sum = 0;
+    for (size_t i = 0; i < TEST_TIME; i++){
+        sum += samples[i];
+    }
+    
+    printf("%f\n",sum/TEST_TIME);
     return 0;
 }
