@@ -152,7 +152,7 @@ bool check_brokerless_sample_id(SampleIdentity sample_id)
 {
     // TODO (pablogs9): Check if requester id stored in the sample_id still exists
     
-      return  !memcmp(&sample_id.writer_guid.entityId.entityKey, (uint8_t*)(&client_key), 3) &&
+    return  !memcmp(&sample_id.writer_guid.entityId.entityKey, (uint8_t*)(&client_key), 3) &&
             !memcmp(&sample_id.writer_guid.entityId.entityKind, (uint8_t*)(&client_key) + 3, 1);
 }
 

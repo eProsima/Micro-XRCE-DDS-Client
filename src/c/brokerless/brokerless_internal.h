@@ -26,7 +26,7 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef unsigned long hash_int_t; 
+typedef uint32_t hash_int_t; 
 
 #define BROKERLESS_MESSAGE_QUEUE_LEN 100
 #define BROKERLESS_ENTITY_MAP_LEN 10
