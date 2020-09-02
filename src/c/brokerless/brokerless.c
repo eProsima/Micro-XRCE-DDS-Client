@@ -200,7 +200,7 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
 
         name_type_buffer[topic_name_len+type_name_len] = '\0';
 
-        found &= add_brokerless_entity_hash(name_type_buffer, id);        
+        found &= add_brokerless_entity_hash(name_type_buffer, id);   
     } 
     else if (id.type == UXR_REQUESTER_ID || id.type == UXR_REPLIER_ID)
     {   
@@ -237,6 +237,8 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
         memcpy(&name_type_buffer[service_name_len+request_type_name_len], content_out, service_name_len);
 
         name_type_buffer[service_name_len+request_type_name_len+reply_type_name_len] = '\0';
+
+        found &= add_brokerless_entity_hash(name_type_buffer, id);   
     }
 
     return found;
