@@ -22,6 +22,8 @@ extern "C"
 
 #include <uxr/client/core/session/object_id.h>
 #include <uxr/client/core/type/xrce_types.h>
+#include <uxr/client/core/session/session.h>
+#include <uxr/client/config.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -66,14 +68,17 @@ typedef struct {
 
 // Internal API
 
-// TODO(Pablogs9): Complete this header list
-
-void init_brokerless();
+void init_brokerless(uint32_t key);
 bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id);
 bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id, SampleIdentity sample_id);
-bool add_brokerless_entity_hash(char* hash, uxrObjectId id);
+bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id);
+bool add_brokerless_entity_hash(char* ref, uxrObjectId id);
+int32_t find_brokerless_hash_from_id(uxrObjectId id);
+int32_t find_brokerless_hash_from_hash(char* hash);
+bool check_brokerless_sample_id(SampleIdentity sample_id);
+void fill_brokerless_sample_id(SampleIdentity* sample_id, uxrObjectId id);
 bool flush_brokerless_queues();
-
+bool listen_brokerless(uxrSession* session, int timeout);
 
 #ifdef __cplusplus
 }

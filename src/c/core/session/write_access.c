@@ -29,10 +29,12 @@ uint16_t uxr_buffer_request(
         WRITE_DATA_Payload_Data payload;
         rv = uxr_init_base_object_request(&session->info, requester_id, &payload.base);
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
-
+        
+#ifdef UCLIENT_BROKERLESS_ENABLE
         SampleIdentity sample_id;
         sample_id.sequence_number.low = rv;
         add_brokerless_message_with_sample_id(&ub, len, requester_id, sample_id);
+#endif
 
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
@@ -60,7 +62,9 @@ uint16_t uxr_buffer_reply(
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
         uxr_serialize_SampleIdentity(&ub, sample_id);
 
+#ifdef UCLIENT_BROKERLESS_ENABLE
         add_brokerless_message_with_sample_id(&ub, len, replier_id, *sample_id);
+#endif
 
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
@@ -84,7 +88,9 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
         ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
 
+#ifdef UCLIENT_BROKERLESS_ENABLE
         add_brokerless_message(ub, topic_size, datawriter_id);
+#endif
     }
 
     return !ub->error;

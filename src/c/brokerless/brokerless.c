@@ -349,13 +349,13 @@ bool flush_brokerless_queues()
     return false;
 }
 
-bool listen_brokerless(uint8_t** data, int timeout, uxrObjectId** id)
-{       
+bool listen_brokerless(uxrSession* session, int timeout)
+{
     size_t readed_bytes = 0;
     if (brokerlessEntityMap.datareaders || brokerlessEntityMap.requesters || brokerlessEntityMap.repliers){
         readed_bytes = brokerless_broadcast_recv(brokerlessBuffer, BROKERLESS_BUFFER_SIZE, timeout);
     }
-    
+
     if(0 != readed_bytes){
 
         ucdrBuffer reader;
@@ -367,9 +367,45 @@ bool listen_brokerless(uint8_t** data, int timeout, uxrObjectId** id)
         int32_t hash_index = find_brokerless_hash_from_hash(hash);
 
         if (-1 != hash_index && brokerlessEntityMap.queue[hash_index].id.type != UXR_DATAWRITER_ID)
-        {   
-            *id = &brokerlessEntityMap.queue[hash_index].id;
-            *data = reader.iterator;
+        {    
+            uxrObjectId * object_id = &brokerlessEntityMap.queue[hash_index].id;
+
+            //CALL CALLBACK
+            // request_id is related to the uxr_buffer_request_data request, so it can determine some limitations imposed into the communication -> NOT IMPLEMENTED BY NOW
+            if (object_id->type == UXR_DATAREADER_ID)
+            {
+                uxrStreamId stream = {0, 0, UCLIENT_BROKERLESS, UXR_INPUT_STREAM};
+                uint32_t length;
+                ucdr_deserialize_uint32_t(&reader, &length);
+                session->on_topic(session, *object_id, 0, stream, &reader, length, session->on_topic_args);
+            }
+            else
+            {
+                bool is_from_requester;
+                SampleIdentity sample_id;
+                uint32_t length;
+
+                ucdr_deserialize_bool(&reader, &is_from_requester);
+
+                // sample_id deserialization is done inside conditional in order to not deserialize when message should be dropped
+
+                if (is_from_requester && object_id->type == UXR_REPLIER_ID)
+                {   
+                    uxr_deserialize_SampleIdentity(&reader, &sample_id);          
+                    ucdr_deserialize_uint32_t(&reader, &length);
+                    session->on_request(session, *object_id, 0, &sample_id, &reader, length, session->on_request_args);
+                }
+                else if(!is_from_requester && object_id->type == UXR_REQUESTER_ID)
+                {
+                    uxr_deserialize_SampleIdentity(&reader, &sample_id);
+                    if (check_brokerless_sample_id(sample_id))
+                    {
+                        ucdr_deserialize_uint32_t(&reader, &length);
+                        session->on_reply(session, *object_id, 0, sample_id.sequence_number.low, &reader, length, session->on_reply_args);
+                    }
+                }
+                
+            }
             return true;
         }
     }

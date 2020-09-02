@@ -82,7 +82,10 @@ void uxr_init_session(uxrSession* session, uxrCommunication* comm, uint32_t key)
 
     uxr_init_session_info(&session->info, 0x81, key);
     uxr_init_stream_storage(&session->streams);
+
+#ifdef UCLIENT_BROKERLESS_ENABLE
     init_brokerless(key);
+#endif
 }
 
 void uxr_set_status_callback(uxrSession* session, uxrOnStatusFunc on_status_func, void* args)
@@ -372,7 +375,10 @@ bool uxr_buffer_performance(uxrSession *session,
 
 void uxr_flash_output_streams(uxrSession* session)
 {
+
+#ifdef UCLIENT_BROKERLESS_ENABLE
     flush_brokerless_queues();
+#endif
 
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
@@ -415,56 +421,10 @@ bool listen_message(uxrSession* session, int poll_ms)
         read_message(session, &ub);
     }
 
-    uint8_t* data_brokerless; uxrObjectId* object_id;
-    bool must_be_read_brokerless = listen_brokerless(&data_brokerless, poll_ms, &object_id);
-    if(must_be_read_brokerless)
-    {   
-        ucdrBuffer temp_buffer;
-        // TODO (pablogs9): Here the available buffer size must be known, using BROKERLESS_BUFFER_SIZE can cause segfault.
-        ucdr_init_buffer(&temp_buffer, data_brokerless, BROKERLESS_BUFFER_SIZE);
-
-        //CALL CALLBACK
-        // object_id is the datareader (or service equivalent) that can be used to identify which topic should the callback must handle
-        // request_id is related to the uxr_buffer_request_data request, so it can determine some limitations imposed into the communication -> NOT IMPLEMENTED BY NOW
-        // stream_id should point to a new type of Brokerless stream -> NOT IMPLEMENTED BY NOW
-        if (object_id->type == UXR_DATAREADER_ID)
-        {
-            uxrStreamId stream = {0, 0, UXR_BROKERLESS, UXR_INPUT_STREAM};
-            uint32_t length;
-            ucdr_deserialize_uint32_t(&temp_buffer, &length);
-            session->on_topic(session, *object_id, 0, stream, &temp_buffer, length, session->on_topic_args);
-        }
-        else
-        {
-            bool is_from_requester;
-            SampleIdentity sample_id;
-            uint32_t length;
-
-            ucdr_deserialize_bool(&temp_buffer, &is_from_requester);
-
-            // sample_id deserialization is done inside conditional in order to not deserialize when message should be dropped
-
-            if (is_from_requester && object_id->type == UXR_REPLIER_ID)
-            {   
-                uxr_deserialize_SampleIdentity(&temp_buffer, &sample_id);          
-                ucdr_deserialize_uint32_t(&temp_buffer, &length);
-                session->on_request(session, *object_id, 0, &sample_id, &temp_buffer, length, session->on_request_args);
-            }
-            else if(!is_from_requester && object_id->type == UXR_REQUESTER_ID)
-            {
-                uxr_deserialize_SampleIdentity(&temp_buffer, &sample_id);
-                if (check_brokerless_sample_id(sample_id))
-                {
-                    ucdr_deserialize_uint32_t(&temp_buffer, &length);
-                    session->on_reply(session, *object_id, 0, sample_id.sequence_number.low, &temp_buffer, length, session->on_reply_args);
-                }
-            }
-            
-        }
-        
-        
-    }
-
+#ifdef UCLIENT_BROKERLESS_ENABLE
+    listen_brokerless(session, poll_ms);
+#endif
+ 
     return must_be_read;
 }
 
