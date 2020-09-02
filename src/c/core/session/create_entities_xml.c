@@ -69,7 +69,7 @@ uint16_t uxr_buffer_create_datawriter_xml(uxrSession* session, uxrStreamId strea
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
     uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
 
-    // TODO (pablogs9): ALERT! Is not possible to parse the XML here for extracting the name/type;
+    add_brokerless_entity_hash_from_xml(xml, object_id);
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
@@ -83,7 +83,8 @@ uint16_t uxr_buffer_create_datareader_xml(uxrSession* session, uxrStreamId strea
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAREADER;
     uxr_object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
 
-    // HERE WE CAN CATCH THE TYPE AND THE NAME OR REFERENCE AND ASSOCIATE IT WITH ITS NUMBER
+    add_brokerless_entity_hash_from_xml(xml, object_id);
+
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
@@ -99,6 +100,8 @@ uint16_t uxr_buffer_create_requester_xml(
     payload.object_representation.kind = DDS_XRCE_OBJK_REQUESTER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
 
+    add_brokerless_entity_hash_from_xml(xml, object_id);
+
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
@@ -113,6 +116,8 @@ uint16_t uxr_buffer_create_replier_xml(
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REPLIER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);
+
+    add_brokerless_entity_hash_from_xml(xml, object_id);
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }

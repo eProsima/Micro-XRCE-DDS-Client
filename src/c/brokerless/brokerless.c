@@ -43,7 +43,7 @@ static brokerlessEntityMap_t brokerlessEntityMap;
 static uint8_t brokerlessBuffer[BROKERLESS_BUFFER_SIZE];
 
 //==================================================================
-//                             PRIVATE
+//                        PRIVATE UTILS
 //==================================================================
 
 // djb2 by Dan Bernstein: http://www.cse.yorku.ca/~oz/hash.html
@@ -59,6 +59,66 @@ void hash_brokerless(unsigned char *str, char* hash)
        hash[i] = ((char*)&int_hash)[i];
     }     
 }
+
+// Find first occurrence of tag in XML
+bool find_tag_xml(char * xml, size_t len, char * tag, char ** content, size_t * content_len)
+{
+    size_t tag_len = strlen(tag);
+    bool found_begin = false;
+    bool found_end = false;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (!found_begin && 0 == memcmp(&xml[i], tag, tag_len))
+        {
+            size_t tag_opener_len = 0;
+            while(xml[i+tag_opener_len] != '>')
+                tag_opener_len++;
+            *content = &xml[i+tag_opener_len+1];
+            found_begin = true;
+        }
+        else if(found_begin && 0 == memcmp(&xml[i], tag, tag_len)  )
+        {
+            *content_len = &xml[i-2] - *content;
+            found_end = true;
+            break;
+        }
+    }
+
+    return found_begin && found_end;
+}
+
+// Find property in first occurrence of tag in XML
+bool find_tag_property(char * xml, size_t len, char * tag, char * property, char ** content, size_t * content_len)
+{
+    size_t tag_len = strlen(tag);
+    size_t property_len = strlen(property);
+
+    bool found_tag = false;
+    bool found_property = false;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (!found_tag && 0 == memcmp(&xml[i], tag, tag_len))
+        {
+            found_tag = true;
+        }
+        else if(found_tag && 0 == memcmp(&xml[i], property, property_len)  )
+        {
+            *content = &xml[i+property_len+2];
+            i += property_len+2;
+            *content_len = 0;
+            while(xml[i + (*content_len)] != '"')
+                *content_len += 1;
+            found_property = true;
+            break;
+        }
+    }
+
+    return found_tag && found_property;
+}
+
+//==================================================================
+//                             PRIVATE
+//==================================================================
 
 void init_brokerless(uint32_t key)
 {
@@ -96,6 +156,92 @@ bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, uint32_t lenght, uxrO
     
     return false;
 }
+
+bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
+{
+    bool found = true;
+    char name_type_buffer[100];
+
+    if (id.type == UXR_DATAWRITER_ID || id.type == UXR_DATAREADER_ID)
+    {
+        char xml_strings[3][12] = { "dds", 
+                                    "data_writer", 
+                                    "topic"
+                                  };
+        if (id.type == UXR_DATAREADER_ID){
+            memcpy(xml_strings[1], "data_reader\0", 12);
+        }
+        
+        char * content_in = xml;
+        char * content_out;
+        size_t content_len_in = strlen(content_in);
+        size_t content_len_out;
+
+        for (size_t i = 0; i < 3; i++)
+        {   
+            printf("Looking %s\n", xml_strings[i]);
+            if(find_tag_xml(content_in, content_len_in, xml_strings[i], &content_out, &content_len_out)){
+                content_in = content_out;
+                content_len_in = content_len_out;
+            } else {
+                printf("Error looking %s\n", xml_strings[i]);
+                return false;
+            }
+        }
+
+        size_t topic_name_len;
+        size_t type_name_len;
+
+        found &= find_tag_xml(content_in, content_len_in, "name", &content_out, &topic_name_len);
+        memcpy(name_type_buffer, content_out, topic_name_len);
+
+        found &= find_tag_xml(content_in, content_len_in, "dataType", &content_out, &type_name_len);
+        memcpy(&name_type_buffer[topic_name_len], content_out, type_name_len);
+
+        name_type_buffer[topic_name_len+type_name_len] = '\0';
+
+        found &= add_brokerless_entity_hash(name_type_buffer, id);        
+    } 
+    else if (id.type == UXR_REQUESTER_ID || id.type == UXR_REPLIER_ID)
+    {   
+        char * content_out;
+        size_t service_name_len;
+        size_t request_type_name_len;
+        size_t reply_type_name_len;
+
+        found &= find_tag_property( xml, 
+                                    strlen(xml), 
+                                    (id.type == UXR_REQUESTER_ID) ? "requester" : "replier", 
+                                    "service_name", 
+                                    &content_out, 
+                                    &service_name_len);
+        
+        memcpy(name_type_buffer, content_out, service_name_len);
+
+        found &= find_tag_property( xml, 
+                            strlen(xml), 
+                            (id.type == UXR_REQUESTER_ID) ? "requester" : "replier", 
+                            "request_type", 
+                            &content_out, 
+                            &request_type_name_len);
+        
+        memcpy(&name_type_buffer[service_name_len], content_out, service_name_len);
+
+        found &= find_tag_property( xml, 
+                    strlen(xml), 
+                    (id.type == UXR_REQUESTER_ID) ? "requester" : "replier", 
+                    "reply_type", 
+                    &content_out, 
+                    &reply_type_name_len);
+        
+        memcpy(&name_type_buffer[service_name_len+request_type_name_len], content_out, service_name_len);
+
+        name_type_buffer[service_name_len+request_type_name_len+reply_type_name_len] = '\0';
+    }
+
+    return found;
+}
+
 
 bool add_brokerless_entity_hash(char* ref, uxrObjectId id)
 {
