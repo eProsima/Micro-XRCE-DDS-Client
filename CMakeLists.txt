@@ -56,6 +56,7 @@ set(UCLIENT_MIN_HEARTBEAT_TIME_INTERVAL 1 CACHE STRING "Set the time interval be
 set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
 set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
 set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
+
 option(UCLIENT_BROKERLESS_ENABLE "Enable brokerless transport (experimental)." ON)
 set(UCLIENT_BROKERLESS_PORT 9999 CACHE STRING "Brokerless UDP port (experimental)")
 set(UCLIENT_BROKERLESS_ENTITY_MAP_LEN 10 CACHE STRING "Brokerless entity map length port (experimental)")
