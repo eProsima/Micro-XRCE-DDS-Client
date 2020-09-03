@@ -30,7 +30,7 @@ bool brokerless_recv_stub(void* instance, uint8_t** buf, size_t* len, int timeou
     return true;
 }
 
-const uxrCommunication brokerless_comm_stub = {
+uxrCommunication brokerless_comm_stub = {
     NULL,
     brokerless_send_stub,
     brokerless_recv_stub,

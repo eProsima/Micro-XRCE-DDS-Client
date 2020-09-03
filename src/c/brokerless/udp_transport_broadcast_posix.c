@@ -57,7 +57,7 @@ size_t brokerless_broadcast_send(
     if (0 > bytes_sent) {
         rv = 0;
     } else {
-        rv = bytes_sent;
+        rv = (size_t)bytes_sent;
     }
 
     return rv;
@@ -78,11 +78,11 @@ size_t brokerless_broadcast_recv(
     setsockopt(fd_recv, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
     struct sockaddr_in from;
-    int fromlen;
+    uint fromlen;
     fromlen = sizeof(from);
 
-    ssize_t readed_bytes =  recvfrom(fd_recv, (void*)buf, len, 0, &from, &fromlen);
+    ssize_t readed_bytes =  recvfrom(fd_recv, (void*)buf, len, 0, (struct sockaddr * restrict)&from, (socklen_t * restrict)&fromlen);
 
-    return (readed_bytes > 0) ? readed_bytes : 0;
+    return (readed_bytes > 0) ? (size_t)readed_bytes : 0;
 }
 

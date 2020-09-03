@@ -52,8 +52,8 @@ void hash_brokerless(unsigned char *str, char* hash)
     hash_int_t int_hash = 5381;
     int c;    
 
-    while (c = *str++)
-        int_hash = ((int_hash << 5) + int_hash) + c; /* hash * 33 + c */
+    while ((c = *str++))
+        int_hash = ((int_hash << 5) + int_hash) + (hash_int_t)c; /* hash * 33 + c */
 
     for (size_t i = 0; i < BROKERLESS_HASH_SIZE; i++){
        hash[i] = ((char*)&int_hash)[i];
@@ -61,7 +61,7 @@ void hash_brokerless(unsigned char *str, char* hash)
 }
 
 // Find first occurrence of tag in XML
-bool find_tag_xml(char * xml, size_t len, char * tag, char ** content, size_t * content_len)
+bool find_tag_xml(const char * xml, size_t len, char * tag, const char ** content, size_t * content_len)
 {
     size_t tag_len = strlen(tag);
     bool found_begin = false;
@@ -78,7 +78,7 @@ bool find_tag_xml(char * xml, size_t len, char * tag, char ** content, size_t * 
         }
         else if(found_begin && 0 == memcmp(&xml[i], tag, tag_len)  )
         {
-            *content_len = &xml[i-2] - *content;
+            *content_len = (size_t)(&xml[i-2] - *content);
             found_end = true;
             break;
         }
@@ -88,7 +88,7 @@ bool find_tag_xml(char * xml, size_t len, char * tag, char ** content, size_t * 
 }
 
 // Find property in first occurrence of tag in XML
-bool find_tag_property(char * xml, size_t len, char * tag, char * property, char ** content, size_t * content_len)
+bool find_tag_property(const char * xml, size_t len, char * tag, char * property, const char ** content, size_t * content_len)
 {
     size_t tag_len = strlen(tag);
     size_t property_len = strlen(property);
@@ -140,7 +140,7 @@ bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id)
     return add_brokerless_message_with_sample_id(ub, lenght, id, sample_id);
 }
 
-bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id, SampleIdentity sample_id)
+bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, size_t lenght, uxrObjectId id, SampleIdentity sample_id)
 {
     if (brokerlessMessageQueue.index < UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN - 1)
     {
@@ -172,14 +172,14 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
             memcpy(xml_strings[1], "data_reader\0", 12);
         }
         
-        char * content_in = xml;
+        const char * content_in = xml;
         char * content_out;
         size_t content_len_in = strlen(content_in);
         size_t content_len_out;
 
         for (size_t i = 0; i < 3; i++)
         {   
-            if(find_tag_xml(content_in, content_len_in, xml_strings[i], &content_out, &content_len_out)){
+            if(find_tag_xml(content_in, content_len_in, xml_strings[i], (const char **)&content_out, &content_len_out)){
                 content_in = content_out;
                 content_len_in = content_len_out;
             } else {
@@ -190,10 +190,10 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
         size_t topic_name_len;
         size_t type_name_len;
 
-        found &= find_tag_xml(content_in, content_len_in, "name", &content_out, &topic_name_len);
+        found &= find_tag_xml(content_in, content_len_in, "name", (const char **)&content_out, &topic_name_len);
         memcpy(name_type_buffer, content_out, topic_name_len);
 
-        found &= find_tag_xml(content_in, content_len_in, "dataType", &content_out, &type_name_len);
+        found &= find_tag_xml(content_in, content_len_in, "dataType", (const char **)&content_out, &type_name_len);
         memcpy(&name_type_buffer[topic_name_len], content_out, type_name_len);
 
         name_type_buffer[topic_name_len+type_name_len] = '\0';
@@ -211,7 +211,7 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
                                     strlen(xml), 
                                     (id.type == UXR_REQUESTER_ID) ? "requester" : "replier", 
                                     "service_name", 
-                                    &content_out, 
+                                    (const char **)&content_out, 
                                     &service_name_len);
         
         memcpy(name_type_buffer, content_out, service_name_len);
@@ -220,7 +220,7 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
                             strlen(xml), 
                             (id.type == UXR_REQUESTER_ID) ? "requester" : "replier", 
                             "request_type", 
-                            &content_out, 
+                            (const char **)&content_out, 
                             &request_type_name_len);
         
         memcpy(&name_type_buffer[service_name_len], content_out, service_name_len);
@@ -229,7 +229,7 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
                     strlen(xml), 
                     (id.type == UXR_REQUESTER_ID) ? "requester" : "replier", 
                     "reply_type", 
-                    &content_out, 
+                    (const char **)&content_out, 
                     &reply_type_name_len);
         
         memcpy(&name_type_buffer[service_name_len+request_type_name_len], content_out, service_name_len);
@@ -243,7 +243,7 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
 }
 
 
-bool add_brokerless_entity_hash(char* ref, uxrObjectId id)
+bool add_brokerless_entity_hash(const char* ref, uxrObjectId id)
 {
     if (brokerlessEntityMap.index < UCLIENT_BROKERLESS_ENTITY_MAP_LEN - 1)
     {   
@@ -336,7 +336,7 @@ bool flush_brokerless_queues()
                 uxr_serialize_SampleIdentity(&writer, &brokerlessMessageQueue.queue[i].sample_id);
             }
 
-            ucdr_serialize_sequence_char(&writer, (char*) brokerlessMessageQueue.queue[i].data, brokerlessMessageQueue.queue[i].lenght);
+            ucdr_serialize_sequence_char(&writer, (char*) brokerlessMessageQueue.queue[i].data, (uint32_t)brokerlessMessageQueue.queue[i].lenght);
 
             brokerless_broadcast_send(writer.init, ucdr_buffer_length(&writer));
         }
@@ -374,7 +374,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
                 uxrStreamId stream = {0, 0, UXR_BROKERLESS, UXR_INPUT_STREAM};
                 uint32_t length;
                 ucdr_deserialize_uint32_t(&reader, &length);
-                session->on_topic(session, *object_id, 0, stream, &reader, length, session->on_topic_args);
+                session->on_topic(session, *object_id, 0, stream, &reader, (uint16_t)length, session->on_topic_args);
             }
             else
             {
@@ -390,7 +390,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
                 {   
                     uxr_deserialize_SampleIdentity(&reader, &sample_id);          
                     ucdr_deserialize_uint32_t(&reader, &length);
-                    session->on_request(session, *object_id, 0, &sample_id, &reader, length, session->on_request_args);
+                    session->on_request(session, *object_id, 0, &sample_id, &reader, (uint16_t)length, session->on_request_args);
                 }
                 else if(!is_from_requester && object_id->type == UXR_REQUESTER_ID)
                 {
@@ -398,7 +398,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
                     if (check_brokerless_sample_id(sample_id))
                     {
                         ucdr_deserialize_uint32_t(&reader, &length);
-                        session->on_reply(session, *object_id, 0, sample_id.sequence_number.low, &reader, length, session->on_reply_args);
+                        session->on_reply(session, *object_id, 0, (uint16_t)sample_id.sequence_number.low, &reader, (uint16_t)length, session->on_reply_args);
                     }
                 }
                 

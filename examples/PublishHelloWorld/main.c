@@ -20,6 +20,7 @@
 #include <stdio.h> //printf
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
+#include <unistd.h> //sleep
 
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY

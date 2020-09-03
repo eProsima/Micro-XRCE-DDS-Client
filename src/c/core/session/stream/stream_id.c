@@ -20,6 +20,7 @@ uxrStreamId uxr_stream_id(uint8_t index, uxrStreamType type, uxrStreamDirection 
         case UXR_NONE_STREAM:
             stream_id.raw = 0;
             break;
+        case UXR_BROKERLESS:
         case UXR_BEST_EFFORT_STREAM:
             stream_id.raw = (uint8_t)(index + BEST_EFFORT_STREAM_THRESHOLD);
             break;

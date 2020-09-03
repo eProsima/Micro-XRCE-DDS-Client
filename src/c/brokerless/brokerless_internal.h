@@ -35,14 +35,14 @@ typedef uint32_t hash_int_t;
 
 typedef struct {
     uint8_t *data;
-    uint32_t lenght;
+    size_t lenght;
     uxrObjectId id;
     SampleIdentity sample_id;
 } brokerlessMessage_t;
 
 typedef struct {
     brokerlessMessage_t queue[UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN];
-    uint8_t index;
+    size_t index;
 } brokerlessMessageQueue_t;
 
 // Entities map
@@ -55,7 +55,7 @@ typedef struct {
 
 typedef struct {
     brokerlessEntityHash_t queue[UCLIENT_BROKERLESS_ENTITY_MAP_LEN];
-    uint8_t index;
+    size_t index;
     uint8_t datawriters;
     uint8_t datareaders;
     uint8_t requesters;
@@ -66,9 +66,9 @@ typedef struct {
 
 void init_brokerless(uint32_t key);
 bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id);
-bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id, SampleIdentity sample_id);
+bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, size_t lenght, uxrObjectId id, SampleIdentity sample_id);
 bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id);
-bool add_brokerless_entity_hash(char* ref, uxrObjectId id);
+bool add_brokerless_entity_hash(const char* ref, uxrObjectId id);
 int32_t find_brokerless_hash_from_id(uxrObjectId id);
 int32_t find_brokerless_hash_from_hash(char* hash);
 bool check_brokerless_sample_id(SampleIdentity sample_id);
