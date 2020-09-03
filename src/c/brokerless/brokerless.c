@@ -371,7 +371,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
             // TODO (pablogs9): request_id is related to the uxr_buffer_request_data request, so it can determine some limitations imposed into the communication -> NOT IMPLEMENTED BY NOW
             if (object_id->type == UXR_DATAREADER_ID)
             {
-                uxrStreamId stream = {0, 0, UCLIENT_BROKERLESS, UXR_INPUT_STREAM};
+                uxrStreamId stream = {0, 0, UXR_BROKERLESS, UXR_INPUT_STREAM};
                 uint32_t length;
                 ucdr_deserialize_uint32_t(&reader, &length);
                 session->on_topic(session, *object_id, 0, stream, &reader, length, session->on_topic_args);

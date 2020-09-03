@@ -46,7 +46,7 @@ typedef enum uxrStreamType
     /** Identifies a reliable stream. */
     UXR_RELIABLE_STREAM,
     /** Identifies a brokerless stream. */
-    UCLIENT_BROKERLESS
+    UXR_BROKERLESS
 
 } uxrStreamType;
 
