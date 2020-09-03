@@ -29,11 +29,7 @@ extern "C"
 #include <stdbool.h>
 
 typedef uint32_t hash_int_t; 
-
-#define BROKERLESS_MESSAGE_QUEUE_LEN 100
-#define BROKERLESS_ENTITY_MAP_LEN 10
 #define BROKERLESS_HASH_SIZE sizeof(hash_int_t)
-#define BROKERLESS_BUFFER_SIZE 1000
 
 // Outcomming message queue
 
@@ -45,7 +41,7 @@ typedef struct {
 } brokerlessMessage_t;
 
 typedef struct {
-    brokerlessMessage_t queue[BROKERLESS_MESSAGE_QUEUE_LEN];
+    brokerlessMessage_t queue[UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN];
     uint8_t index;
 } brokerlessMessageQueue_t;
 
@@ -58,7 +54,7 @@ typedef struct {
 
 
 typedef struct {
-    brokerlessEntityHash_t queue[BROKERLESS_ENTITY_MAP_LEN];
+    brokerlessEntityHash_t queue[UCLIENT_BROKERLESS_ENTITY_MAP_LEN];
     uint8_t index;
     uint8_t datawriters;
     uint8_t datareaders;

@@ -40,7 +40,7 @@
 static uint32_t client_key;
 static brokerlessMessageQueue_t brokerlessMessageQueue;
 static brokerlessEntityMap_t brokerlessEntityMap;
-static uint8_t brokerlessBuffer[BROKERLESS_BUFFER_SIZE];
+static uint8_t brokerlessBuffer[UCLIENT_BROKERLESS_INTERNAL_BUFFER_LEN];
 
 //==================================================================
 //                        PRIVATE UTILS
@@ -142,7 +142,7 @@ bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id)
 
 bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id, SampleIdentity sample_id)
 {
-    if (brokerlessMessageQueue.index < BROKERLESS_MESSAGE_QUEUE_LEN - 1)
+    if (brokerlessMessageQueue.index < UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN - 1)
     {
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].data =  ub->iterator;
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].lenght =  lenght;
@@ -179,12 +179,10 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
 
         for (size_t i = 0; i < 3; i++)
         {   
-            printf("Looking %s\n", xml_strings[i]);
             if(find_tag_xml(content_in, content_len_in, xml_strings[i], &content_out, &content_len_out)){
                 content_in = content_out;
                 content_len_in = content_len_out;
             } else {
-                printf("Error looking %s\n", xml_strings[i]);
                 return false;
             }
         }
@@ -247,7 +245,7 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
 
 bool add_brokerless_entity_hash(char* ref, uxrObjectId id)
 {
-    if (brokerlessEntityMap.index < BROKERLESS_ENTITY_MAP_LEN - 1)
+    if (brokerlessEntityMap.index < UCLIENT_BROKERLESS_ENTITY_MAP_LEN - 1)
     {   
         hash_brokerless((unsigned char*) ref, brokerlessEntityMap.queue[brokerlessEntityMap.index].hash);
 
@@ -323,7 +321,7 @@ bool flush_brokerless_queues()
         if (-1 != hash_index)
         {
             ucdrBuffer writer;
-            ucdr_init_buffer(&writer, brokerlessBuffer, BROKERLESS_BUFFER_SIZE);
+            ucdr_init_buffer(&writer, brokerlessBuffer, UCLIENT_BROKERLESS_INTERNAL_BUFFER_LEN);
             ucdr_serialize_array_char(&writer, brokerlessEntityMap.queue[hash_index].hash, BROKERLESS_HASH_SIZE);
 
             if (brokerlessMessageQueue.queue[i].id.type == UXR_REQUESTER_ID || brokerlessMessageQueue.queue[i].id.type == UXR_REPLIER_ID){
@@ -353,7 +351,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
 {
     size_t readed_bytes = 0;
     if (brokerlessEntityMap.datareaders || brokerlessEntityMap.requesters || brokerlessEntityMap.repliers){
-        readed_bytes = brokerless_broadcast_recv(brokerlessBuffer, BROKERLESS_BUFFER_SIZE, timeout);
+        readed_bytes = brokerless_broadcast_recv(brokerlessBuffer, UCLIENT_BROKERLESS_INTERNAL_BUFFER_LEN, timeout);
     }
 
     if(0 != readed_bytes){
@@ -370,8 +368,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
         {    
             uxrObjectId * object_id = &brokerlessEntityMap.queue[hash_index].id;
 
-            //CALL CALLBACK
-            // request_id is related to the uxr_buffer_request_data request, so it can determine some limitations imposed into the communication -> NOT IMPLEMENTED BY NOW
+            // TODO (pablogs9): request_id is related to the uxr_buffer_request_data request, so it can determine some limitations imposed into the communication -> NOT IMPLEMENTED BY NOW
             if (object_id->type == UXR_DATAREADER_ID)
             {
                 uxrStreamId stream = {0, 0, UCLIENT_BROKERLESS, UXR_INPUT_STREAM};

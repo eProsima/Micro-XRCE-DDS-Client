@@ -57,6 +57,10 @@ set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
 set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
 set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
 option(UCLIENT_BROKERLESS_ENABLE "Enable brokerless transport (experimental)." ON)
+set(UCLIENT_BROKERLESS_PORT 9999 CACHE STRING "Brokerless UDP port (experimental)")
+set(UCLIENT_BROKERLESS_ENTITY_MAP_LEN 10 CACHE STRING "Brokerless entity map length port (experimental)")
+set(UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN 100 CACHE STRING "Brokerless message queue length (experimental)")
+set(UCLIENT_BROKERLESS_INTERNAL_BUFFER_LEN 500 CACHE STRING "Brokerless internal buffer length (experimental)")
 
 ###############################################################################
 # Dependencies
@@ -229,8 +233,8 @@ set(SRCS
     src/c/core/session/create_entities_xml.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
-    src/c/brokerless/brokerless.c
-    src/c/brokerless/udp_transport_broadcast_posix.c
+    $<$<BOOL:${UCLIENT_BROKERLESS_ENABLE}>:src/c/brokerless/brokerless.c>
+    $<$<BOOL:${UCLIENT_BROKERLESS_ENABLE}>:src/c/brokerless/udp_transport_broadcast_posix.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
     )
@@ -349,6 +353,11 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorldP2P)
+endif()
+
+if(UCLIENT_BUILD_EXAMPLES AND UCLIENT_BROKERLESS_ENABLE)
+    add_subdirectory(examples/BrokerlessPublisher)
+    add_subdirectory(examples/BrokerlessSubscriber)
 endif()
 
 ###############################################################################
