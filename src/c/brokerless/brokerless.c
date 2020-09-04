@@ -66,9 +66,9 @@ bool find_tag_xml(const char * xml, size_t len, char * tag, const char ** conten
     size_t tag_len = strlen(tag);
     bool found_begin = false;
     bool found_end = false;
-    for (size_t i = 0; i < len; i++)
+    for (size_t i = 1; i < len; i++)
     {
-        if (!found_begin && 0 == memcmp(&xml[i], tag, tag_len))
+        if (!found_begin && 0 == memcmp(&xml[i], tag, tag_len) && xml[i-1] == '<')
         {
             size_t tag_opener_len = 0;
             while(xml[i+tag_opener_len] != '>')
@@ -76,7 +76,7 @@ bool find_tag_xml(const char * xml, size_t len, char * tag, const char ** conten
             *content = &xml[i+tag_opener_len+1];
             found_begin = true;
         }
-        else if(found_begin && 0 == memcmp(&xml[i], tag, tag_len)  )
+        else if(found_begin && 0 == memcmp(&xml[i], tag, tag_len) && xml[i-1] == '/')
         {
             *content_len = (size_t)(&xml[i-2] - *content);
             found_end = true;
@@ -95,13 +95,13 @@ bool find_tag_property(const char * xml, size_t len, char * tag, char * property
 
     bool found_tag = false;
     bool found_property = false;
-    for (size_t i = 0; i < len; i++)
+    for (size_t i = 1; i < len; i++)
     {
-        if (!found_tag && 0 == memcmp(&xml[i], tag, tag_len))
+        if (!found_tag && 0 == memcmp(&xml[i], tag, tag_len) && xml[i-1] == '<')
         {
             found_tag = true;
         }
-        else if(found_tag && 0 == memcmp(&xml[i], property, property_len)  )
+        else if(found_tag && 0 == memcmp(&xml[i], property, property_len))
         {
             *content = &xml[i+property_len+2];
             i += property_len+2;
@@ -214,7 +214,8 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
                                     (const char **)&content_out, 
                                     &service_name_len);
         
-        memcpy(name_type_buffer, content_out, service_name_len);
+        if (found)
+            memcpy(name_type_buffer, content_out, service_name_len);
 
         found &= find_tag_property( xml, 
                             strlen(xml), 
@@ -222,8 +223,8 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
                             "request_type", 
                             (const char **)&content_out, 
                             &request_type_name_len);
-        
-        memcpy(&name_type_buffer[service_name_len], content_out, service_name_len);
+        if (found)
+            memcpy(&name_type_buffer[service_name_len], content_out, service_name_len);
 
         found &= find_tag_property( xml, 
                     strlen(xml), 
@@ -232,11 +233,15 @@ bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id)
                     (const char **)&content_out, 
                     &reply_type_name_len);
         
-        memcpy(&name_type_buffer[service_name_len+request_type_name_len], content_out, service_name_len);
+        if (found){
+            memcpy(&name_type_buffer[service_name_len+request_type_name_len], content_out, service_name_len);
+            name_type_buffer[service_name_len+request_type_name_len+reply_type_name_len] = '\0';
+        }
 
-        name_type_buffer[service_name_len+request_type_name_len+reply_type_name_len] = '\0';
-
+        if (found)
+            found &= add_brokerless_entity_hash(name_type_buffer, id);   
         found &= add_brokerless_entity_hash(name_type_buffer, id);   
+            found &= add_brokerless_entity_hash(name_type_buffer, id);   
     }
 
     return found;
@@ -249,7 +254,8 @@ bool add_brokerless_entity_hash(const char* ref, uxrObjectId id)
     {   
         hash_brokerless((unsigned char*) ref, brokerlessEntityMap.queue[brokerlessEntityMap.index].hash);
 
-        brokerlessEntityMap.queue[brokerlessMessageQueue.index].id =  id;
+        brokerlessEntityMap.queue[brokerlessEntityMap.index].id.id =  id.id;
+        brokerlessEntityMap.queue[brokerlessEntityMap.index].id.type =  id.type;
         
         if (id.type == UXR_DATAREADER_ID){
             brokerlessEntityMap.datareaders++;
@@ -287,6 +293,19 @@ int32_t find_brokerless_hash_from_hash(char* hash)
     for (size_t i = 0; i < brokerlessEntityMap.index; i++)
     {   
         if (0 == memcmp((void*) hash, (void*) brokerlessEntityMap.queue[i].hash, BROKERLESS_HASH_SIZE))
+        {
+            return (int32_t) i;
+        }
+    }
+    return -1;
+}
+
+int32_t find_brokerless_hash_from_hash_only_reader(char* hash)
+{
+    for (size_t i = 0; i < brokerlessEntityMap.index; i++)
+    {   
+        if (0 == memcmp((void*) hash, (void*) brokerlessEntityMap.queue[i].hash, BROKERLESS_HASH_SIZE) && 
+            brokerlessEntityMap.queue[i].id.type != UXR_DATAWRITER_ID)
         {
             return (int32_t) i;
         }
@@ -362,7 +381,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
         char hash[BROKERLESS_HASH_SIZE];
         ucdr_deserialize_array_char(&reader, hash, BROKERLESS_HASH_SIZE);
 
-        int32_t hash_index = find_brokerless_hash_from_hash(hash);
+        int32_t hash_index = find_brokerless_hash_from_hash_only_reader(hash);
 
         if (-1 != hash_index && brokerlessEntityMap.queue[hash_index].id.type != UXR_DATAWRITER_ID)
         {    
