@@ -374,6 +374,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
                 uxrStreamId stream = {0, 0, UXR_BROKERLESS, UXR_INPUT_STREAM};
                 uint32_t length;
                 ucdr_deserialize_uint32_t(&reader, &length);
+                session->on_data_flag = true;
                 session->on_topic(session, *object_id, 0, stream, &reader, (uint16_t)length, session->on_topic_args);
             }
             else
@@ -390,6 +391,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
                 {   
                     uxr_deserialize_SampleIdentity(&reader, &sample_id);          
                     ucdr_deserialize_uint32_t(&reader, &length);
+                    session->on_data_flag = true;
                     session->on_request(session, *object_id, 0, &sample_id, &reader, (uint16_t)length, session->on_request_args);
                 }
                 else if(!is_from_requester && object_id->type == UXR_REQUESTER_ID)
@@ -398,6 +400,7 @@ bool listen_brokerless(uxrSession* session, int timeout)
                     if (check_brokerless_sample_id(sample_id))
                     {
                         ucdr_deserialize_uint32_t(&reader, &length);
+                        session->on_data_flag = true;
                         session->on_reply(session, *object_id, 0, (uint16_t)sample_id.sequence_number.low, &reader, (uint16_t)length, session->on_reply_args);
                     }
                 }

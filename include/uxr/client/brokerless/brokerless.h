@@ -27,7 +27,7 @@ bool brokerless_send_stub(void* instance, const uint8_t* buf, size_t len){
 }
 
 bool brokerless_recv_stub(void* instance, uint8_t** buf, size_t* len, int timeout){
-    return true;
+    return false;
 }
 
 uxrCommunication brokerless_comm_stub = {
