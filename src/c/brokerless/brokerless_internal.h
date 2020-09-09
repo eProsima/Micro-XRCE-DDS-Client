@@ -36,7 +36,7 @@ typedef uint32_t hash_int_t;
 typedef struct
 {
     uint8_t *data;
-    size_t lenght;
+    size_t length;
     uxrObjectId id;
     SampleIdentity sample_id;
 } brokerlessMessage_t;
@@ -69,8 +69,8 @@ typedef struct
 // Internal API (TODO: add documentation)
 
 void init_brokerless(uint32_t key);
-bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id);
-bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, size_t lenght, uxrObjectId id, SampleIdentity sample_id);
+bool add_brokerless_message(ucdrBuffer* ub, uint32_t length, uxrObjectId id);
+bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, size_t length, uxrObjectId id, SampleIdentity sample_id);
 bool add_brokerless_entity_hash_from_xml(const char* xml, uxrObjectId id);
 bool add_brokerless_entity_hash(const char* ref, uxrObjectId id);
 int32_t find_brokerless_hash_from_id(uxrObjectId id);

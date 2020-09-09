@@ -141,18 +141,18 @@ void init_brokerless(uint32_t key)
     brokerless_init_transport();
 }
 
-bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id)
+bool add_brokerless_message(ucdrBuffer* ub, uint32_t length, uxrObjectId id)
 {
     SampleIdentity sample_id = {0};
-    return add_brokerless_message_with_sample_id(ub, lenght, id, sample_id);
+    return add_brokerless_message_with_sample_id(ub, length, id, sample_id);
 }
 
-bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, size_t lenght, uxrObjectId id, SampleIdentity sample_id)
+bool add_brokerless_message_with_sample_id(ucdrBuffer* ub, size_t length, uxrObjectId id, SampleIdentity sample_id)
 {
     if (brokerlessMessageQueue.index < UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN - 1)
     {
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].data =  ub->iterator;
-        brokerlessMessageQueue.queue[brokerlessMessageQueue.index].lenght =  lenght;
+        brokerlessMessageQueue.queue[brokerlessMessageQueue.index].length =  length;
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].id =  id;
         brokerlessMessageQueue.queue[brokerlessMessageQueue.index].sample_id = sample_id;
 
@@ -389,7 +389,7 @@ bool flush_brokerless_queues()
                 uxr_serialize_SampleIdentity(&writer, &brokerlessMessageQueue.queue[i].sample_id);
             }
 
-            ucdr_serialize_sequence_char(&writer, (char*) brokerlessMessageQueue.queue[i].data, (uint32_t)brokerlessMessageQueue.queue[i].lenght);
+            ucdr_serialize_sequence_char(&writer, (char*) brokerlessMessageQueue.queue[i].data, (uint32_t)brokerlessMessageQueue.queue[i].length);
 
             brokerless_broadcast_send(writer.init, ucdr_buffer_length(&writer));
         }
