@@ -44,7 +44,7 @@ uint16_t uxr_buffer_create_datawriter_ref(uxrSession* session, uxrStreamId strea
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
     uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
 
-#ifdef UCLIENT_BROKERLESS_ENABLE
+#ifdef UCLIENT_PROFILE_BROKERLESS
     add_brokerless_entity_hash(ref, object_id);
 #endif
 
@@ -59,7 +59,7 @@ uint16_t uxr_buffer_create_datareader_ref(uxrSession* session, uxrStreamId strea
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAREADER;
     uxr_object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
 
-#ifdef UCLIENT_BROKERLESS_ENABLE
+#ifdef UCLIENT_PROFILE_BROKERLESS
     add_brokerless_entity_hash(ref, object_id);
 #endif
 
@@ -78,7 +78,7 @@ uint16_t uxr_buffer_create_requester_ref(
     payload.object_representation.kind = DDS_XRCE_OBJK_REQUESTER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
 
-#ifdef UCLIENT_BROKERLESS_ENABLE
+#ifdef UCLIENT_PROFILE_BROKERLESS
     add_brokerless_entity_hash(ref, object_id);
 #endif
 
@@ -97,7 +97,7 @@ uint16_t uxr_buffer_create_replier_ref(
     payload.object_representation.kind = DDS_XRCE_OBJK_REPLIER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);
 
-#ifdef UCLIENT_BROKERLESS_ENABLE
+#ifdef UCLIENT_PROFILE_BROKERLESS
     add_brokerless_entity_hash(ref, object_id);
 #endif
 

@@ -28,32 +28,36 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef uint32_t hash_int_t; 
+typedef uint32_t hash_int_t;
 #define BROKERLESS_HASH_SIZE sizeof(hash_int_t)
 
 // Outcomming message queue
 
-typedef struct {
+typedef struct
+{
     uint8_t *data;
     size_t lenght;
     uxrObjectId id;
     SampleIdentity sample_id;
 } brokerlessMessage_t;
 
-typedef struct {
+typedef struct
+{
     brokerlessMessage_t queue[UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN];
     size_t index;
 } brokerlessMessageQueue_t;
 
 // Entities map
 
-typedef struct {
+typedef struct
+{
     char hash[BROKERLESS_HASH_SIZE];
     uxrObjectId id;
 } brokerlessEntityHash_t;
 
 
-typedef struct {
+typedef struct
+{
     brokerlessEntityHash_t queue[UCLIENT_BROKERLESS_ENTITY_MAP_LEN];
     size_t index;
     uint8_t datawriters;
@@ -62,7 +66,7 @@ typedef struct {
     uint8_t repliers;
 } brokerlessEntityMap_t;
 
-// Internal API
+// Internal API (TODO: add documentation)
 
 void init_brokerless(uint32_t key);
 bool add_brokerless_message(ucdrBuffer* ub, uint32_t lenght, uxrObjectId id);

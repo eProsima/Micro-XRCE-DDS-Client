@@ -83,8 +83,8 @@ void uxr_init_session(uxrSession* session, uxrCommunication* comm, uint32_t key)
     uxr_init_session_info(&session->info, 0x81, key);
     uxr_init_stream_storage(&session->streams);
 
-#ifdef UCLIENT_BROKERLESS_ENABLE
-    init_brokerless(key);
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    init_brokerless(key); // TODO: should it be desirable to give the user an uxr_init_brokerless_transport() method?
 #endif
 }
 
@@ -376,7 +376,7 @@ bool uxr_buffer_performance(uxrSession *session,
 void uxr_flash_output_streams(uxrSession* session)
 {
 
-#ifdef UCLIENT_BROKERLESS_ENABLE
+#ifdef UCLIENT_PROFILE_BROKERLESS
     flush_brokerless_queues();
 #endif
 
@@ -421,7 +421,7 @@ bool listen_message(uxrSession* session, int poll_ms)
         read_message(session, &ub);
     }
 
-#ifdef UCLIENT_BROKERLESS_ENABLE
+#ifdef UCLIENT_PROFILE_BROKERLESS
     listen_brokerless(session, poll_ms);
 #endif
  

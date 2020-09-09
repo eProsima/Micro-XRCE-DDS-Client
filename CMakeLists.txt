@@ -57,7 +57,11 @@ set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
 set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
 set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
 
-option(UCLIENT_BROKERLESS_ENABLE "Enable brokerless transport (experimental)." ON)
+option(UCLIENT_PROFILE_BROKERLESS "Enable brokerless transport (experimental)." ON)
+if(NOT UCLIENT_PROFILE_UDP)
+    set(UCLIENT_PROFILE_BROKERLESS OFF)
+endif()
+
 set(UCLIENT_BROKERLESS_PORT 9999 CACHE STRING "Brokerless UDP port (experimental)")
 set(UCLIENT_BROKERLESS_ENTITY_MAP_LEN 10 CACHE STRING "Brokerless entity map length port (experimental)")
 set(UCLIENT_BROKERLESS_MESSAGE_QUEUE_LEN 100 CACHE STRING "Brokerless message queue length (experimental)")
@@ -234,8 +238,8 @@ set(SRCS
     src/c/core/session/create_entities_xml.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
-    $<$<BOOL:${UCLIENT_BROKERLESS_ENABLE}>:src/c/brokerless/brokerless.c>
-    $<$<BOOL:${UCLIENT_BROKERLESS_ENABLE}>:src/c/brokerless/udp_transport_broadcast_posix.c>
+    $<$<BOOL:${UCLIENT_PROFILE_BROKERLESS}>:src/c/brokerless/brokerless.c>
+    $<$<BOOL:${UCLIENT_PROFILE_BROKERLESS}>:src/c/brokerless/udp_transport_broadcast_posix.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
     )
@@ -356,7 +360,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorldP2P)
 endif()
 
-if(UCLIENT_BUILD_EXAMPLES AND UCLIENT_BROKERLESS_ENABLE)
+if(UCLIENT_BUILD_EXAMPLES AND UCLIENT_PROFILE_BROKERLESS)
     add_subdirectory(examples/BrokerlessPublisher)
     add_subdirectory(examples/BrokerlessSubscriber)
 endif()

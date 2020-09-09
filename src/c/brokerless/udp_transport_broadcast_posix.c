@@ -52,14 +52,10 @@ size_t brokerless_broadcast_send(
         size_t len)
 {
     size_t rv = 0;
-       
-    ssize_t bytes_sent = sendto(fd_send, buf, len, 0, (struct sockaddr*) &send_addr, sizeof(send_addr));
-    if (0 > bytes_sent) {
-        rv = 0;
-    } else {
-        rv = (size_t)bytes_sent;
-    }
 
+    ssize_t bytes_sent = sendto(fd_send, buf, len, 0, (struct sockaddr*) &send_addr, sizeof(send_addr));
+
+    rv = (0 > bytes_sent) ? 0 : (size_t)bytes_sent;
     return rv;
 }
 
@@ -67,8 +63,7 @@ size_t brokerless_broadcast_recv(
         uint8_t* buf,
         size_t len,
         int timeout)
-{   
-
+{
     timeout = (timeout <= 0) ? 1 : timeout;
 
     struct timeval tv;
@@ -81,6 +76,7 @@ size_t brokerless_broadcast_recv(
     uint fromlen;
     fromlen = sizeof(from);
 
+    // TODO: what if received packages are not full?
     ssize_t readed_bytes =  recvfrom(fd_recv, (void*)buf, len, 0, (struct sockaddr * restrict)&from, (socklen_t * restrict)&fromlen);
 
     return (readed_bytes > 0) ? (size_t)readed_bytes : 0;
