@@ -93,7 +93,7 @@ bool find_tag_xml(const char * xml, size_t len, char * tag, const char ** conten
 }
 
 // Find property in first occurrence of tag in XML
-bool find_tag_property(const char * xml, size_t len, char * tag, char * property, const char ** content, size_t * content_len)
+bool find_tag_property(const char * xml, size_t len, const char * tag, char * property, const char ** content, size_t * content_len)
 {
     size_t tag_len = strlen(tag);
     size_t property_len = strlen(property);

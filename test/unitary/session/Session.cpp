@@ -23,6 +23,9 @@ extern "C"
 
 #include <c/util/time.c>
 
+#include <c/brokerless/brokerless.c>
+#include <c/brokerless/udp_transport_broadcast_posix.c>
+
 #undef UXR_MESSAGE_LOG
 #undef UXR_SERIALIZATION_LOG
 #include <c/core/session/session.c>

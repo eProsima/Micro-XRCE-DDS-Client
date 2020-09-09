@@ -77,7 +77,7 @@ size_t brokerless_broadcast_recv(
     fromlen = sizeof(from);
 
     // TODO: what if received packages are not full?
-    ssize_t readed_bytes =  recvfrom(fd_recv, (void*)buf, len, 0, (struct sockaddr * restrict)&from, (socklen_t * restrict)&fromlen);
+    ssize_t readed_bytes =  recvfrom(fd_recv, (void*)buf, len, 0, (struct sockaddr *)(&from), (socklen_t *)(&fromlen));
 
     return (readed_bytes > 0) ? (size_t)readed_bytes : 0;
 }

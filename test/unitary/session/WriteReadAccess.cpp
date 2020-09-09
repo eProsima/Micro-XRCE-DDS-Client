@@ -20,6 +20,9 @@ extern "C"
 #include <c/core/session/session.c>
 
 #include <c/util/time.c>
+
+#include <c/brokerless/brokerless.c>
+#include <c/brokerless/udp_transport_broadcast_posix.c>
 }
 
 #include <gtest/gtest.h>
