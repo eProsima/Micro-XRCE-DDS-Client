@@ -216,6 +216,10 @@ if(UCLIENT_PROFILE_DISCOVERY)
     endif()
 endif()
 
+if(UCLIENT_PROFILE_BROKERLESS AND UCLIENT_PLATFORM_WINDOWS)
+    set(UCLIENT_PROFILE_BROKERLESS OFF)
+endif()
+
 # Other sources
 set(SRCS
     src/c/core/session/stream/input_best_effort_stream.c
