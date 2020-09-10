@@ -20,7 +20,12 @@
 #include <stdio.h> //printf
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
+
+#ifndef _WIN32
 #include <unistd.h> //sleep
+#else
+#include <Windows.h>
+#endif
 
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
@@ -123,7 +128,12 @@ int main(int args, char** argv)
 
         printf("Send topic: %s, id: %i\n", topic.message, topic.index);
         connected = uxr_run_session_time(&session, 1000);
+
+#ifndef _WIN32
         sleep(1);
+#else
+        Sleep(1000);
+#endif
     }
 
     // Delete resources
