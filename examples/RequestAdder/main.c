@@ -60,7 +60,7 @@ int main(int args, char** argv)
 
     char* ip = argv[1];
     char* port = argv[2];
-    srand(time(NULL));   // Initialization, should only be called once.
+    srand((unsigned int)time(NULL));   // Initialization, should only be called once.
     uint32_t key = rand();
 
     // Transport
