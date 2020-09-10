@@ -21,8 +21,10 @@ extern "C"
 
 #include <c/util/time.c>
 
+#ifdef UCLIENT_PROFILE_BROKERLESS
 #include <c/brokerless/brokerless.c>
 #include <c/brokerless/udp_transport_broadcast_posix.c>
+#endif  // UCLIENT_PROFILE_BROKERLESS
 }
 
 #include <gtest/gtest.h>
