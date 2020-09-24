@@ -19,7 +19,7 @@ endif()
 
 
 if(NOT UCLIENT_PROFILE_DISCOVERY)
-    message(WARNING "Can not compile example: The profile PROFILE_DISCOVERY must be enabled.")
+    message(WARNING "Can not compile example: The profile UCLIENT_PROFILE_DISCOVERY must be enabled.")
 else()
 
     #############################################################
