@@ -18,7 +18,7 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
 endif()
 
 
-if(NOT PROFILE_DISCOVERY)
+if(NOT UCLIENT_PROFILE_DISCOVERY)
     message(WARNING "Can not compile example: The profile PROFILE_DISCOVERY must be enabled.")
 else()
 
