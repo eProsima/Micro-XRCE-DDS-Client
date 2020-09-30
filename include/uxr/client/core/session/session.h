@@ -203,6 +203,15 @@ UXRDLLAPI void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanc
 UXRDLLAPI bool uxr_create_session(uxrSession* session);
 
 /**
+ * @brief Creates a new session with the Agent.
+ *        This function logs in a session, enabling any other XRCE communication with the Agent.
+ * @param session   A uxrSesssion structure previously initialized.
+ * @param retries   Max attempts for creating the session
+ * @return  true in case of successful session establishment, and false in other case.
+ */
+UXRDLLAPI bool uxr_create_session_retries(uxrSession* session, int retries);
+
+/**
  * @brief Deletes a session previously created.
  *        All XRCE entities created within the session will be removed.
  *        This function logs out a session, disabling any other XRCE communication with the Agent.

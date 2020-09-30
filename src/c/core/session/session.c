@@ -121,7 +121,7 @@ void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_e
 }
 #endif
 
-bool uxr_create_session(uxrSession* session)
+bool uxr_create_session_retries(uxrSession* session, int retries)
 {
     uxr_reset_stream_storage(&session->streams);
 
@@ -132,9 +132,14 @@ bool uxr_create_session(uxrSession* session)
     uxr_buffer_create_session(&session->info, &ub, (uint16_t)(session->comm->mtu - INTERNAL_RELIABLE_BUFFER_OFFSET));
     uxr_stamp_create_session_header(&session->info, ub.init);
 
-    bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&ub), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
+    bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&ub), (size_t) retries);
     bool created = received && UXR_STATUS_OK == session->info.last_requested_status;
     return created;
+}
+
+bool uxr_create_session(uxrSession* session)
+{
+    return uxr_create_session_retries(session, UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
 }
 
 bool uxr_delete_session(uxrSession* session)
