@@ -36,6 +36,9 @@ extern "C"
 #include <winsock2.h>
 #endif
 
+#ifdef __INTIME__
+#include <netinet/in.h>
+#endif // __INTIME__
 
 // TODO (julibert): move this to CMake flag.
 #define UXR_UDP_TRANSPORT_MTU_DATAGRAM 200 //Adjusted to the minimun necessary buffer for discovery messages.

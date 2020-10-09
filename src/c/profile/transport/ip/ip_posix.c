@@ -15,10 +15,10 @@
 #include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/config.h>
 
-#if defined(UCLIENT_PLATFORM_POSIX)
-#include <arpa/inet.h>
-#elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
+#if defined(UCLIENT_PLATFORM_POSIX_NOPOLL) || defined(__INTIME__)
 #include <sys/socket.h>
+#elif defined(UCLIENT_PLATFORM_POSIX)
+#include <arpa/inet.h>
 #endif
 
 bool uxr_ip_to_locator(

@@ -7,6 +7,12 @@
 #include <errno.h>
 #include <netdb.h>
 
+#ifdef __INTIME__
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif // __INTIME__
+
 bool uxr_init_udp_platform(
         uxrUDPPlatform* platform,
         uxrIpProtocol ip_protocol,
