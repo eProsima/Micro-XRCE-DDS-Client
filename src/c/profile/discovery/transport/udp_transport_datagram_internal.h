@@ -50,6 +50,8 @@ typedef struct uxrUDPTransportDatagram
     uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
 #if defined(UCLIENT_PLATFORM_POSIX)
     struct pollfd poll_fd;
+#elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
+    int fd;
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
     WSAPOLLFD poll_fd;
 #elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
