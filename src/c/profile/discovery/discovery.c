@@ -16,7 +16,7 @@
 #define GET_INFO_REQUEST_ID 9
 
 #define MULTICAST_DEFAULT_IP   "239.255.0.2"
-#define MULTICAST_DEFAULT_PORT 7400
+#define MULTICAST_DEFAULT_PORT 7401
 
 typedef struct CallbackData
 {

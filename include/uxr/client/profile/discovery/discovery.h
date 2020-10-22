@@ -31,7 +31,7 @@ extern "C"
 typedef bool (*uxrOnAgentFound) (const TransportLocator* locator, void* args);
 
 /**
- * @brief Discovers Agents within the network using UDP/IP multicast with address "239.255.0.2" and port 7400.
+ * @brief Discovers Agents within the network using UDP/IP multicast with address "239.255.0.2" and port 7401.
  * @param attempts      The times a discovery message is sent across the network.
  * @param period        The period using to send multicast messages through the network.
  * @param on_agent_func The callback function that will be called when an Agent is discovered.
