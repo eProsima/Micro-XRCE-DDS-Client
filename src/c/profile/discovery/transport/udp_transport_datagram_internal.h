@@ -50,6 +50,8 @@ typedef struct uxrUDPTransportDatagram
     uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
 #if defined(UCLIENT_PLATFORM_POSIX)
     struct pollfd poll_fd;
+#elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
+    int fd;
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
     WSAPOLLFD poll_fd;
 #elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
@@ -73,6 +75,9 @@ bool uxr_udp_recv_datagram(
         uint8_t** buf,
         size_t* len,
         int timeout);
+
+bool uxr_close_udp_transport_datagram(
+        struct uxrUDPTransportDatagram* transport);
 
 void uxr_bytes_to_ip(
         const uint8_t* bytes,
