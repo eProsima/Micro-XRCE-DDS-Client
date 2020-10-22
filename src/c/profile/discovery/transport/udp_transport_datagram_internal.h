@@ -76,6 +76,9 @@ bool uxr_udp_recv_datagram(
         size_t* len,
         int timeout);
 
+bool uxr_close_udp_transport_datagram(
+        struct uxrUDPTransportDatagram* transport);
+
 void uxr_bytes_to_ip(
         const uint8_t* bytes,
         char* ip);
