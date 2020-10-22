@@ -83,6 +83,7 @@ void uxr_discovery_agents(
                 poll -= (int)(uxr_millis() - timestamp);
             }
         }
+        uxr_close_udp_transport_datagram(&transport);
     }
 }
 

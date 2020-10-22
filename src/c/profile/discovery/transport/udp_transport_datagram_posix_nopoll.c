@@ -8,10 +8,7 @@
 #include <errno.h>
 
 bool uxr_init_udp_transport_datagram(
-        uxrUDPPlatform* platform,
-        uxrIpProtocol ip_protocol,
-        const char* ip,
-        const char* port)
+        uxrUDPTransportDatagram* transport)
 {
     int fd = socket(PF_INET, SOCK_DGRAM, 0);
     transport->fd = fd;
@@ -22,7 +19,7 @@ bool uxr_init_udp_transport_datagram(
 bool uxr_close_udp_transport_datagram(
         uxrUDPTransportDatagram* transport)
 {
-    return (0 == close(transport->poll_fd.fd));
+    return (0 == close(transport->fd));
 }
 
 bool uxr_udp_send_datagram_to(
@@ -41,7 +38,7 @@ bool uxr_udp_send_datagram_to(
             remote_addr.sin_family = AF_INET;
             remote_addr.sin_port = htons(locator->_.medium_locator.locator_port);
 
-            ssize_t bytes_sent = sendto(transport->poll_fd.fd, (const void*)buf, len, 0,
+            ssize_t bytes_sent = sendto(transport->fd, (const void*)buf, len, 0,
                                         (struct sockaddr*)&remote_addr, sizeof(remote_addr));
             if (0 > bytes_sent)
             {
@@ -70,7 +67,7 @@ bool uxr_udp_recv_datagram(
     tv.tv_sec = timeout / 1000;
 	tv.tv_usec = (timeout % 1000) * 1000;
 
-    setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    setsockopt(transport->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
     ssize_t bytes_received = recv(transport->fd, (void*)transport->buffer, sizeof(transport->buffer), 0);
     if (-1 != bytes_received)
