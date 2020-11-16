@@ -198,6 +198,15 @@ TEST_F(OutputReliableStreamTest, WriteFragmentMessage)
     EXPECT_EQ(slot_2 + OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, ub.final);
 }
 
+TEST_F(OutputReliableStreamTest, WriteTwoFragmentMessage)
+{
+    ucdrBuffer ub;
+    bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_FRAGMENT_SIZE*2, &ub);
+    ASSERT_TRUE(available_to_write);
+    available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_FRAGMENT_SIZE*2, &ub);
+    ASSERT_TRUE(available_to_write);
+}
+
 TEST_F(OutputReliableStreamTest, WriteMaxSubmessageSize)
 {
     ucdrBuffer ub;

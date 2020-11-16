@@ -85,16 +85,17 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
     /* Check if the message fit in a fragmented message */
     else
     {
-        size_t remaining_blocks = uxr_seq_num_sub(stream->last_acknown, seq_num) % stream->base.history;
-
         /* Check if the current buffer free space is too small */
         if(buffer_size + (size_t)SUBHEADER_SIZE >= buffer_capacity)
         {
             seq_num = uxr_seq_num_add(seq_num, 1);
             buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
             buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
-            remaining_blocks = (0 < remaining_blocks) ? remaining_blocks - 1 : 0;
         }
+
+        size_t used_blocks = uxr_seq_num_sub(seq_num, stream->last_acknown);
+        used_blocks = (used_blocks == 0) ? 0 : used_blocks - 1;
+        size_t remaining_blocks = stream->base.history - used_blocks;
 
         uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
         uint16_t first_fragment_size = (uint16_t)(buffer_capacity - (uint16_t)(buffer_size + SUBHEADER_SIZE));
