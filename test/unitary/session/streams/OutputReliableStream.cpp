@@ -215,7 +215,7 @@ TEST_F(OutputReliableStreamTest, WriteMultipleFragmentsAndCheckSubHeaders)
     uint8_t client_key[4] = {0xAA, 0xAA, 0xAA, 0xAA};
 
     // Init all message headers
-    for (size_t i = 0; i < HISTORY; i++)
+    for (uint16_t i = 0; i < HISTORY; i++)
     {
         uint8_t* slot = uxr_get_reliable_buffer(&stream.base, i);
         ucdr_init_buffer(&ub, slot, MAX_MESSAGE_SIZE);
