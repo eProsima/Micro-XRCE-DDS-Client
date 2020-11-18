@@ -117,6 +117,7 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
         if(available_to_write)
         {
             ucdrBuffer temp_ub;
+            uint16_t fragment_size = first_fragment_size;
             for(uint16_t i = 0; i < necessary_blocks - 1; i++)
             {
                 ucdr_init_buffer_origin_offset(
@@ -125,9 +126,10 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
                     buffer_capacity,
                     0u,
                     uxr_get_reliable_buffer_size(&stream->base, seq_num));
-                uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, available_block_size, 0);
+                uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, fragment_size, 0);
                 uxr_set_reliable_buffer_size(&stream->base, seq_num, buffer_capacity);
                 seq_num = uxr_seq_num_add(seq_num, 1);
+                fragment_size = available_block_size;
             }
 
             ucdr_init_buffer_origin_offset(
