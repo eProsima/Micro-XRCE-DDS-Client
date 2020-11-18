@@ -7,6 +7,7 @@ extern "C"
 #include <c/core/session/stream/output_reliable_stream.c>
 #include <c/core/serialization/xrce_subheader.c>
 #include <c/core/session/submessage.c>
+#include <c/core/serialization/xrce_header.c>
 }
 
 #define BUFFER_SIZE           size_t(128)
@@ -205,6 +206,51 @@ TEST_F(OutputReliableStreamTest, WriteTwoFragmentMessage)
     ASSERT_TRUE(available_to_write);
     available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_FRAGMENT_SIZE*2, &ub);
     ASSERT_TRUE(available_to_write);
+}
+
+
+TEST_F(OutputReliableStreamTest, WriteMultipleFragmentsAndCheckSubHeaders)
+{
+    ucdrBuffer ub;
+    uint8_t client_key[4] = {0xAA, 0xAA, 0xAA, 0xAA};
+
+    // Init all message headers
+    for (uint16_t i = 0; i < HISTORY; i++)
+    {
+        uint8_t* slot = uxr_get_reliable_buffer(&stream.base, i);
+        ucdr_init_buffer(&ub, slot, MAX_MESSAGE_SIZE);
+        uxr_serialize_message_header(&ub, 0, 0, 0, client_key);
+    }
+
+    // Writing two fragmented message, 3 slots should be used
+    size_t first_message_size = 24; //  1.5 * MAX_FRAGMENT_SIZE;
+    bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
+    ASSERT_TRUE(available_to_write);
+    available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
+    ASSERT_TRUE(available_to_write);
+
+    // Deserialize both messages
+    size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream.base);
+    for (uint16_t i = 0; i < stream.last_written; i++)
+    {
+        uint8_t * slot = uxr_get_reliable_buffer(&stream.base, i);
+        ucdr_init_buffer_origin_offset(&ub, slot, buffer_capacity, 0u, 0u);
+
+        uint8_t session_id, stream_id; 
+        uint16_t seq_no ;
+        uint8_t output_client_key[4];
+        uxr_deserialize_message_header(&ub, &session_id, &stream_id, &seq_no, output_client_key);
+
+        while (ub.iterator < ub.final)
+        {
+            uint8_t id, flags;
+            uint16_t length;
+            uxr_deserialize_submessage_header(&ub, &id, &flags, &length);
+            uint8_t * fragment = reinterpret_cast<uint8_t*>(malloc(length*sizeof(uint8_t)));
+            ASSERT_TRUE(ucdr_deserialize_array_uint8_t(&ub, fragment, length));
+            free(fragment);
+        }
+    }
 }
 
 TEST_F(OutputReliableStreamTest, WriteMaxSubmessageSize)
