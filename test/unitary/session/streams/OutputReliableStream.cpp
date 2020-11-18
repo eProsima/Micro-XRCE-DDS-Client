@@ -214,20 +214,22 @@ TEST_F(OutputReliableStreamTest, WriteMultipleFragmentsAndCheckSubHeaders)
     ucdrBuffer ub;
     uint8_t client_key[4] = {0xAA, 0xAA, 0xAA, 0xAA};
 
-    uint8_t* slot_0 = uxr_get_reliable_buffer(&stream.base, 0);
-    ucdr_init_buffer(&ub, slot_0, MAX_MESSAGE_SIZE);
-    uxr_serialize_message_header(&ub, SESSION_ID_WITHOUT_CLIENT_KEY-2, 0, 0, client_key);
+    // Init all message headers
+    for (size_t i = 0; i < HISTORY; i++)
+    {
+        uint8_t* slot = uxr_get_reliable_buffer(&stream.base, i);
+        ucdr_init_buffer(&ub, slot, MAX_MESSAGE_SIZE);
+        uxr_serialize_message_header(&ub, 0, 0, 0, client_key);
+    }
 
-    uint8_t* slot_1 = uxr_get_reliable_buffer(&stream.base, 1);
-    ucdr_init_buffer(&ub, slot_1, MAX_MESSAGE_SIZE);
-    uxr_serialize_message_header(&ub, SESSION_ID_WITHOUT_CLIENT_KEY-2, 0, 0, client_key);
-
+    // Writing two fragmented message, 3 slots should be used
     size_t first_message_size = 24; //  1.5 * MAX_FRAGMENT_SIZE;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
     ASSERT_TRUE(available_to_write);
     available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
     ASSERT_TRUE(available_to_write);
 
+    // Deserialize both messages
     size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream.base);
     for (uint16_t i = 0; i < stream.last_written; i++)
     {
