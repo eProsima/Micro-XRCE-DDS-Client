@@ -348,6 +348,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorldP2P)
+    add_subdirectory(examples/TimeSync)
 endif()
 
 ###############################################################################
