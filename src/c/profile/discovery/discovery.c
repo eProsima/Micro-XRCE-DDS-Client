@@ -136,6 +136,42 @@ bool read_info_headers(ucdrBuffer* ub)
     return uxr_read_submessage_header(ub, &id, &length, &flags);
 }
 
+bool uxr_deserialize_discovery_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_BaseObjectReply(buffer, &output->base);
+    ret &= ucdr_deserialize_bool(buffer, &output->object_info.optional_config);
+    if(output->object_info.optional_config == true)
+    {
+        ret &= uxr_deserialize_ObjectVariant(buffer, &output->object_info.config);
+    }
+
+    ret &= ucdr_deserialize_bool(buffer, &output->object_info.optional_activity);
+    if(output->object_info.optional_activity == true)
+    {
+        ret &= ucdr_deserialize_uint8_t(buffer, &output->object_info.activity.kind);
+        ret &= output->object_info.activity.kind == DDS_XRCE_OBJK_AGENT;
+        if (ret)
+        {
+            ret &= ucdr_deserialize_int16_t(buffer, &output->object_info.activity._.agent.availibility);
+            ret &= ucdr_deserialize_uint32_t(buffer, &output->object_info.activity._.agent.address_seq.size);
+            
+            // This function takes care of deserializing at least the possible address_seq items
+            // if the sent sequence is too long for the allocated UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX
+            output->object_info.activity._.agent.address_seq.size = 
+                (output->object_info.activity._.agent.address_seq.size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)   ?
+                    UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX                                                         :
+                    output->object_info.activity._.agent.address_seq.size;
+
+            for(uint32_t i = 0; i < output->object_info.activity._.agent.address_seq.size && ret; i++)
+            {
+                ret &= uxr_deserialize_TransportLocator(buffer, &output->object_info.activity._.agent.address_seq.data[i]);
+            }
+        }
+    }
+    return ret;
+}
+
 bool read_info_message(
         ucdrBuffer* ub,
         CallbackData* callback)
@@ -143,7 +179,7 @@ bool read_info_message(
     bool is_succeed = false;
     INFO_Payload payload;
 
-    if(uxr_deserialize_INFO_Payload(ub, &payload))
+    if(uxr_deserialize_discovery_INFO_Payload(ub, &payload))
     {
         XrceVersion* version = &payload.object_info.config._.agent.xrce_version;
         TransportLocatorSeq * locators = &payload.object_info.activity._.agent.address_seq;
