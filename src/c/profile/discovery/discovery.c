@@ -160,7 +160,7 @@ bool uxr_deserialize_discovery_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* ou
             // if the sent sequence is too long for the allocated UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX
             output->object_info.activity._.agent.address_seq.size = 
                 (output->object_info.activity._.agent.address_seq.size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)   ?
-                    UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX               :
+                    UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX                                                         :
                     output->object_info.activity._.agent.address_seq.size;
 
             for(uint32_t i = 0; i < output->object_info.activity._.agent.address_seq.size && ret; i++)
