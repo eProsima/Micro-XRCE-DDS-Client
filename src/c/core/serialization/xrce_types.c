@@ -271,18 +271,22 @@ bool uxr_serialize_TransportLocatorSeq(ucdrBuffer* buffer, const TransportLocato
 bool uxr_deserialize_TransportLocatorSeq(ucdrBuffer* buffer, TransportLocatorSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)
+
+    // If locator seq does not fit, only uses the first ones.
+    // This is the case in Agent discovery, take care if this funtion
+    // is used elsewhere.
+
+    output->size = (output->size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)   ?
+                        UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX               :
+                        output->size;
+
+    for(uint32_t i = 0; i < output->size && ret; i++)
     {
-        buffer->error = true;
-        ret = false;
+        ret = uxr_deserialize_TransportLocator(buffer, &output->data[i]);
     }
-    else
-    {
-        for(uint32_t i = 0; i < output->size && ret; i++)
-        {
-            ret = uxr_deserialize_TransportLocator(buffer, &output->data[i]);
-        }
-    }
+
+    buffer->error =  (output->size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX) ? true : false;
+
     return ret;
 }
 
