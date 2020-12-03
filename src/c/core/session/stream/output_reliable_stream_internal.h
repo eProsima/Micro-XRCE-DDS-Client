@@ -39,6 +39,7 @@ bool uxr_next_reliable_nack_buffer_to_send(uxrOutputReliableStream* stream, uint
 void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uxrSeqNum first_unacked_seq_num);
 
 bool uxr_is_output_up_to_date(const uxrOutputReliableStream* stream);
+bool on_full_output_buffer(struct ucdrBuffer* ub, void* args);
 
 #ifdef __cplusplus
 }
