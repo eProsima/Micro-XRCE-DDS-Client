@@ -20,7 +20,13 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  4
-#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     100 * STREAM_HISTORY
+
+uint8_t data_buffer[100];
+size_t data_source(uint8_t ** buf, size_t len){
+    *buf = data_buffer;
+    return (len > sizeof(data_buffer)) ? sizeof(data_buffer) : len;
+}
 
 int main(int args, char** argv)
 {
@@ -69,7 +75,7 @@ int main(int args, char** argv)
                                       "</participant>"
                                   "</dds>";
     uint16_t participant_req = uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0, participant_xml, UXR_REPLACE);
-
+    uxr_run_session_until_confirm_delivery(&session, 100);
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
                                 "<topic>"
@@ -78,7 +84,7 @@ int main(int args, char** argv)
                                 "</topic>"
                             "</dds>";
     uint16_t topic_req = uxr_buffer_create_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
-
+    uxr_run_session_until_confirm_delivery(&session, 100);
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml = "";
     uint16_t publisher_req = uxr_buffer_create_publisher_xml(&session, reliable_out, publisher_id, participant_id, publisher_xml, UXR_REPLACE);
@@ -86,6 +92,7 @@ int main(int args, char** argv)
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<dds>"
                                      "<data_writer>"
+                                         "<historyMemoryPolicy>PREALLOCATED_WITH_REALLOC</historyMemoryPolicy>"
                                          "<topic>"
                                              "<kind>NO_KEY</kind>"
                                              "<name>HelloWorldTopic</name>"
@@ -94,32 +101,36 @@ int main(int args, char** argv)
                                      "</data_writer>"
                                  "</dds>";
     uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
-
-    // Send create entities message and wait its status
-    uint8_t status[4];
-    uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
-    if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 4))
-    {
-        printf("Error at create entities: participant: %i topic: %i publisher: %i darawriter: %i\n", status[0], status[1], status[2], status[3]);
-        return 1;
-    }
+    uxr_run_session_until_confirm_delivery(&session, 100);
 
     // Write topics
     bool connected = true;
     uint32_t count = 0;
-    while(connected && count < max_topics)
+
+    size_t total_write = 50000;
+
+    // Approach 1
     {
-        HelloWorld topic = {++count, "Hello DDS world!"};
-
         ucdrBuffer ub;
-        uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
-        uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &ub, topic_size);
-        HelloWorld_serialize_topic(&ub, &topic);
+        size_t written = 0;
+        while (written < total_write)
+        {
+            uint16_t writtable = uxr_prepare_output_stream_fragmented(&session, reliable_out, datawriter_id, &ub, written, total_write);
+            written += writtable;
+            while (writtable){
+                uint8_t * buf;
+                size_t len = data_source(&buf, writtable);
+                ucdr_serialize_array_char(&ub, buf, len);
+                writtable -= len;
+            }
+            printf("%d/%d\n",written, total_write);
 
-        printf("Send topic: %s, id: %i\n", topic.message, topic.index);
-        connected = uxr_run_session_time(&session, 1000);
+            connected = uxr_run_session_until_confirm_delivery(&session, 1000);
+        }
+        
     }
-
+        
+    sleep(1);
     // Delete resources
     uxr_delete_session(&session);
     uxr_close_udp_transport(&transport);

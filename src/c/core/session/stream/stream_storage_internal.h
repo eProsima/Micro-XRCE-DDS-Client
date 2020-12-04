@@ -36,11 +36,6 @@ uxrStreamId uxr_add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* b
 uxrStreamId uxr_add_input_best_effort_buffer(uxrStreamStorage* storage);
 uxrStreamId uxr_add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, OnGetFragmentationInfo on_get_fragmentation_info);
 
-uxrOutputBestEffortStream* uxr_get_output_best_effort_stream_id(uxrStreamStorage* storage, uint8_t index);
-uxrOutputReliableStream* uxr_get_output_reliable_stream_id(uxrStreamStorage* storage, uint8_t index);
-uxrInputBestEffortStream* uxr_get_input_best_effort_stream_id(uxrStreamStorage* storage, uint8_t index);
-uxrInputReliableStream* uxr_get_input_reliable_stream_id(uxrStreamStorage* storage, uint8_t index);
-
 uxrOutputBestEffortStream* uxr_get_output_best_effort_stream(uxrStreamStorage* storage, uint8_t index);
 uxrOutputReliableStream* uxr_get_output_reliable_stream(uxrStreamStorage* storage, uint8_t index);
 uxrInputBestEffortStream* uxr_get_input_best_effort_stream(uxrStreamStorage* storage, uint8_t index);

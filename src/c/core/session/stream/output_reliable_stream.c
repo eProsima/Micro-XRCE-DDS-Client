@@ -92,7 +92,11 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
         }
 
         size_t used_blocks = uxr_seq_num_sub(seq_num, stream->last_acknown);
-        used_blocks = (used_blocks == 0) ? 0 : used_blocks - 1;
+        used_blocks = (used_blocks == 0) ? 
+                        0 : 
+                        (used_blocks > stream->base.history) ? 
+                            stream->base.history :
+                            used_blocks - 1;        
         size_t remaining_blocks = stream->base.history - used_blocks;
 
         uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
