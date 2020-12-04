@@ -83,7 +83,7 @@ UXRDLLAPI bool uxr_prepare_output_stream(
         uint32_t topic_size);
 
 UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
-                               ucdrBuffer* ub, uint16_t topic_data_index, uint16_t topic_total_size);
+                               ucdrBuffer* ub, uint16_t topic_total_size);
 #ifdef __cplusplus
 }
 #endif

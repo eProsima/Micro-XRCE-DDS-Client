@@ -113,17 +113,12 @@ int main(int args, char** argv)
     {
         ucdrBuffer ub;
         size_t written = 0;
-        while (written < total_write)
+        // while (written < total_write)
         {
-            uint16_t writtable = uxr_prepare_output_stream_fragmented(&session, reliable_out, datawriter_id, &ub, written, total_write);
-            written += writtable;
-            while (writtable){
-                uint8_t * buf;
-                size_t len = data_source(&buf, writtable);
-                ucdr_serialize_array_char(&ub, buf, len);
-                writtable -= len;
-            }
-            printf("%d/%d\n",written, total_write);
+            uint8_t buf[20000];
+            memset(buf, 'A', sizeof(buf));
+            uxr_prepare_output_stream_fragmented(&session, reliable_out, datawriter_id, &ub, sizeof(buf));
+            ucdr_serialize_array_char(&ub, buf, sizeof(buf));
 
             connected = uxr_run_session_until_confirm_delivery(&session, 1000);
         }
