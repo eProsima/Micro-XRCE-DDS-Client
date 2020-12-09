@@ -90,14 +90,8 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
             buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
             buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
         }
-
-        size_t used_blocks = uxr_seq_num_sub(seq_num, stream->last_acknown);
-        used_blocks = (used_blocks == 0) ? 
-                        0 : 
-                        (used_blocks > stream->base.history) ? 
-                            stream->base.history :
-                            used_blocks - 1;        
-        size_t remaining_blocks = stream->base.history - used_blocks;
+       
+        size_t remaining_blocks = get_available_seq_num(stream);
 
         uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
         uint16_t first_fragment_size = (uint16_t)(buffer_capacity - (uint16_t)(buffer_size + SUBHEADER_SIZE));
@@ -275,5 +269,16 @@ bool on_full_output_buffer(ucdrBuffer* ub, void* args)
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
 
     return false;
+}
+
+uint16_t get_available_seq_num(uxrOutputReliableStream* stream)
+{
+    uint16_t used_blocks = uxr_seq_num_sub(stream->last_written, stream->last_acknown);
+    used_blocks = (used_blocks == 0) ? 
+                    0 : 
+                    (used_blocks > stream->base.history) ? 
+                        stream->base.history :
+                        used_blocks - 1;
+    return (stream->base.history - used_blocks);
 }
 

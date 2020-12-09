@@ -82,8 +82,29 @@ UXRDLLAPI bool uxr_prepare_output_stream(
         struct ucdrBuffer* ub_topic,
         uint32_t topic_size);
 
-UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
-                               ucdrBuffer* ub, uint16_t topic_total_size);
+
+/**
+ * @brief Buffers into the stream identified by `stream_id` an XRCE WRITE_DATA submessage.
+ *        The submessage will be sent when `uxr_flash_output_stream` or `uxr_run_session` function are called.
+ *        This function handles the buffer flush by means of `on_buffer_full` callback.
+ *        As a result of the reception of this submessage, the Agent will write a topic into the DDS Global-Data-Space.
+ * @param session           A uxrSession structure previously initialized.
+ * @param stream_id         The output stream identifier where the WRITE_DATA submessage will be buffered.
+ * @param datawriter_id     The identifier of the XRCE DataWriter that will write the topic into the DDS GDS.
+ * @param ub_topic          The ucdrBuffer structure used for serializing the topic.
+ * @param topic_size        The size of the topic in bytes.
+ * @return A `request_id` that identifies the request made by the Client.
+ *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
+ */
+
+UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(
+    uxrSession* session, 
+    uxrStreamId stream_id, 
+    uxrObjectId datawriter_id,
+    ucdrBuffer* ub, 
+    uint16_t topic_total_size,
+    uxrOnBuffersFull flush_callback);
+
 #ifdef __cplusplus
 }
 #endif

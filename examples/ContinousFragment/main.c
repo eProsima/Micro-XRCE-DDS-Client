@@ -18,14 +18,13 @@
 #include <stdio.h> //printf
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
+#include <unistd.h> //sleep
 
 #define STREAM_HISTORY  4
 #define BUFFER_SIZE     100 * STREAM_HISTORY
 
-uint8_t data_buffer[100];
-size_t data_source(uint8_t ** buf, size_t len){
-    *buf = data_buffer;
-    return (len > sizeof(data_buffer)) ? sizeof(data_buffer) : len;
+void flush_session(uxrSession* session){
+    uxr_run_session_until_confirm_delivery(session, 1000);
 }
 
 int main(int args, char** argv)
@@ -103,29 +102,18 @@ int main(int args, char** argv)
     uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id, datawriter_xml, UXR_REPLACE);
     uxr_run_session_until_confirm_delivery(&session, 100);
 
-    // Write topics
-    bool connected = true;
-    uint32_t count = 0;
+    // Write topic
+    uint8_t buf[20000];
+    memset(buf, 'A', sizeof(buf));
 
-    size_t total_write = 50000;
+    ucdrBuffer ub;
+    uxr_prepare_output_stream_fragmented(&session, reliable_out, datawriter_id, &ub, sizeof(buf), flush_session);
+    ucdr_serialize_array_char(&ub, buf, sizeof(buf));
 
-    // Approach 1
-    {
-        ucdrBuffer ub;
-        size_t written = 0;
-        // while (written < total_write)
-        {
-            uint8_t buf[20000];
-            memset(buf, 'A', sizeof(buf));
-            uxr_prepare_output_stream_fragmented(&session, reliable_out, datawriter_id, &ub, sizeof(buf));
-            ucdr_serialize_array_char(&ub, buf, sizeof(buf));
-
-            connected = uxr_run_session_until_confirm_delivery(&session, 1000);
-        }
-        
-    }
+    uxr_run_session_until_confirm_delivery(&session, 1000);
         
     sleep(1);
+
     // Delete resources
     uxr_delete_session(&session);
     uxr_close_udp_transport(&transport);

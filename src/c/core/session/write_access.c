@@ -82,8 +82,12 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
     return !ub->error;
 }
 
+
+// Continuous fragment mode
+
 typedef struct {
     uxrSession* session;
+    uxrOnBuffersFull flush_callback;
     uxrStreamId stream_id;
     uint16_t topic_total_size;
 } continous_args_t;
@@ -92,10 +96,9 @@ static continous_args_t continous_args;
 
 bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
 {   
-    printf("Jumping to a new slot\n");
     continous_args_t * local_args = (continous_args_t *) args;
 
-    uxrSession* session = ((continous_args_t*) args)->session;
+    uxrSession* session = local_args->session;
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, local_args->stream_id.index);
 
     size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream->base);
@@ -104,24 +107,13 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     size_t buffer_size = uxr_get_reliable_buffer_size(&stream->base, stream->last_written);
     local_args->topic_total_size -= available_block_size;
 
-    size_t used_blocks = uxr_seq_num_sub(stream->last_written, stream->last_acknown);
-    used_blocks = (used_blocks == 0) ? 
-                    0 : 
-                    (used_blocks > stream->base.history) ? 
-                        stream->base.history :
-                        used_blocks - 1;
-    size_t remaining_blocks = stream->base.history - used_blocks;
+    size_t remaining_blocks = get_available_seq_num(stream);
 
     if (0 == remaining_blocks)
     {
-        uxr_run_session_until_confirm_delivery(local_args->session, 1000);
-        used_blocks = uxr_seq_num_sub(stream->last_written, stream->last_acknown);
-        used_blocks = (used_blocks == 0) ? 
-                        0 : 
-                        (used_blocks > stream->base.history) ? 
-                            stream->base.history :
-                            used_blocks - 1;
-        remaining_blocks = stream->base.history - used_blocks;
+        // uxr_run_session_until_confirm_delivery(local_args->session, 1000);
+        local_args->flush_callback(session);
+        remaining_blocks = get_available_seq_num(stream);
     }
 
     ucdrBuffer temp_ub;
@@ -135,7 +127,6 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     uxr_set_reliable_buffer_size(&stream->base, stream->last_written, buffer_capacity);
     stream->last_written = uxr_seq_num_add(stream->last_written, 1);
     
-
     // Preparing the buffer for the user
     ucdr_init_buffer(
         ub,
@@ -146,16 +137,14 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     return false;
 }
 
-uint16_t uxr_prepare_output_stream_fragmented(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
-                               ucdrBuffer* ub, uint16_t topic_total_size)
+uint16_t uxr_prepare_output_stream_fragmented(
+    uxrSession* session, 
+    uxrStreamId stream_id, 
+    uxrObjectId datawriter_id,
+    ucdrBuffer* ub, 
+    uint16_t topic_total_size,
+    uxrOnBuffersFull flush_callback)
 {
-
-    // 1. User told that is going to send TOTAL. INDEX is zero the first time
-    // 2. If TOTAL fits in the current stream, prepare the whole stream and return TOTAL: user will serialize and on_full callback will handle the rest.
-    //    This implies only one call to this function.
-    // 3. If TOTAL does not fit in the current stream, prepare the whole stream and return the data that fits: user will serialize up to this data and then is
-    //    in charge of running session and calling this with an updated INDEX
-
     uint16_t available_write_space = 0;
     uint16_t user_required_space = (topic_total_size) + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 
@@ -173,20 +162,16 @@ uint16_t uxr_prepare_output_stream_fragmented(uxrSession* session, uxrStreamId s
         buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
     }
 
-    size_t used_blocks = uxr_seq_num_sub(seq_num, stream->last_acknown);
-    used_blocks = (used_blocks == 0) ? 
-                    0 : 
-                    (used_blocks > stream->base.history) ? 
-                        stream->base.history :
-                        used_blocks - 1;
-    size_t remaining_blocks = stream->base.history - used_blocks;
+    size_t remaining_blocks = get_available_seq_num(stream);
     uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
     uint16_t writtable_size = (available_block_size * remaining_blocks);
 
     if (0 == remaining_blocks)
     {
         return 0;
-    }else{
+    }
+    else
+    {
         ucdrBuffer temp_ub;
         ucdr_init_buffer_origin_offset(
                 &temp_ub,
@@ -203,7 +188,7 @@ uint16_t uxr_prepare_output_stream_fragmented(uxrSession* session, uxrStreamId s
             ub,
             buffer + buffer_size + SUBHEADER_SIZE,
             (uint32_t)(buffer_capacity - buffer_size - SUBHEADER_SIZE));
-        // ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, stream);
+
         stream->last_written = seq_num;
 
         // Fill the SUBMESSAGE_ID_WRITE_DATA
@@ -220,6 +205,7 @@ uint16_t uxr_prepare_output_stream_fragmented(uxrSession* session, uxrStreamId s
         continous_args.session = session;
         continous_args.stream_id = stream_id;
         continous_args.topic_total_size = user_required_space;    
+        continous_args.flush_callback = flush_callback;    
         ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, &continous_args);
 
         return 1;
