@@ -7,6 +7,7 @@
 #include "./stream/output_reliable_stream_internal.h"
 #include "./stream/common_reliable_stream_internal.h"
 #include "./stream/stream_storage_internal.h"
+#include "./stream/seq_num_internal.h"
 
 #define WRITE_DATA_PAYLOAD_SIZE 4
 #define SAMPLE_IDENTITY_SIZE    24
@@ -89,7 +90,7 @@ typedef struct {
     uxrSession* session;
     uxrOnBuffersFull flush_callback;
     uxrStreamId stream_id;
-    uint16_t topic_total_size;
+    size_t topic_total_size;
 } continous_args_t;
 
 static continous_args_t continous_args;
@@ -103,9 +104,7 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
 
     size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream->base);
     uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
-    uint8_t * buffer = uxr_get_reliable_buffer(&stream->base, stream->last_written);
-    size_t buffer_size = uxr_get_reliable_buffer_size(&stream->base, stream->last_written);
-    local_args->topic_total_size -= available_block_size;
+    local_args->topic_total_size = local_args->topic_total_size - (size_t) available_block_size;
 
     size_t remaining_blocks = get_available_seq_num(stream);
 
@@ -131,7 +130,7 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     ucdr_init_buffer(
         ub,
         temp_ub.iterator,
-        temp_ub.final-temp_ub.iterator);
+        (size_t) (temp_ub.final-temp_ub.iterator));
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, args);
 
     return false;
@@ -142,11 +141,10 @@ uint16_t uxr_prepare_output_stream_fragmented(
     uxrStreamId stream_id, 
     uxrObjectId datawriter_id,
     ucdrBuffer* ub, 
-    uint16_t topic_total_size,
+    size_t topic_total_size,
     uxrOnBuffersFull flush_callback)
 {
-    uint16_t available_write_space = 0;
-    uint16_t user_required_space = (topic_total_size) + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
+    size_t user_required_space = (topic_total_size) + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 
     uxrOutputReliableStream * stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
     uxrSeqNum seq_num = stream->last_written;
@@ -164,7 +162,6 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
     size_t remaining_blocks = get_available_seq_num(stream);
     uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
-    uint16_t writtable_size = (available_block_size * remaining_blocks);
 
     if (0 == remaining_blocks)
     {

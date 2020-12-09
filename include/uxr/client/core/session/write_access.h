@@ -102,7 +102,7 @@ UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(
     uxrStreamId stream_id, 
     uxrObjectId datawriter_id,
     ucdrBuffer* ub, 
-    uint16_t topic_total_size,
+    size_t topic_total_size,
     uxrOnBuffersFull flush_callback);
 
 #ifdef __cplusplus
