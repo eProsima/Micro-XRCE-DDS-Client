@@ -275,9 +275,8 @@ uint16_t get_available_seq_num(uxrOutputReliableStream* stream)
 {
     int used_blocks = uxr_seq_num_sub(stream->last_written, stream->last_acknown);
 
-    used_blocks = (used_blocks == 0) ? 
-                    0 : 
-                    (used_blocks > stream->base.history) ? 
+    used_blocks = (used_blocks == 0) ? 0 : 
+                  (used_blocks > stream->base.history) ? 
                         stream->base.history :
                         used_blocks - 1;
     return (uint16_t)(stream->base.history - used_blocks);
