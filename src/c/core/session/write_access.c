@@ -90,7 +90,7 @@ typedef struct {
     uxrSession* session;
     uxrOnBuffersFull flush_callback;
     uxrStreamId stream_id;
-    size_t topic_total_size;
+    size_t topic_size;
 } continous_args_t;
 
 static continous_args_t continous_args;
@@ -104,7 +104,7 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
 
     size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream->base);
     uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
-    local_args->topic_total_size = local_args->topic_total_size - (size_t) available_block_size;
+    local_args->topic_size = local_args->topic_size - (size_t) available_block_size;
 
     size_t remaining_blocks = get_available_seq_num(stream);
 
@@ -122,7 +122,7 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
             buffer_capacity,
             0u,
             uxr_get_reliable_buffer_size(&stream->base, stream->last_written));
-    uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, available_block_size, (local_args->topic_total_size < buffer_capacity) ? FLAG_LAST_FRAGMENT : 0);
+    uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, available_block_size, (local_args->topic_size < buffer_capacity) ? FLAG_LAST_FRAGMENT : 0);
     uxr_set_reliable_buffer_size(&stream->base, stream->last_written, buffer_capacity);
     stream->last_written = uxr_seq_num_add(stream->last_written, 1);
     
@@ -136,17 +136,22 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     return false;
 }
 
-uint16_t uxr_prepare_output_stream_fragmented(
+bool uxr_prepare_output_stream_fragmented(
     uxrSession* session, 
     uxrStreamId stream_id, 
     uxrObjectId datawriter_id,
     ucdrBuffer* ub, 
-    size_t topic_total_size,
+    size_t topic_size,
     uxrOnBuffersFull flush_callback)
 {
-    size_t user_required_space = (topic_total_size) + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
+    size_t user_required_space = (topic_size) + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 
     uxrOutputReliableStream * stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
+    if (stream == NULL)
+    {
+        return false;
+    }
+    
     uxrSeqNum seq_num = stream->last_written;
     uint8_t * buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
     size_t buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
@@ -165,7 +170,7 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
     if (0 == remaining_blocks)
     {
-        return 0;
+        return false;
     }
     else
     {
@@ -189,7 +194,7 @@ uint16_t uxr_prepare_output_stream_fragmented(
         stream->last_written = seq_num;
 
         // Fill the SUBMESSAGE_ID_WRITE_DATA
-        size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + topic_total_size;
+        size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + topic_size;
 
         (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_WRITE_DATA, (uint16_t)payload_size, FORMAT_DATA);
     
@@ -201,11 +206,11 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
         continous_args.session = session;
         continous_args.stream_id = stream_id;
-        continous_args.topic_total_size = user_required_space;    
+        continous_args.topic_size = user_required_space;    
         continous_args.flush_callback = flush_callback;    
         ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, &continous_args);
 
-        return 1;
+        return true;
     }
 }
 
