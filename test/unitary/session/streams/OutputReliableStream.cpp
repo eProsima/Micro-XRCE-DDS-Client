@@ -479,34 +479,3 @@ TEST_F(OutputReliableStreamTest, FragmentedSerialization)
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.iterator);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.final);
 }
-
-TEST_F(OutputReliableStreamTest, FragmentedSerialization2)
-{
-    uxrOutputReliableStream inner_stream;
-    uint8_t buff[2048];
-    uxr_init_output_reliable_stream(&inner_stream, buff, 2048, 4, 0);
-
-    uint8_t* slot_0 = uxr_get_reliable_buffer(&inner_stream.base, 0);
-    uint8_t* slot_1 = uxr_get_reliable_buffer(&inner_stream.base, 1);
-
-    ucdrBuffer ub;
-    uint8_t message[728];
-    double d_array[36];
-
-    size_t first_message_size = 440;
-    size_t second_message_size = 36*sizeof(double);
-
-    // (void) uxr_prepare_reliable_buffer_to_write(&inner_stream, first_message_size+second_message_size, &ub);
-    (void) uxr_prepare_reliable_buffer_to_write(&inner_stream, 728, &ub);
-
-    bool serialize = ucdr_serialize_array_uint8_t(&ub, message, first_message_size);
-    ASSERT_TRUE(serialize);
-    EXPECT_EQ(slot_0 + first_message_size + SUBHEADER_SIZE, ub.iterator);
-    EXPECT_EQ(slot_0 + uxr_get_reliable_buffer_capacity(&inner_stream.base), ub.final);
-
-    size_t second_message_last_part = second_message_size -  (uxr_get_reliable_buffer_capacity(&inner_stream.base) - first_message_size);
-
-    serialize = ucdr_serialize_array_double(&ub, d_array, 36);
-    ASSERT_TRUE(serialize);
-    EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&inner_stream.base, 1), ub.final);
-}
