@@ -18,7 +18,6 @@
 #include <stdio.h> //printf
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
-#include <unistd.h> //sleep
 
 #define STREAM_HISTORY  4
 #define BUFFER_SIZE     100 * STREAM_HISTORY
@@ -111,9 +110,7 @@ int main(int args, char** argv)
     ucdr_serialize_array_char(&ub, buf, sizeof(buf));
 
     uxr_run_session_until_confirm_delivery(&session, 1000);
-        
-    sleep(1);
-
+    
     // Delete resources
     uxr_delete_session(&session);
     uxr_close_udp_transport(&transport);
