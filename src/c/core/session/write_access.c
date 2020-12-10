@@ -110,8 +110,9 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
 
     if (0 == remaining_blocks)
     {
-        // uxr_run_session_until_confirm_delivery(local_args->session, 1000);
-        local_args->flush_callback(session);
+        if(!local_args->flush_callback(session)){
+            return true;
+        };
         remaining_blocks = get_available_seq_num(stream);
     }
 
