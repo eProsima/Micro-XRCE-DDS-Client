@@ -84,6 +84,7 @@ protected:
     static size_t read(uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* error);
 
     CircularBuffer * buffer;
+    size_t max_payload;
 };
 
 #endif //_TEST_TRANSPORT_SERIALCOMM_HPP_
