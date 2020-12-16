@@ -24,7 +24,7 @@ bool uxr_close_serial_platform(void* args)
     return (-1 == platform->poll_fd.fd) ? true : (0 == close(platform->poll_fd.fd));
 }
 
-size_t uxr_write_serial_data_platform(void* args, uint8_t* buf, size_t len, uint8_t* errcode)
+size_t uxr_write_serial_data_platform(void* args, const uint8_t* buf, size_t len, uint8_t* errcode)
 {
     size_t rv = 0;
     struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;

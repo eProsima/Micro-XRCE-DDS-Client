@@ -216,6 +216,11 @@ if(UCLIENT_PROFILE_DISCOVERY)
     endif()
 endif()
 
+
+if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
+    list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
+endif()
+
 # Other sources
 set(SRCS
     src/c/core/session/stream/input_best_effort_stream.c
@@ -239,7 +244,7 @@ set(SRCS
     src/c/core/session/create_entities_xml.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
-    $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>
+    src/c/profile/transport/stream_framing/stream_framing_protocol.c
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
     )
@@ -380,6 +385,7 @@ if(UCLIENT_BUILD_TESTS)
     include(CTest)
 
     add_subdirectory(test/unitary)
+    add_subdirectory(test/transport/custom_comm)
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/serial_comm)
     endif()

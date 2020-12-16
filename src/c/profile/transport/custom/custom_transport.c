@@ -20,7 +20,7 @@ static bool send_custom_msg(void* instance, const uint8_t* buf, size_t len)
     if (transport->framing)
     {    
         bytes_written = uxr_write_framed_msg(&transport->framing_io,
-                                            transport->write,
+                                            (uxr_write_cb) transport->write,
                                             transport,
                                             buf,
                                             len,
@@ -59,7 +59,7 @@ static bool recv_custom_msg(void* instance, uint8_t** buf, size_t* len, int time
         if (transport->framing)
         {    
             bytes_read = uxr_read_framed_msg(&transport->framing_io,
-                                            transport->read,
+                                            (uxr_read_cb) transport->read,
                                             transport,
                                             transport->buffer,
                                             sizeof(transport->buffer),
@@ -141,6 +141,7 @@ bool uxr_init_custom_transport(uxrCustomTransport* transport,
         transport->comm.recv_msg = recv_custom_msg;
         transport->comm.comm_error = get_custom_error;
         transport->comm.mtu = UCLIENT_CUSTOM_TRANSPORT_MTU;
+        transport->args = args;
 
         rv = true;
     }

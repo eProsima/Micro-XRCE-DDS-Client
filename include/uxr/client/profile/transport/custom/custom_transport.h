@@ -25,9 +25,11 @@ extern "C"
 #include <uxr/client/profile/transport/stream_framing/stream_framing_protocol.h>
 #include <uxr/client/visibility.h>
 
-typedef bool (*open_custom_func)(void *);
+struct uxrCustomTransport;
+
+typedef bool (*open_custom_func)(struct uxrCustomTransport*);
 typedef bool (*close_custom_func)(struct uxrCustomTransport*);
-typedef size_t (*write_custom_func)(struct uxrCustomTransport*, uint8_t*, size_t, uint8_t*);
+typedef size_t (*write_custom_func)(struct uxrCustomTransport*, const uint8_t*, size_t, uint8_t*);
 typedef size_t (*read_custom_func)(struct uxrCustomTransport*, uint8_t*, size_t, int, uint8_t*);
 
 typedef struct uxrCustomTransport
@@ -55,9 +57,9 @@ typedef struct uxrCustomTransport
 UXRDLLAPI void uxr_set_custom_transport_callbacks(uxrCustomTransport* transport,
                                                   bool framing,
                                                   open_custom_func open,
-                                                  close_custom_func close);
-                                                //   write_custom_func write,
-                                                //   read_custom_func read);
+                                                  close_custom_func close,
+                                                  write_custom_func write,
+                                                  read_custom_func read);
 
 /**
  * @brief Initializes a Custom transport.

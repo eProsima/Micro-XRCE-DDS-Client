@@ -26,7 +26,7 @@ bool uxr_init_serial_platform(void* args, const int fd, uint8_t remote_addr, uin
 bool uxr_close_serial_platform(void* args);
 
 size_t uxr_write_serial_data_platform(void* args,
-                                      uint8_t* buf,
+                                      const uint8_t* buf,
                                       size_t len,
                                       uint8_t* errcode);
 

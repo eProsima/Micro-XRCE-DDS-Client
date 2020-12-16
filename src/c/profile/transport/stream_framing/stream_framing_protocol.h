@@ -33,7 +33,7 @@ void uxr_update_crc(uint16_t* crc, const uint8_t data);
 bool uxr_get_next_octet(uxrFramingIO* framing_io, uint8_t* octet);
 bool uxr_add_next_octet(uxrFramingIO* framing_io, uint8_t octet);
 
-typedef size_t (*uxr_write_cb)(void*, uint8_t*, size_t, uint8_t*);
+typedef size_t (*uxr_write_cb)(void*, const uint8_t*, size_t, uint8_t*);
 typedef size_t (*uxr_read_cb)(void*, uint8_t*, size_t, int, uint8_t*);
 
 size_t uxr_write_framed_msg(uxrFramingIO* framing_io,
