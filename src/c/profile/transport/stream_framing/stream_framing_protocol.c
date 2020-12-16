@@ -113,7 +113,7 @@ void uxr_init_serial_io(uxrSerialIO* serial_io, uint8_t local_addr)
     serial_io->rb_tail = 0;
 }
 
-size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
+size_t uxr_write_framed_msg(uxrSerialIO* serial_io,
                             uxr_write_cb write_cb,
                             void* cb_arg,
                             const uint8_t* buf,
@@ -205,7 +205,7 @@ size_t uxr_write_serial_msg(uxrSerialIO* serial_io,
     return cond ? (uint16_t)(len) : 0;
 }
 
-size_t uxr_read_serial_msg(uxrSerialIO* serial_io,
+size_t uxr_read_framed_msg(uxrSerialIO* serial_io,
                            uxr_read_cb read_cb,
                            void* cb_arg,
                            uint8_t* buf,
