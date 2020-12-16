@@ -1,3 +1,4 @@
+#include <uxr/client/util/time.h>
 #include "stream_framing_protocol.h"
 #include <string.h>
 
@@ -113,6 +114,27 @@ void uxr_init_framing_io(uxrFramingIO* framing_io, uint8_t local_addr)
     framing_io->rb_tail = 0;
 }
 
+bool uxr_framing_write_transport(uxrFramingIO* framing_io,
+                                uxr_write_cb write_cb,
+                                void* cb_arg,
+                                uint8_t* errcode)
+{
+    size_t bytes_written = 0;
+    size_t last_written = 0;
+
+    do {   
+        last_written = write_cb(cb_arg, &framing_io->wb[bytes_written], framing_io->wb_pos - bytes_written, errcode);
+        bytes_written += last_written;
+    } while (bytes_written < framing_io->wb_pos && 0 < last_written);
+    
+    if (bytes_written == framing_io->wb_pos)
+    {
+        framing_io->wb_pos = 0;
+        return true;
+    }
+    return false;
+}
+
 size_t uxr_write_framed_msg(uxrFramingIO* framing_io,
                             uxr_write_cb write_cb,
                             void* cb_arg,
@@ -146,16 +168,7 @@ size_t uxr_write_framed_msg(uxrFramingIO* framing_io,
         }
         else
         {
-            size_t bytes_written = write_cb(cb_arg, framing_io->wb, framing_io->wb_pos, errcode);
-            if (0 < bytes_written)
-            {
-                cond = true;
-                framing_io->wb_pos = (uint8_t)(framing_io->wb_pos - bytes_written);
-            }
-            else
-            {
-                cond = false;
-            }
+            cond = uxr_framing_write_transport(framing_io, write_cb, cb_arg, errcode);
         }
     }
 
@@ -174,47 +187,26 @@ size_t uxr_write_framed_msg(uxrFramingIO* framing_io,
         }
         else
         {
-            size_t bytes_written = write_cb(cb_arg, framing_io->wb, framing_io->wb_pos, errcode);
-            if (0 < bytes_written)
-            {
-                cond = true;
-                framing_io->wb_pos = (uint8_t)(framing_io->wb_pos - bytes_written);
-            }
-            else
-            {
-                cond = false;
-            }
+            cond = uxr_framing_write_transport(framing_io, write_cb, cb_arg, errcode);
         }
     }
 
-    /* Flus write buffer. */
+    /* Flush write buffer. */
     if (cond && (0 < framing_io->wb_pos))
     {
-            size_t bytes_written = write_cb(cb_arg, framing_io->wb, framing_io->wb_pos, errcode);
-            if (0 < bytes_written)
-            {
-                cond = true;
-                framing_io->wb_pos = (uint8_t)(framing_io->wb_pos - bytes_written);
-            }
-            else
-            {
-                cond = false;
-            }
+        cond = uxr_framing_write_transport(framing_io, write_cb, cb_arg, errcode);
     }
 
     return cond ? (uint16_t)(len) : 0;
 }
 
-size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
-                           uxr_read_cb read_cb,
-                           void* cb_arg,
-                           uint8_t* buf,
-                           size_t len,
-                           uint8_t* remote_addr,
-                           int timeout,
-                           uint8_t* errcode)
-{
-    size_t rv = 0;
+size_t uxr_framing_read_transport(uxrFramingIO* framing_io,
+                                uxr_read_cb read_cb,
+                                void* cb_arg,
+                                int * timeout,
+                                uint8_t* errcode)
+{   
+    int64_t time_init = uxr_millis();
 
     /* Compute read-buffer available size. */
     uint8_t av_len[2] = {0, 0};
@@ -245,7 +237,7 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
     size_t bytes_read[2] = {0};
     if (0 < av_len[0])
     {
-        bytes_read[0] = read_cb(cb_arg, &framing_io->rb[framing_io->rb_head], av_len[0], timeout, errcode);
+        bytes_read[0] = read_cb(cb_arg, &framing_io->rb[framing_io->rb_head], av_len[0], *timeout, errcode);
         framing_io->rb_head = (uint8_t)((size_t)(framing_io->rb_head + bytes_read[0]) % sizeof(framing_io->rb));
         if (0 < bytes_read[0])
         {
@@ -256,8 +248,26 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
             }
         }
     }
+    
+    *timeout -= (int)(uxr_millis() - time_init);
+    *timeout = (0 > *timeout) ? 0 : *timeout;
+    return bytes_read[0] + bytes_read[1];
+}
 
-    if (0 < (bytes_read[0] + bytes_read[1]) || (framing_io->rb_tail != framing_io->rb_head))
+size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
+                           uxr_read_cb read_cb,
+                           void* cb_arg,
+                           uint8_t* buf,
+                           size_t len,
+                           uint8_t* remote_addr,
+                           int timeout,
+                           uint8_t* errcode)
+{
+    size_t rv = 0;
+
+    size_t readed_bytes = uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode);
+
+    if (0 < readed_bytes || (framing_io->rb_tail != framing_io->rb_head))
     {
         /* State Machine. */
         bool exit_cond = false;
@@ -382,6 +392,9 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                         if (UXR_FRAMING_BEGIN_FLAG == octet)
                         {
                             framing_io->state = UXR_FRAMING_READING_SRC_ADDR;
+                        }
+                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode)){
+
                         }
                         else
                         {
