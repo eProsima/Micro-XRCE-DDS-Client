@@ -23,7 +23,7 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
 
     uint8_t errcode;
-    size_t bytes_written = uxr_write_framed_msg(&transport->serial_io,
+    size_t bytes_written = uxr_write_framed_msg(&transport->framing_io,
                                                 uxr_write_serial_data_platform,
                                                 &transport->platform,
                                                 buf,
@@ -53,7 +53,7 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
         int64_t time_init = uxr_millis();
         uint8_t remote_addr;
         uint8_t errcode;
-        bytes_read = uxr_read_framed_msg(&transport->serial_io,
+        bytes_read = uxr_read_framed_msg(&transport->framing_io,
                                          uxr_read_serial_data_platform,
                                          &transport->platform,
                                          transport->buffer,
@@ -98,7 +98,7 @@ bool uxr_init_serial_transport(uxrSerialTransport* transport,
         transport->remote_addr = remote_addr;
 
         /* Init SerialIO. */
-        uxr_init_serial_io(&transport->serial_io, local_addr);
+        uxr_init_framing_io(&transport->framing_io, local_addr);
 
         /* Setup interface. */
         transport->comm.instance = (void*)transport;

@@ -20,7 +20,7 @@ static bool send_custom_msg(void* instance, const uint8_t* buf, size_t len)
     uint8_t errcode;
     size_t bytes_written = 0;
 #ifdef UCLIENT_CUSTOM_TRANSPORT_STREAM_FRAMING
-    bytes_written = uxr_write_framed_msg(&transport->serial_io,
+    bytes_written = uxr_write_framed_msg(&transport->framing_io,
                                          transport->write,
                                          transport,
                                          buf,
@@ -56,7 +56,7 @@ static bool recv_custom_msg(void* instance, uint8_t** buf, size_t* len, int time
         uint8_t errcode;
 
 #ifdef UCLIENT_CUSTOM_TRANSPORT_STREAM_FRAMING
-        bytes_read = uxr_read_framed_msg(&transport->serial_io,
+        bytes_read = uxr_read_framed_msg(&transport->framing_io,
                                          transport->read,
                                          transport,
                                          transport->buffer,
@@ -108,7 +108,7 @@ bool uxr_init_custom_transport(uxrCustomTransport* transport,
 
 #ifdef UCLIENT_CUSTOM_TRANSPORT_STREAM_FRAMING
         /* Init SerialIO. */
-        uxr_init_serial_io(&transport->serial_io, 0x00);
+        uxr_init_framing_io(&transport->framing_io, 0x00);
 #endif
 
         /* Setup interface. */

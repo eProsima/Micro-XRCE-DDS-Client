@@ -36,7 +36,7 @@ typedef struct uxrCustomTransport
 {
     uint8_t buffer[UCLIENT_CUSTOM_TRANSPORT_MTU];
 #ifdef UCLIENT_CUSTOM_TRANSPORT_STREAM_FRAMING
-    uxrSerialIO serial_io;
+    uxrFramingIO framing_io;
 #endif
     open_custom_func open;
     close_custom_func close;
