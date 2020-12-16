@@ -22,36 +22,48 @@ extern "C"
 
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/config.h>
-#ifdef UCLIENT_CUSTOM_TRANSPORT_STREAM_FRAMING
 #include <uxr/client/profile/transport/stream_framing/stream_framing_protocol.h>
-#endif
 #include <uxr/client/visibility.h>
 
-typedef bool (*open_custom_func)(void * args);
-typedef bool (*close_custom_func)(uxrCustomTransport* transport);
-typedef size_t (*write_custom_func)(uxrCustomTransport* transport, uint8_t* buf, size_t len, uint8_t* errcode);
-typedef size_t (*read_custom_func)(uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* errcode);
+typedef bool (*open_custom_func)(void *);
+typedef bool (*close_custom_func)(struct uxrCustomTransport*);
+typedef size_t (*write_custom_func)(struct uxrCustomTransport*, uint8_t*, size_t, uint8_t*);
+typedef size_t (*read_custom_func)(struct uxrCustomTransport*, uint8_t*, size_t, int, uint8_t*);
 
 typedef struct uxrCustomTransport
 {
     uint8_t buffer[UCLIENT_CUSTOM_TRANSPORT_MTU];
-#ifdef UCLIENT_CUSTOM_TRANSPORT_STREAM_FRAMING
+    bool framing;
     uxrFramingIO framing_io;
-#endif
     open_custom_func open;
     close_custom_func close;
     write_custom_func write;
     read_custom_func read;
-
     uxrCommunication comm;
     void * args;
 } uxrCustomTransport;
 
 
 /**
- * @brief Initializes a Custom transport.
+ * @brief Set a Custom transport callbacks.
  * @param transport     The uninitialized transport structure used for managing the transport.
- *                      This structure must be accesible during the connection.
+ * @param open          Open callback.
+ * @param close         Close callback.
+ * @param write         Write callback.
+ * @param read          Read callback.
+ */
+UXRDLLAPI void uxr_set_custom_transport_callbacks(uxrCustomTransport* transport,
+                                                  bool framing,
+                                                  open_custom_func open,
+                                                  close_custom_func close);
+                                                //   write_custom_func write,
+                                                //   read_custom_func read);
+
+/**
+ * @brief Initializes a Custom transport.
+ * @param transport     The transport structure used for managing the transport.
+ *                      Callbacks must be set.
+ * @param open_args     Arguments for the open function.
  * @return `true` in case of successful initialization. `false` in other case.
  */
 UXRDLLAPI bool uxr_init_custom_transport(uxrCustomTransport* transport,
@@ -62,7 +74,7 @@ UXRDLLAPI bool uxr_init_custom_transport(uxrCustomTransport* transport,
  * @param transport The transport structure.
  * @return `true` in case of successful closing. `false` in other case.
  */
-UXRDLLAPI bool uxr_close_serial_transport(uxrCustomTransport* transport);
+UXRDLLAPI bool uxr_close_custom_transport(uxrCustomTransport* transport);
 
 #ifdef __cplusplus
 }

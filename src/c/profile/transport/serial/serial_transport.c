@@ -97,7 +97,7 @@ bool uxr_init_serial_transport(uxrSerialTransport* transport,
         /* Setup address. */
         transport->remote_addr = remote_addr;
 
-        /* Init SerialIO. */
+        /* Init FramingIO. */
         uxr_init_framing_io(&transport->framing_io, local_addr);
 
         /* Setup interface. */
