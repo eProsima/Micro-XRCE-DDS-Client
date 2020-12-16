@@ -1,4 +1,4 @@
-#include "serial_protocol_internal.h"
+#include "stream_framing_protocol.h"
 #include <string.h>
 
 /*******************************************************************************

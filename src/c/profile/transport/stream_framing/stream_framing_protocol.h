@@ -19,7 +19,7 @@ extern "C"
 {
 #endif
 
-#include <uxr/client/profile/transport/serial/serial_protocol.h>
+#include <uxr/client/profile/transport/stream_framing/stream_framing_protocol.h>
 #include <stddef.h>
 #include <stdbool.h>
 

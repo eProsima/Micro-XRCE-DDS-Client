@@ -1,5 +1,5 @@
 #include <uxr/client/profile/transport/serial/serial_transport_platform.h>
-#include "serial_protocol_internal.h"
+#include "../stream_framing/stream_framing_protocol.h"
 #include <uxr/client/util/time.h>
 
 /*******************************************************************************

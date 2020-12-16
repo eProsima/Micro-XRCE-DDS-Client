@@ -46,6 +46,7 @@ option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
 option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
 option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
 option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
+option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
 set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
 set(UCLIENT_MAX_OUTPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of output reliable streams for session.")
 set(UCLIENT_MAX_INPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of input best-effort streams for session.")
@@ -175,8 +176,8 @@ set(UCLIENT_PROFILE_SERIAL OFF)
 endif()
 
 if(UCLIENT_PROFILE_SERIAL)
+    set(UCLIENT_PROFILE_STREAM_FRAMING ON)
     list(APPEND _transport_src src/c/profile/transport/serial/serial_transport.c)
-    list(APPEND _transport_src src/c/profile/transport/serial/serial_protocol.c)
     if(UCLIENT_EXTERNAL_SERIAL)
         list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_external.c)
     else()
@@ -235,6 +236,7 @@ set(SRCS
     src/c/core/session/create_entities_xml.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
+    $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
     )

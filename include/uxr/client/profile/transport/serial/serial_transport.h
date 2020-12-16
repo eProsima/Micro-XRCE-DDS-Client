@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #include <uxr/client/core/communication/communication.h>
-#include <uxr/client/profile/transport/serial/serial_protocol.h>
+#include <uxr/client/profile/transport/stream_framing/stream_framing_protocol.h>
 #include <uxr/client/config.h>
 #include <uxr/client/visibility.h>
 #include <uxr/client/transport.h>
