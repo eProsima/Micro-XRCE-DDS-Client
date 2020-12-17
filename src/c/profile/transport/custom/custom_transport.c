@@ -148,7 +148,7 @@ bool uxr_init_custom_transport(uxrCustomTransport* transport,
     return rv;
 }
 
-bool uxr_close_serial_transport(uxrCustomTransport* transport)
+bool uxr_close_custom_transport(uxrCustomTransport* transport)
 {
     return transport->close(transport);
 }

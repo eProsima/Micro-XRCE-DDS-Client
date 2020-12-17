@@ -14,6 +14,8 @@ CustomComm::CustomComm() : buffer(2000)
 
 CustomComm::~CustomComm()
 {
+    uxr_close_custom_transport(&master_);
+    uxr_close_custom_transport(&slave_);
 }
 
 bool CustomComm::open(uxrCustomTransport* transport)
