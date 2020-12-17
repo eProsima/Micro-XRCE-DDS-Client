@@ -33,32 +33,32 @@ class CircularBuffer {
         {
             size_t next;
 
-            next = head + 1;  // next is where head will point to after this write.
+            next = head + 1;
             if (next >= maxlen)
                 next = 0;
 
-            if (next == tail)  // if the head + 1 == tail, circular buffer is full
+            if (next == tail) 
                 return -1;
 
-            buffer[head] = data;  // Load data and then move
-            head = next;             // head to next data offset.
-            return 0;  // return success to indicate successful push.
+            buffer[head] = data;
+            head = next;
+            return 0;
         }
 
         int read(uint8_t *data)
         {
             size_t next;
 
-            if (head == tail)  // if the head == tail, we don't have any data
+            if (head == tail)
                 return -1;
 
-            next = tail + 1;  // next is where tail will point to after this read.
+            next = tail + 1;
             if(next >= maxlen)
                 next = 0;
 
-            *data = buffer[tail];  // Read data and then move
-            tail = next;              // tail to next offset.
-            return 0;  // return success to indicate successful pop.
+            *data = buffer[tail];
+            tail = next;
+            return 0;
         }
 
     private:
@@ -83,7 +83,7 @@ protected:
     static size_t write(uxrCustomTransport* transport, const uint8_t* buf, size_t len, uint8_t* error);
     static size_t read(uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* error);
 
-    CircularBuffer * buffer;
+    CircularBuffer buffer;
     size_t max_payload;
 };
 
