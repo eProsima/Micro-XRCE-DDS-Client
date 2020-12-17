@@ -1,7 +1,6 @@
 #include "CustomComm.hpp"
 
 #include <stdint.h>
-#include <fcntl.h>
 
 CustomComm::CustomComm() : buffer(2000)
 {
