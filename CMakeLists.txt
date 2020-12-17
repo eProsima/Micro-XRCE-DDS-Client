@@ -139,6 +139,10 @@ option(UCLIENT_EXTERNAL_TCP "Enable external serial transport." OFF)
 option(UCLIENT_EXTERNAL_UDP "Enable external serial transport." OFF)
 option(UCLIENT_EXTERNAL_SERIAL "Enable external serial transport." OFF)
 
+if(UCLIENT_EXTERNAL_TCP OR UCLIENT_EXTERNAL_UDP OR UCLIENT_EXTERNAL_SERIAL)
+    message(WARNING "External transports CMake flags will be deprecated in next version")
+endif()
+
 # Transport sources.
 set(_transport_src)
 
