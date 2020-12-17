@@ -1,3 +1,4 @@
+#include <uxr/client/util/time.h>
 #include "serial_protocol_internal.h"
 #include <string.h>
 
