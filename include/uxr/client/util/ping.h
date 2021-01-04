@@ -31,6 +31,8 @@ extern "C"
 /**
  * @brief   Checks the availability status of a valid connection with an agent.
  *          This methods performs a single attempt.
+ *          Transport must be properly initialized before calling this method.
+ *          This method does not take care of init/fini the transport struct.
  * @param   comm Pointer to the uxrCommunication struct holding the transport
  *               information and callback methods.
  * @param   timeout Time, in milliseconds, for a ping attempt.
@@ -45,6 +47,8 @@ UXRDLLAPI bool uxr_ping_agent(
  *          Additionally, this method allows the user to specify the number
  *          of attempts to be performed. This number will not be reached if a
  *          successful ping occurs.
+ *          Transport must be properly initialized before calling this method.
+ *          This method does not take care of init/fini the transport struct.
  * @param   comm Pointer to the uxrCommunication struct holding the transport
  *               information and callback methods.
  * @param   timeout Time, in milliseconds, for a ping attempt.
