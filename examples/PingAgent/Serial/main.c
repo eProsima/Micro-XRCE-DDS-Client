@@ -20,6 +20,10 @@
 
 int main(int argc, char** argv)
 {
+#ifdef WIN32
+    printf("Sorry, this example is not available for Windows platforms.");
+    return 0;
+#else
     // CLI
     if (2 != argc)
     {
@@ -53,4 +57,5 @@ int main(int argc, char** argv)
     uxr_close_serial_transport(&transport);
 
     return 0;
+#endif  // WIN32
 }
