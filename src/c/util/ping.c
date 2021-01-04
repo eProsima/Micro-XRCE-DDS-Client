@@ -15,7 +15,7 @@ bool uxr_acknack_pong(
 
 bool listen_info_message(
         const uxrCommunication* comm,
-        int timeout);
+        const int timeout);
 
 //==================================================================
 //                             PUBLIC
