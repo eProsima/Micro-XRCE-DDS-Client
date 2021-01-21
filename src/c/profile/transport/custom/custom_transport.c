@@ -127,7 +127,9 @@ bool uxr_init_custom_transport(uxrCustomTransport* transport,
         return rv;
     }
     
-    if (transport->open(args))
+    transport->args = args;
+
+    if (transport->open(transport))
     {
         if (transport->framing)
         {
@@ -141,7 +143,6 @@ bool uxr_init_custom_transport(uxrCustomTransport* transport,
         transport->comm.recv_msg = recv_custom_msg;
         transport->comm.comm_error = get_custom_error;
         transport->comm.mtu = UCLIENT_CUSTOM_TRANSPORT_MTU;
-        transport->args = args;
 
         rv = true;
     }
