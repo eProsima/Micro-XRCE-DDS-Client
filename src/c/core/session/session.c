@@ -16,6 +16,7 @@
 #include "stream/seq_num_internal.h"
 #include "../log/log_internal.h"
 #include "../../util/time_internal.h"
+#include "../../brokerless/brokerless_internal.h"
 
 #define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE)
 #define DELETE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE)
@@ -81,6 +82,10 @@ void uxr_init_session(uxrSession* session, uxrCommunication* comm, uint32_t key)
 
     uxr_init_session_info(&session->info, 0x81, key);
     uxr_init_stream_storage(&session->streams);
+
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    init_brokerless(key); // TODO: should it be desirable to give the user an uxr_init_brokerless_transport() method?
+#endif
 }
 
 void uxr_set_status_callback(uxrSession* session, uxrOnStatusFunc on_status_func, void* args)
@@ -370,6 +375,11 @@ bool uxr_buffer_performance(uxrSession *session,
 
 void uxr_flash_output_streams(uxrSession* session)
 {
+
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    flush_brokerless_queues();
+#endif
+
     for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
         uxrOutputBestEffortStream* stream = &session->streams.output_best_effort[i];
@@ -411,6 +421,10 @@ bool listen_message(uxrSession* session, int poll_ms)
         read_message(session, &ub);
     }
 
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    listen_brokerless(session, poll_ms);
+#endif
+ 
     return must_be_read;
 }
 
@@ -480,6 +494,7 @@ inline bool send_message(const uxrSession* session, uint8_t* buffer, size_t leng
 inline bool recv_message(const uxrSession* session, uint8_t**buffer, size_t* length, int poll_ms)
 {
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
+    //LISTEN P2P PROPOSAL
     if(received)
     {
         UXR_DEBUG_PRINT_MESSAGE(UXR_RECV, *buffer, *length, session->info.key);

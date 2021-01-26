@@ -2,6 +2,7 @@
 #include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
+#include "../../brokerless/brokerless_internal.h"
 
 #include <string.h>
 
@@ -69,6 +70,10 @@ uint16_t uxr_buffer_create_datawriter_xml(uxrSession* session, uxrStreamId strea
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
     uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
 
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    add_brokerless_entity_hash_from_xml(xml, object_id);
+#endif
+
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
@@ -80,6 +85,10 @@ uint16_t uxr_buffer_create_datareader_xml(uxrSession* session, uxrStreamId strea
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAREADER;
     uxr_object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
+
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    add_brokerless_entity_hash_from_xml(xml, object_id);
+#endif
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
@@ -96,6 +105,10 @@ uint16_t uxr_buffer_create_requester_xml(
     payload.object_representation.kind = DDS_XRCE_OBJK_REQUESTER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
 
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    add_brokerless_entity_hash_from_xml(xml, object_id);
+#endif
+
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
@@ -110,6 +123,10 @@ uint16_t uxr_buffer_create_replier_xml(
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REPLIER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);
+
+#ifdef UCLIENT_PROFILE_BROKERLESS
+    add_brokerless_entity_hash_from_xml(xml, object_id);
+#endif
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }

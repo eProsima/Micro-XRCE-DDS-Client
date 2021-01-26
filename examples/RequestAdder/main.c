@@ -18,9 +18,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <time.h>
 
 #define STREAM_HISTORY  8
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+
+bool sended = false;
 
 void on_reply(
         uxrSession* session,
@@ -37,6 +40,8 @@ void on_reply(
 
     uint64_t result;
     ucdr_deserialize_uint64_t(ub, &result);
+
+    sended = false;
 
 #ifdef WIN32
     printf("Reply received: %I64u [id: %d]\n", result, reply_id);
@@ -55,7 +60,8 @@ int main(int args, char** argv)
 
     char* ip = argv[1];
     char* port = argv[2];
-    uint32_t key = (args == 4) ? (uint32_t)atoi(argv[3]) : 0xAAAABBBB;
+    srand((unsigned int)time(NULL));   // Initialization, should only be called once.
+    uint32_t key = rand();
 
     // Transport
     uxrUDPTransport transport;
@@ -102,7 +108,7 @@ int main(int args, char** argv)
                                                "reply_type=\"reply_type\">"
                                     "</requester>"
                                 "</dds>";
-    uint16_t requester_req = uxr_buffer_create_requester_xml(&session, reliable_out, requester_id, participant_id, requester_xml, UXR_REPLACE);
+    uint16_t requester_req = uxr_buffer_create_requester_ref(&session, reliable_out, requester_id, participant_id, "repli1", UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[2];
@@ -110,7 +116,7 @@ int main(int args, char** argv)
     if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 2))
     {
         printf("Error at create entities: participant: %i requester: %i\n", status[0], status[1]);
-        return 1;
+        // return 1;
     }
 
     // Request replies
@@ -120,21 +126,26 @@ int main(int args, char** argv)
 
     // Write requests
     bool connected = true;
-    uint32_t count = 0;
-    while (connected)
+    uint32_t count = atoi(argv[3]);
+    while (1)
     {
-        uint8_t request[2 * 4] = {0};
-        ucdrBuffer ub;
+        if (!sended)
+        {
+            uint8_t request[2 * 4] = {0};
+            ucdrBuffer ub;
 
-        ucdr_init_buffer(&ub, request, sizeof(request));
-        ucdr_serialize_uint32_t(&ub, count);
-        ucdr_serialize_uint32_t(&ub, count);
+            ucdr_init_buffer(&ub, request, sizeof(request));
+            ucdr_serialize_uint32_t(&ub, count);
+            ucdr_serialize_uint32_t(&ub, count);
 
-        uint16_t request_id = uxr_buffer_request(&session, reliable_out, requester_id, request, sizeof(request));
-        printf("Request sent: (%d + %d) [id: %d]\n", count, count, request_id);
-        connected = uxr_run_session_time(&session, 1000);
+            uint16_t request_id = uxr_buffer_request(&session, reliable_out, requester_id, request, sizeof(request));
+            printf("Request sent: (%d + %d) [id: %d]\n", count, count, request_id);
 
-        ++count;
+            ++count;
+            sended = true;
+        }
+        
+        connected = uxr_run_session_time(&session, 10);
     }
 
     return 0;
