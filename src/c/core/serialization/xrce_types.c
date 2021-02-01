@@ -1325,7 +1325,7 @@ bool uxr_deserialize_BaseObjectRequest(ucdrBuffer* buffer, BaseObjectRequest* ou
 bool uxr_serialize_AGENT_ActivityInfo(ucdrBuffer* buffer, const AGENT_ActivityInfo* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_int16_t(buffer, input->availibility);
+    ret &= ucdr_serialize_int16_t(buffer, input->availability);
     ret &= uxr_serialize_TransportLocatorSeq(buffer, &input->address_seq);
     return ret;
 }
@@ -1333,7 +1333,7 @@ bool uxr_serialize_AGENT_ActivityInfo(ucdrBuffer* buffer, const AGENT_ActivityIn
 bool uxr_deserialize_AGENT_ActivityInfo(ucdrBuffer* buffer, AGENT_ActivityInfo* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_int16_t(buffer, &output->availibility);
+    ret &= ucdr_deserialize_int16_t(buffer, &output->availability);
     ret &= uxr_deserialize_TransportLocatorSeq(buffer, &output->address_seq);
     return ret;
 }

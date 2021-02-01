@@ -225,6 +225,7 @@ set(SRCS
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/util/time.c
+    src/c/util/ping.c
     src/c/core/session/common_create_entities.c
     src/c/core/session/create_entities_ref.c
     src/c/core/session/create_entities_xml.c
@@ -349,6 +350,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorldP2P)
     add_subdirectory(examples/TimeSync)
+    add_subdirectory(examples/PingAgent)
 endif()
 
 ###############################################################################

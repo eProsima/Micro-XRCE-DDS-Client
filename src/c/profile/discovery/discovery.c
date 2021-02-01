@@ -153,9 +153,9 @@ bool uxr_deserialize_discovery_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* ou
         ret &= output->object_info.activity.kind == DDS_XRCE_OBJK_AGENT;
         if (ret)
         {
-            ret &= ucdr_deserialize_int16_t(buffer, &output->object_info.activity._.agent.availibility);
+            ret &= ucdr_deserialize_int16_t(buffer, &output->object_info.activity._.agent.availability);
             ret &= ucdr_deserialize_uint32_t(buffer, &output->object_info.activity._.agent.address_seq.size);
-            
+
             // This function takes care of deserializing at least the possible address_seq items
             // if the sent sequence is too long for the allocated UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX
             output->object_info.activity._.agent.address_seq.size = 
