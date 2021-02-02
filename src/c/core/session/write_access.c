@@ -211,10 +211,10 @@ bool uxr_prepare_output_stream_fragmented(
 
     ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
 
-    continous_args.session = session;
-    continous_args.stream_id = stream_id;
-    continous_args.topic_size = user_required_space;    
-    continous_args.flush_callback = flush_callback;    
+    continuous_args.session = session;
+    continuous_args.stream_id = stream_id;
+    continuous_args.topic_size = user_required_space;    
+    continuous_args.flush_callback = flush_callback;    
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, &continuous_args);
 
     return true;
