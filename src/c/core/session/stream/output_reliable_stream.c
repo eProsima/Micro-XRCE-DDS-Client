@@ -91,30 +91,30 @@ bool uxr_prepare_reliable_buffer_to_write(uxrOutputReliableStream* stream, size_
             buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
         }
        
-        size_t remaining_blocks = get_available_seq_num(stream);
+        size_t remaining_blocks = get_available_free_slots(stream);
 
         uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
         uint16_t first_fragment_size = (uint16_t)(buffer_capacity - (uint16_t)(buffer_size + SUBHEADER_SIZE));
         uint16_t remaining_size = (uint16_t)(length - first_fragment_size);
         uint16_t last_fragment_size;
-        uint16_t necessary_blocks;
+        uint16_t necessary_complete_blocks;
         if (0 == (remaining_size % available_block_size))
         {
             last_fragment_size = available_block_size;
-            necessary_blocks = (uint16_t)((0 < first_fragment_size) + (remaining_size / available_block_size));
+            necessary_complete_blocks = (uint16_t)((remaining_size / available_block_size));
         }
         else
         {
             last_fragment_size = remaining_size % available_block_size;
-            necessary_blocks = (uint16_t)((0 < first_fragment_size) + (remaining_size / available_block_size) + 1);
+            necessary_complete_blocks = (uint16_t)((remaining_size / available_block_size) + 1);
         }
 
-        available_to_write = necessary_blocks <= remaining_blocks;
+        available_to_write = necessary_complete_blocks <= remaining_blocks;
         if(available_to_write)
         {
             ucdrBuffer temp_ub;
             uint16_t fragment_size = first_fragment_size;
-            for(uint16_t i = 0; i < necessary_blocks - 1; i++)
+            for(uint16_t i = 0; i < necessary_complete_blocks; i++)
             {
                 ucdr_init_buffer_origin_offset(
                     &temp_ub,
@@ -271,14 +271,16 @@ bool on_full_output_buffer(ucdrBuffer* ub, void* args)
     return false;
 }
 
-uint16_t get_available_seq_num(uxrOutputReliableStream* stream)
+uint16_t get_available_free_slots(uxrOutputReliableStream* stream)
 {
-    int used_blocks = uxr_seq_num_sub(stream->last_written, stream->last_acknown);
-
-    used_blocks = (used_blocks == 0) ? 0 : 
-                  (used_blocks > stream->base.history) ? 
-                        stream->base.history :
-                        used_blocks - 1;
-    return (uint16_t)(stream->base.history - used_blocks);
+    uint16_t free_slots = 0;
+    for (uint16_t i = 0; i < stream->base.history; i++)
+    {
+        if (uxr_get_reliable_buffer_size(&stream->base, i) == stream->offset)
+        {
+            free_slots++;
+        }
+    }
+    return free_slots;
 }
 

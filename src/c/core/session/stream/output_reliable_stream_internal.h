@@ -41,7 +41,7 @@ void uxr_process_acknack(uxrOutputReliableStream* stream, uint16_t bitmap, uxrSe
 bool uxr_is_output_up_to_date(const uxrOutputReliableStream* stream);
 bool on_full_output_buffer(struct ucdrBuffer* ub, void* args);
 
-uint16_t get_available_seq_num(uxrOutputReliableStream* stream);
+uint16_t get_available_free_slots(uxrOutputReliableStream* stream);
 
 #ifdef __cplusplus
 }

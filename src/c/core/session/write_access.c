@@ -102,12 +102,12 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     uxrSession* session = local_args->session;
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, local_args->stream_id.index);
 
-    size_t remaining_blocks = get_available_seq_num(stream);
+    size_t remaining_blocks = get_available_free_slots(stream);
 
     if (0 == remaining_blocks)
     {
         if(!local_args->flush_callback(session) ||
-           0 == (remaining_blocks = get_available_seq_num(stream))){
+           0 == (remaining_blocks = get_available_free_slots(stream))){
             return true;
         }
     }
@@ -154,12 +154,12 @@ bool uxr_prepare_output_stream_fragmented(
         return false;
     }
 
-    size_t remaining_blocks = get_available_seq_num(stream);
+    size_t remaining_blocks = get_available_free_slots(stream);
     
     if (0 == remaining_blocks)
     {
         if(!flush_callback(session) ||
-           0 == (remaining_blocks = get_available_seq_num(stream))){
+           0 == (remaining_blocks = get_available_free_slots(stream))){
             return false;
         }
     }
