@@ -131,7 +131,7 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     ucdr_init_buffer(
         ub,
         temp_ub.iterator,
-        (size_t) (temp_ub.final-temp_ub.iterator));
+        (size_t)(temp_ub.final - temp_ub.iterator));
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, args);
 
     return false;
