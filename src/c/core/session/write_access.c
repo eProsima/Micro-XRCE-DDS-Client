@@ -213,7 +213,7 @@ bool uxr_prepare_output_stream_fragmented(
     continous_args.stream_id = stream_id;
     continous_args.topic_size = user_required_space;    
     continous_args.flush_callback = flush_callback;    
-    ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, &continous_args);
+    ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, &continuous_args);
 
     return true;
 }
