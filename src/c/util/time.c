@@ -1,4 +1,5 @@
 #include <uxr/client/util/time.h>
+#include <uxr/client/config.h>
 #include <time.h>
 
 #ifdef WIN32
@@ -46,6 +47,10 @@ int64_t uxr_nanos(void)
 #endif // ( configUSE_16_BIT_TICKS == 1 )
     total_tick |= (int64_t) tick_count.xTimeOnEntering;
     return ( ( total_tick / (int64_t) portTICK_PERIOD_MS ) * 1000000 );
+#elif defined(UCLIENT_PLATFORM_ZEPHYR)
+    struct timespec ts;
+    z_impl_clock_gettime(CLOCK_REALTIME, &ts);
+    return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
 #else
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
