@@ -91,7 +91,7 @@ typedef struct {
     uxrOnBuffersFull flush_callback;
     uxrStreamId stream_id;
     size_t topic_size;
-} continous_args_t;
+} continuous_args_t;
 
 static continous_args_t continous_args;
 
