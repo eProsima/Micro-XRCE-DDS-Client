@@ -165,7 +165,7 @@ bool uxr_prepare_output_stream_fragmented(
     }
     
     uxrSeqNum seq_num = stream->last_written;
-    uint8_t * buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
+    uint8_t* buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
     size_t buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
     size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream->base);
 
