@@ -351,7 +351,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/SubscribeHelloWorldP2P)
     add_subdirectory(examples/TimeSync)
     add_subdirectory(examples/PingAgent)
-    add_subdirectory(examples/ContinousFragment)
+    add_subdirectory(examples/ContinuousFragment)
 endif()
 
 ###############################################################################
