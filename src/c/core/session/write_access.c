@@ -147,7 +147,7 @@ bool uxr_prepare_output_stream_fragmented(
 {
     size_t user_required_space = topic_size + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 
-    uxrOutputReliableStream * stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
+    uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
 
     if (stream == NULL)
     {
@@ -217,4 +217,3 @@ bool uxr_prepare_output_stream_fragmented(
 
     return true;
 }
-
