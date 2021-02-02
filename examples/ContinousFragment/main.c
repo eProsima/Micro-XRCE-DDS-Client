@@ -22,7 +22,8 @@
 #define STREAM_HISTORY  4
 #define BUFFER_SIZE     100 * STREAM_HISTORY
 
-void flush_session(uxrSession* session){
+bool flush_session(uxrSession* session)
+{
     return uxr_run_session_until_confirm_delivery(session, 1000);
 }
 
