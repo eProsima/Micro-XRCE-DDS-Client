@@ -479,3 +479,18 @@ TEST_F(OutputReliableStreamTest, FragmentedSerialization)
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.iterator);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.final);
 }
+
+TEST_F(OutputReliableStreamTest, GetAvailableSeqNum)
+{
+    EXPECT_EQ(get_available_free_slots(&stream), HISTORY);
+
+    ucdrBuffer ub;
+    for (size_t i = 0; i < HISTORY; i++)
+    {
+        ASSERT_TRUE(uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub));
+        EXPECT_EQ(get_available_free_slots(&stream), HISTORY - (i + 1));
+    }
+
+    ASSERT_FALSE(uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub));
+    EXPECT_EQ(get_available_free_slots(&stream), 0);
+}
