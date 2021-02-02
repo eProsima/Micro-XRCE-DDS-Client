@@ -72,7 +72,7 @@ uint16_t uxr_buffer_reply(
  * @param datawriter_id     The identifier of the XRCE DataWriter that will write the topic into the DDS GDS.
  * @param ub_topic          The ucdrBuffer structure used for serializing the topic.
  * @param topic_size        The size of the topic in bytes.
- * @return A `bool` that identifies the request made by the Clientif the message can be serialized
+ * @return A `bool` that identifies the request made by the Client, if the message can be serialized
  */
 UXRDLLAPI bool uxr_prepare_output_stream(
         uxrSession* session,
