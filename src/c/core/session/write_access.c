@@ -97,7 +97,7 @@ static continuous_args_t continuous_args;
 
 bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
 {   
-    continous_args_t * local_args = (continous_args_t *) args;
+    continuous_args_t * local_args = (continuous_args_t *) args;
 
     uxrSession* session = local_args->session;
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, local_args->stream_id.index);
