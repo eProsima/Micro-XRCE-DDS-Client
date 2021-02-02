@@ -93,7 +93,7 @@ typedef struct {
     size_t topic_size;
 } continuous_args_t;
 
-static continous_args_t continous_args;
+static continuous_args_t continuous_args;
 
 bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
 {   
