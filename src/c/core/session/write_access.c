@@ -107,7 +107,8 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     if (0 == remaining_blocks)
     {
         if(!local_args->flush_callback(session) ||
-           0 == (remaining_blocks = get_available_free_slots(stream))){
+           0 == (remaining_blocks = get_available_free_slots(stream)))
+        {
             return true;
         }
     }
@@ -159,7 +160,8 @@ bool uxr_prepare_output_stream_fragmented(
     if (0 == remaining_blocks)
     {
         if(!flush_callback(session) ||
-           0 == (remaining_blocks = get_available_free_slots(stream))){
+           0 == (remaining_blocks = get_available_free_slots(stream)))
+        {
             return false;
         }
     }
