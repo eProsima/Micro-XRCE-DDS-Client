@@ -85,7 +85,7 @@ UXRDLLAPI bool uxr_prepare_output_stream(
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE WRITE_DATA submessage.
  *        The submessage will be sent when `uxr_flash_output_stream` or `uxr_run_session` function are called.
- *        This function handles the buffer flush by means of `on_buffer_full` callback.
+ *        This function handles the buffer flush by means of  `uxrOnBuffersFull` callback.
  *        As a result of the reception of this submessage, the Agent will write a topic into the DDS Global-Data-Space.
  * @param session           A uxrSession structure previously initialized.
  * @param stream_id         The output stream identifier where the WRITE_DATA submessage will be buffered.
