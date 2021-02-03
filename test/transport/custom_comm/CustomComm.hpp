@@ -18,7 +18,8 @@
 #include <gtest/gtest.h>
 #include <uxr/client/client.h>
 
-class CircularBuffer {
+class CircularBuffer
+{
 public:
         CircularBuffer(size_t len)
             : maxlen(len)
