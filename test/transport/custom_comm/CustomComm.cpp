@@ -18,21 +18,18 @@ CustomComm::~CustomComm()
     uxr_close_custom_transport(&slave_);
 }
 
-bool CustomComm::open(uxrCustomTransport* transport)
+bool CustomComm::open(uxrCustomTransport* /*transport*/)
 {   
-    (void) transport;
     return true;
 }   
 
-bool CustomComm::close(uxrCustomTransport* transport)
+bool CustomComm::close(uxrCustomTransport* /*transport*/)
 {
-    (void) transport;
     return true;
 }
 
-size_t CustomComm::write(uxrCustomTransport* transport, const uint8_t* buf, size_t len, uint8_t* error)
+size_t CustomComm::write(uxrCustomTransport* transport, const uint8_t* buf, size_t len, uint8_t* /*error*/)
 {
-    (void) error;
     CustomComm* custom_comm = static_cast<CustomComm*>(transport->args);
 
     size_t written = 0;
@@ -50,10 +47,8 @@ size_t CustomComm::write(uxrCustomTransport* transport, const uint8_t* buf, size
     return written;
 }
 
-size_t CustomComm::read(uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* error)
+size_t CustomComm::read(uxrCustomTransport* transport, uint8_t* buf, size_t len, int /*timeout*/, uint8_t* /*error*/)
 {
-    (void) error;
-    (void) timeout;
     CustomComm* custom_comm = static_cast<CustomComm*>(transport->args);
 
     size_t readed = 0;
