@@ -57,10 +57,14 @@ size_t CustomComm::read(uxrCustomTransport* transport, uint8_t* buf, size_t len,
     CustomComm* custom_comm = static_cast<CustomComm*>(transport->args);
 
     size_t readed = 0;
-    while (readed < len && readed < custom_comm->max_payload){
-        if (0 == custom_comm->buffer.read(&buf[readed])){
+    while (readed < len && readed < custom_comm->max_payload)
+    {
+        if (0 == custom_comm->buffer.read(&buf[readed]))
+        {
             readed++;
-        }else{
+        }
+        else
+        {
             break;
         }
     }
