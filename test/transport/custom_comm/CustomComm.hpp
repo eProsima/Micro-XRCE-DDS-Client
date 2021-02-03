@@ -20,7 +20,11 @@
 
 class CircularBuffer {
     public:
-        CircularBuffer(size_t len) : maxlen(len), head(0), tail(0) {
+        CircularBuffer(size_t len)
+            : maxlen(len)
+            , head(0)
+            , tail(0)
+        {
             buffer = static_cast<uint8_t*>(malloc(maxlen));
         }
 
