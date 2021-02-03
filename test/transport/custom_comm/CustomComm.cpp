@@ -36,10 +36,14 @@ size_t CustomComm::write(uxrCustomTransport* transport, const uint8_t* buf, size
     CustomComm* custom_comm = static_cast<CustomComm*>(transport->args);
 
     size_t written = 0;
-    while (written < len && written < custom_comm->max_payload){
-        if (0 == custom_comm->buffer.write(buf[written])){
+    while (written < len && written < custom_comm->max_payload)
+    {
+        if (0 == custom_comm->buffer.write(buf[written]))
+        {
             written++;
-        }else{
+        }
+        else
+        {
             break;
         }
     }
