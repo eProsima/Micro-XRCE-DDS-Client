@@ -19,7 +19,7 @@
 #include <uxr/client/client.h>
 
 class CircularBuffer {
-    public:
+public:
         CircularBuffer(size_t len)
             : maxlen(len)
             , head(0)
