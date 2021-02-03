@@ -40,10 +40,14 @@ public:
 
             next = head + 1;
             if (next >= maxlen)
+            {
                 next = 0;
-
+            }
+            
             if (next == tail) 
+            {
                 return -1;
+            }
 
             buffer[head] = data;
             head = next;
@@ -55,11 +59,15 @@ public:
             size_t next;
 
             if (head == tail)
+            {
                 return -1;
+            }
 
             next = tail + 1;
             if(next >= maxlen)
+            {
                 next = 0;
+            }
 
             *data = buffer[tail];
             tail = next;
