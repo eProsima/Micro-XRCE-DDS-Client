@@ -199,7 +199,6 @@ if(UCLIENT_PROFILE_DISCOVERY)
     endif()
 endif()
 
-
 if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
     list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
 endif()
