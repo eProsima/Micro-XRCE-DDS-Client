@@ -28,6 +28,11 @@ extern "C"
 
 struct SerialProperties;
 
+typedef struct uxrSerialPlatform
+{
+
+} uxrSerialPlatform;
+
 typedef struct SerialTransport
 {
     intmax_t (*send_data)(struct SerialTransport* transport, char* buf, size_t len);
