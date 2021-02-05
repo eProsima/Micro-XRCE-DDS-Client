@@ -25,7 +25,7 @@ static bool send_serial_msg(void* instance, const uint8_t* buf, size_t len)
     uint8_t errcode;
     size_t bytes_written = uxr_write_serial_msg(&transport->serial_io,
                                                 uxr_write_serial_data_platform,
-                                                transport->platform,
+                                                &transport->platform,
                                                 buf,
                                                 len,
                                                 transport->remote_addr,
@@ -55,7 +55,7 @@ static bool recv_serial_msg(void* instance, uint8_t** buf, size_t* len, int time
         uint8_t errcode;
         bytes_read = uxr_read_serial_msg(&transport->serial_io,
                                          uxr_read_serial_data_platform,
-                                         transport->platform,
+                                         &transport->platform,
                                          transport->buffer,
                                          sizeof(transport->buffer),
                                          &remote_addr,
@@ -87,17 +87,13 @@ static uint8_t get_serial_error(void)
  * Public function definitions.
  *******************************************************************************/
 bool uxr_init_serial_transport(uxrSerialTransport* transport,
-                               struct uxrSerialPlatform* platfrom,
                                const int fd,
                                uint8_t remote_addr,
                                uint8_t local_addr)
 {
     bool rv = false;
-    if (uxr_init_serial_platform(platfrom, fd, remote_addr, local_addr))
+    if (uxr_init_serial_platform(&transport->platform, fd, remote_addr, local_addr))
     {
-        /* Setup platform. */
-        transport->platform = platfrom;
-
         /* Setup address. */
         transport->remote_addr = remote_addr;
 
@@ -118,5 +114,5 @@ bool uxr_init_serial_transport(uxrSerialTransport* transport,
 
 bool uxr_close_serial_transport(uxrSerialTransport* transport)
 {
-    return uxr_close_serial_platform(transport->platform);
+    return uxr_close_serial_platform(&transport->platform);
 }

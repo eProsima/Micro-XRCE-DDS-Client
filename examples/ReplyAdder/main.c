@@ -76,8 +76,7 @@ int main(int args, char** argv)
 
     // Transport
     uxrUDPTransport transport;
-    uxrUDPPlatform udp_platform;
-    if (!uxr_init_udp_transport(&transport, &udp_platform, UXR_IPv4, ip, port))
+    if (!uxr_init_udp_transport(&transport, UXR_IPv4, ip, port))
     {
         printf("Error at init transport.\n");
         return 1;
