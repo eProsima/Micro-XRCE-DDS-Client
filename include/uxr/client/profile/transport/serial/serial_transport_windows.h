@@ -30,7 +30,7 @@ struct SerialProperties;
 
 typedef struct uxrSerialPlatform
 {
-
+    bool unused;
 } uxrSerialPlatform;
 
 typedef struct SerialTransport
