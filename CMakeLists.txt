@@ -170,6 +170,10 @@ if(UCLIENT_PROFILE_TCP)
     endif()
 endif()
 
+if(UCLIENT_PLATFORM_WINDOWS)
+set(UCLIENT_PROFILE_SERIAL OFF)
+endif()
+
 if(UCLIENT_PROFILE_SERIAL)
     list(APPEND _transport_src src/c/profile/transport/serial/serial_transport.c)
     list(APPEND _transport_src src/c/profile/transport/serial/serial_protocol.c)
