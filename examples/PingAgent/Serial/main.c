@@ -34,12 +34,10 @@ int main(int argc, char** argv)
     char* dev = argv[1];
 
     uxrSerialTransport transport;
-    uxrSerialPlatform serial_platform;
-
     int fd = open(dev, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 
-    if (!uxr_init_serial_transport(&transport, &serial_platform, fd, 0, 1))
+    if (!uxr_init_serial_transport(&transport, fd, 0, 1))
     {
         printf("Error during transport creation\n");
         return 1;

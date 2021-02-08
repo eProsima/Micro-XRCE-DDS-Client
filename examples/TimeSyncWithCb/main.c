@@ -55,8 +55,7 @@ int main(int args, char** argv)
 
     // Transport
     uxrUDPTransport transport;
-    uxrUDPPlatform udp_platform;
-    if(!uxr_init_udp_transport(&transport, &udp_platform, ip, port))
+    if(!uxr_init_udp_transport(&transport, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;

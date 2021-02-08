@@ -64,12 +64,9 @@ int main(int args, char** argv)
     uxrSession session;
 #if !defined(WIN32)
     uxrSerialTransport serial;
-    uxrSerialPlatform serial_platform;
 #endif
     uxrUDPTransport udp;
-    uxrUDPPlatform udp_platform;
     uxrTCPTransport tcp;
-    uxrTCPPlatform tcp_platform;
 
     uxrCommunication* comm;
 
@@ -79,7 +76,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         char* port = argv[3];
-        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv4, ip, port))
+        if(!uxr_init_udp_transport(&udp, UXR_IPv4, ip, port))
         {
             printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -92,7 +89,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         char* port = argv[3];
-        if(!uxr_init_udp_transport(&udp, &udp_platform, UXR_IPv6, ip, port))
+        if(!uxr_init_udp_transport(&udp, UXR_IPv6, ip, port))
         {
             printf("%sCan not create an udp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -105,7 +102,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         char* port = argv[3];
-        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, UXR_IPv4, ip, port))
+        if(!uxr_init_tcp_transport(&tcp, UXR_IPv4, ip, port))
         {
             printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -118,7 +115,7 @@ int main(int args, char** argv)
     {
         char* ip = argv[2];
         char* port = argv[3];
-        if(!uxr_init_tcp_transport(&tcp, &tcp_platform, UXR_IPv6, ip, port))
+        if(!uxr_init_tcp_transport(&tcp, UXR_IPv6, ip, port))
         {
             printf("%sCan not create a tcp connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;
@@ -132,7 +129,7 @@ int main(int args, char** argv)
     {
         char* device = argv[2];
         int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
-        if(!uxr_init_serial_transport(&serial, &serial_platform, fd, 0, 1))
+        if(!uxr_init_serial_transport(&serial, fd, 0, 1))
         {
             printf("%sCan not create a serial connection%s\n", RED_CONSOLE_COLOR, RESTORE_COLOR);
             return 1;

@@ -47,8 +47,7 @@ int main()
 
     // Transport.
     uxrSerialTransport transport = {0};
-    uxrSerialPlatform platform = {0};
-    (void) uxr_init_serial_transport(&transport, &platform, fd, 0, 1);
+    (void) uxr_init_serial_transport(&transport, fd, 0, 1);
 
     // Session.
     uxrSession session;
