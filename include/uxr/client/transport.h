@@ -48,8 +48,6 @@
 #include <uxr/client/profile/transport/serial/serial_transport_external.h>
 #elif defined(UCLIENT_PLATFORM_POSIX)
 #include <uxr/client/profile/transport/serial/serial_transport_posix.h>
-#elif defined(UCLIENT_PLATFORM_WINDOWS)
-#include <uxr/client/profile/transport/serial/serial_transport_windows.h>
 #endif
 #include <uxr/client/profile/transport/serial/serial_transport.h>
 #endif //UCLIENT_PROFILE_SERIAL
