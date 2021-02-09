@@ -127,8 +127,8 @@ if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX)
 endif()
 
 # Check external transport.
-option(UCLIENT_EXTERNAL_TCP "Enable external serial transport." OFF)
-option(UCLIENT_EXTERNAL_UDP "Enable external serial transport." OFF)
+option(UCLIENT_EXTERNAL_TCP "Enable external TCP transport." OFF)
+option(UCLIENT_EXTERNAL_UDP "Enable external UDP transport." OFF)
 option(UCLIENT_EXTERNAL_SERIAL "Enable external serial transport." OFF)
 
 # Other sources
