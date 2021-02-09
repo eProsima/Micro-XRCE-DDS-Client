@@ -4,10 +4,12 @@
 #include <unistd.h>
 #include <errno.h>
 
-bool uxr_init_serial_platform(struct uxrSerialPlatform* platform, int fd, uint8_t remote_addr, uint8_t local_addr)
+bool uxr_init_serial_platform(void* args, int fd, uint8_t remote_addr, uint8_t local_addr)
 {
     (void) remote_addr;
     (void) local_addr;
+
+    struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
 
     /* Poll setup. */
     platform->poll_fd.fd = fd;
@@ -16,14 +18,16 @@ bool uxr_init_serial_platform(struct uxrSerialPlatform* platform, int fd, uint8_
     return true;
 }
 
-bool uxr_close_serial_platform(struct uxrSerialPlatform* platform)
+bool uxr_close_serial_platform(void* args)
 {
+    struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
     return (-1 == platform->poll_fd.fd) ? true : (0 == close(platform->poll_fd.fd));
 }
 
-size_t uxr_write_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, uint8_t* errcode)
+size_t uxr_write_serial_data_platform(void* args, const uint8_t* buf, size_t len, uint8_t* errcode)
 {
     size_t rv = 0;
+    struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
 
     ssize_t bytes_written = write(platform->poll_fd.fd, (void*)buf, (size_t)len);
     if (-1 != bytes_written)
@@ -38,9 +42,10 @@ size_t uxr_write_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf,
     return rv;
 }
 
-size_t uxr_read_serial_data_platform(uxrSerialPlatform* platform, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
+size_t uxr_read_serial_data_platform(void* args, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
 {
     size_t rv = 0;
+    struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
 
     int poll_rv = poll(&platform->poll_fd, 1, timeout);
     if (0 < poll_rv)

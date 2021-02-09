@@ -27,18 +27,18 @@ extern "C"
 
 typedef enum uxrSerialInputState
 {
-    UXR_SERIAL_UNINITIALIZED,
-    UXR_SERIAL_READING_SRC_ADDR,
-    UXR_SERIAL_READING_DST_ADDR,
-    UXR_SERIAL_READING_LEN_LSB,
-    UXR_SERIAL_READING_LEN_MSB,
-    UXR_SERIAL_READING_PAYLOAD,
-    UXR_SERIAL_READING_CRC_LSB,
-    UXR_SERIAL_READING_CRC_MSB,
+    UXR_FRAMING_UNINITIALIZED,
+    UXR_FRAMING_READING_SRC_ADDR,
+    UXR_FRAMING_READING_DST_ADDR,
+    UXR_FRAMING_READING_LEN_LSB,
+    UXR_FRAMING_READING_LEN_MSB,
+    UXR_FRAMING_READING_PAYLOAD,
+    UXR_FRAMING_READING_CRC_LSB,
+    UXR_FRAMING_READING_CRC_MSB,
 
 } uxrSerialInputState;
 
-typedef struct uxrSerialIO
+typedef struct uxrFramingIO
 {
     uxrSerialInputState state;
     uint8_t local_addr;
@@ -53,7 +53,7 @@ typedef struct uxrSerialIO
     uint8_t wb[42];
     uint8_t wb_pos;
 
-} uxrSerialIO;
+} uxrFramingIO;
 
 #ifdef __cplusplus
 }

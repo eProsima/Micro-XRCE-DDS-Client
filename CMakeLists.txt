@@ -46,6 +46,7 @@ option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
 option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
 option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
 option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
+option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
 set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
 set(UCLIENT_MAX_OUTPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of output reliable streams for session.")
 set(UCLIENT_MAX_INPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of input best-effort streams for session.")
@@ -56,6 +57,9 @@ set(UCLIENT_MIN_HEARTBEAT_TIME_INTERVAL 1 CACHE STRING "Set the time interval be
 set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
 set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
 set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
+
+option(UCLIENT_PROFILE_CUSTOM_TRANSPORT "Enable Custom transport." ON)
+set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.")
 
 ###############################################################################
 # Dependencies
@@ -130,43 +134,30 @@ if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX OR UCLIENT_PLATFORM_ZEPHYR)
     set(UCLIENT_PLATFORM_POSIX ON)
 endif()
 
-# Check external transport.
-option(UCLIENT_EXTERNAL_TCP "Enable external serial transport." OFF)
-option(UCLIENT_EXTERNAL_UDP "Enable external serial transport." OFF)
-option(UCLIENT_EXTERNAL_SERIAL "Enable external serial transport." OFF)
-
 # Transport sources.
 set(_transport_src)
 
 if(UCLIENT_PROFILE_UDP)
     list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport.c)
-    if(UCLIENT_EXTERNAL_UDP)
-        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_external.c)
-    else()
-        if(UCLIENT_PLATFORM_POSIX)
-            list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix.c)
-        elseif(UCLIENT_PLATFORM_POSIX_NOPOLL)
-            list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c)
-        elseif(UCLIENT_PLATFORM_WINDOWS)
-            list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_windows.c)
-        elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
-            list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_freertos_plus_tcp.c)
-        endif()
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix.c)
+    elseif(UCLIENT_PLATFORM_POSIX_NOPOLL)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_windows.c)
+    elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_freertos_plus_tcp.c)
     endif()
 endif()
 
 if(UCLIENT_PROFILE_TCP)
     list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport.c)
-    if(UCLIENT_EXTERNAL_TCP)
-        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_external.c)
-    else()
-        if(UCLIENT_PLATFORM_POSIX)
-            list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_posix.c)
-        elseif(UCLIENT_PLATFORM_WINDOWS)
-            list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_windows.c)
-        elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
-            list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_freertos_plus_tcp.c)
-        endif()
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_posix.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_windows.c)
+    elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_freertos_plus_tcp.c)
     endif()
 endif()
 
@@ -175,14 +166,10 @@ set(UCLIENT_PROFILE_SERIAL OFF)
 endif()
 
 if(UCLIENT_PROFILE_SERIAL)
+    set(UCLIENT_PROFILE_STREAM_FRAMING ON)
     list(APPEND _transport_src src/c/profile/transport/serial/serial_transport.c)
-    list(APPEND _transport_src src/c/profile/transport/serial/serial_protocol.c)
-    if(UCLIENT_EXTERNAL_SERIAL)
-        list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_external.c)
-    else()
-        if(UCLIENT_PLATFORM_POSIX)
-            list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_posix.c)
-        endif()
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_posix.c)
     endif()
 endif()
 
@@ -212,6 +199,10 @@ if(UCLIENT_PROFILE_DISCOVERY)
     endif()
 endif()
 
+if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
+    list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
+endif()
+
 # Other sources
 set(SRCS
     src/c/core/session/stream/input_best_effort_stream.c
@@ -235,6 +226,7 @@ set(SRCS
     src/c/core/session/create_entities_xml.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
+    $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
     )
@@ -376,6 +368,7 @@ if(UCLIENT_BUILD_TESTS)
 
     add_subdirectory(test/unitary)
     if(UCLIENT_PLATFORM_LINUX)
+        add_subdirectory(test/transport/custom_comm)
         add_subdirectory(test/transport/serial_comm)
     endif()
 endif()
