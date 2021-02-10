@@ -320,9 +320,6 @@ TEST_F(SessionTest, ListenReliablyTimeout)
 TEST_F(SessionTest, FlashStreams)
 {
     ucdrBuffer ub;
-    uint16_t * a = (uint16_t*) malloc(1212);
-    a[1] = 12;
-    ASSERT_EQ(a[1],12);
     uxrStreamId output_best_effort = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
     uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
     (void) uxr_prepare_stream_to_write_submessage(&session, output_reliable, 8, &ub, 1, 0);
