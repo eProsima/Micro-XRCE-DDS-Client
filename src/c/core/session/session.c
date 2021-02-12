@@ -121,7 +121,7 @@ void uxr_set_performance_callback(uxrSession* session, uxrOnPerformanceFunc on_e
 }
 #endif
 
-bool uxr_create_session_retries(uxrSession* session, const uint8_t retries)
+bool uxr_create_session_retries(uxrSession* session, size_t retries)
 {
     uxr_reset_stream_storage(&session->streams);
 
