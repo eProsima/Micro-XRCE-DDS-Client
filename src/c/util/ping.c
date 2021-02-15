@@ -26,24 +26,20 @@ bool uxr_ping_agent_attempts(
         const uint8_t attempts)
 {
     bool agent_pong = false;
-    bool result = true;
     uint8_t output_buffer[UXR_PING_BUF];
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, output_buffer, sizeof(output_buffer));
 
-    // Serialize GET_INFO message into the buffer
-    result &= serialize_get_info_message(&ub);
-
-    if (result)
+    if (serialize_get_info_message(&ub))
     {
         size_t message_length = ucdr_buffer_length(&ub);
 
-        for (size_t i = 0; !agent_pong && result && i < attempts; ++i)
+        for (size_t i = 0; !agent_pong && i < attempts; ++i)
         {
-            result &= (0 != comm->send_msg(
+            comm->send_msg(
                 comm->instance,
                 output_buffer,
-                message_length));
+                message_length);
 
             int64_t timestamp = uxr_millis();
             int poll = timeout;
