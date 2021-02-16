@@ -468,7 +468,7 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
     for(size_t i = 0; i < attempts && session->info.last_requested_status == UXR_STATUS_NONE; ++i)
     {
         send_message(session, buffer, length);
-        listen_message(session, UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL)
+        listen_message(session, UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL);
     }
 
     return session->info.last_requested_status != UXR_STATUS_NONE;

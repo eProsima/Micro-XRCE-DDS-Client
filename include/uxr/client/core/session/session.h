@@ -231,7 +231,7 @@ UXRDLLAPI bool uxr_delete_session(uxrSession* session);
  * @param retries   Max attempts for deleting the session.
  * @return  true in case of successful session deletion, and false in other case.
  */
-UXRDLLAPI bool uxr_create_session_retries(uxrSession* session, size_t retries);
+UXRDLLAPI bool uxr_delete_session_retries(uxrSession* session, size_t retries);
 
 /**
  * @brief Creates and initializes an output best-effort stream.
