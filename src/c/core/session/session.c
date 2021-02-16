@@ -142,7 +142,7 @@ bool uxr_create_session(uxrSession* session)
     return uxr_create_session_retries(session, UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
 }
 
-bool uxr_delete_session(uxrSession* session)
+bool uxr_delete_session_retries(uxrSession* session, size_t retries)
 {
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer ub;
@@ -151,8 +151,13 @@ bool uxr_delete_session(uxrSession* session)
     uxr_buffer_delete_session(&session->info, &ub);
     uxr_stamp_session_header(&session->info, 0, 0, ub.init);
 
-    bool received = wait_session_status(session, delete_session_buffer, ucdr_buffer_length(&ub), UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
+    bool received = wait_session_status(session, delete_session_buffer, ucdr_buffer_length(&ub), retries);
     return received && UXR_STATUS_OK == session->info.last_requested_status;
+}
+
+bool uxr_delete_session(uxrSession* session)
+{
+    return uxr_delete_session_retries(session, UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS);
 }
 
 uxrStreamId uxr_create_output_best_effort_stream(uxrSession* session, uint8_t* buffer, size_t size)
@@ -460,11 +465,10 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
 {
     session->info.last_requested_status = UXR_STATUS_NONE;
 
-    int poll_ms = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
     for(size_t i = 0; i < attempts && session->info.last_requested_status == UXR_STATUS_NONE; ++i)
     {
         send_message(session, buffer, length);
-        poll_ms = listen_message(session, poll_ms) ? UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL : poll_ms * 2;
+        listen_message(session, UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL);
     }
 
     return session->info.last_requested_status != UXR_STATUS_NONE;
