@@ -122,11 +122,12 @@ bool uxr_framing_write_transport(uxrFramingIO* framing_io,
     size_t bytes_written = 0;
     size_t last_written = 0;
 
-    do {   
+    do
+    {
         last_written = write_cb(cb_arg, &framing_io->wb[bytes_written], framing_io->wb_pos - bytes_written, errcode);
         bytes_written += last_written;
     } while (bytes_written < framing_io->wb_pos && 0 < last_written);
-    
+
     if (bytes_written == framing_io->wb_pos)
     {
         framing_io->wb_pos = 0;
@@ -205,7 +206,7 @@ size_t uxr_framing_read_transport(uxrFramingIO* framing_io,
                                 void* cb_arg,
                                 int * timeout,
                                 uint8_t* errcode)
-{   
+{
     int64_t time_init = uxr_millis();
 
     /* Compute read-buffer available size. */
@@ -248,7 +249,7 @@ size_t uxr_framing_read_transport(uxrFramingIO* framing_io,
             }
         }
     }
-    
+
     *timeout -= (int)(uxr_millis() - time_init);
     *timeout = (0 > *timeout) ? 0 : *timeout;
     return bytes_read[0] + bytes_read[1];
@@ -311,6 +312,7 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                     break;
                 }
                 case UXR_FRAMING_READING_DST_ADDR:
+                {
                     if (uxr_get_next_octet(framing_io, &octet))
                     {
                         framing_io->state = (octet == framing_io->local_addr) ? UXR_FRAMING_READING_LEN_LSB :
@@ -328,7 +330,9 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                         }
                     }
                     break;
+                }
                 case UXR_FRAMING_READING_LEN_LSB:
+                {
                     if (uxr_get_next_octet(framing_io, &octet))
                     {
                         framing_io->msg_len = octet;
@@ -346,7 +350,9 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                         }
                     }
                     break;
+                }
                 case UXR_FRAMING_READING_LEN_MSB:
+                {
                     if (uxr_get_next_octet(framing_io, &octet))
                     {
                         framing_io->msg_len = (uint16_t)(framing_io->msg_len + (octet << 8));
@@ -374,6 +380,7 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                         }
                     }
                     break;
+                }
                 case UXR_FRAMING_READING_PAYLOAD:
                 {
                     while ((framing_io->msg_pos < framing_io->msg_len) && uxr_get_next_octet(framing_io, &octet))
@@ -404,6 +411,7 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                     break;
                 }
                 case UXR_FRAMING_READING_CRC_LSB:
+                {
                     if (uxr_get_next_octet(framing_io, &octet))
                     {
                         framing_io->msg_crc = octet;
@@ -421,7 +429,9 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                         }
                     }
                     break;
+                }
                 case UXR_FRAMING_READING_CRC_MSB:
+                {
                     if (uxr_get_next_octet(framing_io, &octet))
                     {
                         framing_io->msg_crc = (uint16_t)(framing_io->msg_crc + (octet << 8));
@@ -445,6 +455,7 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                         }
                     }
                     break;
+                }
                 default:
                     break;
             }
