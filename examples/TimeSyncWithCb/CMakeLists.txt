@@ -17,7 +17,7 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
     cmake_policy(SET CMP0048 NEW)
 endif()
 
-project(time-sync-with-cb)
+project(TimeSyncWithCb)
 
 if(NOT UCLIENT_BUILD_EXAMPLES)
     find_package(microxrcedds_client REQUIRED)

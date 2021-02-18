@@ -32,7 +32,7 @@ int main(int args, char** argv)
     // CLI
     if(3 > args || 0 == atoi(argv[2]))
     {
-        printf("usage: program [-h | --help] | ip port [<max_topics>]\n");
+        printf("usage: program [-h | --help] | ip port\n");
         return 0;
     }
 
