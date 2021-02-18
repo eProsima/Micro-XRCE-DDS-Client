@@ -51,11 +51,11 @@ int main(int args, char** argv)
     }
 
     char* ip = argv[1];
-    uint16_t port = (uint16_t)atoi(argv[2]);
+    char* port = argv[2];
 
     // Transport
     uxrUDPTransport transport;
-    if(!uxr_init_udp_transport(&transport, ip, port))
+    if(!uxr_init_udp_transport(&transport, UXR_IPv4, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;

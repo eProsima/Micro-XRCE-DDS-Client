@@ -48,13 +48,12 @@ int main(int args, char** argv)
     // CLI
     if(3 > args || 0 == atoi(argv[2]))
     {
-        printf("usage: program [-h | --help] | ip port [<max_topics>]\n");
+        printf("usage: program [-h | --help] | ip port\n");
         return 0;
     }
 
     char* ip = argv[1];
     char* port = argv[2];
-    uint32_t max_topics = (args == 4) ? (uint32_t)atoi(argv[3]) : UINT32_MAX;
 
     // ------ SESSION 1 ------
     // Transport
@@ -93,14 +92,23 @@ int main(int args, char** argv)
                                   "</dds>";
     uint16_t participant_req_1 = uxr_buffer_create_participant_xml(&session_1, reliable_out_1, participant_id_1, 0, participant_xml_1, UXR_REPLACE);
 
-    uxrObjectId topic_id_1 = uxr_object_id(0x01, UXR_TOPIC_ID);
-    const char* topic_xml_1 = "<dds>"
+    uxrObjectId topic_id_1_1 = uxr_object_id(0x01, UXR_TOPIC_ID);
+    const char* topic_xml_1_1 = "<dds>"
                                 "<topic>"
-                                    "<name>HelloWorldTopic</name>"
+                                    "<name>HelloWorldTopic_1_to_2</name>"
                                     "<dataType>HelloWorld</dataType>"
                                 "</topic>"
                             "</dds>";
-    uint16_t topic_req_1 = uxr_buffer_create_topic_xml(&session_1, reliable_out_1, topic_id_1, participant_id_1, topic_xml_1, UXR_REPLACE);
+    uint16_t topic_req_1_1 = uxr_buffer_create_topic_xml(&session_1, reliable_out_1, topic_id_1_1, participant_id_1, topic_xml_1_1, UXR_REPLACE);
+
+    uxrObjectId topic_id_1_2 = uxr_object_id(0x02, UXR_TOPIC_ID);
+    const char* topic_xml_1_2 = "<dds>"
+                                "<topic>"
+                                    "<name>HelloWorldTopic_2_to_1</name>"
+                                    "<dataType>HelloWorld</dataType>"
+                                "</topic>"
+                            "</dds>";
+    uint16_t topic_req_1_2 = uxr_buffer_create_topic_xml(&session_1, reliable_out_1, topic_id_1_2, participant_id_1, topic_xml_1_2, UXR_REPLACE);
 
     uxrObjectId publisher_id_1 = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml_1 = "";
@@ -135,9 +143,10 @@ int main(int args, char** argv)
     uint16_t datareader_req_1 = uxr_buffer_create_datareader_xml(&session_1, reliable_out_1, datareader_id_1, subscriber_id_1, datareader_xml_1, UXR_REPLACE);
 
     // Send create entities message and wait its status
-    uint8_t status_1[6];
-    uint16_t requests_1[6] = {participant_req_1, topic_req_1, publisher_req_1, datawriter_req_1, subscriber_req_1, datareader_req_1};
-    if(!uxr_run_session_until_all_status(&session_1, 1000, requests_1, status_1, 6))
+    uint16_t requests_1[] = {participant_req_1, topic_req_1_1, topic_req_1_2, publisher_req_1, datawriter_req_1, subscriber_req_1, datareader_req_1};
+    uint8_t status_1[sizeof(requests_1)/2];
+
+    if(!uxr_run_session_until_all_status(&session_1, 1000, requests_1, status_1, sizeof(status_1)))
     {
         printf("Error at create entities session 1\n");
         return 1;
@@ -180,14 +189,23 @@ int main(int args, char** argv)
                                   "</dds>";
     uint16_t participant_req_2 = uxr_buffer_create_participant_xml(&session_2, reliable_out_2, participant_id_2, 0, participant_xml_2, UXR_REPLACE);
 
-    uxrObjectId topic_id_2 = uxr_object_id(0x01, UXR_TOPIC_ID);
-    const char* topic_xml_2 = "<dds>"
+    uxrObjectId topic_id_2_1 = uxr_object_id(0x01, UXR_TOPIC_ID);
+    const char* topic_xml_2_1 = "<dds>"
                                 "<topic>"
-                                    "<name>HelloWorldTopic</name>"
+                                    "<name>HelloWorldTopic_2_to_1</name>"
                                     "<dataType>HelloWorld</dataType>"
                                 "</topic>"
                             "</dds>";
-    uint16_t topic_req_2 = uxr_buffer_create_topic_xml(&session_2, reliable_out_2, topic_id_2, participant_id_2, topic_xml_2, UXR_REPLACE);
+    uint16_t topic_req_2_1 = uxr_buffer_create_topic_xml(&session_2, reliable_out_2, topic_id_2_1, participant_id_2, topic_xml_2_1, UXR_REPLACE);
+
+    uxrObjectId topic_id_2_2 = uxr_object_id(0x02, UXR_TOPIC_ID);
+    const char* topic_xml_2_2 = "<dds>"
+                                "<topic>"
+                                    "<name>HelloWorldTopic_1_to_2</name>"
+                                    "<dataType>HelloWorld</dataType>"
+                                "</topic>"
+                            "</dds>";
+    uint16_t topic_req_2_2 = uxr_buffer_create_topic_xml(&session_2, reliable_out_2, topic_id_2_2, participant_id_2, topic_xml_2_2, UXR_REPLACE);
 
     uxrObjectId publisher_id_2 = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml_2 = "";
@@ -222,9 +240,10 @@ int main(int args, char** argv)
     uint16_t datareader_req_2 = uxr_buffer_create_datareader_xml(&session_2, reliable_out_2, datareader_id_2, subscriber_id_2, datareader_xml_2, UXR_REPLACE);
 
     // Send create entities message and wait its status
-    uint8_t status_2[6];
-    uint16_t requests_2[6] = {participant_req_2, topic_req_2, publisher_req_2, datawriter_req_2, subscriber_req_2, datareader_req_2};
-    if(!uxr_run_session_until_all_status(&session_2, 1000, requests_2, status_2, 6))
+    uint16_t requests_2[] = {participant_req_2, topic_req_2_1, topic_req_2_2, publisher_req_2, datawriter_req_2, subscriber_req_2, datareader_req_2};
+    uint8_t status_2[sizeof(requests_2)/2];
+
+    if(!uxr_run_session_until_all_status(&session_2, 1000, requests_2, status_2, sizeof(status_2)))
     {
         printf("Error at create entities session 2\n");
         return 1;
