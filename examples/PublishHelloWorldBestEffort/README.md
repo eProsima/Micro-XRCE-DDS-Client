@@ -10,7 +10,7 @@ In order to compile this example, it is necessary to have the following profiles
 2. Run the *SubscribeHelloWorldBestEffort* example or some subscriber that can read the *HelloWorld* topic.
 3. Run the *PublishHelloWorldBestEffort* example.
    The example can be parameterized with the number of topics that will be sent.
-   If no number is given, the subscriber will listen indefinitely.
+   If no number is given, the publisher will send data indefinitely.
 
 ## Topic
 
