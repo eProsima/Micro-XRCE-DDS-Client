@@ -6,7 +6,7 @@ In order to compile this example, it is necessary to have the following profiles
 - `UCLIENT_PROFILE_UDP`
 
 ## Usage
-1. Run an agent in port *2018*.
+1. Run an agent in a certain port, for example, *2018*: `MicroXRCEAgent udp4 -p 2018`.
 2. Run the *PublisherHelloWorldBestEffort* example or some publisher that can send the *HelloWorld* topic.
 3. Run the *SubscriberHelloWorldBestEffort* example.
    The example can be parameterized with the number of topics that will be listened.
@@ -23,4 +23,3 @@ struct HelloWorld
 	string message;
 };
 ```
-
