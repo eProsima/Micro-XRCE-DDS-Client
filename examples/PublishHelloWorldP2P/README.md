@@ -1,7 +1,7 @@
 # PublishHelloWorldP2P example
 
 This example will show how to publish data creating a client publisher.
-It is necessary to have the following profiles enabled in `client.config` file to compile this example:
+It is necessary to have the following profiles should be enabled to compile this example:
 
 - `UCLIENT_PROFILE_UDP`
 

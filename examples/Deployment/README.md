@@ -5,7 +5,7 @@ The goal of this example is to create a minimal publisher and subscriber that ca
 To archive this minimal examples, it is necessary to split some logic.
 This implies that the publisher and subscriber will be configured previously with another application: the configurator client.
 The configurator client will create the necessary entities in the agent for a specific session.
-In order to compile this example, it is necessary to have the following profiles enabled in `client.config` file:
+In order to compile this example, it is necessary to have the following profiles should be enabled:
 
 - `UCLIENT_PROFILE_UDP`
 

@@ -2,7 +2,7 @@
 
 This example will show how to create multiple sessions on the same program. Both session
 will have a publisher and a subscriber communicating each other.
-In order to compile this example, it is necessary to have the following profiles enabled in `client.config` file:
+In order to compile this example, it is necessary to have the following profiles should be enabled:
 
 - `PROFILE_CREATE_ENTITIES_XML`
 - `PROFILE_WRITE_ACCESS`
