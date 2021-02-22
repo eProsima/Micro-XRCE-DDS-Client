@@ -1,6 +1,6 @@
 # SubscribeHelloWorldBestEffort example
 
-This example will show how to receive data from the DDS World creating a client subscriber in best effort mode..
+This example will show how to receive data from the DDS World creating a client subscriber in best effort mode.
 In order to compile this example, the following profiles should be enabled:
 
 - `UCLIENT_PROFILE_UDP`
