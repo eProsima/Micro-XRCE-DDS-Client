@@ -82,9 +82,8 @@ int main(int args, char** argv)
     uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
-    uint8_t input_besteffort_stream_buffer[BUFFER_SIZE];
     uxrStreamId besteffort_in = uxr_create_input_best_effort_stream(&session);
 
     // Create entities
@@ -140,7 +139,6 @@ int main(int args, char** argv)
     // Read topics
     while(count < max_topics)
     {
-        uint8_t read_data_status;
         uxr_run_session_time(&session, 1000);
     }
 
