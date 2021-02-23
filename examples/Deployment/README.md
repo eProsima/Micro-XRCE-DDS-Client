@@ -5,13 +5,13 @@ The goal of this example is to create a minimal publisher and subscriber that ca
 To archive this minimal examples, it is necessary to split some logic.
 This implies that the publisher and subscriber will be configured previously with another application: the configurator client.
 The configurator client will create the necessary entities in the agent for a specific session.
-In order to compile this example, it is necessary to have the following profiles enabled in `client.config` file:
+In order to compile this example, the following profiles should be enabled:
 
 - `UCLIENT_PROFILE_UDP`
 
 ## Usage
 
-1. Run an agent in port *2018*.
+1. Run an agent in a certain port, for example, *2018*: `MicroXRCEAgent udp4 -p 2018`.
 2. Run the *ConfiguratorClient* example to create both, a publisher and a subscriber.
    1. Configure the publisher: `ConfiguratorClient --key 1000 create pub --id 1`.
       This will create a publisher with the session key `1000`, all necessary entities to create the publisher will have `1` as id.

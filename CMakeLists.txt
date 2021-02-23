@@ -349,6 +349,8 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/TimeSyncWithCb)
     add_subdirectory(examples/PingAgent)
     add_subdirectory(examples/ContinuousFragment)
+    add_subdirectory(examples/PublishHelloWorldBestEffort)
+    add_subdirectory(examples/SubscribeHelloWorldBestEffort)
 endif()
 
 ###############################################################################
