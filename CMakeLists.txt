@@ -351,6 +351,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ContinuousFragment)
     add_subdirectory(examples/PublishHelloWorldBestEffort)
     add_subdirectory(examples/SubscribeHelloWorldBestEffort)
+    add_subdirectory(examples/CustomTransports)
 endif()
 
 ###############################################################################
