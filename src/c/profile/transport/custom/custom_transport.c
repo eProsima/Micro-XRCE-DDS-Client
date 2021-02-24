@@ -142,7 +142,7 @@ bool uxr_init_custom_transport(uxrCustomTransport* transport,
         transport->comm.send_msg = send_custom_msg;
         transport->comm.recv_msg = recv_custom_msg;
         transport->comm.comm_error = get_custom_error;
-        transport->comm.mtu = UCLIENT_CUSTOM_TRANSPORT_MTU;
+        transport->comm.mtu = UXR_CONFIG_CUSTOM_TRANSPORT_MTU;
 
         rv = true;
     }
