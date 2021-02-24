@@ -31,7 +31,7 @@ int main(int args, char** argv)
     uxrCustomTransport transport;
     uxr_set_custom_transport_callbacks(
         &transport,
-        true,
+        false,
         my_custom_transport_open,
         my_custom_transport_close,
         my_custom_transport_write,

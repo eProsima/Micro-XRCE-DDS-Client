@@ -5,12 +5,15 @@
 #include <string.h>
 #include <errno.h>
 #include <netdb.h>
+#include <stdio.h>
 #include <sys/poll.h>
 
 static struct pollfd poll_fd;
 
 bool my_custom_transport_open(uxrCustomTransport* transport)
 {
+    printf("Micro XRCE-DDS Client Custom transport: opening\n");
+
     bool rv = false;
 
     poll_fd.fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -44,6 +47,8 @@ bool my_custom_transport_open(uxrCustomTransport* transport)
 
 bool my_custom_transport_close(uxrCustomTransport* transport)
 {
+    printf("Micro XRCE-DDS Client Custom transport: closing\n");
+
     return (-1 == poll_fd.fd) ? true : (0 == close(poll_fd.fd));
 }
 
@@ -64,6 +69,9 @@ size_t my_custom_transport_write(
     {
         *errcode = 1;
     }
+
+    printf("Micro XRCE-DDS Client Custom transport: wrote %ld B\n", rv);
+
     return rv;
 }
 
@@ -93,5 +101,8 @@ size_t my_custom_transport_read(
     {
         *errcode = (0 == poll_rv) ? 0 : 1;
     }
+
+    printf("Micro XRCE-DDS Client Custom transport: read %ld B\n", rv);
+
     return rv;
 }
