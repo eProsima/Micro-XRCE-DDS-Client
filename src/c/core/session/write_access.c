@@ -86,16 +86,18 @@ uint16_t uxr_buffer_publish(
     return rv;
 }
 
-bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
+uint16_t uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
                                ucdrBuffer* ub, uint32_t topic_size)
 {
+    uint16_t rv = UXR_INVALID_REQUEST_ID;
+
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + topic_size;
     ub->error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, ub, SUBMESSAGE_ID_WRITE_DATA, FORMAT_DATA);
     if(!ub->error)
     {
         WRITE_DATA_Payload_Data payload;
         uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);
-        (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
+        rv = uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
 
         OnFullBuffer on_full_buffer = ub->on_full_buffer;
         void* args = ub->args;
@@ -103,7 +105,7 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
     }
 
-    return !ub->error;
+    return rv;
 }
 
 // Continuous fragment mode

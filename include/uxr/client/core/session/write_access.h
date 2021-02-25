@@ -93,7 +93,7 @@ uint16_t uxr_buffer_publish(
  * @param topic_size        The size of the topic in bytes.
  * @return A `bool` that identifies the request made by the Client, if the message can be serialized
  */
-UXRDLLAPI bool uxr_prepare_output_stream(
+UXRDLLAPI uint16_t uxr_prepare_output_stream(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId datawriter_id,
