@@ -37,14 +37,14 @@ typedef size_t (*write_custom_func) (
         struct uxrCustomTransport* transport,
         const uint8_t* buffer,
         size_t length,
-        uint8_t* errno);
+        uint8_t* error_code);
 
 typedef size_t (*read_custom_func) (
         struct uxrCustomTransport* transport,
         uint8_t* buffer,
         size_t length,
         int timeout,
-        uint8_t* errno);
+        uint8_t* error_code);
 
 typedef struct uxrCustomTransport
 {
