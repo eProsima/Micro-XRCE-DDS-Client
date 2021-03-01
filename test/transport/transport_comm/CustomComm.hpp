@@ -1,4 +1,4 @@
-// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2021-present Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _TEST_TRANSPORT_SERIALCOMM_HPP_
-#define _TEST_TRANSPORT_SERIALCOMM_HPP_
+#ifndef _TEST_TRANSPORT_CUSTOMCOMM_HPP_
+#define _TEST_TRANSPORT_CUSTOMCOMM_HPP_
 
-#include <gtest/gtest.h>
 #include <uxr/client/client.h>
+#include <cstdlib>
 
 class CircularBuffer
 {
@@ -81,13 +81,12 @@ public:
         size_t tail;
 };
 
-class CustomComm : public testing::Test
+class CustomComm
 {
 public:
     CustomComm();
     ~CustomComm();
 
-protected:
     uxrCustomTransport master_;
     uxrCustomTransport slave_;
 
@@ -100,4 +99,4 @@ protected:
     size_t max_payload;
 };
 
-#endif //_TEST_TRANSPORT_SERIALCOMM_HPP_
+#endif //_TEST_TRANSPORT_CUSTOMCOMM_HPP_

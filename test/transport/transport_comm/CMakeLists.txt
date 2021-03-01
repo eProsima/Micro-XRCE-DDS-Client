@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Copyright 2020 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+# Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 # New project because of the CXX GTest dependency.
 if(CMAKE_VERSION VERSION_LESS 3.0)
-    project(custom_transport_test C CXX)
+    project(serial_comm_transport_test C CXX)
 else()
     cmake_policy(SET CMP0048 NEW)
-    project(custom_transport_test LANGUAGES C CXX)
+    project(serial_comm_transport_test LANGUAGES C CXX)
 endif()
 
-if(NOT UCLIENT_PROFILE_CUSTOM_TRANSPORT)
-    message(WARNING "Can not compile test: The UCLIENT_PROFILE_CUSTOM_TRANSPORT must be enabled.")
+if(NOT UCLIENT_PROFILE_SERIAL)
+    message(WARNING "Can not compile test: The UCLIENT_PROFILE_SERIAL must be enabled.")
 else()
 
-    set(SRCS CustomComm.cpp)
+    set(SRCS CustomComm.cpp SerialComm.cpp Test.cpp)
 
     add_executable(${PROJECT_NAME} ${SRCS})
 

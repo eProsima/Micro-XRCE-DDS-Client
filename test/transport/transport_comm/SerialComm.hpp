@@ -15,17 +15,15 @@
 #ifndef _TEST_TRANSPORT_SERIALCOMM_HPP_
 #define _TEST_TRANSPORT_SERIALCOMM_HPP_
 
-#include <gtest/gtest.h>
 #include <uxr/client/client.h>
 
-class SerialComm : public testing::Test
+class SerialComm
 {
 public:
     SerialComm();
     ~SerialComm();
     int init();
 
-protected:
     int fd_;
     uxrSerialTransport master_;
     uxrSerialTransport slave_;

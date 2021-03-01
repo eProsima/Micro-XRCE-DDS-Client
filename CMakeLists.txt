@@ -371,8 +371,7 @@ if(UCLIENT_BUILD_TESTS)
 
     add_subdirectory(test/unitary)
     if(UCLIENT_PLATFORM_LINUX)
-        add_subdirectory(test/transport/custom_comm)
-        add_subdirectory(test/transport/serial_comm)
+        add_subdirectory(test/transport/transport_comm)
     endif()
 endif()
 

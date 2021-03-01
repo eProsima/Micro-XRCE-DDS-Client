@@ -1,5 +1,6 @@
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 extern "C"
 {
