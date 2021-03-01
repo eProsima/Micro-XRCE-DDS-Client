@@ -465,10 +465,11 @@ bool wait_session_status(uxrSession* session, uint8_t* buffer, size_t length, si
 {
     session->info.last_requested_status = UXR_STATUS_NONE;
 
+    int poll_ms = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
     for(size_t i = 0; i < attempts && session->info.last_requested_status == UXR_STATUS_NONE; ++i)
     {
         send_message(session, buffer, length);
-        listen_message(session, UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL);
+        poll_ms = listen_message(session, poll_ms) ? UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL : poll_ms * UXR_CONFIG_MIN_SESSION_CONNECTION_EXP_FACTOR;
     }
 
     return session->info.last_requested_status != UXR_STATUS_NONE;
