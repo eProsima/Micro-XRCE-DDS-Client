@@ -7,7 +7,7 @@ extern "C"
 
 TEST(UtilsTest, ConvertToNanos)
 {
-    uint64_t nanos = uxr_convert_to_nanos(16, 42);
+    int64_t nanos = uxr_convert_to_nanos(16, 42);
     EXPECT_EQ(16000000042, nanos);
 }
 
