@@ -184,6 +184,34 @@ TEST_F(WriteReadAccessTest, BufferReply)
     ASSERT_TRUE(uxr_buffer_reply(&session_, stream_id, replier_id_, &sample_id, buffer, data_length));
 }
 
+TEST_F(WriteReadAccessTest, BufferTopic)
+{
+    uint8_t buffer[MTU];
+    uxrStreamId stream_id;
+    uint16_t data_length;
+
+    // stream_id:   no valid
+    // data_length: fitted
+    // expected:    false
+    stream_id = uxr_stream_id(1, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
+    data_length = uint16_t(TOPIC_FITTED_SIZE);
+    ASSERT_FALSE(uxr_buffer_topic(&session_, stream_id, data_writer_id_, buffer, data_length));
+
+    // stream_id:   valid
+    // data_length: no fitted
+    // expected:    false
+    stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
+    data_length = uint16_t(1 + TOPIC_FITTED_SIZE);
+    ASSERT_FALSE(uxr_buffer_topic(&session_, stream_id, data_writer_id_, buffer, data_length));
+
+    // stream_id:   valid
+    // data_length: fitted
+    // expected:    true
+    stream_id = uxr_stream_id(0, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
+    data_length = uint16_t(TOPIC_FITTED_SIZE);
+    ASSERT_TRUE(uxr_buffer_topic(&session_, stream_id, data_writer_id_, buffer, data_length));
+}
+
 TEST_F(WriteReadAccessTest, ReadFormatData)
 {
     uint8_t buffer[MTU] = {0};
