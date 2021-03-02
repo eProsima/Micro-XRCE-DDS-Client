@@ -86,15 +86,17 @@ uint16_t uxr_buffer_topic(
     return rv;
 }
 
-bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrObjectId datawriter_id,
+uint16_t uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrObjectId entity_id,
                                ucdrBuffer* ub, uint32_t topic_size)
 {
+    uint16_t rv = UXR_INVALID_REQUEST_ID;
+
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + topic_size;
     ub->error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, ub, SUBMESSAGE_ID_WRITE_DATA, FORMAT_DATA);
     if(!ub->error)
     {
         WRITE_DATA_Payload_Data payload;
-        uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);
+        rv = uxr_init_base_object_request(&session->info, entity_id, &payload.base);
         (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
 
         OnFullBuffer on_full_buffer = ub->on_full_buffer;
@@ -103,7 +105,7 @@ bool uxr_prepare_output_stream(uxrSession* session, uxrStreamId stream_id, uxrOb
         ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
     }
 
-    return !ub->error;
+    return rv;
 }
 
 
@@ -161,21 +163,23 @@ bool on_full_output_buffer_fragmented(ucdrBuffer* ub, void* args)
     return false;
 }
 
-bool uxr_prepare_output_stream_fragmented(
+uint16_t uxr_prepare_output_stream_fragmented(
     uxrSession* session, 
     uxrStreamId stream_id, 
-    uxrObjectId datawriter_id,
+    uxrObjectId entity_id,
     ucdrBuffer* ub, 
     size_t topic_size,
     uxrOnBuffersFull flush_callback)
 {
+    uint16_t rv = UXR_INVALID_REQUEST_ID;
+
     size_t user_required_space = topic_size + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
 
     if (stream == NULL)
     {
-        return false;
+        return rv;
     }
 
     size_t remaining_blocks = get_available_free_slots(stream);
@@ -185,7 +189,7 @@ bool uxr_prepare_output_stream_fragmented(
         if(!flush_callback(session) ||
            0 == (remaining_blocks = get_available_free_slots(stream)))
         {
-            return false;
+            return rv;
         }
     }
     
@@ -229,7 +233,7 @@ bool uxr_prepare_output_stream_fragmented(
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_WRITE_DATA, (uint16_t)payload_size, FORMAT_DATA);
 
     WRITE_DATA_Payload_Data payload;
-    uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);
+    rv = uxr_init_base_object_request(&session->info, entity_id, &payload.base);
     (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
 
     ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
@@ -240,5 +244,5 @@ bool uxr_prepare_output_stream_fragmented(
     continuous_args.flush_callback = flush_callback;    
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, &continuous_args);
 
-    return true;
+    return rv;
 }

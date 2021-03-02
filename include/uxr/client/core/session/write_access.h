@@ -93,10 +93,10 @@ uint16_t uxr_buffer_topic(
  * @param topic_size        The size of the topic in bytes.
  * @return A `bool` that identifies the request made by the Client, if the message can be serialized
  */
-UXRDLLAPI bool uxr_prepare_output_stream(
+UXRDLLAPI uint16_t uxr_prepare_output_stream(
         uxrSession* session,
         uxrStreamId stream_id,
-        uxrObjectId datawriter_id,
+        uxrObjectId entity_id,
         struct ucdrBuffer* ub_topic,
         uint32_t topic_size);
 
@@ -115,7 +115,7 @@ UXRDLLAPI bool uxr_prepare_output_stream(
  * @return A `bool` that identifies the request made by the Clientif the message can be serialized
  */
 
-UXRDLLAPI bool uxr_prepare_output_stream_fragmented(
+UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(
     uxrSession* session, 
     uxrStreamId stream_id, 
     uxrObjectId datawriter_id,
