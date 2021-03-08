@@ -27,7 +27,7 @@ The communication between a *Micro XRCE-DDS Client* and a *Micro XRCE-DDS Agent*
 
 ## Documentation
 
-You can access *Micro XRCE-DDS* documentation online, which is hosted on Read the Docs.
+You can access the *eProsima Micro XRCE-DDS* user documentation online, which is hosted on Read the Docs.
 
 * [Start Page](http://micro-xrce-dds.readthedocs.io)
 * [Installation manual](http://micro-xrce-dds.readthedocs.io/en/latest/installation.html)
