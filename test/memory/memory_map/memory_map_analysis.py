@@ -2,7 +2,7 @@ import sys
 import re
 import csv
 
-patter = re.compile('(?P<name>[\w]+)\s(?P<text>[\d]+)\s(?P<data>[\d]+)\s(?P<bss>[\d]+)\s')
+pattern = re.compile('(?P<name>[\w]+)\s(?P<text>[\d]+)\s(?P<data>[\d]+)\s(?P<bss>[\d]+)\s')
 
 # Take data from file.
 complete_profile_data = []
@@ -11,17 +11,17 @@ profiles_data = [[], [], [], []]
 with open(sys.argv[1], 'r') as memory_map_file:
     # Complete profile data
     line = memory_map_file.readline()
-    m = patter.match(line)
+    m = pattern.match(line)
     complete_profile_data = [int(m.group('text')), int(m.group('data')), int(m.group('bss'))]
 
     # Core profile data
     line = memory_map_file.readline()
-    m = patter.match(line)
+    m = pattern.match(line)
     core_profile_data = [int(m.group('text')), int(m.group('data')), int(m.group('bss'))]
 
     line = memory_map_file.readline()
     while line:
-        m = patter.match(line)
+        m = pattern.match(line)
         profiles_data[0].append(m.group('name'))
         profiles_data[1].append(int(m.group('text')) - core_profile_data[0])
         profiles_data[2].append(int(m.group('data')) - core_profile_data[1])

@@ -6,11 +6,8 @@ if [ -d build ]; then
 fi
 mkdir build && cd build;
 
-# Configure global cmake.
-cmake ..;
-
 # Compile profiles.
-PROFILES="complete_profile core_profile tcp_profile udp_profile serial_profile"
+PROFILES="complete_profile core_profile tcp_profile udp_profile serial_profile custom_profile"
 for P in $PROFILES
 do
     cmake -DUCLIENT_CONFIG="${PWD}"/../test/memory/memory_map/$P.config ..;
