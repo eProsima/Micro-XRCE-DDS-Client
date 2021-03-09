@@ -94,7 +94,7 @@ endif()
 ###############################################################################
 # Client configuration options
 ###############################################################################
-set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
+set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Optional configuration client file.")
 # Load configuration file.
 if(EXISTS ${UCLIENT_CONFIG})
     configure_file(${UCLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
