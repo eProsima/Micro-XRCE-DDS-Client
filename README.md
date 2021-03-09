@@ -35,7 +35,7 @@ You can access the *eProsima Micro XRCE-DDS* user documentation online, which is
 
 ## Quality Declaration
 
-**eprosima Micro CDR** claims to be in the **Quality Level 1** category based on the guidelines provided by [ROS 2](https://ros.org/reps/rep-2004.html).
+**eProsima Micro XRCE-DDS Client** claims to be in the **Quality Level 1** category based on the guidelines provided by [ROS 2](https://ros.org/reps/rep-2004.html).
 See the [Quality Declaration](QUALITY.md) for more details.
 ## Getting Help
 

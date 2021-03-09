@@ -6,4 +6,4 @@ Starting on v1.0.0, the version numbers for this library will adhere to the vers
 This means that API breaks should only happen between major version changes.
 If an ABI break is required, it should be done between minor versions, and it should be clearly stated on the release notes.
 
-The changes included on each version can be found in the [release notes](https://github.com/eProsima/Micro-CDR/releases)
+The changes included on each version can be found in the [release notes](https://github.com/eProsima/Micro-XRCE-DDS-Client/releases)

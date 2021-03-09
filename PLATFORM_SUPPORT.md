@@ -1,6 +1,6 @@
 # Platform Support
 
-This document reflects the level of support offered by **eProsima Micro CDR** on different platforms as per the following
+This document reflects the level of support offered by **eProsima Micro XRCE-DDS Client** on different platforms as per the following
 definitions:
 
 ## Tier 1
@@ -14,7 +14,7 @@ priority errors in Tier 1 platforms prior to new version releases.
 ## Tier 2
 
 Tier 2 platforms are subject to periodic CI testing which runs both builds and tests with publicly accessible results.
-The CI is expected to be run at least within a week of relevant changes for the current release of **Micro CDR**.
+The CI is expected to be run at least within a week of relevant changes for the current release of **Micro XRCE-DDS Client**.
 Installation instructions should be available and up-to-date in order for a platform to be listed in this category.
 Package-level binary packages may not be provided but providing a downloadable archive of the built workspace is
 encouraged.
