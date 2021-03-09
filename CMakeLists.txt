@@ -92,6 +92,17 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 ###############################################################################
+# Client configuration options
+###############################################################################
+set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
+# Load configuration file.
+if(EXISTS ${UCLIENT_CONFIG})
+    configure_file(${UCLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
+    load_cache(${PROJECT_SOURCE_DIR})
+    file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
+endif()
+
+###############################################################################
 # Check MSVC architecture
 ###############################################################################
 include(${PROJECT_SOURCE_DIR}/cmake/common/check_configuration.cmake)

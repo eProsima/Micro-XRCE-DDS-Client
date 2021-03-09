@@ -78,6 +78,12 @@ typedef bool (*uxrOnBuffersFull) (
 typedef void (*uxrOnPerformanceFunc) (struct uxrSession* session, struct ucdrBuffer* mb, void* args);
 #endif
 
+typedef struct uxrContinuousArgs {
+    uxrOnBuffersFull flush_callback;
+    uxrStreamId stream_id;
+    size_t data_size;
+} uxrContinuousArgs;
+
 typedef struct uxrSession
 {
     uxrSessionInfo info;
@@ -106,6 +112,7 @@ typedef struct uxrSession
     void* on_reply_args;
 
     bool on_data_flag;
+    uxrContinuousArgs continuous_args;
 
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;
