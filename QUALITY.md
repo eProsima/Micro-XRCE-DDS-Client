@@ -190,8 +190,8 @@ The chart below compares the requirements in the [REP-2004](https://www.ros.org/
 | 4.ii    | Public API tests                                  | ✓             |
 | 4.iii.a | Using coverage                                    | ✓             |
 | 4.iii.b | Coverage policy                                   | ✓             |
-| 4.iv.a  | Performance tests (if applicable)                 | N/A           |
-| 4.iv.b  | Performance tests policy                          | N/A           |
+| 4.iv.a  | Performance tests (if applicable)                 | ✓             |
+| 4.iv.b  | Performance tests policy                          | ✓             |
 | 4.v.a   | Code style enforcement (linters)                  | ✓             |
 | 4.v.b   | Use of static analysis tools                      | ✓             |
 | 5       | **Dependencies**                                  | ---           |
