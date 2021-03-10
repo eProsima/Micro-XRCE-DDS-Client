@@ -116,28 +116,23 @@ As stated in [CONTRIBUTING.md](CONTRIBUTING.md), developers and contributors are
 
 ### Performance [4.iv]
 
-TODO: performance
+**eProsima Micro XRCE-DDS Client** does not provide performance test regarding memory consumption due to the nature of the library.
+These memory consuption tests are under `test/memory` and evaluates the static size (`text`, `bss` and `data` sections) of the library built with different configuration profiles.
+Also, an `stack` consumption analysis is provided by using [Valgrind Massif tool](https://valgrind.org/docs/manual/ms-manual.html).
 
-<!-- **eProsima Micro XRCE-DDS Client** does not provide performance tests.
-However, performance is indirectly tested by *eprosima Micro XRCE-DDS Client*.
+All these results are available in [Micro-XRCE-DDS-Client Nightly Master Performance job](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Performance/plot/)
 
 Any performance regression detected in *eprosima Micro XRCE-DDS Client* would be analyzed and, in case that it is related to **eProsima Micro XRCE-DDS Client** or could be solved modifying this library, changes could be made to the library in order to revert the performance regression.
- -->
+
 ### Linters and Static Analysis [4.v]
 
-
-TODO: uncrustify, check Synopsis and CodeQL
-
-<!-- **eProsima Micro XRCE-DDS Client** [code style](https://github.com/eProsima/cpp-style) is enforced using [*uncrustify*](https://github.com/uncrustify/uncrustify).
+**eProsima Micro XRCE-DDS Client** [code style](https://github.com/eProsima/cpp-style) is enforced using [*uncrustify*](https://github.com/uncrustify/uncrustify).
 Among the CI tests there are tests that ensures that every pull request is compliant with the code style.
-The latest pull request results can be seen [here](http://jenkins.eprosima.com:8080/job/fastcdr_github_uncrustify/lastBuild/).
-The tests only check files where changes have been made.
-Therefore, the code style is only enforced in some files.
-However, the tendency will be to homogenize the older source files to the code style. -->
+The latest pull request results can be seen [here](http://jenkins.eprosima.com:8080/job/Micro-XRCE-DDS-Client%20Manual%20Linux/lastBuild/).
 
-**eProsima Micro XRCE-DDS Client** uses [Synopsis Coverity static code analysis](https://scan.coverity.com/projects/eprosima-micro-cdr).
+**eProsima Micro XRCE-DDS Client** uses [Synopsis Coverity static code analysis](https://scan.coverity.com/projects/eprosima-micro-xrce-dds-client).
 
-**eProsima Micro XRCE-DDS Client** uses [CodeQL](https://github.com/eProsima/Micro-CDR/security/code-scanning?query=tool%3ACodeQL) to find security issues on the code.
+**eProsima Micro XRCE-DDS Client** uses [CodeQL](https://github.com/eProsima/Micro-XRCE-DDS-Client/security/code-scanning?query=tool%3ACodeQL) to find security issues on the code.
 
 ## Dependencies [5]
 
