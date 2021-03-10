@@ -9,11 +9,13 @@
 #include <netdb.h>
 
 #ifdef UCLIENT_PLATFORM_LINUX
-static void sigpipe_handler(int fd)
+static void sigpipe_handler(
+        int fd)
 {
     (void)fd;
 }
-#endif
+
+#endif /* ifdef UCLIENT_PLATFORM_LINUX */
 
 bool uxr_init_tcp_platform(
         struct uxrTCPPlatform* platform,
@@ -37,7 +39,7 @@ bool uxr_init_tcp_platform(
     {
 #ifdef UCLIENT_PLATFORM_LINUX
         signal(SIGPIPE, sigpipe_handler);
-#endif
+#endif /* ifdef UCLIENT_PLATFORM_LINUX */
         struct addrinfo hints;
         struct addrinfo* result;
         struct addrinfo* ptr;

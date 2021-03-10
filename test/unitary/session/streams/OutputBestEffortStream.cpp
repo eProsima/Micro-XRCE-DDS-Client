@@ -15,6 +15,7 @@ extern "C"
 class OutputBestEffortStreamTest : public testing::Test
 {
 public:
+
     OutputBestEffortStreamTest()
     {
         uxr_init_output_best_effort_stream(&stream, buffer, BUFFER_SIZE, OFFSET);
@@ -30,6 +31,7 @@ public:
     }
 
 protected:
+
     uxrOutputBestEffortStream stream;
     uint8_t buffer[BUFFER_SIZE];
 };

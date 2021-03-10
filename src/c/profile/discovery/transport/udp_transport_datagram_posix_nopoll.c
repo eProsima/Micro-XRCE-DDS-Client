@@ -39,7 +39,7 @@ bool uxr_udp_send_datagram_to(
             remote_addr.sin_port = htons(locator->_.medium_locator.locator_port);
 
             ssize_t bytes_sent = sendto(transport->fd, (const void*)buf, len, 0,
-                                        (struct sockaddr*)&remote_addr, sizeof(remote_addr));
+                            (struct sockaddr*)&remote_addr, sizeof(remote_addr));
             if (0 > bytes_sent)
             {
                 rv = false;
@@ -65,7 +65,7 @@ bool uxr_udp_recv_datagram(
 
     struct timeval tv;
     tv.tv_sec = timeout / 1000;
-	tv.tv_usec = (timeout % 1000) * 1000;
+    tv.tv_usec = (timeout % 1000) * 1000;
 
     setsockopt(transport->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 

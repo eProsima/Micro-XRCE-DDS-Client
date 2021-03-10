@@ -21,7 +21,7 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU* STREAM_HISTORY
 
 void on_topic(
         uxrSession* session,
@@ -43,10 +43,12 @@ void on_topic(
     (*count_ptr)++;
 }
 
-int main(int args, char** argv)
+int main(
+        int args,
+        char** argv)
 {
     // CLI
-    if(3 > args || 0 == atoi(argv[2]))
+    if (3 > args || 0 == atoi(argv[2]))
     {
         printf("usage: program [-h | --help] | ip port [<max_topics>]\n");
         return 0;
@@ -61,7 +63,7 @@ int main(int args, char** argv)
 
     // Transport
     uxrUDPTransport transport;
-    if(!uxr_init_udp_transport(&transport, UXR_IPv4, ip, port))
+    if (!uxr_init_udp_transport(&transport, UXR_IPv4, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -71,7 +73,7 @@ int main(int args, char** argv)
     uxrSession session;
     uxr_init_session(&session, &transport.comm, 0xCCCCDDDD);
     uxr_set_topic_callback(&session, on_topic, &count);
-    if(!uxr_create_session(&session))
+    if (!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -79,45 +81,57 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE,
+                    STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE,
+                    STREAM_HISTORY);
 
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
     const char* participant_ref = "participant_name";
-    uint16_t participant_req = uxr_buffer_create_participant_ref(&session, reliable_out, participant_id, 0, participant_ref, UXR_REPLACE);
+    uint16_t participant_req = uxr_buffer_create_participant_ref(&session, reliable_out, participant_id, 0,
+                    participant_ref, UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_ref = "topic_name";
-    uint16_t topic_req = uxr_buffer_create_topic_ref(&session, reliable_out, topic_id, participant_id, topic_ref, UXR_REPLACE);
+    uint16_t topic_req = uxr_buffer_create_topic_ref(&session, reliable_out, topic_id, participant_id, topic_ref,
+                    UXR_REPLACE);
 
     uxrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
     const char* subscriber_xml = "";
-    uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
+    uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(&session, reliable_out, subscriber_id, participant_id,
+                    subscriber_xml, UXR_REPLACE);
 
     uxrObjectId datareader_id = uxr_object_id(0x01, UXR_DATAREADER_ID);
     const char* datareader_ref = topic_ref;
-    uint16_t datareader_req = uxr_buffer_create_datareader_ref(&session, reliable_out, datareader_id, subscriber_id, datareader_ref, UXR_REPLACE);
+    uint16_t datareader_req = uxr_buffer_create_datareader_ref(&session, reliable_out, datareader_id, subscriber_id,
+                    datareader_ref, UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[4];
-    uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
-    if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 4))
+    uint16_t requests[4] = {
+        participant_req, topic_req, subscriber_req, datareader_req
+    };
+    if (!uxr_run_session_until_all_status(&session, 1000, requests, status, 4))
     {
-        printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
+        printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0],
+                status[1], status[2], status[3]);
         return 1;
     }
 
     // Request topics
-    uxrDeliveryControl delivery_control = {0};
+    uxrDeliveryControl delivery_control = {
+        0
+    };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in,
+                    &delivery_control);
 
     // Read topics
     bool connected = true;
-    while(connected && count < max_topics)
+    while (connected && count < max_topics)
     {
         uint8_t read_data_status;
         connected = uxr_run_session_until_all_status(&session, UXR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);

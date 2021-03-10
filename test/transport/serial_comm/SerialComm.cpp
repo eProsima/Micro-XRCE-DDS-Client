@@ -4,7 +4,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-SerialComm::SerialComm() : fd_(-1)
+SerialComm::SerialComm()
+    : fd_(-1)
 {
 }
 
@@ -30,7 +31,7 @@ int SerialComm::init()
             fcntl(fd_, F_SETFL, O_NONBLOCK);
             fcntl(fd_, F_SETPIPE_SZ, 4096);
             if (!uxr_init_serial_transport(&master_, fd_, 1, 0) ||
-                !uxr_init_serial_transport(&slave_, fd_, 0, 1))
+                    !uxr_init_serial_transport(&slave_, fd_, 0, 1))
             {
                 rv = -1;
             }

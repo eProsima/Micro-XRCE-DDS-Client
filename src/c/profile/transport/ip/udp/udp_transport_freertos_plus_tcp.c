@@ -21,7 +21,11 @@
 #include <string.h>
 #include <errno.h>
 
-bool uxr_init_udp_platform(uxrUDPPlatform* platform, uxrIpProtocol ip_protocol, const char* ip, const char* port)
+bool uxr_init_udp_platform(
+        uxrUDPPlatform* platform,
+        uxrIpProtocol ip_protocol,
+        const char* ip,
+        const char* port)
 {
     bool rv = false;
     uint16_t iport;
@@ -51,7 +55,8 @@ bool uxr_init_udp_platform(uxrUDPPlatform* platform, uxrIpProtocol ip_protocol, 
     return rv;
 }
 
-bool uxr_close_udp_platform(uxrUDPPlatform* platform)
+bool uxr_close_udp_platform(
+        uxrUDPPlatform* platform)
 {
     /* FreeRTOS_closesocket() always returns 0. */
     (void) FreeRTOS_closesocket(platform->fd);
@@ -59,12 +64,16 @@ bool uxr_close_udp_platform(uxrUDPPlatform* platform)
     return true;
 }
 
-size_t uxr_write_udp_data_platform(uxrUDPPlatform* platform, const uint8_t* buf, size_t len, uint8_t* errcode)
+size_t uxr_write_udp_data_platform(
+        uxrUDPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode)
 {
     size_t rv = 0;
 
     int32_t bytes_sent = FreeRTOS_sendto(platform->fd, (const void*)buf, len, 0,
-                                         &platform->remote_addr, sizeof(platform->remote_addr));
+                    &platform->remote_addr, sizeof(platform->remote_addr));
 
     /* FreeRTOS_sendto() returns 0 if an error or timeout occurred. */
     if (0 < bytes_sent)
@@ -80,14 +89,19 @@ size_t uxr_write_udp_data_platform(uxrUDPPlatform* platform, const uint8_t* buf,
     return rv;
 }
 
-size_t uxr_read_udp_data_platform(uxrUDPPlatform* platform, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
+size_t uxr_read_udp_data_platform(
+        uxrUDPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
 
     BaseType_t poll_rv = FreeRTOS_select(platform->poll_fd, pdMS_TO_TICKS(timeout));
     if (0 < poll_rv)
     {
-        int32_t bytes_received = FreeRTOS_recvfrom(platform->fd, (void *)buf, len, 0, NULL, NULL);
+        int32_t bytes_received = FreeRTOS_recvfrom(platform->fd, (void*)buf, len, 0, NULL, NULL);
         if (0 <= bytes_received)
         {
             rv = (size_t)bytes_received;

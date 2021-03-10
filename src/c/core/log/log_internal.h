@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <stdint.h>
 #include <stddef.h>
@@ -32,30 +32,37 @@ extern "C"
 #define UXR_MESSAGE_LOGS_AVAILABLE 1
 #else
 #define UXR_MESSAGE_LOGS_AVAILABLE 0
-#endif
+#endif // ifdef UXR_MESSAGE_LOGS
 
 #ifdef UXR_SERIALIZATION_LOGS
 #define UXR_SERIALIZATION_LOGS_AVAILABLE 1
 #else
 #define UXR_SERIALIZATION_LOGS_AVAILABLE 0
-#endif
+#endif // ifdef UXR_SERIALIZATION_LOGS
 
-void uxr_print_message(int direction, uint8_t* buffer, size_t size, const uint8_t* client_key);
-void uxr_print_serialization(int direction, const uint8_t* buffer, size_t size);
+void uxr_print_message(
+        int direction,
+        uint8_t* buffer,
+        size_t size,
+        const uint8_t* client_key);
+void uxr_print_serialization(
+        int direction,
+        const uint8_t* buffer,
+        size_t size);
 
 #if defined(UXR_MESSAGE_LOGS) || defined(UXR_SERIALIZATION_LOGS)
 #define UXR_DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) \
     do \
     { \
-        if (UXR_MESSAGE_LOGS_AVAILABLE) uxr_print_message(direction, buffer, size, client_key); \
-        if (UXR_SERIALIZATION_LOGS_AVAILABLE) uxr_print_serialization(direction, buffer, size); \
+        if (UXR_MESSAGE_LOGS_AVAILABLE)uxr_print_message(direction, buffer, size, client_key); \
+        if (UXR_SERIALIZATION_LOGS_AVAILABLE)uxr_print_serialization(direction, buffer, size); \
     } while (0)
 #else
-#define UXR_DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) do {} while(0)
-#endif
+#define UXR_DEBUG_PRINT_MESSAGE(direction, buffer, size, client_key) do {} while (0)
+#endif // if defined(UXR_MESSAGE_LOGS) || defined(UXR_SERIALIZATION_LOGS)
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_LOG_LOG_INTERNAL_H_

@@ -65,16 +65,18 @@ bool uxr_init_tcp_platform(
     return rv;
 }
 
-bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform)
+bool uxr_close_tcp_platform(
+        struct uxrTCPPlatform* platform)
 {
     bool rv = (INVALID_SOCKET == platform->poll_fd.fd) ? true : (0 == closesocket(platform->poll_fd.fd));
     return (0 == WSACleanup()) && rv;
 }
 
-size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                   const uint8_t* buf,
-                                   size_t len,
-                                   uint8_t* errcode)
+size_t uxr_write_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     int bytes_sent = send(platform->poll_fd.fd, (const char*)buf, (int)len, 0);
@@ -90,11 +92,12 @@ size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
     return rv;
 }
 
-size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                  uint8_t* buf,
-                                  size_t len,
-                                  int timeout,
-                                  uint8_t* errcode)
+size_t uxr_read_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     int poll_rv = WSAPoll(&platform->poll_fd, 1, timeout);
@@ -118,7 +121,8 @@ size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
     return rv;
 }
 
-void uxr_disconnect_tcp_platform(struct uxrTCPPlatform* platform)
+void uxr_disconnect_tcp_platform(
+        struct uxrTCPPlatform* platform)
 {
     closesocket(platform->poll_fd.fd);
     platform->poll_fd.fd = INVALID_SOCKET;

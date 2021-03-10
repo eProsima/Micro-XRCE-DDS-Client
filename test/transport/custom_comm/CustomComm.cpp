@@ -2,7 +2,8 @@
 
 #include <stdint.h>
 
-CustomComm::CustomComm() : buffer(2000)
+CustomComm::CustomComm()
+    : buffer(2000)
 {
     max_payload = 20;
     uxr_set_custom_transport_callbacks(&master_, true, open, close, write, read);
@@ -18,17 +19,23 @@ CustomComm::~CustomComm()
     uxr_close_custom_transport(&slave_);
 }
 
-bool CustomComm::open(uxrCustomTransport* /*transport*/)
-{   
-    return true;
-}   
-
-bool CustomComm::close(uxrCustomTransport* /*transport*/)
+bool CustomComm::open(
+        uxrCustomTransport* /*transport*/)
 {
     return true;
 }
 
-size_t CustomComm::write(uxrCustomTransport* transport, const uint8_t* buf, size_t len, uint8_t* /*error*/)
+bool CustomComm::close(
+        uxrCustomTransport* /*transport*/)
+{
+    return true;
+}
+
+size_t CustomComm::write(
+        uxrCustomTransport* transport,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* /*error*/)
 {
     CustomComm* custom_comm = static_cast<CustomComm*>(transport->args);
 
@@ -47,7 +54,12 @@ size_t CustomComm::write(uxrCustomTransport* transport, const uint8_t* buf, size
     return written;
 }
 
-size_t CustomComm::read(uxrCustomTransport* transport, uint8_t* buf, size_t len, int /*timeout*/, uint8_t* /*error*/)
+size_t CustomComm::read(
+        uxrCustomTransport* transport,
+        uint8_t* buf,
+        size_t len,
+        int /*timeout*/,
+        uint8_t* /*error*/)
 {
     CustomComm* custom_comm = static_cast<CustomComm*>(transport->args);
 

@@ -21,7 +21,7 @@
 #include <windows.h>
 #else
 #include <unistd.h>
-#endif
+#endif /* ifdef WIN32 */
 
 int64_t avg_time_offset = 0;
 size_t sample_id = 0;
@@ -35,16 +35,19 @@ void on_time(
         void* args)
 {
     (void) args;
-    int64_t current_time_offset = ((current_time - originate_timestamp) - (transmit_timestamp - received_timestamp)) / 2;
+    int64_t current_time_offset = ((current_time - originate_timestamp) - (transmit_timestamp - received_timestamp)) /
+            2;
     avg_time_offset = (avg_time_offset * sample_id + current_time_offset) / (sample_id + 1);
     ++sample_id;
     session->time_offset = avg_time_offset;
 }
 
-int main(int args, char** argv)
+int main(
+        int args,
+        char** argv)
 {
     // CLI
-    if(3 > args || 0 == atoi(argv[2]))
+    if (3 > args || 0 == atoi(argv[2]))
     {
         printf("usage: program [-h | --help] | ip port\n");
         return 0;
@@ -55,7 +58,7 @@ int main(int args, char** argv)
 
     // Transport
     uxrUDPTransport transport;
-    if(!uxr_init_udp_transport(&transport, UXR_IPv4, ip, port))
+    if (!uxr_init_udp_transport(&transport, UXR_IPv4, ip, port))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -64,7 +67,7 @@ int main(int args, char** argv)
     // Session
     uxrSession session;
     uxr_init_session(&session, &transport.comm, 0xCCCCDDDD);
-    if(!uxr_create_session(&session))
+    if (!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -84,10 +87,10 @@ int main(int args, char** argv)
 #else
         printf("synchronized with time offset %-5" PRId64 "us\n", session.time_offset / 1000);
         sleep(1);
-#endif
+#endif /* ifdef WIN32 */
 
     } while (synchronized);
-    
+
     // Delete resources
     uxr_delete_session(&session);
     uxr_close_udp_transport(&transport);

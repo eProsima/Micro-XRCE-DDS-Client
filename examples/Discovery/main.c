@@ -19,7 +19,9 @@
 
 #define MAX_AGENTS 10
 
-bool on_agent_found(const TransportLocator* locator, void* args)
+bool on_agent_found(
+        const TransportLocator* locator,
+        void* args)
 {
     (void) args;
     switch (locator->format)
@@ -48,12 +50,14 @@ bool on_agent_found(const TransportLocator* locator, void* args)
     return false;
 }
 
-int main(int args, char** argv)
+int main(
+        int args,
+        char** argv)
 {
-    if(args < 1 || (args >= 2 && (0 == strcmp("-h", argv[1]) ||
-                                 0 == strcmp("--help", argv[1]) ||
-                                 0 == args % 2 ||
-                                 MAX_AGENTS * 2 < args + 2)))
+    if (args < 1 || (args >= 2 && (0 == strcmp("-h", argv[1]) ||
+            0 == strcmp("--help", argv[1]) ||
+            0 == args % 2 ||
+            MAX_AGENTS * 2 < args + 2)))
     {
         printf("usage: program [ -h | --help | [<ip> <port> ...] ]\n");
         return 0;
@@ -67,7 +71,7 @@ int main(int args, char** argv)
     {
         size_t size = 0;
         TransportLocator agent_list[MAX_AGENTS];
-        for(int i = 1; i < args; i += 2, size++)
+        for (int i = 1; i < args; i += 2, size++)
         {
             uxr_ip_to_locator(argv[i], (uint16_t)atoi(argv[i + 1]), UXR_IPv4, &agent_list[i++]);
         }
@@ -77,4 +81,3 @@ int main(int args, char** argv)
 
     return 0;
 }
-

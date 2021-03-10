@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/core/session/stream/input_best_effort_stream.h>
 #include <uxr/client/core/session/stream/seq_num.h>
@@ -26,12 +26,16 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 
-void uxr_init_input_best_effort_stream(uxrInputBestEffortStream* stream);
-void uxr_reset_input_best_effort_stream(uxrInputBestEffortStream* stream);
-bool uxr_receive_best_effort_message(uxrInputBestEffortStream* stream, uxrSeqNum seq_num);
+void uxr_init_input_best_effort_stream(
+        uxrInputBestEffortStream* stream);
+void uxr_reset_input_best_effort_stream(
+        uxrInputBestEffortStream* stream);
+bool uxr_receive_best_effort_message(
+        uxrInputBestEffortStream* stream,
+        uxrSeqNum seq_num);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SESSION_INPUT_STREAM_BEST_EFFORT_STREAM_INTERNAL_H_

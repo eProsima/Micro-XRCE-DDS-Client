@@ -18,17 +18,25 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <ucdr/microcdr.h>
 
-void uxr_serialize_submessage_header(ucdrBuffer* buffer, uint8_t id, uint8_t flags, uint16_t length);
-void uxr_deserialize_submessage_header(ucdrBuffer* buffer, uint8_t* id, uint8_t* flags, uint16_t* length);
+void uxr_serialize_submessage_header(
+        ucdrBuffer* buffer,
+        uint8_t id,
+        uint8_t flags,
+        uint16_t length);
+void uxr_deserialize_submessage_header(
+        ucdrBuffer* buffer,
+        uint8_t* id,
+        uint8_t* flags,
+        uint16_t* length);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SERIALIZATION_SUBHEADER_H_

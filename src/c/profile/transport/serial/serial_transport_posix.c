@@ -4,7 +4,11 @@
 #include <unistd.h>
 #include <errno.h>
 
-bool uxr_init_serial_platform(void* args, int fd, uint8_t remote_addr, uint8_t local_addr)
+bool uxr_init_serial_platform(
+        void* args,
+        int fd,
+        uint8_t remote_addr,
+        uint8_t local_addr)
 {
     (void) remote_addr;
     (void) local_addr;
@@ -18,13 +22,18 @@ bool uxr_init_serial_platform(void* args, int fd, uint8_t remote_addr, uint8_t l
     return true;
 }
 
-bool uxr_close_serial_platform(void* args)
+bool uxr_close_serial_platform(
+        void* args)
 {
     struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
     return (-1 == platform->poll_fd.fd) ? true : (0 == close(platform->poll_fd.fd));
 }
 
-size_t uxr_write_serial_data_platform(void* args, const uint8_t* buf, size_t len, uint8_t* errcode)
+size_t uxr_write_serial_data_platform(
+        void* args,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
@@ -42,7 +51,12 @@ size_t uxr_write_serial_data_platform(void* args, const uint8_t* buf, size_t len
     return rv;
 }
 
-size_t uxr_read_serial_data_platform(void* args, uint8_t* buf, size_t len, int timeout, uint8_t* errcode)
+size_t uxr_read_serial_data_platform(
+        void* args,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
     struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
@@ -67,4 +81,3 @@ size_t uxr_read_serial_data_platform(void* args, uint8_t* buf, size_t len, int t
     }
     return rv;
 }
-

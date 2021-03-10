@@ -17,10 +17,10 @@
 #include <ws2tcpip.h>
 
 bool uxr_ip_to_locator(
-        char const * ip,
+        char const* ip,
         uint16_t port,
         uxrIpProtocol ip_protocol,
-        TransportLocator * locator)
+        TransportLocator* locator)
 {
     bool result = false;
     switch (ip_protocol)
@@ -42,11 +42,11 @@ bool uxr_ip_to_locator(
 }
 
 bool uxr_locator_to_ip(
-        TransportLocator const * locator,
-        char * ip,
+        TransportLocator const* locator,
+        char* ip,
         size_t size,
-        uint16_t * port,
-        uxrIpProtocol * ip_protocol)
+        uint16_t* port,
+        uxrIpProtocol* ip_protocol)
 {
     bool result = false;
     switch (locator->format)

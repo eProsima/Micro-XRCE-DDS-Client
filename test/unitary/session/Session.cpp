@@ -42,6 +42,7 @@ extern "C"
 class SessionTest : public testing::Test
 {
 public:
+
     static SessionTest* current;
     SessionTest()
     {
@@ -93,6 +94,7 @@ public:
     }
 
 public:
+
     uxrCommunication comm;
     uxrSession session;
     uint8_t output_best_effort_buffer[MTU];
@@ -101,28 +103,31 @@ public:
 
     static int listening_counter;
 
-    static bool send_msg(void* instance, const uint8_t* buf, size_t len)
+    static bool send_msg(
+            void* instance,
+            const uint8_t* buf,
+            size_t len)
     {
         (void) buf;
         EXPECT_EQ(SessionTest::current, instance);
-        if(std::string("FlashStreams") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        if (std::string("FlashStreams") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             EXPECT_EQ(size_t(OFFSET + SUBHEADER_SIZE + 8), len);
         }
-        else if(std::string("SendMessageOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("SendMessageOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             EXPECT_EQ(size_t(MTU), len);
         }
-        else if(std::string("SendMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("SendMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             EXPECT_EQ(size_t(MTU), len);
             return false;
         }
-        else if(std::string("SendHeartbeat") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("SendHeartbeat") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             EXPECT_EQ(size_t(HEARTBEAT_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET)), len);
         }
-        else if(std::string("SendAcknack") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("SendAcknack") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             EXPECT_EQ(size_t(ACKNACK_MAX_MSG_SIZE - (MAX_HEADER_SIZE - OFFSET)), len);
         }
@@ -130,17 +135,21 @@ public:
         return true;
     }
 
-    static bool recv_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
+    static bool recv_msg(
+            void* instance,
+            uint8_t** buf,
+            size_t* len,
+            int timeout)
     {
         EXPECT_EQ(SessionTest::current, instance);
         (void) timeout;
         static std::array<uint8_t, MTU> input_buffer;
 
-        if(std::string("CreateOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        if (std::string("CreateOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             std::vector<uint8_t> message = {0x81, 0x00, 0x00, 0x00, 0x04, 0x01, 0x19, 0x00,
                                             0x00, 0x01, 0xFF, 0xFE, 0x00, 0x00, 0x58, 0x52,
-                                            0x43, 0x45, 0x01, 0x00, 0x01, 0x0F , 0x0, 0x00,
+                                            0x43, 0x45, 0x01, 0x00, 0x01, 0x0F, 0x0, 0x00,
                                             0x77, 0x6B, 0x48, 0x5C, 0x43, 0x14, 0x1C, 0x34,
                                             0x00};
             *len = message.size();
@@ -148,11 +157,11 @@ public:
             std::copy_n(message.begin(), *len, input_buffer.begin());
             return true;
         }
-        else if(std::string("CreateNoOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("CreateNoOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             return false;
         }
-        else if(std::string("DeleteOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("DeleteOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             std::vector<uint8_t> message = {0x81, 0x00, 0x00, 0x00, 0x05, 0x01, 0x06, 0x00,
                                             0x00, 0x02, 0xFF, 0xFE, 0x00, 0x00};
@@ -161,57 +170,63 @@ public:
             std::copy_n(message.begin(), *len, input_buffer.begin());
             return true;
         }
-        else if(std::string("DeleteNoOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("DeleteNoOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             return false;
         }
-        else if(std::string("Listen") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("Listen") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             *len = 0u;
             *buf = NULL;
             return true;
         }
-        else if(std::string("ListenTimeout") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("ListenTimeout") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             return false;
         }
-        else if(std::string("ListenReliably") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("ListenReliably") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             *len = 0u;
             *buf = NULL;
             return true;
         }
-        else if(std::string("ListenReliablyTimeout") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("ListenReliablyTimeout") ==
+                ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             return false;
         }
-        else if(std::string("WaitSessionStatusBad") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("WaitSessionStatusBad") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             SessionTest::listening_counter++;
             return false;
         }
-        else if(std::string("RecvMessageOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("RecvMessageOk") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             *len = 8;
             return true;
         }
-        else if(std::string("RecvMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        else if (std::string("RecvMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             return false;
         }
         return false;
     }
 
-    static uint8_t comm_error(void)
+    static uint8_t comm_error(
+            void)
     {
         return 0u;
     }
 
-    static void on_status_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uint8_t status, void* args)
+    static void on_status_func (
+            struct uxrSession* session,
+            uxrObjectId object_id,
+            uint16_t request_id,
+            uint8_t status,
+            void* args)
     {
         (void) session; (void) object_id; (void) request_id; (void) status; (void) args;
-        if(std::string("ProcessStatus") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        if (std::string("ProcessStatus") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             EXPECT_EQ(&SessionTest::current->session, session);
             EXPECT_EQ(2, object_id.id);
@@ -222,8 +237,14 @@ public:
         }
     }
 
-    static void on_topic_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uxrStreamId stream_id, struct ucdrBuffer* ub, uint16_t length, void* args)
+    static void on_topic_func (
+            struct uxrSession* session,
+            uxrObjectId object_id,
+            uint16_t request_id,
+            uxrStreamId stream_id,
+            struct ucdrBuffer* ub,
+            uint16_t length,
+            void* args)
     {
         (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length; (void) args;
         if (std::string("ReadUint64") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
@@ -234,12 +255,18 @@ public:
         }
     }
 
-    static void on_time_func (struct uxrSession* session, int64_t current_timestamp, int64_t transmit_timestamp,
-                            int64_t received_timestamp, int64_t originate_timestamp, void* args)
+    static void on_time_func (
+            struct uxrSession* session,
+            int64_t current_timestamp,
+            int64_t transmit_timestamp,
+            int64_t received_timestamp,
+            int64_t originate_timestamp,
+            void* args)
     {
         (void) session; (void) current_timestamp; (void) transmit_timestamp; (void) received_timestamp;
         (void) originate_timestamp; (void) args;
     }
+
 };
 
 SessionTest* SessionTest::current = nullptr;

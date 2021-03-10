@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/core/session/stream/stream_storage.h>
 #include <uxr/client/core/session/stream/output_best_effort_stream.h>
@@ -28,23 +28,49 @@ extern "C"
 #include <uxr/client/core/session/stream/stream_id.h>
 #include <uxr/client/config.h>
 
-void uxr_init_stream_storage(uxrStreamStorage* storage);
-void uxr_reset_stream_storage(uxrStreamStorage* storage);
+void uxr_init_stream_storage(
+        uxrStreamStorage* storage);
+void uxr_reset_stream_storage(
+        uxrStreamStorage* storage);
 
-uxrStreamId uxr_add_output_best_effort_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint8_t header_offset);
-uxrStreamId uxr_add_output_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset);
-uxrStreamId uxr_add_input_best_effort_buffer(uxrStreamStorage* storage);
-uxrStreamId uxr_add_input_reliable_buffer(uxrStreamStorage* storage, uint8_t* buffer, size_t size, uint16_t history, OnGetFragmentationInfo on_get_fragmentation_info);
+uxrStreamId uxr_add_output_best_effort_buffer(
+        uxrStreamStorage* storage,
+        uint8_t* buffer,
+        size_t size,
+        uint8_t header_offset);
+uxrStreamId uxr_add_output_reliable_buffer(
+        uxrStreamStorage* storage,
+        uint8_t* buffer,
+        size_t size,
+        uint16_t history,
+        uint8_t header_offset);
+uxrStreamId uxr_add_input_best_effort_buffer(
+        uxrStreamStorage* storage);
+uxrStreamId uxr_add_input_reliable_buffer(
+        uxrStreamStorage* storage,
+        uint8_t* buffer,
+        size_t size,
+        uint16_t history,
+        OnGetFragmentationInfo on_get_fragmentation_info);
 
-uxrOutputBestEffortStream* uxr_get_output_best_effort_stream(uxrStreamStorage* storage, uint8_t index);
-uxrOutputReliableStream* uxr_get_output_reliable_stream(uxrStreamStorage* storage, uint8_t index);
-uxrInputBestEffortStream* uxr_get_input_best_effort_stream(uxrStreamStorage* storage, uint8_t index);
-uxrInputReliableStream* uxr_get_input_reliable_stream(uxrStreamStorage* storage, uint8_t index);
+uxrOutputBestEffortStream* uxr_get_output_best_effort_stream(
+        uxrStreamStorage* storage,
+        uint8_t index);
+uxrOutputReliableStream* uxr_get_output_reliable_stream(
+        uxrStreamStorage* storage,
+        uint8_t index);
+uxrInputBestEffortStream* uxr_get_input_best_effort_stream(
+        uxrStreamStorage* storage,
+        uint8_t index);
+uxrInputReliableStream* uxr_get_input_reliable_stream(
+        uxrStreamStorage* storage,
+        uint8_t index);
 
-bool uxr_output_streams_confirmed(const uxrStreamStorage* storage);
+bool uxr_output_streams_confirmed(
+        const uxrStreamStorage* storage);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SESSION_STREAM_STREAM_STORAGE_INTERNAL_H_

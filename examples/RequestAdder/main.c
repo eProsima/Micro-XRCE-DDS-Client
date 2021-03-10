@@ -20,7 +20,7 @@
 #include <inttypes.h>
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU* STREAM_HISTORY
 
 void on_reply(
         uxrSession* session,
@@ -42,12 +42,14 @@ void on_reply(
     printf("Reply received: %I64u [id: %d]\n", result, reply_id);
 #else
     printf("Reply received: %" PRIu64 " [id: %d]\n", result, reply_id);
-#endif
+#endif /* ifdef WIN32 */
 }
 
-int main(int args, char** argv)
+int main(
+        int args,
+        char** argv)
 {
-    if(3 > args || 0 == atoi(argv[2]))
+    if (3 > args || 0 == atoi(argv[2]))
     {
         printf("usage: program [-h | --help] | ip port [key]\n");
         return 0;
@@ -77,52 +79,63 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE,
+                    STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE,
+                    STREAM_HISTORY);
 
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
     const char* participant_xml = "<dds>"
-                                      "<participant>"
-                                          "<rtps>"
-                                              "<name>default_xrce_participant</name>"
-                                          "</rtps>"
-                                      "</participant>"
-                                  "</dds>";
-    uint16_t participant_req = uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0, participant_xml, UXR_REPLACE);
+            "<participant>"
+            "<rtps>"
+            "<name>default_xrce_participant</name>"
+            "</rtps>"
+            "</participant>"
+            "</dds>";
+    uint16_t participant_req = uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0,
+                    participant_xml, UXR_REPLACE);
 
     uxrObjectId requester_id = uxr_object_id(0x01, UXR_REQUESTER_ID);
     const char* requester_xml = "<dds>"
-                                    "<requester profile_name=\"my_requester\""
-                                               "service_name=\"service_name\""
-                                               "request_type=\"request_type\""
-                                               "reply_type=\"reply_type\">"
-                                    "</requester>"
-                                "</dds>";
-    uint16_t requester_req = uxr_buffer_create_requester_xml(&session, reliable_out, requester_id, participant_id, requester_xml, UXR_REPLACE);
+            "<requester profile_name=\"my_requester\""
+            "service_name=\"service_name\""
+            "request_type=\"request_type\""
+            "reply_type=\"reply_type\">"
+            "</requester>"
+            "</dds>";
+    uint16_t requester_req = uxr_buffer_create_requester_xml(&session, reliable_out, requester_id, participant_id,
+                    requester_xml, UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[2];
-    uint16_t requests[2] = {participant_req, requester_req};
-    if(!uxr_run_session_until_all_status(&session, 1000, requests, status, 2))
+    uint16_t requests[2] = {
+        participant_req, requester_req
+    };
+    if (!uxr_run_session_until_all_status(&session, 1000, requests, status, 2))
     {
         printf("Error at create entities: participant: %i requester: %i\n", status[0], status[1]);
         return 1;
     }
 
     // Request replies
-    uxrDeliveryControl delivery_control = {0};
+    uxrDeliveryControl delivery_control = {
+        0
+    };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, requester_id, reliable_in, &delivery_control);
+    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, requester_id, reliable_in,
+                    &delivery_control);
 
     // Write requests
     bool connected = true;
     uint32_t count = 0;
     while (connected)
     {
-        uint8_t request[2 * 4] = {0};
+        uint8_t request[2 * 4] = {
+            0
+        };
         ucdrBuffer ub;
 
         ucdr_init_buffer(&ub, request, sizeof(request));

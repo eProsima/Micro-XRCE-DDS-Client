@@ -21,80 +21,98 @@
 class CircularBuffer
 {
 public:
-        CircularBuffer(size_t len)
-            : maxlen(len)
-            , head(0)
-            , tail(0)
+
+    CircularBuffer(
+            size_t len)
+        : maxlen(len)
+        , head(0)
+        , tail(0)
+    {
+        buffer = static_cast<uint8_t*>(malloc(maxlen));
+    }
+
+    ~CircularBuffer()
+    {
+        free(buffer);
+    }
+
+    int write(
+            uint8_t data)
+    {
+        size_t next;
+
+        next = head + 1;
+        if (next >= maxlen)
         {
-            buffer = static_cast<uint8_t*>(malloc(maxlen));
+            next = 0;
         }
 
-        ~CircularBuffer()
+        if (next == tail)
         {
-            free(buffer);
+            return -1;
         }
 
-        int write(uint8_t data)
+        buffer[head] = data;
+        head = next;
+        return 0;
+    }
+
+    int read(
+            uint8_t* data)
+    {
+        size_t next;
+
+        if (head == tail)
         {
-            size_t next;
-
-            next = head + 1;
-            if (next >= maxlen)
-            {
-                next = 0;
-            }
-            
-            if (next == tail) 
-            {
-                return -1;
-            }
-
-            buffer[head] = data;
-            head = next;
-            return 0;
+            return -1;
         }
 
-        int read(uint8_t *data)
+        next = tail + 1;
+        if (next >= maxlen)
         {
-            size_t next;
-
-            if (head == tail)
-            {
-                return -1;
-            }
-
-            next = tail + 1;
-            if(next >= maxlen)
-            {
-                next = 0;
-            }
-
-            *data = buffer[tail];
-            tail = next;
-            return 0;
+            next = 0;
         }
 
-    private:
-        uint8_t * buffer;
-        size_t maxlen;
-        size_t head;
-        size_t tail;
+        *data = buffer[tail];
+        tail = next;
+        return 0;
+    }
+
+private:
+
+    uint8_t* buffer;
+    size_t maxlen;
+    size_t head;
+    size_t tail;
 };
 
 class CustomComm : public testing::Test
 {
 public:
+
     CustomComm();
     ~CustomComm();
 
 protected:
+
     uxrCustomTransport master_;
     uxrCustomTransport slave_;
 
-    static bool open(uxrCustomTransport * args);
-    static bool close(uxrCustomTransport* transport);
-    static size_t write(uxrCustomTransport* transport, const uint8_t* buf, size_t len, uint8_t* error);
-    static size_t read(uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* error);
+    static bool open(
+            uxrCustomTransport* args);
+    static bool close(
+            uxrCustomTransport* transport);
+    static size_t write(
+            uxrCustomTransport* transport,
+            const uint8_t* buf,
+            size_t len,
+            uint8_t* error);
+    static size_t read(
+            uxrCustomTransport* transport,
+            uint8_t* buf,
+            size_t len,
+            int timeout,
+            uint8_t* error);
 
     CircularBuffer buffer;
     size_t max_payload;

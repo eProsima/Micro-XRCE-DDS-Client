@@ -21,11 +21,13 @@
 class SerialComm : public testing::Test
 {
 public:
+
     SerialComm();
     ~SerialComm();
     int init();
 
 protected:
+
     int fd_;
     uxrSerialTransport master_;
     uxrSerialTransport slave_;

@@ -20,7 +20,11 @@
 #include <string.h>
 #include <errno.h>
 
-bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, uxrIpProtocol ip_protocol, const char* ip, const char* port)
+bool uxr_init_tcp_platform(
+        struct uxrTCPPlatform* platform,
+        uxrIpProtocol ip_protocol,
+        const char* ip,
+        const char* port)
 {
     bool rv = false;
     uint16_t iport;
@@ -50,8 +54,8 @@ bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, uxrIpProtocol ip_pro
         if (rv)
         {
             BaseType_t connected = FreeRTOS_connect(platform->fd,
-                                                    &platform->remote_addr,
-                                                    sizeof(platform->remote_addr));
+                            &platform->remote_addr,
+                            sizeof(platform->remote_addr));
             rv = (0 == connected);
         }
         else
@@ -63,7 +67,8 @@ bool uxr_init_tcp_platform(struct uxrTCPPlatform* platform, uxrIpProtocol ip_pro
     return rv;
 }
 
-bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform)
+bool uxr_close_tcp_platform(
+        struct uxrTCPPlatform* platform)
 {
     (void) FreeRTOS_shutdown(platform->fd, FREERTOS_SHUT_RDWR);
 
@@ -74,10 +79,11 @@ bool uxr_close_tcp_platform(struct uxrTCPPlatform* platform)
     return true;
 }
 
-size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                   const uint8_t* buf,
-                                   size_t len,
-                                   uint8_t* errcode)
+size_t uxr_write_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode)
 {
     size_t rv = 0;
 
@@ -98,11 +104,12 @@ size_t uxr_write_tcp_data_platform(struct uxrTCPPlatform* platform,
     return rv;
 }
 
-size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
-                                  uint8_t* buf,
-                                  size_t len,
-                                  int timeout,
-                                  uint8_t* errcode)
+size_t uxr_read_tcp_data_platform(
+        struct uxrTCPPlatform* platform,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
 
@@ -128,7 +135,8 @@ size_t uxr_read_tcp_data_platform(struct uxrTCPPlatform* platform,
     return rv;
 }
 
-void uxr_disconnect_tcp_platform(struct uxrTCPPlatform* platform)
+void uxr_disconnect_tcp_platform(
+        struct uxrTCPPlatform* platform)
 {
     (void) FreeRTOS_shutdown(platform->fd, FREERTOS_SHUT_RDWR);
 
