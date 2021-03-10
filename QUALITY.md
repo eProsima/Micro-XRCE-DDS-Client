@@ -102,7 +102,7 @@ The tests aim to cover typical usage and corner cases.
 
 ### Coverage [4.iii]
 
-* [![Coverage](https://img.shields.io/jenkins/coverage/cobertura?jobUrl=http%3A%2F%2Fjenkins.eprosima.com%3A8080%2Fview%2FMicro%2520XRCE%2Fjob%2FMicro-XRCE-DDS-Client%2520Nightly%2520Master%2520Linux%2F](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/coverage/)
+[![Coverage](https://img.shields.io/jenkins/coverage/cobertura?jobUrl=http%3A%2F%2Fjenkins.eprosima.com%3A8080%2Fview%2FMicro%2520XRCE%2Fjob%2FMicro-XRCE-DDS-Client%2520Nightly%2520Master%2520Linux)](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/coverage/)
 
 *eProsima Micro XRCE-DDS Client* aims to provide a line coverage **above 90%**.
 *Micro XRCE-DDS Client* code coverage policy comprises:
