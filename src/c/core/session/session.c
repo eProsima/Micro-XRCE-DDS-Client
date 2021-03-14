@@ -306,11 +306,12 @@ bool uxr_run_session_timeout(
 
     uxr_flash_output_streams(session);
 
-    while (remaining_time > 0)
+    do
     {
         listen_message_reliably(session, remaining_time);
         remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
+    while (remaining_time > 0);
     return uxr_output_streams_confirmed(&session->streams);
 }
 
@@ -324,7 +325,7 @@ bool uxr_run_session_until_data(
     uxr_flash_output_streams(session);
 
     session->on_data_flag = false;
-    while (remaining_time > 0)
+    do
     {
         listen_message_reliably(session, remaining_time);
         if (session->on_data_flag)
@@ -333,6 +334,7 @@ bool uxr_run_session_until_data(
         }
         remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
+    while (remaining_time > 0);
     return session->on_data_flag;
 }
 
@@ -380,7 +382,8 @@ bool uxr_run_session_until_all_status(
 
     bool timeout = false;
     bool status_confirmed = false;
-    while (!timeout && !status_confirmed)
+
+    do
     {
         timeout = !listen_message_reliably(session, timeout_ms);
         status_confirmed = true;
@@ -390,6 +393,7 @@ bool uxr_run_session_until_all_status(
                     || request_list[i] == UXR_INVALID_REQUEST_ID;         //CHECK: better give an error? an assert?
         }
     }
+    while (!timeout && !status_confirmed);
 
     session->request_status_list_size = 0;
 
@@ -422,7 +426,7 @@ bool uxr_run_session_until_one_status(
 
     bool timeout = false;
     bool status_confirmed = false;
-    while (!timeout && !status_confirmed)
+    do
     {
         timeout = !listen_message_reliably(session, timeout_ms);
         for (unsigned i = 0; i < list_size && !status_confirmed; ++i)
@@ -431,6 +435,7 @@ bool uxr_run_session_until_one_status(
                     || request_list[i] == UXR_INVALID_REQUEST_ID;         //CHECK: better give an error? an assert?
         }
     }
+    while (!timeout && !status_confirmed);
 
     session->request_status_list_size = 0;
 
