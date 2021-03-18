@@ -6,6 +6,13 @@
 
 #include <string.h>
 
+#if defined(WIN32)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#else
+#include <sys/types.h>
+#endif
+
 //==================================================================
 //                             PRIVATE
 //==================================================================
@@ -48,22 +55,24 @@ bool uxr_interprocess_entity_compare(uxr_interprocess_entity_t* e1, uxr_interpro
     return ret;
 }
 
-size_t uxr_get_datawriter_index(uxrSession* session, uxrObjectId* entity_id){
+ssize_t uxr_get_datawriter_index(uxrSession* session, uxrObjectId* entity_id){
     uxr_interprocess_entity_t aux = {.session = session, .object_id = *entity_id};
     for (size_t i = 0; i < uxr_ip_map.entities_len; i++)
     {
         if (uxr_interprocess_entity_compare(&aux, &uxr_ip_map.entities[i]))
         {
-            return i;
+            return (ssize_t)i;
         }
     }
-    // TODO(pablogs): Handling errors here?
-    return 0;
+    return -1;
 }
 
 void uxr_prepare_interprocess(uxrSession* session, uxrObjectId entity_id, ucdrBuffer* ub, uint16_t data_size)
 {
-    size_t datawriter_index = uxr_get_datawriter_index(session, &entity_id);
+    ssize_t datawriter_index = uxr_get_datawriter_index(session, &entity_id);
+    if(-1 == datawriter_index){
+        return;
+    }
     for (size_t i = 0; i < uxr_ip_map.entities_len; i++)
     {
         if (uxr_ip_map.ip_matrix[datawriter_index][i].matched)
