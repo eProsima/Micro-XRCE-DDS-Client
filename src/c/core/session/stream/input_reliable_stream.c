@@ -213,7 +213,7 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
     // TODO(pablogs9): Investigate this situation when fragmentation and sequence number rolls 
     // https://github.com/eProsima/Micro-XRCE-DDS/issues/73#issuecomment-800815444
 
-    if (buffer_size == 0)
+    if (buffer_size < SUBHEADER_SIZE)
     {
         return true;
     }
