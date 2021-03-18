@@ -4,6 +4,7 @@
 #include "session_internal.h"
 #include "session_info_internal.h"
 #include "submessage_internal.h"
+#include "../../profile/multithread/multithread_internal.h"
 
 extern void read_submessage_format(
         uxrSession* session,
@@ -87,11 +88,16 @@ uint16_t uxr_buffer_request_data(
     payload_length += (control != NULL) ? 8 : 0; // delivery control
 
     ucdrBuffer ub;
+
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
     if (uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_READ_DATA, 0))
     {
         request_id = uxr_init_base_object_request(&session->info, datareader_id, &payload.base);
         (void) uxr_serialize_READ_DATA_Payload(&ub, &payload);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return request_id;
 }

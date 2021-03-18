@@ -8,6 +8,8 @@
 #include "./stream/common_reliable_stream_internal.h"
 #include "./stream/stream_storage_internal.h"
 #include "./stream/seq_num_internal.h"
+#include "../../profile/multithread/multithread_internal.h"
+#include "../../profile/multithread/interprocess_internal.h"
 
 #define WRITE_DATA_PAYLOAD_SIZE 4
 #define SAMPLE_IDENTITY_SIZE    24
@@ -26,8 +28,9 @@ uint16_t uxr_buffer_request(
     ucdrBuffer ub;
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + len;
 
-    ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA,
-                    FORMAT_DATA);
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
+    ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA, FORMAT_DATA);
     if (!ub.error)
     {
         WRITE_DATA_Payload_Data payload;
@@ -35,6 +38,8 @@ uint16_t uxr_buffer_request(
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return rv;
 }
@@ -51,8 +56,9 @@ uint16_t uxr_buffer_reply(
     ucdrBuffer ub;
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + SAMPLE_IDENTITY_SIZE + len;
 
-    ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA,
-                    FORMAT_DATA);
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
+    ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA, FORMAT_DATA);
     if (!ub.error)
     {
         WRITE_DATA_Payload_Data payload;
@@ -61,6 +67,8 @@ uint16_t uxr_buffer_reply(
         uxr_serialize_SampleIdentity(&ub, sample_id);
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return rv;
 }
@@ -76,8 +84,9 @@ uint16_t uxr_buffer_topic(
     ucdrBuffer ub;
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + len;
 
-    ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA,
-                    FORMAT_DATA);
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
+    ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA, FORMAT_DATA);
     if (!ub.error)
     {
         WRITE_DATA_Payload_Data payload;
@@ -85,6 +94,8 @@ uint16_t uxr_buffer_topic(
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return rv;
 }
@@ -97,6 +108,8 @@ uint16_t uxr_prepare_output_stream(
         uint32_t data_size)
 {
     uint16_t rv = UXR_INVALID_REQUEST_ID;
+
+    UXR_LOCK_STREAM_ID(session, stream_id);
 
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + data_size;
     ub->error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, ub, SUBMESSAGE_ID_WRITE_DATA,
@@ -173,6 +186,10 @@ uint16_t uxr_prepare_output_stream_fragmented(
         uxrOnBuffersFull flush_callback)
 {
     uint16_t rv = UXR_INVALID_REQUEST_ID;
+
+#ifdef UCLIENT_PROFILE_MULTITHREAD
+    return rv;
+#endif
 
     size_t user_required_space = data_size + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 

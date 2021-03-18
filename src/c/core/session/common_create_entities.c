@@ -4,6 +4,7 @@
 #include "session_internal.h"
 #include "session_info_internal.h"
 #include "submessage_internal.h"
+#include "../../profile/multithread/multithread_internal.h"
 
 //==================================================================
 //                              PUBLIC
@@ -22,11 +23,16 @@ uint16_t uxr_buffer_delete_entity(
     payload_length = (uint16_t)(payload_length + 4); // delete payload (request id + object_id), no padding.
 
     ucdrBuffer ub;
+
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
     if (uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_DELETE, 0))
     {
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload.base);
         (void) uxr_serialize_DELETE_Payload(&ub, &payload);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return request_id;
 }
@@ -55,11 +61,16 @@ uint16_t uxr_common_create_entity(
     payload_length = (uint16_t)(payload_length + 2); //object id ref
 
     ucdrBuffer ub;
+
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
     if (uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_CREATE, mode))
     {
         request_id = uxr_init_base_object_request(&session->info, object_id, &payload->base);
         (void) uxr_serialize_CREATE_Payload(&ub, payload);
     }
+    
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return request_id;
 }

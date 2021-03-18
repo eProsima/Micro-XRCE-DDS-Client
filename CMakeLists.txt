@@ -46,6 +46,7 @@ option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
 option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
 option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
 option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
+option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." ON)
 option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
 set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
 set(UCLIENT_MAX_OUTPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of output reliable streams for session.")
@@ -237,6 +238,7 @@ set(SRCS
     src/c/core/session/create_entities_xml.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
+    $<$<BOOL:${UCLIENT_PROFILE_MULTITHREAD}>:src/c/profile/multithread/multithread.c>
     $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
@@ -303,12 +305,17 @@ if((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (UCLIENT_TARGET_TYPE STREQUAL "SHA
         )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Threads REQUIRED)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         microcdr
         $<$<BOOL:$<PLATFORM_ID:Windows>>:ws2_32>
     PRIVATE
         $<$<BOOL:$<PLATFORM_ID:Linux>>:rt>
+        $<$<BOOL:$<PLATFORM_ID:Linux>>:${CMAKE_THREAD_LIBS_INIT}>
     )
 target_include_directories(${PROJECT_NAME}
     PUBLIC
@@ -360,6 +367,7 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/TimeSyncWithCb)
     add_subdirectory(examples/PingAgent)
     add_subdirectory(examples/ContinuousFragment)
+    add_subdirectory(examples/MultithreadHelloWorld)
     add_subdirectory(examples/PublishHelloWorldBestEffort)
     add_subdirectory(examples/SubscribeHelloWorldBestEffort)
     if(UCLIENT_PLATFORM_LINUX)
