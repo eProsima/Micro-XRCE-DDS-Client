@@ -210,9 +210,7 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
         uxr_set_reliable_buffer_size(&stream->base, history_position, 0);
     }
 
-    // TODO(pablogs9): Investigate this situation when fragmentation and sequence number rolls 
-    // https://github.com/eProsima/Micro-XRCE-DDS/issues/73#issuecomment-800815444
-
+    // IMPORTANT: This situation only happens when stream->base.history is not power of two.
     if (buffer_size < SUBHEADER_SIZE)
     {
         return true;
