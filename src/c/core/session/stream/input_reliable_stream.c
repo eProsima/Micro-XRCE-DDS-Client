@@ -210,6 +210,12 @@ bool on_full_input_buffer(ucdrBuffer* ub, void* args)
         uxr_set_reliable_buffer_size(&stream->base, history_position, 0);
     }
 
+    // IMPORTANT: This situation only happens when stream->base.history is not power of two.
+    if (buffer_size < SUBHEADER_SIZE)
+    {
+        return true;
+    }
+    
     ucdr_init_buffer_origin(
         ub,
         buffer + SUBHEADER_SIZE,
