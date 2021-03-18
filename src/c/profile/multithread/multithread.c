@@ -1,4 +1,6 @@
-#include "multithread_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
+
+#include <uxr/client/core/session/session.h>
 #include "../../core/session/stream/stream_storage_internal.h"
 
 //==================================================================
@@ -47,7 +49,7 @@ void uxr_unlock(uxrMutex* mutex)
 #endif    
 }
 
-uxrMutex * uxr_get_stream_mutex_from_id(uxrSession* session, uxrStreamId stream_id)
+uxrMutex * uxr_get_stream_mutex_from_id(struct uxrSession* session, uxrStreamId stream_id)
 {
     uxrMutex * mutex = NULL;
 

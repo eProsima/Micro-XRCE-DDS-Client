@@ -2,7 +2,7 @@
 
 #include "../submessage_internal.h"
 #include "seq_num_internal.h"
-#include "../../../profile/multithread/multithread_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
 
 #include <ucdr/microcdr.h>
 

@@ -4,7 +4,7 @@
 #include "./input_reliable_stream_internal.h"
 #include "./common_reliable_stream_internal.h"
 #include "../submessage_internal.h"
-#include "../../../profile/multithread/multithread_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
 
 #include <string.h>
 

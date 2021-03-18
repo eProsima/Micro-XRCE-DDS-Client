@@ -3,7 +3,7 @@
 #include "input_reliable_stream_internal.h"
 #include "output_best_effort_stream_internal.h"
 #include "output_reliable_stream_internal.h"
-#include "../../../profile/multithread/multithread_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
 
 //==================================================================
 //                             PUBLIC

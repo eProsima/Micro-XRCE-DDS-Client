@@ -16,7 +16,7 @@
 #include "stream/seq_num_internal.h"
 #include "../log/log_internal.h"
 #include "../../util/time_internal.h"
-#include "../../profile/multithread/multithread_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
 #include "../../profile/multithread/interprocess_internal.h"
 
 #ifdef UCLIENT_PROFILE_INTERPROCESS

@@ -8,7 +8,7 @@
 #include "./output_reliable_stream_internal.h"
 #include "./common_reliable_stream_internal.h"
 #include "../submessage_internal.h"
-#include "../../../profile/multithread/multithread_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
 #define MAX_HEARTBEAT_TRIES         (sizeof(int64_t) * 8 - 1)
