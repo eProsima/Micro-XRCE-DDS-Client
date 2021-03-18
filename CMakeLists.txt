@@ -46,10 +46,6 @@ option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
 option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
 option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
 option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
-option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." ON)
-option(UCLIENT_PROFILE_INTERPROCESS "Enable interprocess support." ON)
-set(UCLIENT_INTERPROCESS_MAX_ENTITIES 4 CACHE STRING "Max number of entities involved in interprocess.")
-option(UCLIENT_PROFILE_MATCHING "Enable QoS matching support." ON)
 option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
 set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
 set(UCLIENT_MAX_OUTPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of output reliable streams for session.")
@@ -64,6 +60,12 @@ set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.
 
 option(UCLIENT_PROFILE_CUSTOM_TRANSPORT "Enable Custom transport." ON)
 set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.")
+
+option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." ON)
+option(UCLIENT_PROFILE_INTERPROCESS "Enable interprocess support." ON)
+option(UCLIENT_PROFILE_MATCHING "Enable QoS matching support." ON)
+set(UCLIENT_INTERPROCESS_MAX_ENTITIES 4 CACHE STRING "Max number of entities involved in interprocess.")
+set(UCLIENT_INTERPROCESS_STATIC_MEM_SIZE 10 CACHE STRING "Max number data buffers stored in interprocess")
 
 ###############################################################################
 # Dependencies
