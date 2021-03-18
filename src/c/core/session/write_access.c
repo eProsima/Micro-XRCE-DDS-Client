@@ -124,6 +124,8 @@ uint16_t uxr_prepare_output_stream(
         void* args = ub->args;
         ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
         ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
+
+        UXR_PREPARE_INTERPROCESS(session, entity_id, ub, (uint16_t) data_size);
     }
 
     return rv;

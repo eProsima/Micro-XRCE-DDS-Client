@@ -47,6 +47,8 @@ option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
 option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
 option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
 option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." ON)
+option(UCLIENT_PROFILE_INTERPROCESS "Enable interprocess support." ON)
+set(UCLIENT_INTERPROCESS_MAX_ENTITIES 4 CACHE STRING "Max number of entities involved in interprocess.")
 option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
 set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
 set(UCLIENT_MAX_OUTPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of output reliable streams for session.")
@@ -213,6 +215,10 @@ endif()
 
 if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
     list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
+endif()
+
+if(UCLIENT_PROFILE_MULTITHREAD)
+    set(UCLIENT_PROFILE_INTERPROCESS ON)
 endif()
 
 # Other sources

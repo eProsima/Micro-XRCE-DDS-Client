@@ -16,8 +16,16 @@
 #include "stream/seq_num_internal.h"
 #include "../log/log_internal.h"
 #include "../../util/time_internal.h"
+#include "../../profile/multithread/multithread_internal.h"
+#include "../../profile/multithread/interprocess_internal.h"
 
+#ifdef UCLIENT_PROFILE_INTERPROCESS
+#define CREATE_SESSION_PROPERTIES_MAX_SIZE 21
+#define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE + CREATE_SESSION_PROPERTIES_MAX_SIZE)
+#else
 #define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE)
+#endif 
+
 #define DELETE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE)
 #define HEARTBEAT_MAX_MSG_SIZE      (MAX_HEADER_SIZE + SUBHEADER_SIZE + HEARTBEAT_PAYLOAD_SIZE)
 #define ACKNACK_MAX_MSG_SIZE        (MAX_HEADER_SIZE + SUBHEADER_SIZE + ACKNACK_PAYLOAD_SIZE)
@@ -124,6 +132,8 @@ void uxr_init_session(
         uxrCommunication* comm,
         uint32_t key)
 {
+    UXR_INIT_LOCK(&session->mutex);
+
     session->comm = comm;
 
     session->request_list = NULL;
@@ -349,6 +359,8 @@ bool uxr_run_session_until_confirm_delivery(
         uxrSession* session,
         int timeout_ms)
 {
+    UXR_LOCK_SESSION(session);
+
     uxr_flash_output_streams(session);
 
     bool timeout = false;
@@ -357,7 +369,10 @@ bool uxr_run_session_until_confirm_delivery(
         timeout = !listen_message_reliably(session, timeout_ms);
     }
 
-    return uxr_output_streams_confirmed(&session->streams);
+    bool ret = uxr_output_streams_confirmed(&session->streams);
+
+    UXR_UNLOCK_SESSION(session);
+    return ret;
 }
 
 bool uxr_run_session_until_all_status(
@@ -367,12 +382,15 @@ bool uxr_run_session_until_all_status(
         uint8_t* status_list,
         size_t list_size)
 {
+    UXR_LOCK_SESSION(session);
+
     uxr_flash_output_streams(session);
 
     for (unsigned i = 0; i < list_size; ++i)
     {
         status_list[i] = UXR_STATUS_NONE;
     }
+
 
     session->request_list = request_list;
     session->status_list = status_list;
@@ -399,6 +417,8 @@ bool uxr_run_session_until_all_status(
         status_ok = status_list[i] == UXR_STATUS_OK || status_list[i] == UXR_STATUS_OK_MATCHED;
     }
 
+    UXR_UNLOCK_SESSION(session);
+    
     return status_ok;
 }
 
@@ -505,17 +525,24 @@ bool uxr_buffer_performance(
 void uxr_flash_output_streams(
         uxrSession* session)
 {
-    for (uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
+    UXR_HANDLE_INTERPROCESS();
+    
+    for(uint8_t i = 0; i < session->streams.output_best_effort_size; ++i)
     {
         uxrOutputBestEffortStream* stream = &session->streams.output_best_effort[i];
         uxrStreamId id = uxr_stream_id(i, UXR_BEST_EFFORT_STREAM, UXR_OUTPUT_STREAM);
 
         uint8_t* buffer; size_t length; uxrSeqNum seq_num;
-        if (uxr_prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
+        
+        UXR_LOCK_STREAM_ID(session, id);
+        
+        if(uxr_prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
             uxr_stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
         }
+
+        UXR_UNLOCK_STREAM_ID(session, id);
     }
 
     for (uint8_t i = 0; i < session->streams.output_reliable_size; ++i)
@@ -524,11 +551,16 @@ void uxr_flash_output_streams(
         uxrStreamId id = uxr_stream_id(i, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
         uint8_t* buffer; size_t length; uxrSeqNum seq_num;
-        while (uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
+        
+        UXR_LOCK_STREAM_ID(session, id);
+        
+        while(uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
             uxr_stamp_session_header(&session->info, id.raw, seq_num, buffer);
             send_message(session, buffer, length);
         }
+
+        UXR_UNLOCK_STREAM_ID(session, id);
     }
 }
 
@@ -540,6 +572,8 @@ bool listen_message(
         int poll_ms)
 {
     uint8_t* data; size_t length;
+
+    UXR_LOCK_ALL_INPUT_STREAMS(session);
     bool must_be_read = recv_message(session, &data, &length, poll_ms);
     if (must_be_read)
     {
@@ -547,7 +581,8 @@ bool listen_message(
         ucdr_init_buffer(&ub, data, (uint32_t)length);
         read_message(session, &ub);
     }
-
+    UXR_UNLOCK_ALL_INPUT_STREAMS(session);
+    
     return must_be_read;
 }
 
@@ -566,7 +601,8 @@ bool listen_message_reliably(
             uxrOutputReliableStream* stream = &session->streams.output_reliable[i];
             uxrStreamId id = uxr_stream_id(i, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
-            if (uxr_update_output_stream_heartbeat_timestamp(stream, timestamp))
+            UXR_LOCK_STREAM_ID(session, id);
+            if(uxr_update_output_stream_heartbeat_timestamp(stream, timestamp))
             {
                 write_submessage_heartbeat(session, id);
             }
@@ -575,6 +611,7 @@ bool listen_message_reliably(
             {
                 next_heartbeat_timestamp = stream->next_heartbeat_timestamp;
             }
+            UXR_UNLOCK_STREAM_ID(session, id);
         }
 
         int32_t poll_to_next_heartbeat =
@@ -888,6 +925,8 @@ void read_submessage_acknack(
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, id.index);
     if (stream)
     {
+        UXR_LOCK_STREAM_ID(session, id);
+
         uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) + acknack.nack_bitmap[1]);
         uxr_process_acknack(stream, nack_bitmap, acknack.first_unacked_seq_num);
 
@@ -897,6 +936,8 @@ void read_submessage_acknack(
         {
             send_message(session, buffer, length);
         }
+
+        UXR_UNLOCK_STREAM_ID(session, id);
     }
 }
 

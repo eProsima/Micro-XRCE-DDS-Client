@@ -2,6 +2,7 @@
 #include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
+#include "../../profile/multithread/interprocess_internal.h"
 
 #include <string.h>
 
@@ -94,6 +95,8 @@ uint16_t uxr_buffer_create_datawriter_xml(
 {
     //assert with the object_id type
 
+     UXR_ADD_INTERPROCESS_ENTITY_XML(session, object_id, xml);
+
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
     uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
@@ -110,6 +113,8 @@ uint16_t uxr_buffer_create_datareader_xml(
         uint8_t mode)
 {
     //assert with the object_id type
+
+    UXR_ADD_INTERPROCESS_ENTITY_XML(session, object_id, xml);
 
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAREADER;
