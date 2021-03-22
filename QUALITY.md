@@ -1,8 +1,8 @@
-This document is a declaration of software quality for **eProsima Micro XRCE-DDS Client** based on the guidelines provided in the [ROS 2 REP-2004 document](https://www.ros.org/reps/rep-2004.html).
+This document is a declaration of software quality for the **eProsima Micro XRCE-DDS Client** based on the guidelines provided in the [ROS 2 REP-2004 document](https://www.ros.org/reps/rep-2004.html).
 
 # Quality Declaration
 
-**eProsima Micro XRCE-DDS Client** is a C99 library that provides a DDS-XRCE implementation for using DDS in eXtreme Resources Constrained Devices. It follows [standard DDS-XRCE](https://www.omg.org/spec/DDS-XRCE/About-DDS-XRCE/).
+**eProsima Micro XRCE-DDS Client** is a C99 library that provides a DDS-XRCE implementation for using DDS in eXtreme Resources Constrained Devices. It follows the [DDS-XRCE standard](https://www.omg.org/spec/DDS-XRCE/About-DDS-XRCE/).
 
 **eProsima Micro XRCE-DDS Client** claims to be in the **Quality Level 1** category.
 
@@ -29,7 +29,7 @@ The public API is documented [in oficial documentation Read the Docs](https://mi
 
 ### ABI Stability Policy [1.v]
 
-Any ABI break in **eProsima Micro XRCE-DDS Client** will be done between minor versions and it should be clearly stated on the release notes.
+Any ABI break in **eProsima Micro XRCE-DDS Client** will be done between minor versions and it should be clearly stated in the release notes.
 
 ## Change Control Process [2]
 
@@ -38,7 +38,7 @@ The change control process can be found in [CONTRIBUTING](CONTRIBUTING.md)
 
 All changes to **eProsima Micro XRCE-DDS Client** occur through pull requests that are required to pass all CI tests.
 In case of failure, only maintainers can merge the pull request, and only when there is enough evidence that the failure is unrelated to the change.
-Additionally, all pull requests must have a positive review from one other contributor that did not author the pull request.
+Additionally, all pull requests must have at least one positive review from another contributor that did not author the pull request.
 
 ### Change Requests [2.i]
 
@@ -57,7 +57,7 @@ All pull requests will be peer-reviewed by at least one other contributor who di
 
 All pull requests must pass CI to be considered for merging, unless maintainers consider that there is enough evidence that the failure is unrelated to the changes.
 CI testing is automatically triggered by incoming pull requests.
-Current nightly results can be seen here for all supported platforms:
+Current nightly results for all supported platforms can be checked at the links:
 
 * Linux [![Linux ci](http://jenkins.eprosima.com:8080/view/Nightly/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/badge/icon?subject=%20%20%20Linux%20CI%20)](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/)
 * Windows [![Windows ci](http://jenkins.eprosima.com:8080/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Windows/badge/icon?subject=%20%20%20%20Windows%20CI%20)](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Windows/)
@@ -70,7 +70,7 @@ All pull requests must resolve related documentation changes before merging as s
 
 ### Feature Documentation [3.i]
 
-**eProsima Micro XRCE-DDS Client** has a documented feature list hosted in [Read the Docs](https://micro-xrce-dds.docs.eprosima.com/en/latest/client.html).
+**eProsima Micro XRCE-DDS Client** has a documented features list hosted by [Read the Docs](https://micro-xrce-dds.docs.eprosima.com/en/latest/client.html).
 
 ### Public API Documentation [3.ii]
 
@@ -83,7 +83,7 @@ A full copy of the license can be found [here](LICENSE).
 
 ### Copyright Statements [3.iv]
 
-**eProsima Micro XRCE-DDS Client** copyright holder provide a statement of copyright in each source file.
+The **eProsima Micro XRCE-DDS Client** copyright holder provides a statement of copyright in each source file.
 
 ## Testing [4]
 
@@ -106,28 +106,28 @@ The tests aim to cover typical usage and corner cases.
 
 *eProsima Micro XRCE-DDS Client* aims to provide a line coverage **above 90%**.
 *Micro XRCE-DDS Client* code coverage policy comprises:
-1. All contributions to *Micro XRCE-DDS Client* must increase (or at least keep) current line coverage.
+1. All contributions to *Micro XRCE-DDS Client* must increase (or at least keep) the current line coverage.
    This is done to ensure that the **90%** line coverage goal is eventually met.
 2. Line coverage regressions are only permitted if properly justified and accepted by maintainers.
-3. If the CI system reports a coverage regression after a pull request has been merged, the maintainers must study the case and decide how to proceed, mostly reverting the changes and asking for a more thorough testing of the committed changes.
+3. If the CI system reports a coverage regression after a pull request has been merged, the maintainers must study the case and decide how to proceed, most often reverting the changes and asking for a more thorough testing of the committed changes.
 4. This policy is enforced through the [nightly Micro XRCE-DDS Client CI job](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/).
 
-As stated in [CONTRIBUTING.md](CONTRIBUTING.md), developers and contributors are asked to run a line coverage assessment locally before submitting a PR.
+As stated in [CONTRIBUTING.md](CONTRIBUTING.md), developers and contributors are required to run a line coverage assessment locally before submitting a PR.
 
 ### Performance [4.iv]
 
-**eProsima Micro XRCE-DDS Client** does not provide performance test regarding memory consumption due to the nature of the library.
+**eProsima Micro XRCE-DDS Client** does provide performance tests regarding memory consumption due to the nature of the library.
 These memory consuption tests are under `test/memory` and evaluates the static size (`text`, `bss` and `data` sections) of the library built with different configuration profiles.
-Also, an `stack` consumption analysis is provided by using [Valgrind Massif tool](https://valgrind.org/docs/manual/ms-manual.html).
+Also, a `stack` consumption analysis is provided by using [Valgrind Massif tool](https://valgrind.org/docs/manual/ms-manual.html).
 
 All these results are available in [Micro-XRCE-DDS-Client Nightly Master Performance job](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Performance/plot/)
 
-Any performance regression detected in *eprosima Micro XRCE-DDS Client* would be analyzed and, in case that it is related to **eProsima Micro XRCE-DDS Client** or could be solved modifying this library, changes could be made to the library in order to revert the performance regression.
+Any performance regression detected in *eProsima Micro XRCE-DDS Client* would be analysed and, in case it is related to **eProsima Micro XRCE-DDS Client** or could be solved by modifying this library, changes can be made to the library in order to revert the performance regression.
 
 ### Linters and Static Analysis [4.v]
 
 **eProsima Micro XRCE-DDS Client** [code style](https://github.com/eProsima/cpp-style) is enforced using [*uncrustify*](https://github.com/uncrustify/uncrustify).
-Among the CI tests there are tests that ensures that every pull request is compliant with the code style.
+Among the CI tests, there are tests that ensure that every pull request is compliant with the code style.
 The latest pull request results can be seen [here](http://jenkins.eprosima.com:8080/job/Micro-XRCE-DDS-Client%20Manual%20Linux/lastBuild/).
 
 **eProsima Micro XRCE-DDS Client** uses [Synopsis Coverity static code analysis](https://scan.coverity.com/projects/eprosima-micro-xrce-dds-client).

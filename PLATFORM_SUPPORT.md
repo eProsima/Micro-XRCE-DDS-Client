@@ -14,7 +14,7 @@ priority errors in Tier 1 platforms prior to new version releases.
 ## Tier 2
 
 Tier 2 platforms are subject to periodic CI testing which runs both builds and tests with publicly accessible results.
-The CI is expected to be run at least within a week of relevant changes for the current release of **Micro XRCE-DDS Client**.
+The CI is expected to be run at least within a week from the last relevant changes for the current release of the **Micro XRCE-DDS Client**.
 Installation instructions should be available and up-to-date in order for a platform to be listed in this category.
 Package-level binary packages may not be provided but providing a downloadable archive of the built workspace is
 encouraged.
@@ -26,7 +26,7 @@ One or more entities should be committed to continuing support of the platform.
 ## Tier 3
 
 Tier 3 platforms are those for which community reports indicate that the release is functional.
-The development team does not run the unit test suite or perform any other tests on platforms in Tier 3.
+The development team does not run the unit test suite nor perform any other tests on platforms in Tier 3.
 Community members may provide assistance with these platforms.
 
 ## Platforms
@@ -44,4 +44,4 @@ Other Tier 3 OS:
 
 * FreeRTOS
 * Zephyr RTOS
-* Nuttx
+* NuttX

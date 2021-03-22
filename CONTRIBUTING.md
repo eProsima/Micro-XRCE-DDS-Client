@@ -1,6 +1,7 @@
 # Contribution Guidelines
 
-The following documents constitutes a set of guidelines to which contributors must adhere.
+The present document provides a set of guidelines to which contributors must adhere.
+
 
 - [Contribution Guidelines](#contribution-guidelines)
   - [Contributions Licensing](#contributions-licensing)
@@ -33,4 +34,4 @@ Because of this, contributors are asked to locally run a coverage assessment tha
 
 ## General considerations
 
-Any other contributing policie can be found in [eProsima general guidelines](https://github.com/eProsima/policies/blob/main/CONTRIBUTING.md).
+Any other contributing policy can be found in [eProsima general guidelines](https://github.com/eProsima/policies/blob/main/CONTRIBUTING.md).
