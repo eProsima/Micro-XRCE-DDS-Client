@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/profile/transport/ip/udp/udp_transport.h>
 
@@ -46,6 +46,6 @@ size_t uxr_read_udp_data_platform(
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // SRC_C_PROFILE_TRANSPORT_UDP_UDP_TRANSPORT_INTERNAL_H_

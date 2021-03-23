@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/visibility.h>
 #include <uxr/client/config.h>
@@ -39,7 +39,7 @@ extern "C"
 #include "list.h"
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
-#endif
+#endif // if defined(UCLIENT_PLATFORM_POSIX)
 
 
 // TODO (julibert): move this to CMake flag.
@@ -57,7 +57,7 @@ typedef struct uxrUDPTransportDatagram
 #elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
     SocketSet_t poll_fd;
     Socket_t fd;
-#endif
+#endif // if defined(UCLIENT_PLATFORM_POSIX)
 
 } uxrUDPTransportDatagram;
 
@@ -85,6 +85,6 @@ void uxr_bytes_to_ip(
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // SRC_C_CLIENT_UDP_TRANSPORT_DATAGRAM_INTERNAL_H_

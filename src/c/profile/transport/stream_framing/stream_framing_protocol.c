@@ -3,8 +3,8 @@
 #include <string.h>
 
 /*******************************************************************************
- * Static members.
- *******************************************************************************/
+* Static members.
+*******************************************************************************/
 // CRC-16 table for POLY 0x8005 (x^16 + x^15 + x^2 + 1).
 static const uint16_t crc16_table[256] = {
     0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -42,14 +42,18 @@ static const uint16_t crc16_table[256] = {
 };
 
 /*******************************************************************************
- * Public function definitions.
- *******************************************************************************/
-void uxr_update_crc(uint16_t* crc, const uint8_t data)
+* Public function definitions.
+*******************************************************************************/
+void uxr_update_crc(
+        uint16_t* crc,
+        const uint8_t data)
 {
     *crc = (*crc >> 8) ^ crc16_table[(*crc ^ data) & 0xFF];
 }
 
-bool uxr_get_next_octet(uxrFramingIO* framing_io, uint8_t* octet)
+bool uxr_get_next_octet(
+        uxrFramingIO* framing_io,
+        uint8_t* octet)
 {
     bool rv = false;
     *octet = 0;
@@ -79,7 +83,9 @@ bool uxr_get_next_octet(uxrFramingIO* framing_io, uint8_t* octet)
     return rv;
 }
 
-bool uxr_add_next_octet(uxrFramingIO* framing_io, uint8_t octet)
+bool uxr_add_next_octet(
+        uxrFramingIO* framing_io,
+        uint8_t octet)
 {
     bool rv = false;
 
@@ -106,7 +112,9 @@ bool uxr_add_next_octet(uxrFramingIO* framing_io, uint8_t octet)
     return rv;
 }
 
-void uxr_init_framing_io(uxrFramingIO* framing_io, uint8_t local_addr)
+void uxr_init_framing_io(
+        uxrFramingIO* framing_io,
+        uint8_t local_addr)
 {
     framing_io->local_addr = local_addr;
     framing_io->state = UXR_FRAMING_UNINITIALIZED;
@@ -114,10 +122,11 @@ void uxr_init_framing_io(uxrFramingIO* framing_io, uint8_t local_addr)
     framing_io->rb_tail = 0;
 }
 
-bool uxr_framing_write_transport(uxrFramingIO* framing_io,
-                                uxr_write_cb write_cb,
-                                void* cb_arg,
-                                uint8_t* errcode)
+bool uxr_framing_write_transport(
+        uxrFramingIO* framing_io,
+        uxr_write_cb write_cb,
+        void* cb_arg,
+        uint8_t* errcode)
 {
     size_t bytes_written = 0;
     size_t last_written = 0;
@@ -136,13 +145,14 @@ bool uxr_framing_write_transport(uxrFramingIO* framing_io,
     return false;
 }
 
-size_t uxr_write_framed_msg(uxrFramingIO* framing_io,
-                            uxr_write_cb write_cb,
-                            void* cb_arg,
-                            const uint8_t* buf,
-                            size_t len,
-                            uint8_t remote_addr,
-                            uint8_t* errcode)
+size_t uxr_write_framed_msg(
+        uxrFramingIO* framing_io,
+        uxr_write_cb write_cb,
+        void* cb_arg,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t remote_addr,
+        uint8_t* errcode)
 {
     /* Buffer being flag. */
     framing_io->wb[0] = UXR_FRAMING_BEGIN_FLAG;
@@ -201,16 +211,19 @@ size_t uxr_write_framed_msg(uxrFramingIO* framing_io,
     return cond ? (uint16_t)(len) : 0;
 }
 
-size_t uxr_framing_read_transport(uxrFramingIO* framing_io,
-                                uxr_read_cb read_cb,
-                                void* cb_arg,
-                                int * timeout,
-                                uint8_t* errcode)
+size_t uxr_framing_read_transport(
+        uxrFramingIO* framing_io,
+        uxr_read_cb read_cb,
+        void* cb_arg,
+        int* timeout,
+        uint8_t* errcode)
 {
     int64_t time_init = uxr_millis();
 
     /* Compute read-buffer available size. */
-    uint8_t av_len[2] = {0, 0};
+    uint8_t av_len[2] = {
+        0, 0
+    };
     if (framing_io->rb_head == framing_io->rb_tail)
     {
         framing_io->rb_head = 0;
@@ -235,7 +248,9 @@ size_t uxr_framing_read_transport(uxrFramingIO* framing_io,
     }
 
     /* Read */
-    size_t bytes_read[2] = {0};
+    size_t bytes_read[2] = {
+        0
+    };
     if (0 < av_len[0])
     {
         bytes_read[0] = read_cb(cb_arg, &framing_io->rb[framing_io->rb_head], av_len[0], *timeout, errcode);
@@ -255,14 +270,15 @@ size_t uxr_framing_read_transport(uxrFramingIO* framing_io,
     return bytes_read[0] + bytes_read[1];
 }
 
-size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
-                           uxr_read_cb read_cb,
-                           void* cb_arg,
-                           uint8_t* buf,
-                           size_t len,
-                           uint8_t* remote_addr,
-                           int timeout,
-                           uint8_t* errcode)
+size_t uxr_read_framed_msg(
+        uxrFramingIO* framing_io,
+        uxr_read_cb read_cb,
+        void* cb_arg,
+        uint8_t* buf,
+        size_t len,
+        uint8_t* remote_addr,
+        int timeout,
+        uint8_t* errcode)
 {
     size_t rv = 0;
 
@@ -316,7 +332,7 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                     if (uxr_get_next_octet(framing_io, &octet))
                     {
                         framing_io->state = (octet == framing_io->local_addr) ? UXR_FRAMING_READING_LEN_LSB :
-                                                                              UXR_FRAMING_UNINITIALIZED;
+                                UXR_FRAMING_UNINITIALIZED;
                     }
                     else
                     {
@@ -400,7 +416,8 @@ size_t uxr_read_framed_msg(uxrFramingIO* framing_io,
                         {
                             framing_io->state = UXR_FRAMING_READING_SRC_ADDR;
                         }
-                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode)){
+                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode))
+                        {
 
                         }
                         else

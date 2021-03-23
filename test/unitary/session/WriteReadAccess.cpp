@@ -28,11 +28,13 @@ extern "C"
 #define HISTORY 4
 #define TOPIC_FITTED_SIZE   (MTU - (MIN_HEADER_SIZE + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE))
 #define REQUEST_FITTED_SIZE TOPIC_FITTED_SIZE
-#define REPLY_FITTED_SIZE   (MTU - (MIN_HEADER_SIZE + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE) - sizeof(SampleIdentity))
+#define REPLY_FITTED_SIZE   (MTU - (MIN_HEADER_SIZE + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE) - \
+    sizeof(SampleIdentity))
 
 class WriteReadAccessTest : public testing::Test
 {
 public:
+
     WriteReadAccessTest()
         : session_{}
         , data_writer_id_{uxr_object_id(0, UXR_DATAWRITER_ID)}
@@ -51,8 +53,14 @@ public:
         uxr_set_request_callback(&session_, on_request_func, &request_);
     }
 
-    static void on_topic_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uxrStreamId stream_id, struct ucdrBuffer* ub, uint16_t length, void* args)
+    static void on_topic_func (
+            struct uxrSession* session,
+            uxrObjectId object_id,
+            uint16_t request_id,
+            uxrStreamId stream_id,
+            struct ucdrBuffer* ub,
+            uint16_t length,
+            void* args)
     {
         (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length; (void) args;
         uint64_t topic_sent = *reinterpret_cast<uint64_t*>(args);
@@ -61,8 +69,14 @@ public:
         EXPECT_EQ(topic_sent, topic_received);
     }
 
-    static void on_reply_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             uint16_t reply_id, struct ucdrBuffer* ub, uint16_t length, void* args)
+    static void on_reply_func (
+            struct uxrSession* session,
+            uxrObjectId object_id,
+            uint16_t request_id,
+            uint16_t reply_id,
+            struct ucdrBuffer* ub,
+            uint16_t length,
+            void* args)
     {
         (void) session; (void) object_id; (void) request_id; (void) reply_id; (void) length; (void) args;
         uint64_t reply_sent = *reinterpret_cast<uint64_t*>(args);
@@ -71,8 +85,14 @@ public:
         EXPECT_EQ(reply_sent, reply_received);
     }
 
-    static void on_request_func (struct uxrSession* session, uxrObjectId object_id, uint16_t request_id,
-                             SampleIdentity* sample_id, struct ucdrBuffer* ub, uint16_t length, void* args)
+    static void on_request_func (
+            struct uxrSession* session,
+            uxrObjectId object_id,
+            uint16_t request_id,
+            SampleIdentity* sample_id,
+            struct ucdrBuffer* ub,
+            uint16_t length,
+            void* args)
     {
         (void) session; (void) object_id; (void) request_id; (void) sample_id; (void) length; (void) args;
         uint32_t* data_ptr = reinterpret_cast<uint32_t*>(args);
@@ -84,6 +104,7 @@ public:
     }
 
 protected:
+
     uxrSession session_;
     uxrObjectId data_writer_id_;
     uxrObjectId data_reader_id_;
@@ -94,6 +115,7 @@ protected:
     uint64_t reply_;
 
 private:
+
     uint8_t output_best_effort_buffer_[MTU];
 };
 

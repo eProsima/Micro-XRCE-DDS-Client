@@ -38,7 +38,7 @@ bool uxr_udp_send_datagram_to(
             remote_addr.sin_port = htons(locator->_.medium_locator.locator_port);
 
             ssize_t bytes_sent = sendto(transport->poll_fd.fd, (const void*)buf, len, 0,
-                                        (struct sockaddr*)&remote_addr, sizeof(remote_addr));
+                            (struct sockaddr*)&remote_addr, sizeof(remote_addr));
             if (0 > bytes_sent)
             {
                 rv = false;
@@ -88,4 +88,3 @@ void uxr_bytes_to_ip(
     char* internal_ip = inet_ntoa(addr);
     strcpy(ip, internal_ip);
 }
-

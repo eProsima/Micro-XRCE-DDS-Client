@@ -18,9 +18,20 @@
 
 #include <uxr/client/profile/transport/custom/custom_transport.h>
 
-bool my_custom_transport_open(uxrCustomTransport* transport);
-bool my_custom_transport_close(uxrCustomTransport* transport);
-size_t my_custom_transport_write( uxrCustomTransport* transport, const uint8_t* buf, size_t len, uint8_t* errcode);
-size_t my_custom_transport_read( uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* errcode);
+bool my_custom_transport_open(
+        uxrCustomTransport* transport);
+bool my_custom_transport_close(
+        uxrCustomTransport* transport);
+size_t my_custom_transport_write(
+        uxrCustomTransport* transport,
+        const uint8_t* buf,
+        size_t len,
+        uint8_t* errcode);
+size_t my_custom_transport_read(
+        uxrCustomTransport* transport,
+        uint8_t* buf,
+        size_t len,
+        int timeout,
+        uint8_t* errcode);
 
-#endif
+#endif // ifndef _my_custom_transport_H_

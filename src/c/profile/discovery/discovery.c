@@ -25,10 +25,17 @@ typedef struct CallbackData
 
 } CallbackData;
 
-static void write_get_info_message(ucdrBuffer* ub);
-static bool listen_info_message(uxrUDPTransportDatagram* transport, int period, CallbackData* callback);
-static bool read_info_headers(ucdrBuffer* ub);
-static bool read_info_message(ucdrBuffer* ub, CallbackData* callback);
+static void write_get_info_message(
+        ucdrBuffer* ub);
+static bool listen_info_message(
+        uxrUDPTransportDatagram* transport,
+        int period,
+        CallbackData* callback);
+static bool read_info_headers(
+        ucdrBuffer* ub);
+static bool read_info_message(
+        ucdrBuffer* ub,
+        CallbackData* callback);
 
 //==================================================================
 //                             PUBLIC
@@ -64,12 +71,12 @@ void uxr_discovery_agents(
     size_t message_length = ucdr_buffer_length(&ub);
 
     uxrUDPTransportDatagram transport;
-    if(uxr_init_udp_transport_datagram(&transport))
+    if (uxr_init_udp_transport_datagram(&transport))
     {
         bool is_agent_found = false;
-        for(uint32_t a = 0; a < attempts && !is_agent_found; ++a)
+        for (uint32_t a = 0; a < attempts && !is_agent_found; ++a)
         {
-            for(size_t i = 0; i < agent_list_size; ++i)
+            for (size_t i = 0; i < agent_list_size; ++i)
             {
                 (void) uxr_udp_send_datagram_to(&transport, output_buffer, message_length, &agent_list[i]);
                 UXR_DEBUG_PRINT_MESSAGE(UXR_SEND, output_buffer, message_length, 0);
@@ -77,7 +84,7 @@ void uxr_discovery_agents(
 
             int64_t timestamp = uxr_millis();
             int poll = period;
-            while(0 < poll && !is_agent_found)
+            while (0 < poll && !is_agent_found)
             {
                 is_agent_found = listen_info_message(&transport, poll, &callback);
                 poll -= (int)(uxr_millis() - timestamp);
@@ -91,10 +98,14 @@ void uxr_discovery_agents(
 //                             INTERNAL
 //==================================================================
 
-void write_get_info_message(ucdrBuffer* ub)
+void write_get_info_message(
+        ucdrBuffer* ub)
 {
     GET_INFO_Payload payload;
-    payload.base.request_id = (RequestId){{0x00, GET_INFO_REQUEST_ID}};
+    payload.base.request_id = (RequestId){{
+                                              0x00, GET_INFO_REQUEST_ID
+                                          }
+    };
     payload.base.object_id = DDS_XRCE_OBJECTID_AGENT;
     payload.info_mask = INFO_CONFIGURATION | INFO_ACTIVITY;
 
@@ -112,13 +123,13 @@ bool listen_info_message(
 
     bool is_succeed = false;
     bool received = uxr_udp_recv_datagram(transport, &input_buffer, &length, poll);
-    if(received)
+    if (received)
     {
         UXR_DEBUG_PRINT_MESSAGE(UXR_RECV, input_buffer, length, 0);
 
         ucdrBuffer ub;
         ucdr_init_buffer(&ub, input_buffer, (uint32_t)length);
-        if(read_info_headers(&ub))
+        if (read_info_headers(&ub))
         {
             is_succeed = read_info_message(&ub, callback);
         }
@@ -127,7 +138,8 @@ bool listen_info_message(
     return is_succeed;
 }
 
-bool read_info_headers(ucdrBuffer* ub)
+bool read_info_headers(
+        ucdrBuffer* ub)
 {
     uint8_t session_id; uint8_t stream_id_raw; uxrSeqNum seq_num; uint8_t key[CLIENT_KEY_SIZE];
     uxr_deserialize_message_header(ub, &session_id, &stream_id_raw, &seq_num, key);
@@ -136,18 +148,20 @@ bool read_info_headers(ucdrBuffer* ub)
     return uxr_read_submessage_header(ub, &id, &length, &flags);
 }
 
-bool uxr_deserialize_discovery_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* output)
+bool uxr_deserialize_discovery_INFO_Payload(
+        ucdrBuffer* buffer,
+        INFO_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectReply(buffer, &output->base);
     ret &= ucdr_deserialize_bool(buffer, &output->object_info.optional_config);
-    if(output->object_info.optional_config == true)
+    if (output->object_info.optional_config == true)
     {
         ret &= uxr_deserialize_ObjectVariant(buffer, &output->object_info.config);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->object_info.optional_activity);
-    if(output->object_info.optional_activity == true)
+    if (output->object_info.optional_activity == true)
     {
         ret &= ucdr_deserialize_uint8_t(buffer, &output->object_info.activity.kind);
         ret &= output->object_info.activity.kind == DDS_XRCE_OBJK_AGENT;
@@ -158,14 +172,15 @@ bool uxr_deserialize_discovery_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* ou
 
             // This function takes care of deserializing at least the possible address_seq items
             // if the sent sequence is too long for the allocated UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX
-            output->object_info.activity._.agent.address_seq.size = 
-                (output->object_info.activity._.agent.address_seq.size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)   ?
+            output->object_info.activity._.agent.address_seq.size =
+                    (output->object_info.activity._.agent.address_seq.size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)   ?
                     UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX                                                         :
                     output->object_info.activity._.agent.address_seq.size;
 
-            for(uint32_t i = 0; i < output->object_info.activity._.agent.address_seq.size && ret; i++)
+            for (uint32_t i = 0; i < output->object_info.activity._.agent.address_seq.size && ret; i++)
             {
-                ret &= uxr_deserialize_TransportLocator(buffer, &output->object_info.activity._.agent.address_seq.data[i]);
+                ret &= uxr_deserialize_TransportLocator(buffer,
+                                &output->object_info.activity._.agent.address_seq.data[i]);
             }
         }
     }
@@ -179,14 +194,14 @@ bool read_info_message(
     bool is_succeed = false;
     INFO_Payload payload;
 
-    if(uxr_deserialize_discovery_INFO_Payload(ub, &payload))
+    if (uxr_deserialize_discovery_INFO_Payload(ub, &payload))
     {
         XrceVersion* version = &payload.object_info.config._.agent.xrce_version;
-        TransportLocatorSeq * locators = &payload.object_info.activity._.agent.address_seq;
+        TransportLocatorSeq* locators = &payload.object_info.activity._.agent.address_seq;
         for (size_t i = 0; i < (size_t)locators->size; ++i)
         {
             TransportLocator* transport = &locators->data[i];
-            if(0 == memcmp(version->data, DDS_XRCE_XRCE_VERSION.data, sizeof(DDS_XRCE_XRCE_VERSION.data)))
+            if (0 == memcmp(version->data, DDS_XRCE_XRCE_VERSION.data, sizeof(DDS_XRCE_XRCE_VERSION.data)))
             {
                 is_succeed = callback->on_agent(transport, callback->args);
             }

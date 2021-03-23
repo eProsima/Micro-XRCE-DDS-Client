@@ -5,15 +5,24 @@
 
 #include <string.h>
 
-static uint16_t create_entity_ref(uxrSession* session, uxrStreamId stream_id,
-                                  uxrObjectId object_id, const char* ref, uint8_t mode,
-                                  CREATE_Payload* payload);
+static uint16_t create_entity_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        const char* ref,
+        uint8_t mode,
+        CREATE_Payload* payload);
 
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t uxr_buffer_create_participant_ref(uxrSession* session, uxrStreamId stream_id,
-                                         uxrObjectId object_id, int16_t domain_id, const char* ref, uint8_t mode)
+uint16_t uxr_buffer_create_participant_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        int16_t domain_id,
+        const char* ref,
+        uint8_t mode)
 {
     //assert with the object_id type
 
@@ -24,9 +33,13 @@ uint16_t uxr_buffer_create_participant_ref(uxrSession* session, uxrStreamId stre
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
-                                   uxrObjectId object_id, uxrObjectId participant_id,
-                                   const char* ref, uint8_t mode)
+uint16_t uxr_buffer_create_topic_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* ref,
+        uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_TOPIC;
@@ -35,9 +48,13 @@ uint16_t uxr_buffer_create_topic_ref(uxrSession* session, uxrStreamId stream_id,
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_datawriter_ref(uxrSession* session, uxrStreamId stream_id,
-                                        uxrObjectId object_id, uxrObjectId publisher_id,
-                                        const char* ref, uint8_t mode)
+uint16_t uxr_buffer_create_datawriter_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId publisher_id,
+        const char* ref,
+        uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
@@ -46,9 +63,13 @@ uint16_t uxr_buffer_create_datawriter_ref(uxrSession* session, uxrStreamId strea
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_datareader_ref(uxrSession* session, uxrStreamId stream_id,
-                                        uxrObjectId object_id, uxrObjectId subscriber_id,
-                                        const char* ref, uint8_t mode)
+uint16_t uxr_buffer_create_datareader_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId subscriber_id,
+        const char* ref,
+        uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAREADER;
@@ -58,12 +79,12 @@ uint16_t uxr_buffer_create_datareader_ref(uxrSession* session, uxrStreamId strea
 }
 
 uint16_t uxr_buffer_create_requester_ref(
-    uxrSession* session,
-    uxrStreamId stream_id,
-    uxrObjectId object_id,
-    uxrObjectId participant_id,
-    const char* ref,
-    uint8_t mode)
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* ref,
+        uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REQUESTER;
@@ -73,12 +94,12 @@ uint16_t uxr_buffer_create_requester_ref(
 }
 
 uint16_t uxr_buffer_create_replier_ref(
-    uxrSession* session,
-    uxrStreamId stream_id,
-    uxrObjectId object_id,
-    uxrObjectId participant_id,
-    const char* ref,
-    uint8_t mode)
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* ref,
+        uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REPLIER;
@@ -91,9 +112,13 @@ uint16_t uxr_buffer_create_replier_ref(
 //                             PRIVATE
 //==================================================================
 
-inline uint16_t create_entity_ref(uxrSession* session, uxrStreamId stream_id,
-                                  uxrObjectId object_id, const char* ref, uint8_t mode,
-                                  CREATE_Payload* payload)
+inline uint16_t create_entity_ref(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        const char* ref,
+        uint8_t mode,
+        CREATE_Payload* payload)
 {
     // Use participant access to access to the ref base of any object variant. //Future elegant change?
     payload->object_representation._.participant.base.representation.format = DDS_XRCE_REPRESENTATION_BY_REFERENCE;

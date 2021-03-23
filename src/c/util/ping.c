@@ -72,7 +72,10 @@ bool serialize_get_info_message(
     bool res = true;
     GET_INFO_Payload gi_payload;
 
-    gi_payload.base.request_id = (RequestId){{0x00, GET_INFO_REQUEST_ID}};
+    gi_payload.base.request_id = (RequestId){{
+                                                 0x00, GET_INFO_REQUEST_ID
+                                             }
+    };
     gi_payload.base.object_id = DDS_XRCE_OBJECTID_AGENT;
     gi_payload.info_mask = INFO_ACTIVITY;
 
@@ -104,7 +107,7 @@ bool uxr_acknack_pong(
         if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
         {
             success &= ucdr_deserialize_int16_t(buffer,
-                &info_payload.object_info.activity._.agent.availability);
+                            &info_payload.object_info.activity._.agent.availability);
             success &= (bool)info_payload.object_info.activity._.agent.availability;
         }
     }
@@ -135,12 +138,12 @@ bool listen_info_message(
         ucdr_init_buffer(&ub, input_buffer, len);
 
         size_t advance_len = 1 /* uint8_t session_id */
-            + 1 /* uint8_t stream_id */
-            + 2 /* uint16_t sequence_number */
-            + CLIENT_KEY_SIZE
-            + 1 /* uint8_t submessage_header_id */
-            + 1 /* uint8_t submessage_flags */
-            + 2; /* uint16_t submessage_length */
+                + 1 /* uint8_t stream_id */
+                + 2 /* uint16_t sequence_number */
+                + CLIENT_KEY_SIZE
+                + 1 /* uint8_t submessage_header_id */
+                + 1 /* uint8_t submessage_flags */
+                + 2; /* uint16_t submessage_length */
         ucdr_advance_buffer(&ub, advance_len);
 
         return uxr_acknack_pong(&ub);

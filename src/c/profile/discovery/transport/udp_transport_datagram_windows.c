@@ -49,7 +49,7 @@ bool uxr_udp_send_datagram_to(
             remote_addr.sin_port = htons(locator->_.medium_locator.locator_port);
 
             int bytes_sent = sendto(transport->poll_fd.fd, (const char*)buf, (int)len, 0,
-                                        (struct sockaddr*)&remote_addr, sizeof(remote_addr));
+                            (struct sockaddr*)&remote_addr, sizeof(remote_addr));
             rv = (SOCKET_ERROR != bytes_sent);
             break;
         }
@@ -94,4 +94,3 @@ void uxr_bytes_to_ip(
     addr.s_addr = (unsigned long)(*bytes + (*(bytes + 1) << 8) + (*(bytes + 2) << 16) + (*(bytes + 3) << 24));
     inet_ntop(AF_INET, &(addr.s_addr), ip, INET_ADDRSTRLEN);
 }
-

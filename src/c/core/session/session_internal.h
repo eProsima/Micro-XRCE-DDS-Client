@@ -18,22 +18,23 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/core/session/session.h>
 
 struct ucdrBuffer;
 
-bool uxr_prepare_stream_to_write_submessage(uxrSession* session,
-                                            uxrStreamId stream_id,
-                                            size_t payload_size,
-                                            struct ucdrBuffer* ub,
-                                            uint8_t submessage_id,
-                                            uint8_t mode);
+bool uxr_prepare_stream_to_write_submessage(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        size_t payload_size,
+        struct ucdrBuffer* ub,
+        uint8_t submessage_id,
+        uint8_t mode);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SESSION_SESSION_INTERNAL_H_
 

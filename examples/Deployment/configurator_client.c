@@ -18,7 +18,7 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU* STREAM_HISTORY
 
 #define ACTION_CREATE 1
 #define ACTION_DELETE 2
@@ -26,16 +26,33 @@
 #define TARGET_PUBLISHER 1 << 8
 #define TARGET_SUBSCRIBER 2 << 8
 
-static void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status, void* args);
+static void on_status(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uint8_t status,
+        void* args);
 
-static void create_publisher(uxrSession* session, uint16_t ids);
-static void create_subscriber(uxrSession* session, uint16_t ids);
-static void delete_publisher(uxrSession* session, uint16_t ids);
-static void delete_subscriber(uxrSession* session, uint16_t ids);
+static void create_publisher(
+        uxrSession* session,
+        uint16_t ids);
+static void create_subscriber(
+        uxrSession* session,
+        uint16_t ids);
+static void delete_publisher(
+        uxrSession* session,
+        uint16_t ids);
+static void delete_subscriber(
+        uxrSession* session,
+        uint16_t ids);
 
-static void wait_status(uxrSession* session, uint16_t* requests);
+static void wait_status(
+        uxrSession* session,
+        uint16_t* requests);
 
-int main(int args, char** argv)
+int main(
+        int args,
+        char** argv)
 {
     // Check args
     uint32_t key;
@@ -43,33 +60,33 @@ int main(int args, char** argv)
     int pub_sub = 0;
     uint16_t ids = 0;
 
-    if(args == 7)
+    if (args == 7)
     {
         key = atoi(argv[2]);
-        if(0 == strcmp(argv[3], "create"))
+        if (0 == strcmp(argv[3], "create"))
         {
             create_delete = ACTION_CREATE;
         }
-        else if(0 == strcmp(argv[3], "delete"))
+        else if (0 == strcmp(argv[3], "delete"))
         {
             create_delete = ACTION_DELETE;
         }
 
-        if(0 == strcmp(argv[4], "pub"))
+        if (0 == strcmp(argv[4], "pub"))
         {
             pub_sub = TARGET_PUBLISHER;
         }
-        else if(0 == strcmp(argv[4], "sub"))
+        else if (0 == strcmp(argv[4], "sub"))
         {
             pub_sub = TARGET_SUBSCRIBER;
         }
         ids = atoi(argv[6]);
     }
 
-    if(args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
-                || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[5])
-                || 0 == atoi(argv[2]) || 0 == atoi(argv[6])
-                || !create_delete || !pub_sub)
+    if (args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
+            || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[5])
+            || 0 == atoi(argv[2]) || 0 == atoi(argv[6])
+            || !create_delete || !pub_sub)
     {
         printf("usage: program [-h | --help] | --key <number> <'create'/'delete'> <'pub'/'sub'> --id <id>]\n");
         return 0;
@@ -77,7 +94,7 @@ int main(int args, char** argv)
 
     // Transport
     uxrUDPTransport transport;
-    if(!uxr_init_udp_transport(&transport, UXR_IPv4, "127.0.0.1", "2018"))
+    if (!uxr_init_udp_transport(&transport, UXR_IPv4, "127.0.0.1", "2018"))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -87,7 +104,7 @@ int main(int args, char** argv)
     uxrSession session;
     uxr_init_session(&session, &transport.comm, key);
     uxr_set_status_callback(&session, on_status, NULL);
-    if(!uxr_create_session(&session))
+    if (!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -100,9 +117,9 @@ int main(int args, char** argv)
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
     uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
 
-    switch(create_delete | pub_sub)
+    switch (create_delete | pub_sub)
     {
-      case ACTION_CREATE | TARGET_PUBLISHER:
+        case ACTION_CREATE | TARGET_PUBLISHER:
             create_publisher(&session, ids);
             break;
 
@@ -124,93 +141,109 @@ int main(int args, char** argv)
     return 0;
 }
 
-void create_publisher(uxrSession* session, uint16_t id)
+void create_publisher(
+        uxrSession* session,
+        uint16_t id)
 {
     uxrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
     uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
     const char* participant_xml = "<dds>"
-                                      "<participant>"
-                                          "<rtps>"
-                                              "<name>default_xrce_participant</name>"
-                                          "</rtps>"
-                                      "</participant>"
-                                  "</dds>";
-    uint16_t participant_req = uxr_buffer_create_participant_xml(session, output, participant_id, 0, participant_xml, 0);
+            "<participant>"
+            "<rtps>"
+            "<name>default_xrce_participant</name>"
+            "</rtps>"
+            "</participant>"
+            "</dds>";
+    uint16_t participant_req =
+            uxr_buffer_create_participant_xml(session, output, participant_id, 0, participant_xml, 0);
 
     uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
-                                "<topic>"
-                                    "<name>HelloWorldTopic</name>"
-                                    "<dataType>HelloWorld</dataType>"
-                                "</topic>"
-                            "</dds>";
+            "<topic>"
+            "<name>HelloWorldTopic</name>"
+            "<dataType>HelloWorld</dataType>"
+            "</topic>"
+            "</dds>";
     uint16_t topic_req = uxr_buffer_create_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
     uxrObjectId publisher_id = uxr_object_id(id, UXR_PUBLISHER_ID);
     const char* publisher_xml = "";
-    uint16_t publisher_req = uxr_buffer_create_publisher_xml(session, output, publisher_id, participant_id, publisher_xml, 0);
+    uint16_t publisher_req = uxr_buffer_create_publisher_xml(session, output, publisher_id, participant_id,
+                    publisher_xml, 0);
 
     uxrObjectId datawriter_id = uxr_object_id(id, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<dds>"
-                                     "<data_writer>"
-                                         "<topic>"
-                                             "<kind>NO_KEY</kind>"
-                                             "<name>HelloWorldTopic</name>"
-                                             "<dataType>HelloWorld</dataType>"
-                                         "</topic>"
-                                     "</data_writer>"
-                                 "</dds>";
-    uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(session, output, datawriter_id, publisher_id, datawriter_xml, 0);
+            "<data_writer>"
+            "<topic>"
+            "<kind>NO_KEY</kind>"
+            "<name>HelloWorldTopic</name>"
+            "<dataType>HelloWorld</dataType>"
+            "</topic>"
+            "</data_writer>"
+            "</dds>";
+    uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(session, output, datawriter_id, publisher_id,
+                    datawriter_xml, 0);
 
-    uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
+    uint16_t requests[4] = {
+        participant_req, topic_req, publisher_req, datawriter_req
+    };
     wait_status(session, requests);
 }
 
-void create_subscriber(uxrSession* session, uint16_t id)
+void create_subscriber(
+        uxrSession* session,
+        uint16_t id)
 {
     uxrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
     uxrObjectId participant_id = uxr_object_id(id, UXR_PARTICIPANT_ID);
     const char* participant_xml = "<dds>"
-                                      "<participant>"
-                                          "<rtps>"
-                                              "<name>default_xrce_participant</name>"
-                                          "</rtps>"
-                                      "</participant>"
-                                  "</dds>";
-    uint16_t participant_req = uxr_buffer_create_participant_xml(session, output, participant_id, 0, participant_xml, 0);
+            "<participant>"
+            "<rtps>"
+            "<name>default_xrce_participant</name>"
+            "</rtps>"
+            "</participant>"
+            "</dds>";
+    uint16_t participant_req =
+            uxr_buffer_create_participant_xml(session, output, participant_id, 0, participant_xml, 0);
 
     uxrObjectId topic_id = uxr_object_id(id, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
-                                "<topic>"
-                                    "<name>HelloWorldTopic</name>"
-                                    "<dataType>HelloWorld</dataType>"
-                                "</topic>"
-                            "</dds>";
+            "<topic>"
+            "<name>HelloWorldTopic</name>"
+            "<dataType>HelloWorld</dataType>"
+            "</topic>"
+            "</dds>";
     uint16_t topic_req = uxr_buffer_create_topic_xml(session, output, topic_id, participant_id, topic_xml, 0);
 
     uxrObjectId subscriber_id = uxr_object_id(id, UXR_SUBSCRIBER_ID);
     const char* subscriber_xml = "";
-    uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(session, output, subscriber_id, participant_id, subscriber_xml, 0);
+    uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(session, output, subscriber_id, participant_id,
+                    subscriber_xml, 0);
 
     uxrObjectId datareader_id = uxr_object_id(id, UXR_DATAREADER_ID);
     const char* datareader_xml = "<dds>"
-                                     "<data_reader>"
-                                         "<topic>"
-                                             "<kind>NO_KEY</kind>"
-                                             "<name>HelloWorldTopic</name>"
-                                             "<dataType>HelloWorld</dataType>"
-                                         "</topic>"
-                                     "</data_reader>"
-                                 "</dds>";
-    uint16_t datareader_req = uxr_buffer_create_datareader_xml(session, output, datareader_id, subscriber_id, datareader_xml, 0);
+            "<data_reader>"
+            "<topic>"
+            "<kind>NO_KEY</kind>"
+            "<name>HelloWorldTopic</name>"
+            "<dataType>HelloWorld</dataType>"
+            "</topic>"
+            "</data_reader>"
+            "</dds>";
+    uint16_t datareader_req = uxr_buffer_create_datareader_xml(session, output, datareader_id, subscriber_id,
+                    datareader_xml, 0);
 
-    uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
+    uint16_t requests[4] = {
+        participant_req, topic_req, subscriber_req, datareader_req
+    };
     wait_status(session, requests);
 }
 
-void delete_publisher(uxrSession* session, uint16_t id)
+void delete_publisher(
+        uxrSession* session,
+        uint16_t id)
 {
     uxrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
@@ -219,11 +252,15 @@ void delete_publisher(uxrSession* session, uint16_t id)
     uint16_t topic_req = uxr_buffer_delete_entity(session, output, uxr_object_id(id, UXR_TOPIC_ID));
     uint16_t participant_req = uxr_buffer_delete_entity(session, output, uxr_object_id(id, UXR_PARTICIPANT_ID));
 
-    uint16_t requests[4] = {participant_req, topic_req, publisher_req, datawriter_req};
+    uint16_t requests[4] = {
+        participant_req, topic_req, publisher_req, datawriter_req
+    };
     wait_status(session, requests);
 }
 
-void delete_subscriber(uxrSession* session, uint16_t id)
+void delete_subscriber(
+        uxrSession* session,
+        uint16_t id)
 {
     uxrStreamId output = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
@@ -232,14 +269,18 @@ void delete_subscriber(uxrSession* session, uint16_t id)
     uint16_t topic_req = uxr_buffer_delete_entity(session, output, uxr_object_id(id, UXR_TOPIC_ID));
     uint16_t participant_req = uxr_buffer_delete_entity(session, output, uxr_object_id(id, UXR_PARTICIPANT_ID));
 
-    uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
+    uint16_t requests[4] = {
+        participant_req, topic_req, subscriber_req, datareader_req
+    };
     wait_status(session, requests);
 }
 
-void wait_status(uxrSession* session, uint16_t* requests)
+void wait_status(
+        uxrSession* session,
+        uint16_t* requests)
 {
     uint8_t status[4];
-    if(uxr_run_session_until_all_status(session, 3000, requests, status, 4))
+    if (uxr_run_session_until_all_status(session, 3000, requests, status, 4))
     {
         printf("Ok\n");
     }
@@ -249,11 +290,16 @@ void wait_status(uxrSession* session, uint16_t* requests)
     }
 }
 
-void on_status(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uint8_t status, void* args)
+void on_status(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uint8_t status,
+        void* args)
 {
     (void) session; (void) request_id; (void) args;
 
-    if(status != UXR_STATUS_OK && status != UXR_STATUS_OK_MATCHED)
+    if (status != UXR_STATUS_OK && status != UXR_STATUS_OK_MATCHED)
     {
         printf("Status error: 0x%02X at entity id '%u' of object type '%u'\n", status, object_id.id, object_id.type);
     }

@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/core/session/session_info.h>
 #include "../serialization/xrce_header_internal.h"
@@ -32,25 +32,54 @@ extern "C"
 struct ucdrBuffer;
 struct BaseObjectRequest;
 
-void uxr_init_session_info(uxrSessionInfo* info, uint8_t id, uint32_t key);
+void uxr_init_session_info(
+        uxrSessionInfo* info,
+        uint8_t id,
+        uint32_t key);
 
-void uxr_buffer_create_session(uxrSessionInfo* info, struct ucdrBuffer* ub, uint16_t mtu);
-void uxr_buffer_delete_session(uxrSessionInfo* info, struct ucdrBuffer* ub);
-void uxr_read_create_session_status(uxrSessionInfo* info, struct ucdrBuffer* ub);
-void uxr_read_delete_session_status(uxrSessionInfo* info, struct ucdrBuffer* ub);
+void uxr_buffer_create_session(
+        uxrSessionInfo* info,
+        struct ucdrBuffer* ub,
+        uint16_t mtu);
+void uxr_buffer_delete_session(
+        uxrSessionInfo* info,
+        struct ucdrBuffer* ub);
+void uxr_read_create_session_status(
+        uxrSessionInfo* info,
+        struct ucdrBuffer* ub);
+void uxr_read_delete_session_status(
+        uxrSessionInfo* info,
+        struct ucdrBuffer* ub);
 
-void uxr_stamp_create_session_header(const uxrSessionInfo* info, uint8_t* buffer);
-void uxr_stamp_session_header(const uxrSessionInfo* info, uint8_t stream_id_raw, uxrSeqNum seq_num, uint8_t* buffer);
-bool uxr_read_session_header(const uxrSessionInfo* info, struct ucdrBuffer* ub, uint8_t* stream_id_raw, uxrSeqNum* seq_num);
+void uxr_stamp_create_session_header(
+        const uxrSessionInfo* info,
+        uint8_t* buffer);
+void uxr_stamp_session_header(
+        const uxrSessionInfo* info,
+        uint8_t stream_id_raw,
+        uxrSeqNum seq_num,
+        uint8_t* buffer);
+bool uxr_read_session_header(
+        const uxrSessionInfo* info,
+        struct ucdrBuffer* ub,
+        uint8_t* stream_id_raw,
+        uxrSeqNum* seq_num);
 
-uint8_t uxr_session_header_offset(const uxrSessionInfo* info);
+uint8_t uxr_session_header_offset(
+        const uxrSessionInfo* info);
 
-uint16_t uxr_init_base_object_request(uxrSessionInfo* info, uxrObjectId object_id, struct BaseObjectRequest* base);
-void uxr_parse_base_object_request(const struct BaseObjectRequest* base, uxrObjectId* object_id, uint16_t* request_id);
+uint16_t uxr_init_base_object_request(
+        uxrSessionInfo* info,
+        uxrObjectId object_id,
+        struct BaseObjectRequest* base);
+void uxr_parse_base_object_request(
+        const struct BaseObjectRequest* base,
+        uxrObjectId* object_id,
+        uint16_t* request_id);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SESSION_SESSION_INFO_INTERNAL_H_
 

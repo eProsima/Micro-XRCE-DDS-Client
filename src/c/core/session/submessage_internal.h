@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/visibility.h>
 #include <stdint.h>
@@ -50,7 +50,7 @@ typedef enum SubmessageId
 #ifdef PERFORMANCE_TESTING
     ,
     SUBMESSAGE_ID_PERFORMANCE   = 14
-#endif
+#endif // ifdef PERFORMANCE_TESTING
 
 } SubmessageId;
 
@@ -66,12 +66,21 @@ typedef enum SubmessageFlags
 
 } SubmessageFlags;
 
-bool uxr_buffer_submessage_header(struct ucdrBuffer* ub, uint8_t submessage_id, uint16_t length, uint8_t flags);
-bool uxr_read_submessage_header(struct ucdrBuffer* ub, uint8_t* submessage_id, uint16_t* length, uint8_t* flags);
-size_t uxr_submessage_padding(size_t length);
+bool uxr_buffer_submessage_header(
+        struct ucdrBuffer* ub,
+        uint8_t submessage_id,
+        uint16_t length,
+        uint8_t flags);
+bool uxr_read_submessage_header(
+        struct ucdrBuffer* ub,
+        uint8_t* submessage_id,
+        uint16_t* length,
+        uint8_t* flags);
+size_t uxr_submessage_padding(
+        size_t length);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SESSION_SUBMESSAGE_INTERNAL_H_

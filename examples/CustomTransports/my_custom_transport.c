@@ -10,7 +10,8 @@
 
 static struct pollfd poll_fd;
 
-bool my_custom_transport_open(uxrCustomTransport* transport)
+bool my_custom_transport_open(
+        uxrCustomTransport* transport)
 {
     printf("Micro XRCE-DDS Client Custom transport: opening\n");
 
@@ -45,7 +46,8 @@ bool my_custom_transport_open(uxrCustomTransport* transport)
     return rv;
 }
 
-bool my_custom_transport_close(uxrCustomTransport* transport)
+bool my_custom_transport_close(
+        uxrCustomTransport* transport)
 {
     printf("Micro XRCE-DDS Client Custom transport: closing\n");
 

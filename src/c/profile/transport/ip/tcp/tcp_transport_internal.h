@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
 
@@ -49,6 +49,6 @@ void uxr_disconnect_tcp_platform(
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // SRC_C_PROFILE_TRANSPORT_TCP_TCP_TRANSPORT_INTERNAL_H_

@@ -18,7 +18,9 @@
 #include <fcntl.h>  // O_RDWR, O_NOCTTY, O_NONBLOCK
 #include <stdio.h>
 
-int main(int argc, char** argv)
+int main(
+        int argc,
+        char** argv)
 {
 #ifdef WIN32
     printf("Sorry, this example is not available for Windows platforms.");

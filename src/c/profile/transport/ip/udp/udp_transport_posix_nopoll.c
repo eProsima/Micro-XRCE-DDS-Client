@@ -48,7 +48,7 @@ bool uxr_init_udp_platform(
         if (0 == getaddrinfo(ip, port, &hints, &result))
         {
             for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
-            {   
+            {
                 if (0 == connect(platform->fd, ptr->ai_addr, ptr->ai_addrlen))
                 {
                     rv = true;
@@ -100,7 +100,7 @@ size_t uxr_read_udp_data_platform(
 
     struct timeval tv;
     tv.tv_sec = timeout / 1000;
-	tv.tv_usec = (timeout % 1000) * 1000;
+    tv.tv_usec = (timeout % 1000) * 1000;
 
     setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
@@ -114,6 +114,6 @@ size_t uxr_read_udp_data_platform(
     {
         *errcode = 1;
     }
-    
+
     return rv;
 }

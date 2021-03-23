@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/core/session/stream/output_best_effort_stream.h>
 #include <uxr/client/core/session/stream/seq_num.h>
@@ -26,13 +26,25 @@ extern "C"
 #include <stddef.h>
 #include <stdbool.h>
 
-void uxr_init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset);
-void uxr_reset_output_best_effort_stream(uxrOutputBestEffortStream* stream);
-bool uxr_prepare_best_effort_buffer_to_write(uxrOutputBestEffortStream* stream, size_t size, struct ucdrBuffer* ub);
-bool uxr_prepare_best_effort_buffer_to_send(uxrOutputBestEffortStream* stream, uint8_t** buffer, size_t* length, uint16_t* seq_num);
+void uxr_init_output_best_effort_stream(
+        uxrOutputBestEffortStream* stream,
+        uint8_t* buffer,
+        size_t size,
+        uint8_t offset);
+void uxr_reset_output_best_effort_stream(
+        uxrOutputBestEffortStream* stream);
+bool uxr_prepare_best_effort_buffer_to_write(
+        uxrOutputBestEffortStream* stream,
+        size_t size,
+        struct ucdrBuffer* ub);
+bool uxr_prepare_best_effort_buffer_to_send(
+        uxrOutputBestEffortStream* stream,
+        uint8_t** buffer,
+        size_t* length,
+        uint16_t* seq_num);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SESSION_STREAM_OUTPUT_BEST_EFFORT_STREAM_INTERNAL_H_
