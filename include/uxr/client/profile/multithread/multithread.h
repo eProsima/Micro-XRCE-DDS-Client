@@ -30,7 +30,8 @@ struct uxrSession;
 
 #ifdef WIN32
 #elif defined(PLATFORM_NAME_FREERTOS)
-#include <semphr. h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
 #elif defined(UCLIENT_PLATFORM_POSIX)
 #include <pthread.h>
