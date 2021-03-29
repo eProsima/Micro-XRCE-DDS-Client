@@ -42,14 +42,30 @@ if((CMAKE_SYSTEM_NAME STREQUAL "") AND (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by default is little endianness)." OFF)
+option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
+option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
+option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
+option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
+option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
+set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
+set(UCLIENT_MAX_OUTPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of output reliable streams for session.")
+set(UCLIENT_MAX_INPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of input best-effort streams for session.")
+set(UCLIENT_MAX_INPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of input reliable streams for session.")
+set(UCLIENT_MAX_SESSION_CONNECTION_ATTEMPTS 10 CACHE STRING "Set the number of connection attemps.")
+set(UCLIENT_MIN_SESSION_CONNECTION_INTERVAL 1000 CACHE STRING "Set the connection interval in milliseconds.")
+set(UCLIENT_MIN_HEARTBEAT_TIME_INTERVAL 1 CACHE STRING "Set the time interval between heartbeats in milliseconds.")
+set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
+set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
+set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
 
-set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Configuration client file.")
+option(UCLIENT_PROFILE_CUSTOM_TRANSPORT "Enable Custom transport." ON)
+set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.")
 
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 1.2.0)
-set(_microcdr_tag v1.2.0)
+set(_microcdr_version 1.2.1)
+set(_microcdr_tag v1.2.1)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
@@ -59,7 +75,7 @@ list(APPEND _deps "microcdr\;${_microcdr_version}")
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(NOT UCLIENT_SUPERBUILD)
-    project(microxrcedds_client VERSION "1.2.5" LANGUAGES C)
+    project(microxrcedds_client VERSION "2.0.0" LANGUAGES C)
 else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
@@ -78,13 +94,12 @@ endif()
 ###############################################################################
 # Client configuration options
 ###############################################################################
+set(UCLIENT_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/client.config" CACHE PATH "Optional configuration client file.")
 # Load configuration file.
 if(EXISTS ${UCLIENT_CONFIG})
     configure_file(${UCLIENT_CONFIG} ${PROJECT_SOURCE_DIR}/CMakeCache.txt COPYONLY)
     load_cache(${PROJECT_SOURCE_DIR})
     file(REMOVE ${PROJECT_SOURCE_DIR}/CMakeCache.txt)
-else()
-    message(FATAL_ERROR "No client.config found.")
 endif()
 
 ###############################################################################
@@ -117,19 +132,87 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
         set(UCLIENT_PLATFORM_NUTTX ON)
+    elseif(PLATFORM_NAME STREQUAL "zephyr")
+        set(UCLIENT_PLATFORM_ZEPHYR ON)
     elseif(PLATFORM_NAME STREQUAL "LwIP")
         set(UCLIENT_PLATFORM_POSIX_NOPOLL ON)
+    elseif(PLATFORM_NAME STREQUAL "FreeRTOS_Plus_TCP")
+        set(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP ON)
     endif()
 endif()
 
-if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX)
+if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX OR UCLIENT_PLATFORM_ZEPHYR)
     set(UCLIENT_PLATFORM_POSIX ON)
 endif()
 
-# Check external transport.
-option(UCLIENT_EXTERNAL_TCP "Enable external TCP transport." OFF)
-option(UCLIENT_EXTERNAL_UDP "Enable external UDP transport." OFF)
-option(UCLIENT_EXTERNAL_SERIAL "Enable external serial transport." OFF)
+# Transport sources.
+set(_transport_src)
+
+if(UCLIENT_PROFILE_UDP)
+    list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport.c)
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix.c)
+    elseif(UCLIENT_PLATFORM_POSIX_NOPOLL)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_windows.c)
+    elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_freertos_plus_tcp.c)
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_TCP)
+    list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport.c)
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_posix.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_windows.c)
+    elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_freertos_plus_tcp.c)
+    endif()
+endif()
+
+if(UCLIENT_PLATFORM_WINDOWS)
+set(UCLIENT_PROFILE_SERIAL OFF)
+endif()
+
+if(UCLIENT_PROFILE_SERIAL)
+    set(UCLIENT_PROFILE_STREAM_FRAMING ON)
+    list(APPEND _transport_src src/c/profile/transport/serial/serial_transport.c)
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_posix.c)
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_DISCOVERY OR UCLIENT_PROFILE_UDP OR UCLIENT_PROFILE_TCP)
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_posix.c)
+    elseif(UCLIENT_PLATFORM_POSIX_NOPOLL)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_posix.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_windows.c)
+    elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_freertos_plus_tcp.c)
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_DISCOVERY)
+    list(APPEND _transport_src src/c/profile/discovery/discovery.c)
+    list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport.c)
+    if(UCLIENT_PLATFORM_POSIX)
+        list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_posix.c)
+    elseif(UCLIENT_PLATFORM_POSIX_NOPOLL)
+        list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_posix_nopoll.c)
+    elseif(UCLIENT_PLATFORM_WINDOWS)
+        list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
+    elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
+        list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_freertos_plus_tcp.c)
+    endif()
+endif()
+
+if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
+    list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
+endif()
 
 # Other sources
 set(SRCS
@@ -148,31 +231,15 @@ set(SRCS
     src/c/core/serialization/xrce_header.c
     src/c/core/serialization/xrce_subheader.c
     src/c/util/time.c
+    src/c/util/ping.c
     src/c/core/session/common_create_entities.c
     src/c/core/session/create_entities_ref.c
     src/c/core/session/create_entities_xml.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
+    $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
-    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/discovery/discovery.c>
-    $<$<BOOL:${PROFILE_DISCOVERY}>:src/c/profile/transport/ip/udp/udp_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/discovery/transport/udp_transport_datagram_posix.c>
-    $<$<AND:$<BOOL:${PROFILE_DISCOVERY}>,$<PLATFORM_ID:Windows>>:src/c/profile/discovery/transport/udp_transport_datagram_windows.c>
-    $<$<BOOL:${PROFILE_UDP_TRANSPORT}>:src/c/profile/transport/ip/udp/udp_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/udp/udp_transport_posix.c>
-    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/udp/udp_transport_posix_nopoll.c>
-    $<$<AND:$<BOOL:${PROFILE_UDP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/udp/udp_transport_windows.c>
-    $<$<BOOL:${PROFILE_TCP_TRANSPORT}>:src/c/profile/transport/ip/tcp/tcp_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/ip/tcp/tcp_transport_posix.c>
-    $<$<AND:$<BOOL:${PROFILE_TCP_TRANSPORT}>,$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/tcp/tcp_transport_windows.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_transport.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<OR:$<PLATFORM_ID:Linux>,$<PLATFORM_ID:Generic>>>:src/c/profile/transport/serial/serial_protocol.c>
-    $<$<AND:$<BOOL:${PROFILE_SERIAL_TRANSPORT}>,$<BOOL:${UCLIENT_PLATFORM_POSIX}>>:src/c/profile/transport/serial/serial_transport_posix.c>
-    $<$<BOOL:${UCLIENT_EXTERNAL_TCP}>:src/c/profile/transport/ip/tcp/tcp_transport_external.c>
-    $<$<BOOL:${UCLIENT_EXTERNAL_UDP}>:src/c/profile/transport/ip/udp/udp_transport_external.c>
-    $<$<BOOL:${UCLIENT_EXTERNAL_SERIAL}>:src/c/profile/transport/serial/serial_transport_external.c>
-    $<$<OR:$<BOOL:${UCLIENT_PLATFORM_POSIX}>,$<BOOL:${UCLIENT_PLATFORM_POSIX_NOPOLL}>>:src/c/profile/transport/ip/ip_posix.c>
-    $<$<BOOL:$<PLATFORM_ID:Windows>>:src/c/profile/transport/ip/ip_windows.c>
+    ${_transport_src}
     )
 
 ###############################################################################
@@ -289,6 +356,15 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ShapesDemo)
     add_subdirectory(examples/SubscribeHelloWorld)
     add_subdirectory(examples/SubscribeHelloWorldP2P)
+    add_subdirectory(examples/TimeSync)
+    add_subdirectory(examples/TimeSyncWithCb)
+    add_subdirectory(examples/PingAgent)
+    add_subdirectory(examples/ContinuousFragment)
+    add_subdirectory(examples/PublishHelloWorldBestEffort)
+    add_subdirectory(examples/SubscribeHelloWorldBestEffort)
+    if(UCLIENT_PLATFORM_LINUX)
+        add_subdirectory(examples/CustomTransports)
+    endif()
 endif()
 
 ###############################################################################
@@ -309,6 +385,7 @@ if(UCLIENT_BUILD_TESTS)
 
     add_subdirectory(test/unitary)
     if(UCLIENT_PLATFORM_LINUX)
+        add_subdirectory(test/transport/custom_comm)
         add_subdirectory(test/transport/serial_comm)
     endif()
 endif()

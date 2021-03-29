@@ -4,7 +4,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-SerialComm::SerialComm() : fd_(-1)
+SerialComm::SerialComm()
+    : fd_(-1)
 {
 }
 
@@ -29,8 +30,8 @@ int SerialComm::init()
         {
             fcntl(fd_, F_SETFL, O_NONBLOCK);
             fcntl(fd_, F_SETPIPE_SZ, 4096);
-            if (!uxr_init_serial_transport(&master_, &master_platform_, fd_, 1, 0) ||
-                !uxr_init_serial_transport(&slave_, &slave_platform_, fd_, 0, 1))
+            if (!uxr_init_serial_transport(&master_, fd_, 1, 0) ||
+                    !uxr_init_serial_transport(&slave_, fd_, 0, 1))
             {
                 rv = -1;
             }
@@ -95,7 +96,7 @@ TEST_F(SerialComm, SingleOctetTest)
 
     /* Receive message. */
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 10));
-    ASSERT_EQ(input_msg_len, 1);
+    ASSERT_EQ(input_msg_len, size_t(1));
     ASSERT_EQ(*input_msg, 0);
 }
 
@@ -174,17 +175,17 @@ TEST_F(SerialComm, SplitMessageTest)
     uint8_t flag = UXR_FRAMING_BEGIN_FLAG;
 
     /* Send BEGIN flag. */
-    ASSERT_EQ(write(slave_.platform->poll_fd.fd, static_cast<void*>(&flag), 1), 1);
+    ASSERT_EQ(write(slave_.platform.poll_fd.fd, static_cast<void*>(&flag), 1), 1);
 
     /* Send PAYLOAD. */
     for (size_t i = 0; i < sizeof(output_msg); ++i)
     {
         ASSERT_FALSE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 10));
-        ASSERT_EQ(write(slave_.platform->poll_fd.fd, static_cast<void*>(&output_msg[i]), 1), 1);
+        ASSERT_EQ(write(slave_.platform.poll_fd.fd, static_cast<void*>(&output_msg[i]), 1), 1);
     }
 
     ASSERT_TRUE(slave_.comm.recv_msg(&slave_, &input_msg, &input_msg_len, 10));
-    ASSERT_EQ(input_msg_len, 1);
+    ASSERT_EQ(input_msg_len, size_t(1));
     ASSERT_EQ(*input_msg, 0);
 }
 

@@ -8,14 +8,17 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-uxrStreamId uxr_stream_id(uint8_t index, uxrStreamType type, uxrStreamDirection direction)
+uxrStreamId uxr_stream_id(
+        uint8_t index,
+        uxrStreamType type,
+        uxrStreamDirection direction)
 {
     uxrStreamId stream_id;
     stream_id.direction = (uint8_t)direction;
     stream_id.index = index;
     stream_id.type = (uint8_t)type;
 
-    switch(type)
+    switch (type)
     {
         case UXR_NONE_STREAM:
             stream_id.raw = 0;
@@ -31,18 +34,20 @@ uxrStreamId uxr_stream_id(uint8_t index, uxrStreamType type, uxrStreamDirection 
     return stream_id;
 }
 
-uxrStreamId uxr_stream_id_from_raw(uint8_t stream_id_raw, uxrStreamDirection direction)
+uxrStreamId uxr_stream_id_from_raw(
+        uint8_t stream_id_raw,
+        uxrStreamDirection direction)
 {
     uxrStreamId stream_id;
     stream_id.raw = stream_id_raw;
     stream_id.direction = (uint8_t)direction;
 
-    if(BEST_EFFORT_STREAM_THRESHOLD > stream_id_raw)
+    if (BEST_EFFORT_STREAM_THRESHOLD > stream_id_raw)
     {
         stream_id.index = stream_id_raw;
         stream_id.type = UXR_NONE_STREAM;
     }
-    else if(RELIABLE_STREAM_THRESHOLD > stream_id_raw)
+    else if (RELIABLE_STREAM_THRESHOLD > stream_id_raw)
     {
         stream_id.index = (uint8_t)(stream_id_raw - BEST_EFFORT_STREAM_THRESHOLD);
         stream_id.type = UXR_BEST_EFFORT_STREAM;

@@ -25,7 +25,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -45,13 +45,19 @@ typedef struct ShapeType
 
 struct ucdrBuffer;
 
-bool ShapeType_serialize_topic(struct ucdrBuffer* writer, const ShapeType* topic);
-bool ShapeType_deserialize_topic(struct ucdrBuffer* reader, ShapeType* topic);
-uint32_t ShapeType_size_of_topic(const ShapeType* topic, uint32_t size);
+bool ShapeType_serialize_topic(
+        struct ucdrBuffer* writer,
+        const ShapeType* topic);
+bool ShapeType_deserialize_topic(
+        struct ucdrBuffer* reader,
+        ShapeType* topic);
+uint32_t ShapeType_size_of_topic(
+        const ShapeType* topic,
+        uint32_t size);
 
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _ShapeType_H_

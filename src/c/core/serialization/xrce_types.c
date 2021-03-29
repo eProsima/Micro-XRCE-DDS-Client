@@ -4,7 +4,9 @@
 //==================================================================
 //                             PUBLIC
 //==================================================================
-bool uxr_serialize_Time_t(ucdrBuffer* buffer, const Time_t* input)
+bool uxr_serialize_Time_t(
+        ucdrBuffer* buffer,
+        const Time_t* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_int32_t(buffer, input->seconds);
@@ -12,7 +14,9 @@ bool uxr_serialize_Time_t(ucdrBuffer* buffer, const Time_t* input)
     return ret;
 }
 
-bool uxr_deserialize_Time_t(ucdrBuffer* buffer, Time_t* output)
+bool uxr_deserialize_Time_t(
+        ucdrBuffer* buffer,
+        Time_t* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_int32_t(buffer, &output->seconds);
@@ -20,37 +24,45 @@ bool uxr_deserialize_Time_t(ucdrBuffer* buffer, Time_t* output)
     return ret;
 }
 
-bool uxr_serialize_BinarySequence_t(ucdrBuffer* buffer, const BinarySequence_t* input)
+bool uxr_serialize_BinarySequence_t(
+        ucdrBuffer* buffer,
+        const BinarySequence_t* input)
 {
     return ucdr_serialize_sequence_uint8_t(buffer, input->data, input->size);
 }
 
-bool uxr_deserialize_BinarySequence_t(ucdrBuffer* buffer, BinarySequence_t* output)
+bool uxr_deserialize_BinarySequence_t(
+        ucdrBuffer* buffer,
+        BinarySequence_t* output)
 {
     return ucdr_deserialize_sequence_uint8_t(buffer, output->data, UXR_BINARY_SEQUENCE_MAX, &output->size);
 }
 
-bool uxr_serialize_StringSequence_t(ucdrBuffer* buffer, const StringSequence_t* input)
+bool uxr_serialize_StringSequence_t(
+        ucdrBuffer* buffer,
+        const StringSequence_t* input)
 {
     bool ret = ucdr_serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size && ret; i++)
+    for (uint32_t i = 0; i < input->size && ret; i++)
     {
         ret = ucdr_serialize_string(buffer, input->data[i]);
     }
     return ret;
 }
 
-bool uxr_deserialize_StringSequence_t(ucdrBuffer* buffer, StringSequence_t* output)
+bool uxr_deserialize_StringSequence_t(
+        ucdrBuffer* buffer,
+        StringSequence_t* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > UXR_STRING_SEQUENCE_MAX)
+    if (output->size > UXR_STRING_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
     }
     else
     {
-        for(uint32_t i = 0; i < output->size && ret; i++)
+        for (uint32_t i = 0; i < output->size && ret; i++)
         {
             ret = ucdr_deserialize_string(buffer, output->data[i], UXR_STRING_SIZE_MAX);
         }
@@ -58,91 +70,117 @@ bool uxr_deserialize_StringSequence_t(ucdrBuffer* buffer, StringSequence_t* outp
     return ret;
 }
 
-bool uxr_serialize_ClientKey(ucdrBuffer* buffer, const ClientKey* input)
+bool uxr_serialize_ClientKey(
+        ucdrBuffer* buffer,
+        const ClientKey* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, 4);
     return ret;
 }
 
-bool uxr_deserialize_ClientKey(ucdrBuffer* buffer, ClientKey* output)
+bool uxr_deserialize_ClientKey(
+        ucdrBuffer* buffer,
+        ClientKey* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, 4);
     return ret;
 }
 
-bool uxr_serialize_ObjectId(ucdrBuffer* buffer, const ObjectId* input)
+bool uxr_serialize_ObjectId(
+        ucdrBuffer* buffer,
+        const ObjectId* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool uxr_deserialize_ObjectId(ucdrBuffer* buffer, ObjectId* output)
+bool uxr_deserialize_ObjectId(
+        ucdrBuffer* buffer,
+        ObjectId* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool uxr_serialize_ObjectPrefix(ucdrBuffer* buffer, const ObjectPrefix* input)
+bool uxr_serialize_ObjectPrefix(
+        ucdrBuffer* buffer,
+        const ObjectPrefix* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool uxr_deserialize_ObjectPrefix(ucdrBuffer* buffer, ObjectPrefix* output)
+bool uxr_deserialize_ObjectPrefix(
+        ucdrBuffer* buffer,
+        ObjectPrefix* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool uxr_serialize_XrceCookie(ucdrBuffer* buffer, const XrceCookie* input)
+bool uxr_serialize_XrceCookie(
+        ucdrBuffer* buffer,
+        const XrceCookie* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, 4);
     return ret;
 }
 
-bool uxr_deserialize_XrceCookie(ucdrBuffer* buffer, XrceCookie* output)
+bool uxr_deserialize_XrceCookie(
+        ucdrBuffer* buffer,
+        XrceCookie* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, 4);
     return ret;
 }
 
-bool uxr_serialize_XrceVersion(ucdrBuffer* buffer, const XrceVersion* input)
+bool uxr_serialize_XrceVersion(
+        ucdrBuffer* buffer,
+        const XrceVersion* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool uxr_deserialize_XrceVersion(ucdrBuffer* buffer, XrceVersion* output)
+bool uxr_deserialize_XrceVersion(
+        ucdrBuffer* buffer,
+        XrceVersion* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool uxr_serialize_XrceVendorId(ucdrBuffer* buffer, const XrceVendorId* input)
+bool uxr_serialize_XrceVendorId(
+        ucdrBuffer* buffer,
+        const XrceVendorId* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool uxr_deserialize_XrceVendorId(ucdrBuffer* buffer, XrceVendorId* output)
+bool uxr_deserialize_XrceVendorId(
+        ucdrBuffer* buffer,
+        XrceVendorId* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool uxr_serialize_TransportLocatorSmall(ucdrBuffer* buffer, const TransportLocatorSmall* input)
+bool uxr_serialize_TransportLocatorSmall(
+        ucdrBuffer* buffer,
+        const TransportLocatorSmall* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->address, 2);
@@ -150,7 +188,9 @@ bool uxr_serialize_TransportLocatorSmall(ucdrBuffer* buffer, const TransportLoca
     return ret;
 }
 
-bool uxr_deserialize_TransportLocatorSmall(ucdrBuffer* buffer, TransportLocatorSmall* output)
+bool uxr_deserialize_TransportLocatorSmall(
+        ucdrBuffer* buffer,
+        TransportLocatorSmall* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->address, 2);
@@ -158,7 +198,9 @@ bool uxr_deserialize_TransportLocatorSmall(ucdrBuffer* buffer, TransportLocatorS
     return ret;
 }
 
-bool uxr_serialize_TransportLocatorMedium(ucdrBuffer* buffer, const TransportLocatorMedium* input)
+bool uxr_serialize_TransportLocatorMedium(
+        ucdrBuffer* buffer,
+        const TransportLocatorMedium* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->address, 4);
@@ -166,7 +208,9 @@ bool uxr_serialize_TransportLocatorMedium(ucdrBuffer* buffer, const TransportLoc
     return ret;
 }
 
-bool uxr_deserialize_TransportLocatorMedium(ucdrBuffer* buffer, TransportLocatorMedium* output)
+bool uxr_deserialize_TransportLocatorMedium(
+        ucdrBuffer* buffer,
+        TransportLocatorMedium* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->address, 4);
@@ -174,7 +218,9 @@ bool uxr_deserialize_TransportLocatorMedium(ucdrBuffer* buffer, TransportLocator
     return ret;
 }
 
-bool uxr_serialize_TransportLocatorLarge(ucdrBuffer* buffer, const TransportLocatorLarge* input)
+bool uxr_serialize_TransportLocatorLarge(
+        ucdrBuffer* buffer,
+        const TransportLocatorLarge* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->address, 16);
@@ -182,7 +228,9 @@ bool uxr_serialize_TransportLocatorLarge(ucdrBuffer* buffer, const TransportLoca
     return ret;
 }
 
-bool uxr_deserialize_TransportLocatorLarge(ucdrBuffer* buffer, TransportLocatorLarge* output)
+bool uxr_deserialize_TransportLocatorLarge(
+        ucdrBuffer* buffer,
+        TransportLocatorLarge* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->address, 16);
@@ -190,27 +238,33 @@ bool uxr_deserialize_TransportLocatorLarge(ucdrBuffer* buffer, TransportLocatorL
     return ret;
 }
 
-bool uxr_serialize_TransportLocatorString(ucdrBuffer* buffer, const TransportLocatorString* input)
+bool uxr_serialize_TransportLocatorString(
+        ucdrBuffer* buffer,
+        const TransportLocatorString* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_string(buffer, input->value);
     return ret;
 }
 
-bool uxr_deserialize_TransportLocatorString(ucdrBuffer* buffer, TransportLocatorString* output)
+bool uxr_deserialize_TransportLocatorString(
+        ucdrBuffer* buffer,
+        TransportLocatorString* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_string(buffer, output->value, UXR_STRING_SIZE_MAX);
     return ret;
 }
 
-bool uxr_serialize_TransportLocator(ucdrBuffer* buffer, const TransportLocator* input)
+bool uxr_serialize_TransportLocator(
+        ucdrBuffer* buffer,
+        const TransportLocator* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->format);
     if (ret)
     {
-        switch(input->format)
+        switch (input->format)
         {
             case ADDRESS_FORMAT_SMALL:
                 ret &= uxr_serialize_TransportLocatorSmall(buffer, &input->_.small_locator);
@@ -231,13 +285,15 @@ bool uxr_serialize_TransportLocator(ucdrBuffer* buffer, const TransportLocator* 
     return ret;
 }
 
-bool uxr_deserialize_TransportLocator(ucdrBuffer* buffer, TransportLocator* output)
+bool uxr_deserialize_TransportLocator(
+        ucdrBuffer* buffer,
+        TransportLocator* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->format);
     if (ret)
     {
-        switch(output->format)
+        switch (output->format)
         {
             case ADDRESS_FORMAT_SMALL:
                 ret &= uxr_deserialize_TransportLocatorSmall(buffer, &output->_.small_locator);
@@ -258,27 +314,31 @@ bool uxr_deserialize_TransportLocator(ucdrBuffer* buffer, TransportLocator* outp
     return ret;
 }
 
-bool uxr_serialize_TransportLocatorSeq(ucdrBuffer* buffer, const TransportLocatorSeq* input)
+bool uxr_serialize_TransportLocatorSeq(
+        ucdrBuffer* buffer,
+        const TransportLocatorSeq* input)
 {
     bool ret = ucdr_serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size && ret; i++)
+    for (uint32_t i = 0; i < input->size && ret; i++)
     {
         ret = uxr_serialize_TransportLocator(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool uxr_deserialize_TransportLocatorSeq(ucdrBuffer* buffer, TransportLocatorSeq* output)
+bool uxr_deserialize_TransportLocatorSeq(
+        ucdrBuffer* buffer,
+        TransportLocatorSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)
+    if (output->size > UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
     }
     else
     {
-        for(uint32_t i = 0; i < output->size && ret; i++)
+        for (uint32_t i = 0; i < output->size && ret; i++)
         {
             ret = uxr_deserialize_TransportLocator(buffer, &output->data[i]);
         }
@@ -286,7 +346,9 @@ bool uxr_deserialize_TransportLocatorSeq(ucdrBuffer* buffer, TransportLocatorSeq
     return ret;
 }
 
-bool uxr_serialize_Property(ucdrBuffer* buffer, const Property* input)
+bool uxr_serialize_Property(
+        ucdrBuffer* buffer,
+        const Property* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_string(buffer, input->name);
@@ -294,7 +356,9 @@ bool uxr_serialize_Property(ucdrBuffer* buffer, const Property* input)
     return ret;
 }
 
-bool uxr_deserialize_Property(ucdrBuffer* buffer, Property* output)
+bool uxr_deserialize_Property(
+        ucdrBuffer* buffer,
+        Property* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_string(buffer, output->name, UXR_STRING_SIZE_MAX);
@@ -302,28 +366,32 @@ bool uxr_deserialize_Property(ucdrBuffer* buffer, Property* output)
     return ret;
 }
 
-bool uxr_serialize_PropertySeq(ucdrBuffer* buffer, const PropertySeq* input)
+bool uxr_serialize_PropertySeq(
+        ucdrBuffer* buffer,
+        const PropertySeq* input)
 {
     bool ret = ucdr_serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size && ret; i++)
+    for (uint32_t i = 0; i < input->size && ret; i++)
     {
         ret = uxr_serialize_Property(buffer, input->data + i);
     }
     return ret;
 }
 
-bool uxr_deserialize_PropertySeq(ucdrBuffer* buffer, PropertySeq* output)
+bool uxr_deserialize_PropertySeq(
+        ucdrBuffer* buffer,
+        PropertySeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
 
-    if(output->size > UXR_PROPERTY_SEQUENCE_MAX)
+    if (output->size > UXR_PROPERTY_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
     }
     else
     {
-        for(uint32_t i = 0; i < output->size && ret; i++)
+        for (uint32_t i = 0; i < output->size && ret; i++)
         {
             ret = uxr_deserialize_Property(buffer, &output->data[i]);
         }
@@ -331,7 +399,9 @@ bool uxr_deserialize_PropertySeq(ucdrBuffer* buffer, PropertySeq* output)
     return ret;
 }
 
-bool uxr_serialize_CLIENT_Representation(ucdrBuffer* buffer, const CLIENT_Representation* input)
+bool uxr_serialize_CLIENT_Representation(
+        ucdrBuffer* buffer,
+        const CLIENT_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_XrceCookie(buffer, &input->xrce_cookie);
@@ -340,7 +410,7 @@ bool uxr_serialize_CLIENT_Representation(ucdrBuffer* buffer, const CLIENT_Repres
     ret &= uxr_serialize_ClientKey(buffer, &input->client_key);
     ret &= ucdr_serialize_uint8_t(buffer, input->session_id);
     ret &= ucdr_serialize_bool(buffer, input->optional_properties);
-    if(input->optional_properties == true)
+    if (input->optional_properties == true)
     {
         ret &= uxr_serialize_PropertySeq(buffer, &input->properties);
     }
@@ -349,7 +419,9 @@ bool uxr_serialize_CLIENT_Representation(ucdrBuffer* buffer, const CLIENT_Repres
     return ret;
 }
 
-bool uxr_deserialize_CLIENT_Representation(ucdrBuffer* buffer, CLIENT_Representation* output)
+bool uxr_deserialize_CLIENT_Representation(
+        ucdrBuffer* buffer,
+        CLIENT_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_XrceCookie(buffer, &output->xrce_cookie);
@@ -358,23 +430,25 @@ bool uxr_deserialize_CLIENT_Representation(ucdrBuffer* buffer, CLIENT_Representa
     ret &= uxr_deserialize_ClientKey(buffer, &output->client_key);
     ret &= ucdr_deserialize_uint8_t(buffer, &output->session_id);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_properties);
-    if(output->optional_properties == true)
+    if (output->optional_properties == true)
     {
-            ret &= uxr_deserialize_PropertySeq(buffer, &output->properties);
+        ret &= uxr_deserialize_PropertySeq(buffer, &output->properties);
     }
     ret &= ucdr_deserialize_uint16_t(buffer, &output->mtu);
 
     return ret;
 }
 
-bool uxr_serialize_AGENT_Representation(ucdrBuffer* buffer, const AGENT_Representation* input)
+bool uxr_serialize_AGENT_Representation(
+        ucdrBuffer* buffer,
+        const AGENT_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_XrceCookie(buffer, &input->xrce_cookie);
     ret &= uxr_serialize_XrceVersion(buffer, &input->xrce_version);
     ret &= uxr_serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
     ret &= ucdr_serialize_bool(buffer, input->optional_properties);
-    if(input->optional_properties == true)
+    if (input->optional_properties == true)
     {
         ret &= uxr_serialize_PropertySeq(buffer, &input->properties);
     }
@@ -382,7 +456,9 @@ bool uxr_serialize_AGENT_Representation(ucdrBuffer* buffer, const AGENT_Represen
     return ret;
 }
 
-bool uxr_deserialize_AGENT_Representation(ucdrBuffer* buffer, AGENT_Representation* output)
+bool uxr_deserialize_AGENT_Representation(
+        ucdrBuffer* buffer,
+        AGENT_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_XrceCookie(buffer, &output->xrce_cookie);
@@ -398,13 +474,15 @@ bool uxr_deserialize_AGENT_Representation(ucdrBuffer* buffer, AGENT_Representati
     return ret;
 }
 
-bool uxr_serialize_OBJK_Representation3Formats(ucdrBuffer* buffer, const OBJK_Representation3Formats* input)
+bool uxr_serialize_OBJK_Representation3Formats(
+        ucdrBuffer* buffer,
+        const OBJK_Representation3Formats* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->format);
     if (ret)
     {
-        switch(input->format)
+        switch (input->format)
         {
             case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_serialize_string(buffer, input->_.object_reference);
@@ -422,13 +500,15 @@ bool uxr_serialize_OBJK_Representation3Formats(ucdrBuffer* buffer, const OBJK_Re
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Representation3Formats(ucdrBuffer* buffer, OBJK_Representation3Formats* output)
+bool uxr_deserialize_OBJK_Representation3Formats(
+        ucdrBuffer* buffer,
+        OBJK_Representation3Formats* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->format);
     if (ret)
     {
-        switch(output->format)
+        switch (output->format)
         {
             case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_deserialize_string(buffer, output->_.object_reference, UXR_STRING_SIZE_MAX);
@@ -446,13 +526,15 @@ bool uxr_deserialize_OBJK_Representation3Formats(ucdrBuffer* buffer, OBJK_Repres
     return ret;
 }
 
-bool uxr_serialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, const OBJK_RepresentationRefAndXMLFormats* input)
+bool uxr_serialize_OBJK_RepresentationRefAndXMLFormats(
+        ucdrBuffer* buffer,
+        const OBJK_RepresentationRefAndXMLFormats* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->format);
     if (ret)
     {
-        switch(input->format)
+        switch (input->format)
         {
             case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_serialize_string(buffer, input->_.object_name);
@@ -467,13 +549,15 @@ bool uxr_serialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, const
     return ret;
 }
 
-bool uxr_deserialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, OBJK_RepresentationRefAndXMLFormats* output)
+bool uxr_deserialize_OBJK_RepresentationRefAndXMLFormats(
+        ucdrBuffer* buffer,
+        OBJK_RepresentationRefAndXMLFormats* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->format);
     if (ret)
     {
-        switch(output->format)
+        switch (output->format)
         {
             case DDS_XRCE_REPRESENTATION_BY_REFERENCE:
                 ret &= ucdr_deserialize_string(buffer, output->_.object_name, UXR_STRING_SIZE_MAX);
@@ -488,13 +572,15 @@ bool uxr_deserialize_OBJK_RepresentationRefAndXMLFormats(ucdrBuffer* buffer, OBJ
     return ret;
 }
 
-bool uxr_serialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, const OBJK_RepresentationBinAndXMLFormats* input)
+bool uxr_serialize_OBJK_RepresentationBinAndXMLFormats(
+        ucdrBuffer* buffer,
+        const OBJK_RepresentationBinAndXMLFormats* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->format);
     if (ret)
     {
-        switch(input->format)
+        switch (input->format)
         {
             case DDS_XRCE_REPRESENTATION_IN_BINARY:
                 ret &= uxr_serialize_BinarySequence_t(buffer, &input->_.binary_representation);
@@ -509,13 +595,15 @@ bool uxr_serialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, const
     return ret;
 }
 
-bool uxr_deserialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, OBJK_RepresentationBinAndXMLFormats* output)
+bool uxr_deserialize_OBJK_RepresentationBinAndXMLFormats(
+        ucdrBuffer* buffer,
+        OBJK_RepresentationBinAndXMLFormats* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->format);
     if (ret)
     {
-        switch(output->format)
+        switch (output->format)
         {
             case DDS_XRCE_REPRESENTATION_IN_BINARY:
                 ret &= uxr_deserialize_BinarySequence_t(buffer, &output->_.binary_representation);
@@ -530,105 +618,135 @@ bool uxr_deserialize_OBJK_RepresentationBinAndXMLFormats(ucdrBuffer* buffer, OBJ
     return ret;
 }
 
-bool uxr_serialize_OBJK_RepresentationRefAndXML_Base(ucdrBuffer* buffer, const OBJK_RepresentationRefAndXML_Base* input)
+bool uxr_serialize_OBJK_RepresentationRefAndXML_Base(
+        ucdrBuffer* buffer,
+        const OBJK_RepresentationRefAndXML_Base* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationRefAndXMLFormats(buffer, &input->representation);
     return ret;
 }
 
-bool uxr_deserialize_OBJK_RepresentationRefAndXML_Base(ucdrBuffer* buffer, OBJK_RepresentationRefAndXML_Base* output)
+bool uxr_deserialize_OBJK_RepresentationRefAndXML_Base(
+        ucdrBuffer* buffer,
+        OBJK_RepresentationRefAndXML_Base* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationRefAndXMLFormats(buffer, &output->representation);
     return ret;
 }
 
-bool uxr_serialize_OBJK_RepresentationBinAndXML_Base(ucdrBuffer* buffer, const OBJK_RepresentationBinAndXML_Base* input)
+bool uxr_serialize_OBJK_RepresentationBinAndXML_Base(
+        ucdrBuffer* buffer,
+        const OBJK_RepresentationBinAndXML_Base* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationBinAndXMLFormats(buffer, &input->representation);
     return ret;
 }
 
-bool uxr_deserialize_OBJK_RepresentationBinAndXML_Base(ucdrBuffer* buffer, OBJK_RepresentationBinAndXML_Base* output)
+bool uxr_deserialize_OBJK_RepresentationBinAndXML_Base(
+        ucdrBuffer* buffer,
+        OBJK_RepresentationBinAndXML_Base* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationBinAndXMLFormats(buffer, &output->representation);
     return ret;
 }
 
-bool uxr_serialize_OBJK_Representation3_Base(ucdrBuffer* buffer, const OBJK_Representation3_Base* input)
+bool uxr_serialize_OBJK_Representation3_Base(
+        ucdrBuffer* buffer,
+        const OBJK_Representation3_Base* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Representation3Formats(buffer, &input->representation);
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Representation3_Base(ucdrBuffer* buffer, OBJK_Representation3_Base* output)
+bool uxr_deserialize_OBJK_Representation3_Base(
+        ucdrBuffer* buffer,
+        OBJK_Representation3_Base* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Representation3Formats(buffer, &output->representation);
     return ret;
 }
 
-bool uxr_serialize_OBJK_QOSPROFILE_Representation(ucdrBuffer* buffer, const OBJK_QOSPROFILE_Representation* input)
+bool uxr_serialize_OBJK_QOSPROFILE_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_QOSPROFILE_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool uxr_deserialize_OBJK_QOSPROFILE_Representation(ucdrBuffer* buffer, OBJK_QOSPROFILE_Representation* output)
+bool uxr_deserialize_OBJK_QOSPROFILE_Representation(
+        ucdrBuffer* buffer,
+        OBJK_QOSPROFILE_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool uxr_serialize_OBJK_TYPE_Representation(ucdrBuffer* buffer, const OBJK_TYPE_Representation* input)
+bool uxr_serialize_OBJK_TYPE_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_TYPE_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool uxr_deserialize_OBJK_TYPE_Representation(ucdrBuffer* buffer, OBJK_TYPE_Representation* output)
+bool uxr_deserialize_OBJK_TYPE_Representation(
+        ucdrBuffer* buffer,
+        OBJK_TYPE_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool uxr_serialize_OBJK_DOMAIN_Representation(ucdrBuffer* buffer, const OBJK_DOMAIN_Representation* input)
+bool uxr_serialize_OBJK_DOMAIN_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_DOMAIN_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool uxr_deserialize_OBJK_DOMAIN_Representation(ucdrBuffer* buffer, OBJK_DOMAIN_Representation* output)
+bool uxr_deserialize_OBJK_DOMAIN_Representation(
+        ucdrBuffer* buffer,
+        OBJK_DOMAIN_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool uxr_serialize_OBJK_APPLICATION_Representation(ucdrBuffer* buffer, const OBJK_APPLICATION_Representation* input)
+bool uxr_serialize_OBJK_APPLICATION_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_APPLICATION_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationRefAndXML_Base(buffer, &input->base);
     return ret;
 }
 
-bool uxr_deserialize_OBJK_APPLICATION_Representation(ucdrBuffer* buffer, OBJK_APPLICATION_Representation* output)
+bool uxr_deserialize_OBJK_APPLICATION_Representation(
+        ucdrBuffer* buffer,
+        OBJK_APPLICATION_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationRefAndXML_Base(buffer, &output->base);
     return ret;
 }
 
-bool uxr_serialize_OBJK_PUBLISHER_Representation(ucdrBuffer* buffer, const OBJK_PUBLISHER_Representation* input)
+bool uxr_serialize_OBJK_PUBLISHER_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_PUBLISHER_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
@@ -636,7 +754,9 @@ bool uxr_serialize_OBJK_PUBLISHER_Representation(ucdrBuffer* buffer, const OBJK_
     return ret;
 }
 
-bool uxr_deserialize_OBJK_PUBLISHER_Representation(ucdrBuffer* buffer, OBJK_PUBLISHER_Representation* output)
+bool uxr_deserialize_OBJK_PUBLISHER_Representation(
+        ucdrBuffer* buffer,
+        OBJK_PUBLISHER_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
@@ -644,7 +764,9 @@ bool uxr_deserialize_OBJK_PUBLISHER_Representation(ucdrBuffer* buffer, OBJK_PUBL
     return ret;
 }
 
-bool uxr_serialize_OBJK_SUBSCRIBER_Representation(ucdrBuffer* buffer, const OBJK_SUBSCRIBER_Representation* input)
+bool uxr_serialize_OBJK_SUBSCRIBER_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_SUBSCRIBER_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_RepresentationBinAndXML_Base(buffer, &input->base);
@@ -652,7 +774,9 @@ bool uxr_serialize_OBJK_SUBSCRIBER_Representation(ucdrBuffer* buffer, const OBJK
     return ret;
 }
 
-bool uxr_deserialize_OBJK_SUBSCRIBER_Representation(ucdrBuffer* buffer, OBJK_SUBSCRIBER_Representation* output)
+bool uxr_deserialize_OBJK_SUBSCRIBER_Representation(
+        ucdrBuffer* buffer,
+        OBJK_SUBSCRIBER_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_RepresentationBinAndXML_Base(buffer, &output->base);
@@ -660,7 +784,9 @@ bool uxr_deserialize_OBJK_SUBSCRIBER_Representation(ucdrBuffer* buffer, OBJK_SUB
     return ret;
 }
 
-bool uxr_serialize_DATAWRITER_Representation(ucdrBuffer* buffer, const DATAWRITER_Representation* input)
+bool uxr_serialize_DATAWRITER_Representation(
+        ucdrBuffer* buffer,
+        const DATAWRITER_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
@@ -668,7 +794,9 @@ bool uxr_serialize_DATAWRITER_Representation(ucdrBuffer* buffer, const DATAWRITE
     return ret;
 }
 
-bool uxr_deserialize_DATAWRITER_Representation(ucdrBuffer* buffer, DATAWRITER_Representation* output)
+bool uxr_deserialize_DATAWRITER_Representation(
+        ucdrBuffer* buffer,
+        DATAWRITER_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
@@ -676,7 +804,9 @@ bool uxr_deserialize_DATAWRITER_Representation(ucdrBuffer* buffer, DATAWRITER_Re
     return ret;
 }
 
-bool uxr_serialize_DATAREADER_Representation(ucdrBuffer* buffer, const DATAREADER_Representation* input)
+bool uxr_serialize_DATAREADER_Representation(
+        ucdrBuffer* buffer,
+        const DATAREADER_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
@@ -684,7 +814,9 @@ bool uxr_serialize_DATAREADER_Representation(ucdrBuffer* buffer, const DATAREADE
     return ret;
 }
 
-bool uxr_deserialize_DATAREADER_Representation(ucdrBuffer* buffer, DATAREADER_Representation* output)
+bool uxr_deserialize_DATAREADER_Representation(
+        ucdrBuffer* buffer,
+        DATAREADER_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
@@ -692,7 +824,9 @@ bool uxr_deserialize_DATAREADER_Representation(ucdrBuffer* buffer, DATAREADER_Re
     return ret;
 }
 
-bool uxr_serialize_OBJK_PARTICIPANT_Representation(ucdrBuffer* buffer, const OBJK_PARTICIPANT_Representation* input)
+bool uxr_serialize_OBJK_PARTICIPANT_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_PARTICIPANT_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
@@ -700,7 +834,9 @@ bool uxr_serialize_OBJK_PARTICIPANT_Representation(ucdrBuffer* buffer, const OBJ
     return ret;
 }
 
-bool uxr_deserialize_OBJK_PARTICIPANT_Representation(ucdrBuffer* buffer, OBJK_PARTICIPANT_Representation* output)
+bool uxr_deserialize_OBJK_PARTICIPANT_Representation(
+        ucdrBuffer* buffer,
+        OBJK_PARTICIPANT_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
@@ -708,7 +844,9 @@ bool uxr_deserialize_OBJK_PARTICIPANT_Representation(ucdrBuffer* buffer, OBJK_PA
     return ret;
 }
 
-bool uxr_serialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, const OBJK_TOPIC_Representation* input)
+bool uxr_serialize_OBJK_TOPIC_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_TOPIC_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
@@ -716,7 +854,9 @@ bool uxr_serialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, const OBJK_TOPI
     return ret;
 }
 
-bool uxr_deserialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, OBJK_TOPIC_Representation* output)
+bool uxr_deserialize_OBJK_TOPIC_Representation(
+        ucdrBuffer* buffer,
+        OBJK_TOPIC_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
@@ -724,7 +864,9 @@ bool uxr_deserialize_OBJK_TOPIC_Representation(ucdrBuffer* buffer, OBJK_TOPIC_Re
     return ret;
 }
 
-bool uxr_serialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, const OBJK_REQUESTER_Representation* input)
+bool uxr_serialize_OBJK_REQUESTER_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_REQUESTER_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
@@ -732,7 +874,9 @@ bool uxr_serialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, const OBJK_
     return ret;
 }
 
-bool uxr_deserialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, OBJK_REQUESTER_Representation* output)
+bool uxr_deserialize_OBJK_REQUESTER_Representation(
+        ucdrBuffer* buffer,
+        OBJK_REQUESTER_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
@@ -740,7 +884,9 @@ bool uxr_deserialize_OBJK_REQUESTER_Representation(ucdrBuffer* buffer, OBJK_REQU
     return ret;
 }
 
-bool uxr_serialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, const OBJK_REPLIER_Representation* input)
+bool uxr_serialize_OBJK_REPLIER_Representation(
+        ucdrBuffer* buffer,
+        const OBJK_REPLIER_Representation* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Representation3_Base(buffer, &input->base);
@@ -748,7 +894,9 @@ bool uxr_serialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, const OBJK_RE
     return ret;
 }
 
-bool uxr_deserialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, OBJK_REPLIER_Representation* output)
+bool uxr_deserialize_OBJK_REPLIER_Representation(
+        ucdrBuffer* buffer,
+        OBJK_REPLIER_Representation* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Representation3_Base(buffer, &output->base);
@@ -756,17 +904,19 @@ bool uxr_deserialize_OBJK_REPLIER_Representation(ucdrBuffer* buffer, OBJK_REPLIE
     return ret;
 }
 
-bool uxr_serialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, const OBJK_DomainParticipant_Binary* input)
+bool uxr_serialize_OBJK_DomainParticipant_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_DomainParticipant_Binary* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_bool(buffer, input->optional_domain_reference);
-    if(input->optional_domain_reference == true)
+    if (input->optional_domain_reference == true)
     {
         ret &= ucdr_serialize_string(buffer, input->domain_reference);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_qos_profile_reference);
-    if(input->optional_qos_profile_reference == true)
+    if (input->optional_qos_profile_reference == true)
     {
         ret &= ucdr_serialize_string(buffer, input->qos_profile_reference);
     }
@@ -774,36 +924,40 @@ bool uxr_serialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, const OBJK_
     return ret;
 }
 
-bool uxr_deserialize_OBJK_DomainParticipant_Binary(ucdrBuffer* buffer, OBJK_DomainParticipant_Binary* output)
+bool uxr_deserialize_OBJK_DomainParticipant_Binary(
+        ucdrBuffer* buffer,
+        OBJK_DomainParticipant_Binary* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_bool(buffer, &output->optional_domain_reference);
-    if(output->optional_domain_reference == true)
+    if (output->optional_domain_reference == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->domain_reference, UXR_STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->domain_reference, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos_profile_reference);
-    if(output->optional_qos_profile_reference == true)
+    if (output->optional_qos_profile_reference == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->qos_profile_reference, UXR_STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->qos_profile_reference, UXR_STRING_SIZE_MAX);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_Topic_Binary(ucdrBuffer* buffer, const OBJK_Topic_Binary* input)
+bool uxr_serialize_OBJK_Topic_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_Topic_Binary* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_string(buffer, input->topic_name);
     ret &= ucdr_serialize_bool(buffer, input->optional_type_reference);
-    if(input->optional_type_reference == true)
+    if (input->optional_type_reference == true)
     {
         ret &= ucdr_serialize_string(buffer, input->type_reference);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_type_name);
-    if(input->optional_type_name == true)
+    if (input->optional_type_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->type_name);
     }
@@ -811,36 +965,40 @@ bool uxr_serialize_OBJK_Topic_Binary(ucdrBuffer* buffer, const OBJK_Topic_Binary
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Topic_Binary(ucdrBuffer* buffer, OBJK_Topic_Binary* output)
+bool uxr_deserialize_OBJK_Topic_Binary(
+        ucdrBuffer* buffer,
+        OBJK_Topic_Binary* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_type_reference);
-    if(output->optional_type_reference == true)
+    if (output->optional_type_reference == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->type_reference, UXR_STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->type_reference, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_type_name);
-    if(output->optional_type_name == true)
+    if (output->optional_type_name == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->type_name, UXR_STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->type_name, UXR_STRING_SIZE_MAX);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_Publisher_Binary_Qos(ucdrBuffer* buffer, const OBJK_Publisher_Binary_Qos* input)
+bool uxr_serialize_OBJK_Publisher_Binary_Qos(
+        ucdrBuffer* buffer,
+        const OBJK_Publisher_Binary_Qos* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_bool(buffer, input->optional_partitions);
-    if(input->optional_partitions == true)
+    if (input->optional_partitions == true)
     {
         ret &= uxr_serialize_StringSequence_t(buffer, &input->partitions);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_group_data);
-    if(input->optional_group_data == true)
+    if (input->optional_group_data == true)
     {
         ret &= uxr_serialize_BinarySequence_t(buffer, &input->group_data);
     }
@@ -848,35 +1006,39 @@ bool uxr_serialize_OBJK_Publisher_Binary_Qos(ucdrBuffer* buffer, const OBJK_Publ
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Publisher_Binary_Qos(ucdrBuffer* buffer, OBJK_Publisher_Binary_Qos* output)
+bool uxr_deserialize_OBJK_Publisher_Binary_Qos(
+        ucdrBuffer* buffer,
+        OBJK_Publisher_Binary_Qos* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_bool(buffer, &output->optional_partitions);
-    if(output->optional_partitions == true)
+    if (output->optional_partitions == true)
     {
-            ret &= uxr_deserialize_StringSequence_t(buffer, &output->partitions);
+        ret &= uxr_deserialize_StringSequence_t(buffer, &output->partitions);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_group_data);
-    if(output->optional_group_data == true)
+    if (output->optional_group_data == true)
     {
-            ret &= uxr_deserialize_BinarySequence_t(buffer, &output->group_data);
+        ret &= uxr_deserialize_BinarySequence_t(buffer, &output->group_data);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_Publisher_Binary(ucdrBuffer* buffer, const OBJK_Publisher_Binary* input)
+bool uxr_serialize_OBJK_Publisher_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_Publisher_Binary* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_bool(buffer, input->optional_publisher_name);
-    if(input->optional_publisher_name == true)
+    if (input->optional_publisher_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->publisher_name);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_qos);
-    if(input->optional_qos == true)
+    if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_Publisher_Binary_Qos(buffer, &input->qos);
     }
@@ -884,35 +1046,39 @@ bool uxr_serialize_OBJK_Publisher_Binary(ucdrBuffer* buffer, const OBJK_Publishe
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Publisher_Binary(ucdrBuffer* buffer, OBJK_Publisher_Binary* output)
+bool uxr_deserialize_OBJK_Publisher_Binary(
+        ucdrBuffer* buffer,
+        OBJK_Publisher_Binary* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_bool(buffer, &output->optional_publisher_name);
-    if(output->optional_publisher_name == true)
+    if (output->optional_publisher_name == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->publisher_name, UXR_STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->publisher_name, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
-    if(output->optional_qos == true)
+    if (output->optional_qos == true)
     {
-            ret &= uxr_deserialize_OBJK_Publisher_Binary_Qos(buffer, &output->qos);
+        ret &= uxr_deserialize_OBJK_Publisher_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_Subscriber_Binary_Qos(ucdrBuffer* buffer, const OBJK_Subscriber_Binary_Qos* input)
+bool uxr_serialize_OBJK_Subscriber_Binary_Qos(
+        ucdrBuffer* buffer,
+        const OBJK_Subscriber_Binary_Qos* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_bool(buffer, input->optional_partitions);
-    if(input->optional_partitions == true)
+    if (input->optional_partitions == true)
     {
         ret &= uxr_serialize_StringSequence_t(buffer, &input->partitions);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_group_data);
-    if(input->optional_group_data == true)
+    if (input->optional_group_data == true)
     {
         ret &= uxr_serialize_BinarySequence_t(buffer, &input->group_data);
     }
@@ -920,35 +1086,39 @@ bool uxr_serialize_OBJK_Subscriber_Binary_Qos(ucdrBuffer* buffer, const OBJK_Sub
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Subscriber_Binary_Qos(ucdrBuffer* buffer, OBJK_Subscriber_Binary_Qos* output)
+bool uxr_deserialize_OBJK_Subscriber_Binary_Qos(
+        ucdrBuffer* buffer,
+        OBJK_Subscriber_Binary_Qos* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_bool(buffer, &output->optional_partitions);
-    if(output->optional_partitions == true)
+    if (output->optional_partitions == true)
     {
-            ret &= uxr_deserialize_StringSequence_t(buffer, &output->partitions);
+        ret &= uxr_deserialize_StringSequence_t(buffer, &output->partitions);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_group_data);
-    if(output->optional_group_data == true)
+    if (output->optional_group_data == true)
     {
-            ret &= uxr_deserialize_BinarySequence_t(buffer, &output->group_data);
+        ret &= uxr_deserialize_BinarySequence_t(buffer, &output->group_data);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_Subscriber_Binary(ucdrBuffer* buffer, const OBJK_Subscriber_Binary* input)
+bool uxr_serialize_OBJK_Subscriber_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_Subscriber_Binary* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_bool(buffer, input->optional_subscriber_name);
-    if(input->optional_subscriber_name == true)
+    if (input->optional_subscriber_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->subscriber_name);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_qos);
-    if(input->optional_qos == true)
+    if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_Subscriber_Binary_Qos(buffer, &input->qos);
     }
@@ -956,48 +1126,52 @@ bool uxr_serialize_OBJK_Subscriber_Binary(ucdrBuffer* buffer, const OBJK_Subscri
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Subscriber_Binary(ucdrBuffer* buffer, OBJK_Subscriber_Binary* output)
+bool uxr_deserialize_OBJK_Subscriber_Binary(
+        ucdrBuffer* buffer,
+        OBJK_Subscriber_Binary* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_bool(buffer, &output->optional_subscriber_name);
-    if(output->optional_subscriber_name == true)
+    if (output->optional_subscriber_name == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->subscriber_name, UXR_STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->subscriber_name, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
-    if(output->optional_qos == true)
+    if (output->optional_qos == true)
     {
-            ret &= uxr_deserialize_OBJK_Subscriber_Binary_Qos(buffer, &output->qos);
+        ret &= uxr_deserialize_OBJK_Subscriber_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_Endpoint_QosBinary(ucdrBuffer* buffer, const OBJK_Endpoint_QosBinary* input)
+bool uxr_serialize_OBJK_Endpoint_QosBinary(
+        ucdrBuffer* buffer,
+        const OBJK_Endpoint_QosBinary* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint16_t(buffer, input->qos_flags);
     ret &= ucdr_serialize_bool(buffer, input->optional_history_depth);
-    if(input->optional_history_depth == true)
+    if (input->optional_history_depth == true)
     {
         ret &= ucdr_serialize_uint16_t(buffer, input->history_depth);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_deadline_msec);
-    if(input->optional_deadline_msec == true)
+    if (input->optional_deadline_msec == true)
     {
         ret &= ucdr_serialize_uint32_t(buffer, input->deadline_msec);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_lifespan_msec);
-    if(input->optional_lifespan_msec == true)
+    if (input->optional_lifespan_msec == true)
     {
         ret &= ucdr_serialize_uint32_t(buffer, input->lifespan_msec);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_user_data);
-    if(input->optional_user_data == true)
+    if (input->optional_user_data == true)
     {
         ret &= uxr_serialize_BinarySequence_t(buffer, &input->user_data);
     }
@@ -1005,43 +1179,47 @@ bool uxr_serialize_OBJK_Endpoint_QosBinary(ucdrBuffer* buffer, const OBJK_Endpoi
     return ret;
 }
 
-bool uxr_deserialize_OBJK_Endpoint_QosBinary(ucdrBuffer* buffer, OBJK_Endpoint_QosBinary* output)
+bool uxr_deserialize_OBJK_Endpoint_QosBinary(
+        ucdrBuffer* buffer,
+        OBJK_Endpoint_QosBinary* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint16_t(buffer, &output->qos_flags);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_history_depth);
-    if(output->optional_history_depth == true)
+    if (output->optional_history_depth == true)
     {
-            ret &= ucdr_deserialize_uint16_t(buffer, &output->history_depth);
+        ret &= ucdr_deserialize_uint16_t(buffer, &output->history_depth);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_deadline_msec);
-    if(output->optional_deadline_msec == true)
+    if (output->optional_deadline_msec == true)
     {
-            ret &= ucdr_deserialize_uint32_t(buffer, &output->deadline_msec);
+        ret &= ucdr_deserialize_uint32_t(buffer, &output->deadline_msec);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_lifespan_msec);
-    if(output->optional_lifespan_msec == true)
+    if (output->optional_lifespan_msec == true)
     {
-            ret &= ucdr_deserialize_uint32_t(buffer, &output->lifespan_msec);
+        ret &= ucdr_deserialize_uint32_t(buffer, &output->lifespan_msec);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_user_data);
-    if(output->optional_user_data == true)
+    if (output->optional_user_data == true)
     {
-            ret &= uxr_deserialize_BinarySequence_t(buffer, &output->user_data);
+        ret &= uxr_deserialize_BinarySequence_t(buffer, &output->user_data);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_DataWriter_Binary_Qos(ucdrBuffer* buffer, const OBJK_DataWriter_Binary_Qos* input)
+bool uxr_serialize_OBJK_DataWriter_Binary_Qos(
+        ucdrBuffer* buffer,
+        const OBJK_DataWriter_Binary_Qos* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
     ret &= ucdr_serialize_bool(buffer, input->optional_ownership_strength);
-    if(input->optional_ownership_strength == true)
+    if (input->optional_ownership_strength == true)
     {
         ret &= ucdr_serialize_uint64_t(buffer, input->ownership_strength);
     }
@@ -1049,31 +1227,35 @@ bool uxr_serialize_OBJK_DataWriter_Binary_Qos(ucdrBuffer* buffer, const OBJK_Dat
     return ret;
 }
 
-bool uxr_deserialize_OBJK_DataWriter_Binary_Qos(ucdrBuffer* buffer, OBJK_DataWriter_Binary_Qos* output)
+bool uxr_deserialize_OBJK_DataWriter_Binary_Qos(
+        ucdrBuffer* buffer,
+        OBJK_DataWriter_Binary_Qos* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_ownership_strength);
-    if(output->optional_ownership_strength == true)
+    if (output->optional_ownership_strength == true)
     {
-            ret &= ucdr_deserialize_uint64_t(buffer, &output->ownership_strength);
+        ret &= ucdr_deserialize_uint64_t(buffer, &output->ownership_strength);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_DataReader_Binary_Qos(ucdrBuffer* buffer, const OBJK_DataReader_Binary_Qos* input)
+bool uxr_serialize_OBJK_DataReader_Binary_Qos(
+        ucdrBuffer* buffer,
+        const OBJK_DataReader_Binary_Qos* input)
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
     ret &= ucdr_serialize_bool(buffer, input->optional_timebasedfilter_msec);
-    if(input->optional_timebasedfilter_msec == true)
+    if (input->optional_timebasedfilter_msec == true)
     {
         ret &= ucdr_serialize_uint64_t(buffer, input->timebasedfilter_msec);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_contentbased_filter);
-    if(input->optional_contentbased_filter == true)
+    if (input->optional_contentbased_filter == true)
     {
         ret &= ucdr_serialize_string(buffer, input->contentbased_filter);
     }
@@ -1081,31 +1263,35 @@ bool uxr_serialize_OBJK_DataReader_Binary_Qos(ucdrBuffer* buffer, const OBJK_Dat
     return ret;
 }
 
-bool uxr_deserialize_OBJK_DataReader_Binary_Qos(ucdrBuffer* buffer, OBJK_DataReader_Binary_Qos* output)
+bool uxr_deserialize_OBJK_DataReader_Binary_Qos(
+        ucdrBuffer* buffer,
+        OBJK_DataReader_Binary_Qos* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_OBJK_Endpoint_QosBinary(buffer, &output->base);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_timebasedfilter_msec);
-    if(output->optional_timebasedfilter_msec == true)
+    if (output->optional_timebasedfilter_msec == true)
     {
-            ret &= ucdr_deserialize_uint64_t(buffer, &output->timebasedfilter_msec);
+        ret &= ucdr_deserialize_uint64_t(buffer, &output->timebasedfilter_msec);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_contentbased_filter);
-    if(output->optional_contentbased_filter == true)
+    if (output->optional_contentbased_filter == true)
     {
-            ret &= ucdr_deserialize_string(buffer, output->contentbased_filter, UXR_STRING_SIZE_MAX);
+        ret &= ucdr_deserialize_string(buffer, output->contentbased_filter, UXR_STRING_SIZE_MAX);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_DataReader_Binary(ucdrBuffer* buffer, const OBJK_DataReader_Binary* input)
+bool uxr_serialize_OBJK_DataReader_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_DataReader_Binary* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_string(buffer, input->topic_name);
     ret &= ucdr_serialize_bool(buffer, input->optional_qos);
-    if(input->optional_qos == true)
+    if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_DataReader_Binary_Qos(buffer, &input->qos);
     }
@@ -1113,25 +1299,29 @@ bool uxr_serialize_OBJK_DataReader_Binary(ucdrBuffer* buffer, const OBJK_DataRea
     return ret;
 }
 
-bool uxr_deserialize_OBJK_DataReader_Binary(ucdrBuffer* buffer, OBJK_DataReader_Binary* output)
+bool uxr_deserialize_OBJK_DataReader_Binary(
+        ucdrBuffer* buffer,
+        OBJK_DataReader_Binary* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
-    if(output->optional_qos == true)
+    if (output->optional_qos == true)
     {
-            ret &= uxr_deserialize_OBJK_DataReader_Binary_Qos(buffer, &output->qos);
+        ret &= uxr_deserialize_OBJK_DataReader_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool uxr_serialize_OBJK_DataWriter_Binary(ucdrBuffer* buffer, const OBJK_DataWriter_Binary* input)
+bool uxr_serialize_OBJK_DataWriter_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_DataWriter_Binary* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_string(buffer, input->topic_name);
     ret &= ucdr_serialize_bool(buffer, input->optional_qos);
-    if(input->optional_qos == true)
+    if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_DataWriter_Binary_Qos(buffer, &input->qos);
     }
@@ -1139,26 +1329,30 @@ bool uxr_serialize_OBJK_DataWriter_Binary(ucdrBuffer* buffer, const OBJK_DataWri
     return ret;
 }
 
-bool uxr_deserialize_OBJK_DataWriter_Binary(ucdrBuffer* buffer, OBJK_DataWriter_Binary* output)
+bool uxr_deserialize_OBJK_DataWriter_Binary(
+        ucdrBuffer* buffer,
+        OBJK_DataWriter_Binary* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
-    if(output->optional_qos == true)
+    if (output->optional_qos == true)
     {
-            ret &= uxr_deserialize_OBJK_DataWriter_Binary_Qos(buffer, &output->qos);
+        ret &= uxr_deserialize_OBJK_DataWriter_Binary_Qos(buffer, &output->qos);
     }
 
     return ret;
 }
 
-bool uxr_serialize_ObjectVariant(ucdrBuffer* buffer, const ObjectVariant* input)
+bool uxr_serialize_ObjectVariant(
+        ucdrBuffer* buffer,
+        const ObjectVariant* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->kind);
     if (ret)
     {
-        switch(input->kind)
+        switch (input->kind)
         {
             case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_serialize_AGENT_Representation(buffer, &input->_.agent);
@@ -1206,13 +1400,15 @@ bool uxr_serialize_ObjectVariant(ucdrBuffer* buffer, const ObjectVariant* input)
     return ret;
 }
 
-bool uxr_deserialize_ObjectVariant(ucdrBuffer* buffer, ObjectVariant* output)
+bool uxr_deserialize_ObjectVariant(
+        ucdrBuffer* buffer,
+        ObjectVariant* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->kind);
     if (ret)
     {
-        switch(output->kind)
+        switch (output->kind)
         {
             case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_deserialize_AGENT_Representation(buffer, &output->_.agent);
@@ -1260,7 +1456,9 @@ bool uxr_deserialize_ObjectVariant(ucdrBuffer* buffer, ObjectVariant* output)
     return ret;
 }
 
-bool uxr_serialize_CreationMode(ucdrBuffer* buffer, const CreationMode* input)
+bool uxr_serialize_CreationMode(
+        ucdrBuffer* buffer,
+        const CreationMode* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_bool(buffer, input->reuse);
@@ -1268,7 +1466,9 @@ bool uxr_serialize_CreationMode(ucdrBuffer* buffer, const CreationMode* input)
     return ret;
 }
 
-bool uxr_deserialize_CreationMode(ucdrBuffer* buffer, CreationMode* output)
+bool uxr_deserialize_CreationMode(
+        ucdrBuffer* buffer,
+        CreationMode* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_bool(buffer, &output->reuse);
@@ -1276,21 +1476,27 @@ bool uxr_deserialize_CreationMode(ucdrBuffer* buffer, CreationMode* output)
     return ret;
 }
 
-bool uxr_serialize_RequestId(ucdrBuffer* buffer, const RequestId* input)
+bool uxr_serialize_RequestId(
+        ucdrBuffer* buffer,
+        const RequestId* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, 2);
     return ret;
 }
 
-bool uxr_deserialize_RequestId(ucdrBuffer* buffer, RequestId* output)
+bool uxr_deserialize_RequestId(
+        ucdrBuffer* buffer,
+        RequestId* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, 2);
     return ret;
 }
 
-bool uxr_serialize_ResultStatus(ucdrBuffer* buffer, const ResultStatus* input)
+bool uxr_serialize_ResultStatus(
+        ucdrBuffer* buffer,
+        const ResultStatus* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->status);
@@ -1298,7 +1504,9 @@ bool uxr_serialize_ResultStatus(ucdrBuffer* buffer, const ResultStatus* input)
     return ret;
 }
 
-bool uxr_deserialize_ResultStatus(ucdrBuffer* buffer, ResultStatus* output)
+bool uxr_deserialize_ResultStatus(
+        ucdrBuffer* buffer,
+        ResultStatus* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->status);
@@ -1306,7 +1514,9 @@ bool uxr_deserialize_ResultStatus(ucdrBuffer* buffer, ResultStatus* output)
     return ret;
 }
 
-bool uxr_serialize_BaseObjectRequest(ucdrBuffer* buffer, const BaseObjectRequest* input)
+bool uxr_serialize_BaseObjectRequest(
+        ucdrBuffer* buffer,
+        const BaseObjectRequest* input)
 {
     bool ret = true;
     ret &= uxr_serialize_RequestId(buffer, &input->request_id);
@@ -1314,7 +1524,9 @@ bool uxr_serialize_BaseObjectRequest(ucdrBuffer* buffer, const BaseObjectRequest
     return ret;
 }
 
-bool uxr_deserialize_BaseObjectRequest(ucdrBuffer* buffer, BaseObjectRequest* output)
+bool uxr_deserialize_BaseObjectRequest(
+        ucdrBuffer* buffer,
+        BaseObjectRequest* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_RequestId(buffer, &output->request_id);
@@ -1322,37 +1534,47 @@ bool uxr_deserialize_BaseObjectRequest(ucdrBuffer* buffer, BaseObjectRequest* ou
     return ret;
 }
 
-bool uxr_serialize_AGENT_ActivityInfo(ucdrBuffer* buffer, const AGENT_ActivityInfo* input)
+bool uxr_serialize_AGENT_ActivityInfo(
+        ucdrBuffer* buffer,
+        const AGENT_ActivityInfo* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_int16_t(buffer, input->availibility);
+    ret &= ucdr_serialize_int16_t(buffer, input->availability);
     ret &= uxr_serialize_TransportLocatorSeq(buffer, &input->address_seq);
     return ret;
 }
 
-bool uxr_deserialize_AGENT_ActivityInfo(ucdrBuffer* buffer, AGENT_ActivityInfo* output)
+bool uxr_deserialize_AGENT_ActivityInfo(
+        ucdrBuffer* buffer,
+        AGENT_ActivityInfo* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_int16_t(buffer, &output->availibility);
+    ret &= ucdr_deserialize_int16_t(buffer, &output->availability);
     ret &= uxr_deserialize_TransportLocatorSeq(buffer, &output->address_seq);
     return ret;
 }
 
-bool uxr_serialize_DATAREADER_ActivityInfo(ucdrBuffer* buffer, const DATAREADER_ActivityInfo* input)
+bool uxr_serialize_DATAREADER_ActivityInfo(
+        ucdrBuffer* buffer,
+        const DATAREADER_ActivityInfo* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_int16_t(buffer, input->highest_acked_num);
     return ret;
 }
 
-bool uxr_deserialize_DATAREADER_ActivityInfo(ucdrBuffer* buffer, DATAREADER_ActivityInfo* output)
+bool uxr_deserialize_DATAREADER_ActivityInfo(
+        ucdrBuffer* buffer,
+        DATAREADER_ActivityInfo* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_int16_t(buffer, &output->highest_acked_num);
     return ret;
 }
 
-bool uxr_serialize_DATAWRITER_ActivityInfo(ucdrBuffer* buffer, const DATAWRITER_ActivityInfo* input)
+bool uxr_serialize_DATAWRITER_ActivityInfo(
+        ucdrBuffer* buffer,
+        const DATAWRITER_ActivityInfo* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_int16_t(buffer, input->stream_seq_num);
@@ -1360,7 +1582,9 @@ bool uxr_serialize_DATAWRITER_ActivityInfo(ucdrBuffer* buffer, const DATAWRITER_
     return ret;
 }
 
-bool uxr_deserialize_DATAWRITER_ActivityInfo(ucdrBuffer* buffer, DATAWRITER_ActivityInfo* output)
+bool uxr_deserialize_DATAWRITER_ActivityInfo(
+        ucdrBuffer* buffer,
+        DATAWRITER_ActivityInfo* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_int16_t(buffer, &output->stream_seq_num);
@@ -1368,13 +1592,15 @@ bool uxr_deserialize_DATAWRITER_ActivityInfo(ucdrBuffer* buffer, DATAWRITER_Acti
     return ret;
 }
 
-bool uxr_serialize_ActivityInfoVariant(ucdrBuffer* buffer, const ActivityInfoVariant* input)
+bool uxr_serialize_ActivityInfoVariant(
+        ucdrBuffer* buffer,
+        const ActivityInfoVariant* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->kind);
     if (ret)
     {
-        switch(input->kind)
+        switch (input->kind)
         {
             case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_serialize_AGENT_ActivityInfo(buffer, &input->_.agent);
@@ -1392,13 +1618,15 @@ bool uxr_serialize_ActivityInfoVariant(ucdrBuffer* buffer, const ActivityInfoVar
     return ret;
 }
 
-bool uxr_deserialize_ActivityInfoVariant(ucdrBuffer* buffer, ActivityInfoVariant* output)
+bool uxr_deserialize_ActivityInfoVariant(
+        ucdrBuffer* buffer,
+        ActivityInfoVariant* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->kind);
     if (ret)
     {
-        switch(output->kind)
+        switch (output->kind)
         {
             case DDS_XRCE_OBJK_AGENT:
                 ret &= uxr_deserialize_AGENT_ActivityInfo(buffer, &output->_.agent);
@@ -1416,17 +1644,19 @@ bool uxr_deserialize_ActivityInfoVariant(ucdrBuffer* buffer, ActivityInfoVariant
     return ret;
 }
 
-bool uxr_serialize_ObjectInfo(ucdrBuffer* buffer, const ObjectInfo* input)
+bool uxr_serialize_ObjectInfo(
+        ucdrBuffer* buffer,
+        const ObjectInfo* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_bool(buffer, input->optional_config);
-    if(input->optional_config == true)
+    if (input->optional_config == true)
     {
         ret &= uxr_serialize_ObjectVariant(buffer, &input->config);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_activity);
-    if(input->optional_activity == true)
+    if (input->optional_activity == true)
     {
         ret &= uxr_serialize_ActivityInfoVariant(buffer, &input->activity);
     }
@@ -1434,25 +1664,29 @@ bool uxr_serialize_ObjectInfo(ucdrBuffer* buffer, const ObjectInfo* input)
     return ret;
 }
 
-bool uxr_deserialize_ObjectInfo(ucdrBuffer* buffer, ObjectInfo* output)
+bool uxr_deserialize_ObjectInfo(
+        ucdrBuffer* buffer,
+        ObjectInfo* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_bool(buffer, &output->optional_config);
-    if(output->optional_config == true)
+    if (output->optional_config == true)
     {
-            ret &= uxr_deserialize_ObjectVariant(buffer, &output->config);
+        ret &= uxr_deserialize_ObjectVariant(buffer, &output->config);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_activity);
-    if(output->optional_activity == true)
+    if (output->optional_activity == true)
     {
-            ret &= uxr_deserialize_ActivityInfoVariant(buffer, &output->activity);
+        ret &= uxr_deserialize_ActivityInfoVariant(buffer, &output->activity);
     }
 
     return ret;
 }
 
-bool uxr_serialize_BaseObjectReply(ucdrBuffer* buffer, const BaseObjectReply* input)
+bool uxr_serialize_BaseObjectReply(
+        ucdrBuffer* buffer,
+        const BaseObjectReply* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->related_request);
@@ -1460,7 +1694,9 @@ bool uxr_serialize_BaseObjectReply(ucdrBuffer* buffer, const BaseObjectReply* in
     return ret;
 }
 
-bool uxr_deserialize_BaseObjectReply(ucdrBuffer* buffer, BaseObjectReply* output)
+bool uxr_deserialize_BaseObjectReply(
+        ucdrBuffer* buffer,
+        BaseObjectReply* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->related_request);
@@ -1468,7 +1704,9 @@ bool uxr_deserialize_BaseObjectReply(ucdrBuffer* buffer, BaseObjectReply* output
     return ret;
 }
 
-bool uxr_serialize_DataDeliveryControl(ucdrBuffer* buffer, const DataDeliveryControl* input)
+bool uxr_serialize_DataDeliveryControl(
+        ucdrBuffer* buffer,
+        const DataDeliveryControl* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint16_t(buffer, input->max_samples);
@@ -1478,7 +1716,9 @@ bool uxr_serialize_DataDeliveryControl(ucdrBuffer* buffer, const DataDeliveryCon
     return ret;
 }
 
-bool uxr_deserialize_DataDeliveryControl(ucdrBuffer* buffer, DataDeliveryControl* output)
+bool uxr_deserialize_DataDeliveryControl(
+        ucdrBuffer* buffer,
+        DataDeliveryControl* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint16_t(buffer, &output->max_samples);
@@ -1488,19 +1728,21 @@ bool uxr_deserialize_DataDeliveryControl(ucdrBuffer* buffer, DataDeliveryControl
     return ret;
 }
 
-bool uxr_serialize_ReadSpecification(ucdrBuffer* buffer, const ReadSpecification* input)
+bool uxr_serialize_ReadSpecification(
+        ucdrBuffer* buffer,
+        const ReadSpecification* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->preferred_stream_id);
     ret &= ucdr_serialize_uint8_t(buffer, input->data_format);
     ret &= ucdr_serialize_bool(buffer, input->optional_content_filter_expression);
-    if(input->optional_content_filter_expression == true)
+    if (input->optional_content_filter_expression == true)
     {
         ret &= ucdr_serialize_string(buffer, input->content_filter_expression);
     }
 
     ret &= ucdr_serialize_bool(buffer, input->optional_delivery_control);
-    if(input->optional_delivery_control == true)
+    if (input->optional_delivery_control == true)
     {
         ret &= uxr_serialize_DataDeliveryControl(buffer, &input->delivery_control);
     }
@@ -1508,19 +1750,21 @@ bool uxr_serialize_ReadSpecification(ucdrBuffer* buffer, const ReadSpecification
     return ret;
 }
 
-bool uxr_deserialize_ReadSpecification(ucdrBuffer* buffer, ReadSpecification* output)
+bool uxr_deserialize_ReadSpecification(
+        ucdrBuffer* buffer,
+        ReadSpecification* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->preferred_stream_id);
     ret &= ucdr_deserialize_uint8_t(buffer, &output->data_format);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_content_filter_expression);
-    if(output->optional_content_filter_expression == true)
+    if (output->optional_content_filter_expression == true)
     {
         ret &= ucdr_deserialize_string(buffer, output->content_filter_expression, UXR_STRING_SIZE_MAX);
     }
 
     ret &= ucdr_deserialize_bool(buffer, &output->optional_delivery_control);
-    if(output->optional_delivery_control == true)
+    if (output->optional_delivery_control == true)
     {
         ret &= uxr_deserialize_DataDeliveryControl(buffer, &output->delivery_control);
     }
@@ -1528,7 +1772,9 @@ bool uxr_deserialize_ReadSpecification(ucdrBuffer* buffer, ReadSpecification* ou
     return ret;
 }
 
-bool uxr_serialize_SeqNumberAndTimestamp(ucdrBuffer* buffer, const SeqNumberAndTimestamp* input)
+bool uxr_serialize_SeqNumberAndTimestamp(
+        ucdrBuffer* buffer,
+        const SeqNumberAndTimestamp* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint32_t(buffer, input->sequence_number);
@@ -1536,7 +1782,9 @@ bool uxr_serialize_SeqNumberAndTimestamp(ucdrBuffer* buffer, const SeqNumberAndT
     return ret;
 }
 
-bool uxr_deserialize_SeqNumberAndTimestamp(ucdrBuffer* buffer, SeqNumberAndTimestamp* output)
+bool uxr_deserialize_SeqNumberAndTimestamp(
+        ucdrBuffer* buffer,
+        SeqNumberAndTimestamp* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint32_t(buffer, &output->sequence_number);
@@ -1544,13 +1792,15 @@ bool uxr_deserialize_SeqNumberAndTimestamp(ucdrBuffer* buffer, SeqNumberAndTimes
     return ret;
 }
 
-bool uxr_serialize_SampleInfoDetail(ucdrBuffer* buffer, const SampleInfoDetail* input)
+bool uxr_serialize_SampleInfoDetail(
+        ucdrBuffer* buffer,
+        const SampleInfoDetail* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint32_t(buffer, input->format);
     if (ret)
     {
-        switch(input->format)
+        switch (input->format)
         {
             case FORMAT_EMPTY:
                 ret &= ucdr_serialize_uint32_t(buffer, input->_.sequence_number);
@@ -1568,13 +1818,15 @@ bool uxr_serialize_SampleInfoDetail(ucdrBuffer* buffer, const SampleInfoDetail* 
     return ret;
 }
 
-bool uxr_deserialize_SampleInfoDetail(ucdrBuffer* buffer, SampleInfoDetail* output)
+bool uxr_deserialize_SampleInfoDetail(
+        ucdrBuffer* buffer,
+        SampleInfoDetail* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint32_t(buffer, &output->format);
     if (ret)
     {
-        switch(output->format)
+        switch (output->format)
         {
             case FORMAT_EMPTY:
                 ret &= ucdr_deserialize_uint32_t(buffer, &output->_.sequence_number);
@@ -1592,7 +1844,9 @@ bool uxr_deserialize_SampleInfoDetail(ucdrBuffer* buffer, SampleInfoDetail* outp
     return ret;
 }
 
-bool uxr_serialize_SampleInfo(ucdrBuffer* buffer, const SampleInfo* input)
+bool uxr_serialize_SampleInfo(
+        ucdrBuffer* buffer,
+        const SampleInfo* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->state);
@@ -1600,7 +1854,9 @@ bool uxr_serialize_SampleInfo(ucdrBuffer* buffer, const SampleInfo* input)
     return ret;
 }
 
-bool uxr_deserialize_SampleInfo(ucdrBuffer* buffer, SampleInfo* output)
+bool uxr_deserialize_SampleInfo(
+        ucdrBuffer* buffer,
+        SampleInfo* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->state);
@@ -1608,7 +1864,9 @@ bool uxr_deserialize_SampleInfo(ucdrBuffer* buffer, SampleInfo* output)
     return ret;
 }
 
-bool uxr_serialize_SampleInfoDelta(ucdrBuffer* buffer, const SampleInfoDelta* input)
+bool uxr_serialize_SampleInfoDelta(
+        ucdrBuffer* buffer,
+        const SampleInfoDelta* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->state);
@@ -1617,7 +1875,9 @@ bool uxr_serialize_SampleInfoDelta(ucdrBuffer* buffer, const SampleInfoDelta* in
     return ret;
 }
 
-bool uxr_deserialize_SampleInfoDelta(ucdrBuffer* buffer, SampleInfoDelta* output)
+bool uxr_deserialize_SampleInfoDelta(
+        ucdrBuffer* buffer,
+        SampleInfoDelta* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->state);
@@ -1626,37 +1886,45 @@ bool uxr_deserialize_SampleInfoDelta(ucdrBuffer* buffer, SampleInfoDelta* output
     return ret;
 }
 
-bool uxr_serialize_SampleData(ucdrBuffer* buffer, const SampleData* input)
+bool uxr_serialize_SampleData(
+        ucdrBuffer* buffer,
+        const SampleData* input)
 {
     return ucdr_serialize_sequence_uint8_t(buffer, input->data, input->size);
 }
 
-bool uxr_deserialize_SampleData(ucdrBuffer* buffer, SampleData* output)
+bool uxr_deserialize_SampleData(
+        ucdrBuffer* buffer,
+        SampleData* output)
 {
     return ucdr_deserialize_sequence_uint8_t(buffer, output->data, UXR_SAMPLE_DATA_SIZE_MAX, &output->size);
 }
 
-bool uxr_serialize_SampleDataSeq(ucdrBuffer* buffer, const SampleDataSeq* input)
+bool uxr_serialize_SampleDataSeq(
+        ucdrBuffer* buffer,
+        const SampleDataSeq* input)
 {
     bool ret = ucdr_serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size && ret; i++)
+    for (uint32_t i = 0; i < input->size && ret; i++)
     {
         ret = uxr_serialize_SampleData(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool uxr_deserialize_SampleDataSeq(ucdrBuffer* buffer, SampleDataSeq* output)
+bool uxr_deserialize_SampleDataSeq(
+        ucdrBuffer* buffer,
+        SampleDataSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > UXR_SAMPLE_DATA_SEQUENCE_MAX)
+    if (output->size > UXR_SAMPLE_DATA_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
     }
     else
     {
-        for(uint32_t i = 0; i < output->size && ret; i++)
+        for (uint32_t i = 0; i < output->size && ret; i++)
         {
             ret = uxr_deserialize_SampleData(buffer, &output->data[i]);
         }
@@ -1664,7 +1932,9 @@ bool uxr_deserialize_SampleDataSeq(ucdrBuffer* buffer, SampleDataSeq* output)
     return ret;
 }
 
-bool uxr_serialize_Sample(ucdrBuffer* buffer, const Sample* input)
+bool uxr_serialize_Sample(
+        ucdrBuffer* buffer,
+        const Sample* input)
 {
     bool ret = true;
     ret &= uxr_serialize_SampleInfo(buffer, &input->info);
@@ -1672,7 +1942,9 @@ bool uxr_serialize_Sample(ucdrBuffer* buffer, const Sample* input)
     return ret;
 }
 
-bool uxr_deserialize_Sample(ucdrBuffer* buffer, Sample* output)
+bool uxr_deserialize_Sample(
+        ucdrBuffer* buffer,
+        Sample* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_SampleInfo(buffer, &output->info);
@@ -1680,27 +1952,31 @@ bool uxr_deserialize_Sample(ucdrBuffer* buffer, Sample* output)
     return ret;
 }
 
-bool uxr_serialize_SampleSeq(ucdrBuffer* buffer, const SampleSeq* input)
+bool uxr_serialize_SampleSeq(
+        ucdrBuffer* buffer,
+        const SampleSeq* input)
 {
     bool ret = ucdr_serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size && ret; i++)
+    for (uint32_t i = 0; i < input->size && ret; i++)
     {
         ret = uxr_serialize_Sample(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool uxr_deserialize_SampleSeq(ucdrBuffer* buffer, SampleSeq* output)
+bool uxr_deserialize_SampleSeq(
+        ucdrBuffer* buffer,
+        SampleSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > UXR_SAMPLE_SEQUENCE_MAX)
+    if (output->size > UXR_SAMPLE_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
     }
     else
     {
-        for(uint32_t i = 0; i < output->size && ret; i++)
+        for (uint32_t i = 0; i < output->size && ret; i++)
         {
             ret = uxr_deserialize_Sample(buffer, &output->data[i]);
         }
@@ -1708,7 +1984,9 @@ bool uxr_deserialize_SampleSeq(ucdrBuffer* buffer, SampleSeq* output)
     return ret;
 }
 
-bool uxr_serialize_SampleDelta(ucdrBuffer* buffer, const SampleDelta* input)
+bool uxr_serialize_SampleDelta(
+        ucdrBuffer* buffer,
+        const SampleDelta* input)
 {
     bool ret = true;
     ret &= uxr_serialize_SampleInfoDelta(buffer, &input->info_delta);
@@ -1716,7 +1994,9 @@ bool uxr_serialize_SampleDelta(ucdrBuffer* buffer, const SampleDelta* input)
     return ret;
 }
 
-bool uxr_deserialize_SampleDelta(ucdrBuffer* buffer, SampleDelta* output)
+bool uxr_deserialize_SampleDelta(
+        ucdrBuffer* buffer,
+        SampleDelta* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_SampleInfoDelta(buffer, &output->info_delta);
@@ -1724,27 +2004,31 @@ bool uxr_deserialize_SampleDelta(ucdrBuffer* buffer, SampleDelta* output)
     return ret;
 }
 
-bool uxr_serialize_SampleDeltaSequence(ucdrBuffer* buffer, const SampleDeltaSequence* input)
+bool uxr_serialize_SampleDeltaSequence(
+        ucdrBuffer* buffer,
+        const SampleDeltaSequence* input)
 {
     bool ret = ucdr_serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size && ret; i++)
+    for (uint32_t i = 0; i < input->size && ret; i++)
     {
         ret = uxr_serialize_SampleDelta(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool uxr_deserialize_SampleDeltaSequence(ucdrBuffer* buffer, SampleDeltaSequence* output)
+bool uxr_deserialize_SampleDeltaSequence(
+        ucdrBuffer* buffer,
+        SampleDeltaSequence* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > UXR_SAMPLE_DELTA_SEQUENCE_MAX)
+    if (output->size > UXR_SAMPLE_DELTA_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
     }
     else
     {
-        for(uint32_t i = 0; i < output->size && ret; i++)
+        for (uint32_t i = 0; i < output->size && ret; i++)
         {
             ret = uxr_deserialize_SampleDelta(buffer, &output->data[i]);
         }
@@ -1752,7 +2036,9 @@ bool uxr_deserialize_SampleDeltaSequence(ucdrBuffer* buffer, SampleDeltaSequence
     return ret;
 }
 
-bool uxr_serialize_PackedSamples(ucdrBuffer* buffer, const PackedSamples* input)
+bool uxr_serialize_PackedSamples(
+        ucdrBuffer* buffer,
+        const PackedSamples* input)
 {
     bool ret = true;
     ret &= uxr_serialize_SampleInfo(buffer, &input->info_base);
@@ -1760,7 +2046,9 @@ bool uxr_serialize_PackedSamples(ucdrBuffer* buffer, const PackedSamples* input)
     return ret;
 }
 
-bool uxr_deserialize_PackedSamples(ucdrBuffer* buffer, PackedSamples* output)
+bool uxr_deserialize_PackedSamples(
+        ucdrBuffer* buffer,
+        PackedSamples* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_SampleInfo(buffer, &output->info_base);
@@ -1768,27 +2056,31 @@ bool uxr_deserialize_PackedSamples(ucdrBuffer* buffer, PackedSamples* output)
     return ret;
 }
 
-bool uxr_serialize_SamplePackedSeq(ucdrBuffer* buffer, const SamplePackedSeq* input)
+bool uxr_serialize_SamplePackedSeq(
+        ucdrBuffer* buffer,
+        const SamplePackedSeq* input)
 {
     bool ret = ucdr_serialize_uint32_t(buffer, input->size);
-    for(uint32_t i = 0; i < input->size && ret; i++)
+    for (uint32_t i = 0; i < input->size && ret; i++)
     {
         ret = uxr_serialize_PackedSamples(buffer, &input->data[i]);
     }
     return ret;
 }
 
-bool uxr_deserialize_SamplePackedSeq(ucdrBuffer* buffer, SamplePackedSeq* output)
+bool uxr_deserialize_SamplePackedSeq(
+        ucdrBuffer* buffer,
+        SamplePackedSeq* output)
 {
     bool ret = ucdr_deserialize_uint32_t(buffer, &output->size);
-    if(output->size > UXR_PACKED_SAMPLES_SEQUENCE_MAX)
+    if (output->size > UXR_PACKED_SAMPLES_SEQUENCE_MAX)
     {
         buffer->error = true;
         ret = false;
     }
     else
     {
-        for(uint32_t i = 0; i < output->size && ret; i++)
+        for (uint32_t i = 0; i < output->size && ret; i++)
         {
             ret = uxr_deserialize_PackedSamples(buffer, &output->data[i]);
         }
@@ -1796,13 +2088,15 @@ bool uxr_deserialize_SamplePackedSeq(ucdrBuffer* buffer, SamplePackedSeq* output
     return ret;
 }
 
-bool uxr_serialize_DataRepresentation(ucdrBuffer* buffer, const DataRepresentation* input)
+bool uxr_serialize_DataRepresentation(
+        ucdrBuffer* buffer,
+        const DataRepresentation* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->format);
     if (ret)
     {
-        switch(input->format)
+        switch (input->format)
         {
             case FORMAT_DATA:
                 ret &= uxr_serialize_SampleData(buffer, &input->_.data);
@@ -1826,13 +2120,15 @@ bool uxr_serialize_DataRepresentation(ucdrBuffer* buffer, const DataRepresentati
     return ret;
 }
 
-bool uxr_deserialize_DataRepresentation(ucdrBuffer* buffer, DataRepresentation* output)
+bool uxr_deserialize_DataRepresentation(
+        ucdrBuffer* buffer,
+        DataRepresentation* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint8_t(buffer, &output->format);
     if (ret)
     {
-        switch(output->format)
+        switch (output->format)
         {
             case FORMAT_DATA:
                 ret &= uxr_deserialize_SampleData(buffer, &output->_.data);
@@ -1856,21 +2152,27 @@ bool uxr_deserialize_DataRepresentation(ucdrBuffer* buffer, DataRepresentation* 
     return ret;
 }
 
-bool uxr_serialize_CREATE_CLIENT_Payload(ucdrBuffer* buffer, const CREATE_CLIENT_Payload* input)
+bool uxr_serialize_CREATE_CLIENT_Payload(
+        ucdrBuffer* buffer,
+        const CREATE_CLIENT_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_CLIENT_Representation(buffer, &input->client_representation);
     return ret;
 }
 
-bool uxr_deserialize_CREATE_CLIENT_Payload(ucdrBuffer* buffer, CREATE_CLIENT_Payload* output)
+bool uxr_deserialize_CREATE_CLIENT_Payload(
+        ucdrBuffer* buffer,
+        CREATE_CLIENT_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_CLIENT_Representation(buffer, &output->client_representation);
     return ret;
 }
 
-bool uxr_serialize_CREATE_Payload(ucdrBuffer* buffer, const CREATE_Payload* input)
+bool uxr_serialize_CREATE_Payload(
+        ucdrBuffer* buffer,
+        const CREATE_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
@@ -1878,7 +2180,9 @@ bool uxr_serialize_CREATE_Payload(ucdrBuffer* buffer, const CREATE_Payload* inpu
     return ret;
 }
 
-bool uxr_deserialize_CREATE_Payload(ucdrBuffer* buffer, CREATE_Payload* output)
+bool uxr_deserialize_CREATE_Payload(
+        ucdrBuffer* buffer,
+        CREATE_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
@@ -1886,7 +2190,9 @@ bool uxr_deserialize_CREATE_Payload(ucdrBuffer* buffer, CREATE_Payload* output)
     return ret;
 }
 
-bool uxr_serialize_GET_INFO_Payload(ucdrBuffer* buffer, const GET_INFO_Payload* input)
+bool uxr_serialize_GET_INFO_Payload(
+        ucdrBuffer* buffer,
+        const GET_INFO_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
@@ -1894,7 +2200,9 @@ bool uxr_serialize_GET_INFO_Payload(ucdrBuffer* buffer, const GET_INFO_Payload* 
     return ret;
 }
 
-bool uxr_deserialize_GET_INFO_Payload(ucdrBuffer* buffer, GET_INFO_Payload* output)
+bool uxr_deserialize_GET_INFO_Payload(
+        ucdrBuffer* buffer,
+        GET_INFO_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
@@ -1902,21 +2210,27 @@ bool uxr_deserialize_GET_INFO_Payload(ucdrBuffer* buffer, GET_INFO_Payload* outp
     return ret;
 }
 
-bool uxr_serialize_DELETE_Payload(ucdrBuffer* buffer, const DELETE_Payload* input)
+bool uxr_serialize_DELETE_Payload(
+        ucdrBuffer* buffer,
+        const DELETE_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
     return ret;
 }
 
-bool uxr_deserialize_DELETE_Payload(ucdrBuffer* buffer, DELETE_Payload* output)
+bool uxr_deserialize_DELETE_Payload(
+        ucdrBuffer* buffer,
+        DELETE_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
     return ret;
 }
 
-bool uxr_serialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, const STATUS_AGENT_Payload* input)
+bool uxr_serialize_STATUS_AGENT_Payload(
+        ucdrBuffer* buffer,
+        const STATUS_AGENT_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_ResultStatus(buffer, &input->result);
@@ -1924,7 +2238,9 @@ bool uxr_serialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, const STATUS_AGENT_P
     return ret;
 }
 
-bool uxr_deserialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, STATUS_AGENT_Payload* output)
+bool uxr_deserialize_STATUS_AGENT_Payload(
+        ucdrBuffer* buffer,
+        STATUS_AGENT_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_ResultStatus(buffer, &output->result);
@@ -1932,21 +2248,27 @@ bool uxr_deserialize_STATUS_AGENT_Payload(ucdrBuffer* buffer, STATUS_AGENT_Paylo
     return ret;
 }
 
-bool uxr_serialize_STATUS_Payload(ucdrBuffer* buffer, const STATUS_Payload* input)
+bool uxr_serialize_STATUS_Payload(
+        ucdrBuffer* buffer,
+        const STATUS_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectReply(buffer, &input->base);
     return ret;
 }
 
-bool uxr_deserialize_STATUS_Payload(ucdrBuffer* buffer, STATUS_Payload* output)
+bool uxr_deserialize_STATUS_Payload(
+        ucdrBuffer* buffer,
+        STATUS_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectReply(buffer, &output->base);
     return ret;
 }
 
-bool uxr_serialize_INFO_Payload(ucdrBuffer* buffer, const INFO_Payload* input)
+bool uxr_serialize_INFO_Payload(
+        ucdrBuffer* buffer,
+        const INFO_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectReply(buffer, &input->base);
@@ -1954,7 +2276,9 @@ bool uxr_serialize_INFO_Payload(ucdrBuffer* buffer, const INFO_Payload* input)
     return ret;
 }
 
-bool uxr_deserialize_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* output)
+bool uxr_deserialize_INFO_Payload(
+        ucdrBuffer* buffer,
+        INFO_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectReply(buffer, &output->base);
@@ -1962,7 +2286,9 @@ bool uxr_deserialize_INFO_Payload(ucdrBuffer* buffer, INFO_Payload* output)
     return ret;
 }
 
-bool uxr_serialize_READ_DATA_Payload(ucdrBuffer* buffer, const READ_DATA_Payload* input)
+bool uxr_serialize_READ_DATA_Payload(
+        ucdrBuffer* buffer,
+        const READ_DATA_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
@@ -1970,7 +2296,9 @@ bool uxr_serialize_READ_DATA_Payload(ucdrBuffer* buffer, const READ_DATA_Payload
     return ret;
 }
 
-bool uxr_deserialize_READ_DATA_Payload(ucdrBuffer* buffer, READ_DATA_Payload* output)
+bool uxr_deserialize_READ_DATA_Payload(
+        ucdrBuffer* buffer,
+        READ_DATA_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
@@ -1978,99 +2306,27 @@ bool uxr_deserialize_READ_DATA_Payload(ucdrBuffer* buffer, READ_DATA_Payload* ou
     return ret;
 }
 
-bool uxr_serialize_WRITE_DATA_Payload_Data(ucdrBuffer* buffer, const WRITE_DATA_Payload_Data* input)
+bool uxr_serialize_WRITE_DATA_Payload_Data(
+        ucdrBuffer* buffer,
+        const WRITE_DATA_Payload_Data* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
     return ret;
 }
 
-bool uxr_deserialize_WRITE_DATA_Payload_Data(ucdrBuffer* buffer, WRITE_DATA_Payload_Data* output)
+bool uxr_deserialize_WRITE_DATA_Payload_Data(
+        ucdrBuffer* buffer,
+        WRITE_DATA_Payload_Data* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
     return ret;
 }
 
-bool uxr_serialize_WRITE_DATA_Payload_Sample(ucdrBuffer* buffer, const WRITE_DATA_Payload_Sample* input)
-{
-    bool ret = true;
-    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= uxr_serialize_Sample(buffer, &input->sample);
-    return ret;
-}
-
-bool uxr_deserialize_WRITE_DATA_Payload_Sample(ucdrBuffer* buffer, WRITE_DATA_Payload_Sample* output)
-{
-    bool ret = true;
-    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= uxr_deserialize_Sample(buffer, &output->sample);
-    return ret;
-}
-
-bool uxr_serialize_WRITE_DATA_Payload_DataSeq(ucdrBuffer* buffer, const WRITE_DATA_Payload_DataSeq* input)
-{
-    bool ret = true;
-    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= uxr_serialize_SampleDataSeq(buffer, &input->data_seq);
-    return ret;
-}
-
-bool uxr_deserialize_WRITE_DATA_Payload_DataSeq(ucdrBuffer* buffer, WRITE_DATA_Payload_DataSeq* output)
-{
-    bool ret = true;
-    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= uxr_deserialize_SampleDataSeq(buffer, &output->data_seq);
-    return ret;
-}
-
-bool uxr_serialize_WRITE_DATA_Payload_SampleSeq(ucdrBuffer* buffer, const WRITE_DATA_Payload_SampleSeq* input)
-{
-    bool ret = true;
-    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= uxr_serialize_SampleSeq(buffer, &input->sample_seq);
-    return ret;
-}
-
-bool uxr_deserialize_WRITE_DATA_Payload_SampleSeq(ucdrBuffer* buffer, WRITE_DATA_Payload_SampleSeq* output)
-{
-    bool ret = true;
-    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= uxr_deserialize_SampleSeq(buffer, &output->sample_seq);
-    return ret;
-}
-
-bool uxr_serialize_WRITE_DATA_Payload_PackedSamples(ucdrBuffer* buffer, const WRITE_DATA_Payload_PackedSamples* input)
-{
-    bool ret = true;
-    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
-    ret &= uxr_serialize_PackedSamples(buffer, &input->packed_samples);
-    return ret;
-}
-
-bool uxr_deserialize_WRITE_DATA_Payload_PackedSamples(ucdrBuffer* buffer, WRITE_DATA_Payload_PackedSamples* output)
-{
-    bool ret = true;
-    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
-    ret &= uxr_deserialize_PackedSamples(buffer, &output->packed_samples);
-    return ret;
-}
-
-bool uxr_serialize_DATA_Payload_Data(ucdrBuffer* buffer, const DATA_Payload_Data* input)
-{
-    bool ret = true;
-    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
-    return ret;
-}
-
-bool uxr_deserialize_DATA_Payload_Data(ucdrBuffer* buffer, DATA_Payload_Data* output)
-{
-    bool ret = true;
-    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
-    return ret;
-}
-
-bool uxr_serialize_DATA_Payload_Sample(ucdrBuffer* buffer, const DATA_Payload_Sample* input)
+bool uxr_serialize_WRITE_DATA_Payload_Sample(
+        ucdrBuffer* buffer,
+        const WRITE_DATA_Payload_Sample* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
@@ -2078,7 +2334,9 @@ bool uxr_serialize_DATA_Payload_Sample(ucdrBuffer* buffer, const DATA_Payload_Sa
     return ret;
 }
 
-bool uxr_deserialize_DATA_Payload_Sample(ucdrBuffer* buffer, DATA_Payload_Sample* output)
+bool uxr_deserialize_WRITE_DATA_Payload_Sample(
+        ucdrBuffer* buffer,
+        WRITE_DATA_Payload_Sample* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
@@ -2086,7 +2344,9 @@ bool uxr_deserialize_DATA_Payload_Sample(ucdrBuffer* buffer, DATA_Payload_Sample
     return ret;
 }
 
-bool uxr_serialize_DATA_Payload_DataSeq(ucdrBuffer* buffer, const DATA_Payload_DataSeq* input)
+bool uxr_serialize_WRITE_DATA_Payload_DataSeq(
+        ucdrBuffer* buffer,
+        const WRITE_DATA_Payload_DataSeq* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
@@ -2094,7 +2354,9 @@ bool uxr_serialize_DATA_Payload_DataSeq(ucdrBuffer* buffer, const DATA_Payload_D
     return ret;
 }
 
-bool uxr_deserialize_DATA_Payload_DataSeq(ucdrBuffer* buffer, DATA_Payload_DataSeq* output)
+bool uxr_deserialize_WRITE_DATA_Payload_DataSeq(
+        ucdrBuffer* buffer,
+        WRITE_DATA_Payload_DataSeq* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
@@ -2102,7 +2364,9 @@ bool uxr_deserialize_DATA_Payload_DataSeq(ucdrBuffer* buffer, DATA_Payload_DataS
     return ret;
 }
 
-bool uxr_serialize_DATA_Payload_SampleSeq(ucdrBuffer* buffer, const DATA_Payload_SampleSeq* input)
+bool uxr_serialize_WRITE_DATA_Payload_SampleSeq(
+        ucdrBuffer* buffer,
+        const WRITE_DATA_Payload_SampleSeq* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
@@ -2110,7 +2374,9 @@ bool uxr_serialize_DATA_Payload_SampleSeq(ucdrBuffer* buffer, const DATA_Payload
     return ret;
 }
 
-bool uxr_deserialize_DATA_Payload_SampleSeq(ucdrBuffer* buffer, DATA_Payload_SampleSeq* output)
+bool uxr_deserialize_WRITE_DATA_Payload_SampleSeq(
+        ucdrBuffer* buffer,
+        WRITE_DATA_Payload_SampleSeq* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
@@ -2118,7 +2384,9 @@ bool uxr_deserialize_DATA_Payload_SampleSeq(ucdrBuffer* buffer, DATA_Payload_Sam
     return ret;
 }
 
-bool uxr_serialize_DATA_Payload_PackedSamples(ucdrBuffer* buffer, const DATA_Payload_PackedSamples* input)
+bool uxr_serialize_WRITE_DATA_Payload_PackedSamples(
+        ucdrBuffer* buffer,
+        const WRITE_DATA_Payload_PackedSamples* input)
 {
     bool ret = true;
     ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
@@ -2126,7 +2394,9 @@ bool uxr_serialize_DATA_Payload_PackedSamples(ucdrBuffer* buffer, const DATA_Pay
     return ret;
 }
 
-bool uxr_deserialize_DATA_Payload_PackedSamples(ucdrBuffer* buffer, DATA_Payload_PackedSamples* output)
+bool uxr_deserialize_WRITE_DATA_Payload_PackedSamples(
+        ucdrBuffer* buffer,
+        WRITE_DATA_Payload_PackedSamples* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
@@ -2134,7 +2404,107 @@ bool uxr_deserialize_DATA_Payload_PackedSamples(ucdrBuffer* buffer, DATA_Payload
     return ret;
 }
 
-bool uxr_serialize_ACKNACK_Payload(ucdrBuffer* buffer, const ACKNACK_Payload* input)
+bool uxr_serialize_DATA_Payload_Data(
+        ucdrBuffer* buffer,
+        const DATA_Payload_Data* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
+    return ret;
+}
+
+bool uxr_deserialize_DATA_Payload_Data(
+        ucdrBuffer* buffer,
+        DATA_Payload_Data* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
+    return ret;
+}
+
+bool uxr_serialize_DATA_Payload_Sample(
+        ucdrBuffer* buffer,
+        const DATA_Payload_Sample* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= uxr_serialize_Sample(buffer, &input->sample);
+    return ret;
+}
+
+bool uxr_deserialize_DATA_Payload_Sample(
+        ucdrBuffer* buffer,
+        DATA_Payload_Sample* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= uxr_deserialize_Sample(buffer, &output->sample);
+    return ret;
+}
+
+bool uxr_serialize_DATA_Payload_DataSeq(
+        ucdrBuffer* buffer,
+        const DATA_Payload_DataSeq* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= uxr_serialize_SampleDataSeq(buffer, &input->data_seq);
+    return ret;
+}
+
+bool uxr_deserialize_DATA_Payload_DataSeq(
+        ucdrBuffer* buffer,
+        DATA_Payload_DataSeq* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= uxr_deserialize_SampleDataSeq(buffer, &output->data_seq);
+    return ret;
+}
+
+bool uxr_serialize_DATA_Payload_SampleSeq(
+        ucdrBuffer* buffer,
+        const DATA_Payload_SampleSeq* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= uxr_serialize_SampleSeq(buffer, &input->sample_seq);
+    return ret;
+}
+
+bool uxr_deserialize_DATA_Payload_SampleSeq(
+        ucdrBuffer* buffer,
+        DATA_Payload_SampleSeq* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= uxr_deserialize_SampleSeq(buffer, &output->sample_seq);
+    return ret;
+}
+
+bool uxr_serialize_DATA_Payload_PackedSamples(
+        ucdrBuffer* buffer,
+        const DATA_Payload_PackedSamples* input)
+{
+    bool ret = true;
+    ret &= uxr_serialize_BaseObjectRequest(buffer, &input->base);
+    ret &= uxr_serialize_PackedSamples(buffer, &input->packed_samples);
+    return ret;
+}
+
+bool uxr_deserialize_DATA_Payload_PackedSamples(
+        ucdrBuffer* buffer,
+        DATA_Payload_PackedSamples* output)
+{
+    bool ret = true;
+    ret &= uxr_deserialize_BaseObjectRequest(buffer, &output->base);
+    ret &= uxr_deserialize_PackedSamples(buffer, &output->packed_samples);
+    return ret;
+}
+
+bool uxr_serialize_ACKNACK_Payload(
+        ucdrBuffer* buffer,
+        const ACKNACK_Payload* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint16_t(buffer, input->first_unacked_seq_num);
@@ -2143,7 +2513,9 @@ bool uxr_serialize_ACKNACK_Payload(ucdrBuffer* buffer, const ACKNACK_Payload* in
     return ret;
 }
 
-bool uxr_deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output)
+bool uxr_deserialize_ACKNACK_Payload(
+        ucdrBuffer* buffer,
+        ACKNACK_Payload* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint16_t(buffer, &output->first_unacked_seq_num);
@@ -2152,7 +2524,9 @@ bool uxr_deserialize_ACKNACK_Payload(ucdrBuffer* buffer, ACKNACK_Payload* output
     return ret;
 }
 
-bool uxr_serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload* input)
+bool uxr_serialize_HEARTBEAT_Payload(
+        ucdrBuffer* buffer,
+        const HEARTBEAT_Payload* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint16_t(buffer, input->first_unacked_seq_nr);
@@ -2161,7 +2535,9 @@ bool uxr_serialize_HEARTBEAT_Payload(ucdrBuffer* buffer, const HEARTBEAT_Payload
     return ret;
 }
 
-bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* output)
+bool uxr_deserialize_HEARTBEAT_Payload(
+        ucdrBuffer* buffer,
+        HEARTBEAT_Payload* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint16_t(buffer, &output->first_unacked_seq_nr);
@@ -2170,21 +2546,27 @@ bool uxr_deserialize_HEARTBEAT_Payload(ucdrBuffer* buffer, HEARTBEAT_Payload* ou
     return ret;
 }
 
-bool uxr_serialize_TIMESTAMP_Payload(ucdrBuffer* buffer, const TIMESTAMP_Payload* input)
+bool uxr_serialize_TIMESTAMP_Payload(
+        ucdrBuffer* buffer,
+        const TIMESTAMP_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_Time_t(buffer, &input->transmit_timestamp);
     return ret;
 }
 
-bool uxr_deserialize_TIMESTAMP_Payload(ucdrBuffer* buffer, TIMESTAMP_Payload* output)
+bool uxr_deserialize_TIMESTAMP_Payload(
+        ucdrBuffer* buffer,
+        TIMESTAMP_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_Time_t(buffer, &output->transmit_timestamp);
     return ret;
 }
 
-bool uxr_serialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, const TIMESTAMP_REPLY_Payload* input)
+bool uxr_serialize_TIMESTAMP_REPLY_Payload(
+        ucdrBuffer* buffer,
+        const TIMESTAMP_REPLY_Payload* input)
 {
     bool ret = true;
     ret &= uxr_serialize_Time_t(buffer, &input->transmit_timestamp);
@@ -2193,7 +2575,9 @@ bool uxr_serialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, const TIMESTAMP_R
     return ret;
 }
 
-bool uxr_deserialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, TIMESTAMP_REPLY_Payload* output)
+bool uxr_deserialize_TIMESTAMP_REPLY_Payload(
+        ucdrBuffer* buffer,
+        TIMESTAMP_REPLY_Payload* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_Time_t(buffer, &output->transmit_timestamp);
@@ -2202,37 +2586,47 @@ bool uxr_deserialize_TIMESTAMP_REPLY_Payload(ucdrBuffer* buffer, TIMESTAMP_REPLY
     return ret;
 }
 
-bool uxr_serialize_GuidPrefix_t(ucdrBuffer* buffer, const GuidPrefix_t* input)
+bool uxr_serialize_GuidPrefix_t(
+        ucdrBuffer* buffer,
+        const GuidPrefix_t* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_array_uint8_t(buffer, input->data, sizeof(GuidPrefix_t));
     return ret;
 }
 
-bool uxr_deserialize_GuidPrefix_t(ucdrBuffer* buffer, GuidPrefix_t* output)
+bool uxr_deserialize_GuidPrefix_t(
+        ucdrBuffer* buffer,
+        GuidPrefix_t* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->data, sizeof(GuidPrefix_t));
     return ret;
 }
 
-bool uxr_serialize_EntityId_t(ucdrBuffer* buffer, const EntityId_t* input)
+bool uxr_serialize_EntityId_t(
+        ucdrBuffer* buffer,
+        const EntityId_t* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_array_uint8_t(buffer, input->entityKey, sizeof(((EntityId_t *)0)->entityKey));
+    ret &= ucdr_serialize_array_uint8_t(buffer, input->entityKey, sizeof(((EntityId_t*)0)->entityKey));
     ret &= ucdr_serialize_uint8_t(buffer, input->entityKind);
     return ret;
 }
 
-bool uxr_deserialize_EntityId_t(ucdrBuffer* buffer, EntityId_t* output)
+bool uxr_deserialize_EntityId_t(
+        ucdrBuffer* buffer,
+        EntityId_t* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_array_uint8_t(buffer, output->entityKey, sizeof(((EntityId_t *)0)->entityKey));
+    ret &= ucdr_deserialize_array_uint8_t(buffer, output->entityKey, sizeof(((EntityId_t*)0)->entityKey));
     ret &= ucdr_deserialize_uint8_t(buffer, &output->entityKind);
     return ret;
 }
 
-bool uxr_serialize_GUID_t(ucdrBuffer* buffer, const GUID_t* input)
+bool uxr_serialize_GUID_t(
+        ucdrBuffer* buffer,
+        const GUID_t* input)
 {
     bool ret = true;
     ret &= uxr_serialize_GuidPrefix_t(buffer, &input->guidPrefix);
@@ -2240,7 +2634,9 @@ bool uxr_serialize_GUID_t(ucdrBuffer* buffer, const GUID_t* input)
     return ret;
 }
 
-bool uxr_deserialize_GUID_t(ucdrBuffer* buffer, GUID_t* output)
+bool uxr_deserialize_GUID_t(
+        ucdrBuffer* buffer,
+        GUID_t* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_GuidPrefix_t(buffer, &output->guidPrefix);
@@ -2248,7 +2644,9 @@ bool uxr_deserialize_GUID_t(ucdrBuffer* buffer, GUID_t* output)
     return ret;
 }
 
-bool uxr_serialize_SequenceNumber_t(ucdrBuffer* buffer, const SequenceNumber_t* input)
+bool uxr_serialize_SequenceNumber_t(
+        ucdrBuffer* buffer,
+        const SequenceNumber_t* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_int32_t(buffer, input->high);
@@ -2256,7 +2654,9 @@ bool uxr_serialize_SequenceNumber_t(ucdrBuffer* buffer, const SequenceNumber_t* 
     return ret;
 }
 
-bool uxr_deserialize_SequenceNumber_t(ucdrBuffer* buffer, SequenceNumber_t* output)
+bool uxr_deserialize_SequenceNumber_t(
+        ucdrBuffer* buffer,
+        SequenceNumber_t* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_int32_t(buffer, &output->high);
@@ -2264,7 +2664,9 @@ bool uxr_deserialize_SequenceNumber_t(ucdrBuffer* buffer, SequenceNumber_t* outp
     return ret;
 }
 
-bool uxr_serialize_SampleIdentity(ucdrBuffer* buffer, const SampleIdentity* input)
+bool uxr_serialize_SampleIdentity(
+        ucdrBuffer* buffer,
+        const SampleIdentity* input)
 {
     bool ret = true;
     ret &= uxr_serialize_GUID_t(buffer, &input->writer_guid);
@@ -2272,7 +2674,9 @@ bool uxr_serialize_SampleIdentity(ucdrBuffer* buffer, const SampleIdentity* inpu
     return ret;
 }
 
-bool uxr_deserialize_SampleIdentity(ucdrBuffer* buffer, SampleIdentity* output)
+bool uxr_deserialize_SampleIdentity(
+        ucdrBuffer* buffer,
+        SampleIdentity* output)
 {
     bool ret = true;
     ret &= uxr_deserialize_GUID_t(buffer, &output->writer_guid);
@@ -2281,7 +2685,9 @@ bool uxr_deserialize_SampleIdentity(ucdrBuffer* buffer, SampleIdentity* output)
 }
 
 #ifdef PERFORMANCE_TESTING
-bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Payload* input)
+bool uxr_serialize_PERFORMANCE_Payload(
+        ucdrBuffer* buffer,
+        const PERFORMANCE_Payload* input)
 {
     bool ret = true;
     ret &= ucdr_serialize_uint32_t(buffer, input->epoch_time_lsb);
@@ -2290,7 +2696,9 @@ bool uxr_serialize_PERFORMANCE_Payload(ucdrBuffer* buffer, const PERFORMANCE_Pay
     return ret;
 }
 
-bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload* output)
+bool uxr_deserialize_PERFORMANCE_Payload(
+        ucdrBuffer* buffer,
+        PERFORMANCE_Payload* output)
 {
     bool ret = true;
     ret &= ucdr_deserialize_uint32_t(buffer, &output->epoch_time_lsb);
@@ -2298,4 +2706,5 @@ bool uxr_deserialize_PERFORMANCE_Payload(ucdrBuffer* buffer, PERFORMANCE_Payload
     ret &= ucdr_deserialize_array_uint8_t(buffer, output->buf, output->len);
     return ret;
 }
-#endif
+
+#endif /* ifdef PERFORMANCE_TESTING */

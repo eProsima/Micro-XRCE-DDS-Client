@@ -15,6 +15,7 @@ extern "C"
 class StreamStorageTest : public testing::Test
 {
 public:
+
     StreamStorageTest()
     {
         uxr_init_stream_storage(&storage);
@@ -30,18 +31,21 @@ public:
     }
 
 protected:
+
     uxrStreamStorage storage;
     uint8_t ob_buffer[BUFFER_SIZE / HISTORY];
     uint8_t or_buffer[BUFFER_SIZE];
     uint8_t ir_buffer[BUFFER_SIZE];
 
-    static FragmentationInfo on_get_fragmentation_info(uint8_t* buffer)
+    static FragmentationInfo on_get_fragmentation_info(
+            uint8_t* buffer)
     {
         (void) buffer;
         return NO_FRAGMENTED;
     }
 
 public:
+
     static int output_best_effort_reset_times;
     static int input_best_effort_reset_times;
     static int output_reliable_reset_times;
@@ -111,7 +115,8 @@ TEST_F(StreamStorageTest, OutputBestEffortInitialization)
 TEST_F(StreamStorageTest, InputReliableInitialization)
 {
     input_reliable_initialized = false;
-    uxrStreamId id = uxr_add_input_reliable_buffer(&storage, ir_buffer, BUFFER_SIZE, HISTORY, on_get_fragmentation_info);
+    uxrStreamId id =
+            uxr_add_input_reliable_buffer(&storage, ir_buffer, BUFFER_SIZE, HISTORY, on_get_fragmentation_info);
     EXPECT_TRUE(input_reliable_initialized);
     EXPECT_EQ(0, id.index);
     EXPECT_EQ(128, id.raw);
@@ -167,55 +172,75 @@ TEST_F(StreamStorageTest, OutputStreamNoConfirmed)
 // ****************************************************************************Y
 //                                  MOCKS
 // ****************************************************************************Y
-void uxr_reset_output_best_effort_stream(uxrOutputBestEffortStream* stream)
+void uxr_reset_output_best_effort_stream(
+        uxrOutputBestEffortStream* stream)
 {
     (void) stream;
     StreamStorageTest::output_best_effort_reset_times++;
 }
 
-void uxr_reset_input_best_effort_stream(uxrInputBestEffortStream* stream)
+void uxr_reset_input_best_effort_stream(
+        uxrInputBestEffortStream* stream)
 {
     (void) stream;
     StreamStorageTest::input_best_effort_reset_times++;
 }
 
-void uxr_reset_output_reliable_stream(uxrOutputReliableStream* stream)
+void uxr_reset_output_reliable_stream(
+        uxrOutputReliableStream* stream)
 {
     (void) stream;
     StreamStorageTest::output_reliable_reset_times++;
 }
 
-void uxr_reset_input_reliable_stream(uxrInputReliableStream* stream)
+void uxr_reset_input_reliable_stream(
+        uxrInputReliableStream* stream)
 {
     (void) stream;
     StreamStorageTest::input_reliable_reset_times++;
 }
 
-void uxr_init_input_best_effort_stream(uxrInputBestEffortStream* stream)
+void uxr_init_input_best_effort_stream(
+        uxrInputBestEffortStream* stream)
 {
     (void) stream;
     StreamStorageTest::input_best_effort_initialized = true;
 }
 
-void uxr_init_output_best_effort_stream(uxrOutputBestEffortStream* stream, uint8_t* buffer, size_t size, uint8_t offset)
+void uxr_init_output_best_effort_stream(
+        uxrOutputBestEffortStream* stream,
+        uint8_t* buffer,
+        size_t size,
+        uint8_t offset)
 {
     (void) stream; (void) buffer; (void) size; (void) offset;
     StreamStorageTest::output_best_effort_initialized = true;
 }
 
-void uxr_init_input_reliable_stream(uxrInputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, OnGetFragmentationInfo on_get_fragmentation_info)
+void uxr_init_input_reliable_stream(
+        uxrInputReliableStream* stream,
+        uint8_t* buffer,
+        size_t size,
+        uint16_t history,
+        OnGetFragmentationInfo on_get_fragmentation_info)
 {
     (void) stream; (void) buffer; (void) size; (void) history; (void) on_get_fragmentation_info;
     StreamStorageTest::input_reliable_initialized = true;
 }
 
-void uxr_init_output_reliable_stream(uxrOutputReliableStream* stream, uint8_t* buffer, size_t size, uint16_t history, uint8_t header_offset)
+void uxr_init_output_reliable_stream(
+        uxrOutputReliableStream* stream,
+        uint8_t* buffer,
+        size_t size,
+        uint16_t history,
+        uint8_t header_offset)
 {
     (void) stream; (void) buffer; (void) size; (void) history; (void) header_offset;
     StreamStorageTest::output_reliable_initialized = true;
 }
 
-bool uxr_is_output_up_to_date(const uxrOutputReliableStream* stream)
+bool uxr_is_output_up_to_date(
+        const uxrOutputReliableStream* stream)
 {
     (void) stream;
     return StreamStorageTest::output_reliable_up_to_date;

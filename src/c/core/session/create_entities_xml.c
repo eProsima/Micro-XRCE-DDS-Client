@@ -5,15 +5,24 @@
 
 #include <string.h>
 
-static uint16_t create_entity_xml(uxrSession* session, uxrStreamId stream_id,
-                                  uxrObjectId object_id, const char* xml, uint8_t mode,
-                                  CREATE_Payload* payload);
+static uint16_t create_entity_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        const char* xml,
+        uint8_t mode,
+        CREATE_Payload* payload);
 
 //==================================================================
 //                              PUBLIC
 //==================================================================
-uint16_t uxr_buffer_create_participant_xml(uxrSession* session, uxrStreamId stream_id,
-                                         uxrObjectId object_id, uint16_t domain, const char* xml, uint8_t mode)
+uint16_t uxr_buffer_create_participant_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uint16_t domain,
+        const char* xml,
+        uint8_t mode)
 {
     //assert with the object_id type
 
@@ -24,8 +33,13 @@ uint16_t uxr_buffer_create_participant_xml(uxrSession* session, uxrStreamId stre
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_topic_xml(uxrSession* session, uxrStreamId stream_id,
-                                   uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode)
+uint16_t uxr_buffer_create_topic_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* xml,
+        uint8_t mode)
 {
     //assert with the object_id type
 
@@ -36,8 +50,13 @@ uint16_t uxr_buffer_create_topic_xml(uxrSession* session, uxrStreamId stream_id,
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_publisher_xml(uxrSession* session, uxrStreamId stream_id,
-                                       uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode)
+uint16_t uxr_buffer_create_publisher_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* xml,
+        uint8_t mode)
 {
     //assert with the object_id type
 
@@ -48,8 +67,13 @@ uint16_t uxr_buffer_create_publisher_xml(uxrSession* session, uxrStreamId stream
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_subscriber_xml(uxrSession* session, uxrStreamId stream_id,
-                                        uxrObjectId object_id, uxrObjectId participant_id, const char* xml, uint8_t mode)
+uint16_t uxr_buffer_create_subscriber_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* xml,
+        uint8_t mode)
 {
     //assert with the object_id type
 
@@ -60,8 +84,13 @@ uint16_t uxr_buffer_create_subscriber_xml(uxrSession* session, uxrStreamId strea
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_datawriter_xml(uxrSession* session, uxrStreamId stream_id,
-                                        uxrObjectId object_id, uxrObjectId publisher_id, const char* xml, uint8_t mode)
+uint16_t uxr_buffer_create_datawriter_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId publisher_id,
+        const char* xml,
+        uint8_t mode)
 {
     //assert with the object_id type
 
@@ -72,8 +101,13 @@ uint16_t uxr_buffer_create_datawriter_xml(uxrSession* session, uxrStreamId strea
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
 
-uint16_t uxr_buffer_create_datareader_xml(uxrSession* session, uxrStreamId stream_id,
-                                        uxrObjectId object_id, uxrObjectId subscriber_id, const char* xml, uint8_t mode)
+uint16_t uxr_buffer_create_datareader_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId subscriber_id,
+        const char* xml,
+        uint8_t mode)
 {
     //assert with the object_id type
 
@@ -85,12 +119,12 @@ uint16_t uxr_buffer_create_datareader_xml(uxrSession* session, uxrStreamId strea
 }
 
 uint16_t uxr_buffer_create_requester_xml(
-    uxrSession* session,
-    uxrStreamId stream_id,
-    uxrObjectId object_id,
-    uxrObjectId participant_id,
-    const char* xml,
-    uint8_t mode)
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* xml,
+        uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REQUESTER;
@@ -100,12 +134,12 @@ uint16_t uxr_buffer_create_requester_xml(
 }
 
 uint16_t uxr_buffer_create_replier_xml(
-    uxrSession* session,
-    uxrStreamId stream_id,
-    uxrObjectId object_id,
-    uxrObjectId participant_id,
-    const char* xml,
-    uint8_t mode)
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        uxrObjectId participant_id,
+        const char* xml,
+        uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REPLIER;
@@ -118,9 +152,13 @@ uint16_t uxr_buffer_create_replier_xml(
 //                             PRIVATE
 //==================================================================
 
-inline uint16_t create_entity_xml(uxrSession* session, uxrStreamId stream_id,
-                                  uxrObjectId object_id, const char* xml, uint8_t mode,
-                                  CREATE_Payload* payload)
+inline uint16_t create_entity_xml(
+        uxrSession* session,
+        uxrStreamId stream_id,
+        uxrObjectId object_id,
+        const char* xml,
+        uint8_t mode,
+        CREATE_Payload* payload)
 {
     // Use participant access to access to the xml base of any object variant. //Future elegant change?
     payload->object_representation._.participant.base.representation.format = DDS_XRCE_REPRESENTATION_AS_XML_STRING;

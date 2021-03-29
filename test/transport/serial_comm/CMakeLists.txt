@@ -26,8 +26,8 @@ else()
     project(serial_comm_transport_test LANGUAGES C CXX)
 endif()
 
-if(NOT PROFILE_SERIAL_TRANSPORT)
-    message(WARNING "Can not compile test: The PROFILE_SERIAL_TRANSPORT must be enabled.")
+if(NOT UCLIENT_PROFILE_SERIAL)
+    message(WARNING "Can not compile test: The UCLIENT_PROFILE_SERIAL must be enabled.")
 else()
 
     set(SRCS SerialComm.cpp)

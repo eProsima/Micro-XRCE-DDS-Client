@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIAL_PROTOCOL_INTERNAL_H_
-#define _UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIAL_PROTOCOL_INTERNAL_H_
+#ifndef _UXR_CLIENT_PROFILE_TRANSPORT_STREAM_FRAMING_PROTOCOL_H_
+#define _UXR_CLIENT_PROFILE_TRANSPORT_STREAM_FRAMING_PROTOCOL_H_
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <stdint.h>
 
@@ -25,22 +25,22 @@ extern "C"
 #define UXR_FRAMING_ESC_FLAG 0x7D
 #define UXR_FRAMING_XOR_FLAG 0x20
 
-typedef enum uxrSerialInputState
+typedef enum uxrFramingInputState
 {
-    UXR_SERIAL_UNINITIALIZED,
-    UXR_SERIAL_READING_SRC_ADDR,
-    UXR_SERIAL_READING_DST_ADDR,
-    UXR_SERIAL_READING_LEN_LSB,
-    UXR_SERIAL_READING_LEN_MSB,
-    UXR_SERIAL_READING_PAYLOAD,
-    UXR_SERIAL_READING_CRC_LSB,
-    UXR_SERIAL_READING_CRC_MSB,
+    UXR_FRAMING_UNINITIALIZED,
+    UXR_FRAMING_READING_SRC_ADDR,
+    UXR_FRAMING_READING_DST_ADDR,
+    UXR_FRAMING_READING_LEN_LSB,
+    UXR_FRAMING_READING_LEN_MSB,
+    UXR_FRAMING_READING_PAYLOAD,
+    UXR_FRAMING_READING_CRC_LSB,
+    UXR_FRAMING_READING_CRC_MSB,
 
-} uxrSerialInputState;
+} uxrFramingInputState;
 
-typedef struct uxrSerialIO
+typedef struct uxrFramingIO
 {
-    uxrSerialInputState state;
+    uxrFramingInputState state;
     uint8_t local_addr;
     uint8_t rb[42];
     uint8_t rb_head;
@@ -53,10 +53,10 @@ typedef struct uxrSerialIO
     uint8_t wb[42];
     uint8_t wb_pos;
 
-} uxrSerialIO;
+} uxrFramingIO;
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
-#endif //_UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIAL_PROTOCOL_INTERNAL_H_
+#endif //_UXR_CLIENT_PROFILE_TRANSPORT_STREAM_FRAMING_PROTOCOL_H_

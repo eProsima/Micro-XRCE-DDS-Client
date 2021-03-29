@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/visibility.h>
 #include <uxr/client/config.h>
@@ -34,7 +34,12 @@ extern "C"
 #include <poll.h>
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <winsock2.h>
-#endif
+#elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
+#include "FreeRTOS.h"
+#include "list.h"
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
+#endif // if defined(UCLIENT_PLATFORM_POSIX)
 
 
 // TODO (julibert): move this to CMake flag.
@@ -45,9 +50,14 @@ typedef struct uxrUDPTransportDatagram
     uint8_t buffer[UXR_UDP_TRANSPORT_MTU_DATAGRAM];
 #if defined(UCLIENT_PLATFORM_POSIX)
     struct pollfd poll_fd;
+#elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
+    int fd;
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
     WSAPOLLFD poll_fd;
-#endif
+#elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
+    SocketSet_t poll_fd;
+    Socket_t fd;
+#endif // if defined(UCLIENT_PLATFORM_POSIX)
 
 } uxrUDPTransportDatagram;
 
@@ -66,12 +76,15 @@ bool uxr_udp_recv_datagram(
         size_t* len,
         int timeout);
 
+bool uxr_close_udp_transport_datagram(
+        struct uxrUDPTransportDatagram* transport);
+
 void uxr_bytes_to_ip(
         const uint8_t* bytes,
         char* ip);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // SRC_C_CLIENT_UDP_TRANSPORT_DATAGRAM_INTERNAL_H_

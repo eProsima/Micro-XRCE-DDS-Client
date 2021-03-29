@@ -17,8 +17,7 @@
 
 #include <uxr/client/config.h>
 
-#ifdef PROFILE_UDP_TRANSPORT
-#include <uxr/client/profile/transport/ip/udp/udp_transport.h>
+#ifdef UCLIENT_PROFILE_UDP
 #if defined(UCLIENT_EXTERNAL_UDP)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_external.h>
 #elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
@@ -27,28 +26,34 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_posix.h>
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_windows.h>
-#endif
-#endif //PROFILE_UDP_TRANSPORT
+#elif defined(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
+#include <uxr/client/profile/transport/ip/udp/udp_transport_freertos_plus_tcp.h>
+#endif // if defined(UCLIENT_EXTERNAL_UDP)
+#include <uxr/client/profile/transport/ip/udp/udp_transport.h>
+#endif //UCLIENT_PROFILE_UDP
 
-#ifdef PROFILE_TCP_TRANSPORT
-#include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
+#ifdef UCLIENT_PROFILE_TCP
 #if defined(UCLIENT_EXTERNAL_TCP)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_external.h>
 #elif defined(UCLIENT_PLATFORM_POSIX)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_posix.h>
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_windows.h>
-#endif
-#endif //PROFILE_TCP_TRANSPORT
+#endif // if defined(UCLIENT_EXTERNAL_TCP)
+#include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
+#endif //UCLIENT_PROFILE_TCP
 
-#ifdef PROFILE_SERIAL_TRANSPORT
-#include <uxr/client/profile/transport/serial/serial_transport.h>
+#ifdef UCLIENT_PROFILE_SERIAL
 #if defined(UCLIENT_EXTERNAL_SERIAL)
 #include <uxr/client/profile/transport/serial/serial_transport_external.h>
 #elif defined(UCLIENT_PLATFORM_POSIX)
 #include <uxr/client/profile/transport/serial/serial_transport_posix.h>
-#elif defined(UCLIENT_PLATFORM_WINDOWS)
-#endif
-#endif //PROFILE_SERIAL_TRANSPORT
+#endif // if defined(UCLIENT_EXTERNAL_SERIAL)
+#include <uxr/client/profile/transport/serial/serial_transport.h>
+#endif //UCLIENT_PROFILE_SERIAL
+
+#ifdef UCLIENT_PROFILE_CUSTOM_TRANSPORT
+#include <uxr/client/profile/transport/custom/custom_transport.h>
+#endif //UCLIENT_PROFILE_CUSTOM_TRANSPORT
 
 #endif // UXR_CLIENT_TRANSPORT_H_

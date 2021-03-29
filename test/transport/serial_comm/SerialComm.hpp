@@ -21,16 +21,16 @@
 class SerialComm : public testing::Test
 {
 public:
+
     SerialComm();
     ~SerialComm();
     int init();
 
 protected:
+
     int fd_;
     uxrSerialTransport master_;
-    uxrSerialPlatform master_platform_;
     uxrSerialTransport slave_;
-    uxrSerialPlatform slave_platform_;
 };
 
 #endif //_TEST_TRANSPORT_SERIALCOMM_HPP_
