@@ -31,12 +31,14 @@ extern "C"
 #define UXR_PREPARE_INTERPROCESS(a,b,c,d) uxr_prepare_interprocess(a,b,c,d)
 #define UXR_HANDLE_INTERPROCESS() uxr_handle_interprocess()
 #define UXR_ADD_INTERPROCESS_ENTITY_XML(a,b,c) uxr_add_interprocess_entity_xml(a,b,c)
+#define UXR_CLEAN_INTERPROCESS() uxr_deinit_static_list()
 
 #else // UCLIENT_PROFILE_INTERPROCESS
 
 #define UXR_PREPARE_INTERPROCESS(a,b,c,d)
 #define UXR_HANDLE_INTERPROCESS()
 #define UXR_ADD_INTERPROCESS_ENTITY(a,b,c)
+#define UXR_CLEAN_INTERPROCESS()
 
 #endif // UCLIENT_PROFILE_INTERPROCESS
 
@@ -57,6 +59,12 @@ UXRDLLAPI void uxr_handle_interprocess();
  * TODO
  */
 UXRDLLAPI void uxr_add_interprocess_entity_xml(uxrSession* session, uxrObjectId entity_id, const char* xml);
+
+/**
+ * @brief
+ * TODO
+ */
+UXRDLLAPI void uxr_deinit_static_list();
 
 #ifdef __cplusplus
 }

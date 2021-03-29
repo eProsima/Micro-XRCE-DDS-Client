@@ -239,7 +239,9 @@ bool uxr_create_session(
 bool uxr_delete_session_retries(
         uxrSession* session,
         size_t retries)
-{
+{   
+    UXR_CLEAN_INTERPROCESS();
+    
     uint8_t delete_session_buffer[DELETE_SESSION_MAX_MSG_SIZE];
     ucdrBuffer ub;
     ucdr_init_buffer_origin_offset(&ub, delete_session_buffer, DELETE_SESSION_MAX_MSG_SIZE, 0u, uxr_session_header_offset(

@@ -66,6 +66,10 @@ void uxr_init_static_list(){
     }
 }
 
+void uxr_deinit_static_list(){
+    memset(&uxr_ip_map, 0, sizeof(uxr_ip_map));
+}
+
 // API
 
 bool uxr_interprocess_entity_compare(uxr_interprocess_entity_t* e1, uxr_interprocess_entity_t* e2)
