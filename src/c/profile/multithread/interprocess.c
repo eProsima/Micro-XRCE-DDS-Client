@@ -178,7 +178,7 @@ void uxr_update_interprocess_matching(){
 
 void uxr_add_interprocess_entity_xml(uxrSession* session, uxrObjectId entity_id, const char* xml)
 {
-    if (uxr_ip_map.entities_len < UXR_CONFIG_INTERPROCESS_MAX_ENTITIES - 1)
+    if (uxr_ip_map.entities_len <= UXR_CONFIG_INTERPROCESS_MAX_ENTITIES - 1)
     {
         uxr_ip_map.entities[uxr_ip_map.entities_len].object_id = entity_id;
         uxr_ip_map.entities[uxr_ip_map.entities_len].session = session;

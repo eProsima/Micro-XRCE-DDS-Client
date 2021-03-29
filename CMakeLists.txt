@@ -61,9 +61,9 @@ set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.
 option(UCLIENT_PROFILE_CUSTOM_TRANSPORT "Enable Custom transport." ON)
 set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.")
 
-option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." ON)
-option(UCLIENT_PROFILE_INTERPROCESS "Enable interprocess support." ON)
-option(UCLIENT_PROFILE_MATCHING "Enable QoS matching support." ON)
+option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." OFF)
+option(UCLIENT_PROFILE_INTERPROCESS "Enable interprocess support." OFF)
+option(UCLIENT_PROFILE_MATCHING "Enable QoS matching support." OFF)
 set(UCLIENT_INTERPROCESS_MAX_ENTITIES 4 CACHE STRING "Max number of entities involved in interprocess.")
 set(UCLIENT_INTERPROCESS_STATIC_MEM_SIZE 10 CACHE STRING "Max number data buffers stored in interprocess")
 
@@ -411,6 +411,7 @@ if(UCLIENT_BUILD_TESTS)
         add_subdirectory(test/transport/custom_comm)
         add_subdirectory(test/transport/serial_comm)
     endif()
+    add_subdirectory(test/shared_memory)
 endif()
 
 if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
