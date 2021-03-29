@@ -95,7 +95,7 @@ uint16_t uxr_buffer_create_datawriter_xml(
 {
     //assert with the object_id type
 
-     UXR_ADD_INTERPROCESS_ENTITY_XML(session, object_id, xml);
+    UXR_ADD_INTERPROCESS_ENTITY_XML(session, object_id, xml);
 
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
