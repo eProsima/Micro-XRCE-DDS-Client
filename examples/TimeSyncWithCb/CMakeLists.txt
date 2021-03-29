@@ -17,14 +17,14 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
     cmake_policy(SET CMP0048 NEW)
 endif()
 
-project(time-sync-with-cb)
+project(TimeSyncWithCb)
 
 if(NOT UCLIENT_BUILD_EXAMPLES)
     find_package(microxrcedds_client REQUIRED)
 endif()
 
-if(NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: The PROFILE_UDP_TRANSPORT must be enabled.")
+if(NOT UCLIENT_PROFILE_UDP)
+    message(WARNING "Can not compile example: The UCLIENT_PROFILE_UDP must be enabled.")
 else()
     add_executable(${PROJECT_NAME} main.c)
     if(MSVC OR MSVC_IDE)

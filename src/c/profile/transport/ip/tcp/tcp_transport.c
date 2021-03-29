@@ -4,22 +4,35 @@
 #define UXR_MAX_WRITE_TCP_ATTEMPS 16
 
 /*******************************************************************************
- * Static members.
- *******************************************************************************/
+* Static members.
+*******************************************************************************/
 static uint8_t error_code;
 
 /*******************************************************************************
- * Private function declarations.
- *******************************************************************************/
-static bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len);
-static bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout);
-static uint8_t get_tcp_error(void);
-static size_t read_tcp_data(uxrTCPTransport* transport, int timeout);
+* Private function declarations.
+*******************************************************************************/
+static bool send_tcp_msg(
+        void* instance,
+        const uint8_t* buf,
+        size_t len);
+static bool recv_tcp_msg(
+        void* instance,
+        uint8_t** buf,
+        size_t* len,
+        int timeout);
+static uint8_t get_tcp_error(
+        void);
+static size_t read_tcp_data(
+        uxrTCPTransport* transport,
+        int timeout);
 
 /*******************************************************************************
- * Private function definitions.
- *******************************************************************************/
-bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
+* Private function definitions.
+*******************************************************************************/
+bool send_tcp_msg(
+        void* instance,
+        const uint8_t* buf,
+        size_t len)
 {
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
@@ -35,7 +48,7 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
     do
     {
         uint8_t errcode;
-        size_t send_rv = uxr_write_tcp_data_platform(transport->platform, msg_size_buf, 2, &errcode);
+        size_t send_rv = uxr_write_tcp_data_platform(&transport->platform, msg_size_buf, 2, &errcode);
         if (0 < send_rv)
         {
             bytes_sent = (size_t)(bytes_sent + send_rv);
@@ -62,10 +75,10 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
         do
         {
             uint8_t errcode;
-            size_t send_rv = uxr_write_tcp_data_platform(transport->platform, 
-                                                         buf + bytes_sent, 
-                                                         len - bytes_sent, 
-                                                         &errcode);
+            size_t send_rv = uxr_write_tcp_data_platform(&transport->platform,
+                            buf + bytes_sent,
+                            len - bytes_sent,
+                            &errcode);
             if (0 < send_rv)
             {
                 bytes_sent = (size_t)(bytes_sent + send_rv);
@@ -90,13 +103,17 @@ bool send_tcp_msg(void* instance, const uint8_t* buf, size_t len)
     }
     else
     {
-        uxr_disconnect_tcp_platform(transport->platform);
+        uxr_disconnect_tcp_platform(&transport->platform);
     }
 
     return rv;
 }
 
-bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
+bool recv_tcp_msg(
+        void* instance,
+        uint8_t** buf,
+        size_t* len,
+        int timeout)
 {
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
@@ -119,18 +136,21 @@ bool recv_tcp_msg(void* instance, uint8_t** buf, size_t* len, int timeout)
     return rv;
 }
 
-uint8_t get_tcp_error(void)
+uint8_t get_tcp_error(
+        void)
 {
     return error_code;
 }
 
-size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
+size_t read_tcp_data(
+        uxrTCPTransport* transport,
+        int timeout)
 {
     size_t rv = 0;
     bool exit_flag = false;
 
     /* State Machine. */
-    while(!exit_flag)
+    while (!exit_flag)
     {
         switch (transport->input_buffer.state)
         {
@@ -139,7 +159,8 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 transport->input_buffer.position = 0;
                 uint8_t size_buf[2];
                 uint8_t errcode;
-                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, size_buf, 2, timeout, &errcode);
+                size_t bytes_received =
+                        uxr_read_tcp_data_platform(&transport->platform, size_buf, 2, timeout, &errcode);
                 if (0 < bytes_received)
                 {
                     transport->input_buffer.msg_size = 0;
@@ -161,7 +182,7 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 {
                     if (0 < errcode)
                     {
-                        uxr_disconnect_tcp_platform(transport->platform);
+                        uxr_disconnect_tcp_platform(&transport->platform);
                     }
                     error_code = errcode;
                     exit_flag = true;
@@ -172,7 +193,8 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             {
                 uint8_t size_msb;
                 uint8_t errcode;
-                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform, &size_msb, 1, timeout, &errcode);
+                size_t bytes_received =
+                        uxr_read_tcp_data_platform(&transport->platform, &size_msb, 1, timeout, &errcode);
                 if (0 < bytes_received)
                 {
                     transport->input_buffer.msg_size = (size_t)(size_msb << 8) | transport->input_buffer.msg_size;
@@ -189,7 +211,7 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 {
                     if (0 < errcode)
                     {
-                        uxr_disconnect_tcp_platform(transport->platform);
+                        uxr_disconnect_tcp_platform(&transport->platform);
                     }
                     error_code = errcode;
                     exit_flag = true;
@@ -199,11 +221,11 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             case UXR_TCP_SIZE_READ:
             {
                 uint8_t errcode;
-                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
-                                                                   transport->input_buffer.buffer,
-                                                                   transport->input_buffer.msg_size,
-                                                                   timeout,
-                                                                   &errcode);
+                size_t bytes_received = uxr_read_tcp_data_platform(&transport->platform,
+                                transport->input_buffer.buffer,
+                                transport->input_buffer.msg_size,
+                                timeout,
+                                &errcode);
                 if (0 < bytes_received)
                 {
                     if (bytes_received == transport->input_buffer.msg_size)
@@ -221,7 +243,7 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 {
                     if (0 < errcode)
                     {
-                        uxr_disconnect_tcp_platform(transport->platform);
+                        uxr_disconnect_tcp_platform(&transport->platform);
                     }
                     error_code = errcode;
                     exit_flag = true;
@@ -231,13 +253,13 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
             case UXR_TCP_MESSAGE_INCOMPLETE:
             {
                 uint8_t errcode;
-                size_t bytes_received = uxr_read_tcp_data_platform(transport->platform,
-                                                                   transport->input_buffer.buffer +
-                                                                   transport->input_buffer.position,
-                                                                   (size_t)(transport->input_buffer.msg_size -
-                                                                            transport->input_buffer.position),
-                                                                   timeout,
-                                                                   &errcode);
+                size_t bytes_received = uxr_read_tcp_data_platform(&transport->platform,
+                                transport->input_buffer.buffer +
+                                transport->input_buffer.position,
+                                (size_t)(transport->input_buffer.msg_size -
+                                transport->input_buffer.position),
+                                timeout,
+                                &errcode);
                 if (0 < bytes_received)
                 {
                     transport->input_buffer.position = (size_t)(transport->input_buffer.position +  bytes_received);
@@ -254,7 +276,7 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
                 {
                     if (0 < errcode)
                     {
-                        uxr_disconnect_tcp_platform(transport->platform);
+                        uxr_disconnect_tcp_platform(&transport->platform);
                     }
                     error_code = errcode;
                     exit_flag = true;
@@ -279,22 +301,18 @@ size_t read_tcp_data(uxrTCPTransport* transport, int timeout)
 }
 
 /*******************************************************************************
- * Public function definitions.
- *******************************************************************************/
+* Public function definitions.
+*******************************************************************************/
 bool uxr_init_tcp_transport(
         uxrTCPTransport* transport,
-        struct uxrTCPPlatform* platform,
         uxrIpProtocol ip_protocol,
         const char* ip,
         const char* port)
 {
     bool rv = false;
 
-    if(uxr_init_tcp_platform(platform, ip_protocol, ip, port))
+    if (uxr_init_tcp_platform(&transport->platform, ip_protocol, ip, port))
     {
-        /* Setup platform. */
-        transport->platform = platform;
-
         /* Interface setup. */
         transport->comm.instance = (void*)transport;
         transport->comm.send_msg = send_tcp_msg;
@@ -308,7 +326,8 @@ bool uxr_init_tcp_transport(
     return rv;
 }
 
-bool uxr_close_tcp_transport(uxrTCPTransport* transport)
+bool uxr_close_tcp_transport(
+        uxrTCPTransport* transport)
 {
-    return uxr_close_tcp_platform(transport->platform);
+    return uxr_close_tcp_platform(&transport->platform);
 }

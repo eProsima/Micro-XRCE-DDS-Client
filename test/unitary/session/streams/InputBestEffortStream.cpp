@@ -10,6 +10,7 @@ extern "C"
 class InputBestEffortStreamTest : public testing::Test
 {
 public:
+
     InputBestEffortStreamTest()
     {
         uxr_init_input_best_effort_stream(&stream);
@@ -21,6 +22,7 @@ public:
     }
 
 protected:
+
     uxrInputBestEffortStream stream;
 };
 

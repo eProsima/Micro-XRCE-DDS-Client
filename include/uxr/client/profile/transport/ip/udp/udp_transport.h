@@ -18,21 +18,19 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/config.h>
 #include <uxr/client/visibility.h>
-
-struct uxrUDPPlatform;
+#include <uxr/client/transport.h>
 
 typedef struct uxrUDPTransport
 {
     uint8_t buffer[UXR_CONFIG_UDP_TRANSPORT_MTU];
     uxrCommunication comm;
-    struct uxrUDPPlatform* platform;
-
+    struct uxrUDPPlatform platform;
 } uxrUDPTransport;
 
 /**
@@ -47,7 +45,6 @@ typedef struct uxrUDPTransport
  */
 UXRDLLAPI bool uxr_init_udp_transport(
         uxrUDPTransport* transport,
-        struct uxrUDPPlatform* platform,
         uxrIpProtocol ip_protocol,
         const char* ip,
         const char* port);
@@ -63,6 +60,6 @@ UXRDLLAPI bool uxr_close_udp_transport(
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // UXR_CLIENT_UDP_TRANSPORT_H_

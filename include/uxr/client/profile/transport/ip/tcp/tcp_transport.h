@@ -18,13 +18,13 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/config.h>
 #include <uxr/client/visibility.h>
-
+#include <uxr/client/transport.h>
 typedef enum uxrTCPInputBufferState
 {
     UXR_TCP_BUFFER_EMPTY,
@@ -44,13 +44,11 @@ typedef struct uxrTCPInputBuffer
 
 } uxrTCPInputBuffer;
 
-struct uxrTCPPlatform;
-
 typedef struct uxrTCPTransport
 {
     uxrTCPInputBuffer input_buffer;
     uxrCommunication comm;
-    struct uxrTCPPlatform* platform;
+    struct uxrTCPPlatform platform;
 
 } uxrTCPTransport;
 
@@ -66,7 +64,6 @@ typedef struct uxrTCPTransport
  */
 UXRDLLAPI bool uxr_init_tcp_transport(
         uxrTCPTransport* transport,
-        struct uxrTCPPlatform* platform,
         uxrIpProtocol ip_protocol,
         const char* ip,
         const char* port);
@@ -81,6 +78,6 @@ UXRDLLAPI bool uxr_close_tcp_transport(
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // UXR_CLIENT_TCP_TRANSPORT_H_

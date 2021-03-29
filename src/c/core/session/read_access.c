@@ -72,7 +72,7 @@ uint16_t uxr_buffer_request_data(
     payload.read_specification.optional_content_filter_expression = false; //not supported yet
     payload.read_specification.optional_delivery_control = (control != NULL);
 
-    if(control != NULL)
+    if (control != NULL)
     {
         payload.read_specification.delivery_control.max_bytes_per_seconds = control->max_bytes_per_second;
         payload.read_specification.delivery_control.max_elapsed_time = control->max_elapsed_time;
@@ -87,7 +87,7 @@ uint16_t uxr_buffer_request_data(
     payload_length += (control != NULL) ? 8 : 0; // delivery control
 
     ucdrBuffer ub;
-    if(uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_READ_DATA, 0))
+    if (uxr_prepare_stream_to_write_submessage(session, stream_id, payload_length, &ub, SUBMESSAGE_ID_READ_DATA, 0))
     {
         request_id = uxr_init_base_object_request(&session->info, datareader_id, &payload.base);
         (void) uxr_serialize_READ_DATA_Payload(&ub, &payload);
@@ -101,8 +101,12 @@ uint16_t uxr_buffer_cancel_data(
         uxrStreamId stream_id,
         uxrObjectId datareader_id)
 {
-    uxrDeliveryControl delivery_control = {0};
-    uxrStreamId in_stream = {0};
+    uxrDeliveryControl delivery_control = {
+        0
+    };
+    uxrStreamId in_stream = {
+        0
+    };
     return uxr_buffer_request_data(session, stream_id, datareader_id, in_stream, &delivery_control);
 }
 
@@ -118,7 +122,7 @@ void read_submessage_format(
         uxrObjectId object_id,
         uint16_t request_id)
 {
-    switch(format)
+    switch (format)
     {
         case FORMAT_DATA:
             read_format_data(session, data, length, stream_id, object_id, request_id);
@@ -158,7 +162,7 @@ inline void read_format_data(
     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
     if (ub->args)
     {
-        uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
+        uxrInputReliableStream* stream = (uxrInputReliableStream*) ub->args;
         stream->cleanup_flag = false;
     }
 
@@ -168,7 +172,9 @@ inline void read_format_data(
         {
             if (NULL != session->on_topic)
             {
-                session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, length, session->on_topic_args);
+                session->on_topic(session, object_id, request_id, stream_id, &temp_buffer, length,
+                        session->on_topic_args);
+                session->on_data_flag = true;
             }
             break;
         }
@@ -182,7 +188,8 @@ inline void read_format_data(
                 if (uxr_deserialize_SampleIdentity(&temp_buffer, &sample_id))
                 {
                     uint16_t request_length = (uint16_t)(length - (temp_buffer.offset - offset));
-                    ucdr_init_buffer(&temp_buffer, temp_buffer.iterator, (size_t)(temp_buffer.final - temp_buffer.iterator));
+                    ucdr_init_buffer(&temp_buffer, temp_buffer.iterator,
+                            (size_t)(temp_buffer.final - temp_buffer.iterator));
                     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
 
                     session->on_request(
@@ -193,6 +200,8 @@ inline void read_format_data(
                         &temp_buffer,
                         (size_t)request_length,
                         session->on_request_args);
+
+                    session->on_data_flag = true;
                 }
             }
             break;
@@ -207,7 +216,8 @@ inline void read_format_data(
                 if (uxr_deserialize_BaseObjectRequest(&temp_buffer, &request))
                 {
                     uint16_t reply_length = (uint16_t)(length - (temp_buffer.offset - offset));
-                    ucdr_init_buffer(&temp_buffer, temp_buffer.iterator, (size_t)(temp_buffer.final - temp_buffer.iterator));
+                    ucdr_init_buffer(&temp_buffer, temp_buffer.iterator,
+                            (size_t)(temp_buffer.final - temp_buffer.iterator));
                     ucdr_set_on_full_buffer_callback(&temp_buffer, ub->on_full_buffer, ub->args);
 
                     session->on_reply(
@@ -218,6 +228,8 @@ inline void read_format_data(
                         &temp_buffer,
                         (size_t)reply_length,
                         session->on_reply_args);
+
+                    session->on_data_flag = true;
                 }
             }
             ub->iterator += length;
@@ -229,7 +241,7 @@ inline void read_format_data(
 
     if (ub->args)
     {
-        uxrInputReliableStream * stream = (uxrInputReliableStream*) ub->args;
+        uxrInputReliableStream* stream = (uxrInputReliableStream*) ub->args;
         stream->cleanup_flag = true;
     }
     ucdr_advance_buffer(ub, length);

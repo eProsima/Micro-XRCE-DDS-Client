@@ -12,13 +12,18 @@ extern "C"
 class SubmessageTest : public testing::Test
 {
 public:
+
     SubmessageTest()
     {
         ucdr_init_buffer(&ub_write, buffer, BUFFER_SIZE);
         ucdr_init_buffer(&ub_read, buffer, BUFFER_SIZE);
     }
 
-    void write_and_read(uint8_t id, uint16_t length, uint8_t flags, bool fit_payload)
+    void write_and_read(
+            uint8_t id,
+            uint16_t length,
+            uint8_t flags,
+            bool fit_payload)
     {
         ASSERT_EQ(fit_payload, uxr_buffer_submessage_header(&ub_write, id, length, flags));
         uint8_t read_id; uint16_t read_length; uint8_t read_flags;
@@ -35,6 +40,7 @@ public:
     }
 
 protected:
+
     uint8_t buffer[BUFFER_SIZE];
     ucdrBuffer ub_write;
     ucdrBuffer ub_read;

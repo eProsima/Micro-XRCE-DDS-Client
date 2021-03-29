@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // ifdef __cplusplus
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -29,11 +29,21 @@ extern "C"
 #define SESSION_ID_WITH_CLIENT_KEY 0x00
 #define SESSION_ID_WITHOUT_CLIENT_KEY 0x80
 
-void uxr_serialize_message_header(ucdrBuffer* ub, uint8_t session_id, uint8_t stream_id, uint16_t seq_num, const uint8_t* key);
-void uxr_deserialize_message_header(ucdrBuffer* ub, uint8_t* session_id, uint8_t* stream_id, uint16_t* seq_num, uint8_t* key);
+void uxr_serialize_message_header(
+        ucdrBuffer* ub,
+        uint8_t session_id,
+        uint8_t stream_id,
+        uint16_t seq_num,
+        const uint8_t* key);
+void uxr_deserialize_message_header(
+        ucdrBuffer* ub,
+        uint8_t* session_id,
+        uint8_t* stream_id,
+        uint16_t* seq_num,
+        uint8_t* key);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // ifdef __cplusplus
 
 #endif // _SRC_C_CORE_SERIALIZATION_XRCE_HEADER_INTERNAL_H_

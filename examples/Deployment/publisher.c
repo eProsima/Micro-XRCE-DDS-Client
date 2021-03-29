@@ -22,14 +22,16 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU* STREAM_HISTORY
 
-int main(int args, char** argv)
+int main(
+        int args,
+        char** argv)
 {
     // Args
-    if(args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
-                || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[3])
-                || 0 == atoi(argv[2]) || 0 == atoi(argv[4]))
+    if (args < 5 || 0 == strcmp("-h", argv[1]) || 0 == strcmp("--help", argv[1])
+            || 0 != strcmp("--key", argv[1]) || 0 != strcmp("--id", argv[3])
+            || 0 == atoi(argv[2]) || 0 == atoi(argv[4]))
     {
         printf("usage: program [-h | --help | --key <number> --id <datawriter-number>]\n");
         return 0;
@@ -37,8 +39,7 @@ int main(int args, char** argv)
 
     // Transport
     uxrUDPTransport transport;
-    uxrUDPPlatform udp_platform;
-    if(!uxr_init_udp_transport(&transport, &udp_platform, UXR_IPv4, "127.0.0.1", "2018"))
+    if (!uxr_init_udp_transport(&transport, UXR_IPv4, "127.0.0.1", "2018"))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -47,7 +48,7 @@ int main(int args, char** argv)
     // Session
     uxrSession session;
     uxr_init_session(&session, &transport.comm, (uint32_t)atoi(argv[2]));
-    if(!uxr_create_session(&session))
+    if (!uxr_create_session(&session))
     {
         printf("Error at create session.\n");
         return 1;
@@ -55,7 +56,8 @@ int main(int args, char** argv)
 
     // Streams
     uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_out = uxr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE,
+                    STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
     uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
@@ -65,9 +67,11 @@ int main(int args, char** argv)
     // Write topics
     bool connected = true;
     uint32_t count = 0;
-    while(connected)
+    while (connected)
     {
-        HelloWorld topic = {count++, "Hello DDS world!"};
+        HelloWorld topic = {
+            count++, "Hello DDS world!"
+        };
 
         ucdrBuffer ub;
         uint32_t topic_size = HelloWorld_size_of_topic(&topic, 0);
@@ -75,7 +79,7 @@ int main(int args, char** argv)
         HelloWorld_serialize_topic(&ub, &topic);
 
         connected = uxr_run_session_time(&session, 1000);
-        if(connected)
+        if (connected)
         {
             printf("Sent topic: %s, index: %i\n", topic.message, topic.index);
         }

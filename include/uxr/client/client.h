@@ -17,9 +17,9 @@
 
 #include <uxr/client/config.h>
 
-#ifdef PROFILE_DISCOVERY
+#ifdef UCLIENT_PROFILE_DISCOVERY
 #include <uxr/client/profile/discovery/discovery.h>
-#endif //PROFILE_DISCOVERY
+#endif //UCLIENT_PROFILE_DISCOVERY
 
 #include <uxr/client/core/session/session.h>
 #include <uxr/client/core/session/write_access.h>

@@ -7,6 +7,7 @@ extern "C"
 #include <c/core/session/stream/output_reliable_stream.c>
 #include <c/core/serialization/xrce_subheader.c>
 #include <c/core/session/submessage.c>
+#include <c/core/serialization/xrce_header.c>
 }
 
 #define BUFFER_SIZE           size_t(128)
@@ -18,21 +19,25 @@ extern "C"
 #define FRAGMENT_OFFSET       size_t(4)
 #define MAX_FRAGMENT_SIZE     (MAX_MESSAGE_SIZE - OFFSET - FRAGMENT_OFFSET)
 
-bool operator == (const uxrOutputReliableStream& stream1, const uxrOutputReliableStream& stream2)
+bool operator == (
+        const uxrOutputReliableStream& stream1,
+        const uxrOutputReliableStream& stream2)
 {
     return stream1.base.buffer == stream2.base.buffer
-        && stream1.base.size == stream2.base.size
-        && stream1.base.history == stream2.base.history
-        && stream1.offset == stream2.offset
-        && stream1.last_written == stream2.last_written
-        && stream1.last_sent == stream2.last_sent
-        && stream1.last_acknown == stream2.last_acknown
-        && stream1.next_heartbeat_timestamp == stream2.next_heartbeat_timestamp
-        && stream1.next_heartbeat_tries == stream2.next_heartbeat_tries
-        && stream1.send_lost == stream2.send_lost;
+           && stream1.base.size == stream2.base.size
+           && stream1.base.history == stream2.base.history
+           && stream1.offset == stream2.offset
+           && stream1.last_written == stream2.last_written
+           && stream1.last_sent == stream2.last_sent
+           && stream1.last_acknown == stream2.last_acknown
+           && stream1.next_heartbeat_timestamp == stream2.next_heartbeat_timestamp
+           && stream1.next_heartbeat_tries == stream2.next_heartbeat_tries
+           && stream1.send_lost == stream2.send_lost;
 }
 
-bool operator != (const uxrOutputReliableStream& stream1, const uxrOutputReliableStream& stream2)
+bool operator != (
+        const uxrOutputReliableStream& stream1,
+        const uxrOutputReliableStream& stream2)
 {
     return !(stream1 == stream2);
 }
@@ -40,6 +45,7 @@ bool operator != (const uxrOutputReliableStream& stream1, const uxrOutputReliabl
 class OutputReliableStreamTest : public testing::Test
 {
 public:
+
     OutputReliableStreamTest()
     {
         uxr_init_output_reliable_stream(&stream, buffer, BUFFER_SIZE, HISTORY, OFFSET);
@@ -54,13 +60,15 @@ public:
         EXPECT_EQ(0, stream.next_heartbeat_tries);
         EXPECT_EQ(false, stream.send_lost);
 
-        for(uint16_t i = 0; i < HISTORY; ++i)
+        for (uint16_t i = 0; i < HISTORY; ++i)
         {
             EXPECT_EQ(OFFSET, uxr_get_reliable_buffer_size(&stream.base, i));
         }
     }
 
-    void copy(uxrOutputReliableStream* dest, uxrOutputReliableStream* source)
+    void copy(
+            uxrOutputReliableStream* dest,
+            uxrOutputReliableStream* source)
     {
         dest->base.buffer = source->base.buffer;
         dest->base.size = source->base.size;
@@ -81,6 +89,7 @@ public:
     }
 
 protected:
+
     uxrOutputReliableStream stream;
     uint8_t buffer[BUFFER_SIZE];
 };
@@ -198,6 +207,60 @@ TEST_F(OutputReliableStreamTest, WriteFragmentMessage)
     EXPECT_EQ(slot_2 + OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, ub.final);
 }
 
+TEST_F(OutputReliableStreamTest, WriteTwoFragmentMessage)
+{
+    ucdrBuffer ub;
+    bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_FRAGMENT_SIZE * 2, &ub);
+    ASSERT_TRUE(available_to_write);
+    available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_FRAGMENT_SIZE * 2, &ub);
+    ASSERT_TRUE(available_to_write);
+}
+
+
+TEST_F(OutputReliableStreamTest, WriteMultipleFragmentsAndCheckSubHeaders)
+{
+    ucdrBuffer ub;
+    uint8_t client_key[4] = {0xAA, 0xAA, 0xAA, 0xAA};
+
+    // Init all message headers
+    for (uint16_t i = 0; i < HISTORY; i++)
+    {
+        uint8_t* slot = uxr_get_reliable_buffer(&stream.base, i);
+        ucdr_init_buffer(&ub, slot, MAX_MESSAGE_SIZE);
+        uxr_serialize_message_header(&ub, 0, 0, 0, client_key);
+    }
+
+    // Writing two fragmented message, 3 slots should be used
+    size_t first_message_size = 24; //  1.5 * MAX_FRAGMENT_SIZE;
+    bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
+    ASSERT_TRUE(available_to_write);
+    available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
+    ASSERT_TRUE(available_to_write);
+
+    // Deserialize both messages
+    size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream.base);
+    for (uint16_t i = 0; i < stream.last_written; i++)
+    {
+        uint8_t* slot = uxr_get_reliable_buffer(&stream.base, i);
+        ucdr_init_buffer_origin_offset(&ub, slot, buffer_capacity, 0u, 0u);
+
+        uint8_t session_id, stream_id;
+        uint16_t seq_no;
+        uint8_t output_client_key[4];
+        uxr_deserialize_message_header(&ub, &session_id, &stream_id, &seq_no, output_client_key);
+
+        while (ub.iterator < ub.final)
+        {
+            uint8_t id, flags;
+            uint16_t length;
+            uxr_deserialize_submessage_header(&ub, &id, &flags, &length);
+            uint8_t* fragment = reinterpret_cast<uint8_t*>(malloc(length * sizeof(uint8_t)));
+            ASSERT_TRUE(ucdr_deserialize_array_uint8_t(&ub, fragment, length));
+            free(fragment);
+        }
+    }
+}
+
 TEST_F(OutputReliableStreamTest, WriteMaxSubmessageSize)
 {
     ucdrBuffer ub;
@@ -210,7 +273,7 @@ TEST_F(OutputReliableStreamTest, WriteMaxSubmessageSize)
 TEST_F(OutputReliableStreamTest, WriteMessagesUntilFullBuffer)
 {
     ucdrBuffer ub;
-    for(size_t i = 0; i < HISTORY; ++i)
+    for (size_t i = 0; i < HISTORY; ++i)
     {
         bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub);
         ASSERT_TRUE(available_to_write);
@@ -222,7 +285,7 @@ TEST_F(OutputReliableStreamTest, WriteMessagesUntilFullBuffer)
     ASSERT_FALSE(available_to_write);
     EXPECT_EQ(backup, stream);
 
-    for(uint16_t i = 0; i < HISTORY; ++i)
+    for (uint16_t i = 0; i < HISTORY; ++i)
     {
         EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, i));
     }
@@ -255,12 +318,12 @@ TEST_F(OutputReliableStreamTest, PrepareToSendNoMessage)
 TEST_F(OutputReliableStreamTest, PrepareToSendAllMessages)
 {
     ucdrBuffer ub;
-    for(size_t i = 0; i < HISTORY; ++i)
+    for (size_t i = 0; i < HISTORY; ++i)
     {
         (void) uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub);
     }
 
-    for(uint16_t i = 0; i < HISTORY; ++i)
+    for (uint16_t i = 0; i < HISTORY; ++i)
     {
         uint8_t* slot_i = uxr_get_reliable_buffer(&stream.base, i);
         uint8_t* message; size_t length; uxrSeqNum seq_num;
@@ -278,7 +341,7 @@ TEST_F(OutputReliableStreamTest, PrepareToSendAllMessages)
     ASSERT_FALSE(data_to_send);
     EXPECT_EQ(backup, stream);
 
-    for(uint16_t i = 0; i < HISTORY; ++i)
+    for (uint16_t i = 0; i < HISTORY; ++i)
     {
         EXPECT_EQ(MAX_MESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, i));
     }
@@ -372,7 +435,7 @@ TEST_F(OutputReliableStreamTest, AcknackProcessLost)
     uint8_t* message; size_t length; uxrSeqNum seq_num;
     (void) uxr_prepare_next_reliable_buffer_to_send(&stream, &message, &length, &seq_num);
     (void) uxr_update_output_stream_heartbeat_timestamp(&stream, 0);
-    size_t message_length = uxr_get_reliable_buffer_size(&stream.base,0);
+    size_t message_length = uxr_get_reliable_buffer_size(&stream.base, 0);
 
     uxr_process_acknack(&stream, 1, uxrSeqNum(0));
     EXPECT_TRUE(stream.send_lost);
@@ -423,4 +486,19 @@ TEST_F(OutputReliableStreamTest, FragmentedSerialization)
     ASSERT_TRUE(serialize);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.iterator);
     EXPECT_EQ(slot_1 + uxr_get_reliable_buffer_size(&stream.base, 1), ub.final);
+}
+
+TEST_F(OutputReliableStreamTest, GetAvailableSeqNum)
+{
+    EXPECT_EQ(get_available_free_slots(&stream), HISTORY);
+
+    ucdrBuffer ub;
+    for (size_t i = 0; i < HISTORY; i++)
+    {
+        ASSERT_TRUE(uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub));
+        EXPECT_EQ(get_available_free_slots(&stream), HISTORY - (i + 1));
+    }
+
+    ASSERT_FALSE(uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub));
+    EXPECT_EQ(get_available_free_slots(&stream), 0);
 }

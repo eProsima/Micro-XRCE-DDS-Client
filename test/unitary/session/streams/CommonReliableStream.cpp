@@ -17,7 +17,7 @@ TEST(CommonReliableStreamTest, GetBufferSize)
 TEST(CommonReliableStreamTest, GetBuffer)
 {
     uint16_t history_pos = 3;
-    uint8_t * buffer = uxr_get_reliable_buffer(&stream, history_pos);
+    uint8_t* buffer = uxr_get_reliable_buffer(&stream, history_pos);
 
     size_t slot_size = BUFFER_SIZE / HISTORY;
     EXPECT_EQ(history_pos * slot_size + INTERNAL_RELIABLE_BUFFER_OFFSET, size_t(buffer - stream_buffer));

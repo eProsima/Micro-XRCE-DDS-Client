@@ -16,8 +16,8 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
 project(ReplyAdder)
 
-if(NOT PROFILE_UDP_TRANSPORT)
-    message(WARNING "Can not compile example: the PROFILE_UDP_TRANSPORT must be enables.")
+if(NOT UCLIENT_PROFILE_UDP)
+    message(WARNING "Can not compile example: the UCLIENT_PROFILE_UDP must be enables.")
 else()
     add_executable(${PROJECT_NAME} main.c)
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
