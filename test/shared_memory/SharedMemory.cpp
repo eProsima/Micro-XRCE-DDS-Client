@@ -151,6 +151,12 @@ TEST_F(SharedMemoryTest, SharedMemoryPubSub)
         uxr_prepare_output_stream(&session, output_besteffort, datawriter_id, &ub, data_lenght);
         ucdr_serialize_uint32_t(&ub, data);
     }
+
+    
+    // Extra topic that should not be in shared memory
+    uxr_prepare_output_stream(&session, output_besteffort, datawriter_id, &ub, data_lenght);
+    ucdr_serialize_uint32_t(&ub, data);
+
     uxr_run_session_time(&session, 1000);
 
     ASSERT_EQ(received_topics, UXR_CONFIG_INTERPROCESS_STATIC_MEM_SIZE);

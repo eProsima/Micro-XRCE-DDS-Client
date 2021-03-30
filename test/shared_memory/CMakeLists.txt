@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project(unitary_tests LANGUAGES C CXX)
+project(uxr_sharedmem_unitary_tests LANGUAGES C CXX)
 
 include(ExternalProject)
 
