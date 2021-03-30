@@ -3,16 +3,8 @@
 
 #include <functional>
 
-// extern "C"
-// {
-// #include <c/core/serialization/xrce_subheader.c>
-// #include <c/core/session/submessage.c>
-// }
-
-// #define BUFFER_SIZE     size_t(8)
-// #define PAYLOAD_SIZE    size_t(4)
-
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE     1024
+#define HISTORY_SIZE    4
 
 inline bool operator==(const uxrObjectId& lhs, const uxrObjectId& rhs)
 {  
@@ -33,6 +25,9 @@ public:
 
         output_besteffort = uxr_create_output_best_effort_stream(&session, output_besteffort_buffer, BUFFER_SIZE);
         input_besteffort = uxr_create_input_best_effort_stream(&session);
+
+        output_reliable = uxr_create_output_reliable_stream(&session, output_reliable_buffer, sizeof(output_reliable_buffer), HISTORY_SIZE);
+        input_reliable = uxr_create_input_reliable_stream(&session, input_reliable_buffer, sizeof(input_reliable_buffer), HISTORY_SIZE);
     }
 
     void TearDown() override
@@ -97,14 +92,18 @@ protected:
     uxrSession session;
     uxrCommunication comm;
     uint8_t output_besteffort_buffer[BUFFER_SIZE];
+    uint8_t output_reliable_buffer[BUFFER_SIZE * HISTORY_SIZE];
+    uint8_t input_reliable_buffer[BUFFER_SIZE * HISTORY_SIZE];
 
     uxrStreamId output_besteffort;
     uxrStreamId input_besteffort;
+    uxrStreamId output_reliable;
+    uxrStreamId input_reliable;
 
     std::function<void(uxrSession*, uxrObjectId, uint16_t, uxrStreamId, struct ucdrBuffer*, uint16_t)> on_topic;
 };
 
-TEST_F(SharedMemoryTest, SharedmemoryPubSub)
+TEST_F(SharedMemoryTest, SharedMemoryPubSub)
 {
     uxrObjectId datawriter_id = create_datawriter("shared_memory_topic", "shared_memory_type");
     uxrObjectId datareader_id = create_datareaded("shared_memory_topic", "shared_memory_type");
@@ -134,27 +133,30 @@ TEST_F(SharedMemoryTest, SharedmemoryPubSub)
     };
 
     ucdrBuffer ub;
-    for (size_t i = 0; i < 3; i++)
+
+    // Test serializing and running session: no limit
+    for (size_t i = 0; i < UXR_CONFIG_INTERPROCESS_STATIC_MEM_SIZE * 2; i++)
     {
         uxr_prepare_output_stream(&session, output_besteffort, datawriter_id, &ub, data_lenght);
         ucdr_serialize_uint32_t(&ub, data);
 
         uxr_run_session_time(&session, 1000);
     }
+    ASSERT_EQ(received_topics, UXR_CONFIG_INTERPROCESS_STATIC_MEM_SIZE * 2);
 
-    ASSERT_EQ(received_topics, 3);
-
-    for (size_t i = 0; i < 3; i++)
+    received_topics = 0;
+    // Test serializing and then running session: mempool limit
+    for (size_t i = 0; i < UXR_CONFIG_INTERPROCESS_STATIC_MEM_SIZE; i++)
     {
         uxr_prepare_output_stream(&session, output_besteffort, datawriter_id, &ub, data_lenght);
         ucdr_serialize_uint32_t(&ub, data);
     }
     uxr_run_session_time(&session, 1000);
 
-    ASSERT_EQ(received_topics, 6);
+    ASSERT_EQ(received_topics, UXR_CONFIG_INTERPROCESS_STATIC_MEM_SIZE);
 }
 
-TEST_F(SharedMemoryTest, SharedmemoryPub2Sub)
+TEST_F(SharedMemoryTest, SharedMemory1Pub3Sub)
 {
     uxrObjectId datawriter_id = create_datawriter("shared_memory_topic", "shared_memory_type");
     create_datareaded("shared_memory_topic", "shared_memory_type");
@@ -185,9 +187,121 @@ TEST_F(SharedMemoryTest, SharedmemoryPub2Sub)
     ASSERT_EQ(received_topics, 3);
 }
 
-// Matched
-// Unmached
-// Multiple topics
-// Multiple dw 1 dr
-// Multiple dr 1 dw
-// Fragmentation
+TEST_F(SharedMemoryTest, SharedMemory3Pub1Sub)
+{
+    uxrObjectId datawriter_id_1 = create_datawriter("shared_memory_topic", "shared_memory_type");
+    uxrObjectId datawriter_id_2 = create_datawriter("shared_memory_topic", "shared_memory_type");
+    uxrObjectId datawriter_id_3 = create_datawriter("shared_memory_topic", "shared_memory_type");
+    create_datareaded("shared_memory_topic", "shared_memory_type");
+
+    const size_t data_lenght = sizeof(uint32_t);
+    const uint32_t data = 42;
+
+    int received_topics = 0;
+
+    on_topic = [&](
+        uxrSession* /*session*/, 
+        uxrObjectId /*object_id*/, 
+        uint16_t /*request_id*/, 
+        uxrStreamId /*stream_id*/, 
+        struct ucdrBuffer* /*serialization*/, 
+        uint16_t /*length*/) -> void 
+    {
+        received_topics++;
+    };
+
+    ucdrBuffer ub;
+    uxr_prepare_output_stream(&session, output_besteffort, datawriter_id_1, &ub, data_lenght);
+    ucdr_serialize_uint32_t(&ub, data);
+
+    uxr_prepare_output_stream(&session, output_besteffort, datawriter_id_2, &ub, data_lenght);
+    ucdr_serialize_uint32_t(&ub, data);
+
+    uxr_prepare_output_stream(&session, output_besteffort, datawriter_id_3, &ub, data_lenght);
+    ucdr_serialize_uint32_t(&ub, data);
+    
+    uxr_run_session_time(&session, 1000);
+
+    ASSERT_EQ(received_topics, 3);
+}
+
+TEST_F(SharedMemoryTest, SharedMemoryNoMatch)
+{
+    uxrObjectId datawriter_id = create_datawriter("shared_memory_topic", "shared_memory_type");
+    create_datareaded("shared_memory_topic_123", "shared_memory_type_123");
+
+    const size_t data_lenght = sizeof(uint32_t);
+    const uint32_t data = 42;
+
+    int received_topics = 0;
+
+    on_topic = [&](
+        uxrSession* /*session*/, 
+        uxrObjectId /*object_id*/, 
+        uint16_t /*request_id*/, 
+        uxrStreamId /*stream_id*/, 
+        struct ucdrBuffer* /*serialization*/, 
+        uint16_t /*length*/) -> void 
+    {
+        received_topics++;
+    };
+
+    ucdrBuffer ub;
+    uxr_prepare_output_stream(&session, output_besteffort, datawriter_id, &ub, data_lenght);
+    ucdr_serialize_uint32_t(&ub, data);
+    
+    uxr_run_session_time(&session, 1000);
+
+    ASSERT_EQ(received_topics, 0);
+}
+
+TEST_F(SharedMemoryTest, SharedMemoryFragmentation)
+{
+    uxrObjectId datawriter_id = create_datawriter("shared_memory_topic", "shared_memory_type");
+    create_datareaded("shared_memory_topic", "shared_memory_type");
+
+    const size_t data_lenght = 2*BUFFER_SIZE;
+    char * data = static_cast<char *>(malloc(data_lenght));
+    memset(data, 'a', data_lenght);
+    
+    int received_topics = 0;
+
+    on_topic = [&](
+        uxrSession* /*session*/, 
+        uxrObjectId /*object_id*/, 
+        uint16_t /*request_id*/, 
+        uxrStreamId /*stream_id*/, 
+        struct ucdrBuffer* serialization, 
+        uint16_t length) -> void 
+    {
+        ASSERT_EQ(length, data_lenght);
+
+        char * data_out = static_cast<char *>(malloc(data_lenght));
+        memset(data_out, 'z', data_lenght);
+        ucdr_deserialize_array_char(serialization, data_out, data_lenght);
+
+        bool array_check = true;
+        for (size_t i = 0; i < data_lenght; i++)
+        {
+            if (data_out[i] != 'a')
+            {
+                array_check = false;
+                break;
+            }   
+        }
+        
+        ASSERT_TRUE(array_check);
+
+        received_topics++;
+    };
+
+    ucdrBuffer ub;
+    uxr_prepare_output_stream(&session, output_reliable, datawriter_id, &ub, data_lenght);
+    ucdr_serialize_array_char(&ub, data, data_lenght);
+    
+    uxr_run_session_time(&session, 1000);
+
+    ASSERT_EQ(received_topics, 1);
+
+    free(data);
+}
