@@ -126,7 +126,7 @@ TEST_F(SharedMemoryTest, SharedMemoryPubSub)
         ASSERT_EQ(object_id, datareader_id);
 
         uint32_t out;
-        ucdr_deserialize_uint32_t(serialization, &out);
+        ASSERT_TRUE(ucdr_deserialize_uint32_t(serialization, &out));
         ASSERT_EQ(out, data);
 
         received_topics++;
@@ -284,7 +284,7 @@ TEST_F(SharedMemoryTest, SharedMemoryFragmentation)
 
         char * data_out = static_cast<char *>(malloc(data_lenght));
         memset(data_out, 'z', data_lenght);
-        ucdr_deserialize_array_char(serialization, data_out, data_lenght);
+        ASSERT_TRUE(ucdr_deserialize_array_char(serialization, data_out, data_lenght));
 
         bool array_check = true;
         for (size_t i = 0; i < data_lenght; i++)
