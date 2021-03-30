@@ -297,7 +297,8 @@ TEST_F(SharedMemoryTest, SharedMemoryFragmentation)
         }
         
         ASSERT_TRUE(array_check);
-
+        free(data_out);
+        
         received_topics++;
     };
 
