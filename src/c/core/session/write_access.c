@@ -241,8 +241,8 @@ uint16_t uxr_prepare_output_stream_fragmented(
     ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
 
     session->continuous_args.stream_id = stream_id;
-    session->continuous_args.data_size = user_required_space;    
-    session->continuous_args.flush_callback = flush_callback;    
+    session->continuous_args.data_size = user_required_space;
+    session->continuous_args.flush_callback = flush_callback;
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, session);
 
     return rv;

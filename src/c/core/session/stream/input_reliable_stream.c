@@ -245,7 +245,7 @@ bool on_full_input_buffer(
     {
         return true;
     }
-    
+
     ucdr_init_buffer_origin(
         ub,
         buffer + SUBHEADER_SIZE,
