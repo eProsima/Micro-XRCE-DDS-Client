@@ -235,6 +235,7 @@ set(SRCS
     src/c/core/session/common_create_entities.c
     src/c/core/session/create_entities_ref.c
     src/c/core/session/create_entities_xml.c
+    src/c/core/session/create_entities_bin.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
     $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>

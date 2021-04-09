@@ -33,7 +33,7 @@ extern "C"
 #define UXR_STRING_SIZE_MAX                512
 #define UXR_SAMPLE_DATA_SIZE_MAX           512
 #define UXR_STRING_SEQUENCE_MAX            8
-#define UXR_BINARY_SEQUENCE_MAX            8
+#define UXR_BINARY_SEQUENCE_MAX            512
 #define UXR_SAMPLE_SEQUENCE_MAX            8
 #define UXR_SAMPLE_DATA_SEQUENCE_MAX       8
 #define UXR_SAMPLE_DELTA_SEQUENCE_MAX      8
@@ -471,7 +471,7 @@ typedef struct OBJK_Subscriber_Binary
 
 typedef enum EndpointQosFlags
 {
-    is_reliabel = 0x01 << 0,
+    is_reliable = 0x01 << 0,
     is_history_keep_last = 0x01 << 1,
     is_ownership_exclusive = 0x01 << 2,
     is_durability_transient_local = 0x01 << 3,
