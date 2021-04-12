@@ -165,7 +165,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datawriter_bin(
  * @param topic_name            The XRCE DataWriter name.
  * @param reliable              Reliability flag.
  * @param keep_last             Keep last flag.
- * @param transient_local       Transient local flag. * 
+ * @param transient_local       Transient local flag.
  * @param mode                  The set of flags that determines the entity creation mode.
  *                              The Creation Mode Table describes the entities creation behaviour according to the
  *                              `UXR_REUSE` and `UXR_REPLACE` flags.
