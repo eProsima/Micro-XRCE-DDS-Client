@@ -1344,6 +1344,94 @@ bool uxr_deserialize_OBJK_DataWriter_Binary(
     return ret;
 }
 
+bool uxr_serialize_OBJK_Requester_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_Requester_Binary* input)
+{
+    bool ret = true;
+    ret &= ucdr_serialize_string(buffer, input->service_name);
+    ret &= ucdr_serialize_string(buffer, input->request_type);
+    ret &= ucdr_serialize_string(buffer, input->reply_type);
+    ret &= ucdr_serialize_bool(buffer, input->optional_request_topic_name);
+    if (input->optional_request_topic_name == true)
+    {
+        ret &= ucdr_serialize_string(buffer, input->request_topic_name);
+    }
+    ret &= ucdr_serialize_bool(buffer, input->optional_reply_topic_name);
+    if (input->optional_reply_topic_name == true)
+    {
+        ret &= ucdr_serialize_string(buffer, input->reply_topic_name);
+    }
+
+    return ret;
+}
+
+bool uxr_deserialize_OBJK_Requester_Binary(
+        ucdrBuffer* buffer,
+        OBJK_Requester_Binary* output)
+{
+    bool ret = true;
+    ret &= ucdr_deserialize_string(buffer, output->service_name, UXR_STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->request_type, UXR_STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->reply_type, UXR_STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_bool(buffer, &output->optional_request_topic_name);
+    if (output->optional_request_topic_name == true)
+    {
+        ret &= ucdr_deserialize_string(buffer, output->request_topic_name, UXR_STRING_SIZE_MAX);
+    }
+    ret &= ucdr_deserialize_bool(buffer, &output->optional_reply_topic_name);
+    if (output->optional_reply_topic_name == true)
+    {
+        ret &= ucdr_deserialize_string(buffer, output->reply_topic_name, UXR_STRING_SIZE_MAX);
+    }
+
+    return ret;
+}
+
+bool uxr_serialize_OBJK_Replier_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_Replier_Binary* input)
+{
+    bool ret = true;
+    ret &= ucdr_serialize_string(buffer, input->service_name);
+    ret &= ucdr_serialize_string(buffer, input->request_type);
+    ret &= ucdr_serialize_string(buffer, input->reply_type);
+    ret &= ucdr_serialize_bool(buffer, input->optional_request_topic_name);
+    if (input->optional_request_topic_name == true)
+    {
+        ret &= ucdr_serialize_string(buffer, input->request_topic_name);
+    }
+    ret &= ucdr_serialize_bool(buffer, input->optional_reply_topic_name);
+    if (input->optional_reply_topic_name == true)
+    {
+        ret &= ucdr_serialize_string(buffer, input->reply_topic_name);
+    }
+
+    return ret;
+}
+
+bool uxr_deserialize_OBJK_Replier_Binary(
+        ucdrBuffer* buffer,
+        OBJK_Replier_Binary* output)
+{
+    bool ret = true;
+    ret &= ucdr_deserialize_string(buffer, output->service_name, UXR_STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->request_type, UXR_STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_string(buffer, output->reply_type, UXR_STRING_SIZE_MAX);
+    ret &= ucdr_deserialize_bool(buffer, &output->optional_request_topic_name);
+    if (output->optional_request_topic_name == true)
+    {
+        ret &= ucdr_deserialize_string(buffer, output->request_topic_name, UXR_STRING_SIZE_MAX);
+    }
+    ret &= ucdr_deserialize_bool(buffer, &output->optional_reply_topic_name);
+    if (output->optional_reply_topic_name == true)
+    {
+        ret &= ucdr_deserialize_string(buffer, output->reply_topic_name, UXR_STRING_SIZE_MAX);
+    }
+
+    return ret;
+}
+
 bool uxr_serialize_ObjectVariant(
         ucdrBuffer* buffer,
         const ObjectVariant* input)

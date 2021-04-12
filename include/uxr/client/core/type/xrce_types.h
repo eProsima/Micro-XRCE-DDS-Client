@@ -533,6 +533,29 @@ typedef struct OBJK_DataWriter_Binary
 
 } OBJK_DataWriter_Binary;
 
+typedef struct OBJK_Requester_Binary
+{
+    char* service_name;
+    char* request_type;
+    char* reply_type;
+    bool optional_request_topic_name;
+    char* request_topic_name;
+    bool optional_reply_topic_name;
+    char* reply_topic_name;
+
+} OBJK_Requester_Binary;
+
+typedef struct OBJK_Replier_Binary
+{
+    char* service_name;
+    char* request_type;
+    char* reply_type;
+    bool optional_request_topic_name;
+    char* request_topic_name;
+    bool optional_reply_topic_name;
+    char* reply_topic_name;
+
+} OBJK_Replier_Binary;
 
 typedef union ObjectVariantU
 {
@@ -1389,6 +1412,20 @@ bool uxr_serialize_OBJK_DataWriter_Binary(
 bool uxr_deserialize_OBJK_DataWriter_Binary(
         ucdrBuffer* buffer,
         OBJK_DataWriter_Binary* output);
+
+bool uxr_serialize_OBJK_Requester_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_Requester_Binary* input);
+bool uxr_deserialize_OBJK_Requester_Binary(
+        ucdrBuffer* buffer,
+        OBJK_Requester_Binary* output);
+
+bool uxr_serialize_OBJK_Replier_Binary(
+        ucdrBuffer* buffer,
+        const OBJK_Replier_Binary* input);
+bool uxr_deserialize_OBJK_Replier_Binary(
+        ucdrBuffer* buffer,
+        OBJK_Replier_Binary* output);
 
 bool uxr_serialize_ObjectVariant(
         ucdrBuffer* buffer,

@@ -11,12 +11,12 @@ uint16_t uxr_buffer_create_participant_bin(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id,
-        uint16_t domain,
+        uint16_t domain_id,
         uint8_t mode)
 {
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_PARTICIPANT;
-    payload.object_representation._.participant.domain_id = (int16_t)domain;
+    payload.object_representation._.participant.domain_id = (int16_t)domain_id;
     payload.object_representation._.participant.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_DomainParticipant_Binary participant;
@@ -26,9 +26,9 @@ uint16_t uxr_buffer_create_participant_bin(
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.participant.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_DomainParticipant_Binary(&ub, &participant);
-    payload.object_representation._.participant.base.representation._.binary_representation.size = ub.offset;
+    payload.object_representation._.participant.base.representation._.binary_representation.size = (uint32_t) ub.offset;
 
-    return uxr_common_create_entity(session, stream_id, object_id, ub.offset, mode, &payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
 
 uint16_t uxr_buffer_create_topic_bin(
@@ -36,8 +36,8 @@ uint16_t uxr_buffer_create_topic_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        const char* topic_name,
-        const char* type_name,
+        char* topic_name,
+        char* type_name,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -54,9 +54,9 @@ uint16_t uxr_buffer_create_topic_bin(
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.topic.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_Topic_Binary(&ub, &topic);
-    payload.object_representation._.topic.base.representation._.binary_representation.size = ub.offset;
+    payload.object_representation._.topic.base.representation._.binary_representation.size = (uint32_t) ub.offset;
 
-    return uxr_common_create_entity(session, stream_id, object_id, ub.offset, mode, &payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
 
 uint16_t uxr_buffer_create_publisher_bin(
@@ -78,9 +78,9 @@ uint16_t uxr_buffer_create_publisher_bin(
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.publisher.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_Publisher_Binary(&ub, &publisher);
-    payload.object_representation._.publisher.base.representation._.binary_representation.size = ub.offset;
+    payload.object_representation._.publisher.base.representation._.binary_representation.size = (uint32_t) ub.offset;
 
-    return uxr_common_create_entity(session, stream_id, object_id, ub.offset, mode, &payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
 
 uint16_t uxr_buffer_create_subscriber_bin(
@@ -102,9 +102,9 @@ uint16_t uxr_buffer_create_subscriber_bin(
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.subscriber.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_Subscriber_Binary(&ub, &subscriber);
-    payload.object_representation._.subscriber.base.representation._.binary_representation.size = ub.offset;
+    payload.object_representation._.subscriber.base.representation._.binary_representation.size = (uint32_t) ub.offset;
 
-    return uxr_common_create_entity(session, stream_id, object_id, ub.offset, mode, &payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
 
 uint16_t uxr_buffer_create_datawriter_bin(
@@ -112,7 +112,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId publisher_id,
-        const char* topic_name,
+        char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -133,16 +133,16 @@ uint16_t uxr_buffer_create_datawriter_bin(
     datawriter.qos.base.optional_user_data = false;
     
     datawriter.qos.base.qos_flags = 0;
-    datawriter.qos.base.qos_flags |= (reliable) ? is_reliable : 0;
-    datawriter.qos.base.qos_flags |= (keep_last) ? is_history_keep_last : 0;
-    datawriter.qos.base.qos_flags |= (transient_local) ? is_durability_transient_local : 0;
+    datawriter.qos.base.qos_flags = (uint16_t)(datawriter.qos.base.qos_flags | (reliable) ? is_reliable : 0);
+    datawriter.qos.base.qos_flags = (uint16_t)(datawriter.qos.base.qos_flags | (keep_last) ? is_history_keep_last : 0);
+    datawriter.qos.base.qos_flags = (uint16_t)(datawriter.qos.base.qos_flags | (transient_local) ? is_durability_transient_local : 0);
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.data_writer.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_DataWriter_Binary(&ub, &datawriter);
-    payload.object_representation._.data_writer.base.representation._.binary_representation.size = ub.offset;
+    payload.object_representation._.data_writer.base.representation._.binary_representation.size = (uint32_t) ub.offset;
 
-    return uxr_common_create_entity(session, stream_id, object_id, ub.offset, mode, &payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
 
 uint16_t uxr_buffer_create_datareader_bin(
@@ -150,7 +150,7 @@ uint16_t uxr_buffer_create_datareader_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId subscriber_id,
-        const char* topic_name,
+        char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -172,16 +172,16 @@ uint16_t uxr_buffer_create_datareader_bin(
     datareader.qos.base.optional_user_data = false;
 
     datareader.qos.base.qos_flags = 0;
-    datareader.qos.base.qos_flags |= (reliable) ? is_reliable : 0;
-    datareader.qos.base.qos_flags |= (keep_last) ? is_history_keep_last : 0;
-    datareader.qos.base.qos_flags |= (transient_local) ? is_durability_transient_local : 0;
+    datareader.qos.base.qos_flags = (uint16_t)(datareader.qos.base.qos_flags | (reliable) ? is_reliable : 0);
+    datareader.qos.base.qos_flags = (uint16_t)(datareader.qos.base.qos_flags | (keep_last) ? is_history_keep_last : 0);
+    datareader.qos.base.qos_flags = (uint16_t)(datareader.qos.base.qos_flags | (transient_local) ? is_durability_transient_local : 0);
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.data_reader.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_DataReader_Binary(&ub, &datareader);
-    payload.object_representation._.data_reader.base.representation._.binary_representation.size = ub.offset;
+    payload.object_representation._.data_reader.base.representation._.binary_representation.size = (uint32_t) ub.offset;
 
-    return uxr_common_create_entity(session, stream_id, object_id, ub.offset, mode, &payload);
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
 
 uint16_t uxr_buffer_create_requester_bin(
@@ -189,10 +189,33 @@ uint16_t uxr_buffer_create_requester_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        const char* xml,
+        char* service_name,
+        char* request_type,
+        char* reply_type,
+        char* request_topic_name,
+        char* reply_topic_name,
         uint8_t mode)
 {
-    // TODO: Update
+    CREATE_Payload payload;
+    payload.object_representation.kind = UXR_REQUESTER_ID;
+    uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
+    payload.object_representation._.requester.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
+
+    OBJK_Requester_Binary requester;
+    requester.service_name = service_name;
+    requester.request_type = request_type;
+    requester.reply_type = reply_type;
+    requester.optional_reply_topic_name = true;
+    requester.reply_topic_name = reply_topic_name;
+    requester.optional_request_topic_name = true;
+    requester.request_topic_name = request_topic_name;
+
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, payload.object_representation._.requester.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
+    uxr_serialize_OBJK_Requester_Binary(&ub, &requester);
+    payload.object_representation._.requester.base.representation._.binary_representation.size = (uint32_t) ub.offset;
+
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
 
 uint16_t uxr_buffer_create_replier_bin(
@@ -200,40 +223,31 @@ uint16_t uxr_buffer_create_replier_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        const char* xml,
+        char* service_name,
+        char* request_type,
+        char* reply_type,
+        char* request_topic_name,
+        char* reply_topic_name,
         uint8_t mode)
 {
-    // TODO: Update
+    CREATE_Payload payload;
+    payload.object_representation.kind = UXR_REPLIER_ID;
+    uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);
+    payload.object_representation._.replier.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
+
+    OBJK_Replier_Binary replier;
+    replier.service_name = service_name;
+    replier.request_type = request_type;
+    replier.reply_type = reply_type;
+    replier.optional_reply_topic_name = true;
+    replier.reply_topic_name = reply_topic_name;
+    replier.optional_request_topic_name = true;
+    replier.request_topic_name = request_topic_name;
+
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, payload.object_representation._.replier.base.representation._.binary_representation.data, UXR_BINARY_SEQUENCE_MAX);
+    uxr_serialize_OBJK_Replier_Binary(&ub, &replier);
+    payload.object_representation._.replier.base.representation._.binary_representation.size = (uint32_t) ub.offset;
+
+    return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
-
-//==================================================================
-//                             PRIVATE
-//==================================================================
-
-// inline uint16_t create_entity_xml(
-//         uxrSession* session,
-//         uxrStreamId stream_id,
-//         uxrObjectId object_id,
-//         const char* xml,
-//         uint8_t mode,
-//         CREATE_Payload* payload)
-// {
-//     // Use participant access to access to the xml base of any object variant. //Future elegant change?
-//     payload->object_representation._.participant.base.representation.format = DDS_XRCE_REPRESENTATION_AS_XML_STRING;
-//     payload->object_representation._.participant.base.representation._.xml_string_represenatation = (char*)xml;
-
-//     return uxr_common_create_entity(session, stream_id, object_id, (uint16_t)(strlen(xml) + 1), mode, payload);
-// }
-
-
-
-// TODO:
-// 1. Fill client API headers
-// 2. Fill client binary creation implementation
-// 3. Design QoS API (see RMW)
-// 4. Desing a message for requester/replier
-// 5. Implement Agent creation in FastDDS middleware
-// 6. Test in general repo
-// 7. Update RMW to bin creation
-// 8. Remove XML/REF option from RMW
-// 9. Update matching engine in client
