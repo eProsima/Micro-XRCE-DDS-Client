@@ -21,12 +21,7 @@ extern "C"
 #endif // ifdef __cplusplus
 
 #include <uxr/client/core/session/common_create_entities.h>
-
 #include <uxr/client/core/type/xrce_types.h>
-
-#include "common_create_entities_internal.h"
-
-#include <string.h>
 
 //==================================================================
 //                              PUBLIC
