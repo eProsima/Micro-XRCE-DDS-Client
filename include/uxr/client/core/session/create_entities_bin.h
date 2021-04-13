@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
-#define UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
+#ifndef UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_BIN_H_
+#define UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_BIN_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -252,4 +252,4 @@ UXRDLLAPI uint16_t uxr_buffer_create_replier_bin(
 }
 #endif // ifdef __cplusplus
 
-#endif // UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
+#endif // UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_BIN_H_
