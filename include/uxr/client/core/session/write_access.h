@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_CORE_SESSION_WRITE_ACCESS_H_
 #define UXR_CLIENT_CORE_SESSION_WRITE_ACCESS_H_
 
@@ -88,7 +92,7 @@ uint16_t uxr_buffer_topic(
  *        As a result of the reception of this submessage, the Agent will write a topic into the DDS Global-Data-Space.
  * @param session           A uxrSession structure previously initialized.
  * @param stream_id         The output stream identifier where the WRITE_DATA submessage will be buffered.
- * @param datawriter_id     The identifier of the XRCE DataWriter that will write the topic into the DDS GDS.
+ * @param entity_id     The identifier of the XRCE DataWriter that will write the topic into the DDS GDS.
  * @param ub_topic          The ucdrBuffer structure used for serializing the topic.
  * @param topic_size        The size of the topic in bytes.
  * @return A `request_id` that identifies the XRCE request made by the Entity.

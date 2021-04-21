@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
 #define UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
 
@@ -30,7 +34,7 @@ extern "C"
  * @param session       A uxrSession structure previously initialized.
  * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
  * @param object_id     The identifier of the XRCE Participant.
- * @param domain_id     The identifier of the Domain to which the XRCE Participant belongs.
+ * @param domain        The identifier of the Domain to which the XRCE Participant belongs.
  * @param xml           The XML that describes the XRCE Participant entity.
  * @param mode          The set of flags that determines the entity creation mode.
  *                      The Creation Mode Table describes the entities creation behaviour according to the

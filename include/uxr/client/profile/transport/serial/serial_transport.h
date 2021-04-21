@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_SERIAL_TRANSPORT_H_
 #define UXR_CLIENT_SERIAL_TRANSPORT_H_
 
@@ -41,7 +45,6 @@ typedef struct uxrSerialTransport
  * @brief Initializes a UDP transport.
  * @param transport     The uninitialized transport structure used for managing the transport.
  *                      This structure must be accesible during the connection.
- * @param platform      A structure that contains the platform dependencies.
  * @param fd            The file descriptor of the serial connection.
  *                      The fd usually comes from the `open` OS function.
  * @param remote_addr   The addresss of the Agent in the serial connection.

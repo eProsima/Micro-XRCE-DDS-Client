@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
 #define UXR_CLIENT_PROFILE_DISCOVERY_DISCOVERY_H_
 
@@ -28,6 +32,12 @@ extern "C"
 #include <stdbool.h>
 #include <stddef.h>
 
+/**
+ * @brief Function signature used for on_status_func callbacks.
+ * @param locator	Transport locator of a discovered agent
+ * @param args		User pointer data.
+ * @return	true means that the discovery routine has finished. A false implies that the discovery routine must continue searching Agents.
+ */
 typedef bool (* uxrOnAgentFound) (
         const TransportLocator* locator,
         void* args);
