@@ -26,6 +26,11 @@ extern "C"
 
 #include <uxr/client/core/session/session.h>
 
+/** \addtogroup create_common Create entities common profile
+ *  These functions are enabled when either PROFILE_CREATE_ENTITIES_XML or PROFILE_CREATE_ENTITIES_REF are activated as CMake arguments. The declaration of these functions can be found in uxr/client/profile/session/common_create_entities.h.
+ *  @{
+ */
+
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE DELETE submessage.
  *        The submessage will be sent when `uxr_flash_output_stream` or `uxr_run_session` function are called.
@@ -40,6 +45,8 @@ UXRDLLAPI uint16_t uxr_buffer_delete_entity(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id);
+
+/** @}*/
 
 #ifdef __cplusplus
 }

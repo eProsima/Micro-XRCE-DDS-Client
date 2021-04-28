@@ -27,6 +27,11 @@ extern "C"
 #include <uxr/client/visibility.h>
 #include <stdint.h>
 
+/** \addtogroup general_utils General utilities
+ *  Utility functions. The declaration of these functions can be found in uxr/client/core/session/stream_id.h and uxr/client/core/session/object_id.h.
+ *  @{
+ */
+
 /**
  * The enum that identifies the kind of stream.
  * According to the XRCE standard, a stream represents an independent flow of messages within a session.
@@ -65,6 +70,9 @@ typedef enum uxrStreamDirection
 
 } uxrStreamDirection;
 
+/**
+ * @nosubgrouping
+ */
 typedef struct uxrStreamId
 {
     uint8_t raw;
@@ -101,6 +109,8 @@ UXRDLLAPI uxrStreamId uxr_stream_id(
 UXRDLLAPI uxrStreamId uxr_stream_id_from_raw(
         uint8_t stream_id_raw,
         uxrStreamDirection direction);
+
+/** @}*/
 
 #ifdef __cplusplus
 }

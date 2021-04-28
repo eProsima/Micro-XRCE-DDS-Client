@@ -666,7 +666,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            =
+LAYOUT_FILE            = "@PROJECT_SOURCE_DIR@/utils/doxygen/pages/DoxygenLayout.xml"
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -755,8 +755,7 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = "@PROJECT_SOURCE_DIR@/include" \
-                         "@PROJECT_SOURCE_DIR@/utils/doxygen/pages" \
-                         "@PROJECT_SOURCE_DIR@/utils/doxygenfiles/mainpage.dox
+                         "@PROJECT_SOURCE_DIR@/utils/doxygen/pages"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -877,8 +876,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = "@PROJECT_SOURCE_DIR@/utils/images/logo" #\
-                         #"@PROJECT_SOURCE_DIR@/utils/doxygen/pages"
+IMAGE_PATH             = "@PROJECT_SOURCE_DIR@/utils/images/logo"
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1375,7 +1373,7 @@ ECLIPSE_DOC_ID         = org.doxygen.Project
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-DISABLE_INDEX          = NO
+DISABLE_INDEX          = YES
 
 # The GENERATE_TREEVIEW tag is used to specify whether a tree-like index
 # structure should be generated to display hierarchical information. If the tag

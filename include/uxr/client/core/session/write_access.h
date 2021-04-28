@@ -26,6 +26,11 @@ extern "C"
 
 #include <uxr/client/core/session/session.h>
 
+/** \addtogroup write Write access profile
+ *  The Write Access is used by the Client to handle the write operation on the Agent. The declaration of these functions can be found in uxr/client/profile/session/write_access.h.
+ *  @{
+ */
+
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE WRITE_DATA submessage.
  *        As a consequence, an XRCE request is generated associated to the WRITE_DATA submessage.
@@ -128,6 +133,8 @@ UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(
         ucdrBuffer* ub,
         size_t topic_size,
         uxrOnBuffersFull flush_callback);
+
+/** @}*/
 
 #ifdef __cplusplus
 }
