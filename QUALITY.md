@@ -12,7 +12,7 @@ Below are the rationales, notes and caveats for this claim, organized by each re
 
 ### Version Scheme [1.i]
 
-The **Versioning Policy Declaration** for **eProsima Micro XRCE-DDS Client** can be found [here](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/VERSIONING.md) and it adheres to [`semver`](https://semver.org/).
+The **Versioning Policy Declaration** for **eProsima Micro XRCE-DDS Client** can be found [here](VERSIONING.md) and it adheres to [`semver`](https://semver.org/).
 
 ### Version Stability [1.ii]
 
@@ -34,7 +34,7 @@ Any ABI break in **eProsima Micro XRCE-DDS Client** will be done between minor v
 ## Change Control Process [2]
 
 The stability of **eProsima Micro XRCE-DDS Client** is ensured through reviews, CI and tests.
-The change control process can be found in [CONTRIBUTING](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/CONTRIBUTING.md)
+The change control process can be found in [CONTRIBUTING](CONTRIBUTING.md)
 
 All changes to **eProsima Micro XRCE-DDS Client** occur through pull requests that are required to pass all CI tests.
 In case of failure, only maintainers can merge the pull request, and only when there is enough evidence that the failure is unrelated to the change.
@@ -47,7 +47,7 @@ All changes will occur through a pull request.
 ### Contributor Origin [2.ii]
 
 **eProsima Micro XRCE-DDS Client** uses the [Developer Certificate of Origin (DCO)](https://developercertificate.org/) as its confirmation of contributor origin policy since version 2.0.0.
-More information can be found in [CONTRIBUTING](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/CONTRIBUTING.md)
+More information can be found in [CONTRIBUTING](CONTRIBUTING.md)
 
 ### Peer Review Policy [2.iii]
 
@@ -64,7 +64,7 @@ Current nightly results for all supported platforms can be checked at the links:
 
 ### Documentation Policy [2.v]
 
-All pull requests must resolve related documentation changes before merging as stated in [CONTRIBUTING](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/CONTRIBUTING.md).
+All pull requests must resolve related documentation changes before merging as stated in [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Documentation [3]
 
@@ -90,7 +90,7 @@ The **eProsima Micro XRCE-DDS Client** copyright holder provides a statement of 
 ### Feature Testing [4.i]
 
 **eProsima Micro XRCE-DDS Client** provides tests which simulate typical usage, and they are located in the [`test` directory](test).
-New features are required to have tests before being added as stated in [CONTRIBUTING](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/CONTRIBUTING.md).
+New features are required to have tests before being added as stated in [CONTRIBUTING](CONTRIBUTING.md).
 Current nightly results can be found here:
 
 * Linux [![Linux ci](http://jenkins.eprosima.com:8080/view/Nightly/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/badge/icon?subject=%20%20%20Linux%20CI%20)](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/)
@@ -112,7 +112,7 @@ The tests aim to cover typical usage and corner cases.
 3. If the CI system reports a coverage regression after a pull request has been merged, the maintainers must study the case and decide how to proceed, most often reverting the changes and asking for a more thorough testing of the committed changes.
 4. This policy is enforced through the [nightly Micro XRCE-DDS Client CI job](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/).
 
-As stated in [CONTRIBUTING.md](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/CONTRIBUTING.md), developers and contributors are required to run a line coverage assessment locally before submitting a PR.
+As stated in [CONTRIBUTING.md](CONTRIBUTING.md), developers and contributors are required to run a line coverage assessment locally before submitting a PR.
 
 ### Performance [4.iv]
 
@@ -150,7 +150,7 @@ The latest pull request results can be seen [here](http://jenkins.eprosima.com:8
 * Linux [![Linux ci](http://jenkins.eprosima.com:8080/view/Nightly/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/badge/icon?subject=%20%20%20Linux%20CI%20)](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/)
 * Windows [![Windows ci](http://jenkins.eprosima.com:8080/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Windows/badge/icon?subject=%20%20%20%20Windows%20CI%20)](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Windows/)
 
-More information about the supported platforms can be found in [PLATFORM_SUPPORT](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/PLATFORM_SUPPORT.md)
+More information about the supported platforms can be found in [PLATFORM_SUPPORT](PLATFORM_SUPPORT.md)
 
 ## Vulnerability Disclosure Policy [7.i]
 
