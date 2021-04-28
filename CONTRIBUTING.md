@@ -29,11 +29,9 @@ Contributors must sign-off each commit by adding a `Signed-off-by: ...` line to 
 
 ## Code Coverage
 
-As stated in [QUALITY.md](QUALITY.md), all contributions to the project must increase line code coverage.
+As stated in [QUALITY.md](https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/QUALITY.md), all contributions to the project must increase line code coverage.
 Because of this, contributors are asked to locally run a coverage assessment that ensures that code coverage has increased when compared to the latest execution of the [nightly coverage CI job](http://jenkins.eprosima.com:8080/view/Micro%20XRCE/job/Micro-XRCE-DDS-Client%20Nightly%20Master%20Linux/coverage/).
 
 ## General considerations
 
 Any other contributing policy can be found in [eProsima general guidelines](https://github.com/eProsima/policies/blob/main/CONTRIBUTING.md).
-
-\file

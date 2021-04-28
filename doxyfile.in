@@ -756,11 +756,6 @@ WARN_LOGFILE           =
 
 INPUT                  = "@PROJECT_SOURCE_DIR@/include" \
                          "@PROJECT_SOURCE_DIR@/README.md" \
-                         "@PROJECT_SOURCE_DIR@/QUALITY.md" \
-                         "@PROJECT_SOURCE_DIR@/VERSIONING.md" \
-                         "@PROJECT_SOURCE_DIR@/CONTRIBUTING.md" \
-                         "@PROJECT_SOURCE_DIR@/PLATFORM_SUPPORT.md" \
-
                          "@PROJECT_SOURCE_DIR@/utils/doxygen/pages"
 
 # This tag can be used to specify the character encoding of the source files
