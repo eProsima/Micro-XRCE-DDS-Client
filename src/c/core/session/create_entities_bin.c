@@ -149,7 +149,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
     {
         datawriter.qos.base.qos_flags |= is_durability_transient_local;
     }
-    
+
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.data_writer.base.representation._.binary_representation.data,
             UXR_BINARY_SEQUENCE_MAX);
