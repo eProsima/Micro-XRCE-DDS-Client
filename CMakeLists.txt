@@ -29,6 +29,7 @@ option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
 option(UCLIENT_ISOLATED_INSTALL "Install the project and dependencies into separeted folders with version control." OFF)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+option(BUILD_DOCUMENTATION "Use doxygen to create product documentation" OFF)
 
 option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
 if(UCLIENT_BUILD_CI_TESTS)
@@ -60,9 +61,6 @@ set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.
 
 option(UCLIENT_PROFILE_CUSTOM_TRANSPORT "Enable Custom transport." ON)
 set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.")
-
-# Add an option to toggle the generation of the API documentation.
-option(BUILD_DOCUMENTATION "Use doxygen to create product documentation" OFF)
 
 ###############################################################################
 # Dependencies
