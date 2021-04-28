@@ -195,3 +195,5 @@ The chart below compares the requirements in the [REP-2004](https://www.ros.org/
 | 6.i     | Support targets Tier1 ROS platforms               | ✓             |
 | 7       | **Security**                                      | ---           |
 | 7.i     | Vulnerability Disclosure Policy                   | ✓             |
+
+\file

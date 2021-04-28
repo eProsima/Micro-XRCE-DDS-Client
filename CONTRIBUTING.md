@@ -35,3 +35,5 @@ Because of this, contributors are asked to locally run a coverage assessment tha
 ## General considerations
 
 Any other contributing policy can be found in [eProsima general guidelines](https://github.com/eProsima/policies/blob/main/CONTRIBUTING.md).
+
+\file
