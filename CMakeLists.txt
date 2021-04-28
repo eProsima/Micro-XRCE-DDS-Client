@@ -64,8 +64,8 @@ set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 1.2.1)
-set(_microcdr_tag v1.2.1)
+set(_microcdr_version 1.2.2)
+set(_microcdr_tag v1.2.2)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
