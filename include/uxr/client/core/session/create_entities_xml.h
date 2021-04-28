@@ -34,7 +34,7 @@ extern "C"
  * @param session       A uxrSession structure previously initialized.
  * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
  * @param object_id     The identifier of the XRCE Participant.
- * @param domain        The identifier of the Domain to which the XRCE Participant belongs.
+ * @param domain_id     The identifier of the Domain to which the XRCE Participant belongs.
  * @param xml           The XML that describes the XRCE Participant entity.
  * @param mode          The set of flags that determines the entity creation mode.
  *                      The Creation Mode Table describes the entities creation behaviour according to the
@@ -46,7 +46,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_participant_xml(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id,
-        uint16_t domain,
+        uint16_t domain_id,
         const char* xml,
         uint8_t mode);
 

@@ -20,7 +20,7 @@ uint16_t uxr_buffer_create_participant_xml(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id,
-        uint16_t domain,
+        uint16_t domain_id,
         const char* xml,
         uint8_t mode)
 {
@@ -28,7 +28,7 @@ uint16_t uxr_buffer_create_participant_xml(
 
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_PARTICIPANT;
-    payload.object_representation._.participant.domain_id = (int16_t)domain;
+    payload.object_representation._.participant.domain_id = (int16_t)domain_id;
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
