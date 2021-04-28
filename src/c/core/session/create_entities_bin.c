@@ -137,11 +137,19 @@ uint16_t uxr_buffer_create_datawriter_bin(
     datawriter.qos.base.optional_user_data = false;
 
     datawriter.qos.base.qos_flags = 0;
-    datawriter.qos.base.qos_flags = (uint16_t)(datawriter.qos.base.qos_flags | (reliable) ? is_reliable : 0);
-    datawriter.qos.base.qos_flags = (uint16_t)(datawriter.qos.base.qos_flags | (keep_last) ? is_history_keep_last : 0);
-    datawriter.qos.base.qos_flags =
-            (uint16_t)(datawriter.qos.base.qos_flags | (transient_local) ? is_durability_transient_local : 0);
-
+    if (reliable)
+    {
+        datawriter.qos.base.qos_flags |= is_reliable;
+    }
+    if (keep_last)
+    {
+        datawriter.qos.base.qos_flags |= is_history_keep_last;
+    }
+    if (transient_local)
+    {
+        datawriter.qos.base.qos_flags |= is_durability_transient_local;
+    }
+    
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.data_writer.base.representation._.binary_representation.data,
             UXR_BINARY_SEQUENCE_MAX);
@@ -178,10 +186,18 @@ uint16_t uxr_buffer_create_datareader_bin(
     datareader.qos.base.optional_user_data = false;
 
     datareader.qos.base.qos_flags = 0;
-    datareader.qos.base.qos_flags = (uint16_t)(datareader.qos.base.qos_flags | (reliable) ? is_reliable : 0);
-    datareader.qos.base.qos_flags = (uint16_t)(datareader.qos.base.qos_flags | (keep_last) ? is_history_keep_last : 0);
-    datareader.qos.base.qos_flags =
-            (uint16_t)(datareader.qos.base.qos_flags | (transient_local) ? is_durability_transient_local : 0);
+    if (reliable)
+    {
+        datareader.qos.base.qos_flags |= is_reliable;
+    }
+    if (keep_last)
+    {
+        datareader.qos.base.qos_flags |= is_history_keep_last;
+    }
+    if (transient_local)
+    {
+        datareader.qos.base.qos_flags |= is_durability_transient_local;
+    }
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.data_reader.base.representation._.binary_representation.data,
