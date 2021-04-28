@@ -29,6 +29,7 @@ option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
 option(UCLIENT_ISOLATED_INSTALL "Install the project and dependencies into separeted folders with version control." OFF)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+option(BUILD_DOCUMENTATION "Use doxygen to create product documentation" OFF)
 
 option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
 if(UCLIENT_BUILD_CI_TESTS)
@@ -256,10 +257,13 @@ set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation dir
 set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
 if(WIN32)
     set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
+    set(DOC_DIR "doc")
 else()
     set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
+    set(DOC_DIR "${DATA_INSTALL_DIR}/doc")
 endif()
 
+set(DOC_INSTALL_DIR ${DOC_DIR} CACHE PATH "Installation directory for documentation")
 ###############################################################################
 # Targets
 ###############################################################################
@@ -395,6 +399,62 @@ if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
 endif()
 
 ###############################################################################
+# Documentation
+###############################################################################
+if(BUILD_DOCUMENTATION)
+    find_package(Doxygen)
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "doxygen is needed to build the documentation. Please install it correctly")
+    endif()
+    if(UNIX)
+        find_program(DOXYFILE_MAKE make)
+        if(DOXYFILE_MAKE)
+            message(STATUS "Found Make: ${DOXYFILE_MAKE}")
+        else()
+            message(FATAL_ERROR "make is needed to build the documentation. Please install it correctly")
+        endif()
+    elseif(WIN32)
+        set(DOXYFILE_MAKE make.bat)
+    endif()
+
+    find_program(WGET_EXE wget)
+    if(WGET_EXE)
+        message(STATUS "Found WGet: ${WGET_EXE}")
+    else()
+        message(FATAL_ERROR "wget is needed to build the documentation. Please install it correctly")
+    endif()
+    find_program(UNZIP_EXE unzip)
+    if(UNZIP_EXE)
+        message(STATUS "Found Unzip: ${UNZIP_EXE}")
+    else()
+        message(FATAL_ERROR "unzip is needed to build the documentation. Please install it correctly")
+    endif()
+
+    
+    # Target to create documentation directories
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/doc)
+    add_custom_target(docdirs
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/doc/api_reference
+        COMMENT "Creating documentation directory" VERBATIM)
+
+    ### Doxygen ########################3
+    # Configure the template doxyfile for or specific project
+    configure_file(doxyfile.in ${PROJECT_BINARY_DIR}/doxyfile @ONLY IMMEDIATE)
+    # Add custom target to run doxygen when ever the project is build
+    add_custom_target(doxygen
+        COMMAND "${DOXYGEN_EXECUTABLE}" "${PROJECT_BINARY_DIR}/doxyfile"
+        SOURCES "${PROJECT_BINARY_DIR}/doxyfile"
+        COMMENT "Generating API documentation with doxygen" VERBATIM)
+
+    add_dependencies(doxygen docdirs)
+
+    add_custom_target(doc ALL
+    COMMENT "Generated project documentation" VERBATIM)
+
+    add_dependencies(doc doxygen)
+endif()
+
+###############################################################################
 # Packaging
 ###############################################################################
 # Install library
@@ -488,4 +548,12 @@ if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
             USE_SOURCE_PERMISSIONS
         )
     endforeach()
+endif()
+
+if(BUILD_DOCUMENTATION)
+    # Instalation of doxygen files
+    install(DIRECTORY ${PROJECT_BINARY_DIR}/doc/api_reference
+        DESTINATION ${DOC_INSTALL_DIR}
+        COMPONENT documentation
+        )
 endif()

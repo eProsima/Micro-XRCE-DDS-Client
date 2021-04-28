@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
 #define UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_REF_H_
 

@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_UDP_TRANSPORT_H_
 #define UXR_CLIENT_UDP_TRANSPORT_H_
 
@@ -37,7 +41,6 @@ typedef struct uxrUDPTransport
  * @brief Initializes a UDP transport.
  * @param transport     The uninitialized transport structure used for managing the transport.
  *                      This structure must be accesible during the connection.
- * @param platform      A structure that contains the platform dependencies.
  * @param ip_protocol   The IP protocol, it could be UXR_IPv4 or UXR_IPv6.
  * @param ip            The IP address of the Agent.
  * @param port          The port of the Agent.

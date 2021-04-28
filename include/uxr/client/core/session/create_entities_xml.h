@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
 #define UXR_CLIENT_CORE_SESSION_CREATE_ENTITIES_XML_H_
 
@@ -42,7 +46,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_participant_xml(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id,
-        uint16_t domain,
+        uint16_t domain_id,
         const char* xml,
         uint8_t mode);
 

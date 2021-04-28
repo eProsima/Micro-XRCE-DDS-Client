@@ -40,4 +40,3 @@ See the [Quality Declaration](QUALITY.md) for more details.
 ## Getting Help
 
 If you need support you can reach us by mail at `support@eProsima.com` or by phone at `+34 91 804 34 48`.
-
