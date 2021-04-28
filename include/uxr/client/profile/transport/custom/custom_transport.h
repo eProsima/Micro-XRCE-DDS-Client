@@ -35,7 +35,7 @@ struct uxrCustomTransport;
  * @brief Function signature callback for opening a custom transport.
  * @param transport     Custom transport structure. Has the args passed through bool uxr_init_custom_transport(uxrCustomTransport* transport, void * args);.
  * @return      true in case of successful opened transport, and false in other case.
-*/
+ */
 typedef bool (* open_custom_func) (
         struct uxrCustomTransport* transport);
 
@@ -43,7 +43,7 @@ typedef bool (* open_custom_func) (
  * @brief Function signature callback for closing a custom transport.
  * @param transport     Custom transport structure. Has the args passed through bool uxr_init_custom_transport(uxrCustomTransport* transport, void * args);.
  * @return      true in case of successful closed transport, and false in other case.
-*/
+ */
 typedef bool (* close_custom_func) (
         /**  */
         struct uxrCustomTransport* transport);
@@ -55,7 +55,7 @@ typedef bool (* close_custom_func) (
  * @param length        Length of buffer.
  * @param error_code    Error code that should be set in case the write process experiences some error.
  * @return      Number of successfully sent bytes.
-*/
+ */
 typedef size_t (* write_custom_func) (
         struct uxrCustomTransport* transport,
         const uint8_t* buffer,
@@ -70,7 +70,7 @@ typedef size_t (* write_custom_func) (
  * @param timeout       Maximum timeout of the read operation.
  * @param error_code    Error code that should be set in case the write process experiences some error.
  * @return      Number of successfully received bytes.
-*/
+ */
 typedef size_t (* read_custom_func) (
         struct uxrCustomTransport* transport,
         uint8_t* buffer,

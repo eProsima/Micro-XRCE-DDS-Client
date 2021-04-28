@@ -55,7 +55,7 @@ typedef void (* uxrOnStatusFunc) (
  * @param request_id    Request id of the``request_data`` transaction.
  * @param stream_id     Id of the stream used for the communication.
  * @param ub            Serialized topic data.
- * @param length        Length of the serialized data. 
+ * @param length        Length of the serialized data.
  * @param args		    User pointer data.
  */
 typedef void (* uxrOnTopicFunc) (
@@ -91,7 +91,7 @@ typedef void (* uxrOnTimeFunc) (
  * @param request_id    Request id of the``request_data`` transaction.
  * @param sample_id     Identifier of the request.
  * @param ub            Serialized request data.
- * @param length        Length of the serialized data. 
+ * @param length        Length of the serialized data.
  * @param args		    User pointer data.
  */
 typedef void (* uxrOnRequestFunc) (
@@ -105,7 +105,7 @@ typedef void (* uxrOnRequestFunc) (
 
 /**
  * @brief Sets the reply callback, which is called when the Agent sends a READ_DATA submessage associated with a Replier.
- * @param session       Session structure related to the topic.	    
+ * @param session       Session structure related to the topic.
  * @param object_id     The identifier of the entity related to the request.
  * @param request_id    Request id of the``request_data`` transaction.
  * @param reply_id      Identifier of the reply.
