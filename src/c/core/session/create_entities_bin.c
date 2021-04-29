@@ -37,8 +37,8 @@ uint16_t uxr_buffer_create_topic_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        char* topic_name,
-        char* type_name,
+        const char* topic_name,
+        const char* type_name,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -47,9 +47,9 @@ uint16_t uxr_buffer_create_topic_bin(
     payload.object_representation._.topic.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_Topic_Binary topic;
-    topic.topic_name = topic_name;
+    topic.topic_name = (char*) topic_name;
     topic.optional_type_name = true;
-    topic.type_name = type_name;
+    topic.type_name = (char*) type_name;
     topic.optional_type_reference = false;
 
     ucdrBuffer ub;
@@ -116,7 +116,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId publisher_id,
-        char* topic_name,
+        const char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -128,7 +128,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
     payload.object_representation._.data_writer.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_DataWriter_Binary datawriter;
-    datawriter.topic_name = topic_name;
+    datawriter.topic_name = (char*) topic_name;
     datawriter.optional_qos = true;
     datawriter.qos.optional_ownership_strength = false;
     datawriter.qos.base.optional_deadline_msec = false;
@@ -164,7 +164,7 @@ uint16_t uxr_buffer_create_datareader_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId subscriber_id,
-        char* topic_name,
+        const char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -176,7 +176,7 @@ uint16_t uxr_buffer_create_datareader_bin(
     payload.object_representation._.data_reader.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_DataReader_Binary datareader;
-    datareader.topic_name = topic_name;
+    datareader.topic_name = (char*) topic_name;
     datareader.optional_qos = true;
     datareader.qos.optional_contentbased_filter = false;
     datareader.qos.optional_timebasedfilter_msec = false;
@@ -213,11 +213,11 @@ uint16_t uxr_buffer_create_requester_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        char* service_name,
-        char* request_type,
-        char* reply_type,
-        char* request_topic_name,
-        char* reply_topic_name,
+        const char* service_name,
+        const char* request_type,
+        const char* reply_type,
+        const char* request_topic_name,
+        const char* reply_topic_name,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -226,13 +226,13 @@ uint16_t uxr_buffer_create_requester_bin(
     payload.object_representation._.requester.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_Requester_Binary requester;
-    requester.service_name = service_name;
-    requester.request_type = request_type;
-    requester.reply_type = reply_type;
+    requester.service_name = (char*) service_name;
+    requester.request_type = (char*) request_type;
+    requester.reply_type = (char*) reply_type;
     requester.optional_reply_topic_name = true;
-    requester.reply_topic_name = reply_topic_name;
+    requester.reply_topic_name = (char*) reply_topic_name;
     requester.optional_request_topic_name = true;
-    requester.request_topic_name = request_topic_name;
+    requester.request_topic_name = (char*) request_topic_name;
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.requester.base.representation._.binary_representation.data,
@@ -248,11 +248,11 @@ uint16_t uxr_buffer_create_replier_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        char* service_name,
-        char* request_type,
-        char* reply_type,
-        char* request_topic_name,
-        char* reply_topic_name,
+        const char* service_name,
+        const char* request_type,
+        const char* reply_type,
+        const char* request_topic_name,
+        const char* reply_topic_name,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -261,13 +261,13 @@ uint16_t uxr_buffer_create_replier_bin(
     payload.object_representation._.replier.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_Replier_Binary replier;
-    replier.service_name = service_name;
-    replier.request_type = request_type;
-    replier.reply_type = reply_type;
+    replier.service_name = (char*) service_name;
+    replier.request_type = (char*) request_type;
+    replier.reply_type = (char*) reply_type;
     replier.optional_reply_topic_name = true;
-    replier.reply_topic_name = reply_topic_name;
+    replier.reply_topic_name = (char*) reply_topic_name;
     replier.optional_request_topic_name = true;
-    replier.request_topic_name = request_topic_name;
+    replier.request_topic_name = (char*) request_topic_name;
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.replier.base.representation._.binary_representation.data,

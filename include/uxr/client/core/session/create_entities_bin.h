@@ -70,8 +70,8 @@ UXRDLLAPI uint16_t uxr_buffer_create_topic_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        char* topic_name,
-        char* type_name,
+        const char* topic_name,
+        const char* type_name,
         uint8_t mode);
 
 /**
@@ -142,7 +142,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datawriter_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId publisher_id,
-        char* topic_name,
+        const char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -172,7 +172,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datareader_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId subscriber_id,
-        char* topic_name,
+        const char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -203,11 +203,11 @@ UXRDLLAPI uint16_t uxr_buffer_create_requester_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        char* service_name,
-        char* request_type,
-        char* reply_type,
-        char* request_topic_name,
-        char* reply_topic_name,
+        const char* service_name,
+        const char* request_type,
+        const char* reply_type,
+        const char* request_topic_name,
+        const char* reply_topic_name,
         uint8_t mode);
 
 /**
@@ -236,11 +236,11 @@ UXRDLLAPI uint16_t uxr_buffer_create_replier_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId participant_id,
-        char* service_name,
-        char* request_type,
-        char* reply_type,
-        char* request_topic_name,
-        char* reply_topic_name,
+        const char* service_name,
+        const char* request_type,
+        const char* reply_type,
+        const char* request_topic_name,
+        const char* reply_topic_name,
         uint8_t mode);
 
 #ifdef __cplusplus
