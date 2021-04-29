@@ -37,16 +37,16 @@ extern "C"
 
 /** @struct uxrDeliveryControl
  *  @brief A structure used for controlling the delivery of topic from the Agent to the Client.
- * 
+ *
  *  @var uxrDeliveryControl::max_samples
  *  The maximum number of topics that the Agent shall send to the Client.
- * 
+ *
  *  @var uxrDeliveryControl::max_elapsed_time
  *  The maximum amount of time in seconds that shall be spent by the Agent delivering the topic.
- * 
+ *
  *  @var uxrDeliveryControl::max_bytes_per_second
  *  The maximum transfer rate, in bytes per second, that the Agent shall use.
- * 
+ *
  *  @var uxrDeliveryControl::min_pace_period
  *  The minimum elapsed time, in milliseconds, between two topics deliveries.
  */
