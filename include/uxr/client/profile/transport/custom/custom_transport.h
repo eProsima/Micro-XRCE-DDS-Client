@@ -31,6 +31,11 @@ extern "C"
 
 struct uxrCustomTransport;
 
+/** \addtogroup transport Transport
+ *  These functions are platform-dependent. The declaration of these functions can be found in the uxr/client/profile/transport/ folder. The common init transport functions follow the nomenclature below.
+ *  @{
+ */
+
 /**
  * @brief Function signature callback for opening a custom transport.
  * @param transport     Custom transport structure. Has the args passed through bool uxr_init_custom_transport(uxrCustomTransport* transport, void * args);.
@@ -77,6 +82,10 @@ typedef size_t (* read_custom_func) (
         size_t length,
         int timeout,
         uint8_t* error_code);
+
+/**
+ * @nosubgrouping
+ */
 
 typedef struct uxrCustomTransport
 {
@@ -127,6 +136,8 @@ UXRDLLAPI bool uxr_init_custom_transport(
  */
 UXRDLLAPI bool uxr_close_custom_transport(
         uxrCustomTransport* transport);
+
+/** @}*/
 
 #ifdef __cplusplus
 }

@@ -40,6 +40,10 @@ typedef struct uxrSerialTransport
 
 } uxrSerialTransport;
 
+/** \addtogroup transport Transport
+ *  These functions are platform-dependent. The declaration of these functions can be found in the uxr/client/profile/transport/ folder. The common init transport functions follow the nomenclature below.
+ *  @{
+ */
 
 /**
  * @brief Initializes a UDP transport.
@@ -65,6 +69,8 @@ UXRDLLAPI bool uxr_init_serial_transport(
  */
 UXRDLLAPI bool uxr_close_serial_transport(
         uxrSerialTransport* transport);
+
+/** @}*/
 
 #ifdef __cplusplus
 }

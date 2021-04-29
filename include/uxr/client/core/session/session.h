@@ -33,6 +33,12 @@ extern "C"
 struct uxrSession;
 struct uxrCommunication;
 
+/** \addtogroup session Session
+ *  These functions are available even if no profile has been enabled. The declaration of these functions can be found in uxr/client/core/session/session.h.
+ *  @{
+ */
+
+
 /**
  * @brief Function signature used for on_status_func callbacks.
  * @param session	Session structure related to the status.
@@ -130,12 +136,18 @@ typedef bool (* uxrOnBuffersFull) (
         struct uxrSession* session);
 
 #ifdef PERFORMANCE_TESTING
+/**
+ * @nosubgrouping
+ */
 typedef void (* uxrOnPerformanceFunc) (
         struct uxrSession* session,
         struct ucdrBuffer* mb,
         void* args);
 #endif // ifdef PERFORMANCE_TESTING
 
+/**
+ * @nosubgrouping
+ */
 typedef struct uxrContinuousArgs
 {
     uxrOnBuffersFull flush_callback;
@@ -143,6 +155,9 @@ typedef struct uxrContinuousArgs
     size_t data_size;
 } uxrContinuousArgs;
 
+/**
+ * @nosubgrouping
+ */
 typedef struct uxrSession
 {
     uxrSessionInfo info;
@@ -259,6 +274,9 @@ UXRDLLAPI void uxr_set_reply_callback(
         void* args);
 
 #ifdef PERFORMANCE_TESTING
+/**
+ * @nosubgrouping
+ */
 UXRDLLAPI void uxr_set_performance_callback(
         uxrSession* session,
         uxrOnPerformanceFunc on_performance_func,
@@ -516,6 +534,9 @@ UXRDLLAPI int64_t uxr_epoch_nanos(
         uxrSession* session);
 
 #ifdef PERFORMANCE_TESTING
+/**
+ * @nosubgrouping
+ */
 UXRDLLAPI bool uxr_buffer_performance(
         uxrSession* session,
         uxrStreamId stream_id,
@@ -524,6 +545,8 @@ UXRDLLAPI bool uxr_buffer_performance(
         uint16_t len,
         bool echo);
 #endif // ifdef PERFORMANCE_TESTING
+
+/** @}*/
 
 #ifdef __cplusplus
 }

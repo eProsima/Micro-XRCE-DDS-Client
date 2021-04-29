@@ -56,6 +56,11 @@ typedef struct uxrTCPTransport
 
 } uxrTCPTransport;
 
+/** \addtogroup transport Transport
+ *  These functions are platform-dependent. The declaration of these functions can be found in the uxr/client/profile/transport/ folder. The common init transport functions follow the nomenclature below.
+ *  @{
+ */
+
 /**
  * @brief Initializes a TCP transport.
  * @param transport     The uninitialized transport structure used for managing the transport.
@@ -78,6 +83,8 @@ UXRDLLAPI bool uxr_init_tcp_transport(
  */
 UXRDLLAPI bool uxr_close_tcp_transport(
         uxrTCPTransport* transport);
+
+/** @}*/
 
 #ifdef __cplusplus
 }

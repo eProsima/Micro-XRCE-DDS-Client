@@ -26,6 +26,11 @@ extern "C"
 
 #include <uxr/client/core/session/common_create_entities.h>
 
+/** \addtogroup create_xml Create entities by XML
+ *  These functions are enabled when the PROFILE_CREATE_ENTITIES_XML is activated as a CMake argument. The declaration of these functions can be found in uxr/client/profile/session/create_entities_xml.h.
+ *  @{
+ */
+
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Participant payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
@@ -219,6 +224,8 @@ UXRDLLAPI uint16_t uxr_buffer_create_replier_xml(
         uxrObjectId participant_id,
         const char* xml,
         uint8_t mode);
+
+/** @}*/
 
 #ifdef __cplusplus
 }

@@ -26,6 +26,11 @@ extern "C"
 
 #include <uxr/client/core/session/common_create_entities.h>
 
+/** \addtogroup create_ref Create entities by reference
+ *  These functions are enabled when PROFILE_CREATE_ENTITIES_REF is activated as a CMake argument. The declaration of these functions can be found in uxr/client/profile/session/create_entities_ref.h.
+ *  @{
+ */
+
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Participant payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
@@ -171,6 +176,8 @@ UXRDLLAPI uint16_t uxr_buffer_create_replier_ref(
         uxrObjectId participant_id,
         const char* ref,
         uint8_t mode);
+
+/** @}*/
 
 #ifdef __cplusplus
 }
