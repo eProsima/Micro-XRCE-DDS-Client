@@ -24,9 +24,14 @@ extern "C"
 {
 #endif // ifdef __cplusplus
 
+#include <uxr/client/config.h>
 #include <uxr/client/core/session/session_info.h>
 #include <uxr/client/core/session/stream/stream_storage.h>
 #include <uxr/client/core/type/xrce_types.h>
+
+#ifdef UCLIENT_PROFILE_MULTITHREAD
+#include <uxr/client/profile/multithread/multithread.h>
+#endif // ifdef UCLIENT_PROFILE_MULTITHREAD
 
 #define UXR_TIMEOUT_INF       -1
 
@@ -187,6 +192,10 @@ typedef struct uxrSession
 
     bool on_data_flag;
     uxrContinuousArgs continuous_args;
+
+#ifdef UCLIENT_PROFILE_MULTITHREAD
+    uxrMutex mutex;
+#endif // ifdef UCLIENT_PROFILE_MULTITHREAD
 
 #ifdef PERFORMANCE_TESTING
     uxrOnPerformanceFunc on_performance;

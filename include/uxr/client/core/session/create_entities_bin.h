@@ -80,9 +80,6 @@ UXRDLLAPI uint16_t uxr_buffer_create_topic_bin(
  *        As a result of the reception of this submessage, the Agent will create an XRCE Publisher according to
  *        the binary provided in the CREATE submessage.
  * @param session           A uxrSession structure previously initialized.
- * @param stream_id         The output stream identifier where the CREATE submessage will be buffered.
- * @param object_id         The identifier of the XRCE Publisher.
- * @param participant_id    The identifier of the associated XRCE Participant.
  * @param mode              The set of flags that determines the entity creation mode.
  *                          The Creation Mode Table describes the entities creation behaviour according to the
  *                          `UXR_REUSE` and `UXR_REPLACE` flags.
