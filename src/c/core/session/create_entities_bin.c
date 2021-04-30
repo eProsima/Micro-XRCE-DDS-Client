@@ -279,10 +279,10 @@ uint16_t uxr_buffer_create_replier_bin(
     replier.request_topic_name = (char*) request_topic_name;
 
     UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &replier);
-    
+
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.replier.base.representation._.binary_representation.data,
-        UXR_BINARY_SEQUENCE_MAX);
+            UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_Replier_Binary(&ub, &replier);
     payload.object_representation._.replier.base.representation._.binary_representation.size = (uint32_t) ub.offset;
 
