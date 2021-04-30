@@ -29,7 +29,8 @@ The public API is documented [in oficial documentation Read the Docs](https://mi
 
 ### ABI Stability Policy [1.v]
 
-Any ABI break in **eProsima Micro XRCE-DDS Client** will be done between minor versions and it should be clearly stated in the release notes.
+Any ABI break in **eProsima Micro XRCE-DDS Client** will be done between minor versions and it should be clearly stated in the release notes, note that minor releases can happen within a ROS distribution.
+
 
 ## Change Control Process [2]
 
