@@ -127,7 +127,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_subscriber_bin(
  * @param stream_id             The output stream identifier where the CREATE submessage will be buffered.
  * @param object_id             The identifier of the XRCE DataWriter.
  * @param publisher_id          The identifier of the associated XRCE Publisher.
- * @param topic_name            The XRCE DataWriter name.
+ * @param topic_id              The identifier of the associated XRCE Topic.
  * @param reliable              Reliability flag.
  * @param keep_last             Keep last flag.
  * @param transient_local       Transient local flag.
@@ -142,7 +142,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datawriter_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId publisher_id,
-        const char* topic_name,
+        uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -157,7 +157,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datawriter_bin(
  * @param stream_id             The output stream identifier where the CREATE submessage will be buffered.
  * @param object_id             The identifier of the XRCE DataReader.
  * @param subscriber_id         The identifier of the associated XRCE Subscriber.
- * @param topic_name            The XRCE DataWriter name.
+ * @param topic_id              The identifier of the associated XRCE Topic.
  * @param reliable              Reliability flag.
  * @param keep_last             Keep last flag.
  * @param transient_local       Transient local flag.
@@ -172,7 +172,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_datareader_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId subscriber_id,
-        const char* topic_name,
+        uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
         bool transient_local,
