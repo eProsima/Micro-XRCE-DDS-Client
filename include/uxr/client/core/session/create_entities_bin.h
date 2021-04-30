@@ -31,7 +31,7 @@ extern "C"
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Participant payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
  *        As a result of the reception of this submessage, the Agent will create an XRCE Participant according to
- *        the binary provides in the CREATE submessage.
+ *        the binary provided in the CREATE submessage.
  * @param session       A uxrSession structure previously initialized.
  * @param stream_id     The output stream identifier where the CREATE submessage will be buffered.
  * @param object_id     The identifier of the XRCE Participant.
