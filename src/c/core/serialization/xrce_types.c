@@ -1173,7 +1173,7 @@ bool uxr_serialize_OBJK_Endpoint_QosBinary(
     ret &= ucdr_serialize_bool(buffer, input->optional_user_data);
     if (input->optional_user_data == true)
     {
-        ret &= uxr_serialize_BinarySequence_t(buffer, &input->user_data);
+        ret &= uxr_serialize_BinarySequence_t(buffer, (BinarySequence_t*) &input->user_data);
     }
 
     return ret;
@@ -1206,7 +1206,7 @@ bool uxr_deserialize_OBJK_Endpoint_QosBinary(
     ret &= ucdr_deserialize_bool(buffer, &output->optional_user_data);
     if (output->optional_user_data == true)
     {
-        ret &= uxr_deserialize_BinarySequence_t(buffer, &output->user_data);
+        ret &= uxr_deserialize_BinarySequence_t(buffer, (BinarySequence_t*) &output->user_data);
     }
 
     return ret;
@@ -1289,7 +1289,7 @@ bool uxr_serialize_OBJK_DataReader_Binary(
         const OBJK_DataReader_Binary* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_string(buffer, input->topic_name);
+    ret &= uxr_serialize_ObjectId(buffer, &input->topic_id);
     ret &= ucdr_serialize_bool(buffer, input->optional_qos);
     if (input->optional_qos == true)
     {
@@ -1304,7 +1304,7 @@ bool uxr_deserialize_OBJK_DataReader_Binary(
         OBJK_DataReader_Binary* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
+    ret &= uxr_deserialize_ObjectId(buffer, &output->topic_id);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
     if (output->optional_qos == true)
     {
@@ -1319,7 +1319,7 @@ bool uxr_serialize_OBJK_DataWriter_Binary(
         const OBJK_DataWriter_Binary* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_string(buffer, input->topic_name);
+    ret &= uxr_serialize_ObjectId(buffer, &input->topic_id);
     ret &= ucdr_serialize_bool(buffer, input->optional_qos);
     if (input->optional_qos == true)
     {
@@ -1334,7 +1334,7 @@ bool uxr_deserialize_OBJK_DataWriter_Binary(
         OBJK_DataWriter_Binary* output)
 {
     bool ret = true;
-    ret &= ucdr_deserialize_string(buffer, output->topic_name, UXR_STRING_SIZE_MAX);
+    ret &= uxr_deserialize_ObjectId(buffer, &output->topic_id);
     ret &= ucdr_deserialize_bool(buffer, &output->optional_qos);
     if (output->optional_qos == true)
     {

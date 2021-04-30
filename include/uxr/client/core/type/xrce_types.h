@@ -34,6 +34,7 @@ extern "C"
 #define UXR_SAMPLE_DATA_SIZE_MAX           512
 #define UXR_STRING_SEQUENCE_MAX            8
 #define UXR_BINARY_SEQUENCE_MAX            512
+#define UXR_BINARY_SEQUENCE_SMALL_MAX      8
 #define UXR_SAMPLE_SEQUENCE_MAX            8
 #define UXR_SAMPLE_DATA_SEQUENCE_MAX       8
 #define UXR_SAMPLE_DELTA_SEQUENCE_MAX      8
@@ -54,6 +55,13 @@ typedef struct BinarySequence_t
     uint8_t data[UXR_BINARY_SEQUENCE_MAX];
 
 } BinarySequence_t;
+
+typedef struct BinarySequenceSmall_t
+{
+    uint32_t size;
+    uint8_t data[UXR_BINARY_SEQUENCE_SMALL_MAX];
+
+} BinarySequenceSmall_t;
 
 typedef struct StringSequence_t
 {
@@ -491,7 +499,7 @@ typedef struct OBJK_Endpoint_QosBinary
     bool optional_lifespan_msec;
     uint32_t lifespan_msec;
     bool optional_user_data;
-    BinarySequence_t user_data;
+    BinarySequenceSmall_t user_data;
 
 } OBJK_Endpoint_QosBinary;
 
@@ -518,7 +526,7 @@ typedef struct OBJK_DataReader_Binary_Qos
 
 typedef struct OBJK_DataReader_Binary
 {
-    char* topic_name;
+    ObjectId topic_id;
     bool optional_qos;
     OBJK_DataReader_Binary_Qos qos;
 
@@ -527,7 +535,7 @@ typedef struct OBJK_DataReader_Binary
 
 typedef struct OBJK_DataWriter_Binary
 {
-    char* topic_name;
+    ObjectId topic_id;
     bool optional_qos;
     OBJK_DataWriter_Binary_Qos qos;
 

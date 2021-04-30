@@ -116,7 +116,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId publisher_id,
-        const char* topic_name,
+        uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -128,7 +128,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
     payload.object_representation._.data_writer.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_DataWriter_Binary datawriter;
-    datawriter.topic_name = (char*) topic_name;
+    uxr_object_id_to_raw(topic_id, datawriter.topic_id.data);
     datawriter.optional_qos = true;
     datawriter.qos.optional_ownership_strength = false;
     datawriter.qos.base.optional_deadline_msec = false;
@@ -164,7 +164,7 @@ uint16_t uxr_buffer_create_datareader_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId subscriber_id,
-        const char* topic_name,
+        uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -176,7 +176,7 @@ uint16_t uxr_buffer_create_datareader_bin(
     payload.object_representation._.data_reader.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_DataReader_Binary datareader;
-    datareader.topic_name = (char*) topic_name;
+    uxr_object_id_to_raw(topic_id, datareader.topic_id.data);
     datareader.optional_qos = true;
     datareader.qos.optional_contentbased_filter = false;
     datareader.qos.optional_timebasedfilter_msec = false;
