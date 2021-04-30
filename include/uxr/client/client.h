@@ -26,6 +26,7 @@
 #include <uxr/client/core/session/read_access.h>
 #include <uxr/client/core/session/create_entities_ref.h>
 #include <uxr/client/core/session/create_entities_xml.h>
+#include <uxr/client/core/session/create_entities_bin.h>
 
 #include <uxr/client/transport.h>
 
