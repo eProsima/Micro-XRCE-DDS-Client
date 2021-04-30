@@ -1,7 +1,6 @@
 #include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
-#include "../../profile/shared_memory/shared_memory_internal.h"
 
 #include <string.h>
 
@@ -58,8 +57,6 @@ uint16_t uxr_buffer_create_topic_bin(
             UXR_BINARY_SEQUENCE_MAX);
     uxr_serialize_OBJK_Topic_Binary(&ub, &topic);
     payload.object_representation._.topic.base.representation._.binary_representation.size = (uint32_t) ub.offset;
-
-    UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &topic);
 
     return uxr_common_create_entity(session, stream_id, object_id, (uint16_t) ub.offset, mode, &payload);
 }
@@ -119,7 +116,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId publisher_id,
-        uxrObjectId topic_id,
+        const char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -131,7 +128,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
     payload.object_representation._.data_writer.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_DataWriter_Binary datawriter;
-    uxr_object_id_to_raw(topic_id, datawriter.topic_id.data);
+    datawriter.topic_name = (char*) topic_name;
     datawriter.optional_qos = true;
     datawriter.qos.optional_ownership_strength = false;
     datawriter.qos.base.optional_deadline_msec = false;
@@ -153,8 +150,6 @@ uint16_t uxr_buffer_create_datawriter_bin(
         datawriter.qos.base.qos_flags |= is_durability_transient_local;
     }
 
-    UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &datawriter);
-
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.data_writer.base.representation._.binary_representation.data,
             UXR_BINARY_SEQUENCE_MAX);
@@ -169,7 +164,7 @@ uint16_t uxr_buffer_create_datareader_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uxrObjectId subscriber_id,
-        uxrObjectId topic_id,
+        const char* topic_name,
         bool reliable,
         bool keep_last,
         bool transient_local,
@@ -181,7 +176,7 @@ uint16_t uxr_buffer_create_datareader_bin(
     payload.object_representation._.data_reader.base.representation.format = DDS_XRCE_REPRESENTATION_IN_BINARY;
 
     OBJK_DataReader_Binary datareader;
-    uxr_object_id_to_raw(topic_id, datareader.topic_id.data);
+    datareader.topic_name = (char*) topic_name;
     datareader.optional_qos = true;
     datareader.qos.optional_contentbased_filter = false;
     datareader.qos.optional_timebasedfilter_msec = false;
@@ -203,8 +198,6 @@ uint16_t uxr_buffer_create_datareader_bin(
     {
         datareader.qos.base.qos_flags |= is_durability_transient_local;
     }
-
-    UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &datareader);
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.data_reader.base.representation._.binary_representation.data,
@@ -241,8 +234,6 @@ uint16_t uxr_buffer_create_requester_bin(
     requester.optional_request_topic_name = true;
     requester.request_topic_name = (char*) request_topic_name;
 
-    UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &requester);
-
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.requester.base.representation._.binary_representation.data,
             UXR_BINARY_SEQUENCE_MAX);
@@ -277,8 +268,6 @@ uint16_t uxr_buffer_create_replier_bin(
     replier.reply_topic_name = (char*) reply_topic_name;
     replier.optional_request_topic_name = true;
     replier.request_topic_name = (char*) request_topic_name;
-
-    UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &replier);
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.replier.base.representation._.binary_representation.data,
