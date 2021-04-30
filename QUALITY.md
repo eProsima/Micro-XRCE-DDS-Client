@@ -31,7 +31,6 @@ The public API is documented [in oficial documentation Read the Docs](https://mi
 
 Any ABI break in **eProsima Micro XRCE-DDS Client** will be done between minor versions and it should be clearly stated in the release notes, note that minor releases can happen within a ROS distribution.
 
-While ABI breaks are taken into consideration, they are not seen as a critical issue, since the main target of this package is micro-ROS (a static linked environment).
 
 ## Change Control Process [2]
 
