@@ -29,5 +29,6 @@
 #include <uxr/client/core/session/create_entities_bin.h>
 
 #include <uxr/client/transport.h>
+#include <uxr/client/profile/multithread/multithread.h>
 
 #endif // _UXR_CLIENT_CLIENT_H_

@@ -62,6 +62,12 @@ set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.
 option(UCLIENT_PROFILE_CUSTOM_TRANSPORT "Enable Custom transport." ON)
 set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.")
 
+option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." OFF)
+option(UCLIENT_PROFILE_SHARED_MEMORY "Enable shared memory transport support." OFF)
+option(UCLIENT_PROFILE_MATCHING "Enable QoS matching support." OFF)
+set(UCLIENT_SHARED_MEMORY_MAX_ENTITIES 4 CACHE STRING "Max number of entities involved in shared memory.")
+set(UCLIENT_SHARED_MEMORY_STATIC_MEM_SIZE 10 CACHE STRING "Max number data buffers stored in shared memory")
+
 ###############################################################################
 # Dependencies
 ###############################################################################
@@ -215,6 +221,14 @@ if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
     list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
 endif()
 
+if(UCLIENT_PROFILE_MULTITHREAD)
+    set(UCLIENT_PROFILE_SHARED_MEMORY ON)
+endif()
+
+if(UCLIENT_PROFILE_SHARED_MEMORY)
+    set(UCLIENT_PROFILE_MATCHING ON)
+endif()
+
 # Other sources
 set(SRCS
     src/c/core/session/stream/input_best_effort_stream.c
@@ -239,6 +253,9 @@ set(SRCS
     src/c/core/session/create_entities_bin.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
+    $<$<BOOL:${UCLIENT_PROFILE_MULTITHREAD}>:src/c/profile/multithread/multithread.c>
+    $<$<BOOL:${UCLIENT_PROFILE_SHARED_MEMORY}>:src/c/profile/shared_memory/shared_memory.c>
+    $<$<BOOL:${UCLIENT_PROFILE_MATCHING}>:src/c/profile/matching/matching.c>
     $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
@@ -308,12 +325,17 @@ if((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (UCLIENT_TARGET_TYPE STREQUAL "SHA
         )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Threads REQUIRED)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         microcdr
         $<$<BOOL:$<PLATFORM_ID:Windows>>:ws2_32>
     PRIVATE
         $<$<BOOL:$<PLATFORM_ID:Linux>>:rt>
+        $<$<BOOL:$<PLATFORM_ID:Linux>>:${CMAKE_THREAD_LIBS_INIT}>
     )
 target_include_directories(${PROJECT_NAME}
     PUBLIC
@@ -367,7 +389,10 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ContinuousFragment)
     add_subdirectory(examples/PublishHelloWorldBestEffort)
     add_subdirectory(examples/SubscribeHelloWorldBestEffort)
+
     if(UCLIENT_PLATFORM_LINUX)
+        add_subdirectory(examples/MultithreadHelloWorld)
+        add_subdirectory(examples/MultithreadAdder)
         add_subdirectory(examples/CustomTransports)
     endif()
 endif()
@@ -392,6 +417,7 @@ if(UCLIENT_BUILD_TESTS)
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/custom_comm)
         add_subdirectory(test/transport/serial_comm)
+        add_subdirectory(test/shared_memory)
     endif()
 endif()
 

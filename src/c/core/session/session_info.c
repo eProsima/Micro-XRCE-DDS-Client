@@ -1,6 +1,7 @@
 #include <uxr/client/defines.h>
 #include <uxr/client/core/session/object_id.h>
 #include <uxr/client/core/type/xrce_types.h>
+#include <uxr/client/config.h>
 
 #include "session_info_internal.h"
 #include "submessage_internal.h"
@@ -53,6 +54,12 @@ void uxr_buffer_create_session(
     payload.client_representation.client_key.data[3] = info->key[3];
     payload.client_representation.session_id = info->id;
     payload.client_representation.optional_properties = false;
+#ifdef UCLIENT_PROFILE_SHARED_MEMORY
+    payload.client_representation.optional_properties = true;
+    payload.client_representation.properties.size = 1;
+    payload.client_representation.properties.data[0].name = "uxr_sm";
+    payload.client_representation.properties.data[0].value = "1";
+#endif /* ifdef UCLIENT_PROFILE_SHARED_MEMORY */
     payload.client_representation.mtu = mtu;
 
     info->last_request_id = UXR_REQUEST_LOGIN;

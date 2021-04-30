@@ -3,6 +3,7 @@
 #include "input_reliable_stream_internal.h"
 #include "output_best_effort_stream_internal.h"
 #include "output_reliable_stream_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
 
 //==================================================================
 //                             PUBLIC
@@ -141,7 +142,9 @@ bool uxr_output_streams_confirmed(
     bool up_to_date = true;
     for (unsigned i = 0; i < storage->output_reliable_size && up_to_date; ++i)
     {
+        UXR_LOCK((uxrMutex*) &storage->output_reliable[i].mutex);
         up_to_date = uxr_is_output_up_to_date(&storage->output_reliable[i]);
+        UXR_UNLOCK((uxrMutex*) &storage->output_reliable[i].mutex);
     }
     return up_to_date;
 }

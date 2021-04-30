@@ -107,8 +107,8 @@ UXRDLLAPI uint16_t uxr_prepare_output_stream(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId entity_id,
-        struct ucdrBuffer* ub_topic,
-        uint32_t topic_size);
+        struct ucdrBuffer* ub,
+        uint32_t len);
 
 
 /**

@@ -8,6 +8,8 @@
 #include "./stream/common_reliable_stream_internal.h"
 #include "./stream/stream_storage_internal.h"
 #include "./stream/seq_num_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
+#include "../../profile/shared_memory/shared_memory_internal.h"
 
 #define WRITE_DATA_PAYLOAD_SIZE 4
 #define SAMPLE_IDENTITY_SIZE    24
@@ -26,6 +28,8 @@ uint16_t uxr_buffer_request(
     ucdrBuffer ub;
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + len;
 
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
     ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA,
                     FORMAT_DATA);
     if (!ub.error)
@@ -33,8 +37,11 @@ uint16_t uxr_buffer_request(
         WRITE_DATA_Payload_Data payload;
         rv = uxr_init_base_object_request(&session->info, requester_id, &payload.base);
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
+        UXR_PREPARE_SHARED_MEMORY(session, requester_id, &ub, (uint16_t) len, rv);
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return rv;
 }
@@ -51,6 +58,8 @@ uint16_t uxr_buffer_reply(
     ucdrBuffer ub;
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + SAMPLE_IDENTITY_SIZE + len;
 
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
     ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA,
                     FORMAT_DATA);
     if (!ub.error)
@@ -58,9 +67,12 @@ uint16_t uxr_buffer_reply(
         WRITE_DATA_Payload_Data payload;
         rv = uxr_init_base_object_request(&session->info, replier_id, &payload.base);
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
+        UXR_PREPARE_SHARED_MEMORY(session, replier_id, &ub, (uint16_t) (SAMPLE_IDENTITY_SIZE + len), rv);
         uxr_serialize_SampleIdentity(&ub, sample_id);
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return rv;
 }
@@ -76,6 +88,8 @@ uint16_t uxr_buffer_topic(
     ucdrBuffer ub;
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + len;
 
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
     ub.error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, &ub, SUBMESSAGE_ID_WRITE_DATA,
                     FORMAT_DATA);
     if (!ub.error)
@@ -83,8 +97,11 @@ uint16_t uxr_buffer_topic(
         WRITE_DATA_Payload_Data payload;
         rv = uxr_init_base_object_request(&session->info, datawriter_id, &payload.base);
         uxr_serialize_WRITE_DATA_Payload_Data(&ub, &payload);
+        UXR_PREPARE_SHARED_MEMORY(session, datawriter_id, &ub, (uint16_t) len, rv);
         ucdr_serialize_array_uint8_t(&ub, buffer, len);
     }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return rv;
 }
@@ -94,11 +111,14 @@ uint16_t uxr_prepare_output_stream(
         uxrStreamId stream_id,
         uxrObjectId entity_id,
         ucdrBuffer* ub,
-        uint32_t data_size)
+        uint32_t len)
 {
     uint16_t rv = UXR_INVALID_REQUEST_ID;
 
-    size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + data_size;
+    UXR_LOCK_STREAM_ID(session, stream_id);
+
+    size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + len;
+
     ub->error = !uxr_prepare_stream_to_write_submessage(session, stream_id, payload_size, ub, SUBMESSAGE_ID_WRITE_DATA,
                     FORMAT_DATA);
     if (!ub->error)
@@ -111,6 +131,8 @@ uint16_t uxr_prepare_output_stream(
         void* args = ub->args;
         ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
         ucdr_set_on_full_buffer_callback(ub, on_full_buffer, args);
+
+        UXR_PREPARE_SHARED_MEMORY(session, entity_id, ub, (uint16_t) len, rv);
     }
 
     return rv;
@@ -173,6 +195,10 @@ uint16_t uxr_prepare_output_stream_fragmented(
         uxrOnBuffersFull flush_callback)
 {
     uint16_t rv = UXR_INVALID_REQUEST_ID;
+
+#ifdef UCLIENT_PROFILE_MULTITHREAD
+    return rv;
+#endif /* ifdef UCLIENT_PROFILE_MULTITHREAD */
 
     size_t user_required_space = data_size + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 
