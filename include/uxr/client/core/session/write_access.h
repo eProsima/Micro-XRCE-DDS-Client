@@ -97,9 +97,9 @@ uint16_t uxr_buffer_topic(
  *        As a result of the reception of this submessage, the Agent will write a topic into the DDS Global-Data-Space.
  * @param session           A uxrSession structure previously initialized.
  * @param stream_id         The output stream identifier where the WRITE_DATA submessage will be buffered.
- * @param entity_id     The identifier of the XRCE DataWriter that will write the topic into the DDS GDS.
- * @param ub_topic          The ucdrBuffer structure used for serializing the topic.
- * @param topic_size        The size of the topic in bytes.
+ * @param entity_id         The identifier of the XRCE DataWriter that will write the topic into the DDS GDS.
+ * @param ub                The ucdrBuffer structure used for serializing the topic.
+ * @param len               The size of the topic in bytes.
  * @return A `request_id` that identifies the XRCE request made by the Entity.
  *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
  *  */
@@ -120,7 +120,7 @@ UXRDLLAPI uint16_t uxr_prepare_output_stream(
  * @param stream_id         The output stream identifier where the WRITE_DATA submessage will be buffered.
  * @param datawriter_id     The identifier of the XRCE DataWriter that will write the topic into the DDS GDS.
  * @param ub                The ucdrBuffer structure used for serializing the topic.
- * @param topic_size        The size of the topic in bytes.
+ * @param data_size         The size of the topic in bytes.
  * @param flush_callback    Callback that is call by the library when user should flush output buffers.
  * @return A `request_id` that identifies the XRCE request made by the Entity.
  *         This could be used in the `uxr_run_session_until_one_status` or `uxr_run_session_until_all_status` functions.
@@ -131,7 +131,7 @@ UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(
         uxrStreamId stream_id,
         uxrObjectId datawriter_id,
         ucdrBuffer* ub,
-        size_t topic_size,
+        size_t data_size,
         uxrOnBuffersFull flush_callback);
 
 /** @}*/
