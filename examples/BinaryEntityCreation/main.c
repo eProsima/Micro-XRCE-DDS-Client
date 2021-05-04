@@ -78,32 +78,39 @@ int main(
                     STREAM_HISTORY);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
-    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE,
+                    STREAM_HISTORY);
 
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
-    uint16_t participant_req = uxr_buffer_create_participant_bin(&session, reliable_out, participant_id, 0, UXR_REPLACE);
+    uint16_t participant_req =
+            uxr_buffer_create_participant_bin(&session, reliable_out, participant_id, 0, UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
-    uint16_t topic_req = uxr_buffer_create_topic_bin(&session, reliable_out, topic_id, participant_id, "ExampleTopic", "ExampleType", UXR_REPLACE);
+    uint16_t topic_req = uxr_buffer_create_topic_bin(&session, reliable_out, topic_id, participant_id, "ExampleTopic",
+                    "ExampleType", UXR_REPLACE);
 
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
-    uint16_t publisher_req = uxr_buffer_create_publisher_bin(&session, reliable_out, publisher_id, participant_id, UXR_REPLACE);
+    uint16_t publisher_req = uxr_buffer_create_publisher_bin(&session, reliable_out, publisher_id, participant_id,
+                    UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
-    uint16_t datawriter_req = uxr_buffer_create_datawriter_bin(&session, reliable_out, datawriter_id, publisher_id, topic_id, 1, 1, 1, UXR_REPLACE);
+    uint16_t datawriter_req = uxr_buffer_create_datawriter_bin(&session, reliable_out, datawriter_id, publisher_id,
+                    topic_id, 1, 1, 1, UXR_REPLACE);
 
     uxrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
-    uint16_t subscriber_req = uxr_buffer_create_subscriber_bin(&session, reliable_out, subscriber_id, participant_id, UXR_REPLACE);
+    uint16_t subscriber_req = uxr_buffer_create_subscriber_bin(&session, reliable_out, subscriber_id, participant_id,
+                    UXR_REPLACE);
 
     uxrObjectId datareader_id = uxr_object_id(0x01, UXR_DATAREADER_ID);
-    uint16_t datareader_req = uxr_buffer_create_datareader_bin(&session, reliable_out, datareader_id, subscriber_id, topic_id, 1, 1, 1, UXR_REPLACE);
+    uint16_t datareader_req = uxr_buffer_create_datareader_bin(&session, reliable_out, datareader_id, subscriber_id,
+                    topic_id, 1, 1, 1, UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint16_t requests[] = {
         participant_req, topic_req, publisher_req, datawriter_req, subscriber_req, datareader_req
     };
-    uint8_t status[sizeof(requests)/2];
+    uint8_t status[sizeof(requests) / 2];
     if (!uxr_run_session_until_all_status(&session, 1000, requests, status, sizeof(status)))
     {
         printf("Error at create entities.\n");
@@ -111,9 +118,12 @@ int main(
     }
 
     // Request topics
-    uxrDeliveryControl delivery_control = {0};
+    uxrDeliveryControl delivery_control = {
+        0
+    };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in,
+                    &delivery_control);
 
     // Write topics
     bool connected = true;
