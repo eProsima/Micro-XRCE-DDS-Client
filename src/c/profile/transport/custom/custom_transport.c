@@ -18,6 +18,8 @@ static bool send_custom_msg(
 {
     bool rv = false;
     uxrCustomTransport* transport = (uxrCustomTransport*)instance;
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
     uint8_t errcode;
     size_t bytes_written = 0;
@@ -45,6 +47,7 @@ static bool send_custom_msg(
         error_code = errcode;
     }
 
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 
@@ -56,6 +59,8 @@ static bool recv_custom_msg(
 {
     bool rv = false;
     uxrCustomTransport* transport = (uxrCustomTransport*)instance;
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
     size_t bytes_read = 0;
     do
@@ -98,6 +103,7 @@ static bool recv_custom_msg(
     }
     while ((0 == bytes_read) && (0 < timeout));
 
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 

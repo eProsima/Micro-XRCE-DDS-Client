@@ -692,9 +692,7 @@ inline bool send_message(
         uint8_t* buffer,
         size_t length)
 {
-    UXR_LOCK_TRANSPORT(session->comm);
     bool sent = session->comm->send_msg(session->comm->instance, buffer, length);
-    UXR_UNLOCK_TRANSPORT(session->comm);
 
     UXR_DEBUG_PRINT_MESSAGE((sent) ? UXR_SEND : UXR_ERROR_SEND, buffer, length, session->info.key);
     return sent;
@@ -706,9 +704,7 @@ inline bool recv_message(
         size_t* length,
         int poll_ms)
 {
-    UXR_LOCK_TRANSPORT(session->comm);
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
-    UXR_UNLOCK_TRANSPORT(session->comm);
 
     if (received)
     {

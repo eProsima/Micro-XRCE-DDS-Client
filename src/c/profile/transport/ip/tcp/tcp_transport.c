@@ -37,8 +37,10 @@ bool send_tcp_msg(
 {
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
-    uint8_t msg_size_buf[2];
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
+    uint8_t msg_size_buf[2];
     msg_size_buf[0] = (uint8_t)(0x00FF & len);
     msg_size_buf[1] = (uint8_t)((0xFF00 & len) >> 8);
     uint8_t n_attemps = 0;
@@ -107,6 +109,7 @@ bool send_tcp_msg(
         uxr_disconnect_tcp_platform(&transport->platform);
     }
 
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 
@@ -118,6 +121,8 @@ bool recv_tcp_msg(
 {
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
     size_t bytes_read = 0;
     do
@@ -134,6 +139,7 @@ bool recv_tcp_msg(
     }
     while ((0 == bytes_read) && (0 < timeout));
 
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 

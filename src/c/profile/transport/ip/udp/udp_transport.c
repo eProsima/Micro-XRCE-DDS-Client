@@ -31,6 +31,8 @@ static bool send_udp_msg(
 {
     bool rv = false;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
     uint8_t errcode;
     size_t bytes_sent = uxr_write_udp_data_platform(&transport->platform, buf, len, &errcode);
@@ -42,6 +44,8 @@ static bool send_udp_msg(
     {
         error_code = errcode;
     }
+
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 
@@ -53,6 +57,8 @@ static bool recv_udp_msg(
 {
     bool rv = false;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
     uint8_t errcode;
     size_t bytes_received = uxr_read_udp_data_platform(&transport->platform,
@@ -70,6 +76,8 @@ static bool recv_udp_msg(
     {
         error_code = errcode;
     }
+
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 

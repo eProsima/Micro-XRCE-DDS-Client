@@ -33,6 +33,8 @@ static bool send_serial_msg(
 {
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
     uint8_t errcode;
     size_t bytes_written = uxr_write_framed_msg(&transport->framing_io,
@@ -51,6 +53,7 @@ static bool send_serial_msg(
         error_code = errcode;
     }
 
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 
@@ -62,6 +65,8 @@ static bool recv_serial_msg(
 {
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
+    uxrCommunication* comm = &transport->comm;
+    UXR_LOCK_TRANSPORT(comm);
 
     size_t bytes_read = 0;
     do
@@ -91,6 +96,7 @@ static bool recv_serial_msg(
     }
     while ((0 == bytes_read) && (0 < timeout));
 
+    UXR_UNLOCK_TRANSPORT(comm);
     return rv;
 }
 
