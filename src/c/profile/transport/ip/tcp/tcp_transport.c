@@ -1,3 +1,4 @@
+#include <uxr/client/profile/multithread/multithread.h>
 #include "tcp_transport_internal.h"
 #include <uxr/client/util/time.h>
 
@@ -320,6 +321,7 @@ bool uxr_init_tcp_transport(
         transport->comm.comm_error = get_tcp_error;
         transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
         transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
 

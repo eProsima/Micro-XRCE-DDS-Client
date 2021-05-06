@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/serial/serial_transport_platform.h>
+#include <uxr/client/profile/multithread/multithread.h>
 #include "../stream_framing/stream_framing_protocol.h"
 #include <uxr/client/util/time.h>
 
@@ -123,7 +124,7 @@ bool uxr_init_serial_transport(
         transport->comm.recv_msg = recv_serial_msg;
         transport->comm.comm_error = get_serial_error;
         transport->comm.mtu = UXR_CONFIG_SERIAL_TRANSPORT_MTU;
-
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
     return rv;

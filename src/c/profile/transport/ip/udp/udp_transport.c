@@ -1,3 +1,4 @@
+#include <uxr/client/profile/multithread/multithread.h>
 #include "udp_transport_internal.h"
 
 /*******************************************************************************
@@ -97,6 +98,7 @@ bool uxr_init_udp_transport(
         transport->comm.recv_msg = recv_udp_msg;
         transport->comm.comm_error = get_udp_error;
         transport->comm.mtu = UXR_CONFIG_UDP_TRANSPORT_MTU;
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
     return rv;

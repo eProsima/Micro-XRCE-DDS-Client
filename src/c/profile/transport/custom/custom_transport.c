@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/custom/custom_transport.h>
+#include <uxr/client/profile/multithread/multithread.h>
 #include "../stream_framing/stream_framing_protocol.h"
 #include <uxr/client/util/time.h>
 
@@ -153,7 +154,7 @@ bool uxr_init_custom_transport(
         transport->comm.recv_msg = recv_custom_msg;
         transport->comm.comm_error = get_custom_error;
         transport->comm.mtu = UXR_CONFIG_CUSTOM_TRANSPORT_MTU;
-
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
     return rv;
