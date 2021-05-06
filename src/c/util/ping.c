@@ -3,6 +3,7 @@
 
 #include <uxr/client/core/type/xrce_types.h>
 #include <uxr/client/core/session/stream/seq_num.h>
+#include <uxr/client/profile/multithread/multithread.h>
 
 #include "../core/serialization/xrce_header_internal.h"
 #include "../core/session/submessage_internal.h"
