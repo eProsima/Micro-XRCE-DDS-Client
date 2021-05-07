@@ -1,3 +1,4 @@
+#include <uxr/client/profile/multithread/multithread.h>
 #include "tcp_transport_internal.h"
 #include <uxr/client/util/time.h>
 
@@ -36,8 +37,9 @@ bool send_tcp_msg(
 {
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
-    uint8_t msg_size_buf[2];
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
+    uint8_t msg_size_buf[2];
     msg_size_buf[0] = (uint8_t)(0x00FF & len);
     msg_size_buf[1] = (uint8_t)((0xFF00 & len) >> 8);
     uint8_t n_attemps = 0;
@@ -106,6 +108,7 @@ bool send_tcp_msg(
         uxr_disconnect_tcp_platform(&transport->platform);
     }
 
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -117,6 +120,7 @@ bool recv_tcp_msg(
 {
     bool rv = false;
     uxrTCPTransport* transport = (uxrTCPTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     size_t bytes_read = 0;
     do
@@ -133,6 +137,7 @@ bool recv_tcp_msg(
     }
     while ((0 == bytes_read) && (0 < timeout));
 
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -320,6 +325,7 @@ bool uxr_init_tcp_transport(
         transport->comm.comm_error = get_tcp_error;
         transport->comm.mtu = UXR_CONFIG_TCP_TRANSPORT_MTU;
         transport->input_buffer.state = UXR_TCP_BUFFER_EMPTY;
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
 

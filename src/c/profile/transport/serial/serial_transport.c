@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/serial/serial_transport_platform.h>
+#include <uxr/client/profile/multithread/multithread.h>
 #include "../stream_framing/stream_framing_protocol.h"
 #include <uxr/client/util/time.h>
 
@@ -32,6 +33,7 @@ static bool send_serial_msg(
 {
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     uint8_t errcode;
     size_t bytes_written = uxr_write_framed_msg(&transport->framing_io,
@@ -50,6 +52,7 @@ static bool send_serial_msg(
         error_code = errcode;
     }
 
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -61,6 +64,7 @@ static bool recv_serial_msg(
 {
     bool rv = false;
     uxrSerialTransport* transport = (uxrSerialTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     size_t bytes_read = 0;
     do
@@ -90,6 +94,7 @@ static bool recv_serial_msg(
     }
     while ((0 == bytes_read) && (0 < timeout));
 
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -123,7 +128,7 @@ bool uxr_init_serial_transport(
         transport->comm.recv_msg = recv_serial_msg;
         transport->comm.comm_error = get_serial_error;
         transport->comm.mtu = UXR_CONFIG_SERIAL_TRANSPORT_MTU;
-
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
     return rv;

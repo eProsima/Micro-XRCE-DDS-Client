@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/custom/custom_transport.h>
+#include <uxr/client/profile/multithread/multithread.h>
 #include "../stream_framing/stream_framing_protocol.h"
 #include <uxr/client/util/time.h>
 
@@ -17,6 +18,7 @@ static bool send_custom_msg(
 {
     bool rv = false;
     uxrCustomTransport* transport = (uxrCustomTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     uint8_t errcode;
     size_t bytes_written = 0;
@@ -44,6 +46,7 @@ static bool send_custom_msg(
         error_code = errcode;
     }
 
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -55,6 +58,7 @@ static bool recv_custom_msg(
 {
     bool rv = false;
     uxrCustomTransport* transport = (uxrCustomTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     size_t bytes_read = 0;
     do
@@ -97,6 +101,7 @@ static bool recv_custom_msg(
     }
     while ((0 == bytes_read) && (0 < timeout));
 
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -153,7 +158,7 @@ bool uxr_init_custom_transport(
         transport->comm.recv_msg = recv_custom_msg;
         transport->comm.comm_error = get_custom_error;
         transport->comm.mtu = UXR_CONFIG_CUSTOM_TRANSPORT_MTU;
-
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
     return rv;

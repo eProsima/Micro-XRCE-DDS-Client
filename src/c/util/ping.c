@@ -3,6 +3,7 @@
 
 #include <uxr/client/core/type/xrce_types.h>
 #include <uxr/client/core/session/stream/seq_num.h>
+#include <uxr/client/profile/multithread/multithread.h>
 
 #include "../core/serialization/xrce_header_internal.h"
 #include "../core/session/submessage_internal.h"
@@ -14,14 +15,14 @@ bool uxr_acknack_pong(
         ucdrBuffer* buffer);
 
 bool listen_info_message(
-        const uxrCommunication* comm,
+        uxrCommunication* comm,
         const int timeout);
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
 bool uxr_ping_agent_attempts(
-        const uxrCommunication* comm,
+        uxrCommunication* comm,
         const int timeout,
         const uint8_t attempts)
 {
@@ -36,6 +37,8 @@ bool uxr_ping_agent_attempts(
 
         for (size_t i = 0; !agent_pong && i < attempts; ++i)
         {
+            UXR_LOCK_TRANSPORT(comm);
+
             comm->send_msg(
                 comm->instance,
                 output_buffer,
@@ -50,6 +53,8 @@ bool uxr_ping_agent_attempts(
                 poll -= (int)(uxr_millis() - timestamp);
                 timestamp = uxr_millis();
             }
+
+            UXR_UNLOCK_TRANSPORT(comm);
         }
     }
 
@@ -57,7 +62,7 @@ bool uxr_ping_agent_attempts(
 }
 
 inline bool uxr_ping_agent(
-        const uxrCommunication* comm,
+        uxrCommunication* comm,
         const int timeout)
 {
     return uxr_ping_agent_attempts(comm, timeout, 1);
@@ -120,7 +125,7 @@ bool uxr_acknack_pong(
 }
 
 bool listen_info_message(
-        const uxrCommunication* comm,
+        uxrCommunication* comm,
         const int timeout)
 {
     uint8_t* input_buffer = NULL;

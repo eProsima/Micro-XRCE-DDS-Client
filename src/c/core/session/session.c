@@ -693,6 +693,7 @@ inline bool send_message(
         size_t length)
 {
     bool sent = session->comm->send_msg(session->comm->instance, buffer, length);
+
     UXR_DEBUG_PRINT_MESSAGE((sent) ? UXR_SEND : UXR_ERROR_SEND, buffer, length, session->info.key);
     return sent;
 }
@@ -704,6 +705,7 @@ inline bool recv_message(
         int poll_ms)
 {
     bool received = session->comm->recv_msg(session->comm->instance, buffer, length, poll_ms);
+
     if (received)
     {
         UXR_DEBUG_PRINT_MESSAGE(UXR_RECV, *buffer, *length, session->info.key);
