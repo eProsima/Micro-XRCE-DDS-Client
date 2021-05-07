@@ -27,6 +27,9 @@ void uxr_init_lock(
 void uxr_lock(
         uxrMutex* mutex)
 {
+    if (mutex == NULL)
+    return;
+
 #if defined(PLATFORM_NAME_FREERTOS)
     xSemaphoreTakeRecursive(mutex->impl, portMAX_DELAY);
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
@@ -41,6 +44,9 @@ void uxr_lock(
 void uxr_unlock(
         uxrMutex* mutex)
 {
+    if (mutex == NULL)
+    return;
+
 #if defined(PLATFORM_NAME_FREERTOS)
     xSemaphoreGiveRecursive(mutex->impl);
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
