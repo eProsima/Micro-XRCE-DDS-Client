@@ -28,7 +28,9 @@ void uxr_lock(
         uxrMutex* mutex)
 {
     if (mutex == NULL)
-    return;
+    {
+        return;
+    }
 
 #if defined(PLATFORM_NAME_FREERTOS)
     xSemaphoreTakeRecursive(mutex->impl, portMAX_DELAY);
@@ -45,7 +47,9 @@ void uxr_unlock(
         uxrMutex* mutex)
 {
     if (mutex == NULL)
-    return;
+    {
+        return;
+    }
 
 #if defined(PLATFORM_NAME_FREERTOS)
     xSemaphoreGiveRecursive(mutex->impl);
