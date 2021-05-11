@@ -211,10 +211,7 @@ uint16_t uxr_prepare_output_stream_fragmented(
         uxrOnBuffersFull flush_callback)
 {
     uint16_t rv = UXR_INVALID_REQUEST_ID;
-
-#ifdef UCLIENT_PROFILE_MULTITHREAD
-    return rv;
-#endif /* ifdef UCLIENT_PROFILE_MULTITHREAD */
+    UXR_LOCK_STREAM_ID(session, stream_id);
 
     size_t user_required_space = data_size + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE;
 
