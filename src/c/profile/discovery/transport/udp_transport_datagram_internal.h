@@ -34,7 +34,7 @@ extern "C"
 #include <poll.h>
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
 #include <winsock2.h>
-#elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
+#elif defined(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
 #include "FreeRTOS.h"
 #include "list.h"
 #include "FreeRTOS_IP.h"
@@ -54,7 +54,7 @@ typedef struct uxrUDPTransportDatagram
     int fd;
 #elif defined(UCLIENT_PLATFORM_WINDOWS)
     WSAPOLLFD poll_fd;
-#elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
+#elif defined(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
     SocketSet_t poll_fd;
     Socket_t fd;
 #endif // if defined(UCLIENT_PLATFORM_POSIX)
