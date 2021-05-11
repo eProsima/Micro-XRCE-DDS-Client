@@ -140,6 +140,8 @@ uint16_t uxr_prepare_output_stream(
         UXR_UNLOCK_STREAM_ID(session, stream_id);
     }
 
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
+
     return rv;
 }
 
