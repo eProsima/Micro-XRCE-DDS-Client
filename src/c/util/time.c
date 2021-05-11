@@ -4,7 +4,7 @@
 
 #ifdef WIN32
 #include <Windows.h>
-#elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
+#elif defined(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
 #include "FreeRTOS.h"
 #include "task.h"
 #endif /* ifdef WIN32 */
@@ -36,7 +36,7 @@ int64_t uxr_nanos(
     uint64_t current_time = (((uint64_t) ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
 
     return (current_time - epoch_time) * 100;
-#elif defined(PLATFORM_NAME_FREERTOS_PLUS_TCP)
+#elif defined(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
     TimeOut_t tick_count;
 
     /* Get the current tick count. */
