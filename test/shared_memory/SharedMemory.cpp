@@ -504,7 +504,7 @@ TEST_P(SharedMemoryTest, SharedMemoryPubSubMultithread)
 
     ASSERT_EQ(received_topics, 300);
 }
-#endif
+#endif // ifdef UCLIENT_PROFILE_MULTITHREAD
 
 TEST_P(SharedMemoryTest, SharedMemory1Pub3Sub)
 {
@@ -995,7 +995,7 @@ TEST_P(SharedMemoryTest, SharedMemoryReqRepFragmentation)
     ASSERT_EQ(received_data, 2);
     free(data);
 }
-#endif
+#endif // ifdef UCLIENT_PROFILE_MULTITHREAD
 
 INSTANTIATE_TEST_CASE_P(
     SharedMemoryTest,
