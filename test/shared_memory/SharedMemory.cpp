@@ -444,6 +444,7 @@ TEST_P(SharedMemoryTest, SharedMemoryPubSubSimpleAPI)
     ASSERT_EQ(received_topics, 1);
 }
 
+#ifdef UCLIENT_PROFILE_MULTITHREAD
 TEST_P(SharedMemoryTest, SharedMemoryPubSubMultithread)
 {
     uxrObjectId datawriter_id_1 = create_datawriter("shared_memory_topic", "shared_memory_type");
@@ -503,6 +504,7 @@ TEST_P(SharedMemoryTest, SharedMemoryPubSubMultithread)
 
     ASSERT_EQ(received_topics, 300);
 }
+#endif
 
 TEST_P(SharedMemoryTest, SharedMemory1Pub3Sub)
 {
@@ -819,6 +821,7 @@ TEST_P(SharedMemoryTest, SharedMemoryReqResSimpleAPI)
     ASSERT_EQ(received_res, 3);
 }
 
+#ifdef UCLIENT_PROFILE_MULTITHREAD
 TEST_P(SharedMemoryTest, SharedMemoryReqRepMultithread)
 {
     uxrObjectId requester_id_1 = create_requester("shared_memory_reqres", "req_type", "res_type");
@@ -992,6 +995,7 @@ TEST_P(SharedMemoryTest, SharedMemoryReqRepFragmentation)
     ASSERT_EQ(received_data, 2);
     free(data);
 }
+#endif
 
 INSTANTIATE_TEST_CASE_P(
     SharedMemoryTest,
