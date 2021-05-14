@@ -24,7 +24,6 @@ ExternalProject_Add(uxr_sharedmem_project
     INSTALL_DIR
         ${PROJECT_BINARY_DIR}/temp_install/sharedmem
     CMAKE_CACHE_ARGS
-        -DLIB_PREFIX:STRING=libshm_
         -DUCLIENT_PROFILE_SHARED_MEMORY:BOOL=ON
         -DUCLIENT_PROFILE_MULTITHREAD:BOOL=${UCLIENT_PROFILE_MULTITHREAD}
         -DUCLIENT_PROFILE_MATCHING:BOOL=ON
@@ -32,7 +31,7 @@ ExternalProject_Add(uxr_sharedmem_project
         -DUCLIENT_SHARED_MEMORY_STATIC_MEM_SIZE:STRING=30
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-    BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/sharedmem/libshm_microxrcedds_client.a
+    BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/sharedmem/libmicroxrcedds_client.a
     BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/sharedmem/libmicrocdr.a
     )
 
@@ -45,7 +44,7 @@ set_property(TARGET ucdr_sharedmem PROPERTY IMPORTED_LOCATION  ${PROJECT_BINARY_
 add_library(uxr_sharedmem STATIC IMPORTED GLOBAL)
 add_dependencies(uxr_sharedmem uxr_sharedmem_project)
 target_link_libraries(uxr_sharedmem INTERFACE ucdr_sharedmem)
-set_property(TARGET uxr_sharedmem PROPERTY IMPORTED_LOCATION  ${PROJECT_BINARY_DIR}/temp_install/sharedmem/lib/libshm_microxrcedds_client.a)
+set_property(TARGET uxr_sharedmem PROPERTY IMPORTED_LOCATION  ${PROJECT_BINARY_DIR}/temp_install/sharedmem/lib/libmicroxrcedds_client.a)
 
 add_executable(sharedmem_test SharedMemory.cpp)
 

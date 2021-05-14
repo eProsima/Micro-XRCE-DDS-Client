@@ -13,11 +13,10 @@ if(UCLIENT_PROFILE_MULTITHREAD)
         INSTALL_DIR
             ${PROJECT_BINARY_DIR}/temp_install/unitary
         CMAKE_CACHE_ARGS
-            -DLIB_PREFIX:STRING=libthr_
             -DUCLIENT_PROFILE_MULTITHREAD:BOOL=ON
             -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-        BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/unitary/libthr_microxrcedds_client.a
+        BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/unitary/libmicroxrcedds_client.a
         BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/unitary/libmicrocdr.a
         )
 
@@ -30,7 +29,7 @@ if(UCLIENT_PROFILE_MULTITHREAD)
     add_library(uxr_unitary STATIC IMPORTED GLOBAL)
     add_dependencies(uxr_unitary unitary_tests_project)
     target_link_libraries(uxr_unitary INTERFACE ucdr_unitary)
-    set_property(TARGET uxr_unitary PROPERTY IMPORTED_LOCATION  ${PROJECT_BINARY_DIR}/temp_install/unitary/lib/libthr_microxrcedds_client.a)
+    set_property(TARGET uxr_unitary PROPERTY IMPORTED_LOCATION  ${PROJECT_BINARY_DIR}/temp_install/unitary/lib/libmicroxrcedds_client.a)
 endif()
 
 macro(unitary_test TEST_NAME TEST_SOURCE)
