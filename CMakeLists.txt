@@ -221,10 +221,6 @@ if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
     list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
 endif()
 
-if(UCLIENT_PROFILE_MULTITHREAD)
-    set(UCLIENT_PROFILE_SHARED_MEMORY ON)
-endif()
-
 if(UCLIENT_PROFILE_SHARED_MEMORY)
     set(UCLIENT_PROFILE_MATCHING ON)
 endif()

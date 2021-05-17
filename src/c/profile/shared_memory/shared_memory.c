@@ -175,6 +175,7 @@ void uxr_prepare_shared_memory(
     ssize_t entity_index = uxr_shared_memory_get_entity_index(session, &entity_id);
     if (-1 == entity_index)
     {
+        UXR_UNLOCK(&uxr_sm_map.lock);
         return;
     }
 
