@@ -1,3 +1,5 @@
+#include <uxr/client/core/session/create_entities_bin.h>
+
 #include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
@@ -122,7 +124,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
         uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
-        bool transient_local,
+        uxrQoSDurability durability,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -148,9 +150,23 @@ uint16_t uxr_buffer_create_datawriter_bin(
     {
         datawriter.qos.base.qos_flags |= is_history_keep_last;
     }
-    if (transient_local)
+
+    switch (durability)
     {
-        datawriter.qos.base.qos_flags |= is_durability_transient_local;
+        case UXR_DURABILITY_VOLATILE:
+            // datawriter.qos.base.qos_flags all flags zeroed
+            break;
+        case UXR_DURABILITY_TRANSIENT_LOCAL:
+            datawriter.qos.base.qos_flags |= is_durability_transient_local;
+            break;
+        case UXR_DURABILITY_TRANSIENT:
+            datawriter.qos.base.qos_flags |= is_durability_transient;
+            break;
+        case UXR_DURABILITY_PERSISTENT:
+            datawriter.qos.base.qos_flags |= is_durability_persistent;
+            break;
+        default:
+            break;
     }
 
     UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &datawriter);
@@ -172,7 +188,7 @@ uint16_t uxr_buffer_create_datareader_bin(
         uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
-        bool transient_local,
+        uxrQoSDurability durability,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -199,9 +215,23 @@ uint16_t uxr_buffer_create_datareader_bin(
     {
         datareader.qos.base.qos_flags |= is_history_keep_last;
     }
-    if (transient_local)
+
+    switch (durability)
     {
-        datareader.qos.base.qos_flags |= is_durability_transient_local;
+        case UXR_DURABILITY_VOLATILE:
+            // datawriter.qos.base.qos_flags all flags zeroed
+            break;
+        case UXR_DURABILITY_TRANSIENT_LOCAL:
+            datareader.qos.base.qos_flags |= is_durability_transient_local;
+            break;
+        case UXR_DURABILITY_TRANSIENT:
+            datareader.qos.base.qos_flags |= is_durability_transient;
+            break;
+        case UXR_DURABILITY_PERSISTENT:
+            datareader.qos.base.qos_flags |= is_durability_persistent;
+            break;
+        default:
+            break;
     }
 
     UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &datareader);

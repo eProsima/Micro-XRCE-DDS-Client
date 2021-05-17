@@ -87,7 +87,7 @@ protected:
                 uxr_buffer_create_topic_bin(&session, output_besteffort, topic_id, participant_id,
                         topic.c_str(), type.c_str(), UXR_REPLACE);
                 uxr_buffer_create_datawriter_bin(&session, output_besteffort, datawriter_id, publisher_id, topic_id, 1,
-                        1, 1, UXR_REPLACE);
+                        1, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
                 break;
             default:
                 // ASSERT_TRUE(0);
@@ -127,7 +127,7 @@ protected:
                 uxr_buffer_create_topic_bin(&session, output_besteffort, topic_id, participant_id,
                         topic.c_str(), type.c_str(), UXR_REPLACE);
                 uxr_buffer_create_datareader_bin(&session, output_besteffort, datareader_id, subscriber_id, topic_id, 1,
-                        1, 1, UXR_REPLACE);
+                        1, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
                 break;
             default:
                 // ASSERT_TRUE(0);
