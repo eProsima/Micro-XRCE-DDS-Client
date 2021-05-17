@@ -119,12 +119,13 @@ UXRDLLAPI uint16_t uxr_buffer_create_subscriber_bin(
  * The enum that identifies the durability of the QoS of the DDS entity.
  */
 
-typedef enum uxrQoSDurability {
-        UXR_DURABILITY_DEFAULT = 0,
-        UXR_DURABILITY_VOLATILE,
-        UXR_DURABILITY_TRANSIENT_LOCAL,
-        UXR_DURABILITY_TRANSIENT,
-        UXR_DURABILITY_PERSISTENT
+typedef enum uxrQoSDurability
+{
+    UXR_DURABILITY_DEFAULT = 0,
+    UXR_DURABILITY_VOLATILE,
+    UXR_DURABILITY_TRANSIENT_LOCAL,
+    UXR_DURABILITY_TRANSIENT,
+    UXR_DURABILITY_PERSISTENT
 } uxrQoSDurability;
 
 /**

@@ -153,21 +153,21 @@ uint16_t uxr_buffer_create_datawriter_bin(
 
     switch (durability)
     {
-    case UXR_DURABILITY_VOLATILE:
-        // datawriter.qos.base.qos_flags all flags zeroed
-        break;
-    case UXR_DURABILITY_DEFAULT:
-    case UXR_DURABILITY_TRANSIENT_LOCAL:
-        datawriter.qos.base.qos_flags |= is_durability_transient_local;
-        break;
-    case UXR_DURABILITY_TRANSIENT:
-        datawriter.qos.base.qos_flags |= is_durability_transient;
-        break;
-    case UXR_DURABILITY_PERSISTENT:
-        datawriter.qos.base.qos_flags |= is_durability_persistent;
-        break;
-    default:
-        break;
+        case UXR_DURABILITY_VOLATILE:
+            // datawriter.qos.base.qos_flags all flags zeroed
+            break;
+        case UXR_DURABILITY_DEFAULT:
+        case UXR_DURABILITY_TRANSIENT_LOCAL:
+            datawriter.qos.base.qos_flags |= is_durability_transient_local;
+            break;
+        case UXR_DURABILITY_TRANSIENT:
+            datawriter.qos.base.qos_flags |= is_durability_transient;
+            break;
+        case UXR_DURABILITY_PERSISTENT:
+            datawriter.qos.base.qos_flags |= is_durability_persistent;
+            break;
+        default:
+            break;
     }
 
     UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &datawriter);
@@ -219,21 +219,21 @@ uint16_t uxr_buffer_create_datareader_bin(
 
     switch (durability)
     {
-    case UXR_DURABILITY_VOLATILE:
-        // datawriter.qos.base.qos_flags all flags zeroed
-        break;
-    case UXR_DURABILITY_DEFAULT:
-    case UXR_DURABILITY_TRANSIENT_LOCAL:
-        datareader.qos.base.qos_flags |= is_durability_transient_local;
-        break;
-    case UXR_DURABILITY_TRANSIENT:
-        datareader.qos.base.qos_flags |= is_durability_transient;
-        break;
-    case UXR_DURABILITY_PERSISTENT:
-        datareader.qos.base.qos_flags |= is_durability_persistent;
-        break;
-    default:
-        break;
+        case UXR_DURABILITY_VOLATILE:
+            // datawriter.qos.base.qos_flags all flags zeroed
+            break;
+        case UXR_DURABILITY_DEFAULT:
+        case UXR_DURABILITY_TRANSIENT_LOCAL:
+            datareader.qos.base.qos_flags |= is_durability_transient_local;
+            break;
+        case UXR_DURABILITY_TRANSIENT:
+            datareader.qos.base.qos_flags |= is_durability_transient;
+            break;
+        case UXR_DURABILITY_PERSISTENT:
+            datareader.qos.base.qos_flags |= is_durability_persistent;
+            break;
+        default:
+            break;
     }
 
     UXR_ADD_SHARED_MEMORY_ENTITY_BIN(session, object_id, &datareader);
