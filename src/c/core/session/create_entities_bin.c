@@ -156,7 +156,6 @@ uint16_t uxr_buffer_create_datawriter_bin(
         case UXR_DURABILITY_VOLATILE:
             // datawriter.qos.base.qos_flags all flags zeroed
             break;
-        case UXR_DURABILITY_DEFAULT:
         case UXR_DURABILITY_TRANSIENT_LOCAL:
             datawriter.qos.base.qos_flags |= is_durability_transient_local;
             break;
@@ -222,7 +221,6 @@ uint16_t uxr_buffer_create_datareader_bin(
         case UXR_DURABILITY_VOLATILE:
             // datawriter.qos.base.qos_flags all flags zeroed
             break;
-        case UXR_DURABILITY_DEFAULT:
         case UXR_DURABILITY_TRANSIENT_LOCAL:
             datareader.qos.base.qos_flags |= is_durability_transient_local;
             break;
