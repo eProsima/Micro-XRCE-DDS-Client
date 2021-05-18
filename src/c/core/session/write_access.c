@@ -12,6 +12,7 @@
 #include "../../profile/shared_memory/shared_memory_internal.h"
 
 #define WRITE_DATA_PAYLOAD_SIZE 4
+#define MAX_WRITE_DATA_PAYLOAD_SIZE 65535
 #define SAMPLE_IDENTITY_SIZE    24
 
 //==================================================================
@@ -175,9 +176,20 @@ bool on_full_output_buffer_fragmented(
         buffer_capacity,
         0u,
         uxr_get_reliable_buffer_size(&stream->base, stream->last_written));
-    uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, available_block_size,
-            (local_args->data_size < buffer_capacity) ? FLAG_LAST_FRAGMENT : 0);
-    uxr_set_reliable_buffer_size(&stream->base, stream->last_written, buffer_capacity);
+
+    if (local_args->data_size <= buffer_capacity)
+    {
+        uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t) local_args->data_size,
+                FLAG_LAST_FRAGMENT);
+        uxr_set_reliable_buffer_size(&stream->base, stream->last_written,
+                local_args->data_size + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE);
+    }
+    else
+    {
+        uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, available_block_size, 0);
+        uxr_set_reliable_buffer_size(&stream->base, stream->last_written, buffer_capacity);
+    }
+
     stream->last_written = uxr_seq_num_add(stream->last_written, 1);
 
     // Preparing the buffer for the user
@@ -261,6 +273,13 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
     // Fill the SUBMESSAGE_ID_WRITE_DATA
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + data_size;
+
+#ifdef UCLIENT_TWEAK_XRCE_WRITE_LIMIT
+    if (payload_size > MAX_WRITE_DATA_PAYLOAD_SIZE)
+    {
+        payload_size = 0;
+    }
+#endif  // UCLIENT_TWEAK_XRCE_WRITE_LIMIT
 
     (void) uxr_buffer_submessage_header(ub, SUBMESSAGE_ID_WRITE_DATA, (uint16_t)payload_size, FORMAT_DATA);
 
