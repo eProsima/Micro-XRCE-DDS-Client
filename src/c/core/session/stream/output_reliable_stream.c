@@ -107,8 +107,8 @@ bool uxr_prepare_reliable_buffer_to_write(
 
         uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
         uint16_t first_fragment_size = (uint16_t)(buffer_capacity - (uint16_t)(buffer_size + SUBHEADER_SIZE));
-        uint16_t remaining_size = (uint16_t)(length - first_fragment_size);
-        uint16_t last_fragment_size;
+        size_t remaining_size = length - first_fragment_size;
+        size_t last_fragment_size;
         uint16_t necessary_complete_blocks;
         if (0 == (remaining_size % available_block_size))
         {
@@ -146,7 +146,8 @@ bool uxr_prepare_reliable_buffer_to_write(
                 buffer_capacity,
                 0u,
                 uxr_get_reliable_buffer_size(&stream->base, seq_num));
-            uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, last_fragment_size, FLAG_LAST_FRAGMENT);
+            uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)last_fragment_size,
+                    FLAG_LAST_FRAGMENT);
             uxr_set_reliable_buffer_size(&stream->base, seq_num,
                     stream->offset + (size_t)(SUBHEADER_SIZE) + last_fragment_size);
 

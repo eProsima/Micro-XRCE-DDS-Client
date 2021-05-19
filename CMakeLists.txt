@@ -68,6 +68,9 @@ option(UCLIENT_PROFILE_MATCHING "Enable QoS matching support." OFF)
 set(UCLIENT_SHARED_MEMORY_MAX_ENTITIES 4 CACHE STRING "Max number of entities involved in shared memory.")
 set(UCLIENT_SHARED_MEMORY_STATIC_MEM_SIZE 10 CACHE STRING "Max number data buffers stored in shared memory")
 
+# Off-standard features and tweaks
+option(UCLIENT_TWEAK_XRCE_WRITE_LIMIT "This feature uses a tweak to allow XRCE WRITE DATA submessages grater than 64 kB." ON)
+
 ###############################################################################
 # Dependencies
 ###############################################################################
