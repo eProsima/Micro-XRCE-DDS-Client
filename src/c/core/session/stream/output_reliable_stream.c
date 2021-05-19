@@ -146,7 +146,8 @@ bool uxr_prepare_reliable_buffer_to_write(
                 buffer_capacity,
                 0u,
                 uxr_get_reliable_buffer_size(&stream->base, seq_num));
-            uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)last_fragment_size, FLAG_LAST_FRAGMENT);
+            uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)last_fragment_size,
+                    FLAG_LAST_FRAGMENT);
             uxr_set_reliable_buffer_size(&stream->base, seq_num,
                     stream->offset + (size_t)(SUBHEADER_SIZE) + last_fragment_size);
 
