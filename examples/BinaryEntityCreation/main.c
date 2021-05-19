@@ -84,7 +84,7 @@ int main(
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
     uint16_t participant_req =
-            uxr_buffer_create_participant_bin(&session, reliable_out, participant_id, 0, UXR_REPLACE);
+            uxr_buffer_create_participant_bin(&session, reliable_out, participant_id, 0, NULL, UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     uint16_t topic_req = uxr_buffer_create_topic_bin(&session, reliable_out, topic_id, participant_id, "ExampleTopic",
