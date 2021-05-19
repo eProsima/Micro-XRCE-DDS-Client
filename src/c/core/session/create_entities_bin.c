@@ -15,6 +15,7 @@ uint16_t uxr_buffer_create_participant_bin(
         uxrStreamId stream_id,
         uxrObjectId object_id,
         uint16_t domain_id,
+        const char* participant_name,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -25,6 +26,12 @@ uint16_t uxr_buffer_create_participant_bin(
     OBJK_DomainParticipant_Binary participant;
     participant.optional_domain_reference = false;
     participant.optional_qos_profile_reference = false;
+
+    if (participant_name != NULL)
+    {
+        participant.optional_qos_profile_reference = true;
+        participant.qos_profile_reference = (char*) participant_name;
+    }
 
     ucdrBuffer ub;
     ucdr_init_buffer(&ub, payload.object_representation._.participant.base.representation._.binary_representation.data,
