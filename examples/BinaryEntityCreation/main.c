@@ -31,7 +31,7 @@ void on_topic(
         uint16_t length,
         void* args)
 {
-    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length;
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length; (void) args;
 
     int32_t data;
     ucdr_deserialize_int32_t(ub, &data);
@@ -122,7 +122,7 @@ int main(
         0
     };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in,
+    uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in,
                     &delivery_control);
 
     // Write topics

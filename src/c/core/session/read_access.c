@@ -204,7 +204,7 @@ inline void read_format_data(
                         request_id,
                         &sample_id,
                         &temp_buffer,
-                        (size_t)request_length,
+                        request_length,
                         session->on_request_args);
 
                     session->on_data_flag = true;
@@ -232,7 +232,7 @@ inline void read_format_data(
                         request_id,
                         (uint16_t)((request.request_id.data[0] << 8) + request.request_id.data[1]),
                         &temp_buffer,
-                        (size_t)reply_length,
+                        reply_length,
                         session->on_reply_args);
 
                     session->on_data_flag = true;
