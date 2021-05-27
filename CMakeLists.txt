@@ -575,6 +575,9 @@ if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
     endforeach()
 endif()
 
+# Set output library prefix
+set_property(TARGET microxrcedds_client PROPERTY PREFIX ${LIB_PREFIX})
+
 if(BUILD_DOCUMENTATION)
     # Instalation of doxygen files
     install(DIRECTORY ${PROJECT_BINARY_DIR}/doc/api_reference
