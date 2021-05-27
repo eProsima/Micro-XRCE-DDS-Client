@@ -73,7 +73,7 @@ int main(
         TransportLocator agent_list[MAX_AGENTS];
         for (int i = 1; i < args; i += 2, size++)
         {
-            uxr_ip_to_locator(argv[i], (uint16_t)atoi(argv[i + 1]), UXR_IPv4, &agent_list[i++]);
+            uxr_ip_to_locator(argv[i], (uint16_t)atoi(argv[i + 1]), UXR_IPv4, &agent_list[size]);
         }
 
         uxr_discovery_agents(10, 1000, on_agent_found, NULL, agent_list, size);
