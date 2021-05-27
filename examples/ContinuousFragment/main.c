@@ -77,7 +77,7 @@ int main(
             "</participant>"
             "</dds>";
     uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0,
-                    participant_xml, UXR_REPLACE);
+            participant_xml, UXR_REPLACE);
     uxr_run_session_until_confirm_delivery(&session, 100);
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
@@ -87,12 +87,12 @@ int main(
             "</topic>"
             "</dds>";
     uxr_buffer_create_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml,
-                    UXR_REPLACE);
+            UXR_REPLACE);
     uxr_run_session_until_confirm_delivery(&session, 100);
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml = "";
     uxr_buffer_create_publisher_xml(&session, reliable_out, publisher_id, participant_id,
-                    publisher_xml, UXR_REPLACE);
+            publisher_xml, UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<dds>"
@@ -106,7 +106,7 @@ int main(
             "</data_writer>"
             "</dds>";
     uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id,
-                    datawriter_xml, UXR_REPLACE);
+            datawriter_xml, UXR_REPLACE);
 
     uxr_run_session_until_confirm_delivery(&session, 100);
 

@@ -128,7 +128,7 @@ int main(
     };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
     uxr_buffer_request_data(&session, reliable_out, requester_id, reliable_in,
-                    &delivery_control);
+            &delivery_control);
 
     // Write requests
     bool connected = true;

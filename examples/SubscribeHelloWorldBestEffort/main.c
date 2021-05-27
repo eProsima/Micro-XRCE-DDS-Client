@@ -147,7 +147,7 @@ int main(
     };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
     uxr_buffer_request_data(&session, reliable_out, datareader_id, besteffort_in,
-                    &delivery_control);
+            &delivery_control);
 
     // Read topics
     while (count < max_topics)

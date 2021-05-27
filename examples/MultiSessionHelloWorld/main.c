@@ -283,9 +283,9 @@ int main(
     };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
     uxr_buffer_request_data(&session_1, reliable_out_1, datareader_id_1, reliable_in_1,
-                    &delivery_control);
+            &delivery_control);
     uxr_buffer_request_data(&session_2, reliable_out_2, datareader_id_2, reliable_in_2,
-                    &delivery_control);
+            &delivery_control);
 
     // Write topics
     uint32_t count = 0;
