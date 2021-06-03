@@ -35,7 +35,7 @@ static bool send_custom_msg(
                         len,
                         0x00,
                         &errcode);
-        #endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
+#endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
     }
     else
     {
@@ -83,7 +83,7 @@ static bool recv_custom_msg(
                             &remote_addr,
                             timeout,
                             &errcode);
-            #endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
+#endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
         }
         else
         {
@@ -153,13 +153,13 @@ bool uxr_init_custom_transport(
 
     if (transport->open(transport))
     {
-        #ifdef UCLIENT_PROFILE_STREAM_FRAMING
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
         if (transport->framing)
         {
             /* Init FramingIO. */
             uxr_init_framing_io(&transport->framing_io, 0x00);
         }
-        #endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
+#endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
 
         /* Setup interface. */
         transport->comm.instance = (void*)transport;
