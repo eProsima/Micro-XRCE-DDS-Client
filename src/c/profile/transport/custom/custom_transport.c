@@ -27,7 +27,7 @@ static bool send_custom_msg(
     size_t bytes_written = 0;
     if (transport->framing)
     {
-        #ifdef UCLIENT_PROFILE_STREAM_FRAMING
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
         bytes_written = uxr_write_framed_msg(&transport->framing_io,
                         (uxr_write_cb) transport->write,
                         transport,
@@ -74,7 +74,7 @@ static bool recv_custom_msg(
 
         if (transport->framing)
         {
-            #ifdef UCLIENT_PROFILE_STREAM_FRAMING
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
             bytes_read = uxr_read_framed_msg(&transport->framing_io,
                             (uxr_read_cb) transport->read,
                             transport,
