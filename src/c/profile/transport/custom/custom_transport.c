@@ -1,7 +1,10 @@
 #include <uxr/client/profile/transport/custom/custom_transport.h>
 #include <uxr/client/profile/multithread/multithread.h>
-#include "../stream_framing/stream_framing_protocol.h"
 #include <uxr/client/util/time.h>
+
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
+#include "../stream_framing/stream_framing_protocol.h"
+#endif
 
 /*******************************************************************************
 * Static members.
@@ -24,6 +27,7 @@ static bool send_custom_msg(
     size_t bytes_written = 0;
     if (transport->framing)
     {
+        #ifdef UCLIENT_PROFILE_STREAM_FRAMING
         bytes_written = uxr_write_framed_msg(&transport->framing_io,
                         (uxr_write_cb) transport->write,
                         transport,
@@ -31,6 +35,7 @@ static bool send_custom_msg(
                         len,
                         0x00,
                         &errcode);
+        #endif
     }
     else
     {
@@ -69,6 +74,7 @@ static bool recv_custom_msg(
 
         if (transport->framing)
         {
+            #ifdef UCLIENT_PROFILE_STREAM_FRAMING
             bytes_read = uxr_read_framed_msg(&transport->framing_io,
                             (uxr_read_cb) transport->read,
                             transport,
@@ -77,6 +83,7 @@ static bool recv_custom_msg(
                             &remote_addr,
                             timeout,
                             &errcode);
+            #endif
         }
         else
         {
@@ -146,11 +153,13 @@ bool uxr_init_custom_transport(
 
     if (transport->open(transport))
     {
+        #ifdef UCLIENT_PROFILE_STREAM_FRAMING
         if (transport->framing)
         {
             /* Init FramingIO. */
             uxr_init_framing_io(&transport->framing_io, 0x00);
         }
+        #endif
 
         /* Setup interface. */
         transport->comm.instance = (void*)transport;
