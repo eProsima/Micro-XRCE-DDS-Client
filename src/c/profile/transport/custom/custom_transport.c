@@ -153,13 +153,15 @@ bool uxr_init_custom_transport(
 
     if (transport->open(transport))
     {
-#ifdef UCLIENT_PROFILE_STREAM_FRAMING
         if (transport->framing)
         {
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
             /* Init FramingIO. */
             uxr_init_framing_io(&transport->framing_io, 0x00);
-        }
+#else
+            return false;
 #endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
+        }
 
         /* Setup interface. */
         transport->comm.instance = (void*)transport;
