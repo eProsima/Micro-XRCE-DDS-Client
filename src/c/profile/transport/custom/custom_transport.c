@@ -4,7 +4,7 @@
 
 #ifdef UCLIENT_PROFILE_STREAM_FRAMING
 #include "../stream_framing/stream_framing_protocol.h"
-#endif
+#endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
 
 /*******************************************************************************
 * Static members.
@@ -35,7 +35,7 @@ static bool send_custom_msg(
                         len,
                         0x00,
                         &errcode);
-        #endif
+        #endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
     }
     else
     {
@@ -83,7 +83,7 @@ static bool recv_custom_msg(
                             &remote_addr,
                             timeout,
                             &errcode);
-            #endif
+            #endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
         }
         else
         {
@@ -159,7 +159,7 @@ bool uxr_init_custom_transport(
             /* Init FramingIO. */
             uxr_init_framing_io(&transport->framing_io, 0x00);
         }
-        #endif
+        #endif /* ifdef UCLIENT_PROFILE_STREAM_FRAMING */
 
         /* Setup interface. */
         transport->comm.instance = (void*)transport;
