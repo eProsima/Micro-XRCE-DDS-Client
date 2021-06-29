@@ -379,7 +379,7 @@ TEST_F(OutputReliableStreamTest, HeartbeatSuccessfulTry)
 
     bool must_confirm = uxr_update_output_stream_heartbeat_timestamp(&stream, MIN_HEARTBEAT_TIME_INTERVAL);
     ASSERT_TRUE(must_confirm);
-    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 3, stream.next_heartbeat_timestamp);
+    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 2, stream.next_heartbeat_timestamp);
     EXPECT_EQ(2u, stream.next_heartbeat_tries);
 }
 
@@ -394,7 +394,7 @@ TEST_F(OutputReliableStreamTest, HeartbeatTwoSuccessfulTry)
 
     bool must_confirm = uxr_update_output_stream_heartbeat_timestamp(&stream, MIN_HEARTBEAT_TIME_INTERVAL * 3);
     ASSERT_TRUE(must_confirm);
-    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 7, stream.next_heartbeat_timestamp);
+    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 4, stream.next_heartbeat_timestamp);
     EXPECT_EQ(3, stream.next_heartbeat_tries);
 }
 
@@ -409,7 +409,7 @@ TEST_F(OutputReliableStreamTest, HeartbeatUnsuccessfulSecondHeartbeat)
 
     bool must_confirm = uxr_update_output_stream_heartbeat_timestamp(&stream, MIN_HEARTBEAT_TIME_INTERVAL);
     ASSERT_FALSE(must_confirm);
-    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 3, stream.next_heartbeat_timestamp);
+    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 2, stream.next_heartbeat_timestamp);
     EXPECT_EQ(2u, stream.next_heartbeat_tries);
 }
 
