@@ -491,7 +491,7 @@ bool uxr_run_session_until_one_status(
 
 bool uxr_sync_session(
         uxrSession* session,
-        int time)
+        int timeout)
 {
     UXR_LOCK_SESSION(session);
 
@@ -509,7 +509,7 @@ bool uxr_sync_session(
 
     uxr_stamp_session_header(&session->info, 0, 0, ub.init);
     send_message(session, timestamp_buffer, ucdr_buffer_length(&ub));
-    bool ret = run_session_until_sync(session, time);
+    bool ret = run_session_until_sync(session, timeout);
     UXR_UNLOCK_SESSION(session);
 
     return ret;
