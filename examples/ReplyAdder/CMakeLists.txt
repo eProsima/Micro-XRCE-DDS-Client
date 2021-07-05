@@ -14,7 +14,7 @@
 
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-project(ReplyAdder)
+project(ReplyAdder C)
 
 if(NOT UCLIENT_PROFILE_UDP)
     message(WARNING "Can not compile example: the UCLIENT_PROFILE_UDP must be enables.")
