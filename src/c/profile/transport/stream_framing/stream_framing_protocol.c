@@ -282,7 +282,7 @@ size_t uxr_read_framed_msg(
 {
     size_t rv = 0;
 
-    size_t readed_bytes = uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode);
+    size_t readed_bytes = uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode);
 
     if (0 < readed_bytes || (framing_io->rb_tail != framing_io->rb_head))
     {
@@ -416,7 +416,7 @@ size_t uxr_read_framed_msg(
                         {
                             framing_io->state = UXR_FRAMING_READING_SRC_ADDR;
                         }
-                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode))
+                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode))
                         {
 
                         }
