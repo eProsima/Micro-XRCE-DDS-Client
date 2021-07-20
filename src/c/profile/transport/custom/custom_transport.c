@@ -66,47 +66,47 @@ static bool recv_custom_msg(
     UXR_LOCK_TRANSPORT((&transport->comm));
 
     size_t bytes_read = 0;
-    do
-    {
-        int64_t time_init = uxr_millis();
-        uint8_t remote_addr = 0x00;
-        uint8_t errcode;
+    uint8_t remote_addr = 0x00;
+    uint8_t errcode;
 
-        if (transport->framing)
-        {
+    if (transport->framing)
+    {
 #ifdef UCLIENT_PROFILE_STREAM_FRAMING
+        do
+        {
             bytes_read = uxr_read_framed_msg(&transport->framing_io,
                             (uxr_read_cb) transport->read,
                             transport,
                             transport->buffer,
                             sizeof(transport->buffer),
                             &remote_addr,
-                            timeout,
+                            &timeout,
                             &errcode);
-#endif  // ifdef UCLIENT_PROFILE_STREAM_FRAMING
-        }
-        else
-        {
-            bytes_read = transport->read(transport,
-                            transport->buffer,
-                            sizeof(transport->buffer),
-                            timeout,
-                            &errcode);
-        }
 
-        if ((0 < bytes_read) && (remote_addr == 0x00))
-        {
-            *len = bytes_read;
-            *buf = transport->buffer;
-            rv = true;
         }
-        else
-        {
-            error_code = errcode;
-        }
-        timeout -= (int)(uxr_millis() - time_init);
+        while ((0 == bytes_read) && (0 < timeout));
+#endif  // ifdef UCLIENT_PROFILE_STREAM_FRAMING
     }
-    while ((0 == bytes_read) && (0 < timeout));
+    else
+    {
+        bytes_read = transport->read(transport,
+                        transport->buffer,
+                        sizeof(transport->buffer),
+                        timeout,
+                        &errcode);
+    }
+
+    if ((0 < bytes_read) && (remote_addr == 0x00))
+    {
+        *len = bytes_read;
+        *buf = transport->buffer;
+        rv = true;
+    }
+    else
+    {
+        error_code = errcode;
+    }
+
 
     UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;

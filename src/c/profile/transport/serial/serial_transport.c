@@ -67,32 +67,32 @@ static bool recv_serial_msg(
     UXR_LOCK_TRANSPORT((&transport->comm));
 
     size_t bytes_read = 0;
+    uint8_t remote_addr = 0x00;
+    uint8_t errcode;
+
     do
     {
-        int64_t time_init = uxr_millis();
-        uint8_t remote_addr;
-        uint8_t errcode;
         bytes_read = uxr_read_framed_msg(&transport->framing_io,
                         uxr_read_serial_data_platform,
                         &transport->platform,
                         transport->buffer,
                         sizeof(transport->buffer),
                         &remote_addr,
-                        timeout,
+                        &timeout,
                         &errcode);
-        if ((0 < bytes_read) && (remote_addr == transport->remote_addr))
-        {
-            *len = bytes_read;
-            *buf = transport->buffer;
-            rv = true;
-        }
-        else
-        {
-            error_code = errcode;
-        }
-        timeout -= (int)(uxr_millis() - time_init);
     }
     while ((0 == bytes_read) && (0 < timeout));
+
+    if ((0 < bytes_read) && (remote_addr == transport->remote_addr))
+    {
+        *len = bytes_read;
+        *buf = transport->buffer;
+        rv = true;
+    }
+    else
+    {
+        error_code = errcode;
+    }
 
     UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
