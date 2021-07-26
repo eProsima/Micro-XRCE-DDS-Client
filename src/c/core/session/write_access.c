@@ -209,7 +209,7 @@ uint16_t uxr_prepare_output_stream_fragmented(
         ucdrBuffer* ub,
         size_t data_size,
         uxrOnBuffersFull flush_callback,
-        void * flush_callback_args)
+        void* flush_callback_args)
 {
     uint16_t rv = UXR_INVALID_REQUEST_ID;
     UXR_LOCK_STREAM_ID(session, stream_id);

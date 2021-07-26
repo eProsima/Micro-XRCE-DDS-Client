@@ -134,7 +134,7 @@ UXRDLLAPI uint16_t uxr_prepare_output_stream_fragmented(
         ucdrBuffer* ub,
         size_t data_size,
         uxrOnBuffersFull flush_callback,
-        void * flush_callback_args);
+        void* flush_callback_args);
 
 /** @}*/
 

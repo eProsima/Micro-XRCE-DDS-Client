@@ -139,7 +139,7 @@ typedef void (* uxrOnReplyFunc) (
  */
 typedef bool (* uxrOnBuffersFull) (
         struct uxrSession* session,
-        void * args);
+        void* args);
 
 #ifdef PERFORMANCE_TESTING
 /**
@@ -157,7 +157,7 @@ typedef void (* uxrOnPerformanceFunc) (
 typedef struct uxrContinuousArgs
 {
     uxrOnBuffersFull flush_callback;
-    void * flush_callback_args;
+    void* flush_callback_args;
     uxrStreamId stream_id;
     size_t data_size;
 } uxrContinuousArgs;
