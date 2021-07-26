@@ -158,7 +158,7 @@ bool on_full_output_buffer_fragmented(
 
     if (0 == remaining_blocks)
     {
-        if (!local_args->flush_callback(session) ||
+        if (!local_args->flush_callback(session, local_args->flush_callback_args) ||
                 0 == (remaining_blocks = get_available_free_slots(stream)))
         {
             return true;
@@ -208,7 +208,8 @@ uint16_t uxr_prepare_output_stream_fragmented(
         uxrObjectId entity_id,
         ucdrBuffer* ub,
         size_t data_size,
-        uxrOnBuffersFull flush_callback)
+        uxrOnBuffersFull flush_callback,
+        void * flush_callback_args)
 {
     uint16_t rv = UXR_INVALID_REQUEST_ID;
     UXR_LOCK_STREAM_ID(session, stream_id);
@@ -226,7 +227,7 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
     if (0 == remaining_blocks)
     {
-        if (!flush_callback(session) ||
+        if (!flush_callback(session, flush_callback_args) ||
                 0 == (remaining_blocks = get_available_free_slots(stream)))
         {
             return rv;
@@ -289,6 +290,7 @@ uint16_t uxr_prepare_output_stream_fragmented(
     session->continuous_args.stream_id = stream_id;
     session->continuous_args.data_size = user_required_space;
     session->continuous_args.flush_callback = flush_callback;
+    session->continuous_args.flush_callback_args = flush_callback_args;
     ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, session);
 
     return rv;
