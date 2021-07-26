@@ -23,8 +23,10 @@
 #define BUFFER_SIZE     100 * STREAM_HISTORY
 
 bool flush_session(
-        uxrSession* session)
+        uxrSession* session,
+        void * args)
 {
+    (void) args;
     return uxr_run_session_until_confirm_delivery(session, 1000);
 }
 
