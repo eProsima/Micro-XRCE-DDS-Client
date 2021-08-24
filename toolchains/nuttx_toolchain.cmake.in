@@ -17,12 +17,15 @@ foreach(tool gcc ld ar)
 	endif()
 endforeach()
 
-CMAKE_FORCE_C_COMPILER(@CROSSDEV@gcc GNU)
-CMAKE_FORCE_CXX_COMPILER(@CROSSDEV@g++ GNU)
+set(CMAKE_C_COMPILER @CROSSDEV@gcc)
+set(CMAKE_CXX_COMPILER @CROSSDEV@g++)
+
+SET(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
+SET(CMAKE_CXX_COMPILER_WORKS 1 CACHE INTERNAL "")
 
 include_directories(SYSTEM ${CMAKE_SYSROOT}/include)
 add_compile_options(
-    -std=c99 
+    -std=c99
     @ARCH_CPU_FLAGS@
     @ARCH_OPT_FLAGS@
     )
