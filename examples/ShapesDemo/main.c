@@ -575,7 +575,9 @@ void print_help(
     printf("Usage: program --help\n");
     printf("       program <transport> [--key <number>] [--history <number>]\n");
     printf("List of available transports:\n");
+#ifndef _WIN32
     printf("    --serial <device>\n");
+#endif /* ifmdef _WIN32 */
     printf("    --udp4 <agent-ip> <agent-port>\n");
     printf("    --udp6 <agent-ip> <agent-port>\n");
     printf("    --tcp4 <agent-ip> <agent-port>\n");
