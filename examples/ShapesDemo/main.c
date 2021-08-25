@@ -39,8 +39,14 @@
 // Getting the max MTU at compile time.
 #define MAX_UDP_TCP_MTU ((UXR_CONFIG_UDP_TRANSPORT_MTU > \
     UXR_CONFIG_TCP_TRANSPORT_MTU) ? UXR_CONFIG_UDP_TRANSPORT_MTU : UXR_CONFIG_UDP_TRANSPORT_MTU)
+
+#ifdef _WIN32
+#define MAX_TRANSPORT_MTU MAX_UDP_TCP_MTU
+#else
 #define MAX_TRANSPORT_MTU ((UXR_CONFIG_SERIAL_TRANSPORT_MTU > \
     MAX_UDP_TCP_MTU) ? UXR_CONFIG_SERIAL_TRANSPORT_MTU : MAX_UDP_TCP_MTU)
+#endif /* ifdef _WIN32 */
+
 
 // Stream buffers
 #define MAX_HISTORY        16
@@ -569,7 +575,9 @@ void print_help(
     printf("Usage: program --help\n");
     printf("       program <transport> [--key <number>] [--history <number>]\n");
     printf("List of available transports:\n");
+#ifndef _WIN32
     printf("    --serial <device>\n");
+#endif /* ifmdef _WIN32 */
     printf("    --udp4 <agent-ip> <agent-port>\n");
     printf("    --udp6 <agent-ip> <agent-port>\n");
     printf("    --tcp4 <agent-ip> <agent-port>\n");
