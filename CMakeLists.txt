@@ -393,6 +393,11 @@ if(UCLIENT_BUILD_EXAMPLES)
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(examples/CustomTransports)
     endif()
+
+    if(UCLIENT_PROFILE_SHARED_MEMORY)
+        add_subdirectory(examples/SharedMemoryPubSub)
+        add_subdirectory(examples/SharedMemoryReqRep)
+    endif()
 endif()
 
 ###############################################################################
