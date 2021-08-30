@@ -28,9 +28,9 @@ uxrObjectId replier_id;
 uxrStreamId output_besteffort;
 
 static bool send_msg_empty(
-            void* instance,
-            const uint8_t* buf,
-            size_t len)
+        void* instance,
+        const uint8_t* buf,
+        size_t len)
 {
     (void) instance;
     (void) buf;
@@ -54,13 +54,13 @@ static bool recv_msg_empty(
 }
 
 static void on_request(
-            struct uxrSession* session,
-            uxrObjectId object_id,
-            uint16_t request_id,
-            SampleIdentity* sample_id,
-            struct ucdrBuffer* ub,
-            uint16_t length,
-            void* args)
+        struct uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        SampleIdentity* sample_id,
+        struct ucdrBuffer* ub,
+        uint16_t length,
+        void* args)
 {
     // Process request
     uint32_t in, out;
@@ -70,10 +70,10 @@ static void on_request(
     // Send reply
     ucdrBuffer replay_ub;
     uxr_prepare_output_stream(session, output_besteffort, replier_id, &replay_ub,
-                        length + SAMPLE_IDENTITY_SIZE);
+            length + SAMPLE_IDENTITY_SIZE);
     uxr_serialize_SampleIdentity(&replay_ub, sample_id);
     ucdr_serialize_uint32_t(&replay_ub, out);
-    
+
     printf("Request received: %d. Sending reply: %d\n", in, out);
     uxr_run_session_time(session, 1000);
 }
@@ -119,21 +119,22 @@ int main(
     output_besteffort = uxr_create_output_best_effort_stream(&session, output_besteffort_buffer, BUFFER_SIZE);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE * HISTORY_SIZE];
-    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, HISTORY_SIZE);
+    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE,
+                    HISTORY_SIZE);
 
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
-    
+
     // Create requester
     uxrObjectId requester_id = uxr_object_id(0x01, UXR_REQUESTER_ID);
     uxr_buffer_create_requester_bin(&session, output_besteffort, requester_id, participant_id,
-                        "shared_memory_reqres", "req_type", "res_type", "", "", UXR_REPLACE);
+            "shared_memory_reqres", "req_type", "res_type", "", "", UXR_REPLACE);
     uxr_set_request_callback(&session, on_request, NULL);
 
     // Create replier
     replier_id = uxr_object_id(0x01, UXR_REPLIER_ID);
     uxr_buffer_create_replier_bin(&session, reliable_in, replier_id, participant_id,
-                        "shared_memory_reqres", "req_type", "res_type", "", "", UXR_REPLACE);
+            "shared_memory_reqres", "req_type", "res_type", "", "", UXR_REPLACE);
 
     uxr_set_reply_callback(&session, on_reply, NULL);
 

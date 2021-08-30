@@ -24,9 +24,9 @@
 #define HISTORY_SIZE    8
 
 static bool send_msg_empty(
-            void* instance,
-            const uint8_t* buf,
-            size_t len)
+        void* instance,
+        const uint8_t* buf,
+        size_t len)
 {
     (void) instance;
     (void) buf;
@@ -82,23 +82,25 @@ int main(
 
     // Streams
     uint8_t output_besteffort_buffer[BUFFER_SIZE];
-    uxrStreamId output_besteffort = uxr_create_output_best_effort_stream(&session, output_besteffort_buffer, BUFFER_SIZE);
+    uxrStreamId output_besteffort =
+            uxr_create_output_best_effort_stream(&session, output_besteffort_buffer, BUFFER_SIZE);
 
     uint8_t input_reliable_stream_buffer[BUFFER_SIZE * HISTORY_SIZE];
-    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, HISTORY_SIZE);
+    uxrStreamId reliable_in = uxr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE,
+                    HISTORY_SIZE);
 
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
-    
+
     // Create publisher
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
 
     uxr_buffer_create_topic_bin(&session, output_besteffort, topic_id, participant_id,
-                        "shared_memory_topic", "shared_memory_type", UXR_REPLACE);
+            "shared_memory_topic", "shared_memory_type", UXR_REPLACE);
     uxr_buffer_create_datawriter_bin(&session, output_besteffort, datawriter_id, publisher_id, topic_id, 1,
-                        1, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
+            1, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
 
     // Create subscriber
     uxrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
