@@ -20,6 +20,7 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 ###############################################################################
 # Build options
 ###############################################################################
+option(UCLIENT_BUILD_MICROCDR "Force local build of Micro CDR." OFF)
 option(UCLIENT_SUPERBUILD "Enable superbuild compilation." ON)
 option(UCLIENT_BUILD_TESTS "Build tests." OFF)
 option(UCLIENT_BUILD_EXAMPLES "Build examples." OFF)

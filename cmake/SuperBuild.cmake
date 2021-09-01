@@ -21,7 +21,11 @@ enable_language(CXX)
 
 # Micro CDR.
 unset(microcdr_DIR CACHE)
-find_package(microcdr ${_microcdr_version} EXACT QUIET)
+
+if(NOT UCLIENT_BUILD_MICROCDR)
+    find_package(microcdr ${_microcdr_version} EXACT QUIET)
+endif()
+
 if(NOT microcdr_FOUND)
     ExternalProject_Add(microcdr
         GIT_REPOSITORY
