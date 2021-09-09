@@ -96,7 +96,7 @@ int main(
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     uint16_t datawriter_req = uxr_buffer_create_datawriter_bin(&session, reliable_out, datawriter_id, publisher_id,
-                    topic_id, 1, 1, 0,UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
+                    topic_id, 1, 1, 0, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
 
     uxrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
     uint16_t subscriber_req = uxr_buffer_create_subscriber_bin(&session, reliable_out, subscriber_id, participant_id,
