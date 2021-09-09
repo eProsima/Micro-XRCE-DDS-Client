@@ -131,6 +131,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
         uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
+        uint16_t depth,
         uxrQoSDurability durability,
         uint8_t mode)
 {
@@ -144,9 +145,11 @@ uint16_t uxr_buffer_create_datawriter_bin(
     datawriter.optional_qos = true;
     datawriter.qos.optional_ownership_strength = false;
     datawriter.qos.base.optional_deadline_msec = false;
-    datawriter.qos.base.optional_history_depth = false;
     datawriter.qos.base.optional_lifespan_msec = false;
     datawriter.qos.base.optional_user_data = false;
+
+    datawriter.qos.base.optional_history_depth = depth == 0 ? false : true;
+    datawriter.qos.base.history_depth = depth;
 
     datawriter.qos.base.qos_flags = 0;
     if (reliable)
@@ -195,6 +198,7 @@ uint16_t uxr_buffer_create_datareader_bin(
         uxrObjectId topic_id,
         bool reliable,
         bool keep_last,
+        uint16_t depth,
         uxrQoSDurability durability,
         uint8_t mode)
 {
@@ -209,9 +213,11 @@ uint16_t uxr_buffer_create_datareader_bin(
     datareader.qos.optional_contentbased_filter = false;
     datareader.qos.optional_timebasedfilter_msec = false;
     datareader.qos.base.optional_deadline_msec = false;
-    datareader.qos.base.optional_history_depth = false;
     datareader.qos.base.optional_lifespan_msec = false;
     datareader.qos.base.optional_user_data = false;
+
+    datareader.qos.base.optional_history_depth = depth == 0 ? false : true;
+    datareader.qos.base.history_depth = depth;
 
     datareader.qos.base.qos_flags = 0;
     if (reliable)
