@@ -136,7 +136,7 @@ endforeach()
 # Sources
 ###############################################################################
 # Check platform.
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(UCLIENT_PLATFORM_LINUX ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(UCLIENT_PLATFORM_WINDOWS ON)
@@ -325,7 +325,7 @@ if((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (UCLIENT_TARGET_TYPE STREQUAL "SHA
         )
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     find_package(Threads REQUIRED)
 endif()
 
