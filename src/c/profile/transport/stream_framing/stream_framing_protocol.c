@@ -254,10 +254,13 @@ size_t uxr_framing_read_transport(
     };
 
     // Limit the reading size
-    if (max_size < av_len[0]){
+    if (max_size < av_len[0])
+    {
         av_len[0] = (uint8_t)max_size;
         av_len[1] = 0;
-    } else if(max_size < av_len[0] + av_len[1]){
+    }
+    else if (max_size < av_len[0] + av_len[1])
+    {
         av_len[1] = (uint8_t)(max_size - av_len[0]);
     }
 
@@ -292,7 +295,8 @@ size_t uxr_read_framed_msg(
 {
     size_t rv = 0;
 
-    if (framing_io->rb_head == framing_io->rb_tail) {
+    if (framing_io->rb_head == framing_io->rb_tail)
+    {
         uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 5);
     }
 
@@ -444,7 +448,9 @@ size_t uxr_read_framed_msg(
                         {
                             framing_io->state = UXR_FRAMING_READING_SRC_ADDR;
                         }
-                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, (size_t)(framing_io->msg_len - framing_io->msg_pos)))
+                        else if (0 <
+                                uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode,
+                                (size_t)(framing_io->msg_len - framing_io->msg_pos)))
                         {
 
                         }
