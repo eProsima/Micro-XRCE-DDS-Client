@@ -444,7 +444,7 @@ size_t uxr_read_framed_msg(
                         {
                             framing_io->state = UXR_FRAMING_READING_SRC_ADDR;
                         }
-                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, framing_io->msg_len - framing_io->msg_pos))
+                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, (size_t)(framing_io->msg_len - framing_io->msg_pos)))
                         {
 
                         }
