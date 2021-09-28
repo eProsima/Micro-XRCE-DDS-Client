@@ -450,7 +450,7 @@ size_t uxr_read_framed_msg(
                         }
                         else if (0 <
                                 uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode,
-                                (size_t)(framing_io->msg_len - framing_io->msg_pos)))
+                                (size_t)((framing_io->msg_len - framing_io->msg_pos) + 2)))
                         {
 
                         }
