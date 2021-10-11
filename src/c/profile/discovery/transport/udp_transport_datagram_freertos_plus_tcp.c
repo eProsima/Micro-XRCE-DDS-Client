@@ -49,6 +49,11 @@ bool uxr_close_udp_transport_datagram(
     /* FreeRTOS_closesocket() always returns 0. */
     (void) FreeRTOS_closesocket(transport->fd);
 
+    if (NULL != transport->poll_fd)
+    {
+        (void) FreeRTOS_DeleteSocketSet(transport->poll_fd);
+    }
+
     return true;
 }
 
