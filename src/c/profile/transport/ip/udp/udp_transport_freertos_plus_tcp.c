@@ -61,6 +61,11 @@ bool uxr_close_udp_platform(
     /* FreeRTOS_closesocket() always returns 0. */
     (void) FreeRTOS_closesocket(platform->fd);
 
+    if (NULL != platform->poll_fd)
+    {
+        (void) FreeRTOS_DeleteSocketSet(platform->poll_fd);
+    }
+
     return true;
 }
 
