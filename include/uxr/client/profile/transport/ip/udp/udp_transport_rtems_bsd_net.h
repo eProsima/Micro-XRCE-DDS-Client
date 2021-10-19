@@ -12,25 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIALTRANSPORTPOSIX_H_
-#define UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIALTRANSPORTPOSIX_H_
+#ifndef _UXR_CLIENT_UDP_TRANSPORT_RTEMS_H_
+#define _UXR_CLIENT_UDP_TRANSPORT_RTEMS_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif // ifdef __cplusplus
 
-#include <poll.h>
-#include <sys/select.h>
+#include "arpa/inet.h"
+#include "sys/socket.h"
+#include "sys/select.h"
+#include "netinet/in.h"
 
-typedef struct uxrSerialPlatform
+typedef struct uxrUDPPlatform
 {
-    struct pollfd poll_fd;
-
-} uxrSerialPlatform;
+    struct sockaddr_in remote_addr;
+    struct fd_set select_fd;
+    int fd;
+} uxrUDPPlatform;
 
 #ifdef __cplusplus
 }
 #endif // ifdef __cplusplus
 
-#endif // UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIALTRANSPORTPOSIX_H_
+#endif //_UXR_CLIENT_UDP_TRANSPORT_RTEMS_H_

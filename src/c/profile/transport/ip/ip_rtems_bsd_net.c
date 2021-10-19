@@ -15,10 +15,10 @@
 #include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/config.h>
 
-#include <arpa/inet.h>
-#if defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
-#include <sys/socket.h>
-#endif /* if defined(UCLIENT_PLATFORM_POSIX) */
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include <netinet/in.h>
+#include <string.h>
 
 bool uxr_ip_to_locator(
         char const* ip,
@@ -32,12 +32,11 @@ bool uxr_ip_to_locator(
         case UXR_IPv4:
             locator->format = ADDRESS_FORMAT_MEDIUM;
             locator->_.medium_locator.locator_port = port;
-            result = (1 == inet_pton(AF_INET, ip, locator->_.medium_locator.address));
+            uint32_t addr = inet_addr(ip);
+            memcpy(&locator->_.medium_locator.address, &addr, sizeof(locator->_.medium_locator.address));
+            result = locator->_.medium_locator.address != 0;
             break;
         case UXR_IPv6:
-            locator->format = ADDRESS_FORMAT_LARGE;
-            locator->_.large_locator.locator_port = port;
-            result = (1 == inet_pton(AF_INET6, ip, locator->_.large_locator.address));
             break;
         default:
             break;
@@ -53,17 +52,21 @@ bool uxr_locator_to_ip(
         uxrIpProtocol* ip_protocol)
 {
     bool result = false;
+    (void)size;
     switch (locator->format)
     {
         case ADDRESS_FORMAT_MEDIUM:
             *port = locator->_.medium_locator.locator_port;
             *ip_protocol = UXR_IPv4;
-            result = (NULL != inet_ntop(AF_INET, locator->_.medium_locator.address, ip, (socklen_t)size));
+            struct in_addr saddr;
+            uint32_t addr;
+            memcpy(&addr, &locator->_.medium_locator.address, sizeof(locator->_.medium_locator.address));
+            saddr.s_addr = addr;
+            char* res = inet_ntoa(saddr);
+            strncpy(ip, res, 16); // 16 == MAX_IP_LEN
+            result = true;
             break;
         case ADDRESS_FORMAT_LARGE:
-            *port = (uint16_t)locator->_.large_locator.locator_port;
-            *ip_protocol = UXR_IPv6;
-            result = (NULL != inet_ntop(AF_INET6, locator->_.large_locator.address, ip, (socklen_t)size));
             break;
         default:
             break;

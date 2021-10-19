@@ -61,7 +61,13 @@ size_t uxr_read_serial_data_platform(
     size_t rv = 0;
     struct uxrSerialPlatform* platform = (struct uxrSerialPlatform*) args;
 
-    int poll_rv = poll(&platform->poll_fd, 1, timeout);
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(platform->poll_fd.fd, &fds);
+    struct timeval t_out = { 0, timeout*1000};
+    int poll_rv = select(platform->poll_fd.fd+1, &fds, NULL, NULL, &t_out);
+
+    //int poll_rv = poll(&platform->poll_fd, 1, timeout);
     if (0 < poll_rv)
     {
         ssize_t bytes_read = read(platform->poll_fd.fd, buf, len);
