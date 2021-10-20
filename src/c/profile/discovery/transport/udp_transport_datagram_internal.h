@@ -41,6 +41,7 @@ extern "C"
 #include "FreeRTOS_Sockets.h"
 #elif defined(UCLIENT_PLATFORM_RTEMS_BSD_NET)
 #include <sys/types.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #endif // if defined(UCLIENT_PLATFORM_POSIX)
 

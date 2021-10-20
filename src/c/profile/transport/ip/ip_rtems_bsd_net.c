@@ -63,7 +63,7 @@ bool uxr_locator_to_ip(
             memcpy(&addr, &locator->_.medium_locator.address, sizeof(locator->_.medium_locator.address));
             saddr.s_addr = addr;
             char* res = inet_ntoa(saddr);
-            strncpy(ip, res, 16); // 16 == MAX_IP_LEN
+            strncpy(ip, res, 16); // 16 == MAX_IPv4_LEN
             result = true;
             break;
         case ADDRESS_FORMAT_LARGE:

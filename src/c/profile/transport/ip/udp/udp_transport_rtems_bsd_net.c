@@ -100,7 +100,7 @@ size_t uxr_read_udp_data_platform(
     tv.tv_sec = timeout/1000;
     tv.tv_usec = (timeout%1000) *1000;
 
-    int poll_rv = select(platform->fd+1, &platform->select_fd, NULL, NULL, &tv);
+    int32_t poll_rv = select(platform->fd+1, &platform->select_fd, NULL, NULL, &tv);
     if (0 < poll_rv)
     {
         int32_t bytes_received = recvfrom(platform->fd, (void*)buf, len, 0, NULL, NULL);
