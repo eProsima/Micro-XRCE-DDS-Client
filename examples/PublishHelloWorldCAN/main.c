@@ -22,7 +22,7 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UXR_CONFIG_CAN_TRANSPORT_MTU * STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CONFIG_CAN_TRANSPORT_MTU* STREAM_HISTORY
 
 int main(
         int args,
@@ -67,10 +67,12 @@ int main(
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
     uint16_t participant_req =
-            uxr_buffer_create_participant_bin(&session, reliable_out, participant_id, 0, "default_xrce_participant", UXR_REPLACE);
+            uxr_buffer_create_participant_bin(&session, reliable_out, participant_id, 0, "default_xrce_participant",
+                    UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
-    uint16_t topic_req = uxr_buffer_create_topic_bin(&session, reliable_out, topic_id, participant_id, "HelloWorldTopic",
+    uint16_t topic_req = uxr_buffer_create_topic_bin(&session, reliable_out, topic_id, participant_id,
+                    "HelloWorldTopic",
                     "HelloWorld", UXR_REPLACE);
 
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
