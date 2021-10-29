@@ -38,11 +38,16 @@ bool uxr_init_can_platform(
                     &enable_canfd, sizeof(enable_canfd)))
             {
                 platform->poll_fd.events = POLLIN;
-                platform->can_id = can_id;
+                platform->can_id = can_id | CAN_EFF_FLAG;
+
+                // Add CAN filter for micro-ROS data
+                struct can_filter rfilter;
+                rfilter.can_id = platform->can_id;
+                rfilter.can_mask = CAN_EFF_MASK;
+                setsockopt(platform->poll_fd.fd, SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, sizeof(rfilter));
                 rv = true;
             }
 
-            // TODO: add CAN filter for micro-ROS data
 
         }
     }
@@ -62,7 +67,7 @@ size_t uxr_write_can_data_platform(
         uint8_t* errcode)
 {
     struct canfd_frame frame = {
-        .can_id = platform->can_id | CAN_EFF_FLAG, .len = (uint8_t)len
+        .can_id = platform->can_id, .len = (uint8_t)len
     };
     struct pollfd poll_fd_write_ = {
         .fd = platform->poll_fd.fd, .events = POLLOUT
