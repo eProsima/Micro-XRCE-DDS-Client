@@ -422,25 +422,28 @@ bool uxr_run_session_until_all_status(
     session->status_list = status_list;
     session->request_status_list_size = list_size;
 
-    bool timeout = false;
     bool status_confirmed = false;
+
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
 
     do
     {
-        timeout = !listen_message_reliably(session, timeout_ms);
+        listen_message_reliably(session, remaining_time);
         status_confirmed = true;
-        for (unsigned i = 0; i < list_size && status_confirmed; ++i)
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
+        for (size_t i = 0; i < list_size && status_confirmed; ++i)
         {
             status_confirmed = status_list[i] != UXR_STATUS_NONE
                     || request_list[i] == UXR_INVALID_REQUEST_ID;         //CHECK: better give an error? an assert?
         }
     }
-    while (!timeout && !status_confirmed);
+    while (remaining_time > 0 && !status_confirmed);
 
     session->request_status_list_size = 0;
 
     bool status_ok = true;
-    for (unsigned i = 0; i < list_size && status_ok; ++i)
+    for (size_t i = 0; i < list_size && status_ok; ++i)
     {
         status_ok = status_list[i] == UXR_STATUS_OK || status_list[i] == UXR_STATUS_OK_MATCHED;
     }
