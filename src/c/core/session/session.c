@@ -681,6 +681,12 @@ bool wait_session_status(
 {
     session->info.last_requested_status = UXR_STATUS_NONE;
 
+    if (0 == attempts)
+    {
+        send_message(session, buffer, length);
+        return true;
+    }
+
     for (size_t i = 0; i < attempts && session->info.last_requested_status == UXR_STATUS_NONE; ++i)
     {
         send_message(session, buffer, length);
