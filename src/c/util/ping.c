@@ -47,12 +47,12 @@ bool uxr_ping_agent_attempts(
             int64_t timestamp = uxr_millis();
             int poll = timeout;
 
-            while (0 < poll && !agent_pong)
+            do
             {
                 agent_pong = listen_info_message(comm, timeout);
                 poll -= (int)(uxr_millis() - timestamp);
                 timestamp = uxr_millis();
-            }
+            } while (0 < poll && !agent_pong);
 
             UXR_UNLOCK_TRANSPORT(comm);
         }
