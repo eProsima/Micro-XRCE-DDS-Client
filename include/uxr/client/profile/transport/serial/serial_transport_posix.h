@@ -21,7 +21,6 @@ extern "C"
 #endif // ifdef __cplusplus
 
 #include <poll.h>
-#include <sys/select.h>
 
 typedef struct uxrSerialPlatform
 {
