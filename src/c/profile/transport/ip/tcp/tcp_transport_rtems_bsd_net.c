@@ -51,19 +51,11 @@ bool uxr_init_tcp_platform(
         rv = true;
 
         /* Server connection. */
-        if (rv)
-        {
-            int connected = connect(platform->fd,
-                            (struct sockaddr *)&platform->remote_addr,
-                            sizeof(platform->remote_addr));
-            rv = (0 == connected);
-        }
-        else
-        {
-            rv = false;
-        }
+        int connected = connect(platform->fd,
+                        (struct sockaddr *)&platform->remote_addr,
+                        sizeof(platform->remote_addr));
+        rv = (0 == connected);
     }
-
     return rv;
 }
 
@@ -113,6 +105,11 @@ size_t uxr_read_tcp_data_platform(
     tv.tv_sec = timeout/1000;
     tv.tv_usec = (timeout%1000) *1000;
 
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wsign-conversion"
+    FD_ZERO(&platform->select_fd);
+    FD_SET(platform->fd, &platform->select_fd);
+    #pragma GCC diagnostic pop
     int32_t poll_rv = select(platform->fd+1, &platform->select_fd, NULL, NULL, &tv);
     if (0 < poll_rv)
     {
