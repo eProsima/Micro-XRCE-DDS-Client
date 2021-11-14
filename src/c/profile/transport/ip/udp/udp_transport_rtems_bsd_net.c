@@ -72,7 +72,7 @@ size_t uxr_write_udp_data_platform(
     size_t rv = 0;
 
     int32_t bytes_sent = sendto(platform->fd, (const void*)buf, len, 0,
-                    (struct sockaddr *)&platform->remote_addr, sizeof(platform->remote_addr));
+                    (struct sockaddr*)&platform->remote_addr, sizeof(platform->remote_addr));
 
     if (0 < bytes_sent)
     {
@@ -97,15 +97,15 @@ size_t uxr_read_udp_data_platform(
     size_t rv = 0;
 
     struct timeval tv;
-    tv.tv_sec = timeout/1000;
-    tv.tv_usec = (timeout%1000) *1000;
+    tv.tv_sec = timeout / 1000;
+    tv.tv_usec = (timeout % 1000) * 1000;
 
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wsign-conversion"
     FD_ZERO(&platform->select_fd);
     FD_SET(platform->fd, &platform->select_fd);
     #pragma GCC diagnostic pop
-    int32_t poll_rv = select(platform->fd+1, &platform->select_fd, NULL, NULL, &tv);
+    int32_t poll_rv = select(platform->fd + 1, &platform->select_fd, NULL, NULL, &tv);
     if (0 < poll_rv)
     {
         int32_t bytes_received = recvfrom(platform->fd, (void*)buf, len, 0, NULL, NULL);
