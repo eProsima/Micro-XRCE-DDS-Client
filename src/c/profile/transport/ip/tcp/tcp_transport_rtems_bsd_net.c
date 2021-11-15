@@ -48,7 +48,6 @@ bool uxr_init_tcp_platform(
         FD_ZERO(&platform->select_fd);
         FD_SET(platform->fd, &platform->select_fd);
         #pragma GCC diagnostic pop
-        rv = true;
 
         /* Server connection. */
         int connected = connect(platform->fd,
