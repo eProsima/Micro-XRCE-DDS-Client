@@ -400,6 +400,15 @@ UXRDLLAPI void uxr_flash_output_streams(
         uxrSession* session);
 
 /**
+ * @brief Flashes one output stream seding the data through the transport.
+ * @param session   A uxrSession structure previously initialized.
+ * @param stream_id   A uxrStreamId structure previously initialized.
+ */
+UXRDLLAPI void uxr_flash_one_output_stream(
+        const uxrSession* session,
+        const uxrStreamId stream_id);
+
+/**
  * @brief  Keeps communication between the Client and the Agent.
  *         This function involves the following actions:
  *          1. flushing all the output streams sending the data through the transport,
