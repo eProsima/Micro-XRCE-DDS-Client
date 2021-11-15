@@ -122,6 +122,4 @@ void uxr_bytes_to_ip(
     saddr.s_addr = addr;
     char* res = inet_ntoa(saddr);
     strncpy(ip, res, 16); // 16 == MAX_IPv4_LEN
-
-
 }
