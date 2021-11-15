@@ -47,8 +47,6 @@ bool uxr_init_can_platform(
                 setsockopt(platform->poll_fd.fd, SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, sizeof(rfilter));
                 rv = true;
             }
-
-
         }
     }
     return rv;
