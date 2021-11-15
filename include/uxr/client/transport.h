@@ -46,6 +46,13 @@
 #include <uxr/client/profile/transport/serial/serial_transport.h>
 #endif //UCLIENT_PROFILE_SERIAL
 
+#ifdef UCLIENT_PROFILE_CAN
+#if defined(UCLIENT_PLATFORM_POSIX)
+#include <uxr/client/profile/transport/can/can_transport_posix.h>
+#endif // if defined(UCLIENT_EXTERNAL_CAN)
+#include <uxr/client/profile/transport/can/can_transport.h>
+#endif //UCLIENT_PROFILE_CAN
+
 #ifdef UCLIENT_PROFILE_CUSTOM_TRANSPORT
 #include <uxr/client/profile/transport/custom/custom_transport.h>
 #endif //UCLIENT_PROFILE_CUSTOM_TRANSPORT

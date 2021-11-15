@@ -47,6 +47,7 @@ option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by 
 option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
 option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
 option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
+option(UCLIENT_PROFILE_CAN "Enable CAN FD transport." ON)
 option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
 option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
 set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
@@ -185,6 +186,7 @@ endif()
 
 if(UCLIENT_PLATFORM_WINDOWS)
 set(UCLIENT_PROFILE_SERIAL OFF)
+set(UCLIENT_PROFILE_CAN OFF)
 endif()
 
 if(UCLIENT_PROFILE_SERIAL)
@@ -193,6 +195,11 @@ if(UCLIENT_PROFILE_SERIAL)
     if(UCLIENT_PLATFORM_POSIX)
         list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_posix.c)
     endif()
+endif()
+
+if(UCLIENT_PROFILE_CAN AND UCLIENT_PLATFORM_POSIX)
+    list(APPEND _transport_src src/c/profile/transport/can/can_transport.c)
+    list(APPEND _transport_src src/c/profile/transport/can/can_transport_posix.c)
 endif()
 
 if(UCLIENT_PROFILE_DISCOVERY OR UCLIENT_PROFILE_UDP OR UCLIENT_PROFILE_TCP)
@@ -393,6 +400,10 @@ if(UCLIENT_BUILD_EXAMPLES)
 
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(examples/CustomTransports)
+    endif()
+
+    if(UCLIENT_PROFILE_CAN)
+        add_subdirectory(examples/PublishHelloWorldCAN)
     endif()
 
     if(UCLIENT_PROFILE_SHARED_MEMORY)
