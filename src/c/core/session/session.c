@@ -644,7 +644,7 @@ void uxr_flash_output_streams(
 }
 
 void uxr_flash_one_output_stream(
-        const uxrSession* session,
+        uxrSession* session,
         const uxrStreamId stream_id)
 {
     UXR_HANDLE_SHARED_MEMORY();

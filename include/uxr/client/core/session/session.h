@@ -405,7 +405,7 @@ UXRDLLAPI void uxr_flash_output_streams(
  * @param stream_id   A uxrStreamId structure previously initialized.
  */
 UXRDLLAPI void uxr_flash_one_output_stream(
-        const uxrSession* session,
+        uxrSession* session,
         const uxrStreamId stream_id);
 
 /**
