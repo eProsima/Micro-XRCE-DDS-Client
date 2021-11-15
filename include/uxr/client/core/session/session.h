@@ -492,7 +492,7 @@ UXRDLLAPI bool uxr_run_session_until_confirm_delivery(
  * @param session   A uxrSession structure previously initialized.
  * @param stream    A uxrStreamId previously initialized.
  * @param timeout_ms   The waiting time in milliseconds.
- * @return  `true` if all output reliable streams confirm the delivery of their messages. `false` in other case.
+ * @return  `true` if given output reliable stream confirms the delivery of his messages. `false` in other case.
  */
 UXRDLLAPI bool uxr_run_session_until_confirm_delivery_one_stream(
         uxrSession* session,
