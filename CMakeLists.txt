@@ -161,8 +161,6 @@ endif()
 # Transport sources.
 set(_transport_src)
 
-set(UCLIENT_PLATFORM_RTEMS_BSD_NET ON)
-
 if(UCLIENT_PROFILE_UDP)
     list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport.c)
     if(UCLIENT_PLATFORM_POSIX)
