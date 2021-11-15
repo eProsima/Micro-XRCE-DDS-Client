@@ -407,10 +407,20 @@ bool uxr_run_session_until_confirm_delivery(
 
 bool uxr_run_session_until_confirm_delivery_one_stream(
         uxrSession* session,
-        const uxrOutputReliableStream* stream,
+        const uxrStreamId streamid,
         int timeout_ms)
 {
+    if (streamid.direction != UXR_OUTPUT_STREAM ||
+        streamid.type != UXR_RELIABLE_STREAM ||
+        streamid.index >= session->streams.output_reliable_size)
+    {
+        return false;
+    }
+
     UXR_LOCK_SESSION(session);
+
+    const uxrOutputReliableStream * stream =
+        &session->streams.output_reliable[streamid.index];
 
     uxr_flash_output_streams(session);
 
