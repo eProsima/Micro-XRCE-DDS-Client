@@ -13,7 +13,7 @@ ip link set dev vcan0 up
 ```
 
 ## Usage
-1. Run an agent in can mode, for example, *2021*: `MicroXRCEAgent canfd --dev vcan0 --id 0x00000001`.
+1. Run an agent in can mode, for example: `MicroXRCEAgent canfd --dev vcan0 --id 0x00000001`.
 2. Run the *PublisherHelloWorldCAN* example on the same CAN bus with a different can id.
    The example expects the CAN device name as first argument and the client can identifier as second.
    A different can identifier should be used on the Agent and the Client.
