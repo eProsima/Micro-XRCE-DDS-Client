@@ -401,6 +401,31 @@ bool uxr_run_session_until_confirm_delivery(
     return ret;
 }
 
+bool uxr_run_session_until_confirm_delivery_one_stream(
+        uxrSession* session,
+        const uxrOutputReliableStream* stream,
+        int timeout_ms)
+{
+    UXR_LOCK_SESSION(session);
+
+    uxr_flash_output_streams(session);
+
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
+    do
+    {
+        listen_message_reliably(session, remaining_time);
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
+    }
+    while (remaining_time > 0 && !uxr_output_one_stream_confirmed(stream));
+
+    bool ret = uxr_output_one_stream_confirmed(stream);
+
+    UXR_UNLOCK_SESSION(session);
+    return ret;
+}
+
 bool uxr_run_session_until_all_status(
         uxrSession* session,
         int timeout_ms,

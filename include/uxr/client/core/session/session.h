@@ -472,6 +472,22 @@ UXRDLLAPI bool uxr_run_session_until_timeout(
 UXRDLLAPI bool uxr_run_session_until_confirm_delivery(
         uxrSession* session,
         int timeout);
+/**
+ * @brief  Keeps communication between the Client and the Agent.
+ *         This function involves the following actions:
+ *          1. flushing one output streams sending the data through the transport,
+ *          2. listening messages from the Agent calling the associated callback (topic and status).
+ *        The aforementioned actions will be performed in a loop until a the `timeout` is exceeded
+ *        or the output reliable streams confirm the delivery of all their messages.
+ * @param session   A uxrSession structure previously initialized.
+ * @param stream    A uxrOutputReliableStream structure previously initialized.
+ * @param timeout_ms   The waiting time in milliseconds.
+ * @return  `true` if all output reliable streams confirm the delivery of their messages. `false` in other case.
+ */
+UXRDLLAPI bool uxr_run_session_until_confirm_delivery_one_stream(
+        uxrSession* session,
+        const uxrOutputReliableStream* stream,
+        int timeout_ms);
 
 /**
  * @brief  Keeps communication between the Client and the Agent.
