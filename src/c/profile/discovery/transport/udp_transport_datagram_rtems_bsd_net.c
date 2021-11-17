@@ -91,8 +91,8 @@ bool uxr_udp_recv_datagram(
     tv.tv_sec = timeout / 1000;
     tv.tv_usec = (timeout % 1000) * 1000;
 
-
-    int32_t poll_rv = select(transport->fd + 1, &transport->select_fd, NULL, NULL, &tv);
+    fd_set fds = transport->select_fd;
+    int32_t poll_rv = select(transport->fd + 1, &fds, NULL, NULL, &tv);
     if (0 < poll_rv)
     {
         int32_t bytes_received = recvfrom(transport->fd, (void*)transport->buffer, sizeof(transport->buffer),
