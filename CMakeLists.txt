@@ -77,7 +77,7 @@ option(UCLIENT_TWEAK_XRCE_WRITE_LIMIT "This feature uses a tweak to allow XRCE W
 # Dependencies
 ###############################################################################
 set(_microcdr_version 1.2.2)
-set(_microcdr_tag v1.2.2)
+set(_microcdr_tag fix/fast_dds_incompatibility)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
