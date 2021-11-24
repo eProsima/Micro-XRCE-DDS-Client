@@ -680,7 +680,6 @@ bool uxr_run_session_until_pong(
 
     bool ret = session->on_pong_flag;
 
-    UXR_UNLOCK_SESSION(session);
     return ret;
 }
 
