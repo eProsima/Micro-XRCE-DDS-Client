@@ -1048,7 +1048,7 @@ void read_submessage_acknack(
 {
     ACKNACK_Payload acknack;
     uxr_deserialize_ACKNACK_Payload(submessage, &acknack);
-    uxrStreamId id = uxr_stream_id_from_raw(acknack.stream_id, UXR_INPUT_STREAM);
+    uxrStreamId id = uxr_stream_id_from_raw(acknack.stream_id, UXR_OUTPUT_STREAM);
 
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, id.index);
     if (stream)
