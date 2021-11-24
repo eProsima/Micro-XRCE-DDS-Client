@@ -124,6 +124,9 @@ static bool run_session_until_sync(
         uxrSession* session,
         int timeout);
 
+bool uxr_acknack_pong(
+        ucdrBuffer* buffer);
+
 //==================================================================
 //                             PUBLIC
 //==================================================================
@@ -608,6 +611,33 @@ void uxr_flash_output_streams(
 //==================================================================
 //                             PRIVATE
 //==================================================================
+bool uxr_run_session_until_pong(
+        uxrSession* session,
+        int timeout_ms)
+{
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
+    uxr_flash_output_streams(session);
+
+    session->on_pong_flag = false;
+    do
+    {
+        listen_message_reliably(session, remaining_time);
+        if (session->on_pong_flag)
+        {
+            break;
+        }
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
+    }
+    while (remaining_time > 0);
+
+    bool ret = session->on_pong_flag;
+
+    UXR_UNLOCK_SESSION(session);
+    return ret;
+}
+
 bool listen_message(
         uxrSession* session,
         int poll_ms)
@@ -785,6 +815,8 @@ void read_message(
     {
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, ub, id, seq_num);
+    } else if (uxr_acknack_pong(ub)){
+        session->on_pong_flag = true;
     }
 }
 

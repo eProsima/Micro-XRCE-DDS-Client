@@ -2,10 +2,12 @@
 #include <uxr/client/util/time.h>
 
 #include <uxr/client/core/type/xrce_types.h>
+#include <uxr/client/core/session/session.h>
 #include <uxr/client/core/session/stream/seq_num.h>
 #include <uxr/client/profile/multithread/multithread.h>
 
 #include "../core/serialization/xrce_header_internal.h"
+#include "../core/serialization/xrce_subheader_internal.h"
 #include "../core/session/submessage_internal.h"
 
 bool serialize_get_info_message(
@@ -18,9 +20,35 @@ bool listen_info_message(
         uxrCommunication* comm,
         const int timeout);
 
+bool uxr_run_session_until_pong(
+        uxrSession* session,
+        int timeout_ms);
+
 //==================================================================
 //                             PUBLIC
 //==================================================================
+bool uxr_ping_agent_session(
+        uxrSession* session,
+        const int timeout_ms)
+{
+    uint8_t output_buffer[UXR_PING_BUF];
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, output_buffer, sizeof(output_buffer));
+
+    bool ret = false;
+    if (serialize_get_info_message(&ub))
+    {
+        size_t message_length = ucdr_buffer_length(&ub);
+
+        UXR_LOCK_SESSION(session);
+        ret = session->comm->send_msg(session->comm->instance, output_buffer, message_length);
+        ret &= uxr_run_session_until_pong(session, timeout_ms);
+        UXR_UNLOCK_SESSION(session);
+    }
+
+    return ret;
+}
+
 bool uxr_ping_agent_attempts(
         uxrCommunication* comm,
         const int timeout_ms,
@@ -94,31 +122,41 @@ bool serialize_get_info_message(
 bool uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
-    bool success = true;
-    INFO_Payload info_payload;
+    bool success = false;
+    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE + GET_INFO_MSG_SIZE;
 
-    success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
-    success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
+    if (must_be_read){
+        success = true;
 
-    if (info_payload.object_info.optional_config)
-    {
-        success &= uxr_deserialize_ObjectVariant(buffer, &info_payload.object_info.config);
-    }
+        uint8_t id, flags;
+        uint16_t length;
+        uxr_deserialize_submessage_header(buffer, &id, &flags, &length);
 
-    success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_activity);
-    if (info_payload.object_info.optional_activity)
-    {
-        success &= ucdr_deserialize_uint8_t(buffer, &info_payload.object_info.activity.kind);
-        if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
+        INFO_Payload info_payload;
+
+        success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
+        success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
+
+        if (info_payload.object_info.optional_config)
         {
-            success &= ucdr_deserialize_int16_t(buffer,
-                            &info_payload.object_info.activity._.agent.availability);
-            success &= (bool)info_payload.object_info.activity._.agent.availability;
+            success &= uxr_deserialize_ObjectVariant(buffer, &info_payload.object_info.config);
         }
-    }
-    else
-    {
-        success = false;
+
+        success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_activity);
+        if (info_payload.object_info.optional_activity)
+        {
+            success &= ucdr_deserialize_uint8_t(buffer, &info_payload.object_info.activity.kind);
+            if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
+            {
+                success &= ucdr_deserialize_int16_t(buffer,
+                                &info_payload.object_info.activity._.agent.availability);
+                success &= (bool)info_payload.object_info.activity._.agent.availability;
+            }
+        }
+        else
+        {
+            success = false;
+        }
     }
 
     return success;
@@ -145,10 +183,7 @@ bool listen_info_message(
         size_t advance_len = 1 /* uint8_t session_id */
                 + 1 /* uint8_t stream_id */
                 + 2 /* uint16_t sequence_number */
-                + CLIENT_KEY_SIZE
-                + 1 /* uint8_t submessage_header_id */
-                + 1 /* uint8_t submessage_flags */
-                + 2; /* uint16_t submessage_length */
+                + CLIENT_KEY_SIZE;
         ucdr_advance_buffer(&ub, advance_len);
 
         return uxr_acknack_pong(&ub);
