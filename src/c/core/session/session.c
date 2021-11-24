@@ -815,7 +815,9 @@ void read_message(
     {
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, ub, id, seq_num);
-    } else if (uxr_acknack_pong(ub)){
+    }
+    else if (uxr_acknack_pong(ub))
+    {
         session->on_pong_flag = true;
     }
 }

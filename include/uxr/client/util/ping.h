@@ -48,7 +48,7 @@ struct uxrSession;
  * @return `true` in case of a successful ping to the agent, `false` otherwise.
  */
 bool uxr_ping_agent_session(
-        struct uxrSession * session,
+        struct uxrSession* session,
         const int timeout_ms);
 
 /**

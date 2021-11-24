@@ -125,7 +125,8 @@ bool uxr_acknack_pong(
     bool success = false;
     bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE + GET_INFO_MSG_SIZE;
 
-    if (must_be_read){
+    if (must_be_read)
+    {
         success = true;
 
         uint8_t id, flags;
