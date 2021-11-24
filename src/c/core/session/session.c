@@ -362,9 +362,10 @@ bool uxr_run_session_until_data(
     }
     while (remaining_time > 0);
 
-    UXR_UNLOCK_SESSION(session);
+    bool ret = session->on_data_flag;
 
-    return session->on_data_flag;
+    UXR_UNLOCK_SESSION(session);
+    return ret;
 }
 
 bool uxr_run_session_until_timeout(
