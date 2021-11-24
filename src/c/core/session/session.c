@@ -645,7 +645,7 @@ bool uxr_acknack_pong(
             {
                 success &= ucdr_deserialize_int16_t(buffer,
                                 &info_payload.object_info.activity._.agent.availability);
-                success &= (bool)info_payload.object_info.activity._.agent.availability;
+                success &= info_payload.object_info.activity._.agent.availability > 0;
             }
         }
         else
