@@ -1,6 +1,5 @@
 #include <uxr/client/core/session/session.h>
 #include <uxr/client/util/time.h>
-#include <uxr/client/util/ping.h>
 #include <uxr/client/core/communication/communication.h>
 #include <uxr/client/core/type/xrce_types.h>
 #include <uxr/client/config.h>
@@ -617,7 +616,7 @@ bool uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
     bool success = false;
-    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE + GET_INFO_MSG_SIZE;
+    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE + 8;
 
     if (must_be_read)
     {
@@ -1048,7 +1047,7 @@ void read_submessage_acknack(
 {
     ACKNACK_Payload acknack;
     uxr_deserialize_ACKNACK_Payload(submessage, &acknack);
-    uxrStreamId id = uxr_stream_id_from_raw(acknack.stream_id, UXR_OUTPUT_STREAM);
+    uxrStreamId id = uxr_stream_id_from_raw(acknack.stream_id, UXR_INPUT_STREAM);
 
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, id.index);
     if (stream)
