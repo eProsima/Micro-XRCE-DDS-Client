@@ -23,7 +23,7 @@ bool listen_info_message(
 //==================================================================
 bool uxr_ping_agent_attempts(
         uxrCommunication* comm,
-        const int timeout,
+        const int timeout_ms,
         const uint8_t attempts)
 {
     bool agent_pong = false;
@@ -45,11 +45,11 @@ bool uxr_ping_agent_attempts(
                 message_length);
 
             int64_t timestamp = uxr_millis();
-            int poll = timeout;
+            int poll = timeout_ms;
 
             do
             {
-                agent_pong = listen_info_message(comm, timeout);
+                agent_pong = listen_info_message(comm, timeout_ms);
                 poll -= (int)(uxr_millis() - timestamp);
                 timestamp = uxr_millis();
             } while (0 < poll && !agent_pong);
@@ -63,9 +63,9 @@ bool uxr_ping_agent_attempts(
 
 inline bool uxr_ping_agent(
         uxrCommunication* comm,
-        const int timeout)
+        const int timeout_ms)
 {
-    return uxr_ping_agent_attempts(comm, timeout, 1);
+    return uxr_ping_agent_attempts(comm, timeout_ms, 1);
 }
 
 //==================================================================

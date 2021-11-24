@@ -48,7 +48,7 @@ extern "C"
  */
 UXRDLLAPI bool uxr_ping_agent(
         uxrCommunication* comm,
-        const int timeout);
+        const int timeout_ms);
 
 /**
  * @brief   Checks the availability status of a valid connection with an agent.
@@ -66,7 +66,7 @@ UXRDLLAPI bool uxr_ping_agent(
  */
 UXRDLLAPI bool uxr_ping_agent_attempts(
         uxrCommunication* comm,
-        const int timeout,
+        const int timeout_ms,
         const uint8_t attempts);
 
 
