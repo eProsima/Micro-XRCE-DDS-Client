@@ -29,7 +29,8 @@ bool uxr_run_session_until_pong(
 //==================================================================
 bool uxr_ping_agent_session(
         uxrSession* session,
-        const int timeout_ms)
+        const int timeout_ms,
+        const uint8_t attempts)
 {
     uint8_t output_buffer[UXR_PING_BUF];
     ucdrBuffer ub;
@@ -41,8 +42,11 @@ bool uxr_ping_agent_session(
         size_t message_length = ucdr_buffer_length(&ub);
 
         UXR_LOCK_SESSION(session);
-        ret = session->comm->send_msg(session->comm->instance, output_buffer, message_length);
-        ret &= uxr_run_session_until_pong(session, timeout_ms);
+        for (size_t i = 0; !ret && i < attempts; i++)
+        {
+            ret = session->comm->send_msg(session->comm->instance, output_buffer, message_length);
+            ret &= uxr_run_session_until_pong(session, timeout_ms);
+        }
         UXR_UNLOCK_SESSION(session);
     }
 

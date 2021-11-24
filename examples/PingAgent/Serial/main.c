@@ -65,7 +65,7 @@ int main(
         return 1;
     }
 
-    if (uxr_ping_agent_session(&session, 1000))
+    if (uxr_ping_agent_session(&session, 1000, 1))
     {
         printf("Success! Agent is up on device '%s' within a session\n", dev);
     }
