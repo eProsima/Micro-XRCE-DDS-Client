@@ -39,9 +39,29 @@ int main(
         return 1;
     }
 
+    // Sending ping without initing a XRCE session
     if (uxr_ping_agent_attempts(&transport.comm, 1000, 10))
     {
-        printf("Success! Agent is up on %s:%s\n", ip, port);
+        printf("Success! Agent is up on %s:%s without a session\n", ip, port);
+    }
+    else
+    {
+        printf("Sorry, no agent available at %s:%s\n", ip, port);
+        return 1;
+    }
+
+    // Sending ping with initing a XRCE session
+    uxrSession session;
+    uxr_init_session(&session, &transport.comm, 0xAAAABBBB);
+    if (!uxr_create_session(&session))
+    {
+        printf("Error at create session.\n");
+        return 1;
+    }
+
+    if (uxr_ping_agent_session(&session, 1000, 1))
+    {
+        printf("Success! Agent is up on %s:%s within a session\n", ip, port);
     }
     else
     {

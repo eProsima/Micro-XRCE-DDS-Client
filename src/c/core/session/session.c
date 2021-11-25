@@ -14,6 +14,7 @@
 #include "stream/output_best_effort_stream_internal.h"
 #include "stream/output_reliable_stream_internal.h"
 #include "stream/seq_num_internal.h"
+#include "../serialization/xrce_subheader_internal.h"
 #include "../log/log_internal.h"
 #include "../../util/time_internal.h"
 #include <uxr/client/profile/multithread/multithread.h>
@@ -123,6 +124,9 @@ static FragmentationInfo on_get_fragmentation_info(
 static bool run_session_until_sync(
         uxrSession* session,
         int timeout);
+
+bool uxr_acknack_pong(
+        ucdrBuffer* buffer);
 
 //==================================================================
 //                             PUBLIC
@@ -362,9 +366,10 @@ bool uxr_run_session_until_data(
     }
     while (remaining_time > 0);
 
-    UXR_UNLOCK_SESSION(session);
+    bool ret = session->on_data_flag;
 
-    return session->on_data_flag;
+    UXR_UNLOCK_SESSION(session);
+    return ret;
 }
 
 bool uxr_run_session_until_timeout(
@@ -607,6 +612,75 @@ void uxr_flash_output_streams(
 //==================================================================
 //                             PRIVATE
 //==================================================================
+bool uxr_acknack_pong(
+        ucdrBuffer* buffer)
+{
+    bool success = false;
+    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE;
+
+    if (must_be_read)
+    {
+        uint8_t id = 0;
+        uint8_t flags = 0;
+        uint16_t length = 0;
+        uxr_deserialize_submessage_header(buffer, &id, &flags, &length);
+        success = ucdr_buffer_remaining(buffer) >= length;
+
+        if (success && id == SUBMESSAGE_ID_INFO)
+        {
+            INFO_Payload info_payload;
+
+            success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
+            success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
+
+            if (info_payload.object_info.optional_config)
+            {
+                success &= uxr_deserialize_ObjectVariant(buffer, &info_payload.object_info.config);
+            }
+
+            success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_activity);
+            if (info_payload.object_info.optional_activity)
+            {
+                success &= ucdr_deserialize_uint8_t(buffer, &info_payload.object_info.activity.kind);
+                if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
+                {
+                    success &= ucdr_deserialize_int16_t(buffer,
+                                    &info_payload.object_info.activity._.agent.availability);
+                    success &= info_payload.object_info.activity._.agent.availability > 0;
+                }
+            }
+        }
+    }
+
+    return success;
+}
+
+bool uxr_run_session_until_pong(
+        uxrSession* session,
+        int timeout_ms)
+{
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
+    uxr_flash_output_streams(session);
+
+    session->on_pong_flag = false;
+    do
+    {
+        listen_message_reliably(session, remaining_time);
+        if (session->on_pong_flag)
+        {
+            break;
+        }
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
+    }
+    while (remaining_time > 0);
+
+    bool ret = session->on_pong_flag;
+
+    return ret;
+}
+
 bool listen_message(
         uxrSession* session,
         int poll_ms)
@@ -779,11 +853,16 @@ void read_message(
         uxrSession* session,
         ucdrBuffer* ub)
 {
-    uint8_t stream_id_raw; uxrSeqNum seq_num;
+    uint8_t stream_id_raw = 0;
+    uxrSeqNum seq_num;
     if (uxr_read_session_header(&session->info, ub, &stream_id_raw, &seq_num))
     {
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, ub, id, seq_num);
+    }
+    else if (stream_id_raw == SESSION_ID_WITHOUT_CLIENT_KEY && uxr_acknack_pong(ub))
+    {
+        session->on_pong_flag = true;
     }
 }
 
