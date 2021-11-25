@@ -24,6 +24,12 @@ bool uxr_run_session_until_pong(
         uxrSession* session,
         int timeout_ms);
 
+bool uxr_read_session_header(
+        const uxrSessionInfo* info,
+        struct ucdrBuffer* ub,
+        uint8_t* stream_id_raw,
+        uxrSeqNum* seq_num);
+
 //==================================================================
 //                             PUBLIC
 //==================================================================
