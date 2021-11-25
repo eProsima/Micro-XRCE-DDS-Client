@@ -626,7 +626,8 @@ bool uxr_acknack_pong(
         uxr_deserialize_submessage_header(buffer, &id, &flags, &length);
         success = ucdr_buffer_remaining(buffer) >= length;
 
-        if (success && id == SUBMESSAGE_ID_INFO) {
+        if (success && id == SUBMESSAGE_ID_INFO)
+        {
             INFO_Payload info_payload;
 
             success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
