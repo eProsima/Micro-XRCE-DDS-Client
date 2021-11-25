@@ -616,6 +616,7 @@ bool uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
     bool success = false;
+    bool ret = false;
     bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE;
 
     if (must_be_read)
@@ -646,13 +647,13 @@ bool uxr_acknack_pong(
                 {
                     success &= ucdr_deserialize_int16_t(buffer,
                                     &info_payload.object_info.activity._.agent.availability);
-                    success &= info_payload.object_info.activity._.agent.availability > 0;
+                    ret = success && (info_payload.object_info.activity._.agent.availability > 0);
                 }
             }
         }
     }
 
-    return success;
+    return ret;
 }
 
 bool uxr_run_session_until_pong(

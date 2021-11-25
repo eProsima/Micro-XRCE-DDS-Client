@@ -141,14 +141,14 @@ bool listen_info_message(
         ucdrBuffer ub;
         ucdr_init_buffer(&ub, input_buffer, len);
 
-        size_t advance_len = 1 /* uint8_t session_id */
-                + 1 /* uint8_t stream_id */
-                + 2 /* uint16_t sequence_number */
-                + CLIENT_KEY_SIZE;
-        ucdr_advance_buffer(&ub, advance_len);
-
-        return uxr_acknack_pong(&ub);
+        uxrSessionInfo session_info_fake = {
+            0
+        };
+        uint8_t stream_id_raw;
+        uxrSeqNum seq_num;
+        uxr_read_session_header(&session_info_fake, &ub, &stream_id_raw, &seq_num);
+        success &= uxr_acknack_pong(&ub);
     }
 
-    return false;
+    return success;
 }
