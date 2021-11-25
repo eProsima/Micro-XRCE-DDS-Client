@@ -620,8 +620,9 @@ bool uxr_acknack_pong(
 
     if (must_be_read)
     {
-        uint8_t id, flags;
-        uint16_t length;
+        uint8_t id = 0;
+        uint8_t flags = 0;
+        uint16_t length = 0;
         uxr_deserialize_submessage_header(buffer, &id, &flags, &length);
         success = ucdr_buffer_remaining(buffer) >= length;
 
