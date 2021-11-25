@@ -616,40 +616,37 @@ bool uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
     bool success = false;
-    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE + 8;
+    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE;
 
     if (must_be_read)
     {
-        success = true;
-
         uint8_t id, flags;
         uint16_t length;
         uxr_deserialize_submessage_header(buffer, &id, &flags, &length);
+        success = ucdr_buffer_remaining(buffer) >= length;
 
-        INFO_Payload info_payload;
+        if (success && id == SUBMESSAGE_ID_INFO) {
+            INFO_Payload info_payload;
 
-        success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
-        success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
+            success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
+            success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
 
-        if (info_payload.object_info.optional_config)
-        {
-            success &= uxr_deserialize_ObjectVariant(buffer, &info_payload.object_info.config);
-        }
-
-        success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_activity);
-        if (info_payload.object_info.optional_activity)
-        {
-            success &= ucdr_deserialize_uint8_t(buffer, &info_payload.object_info.activity.kind);
-            if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
+            if (info_payload.object_info.optional_config)
             {
-                success &= ucdr_deserialize_int16_t(buffer,
-                                &info_payload.object_info.activity._.agent.availability);
-                success &= info_payload.object_info.activity._.agent.availability > 0;
+                success &= uxr_deserialize_ObjectVariant(buffer, &info_payload.object_info.config);
             }
-        }
-        else
-        {
-            success = false;
+
+            success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_activity);
+            if (info_payload.object_info.optional_activity)
+            {
+                success &= ucdr_deserialize_uint8_t(buffer, &info_payload.object_info.activity.kind);
+                if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
+                {
+                    success &= ucdr_deserialize_int16_t(buffer,
+                                    &info_payload.object_info.activity._.agent.availability);
+                    success &= info_payload.object_info.activity._.agent.availability > 0;
+                }
+            }
         }
     }
 
@@ -860,7 +857,7 @@ void read_message(
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, ub, id, seq_num);
     }
-    else if (uxr_acknack_pong(ub))
+    else if (stream_id_raw == SESSION_ID_WITHOUT_CLIENT_KEY && uxr_acknack_pong(ub))
     {
         session->on_pong_flag = true;
     }
