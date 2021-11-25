@@ -852,7 +852,8 @@ void read_message(
         uxrSession* session,
         ucdrBuffer* ub)
 {
-    uint8_t stream_id_raw; uxrSeqNum seq_num;
+    uint8_t stream_id_raw = 0;
+    uxrSeqNum seq_num;
     if (uxr_read_session_header(&session->info, ub, &stream_id_raw, &seq_num))
     {
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
