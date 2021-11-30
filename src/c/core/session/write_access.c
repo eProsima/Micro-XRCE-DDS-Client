@@ -218,7 +218,7 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
 
-    if (stream == NULL)
+    if (stream_id.type == UXR_BEST_EFFORT_STREAM || stream == NULL)
     {
         return rv;
     }
