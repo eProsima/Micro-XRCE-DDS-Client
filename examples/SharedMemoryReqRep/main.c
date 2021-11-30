@@ -127,14 +127,19 @@ int main(
 
     // Create requester
     uxrObjectId requester_id = uxr_object_id(0x01, UXR_REQUESTER_ID);
-    uxr_buffer_create_requester_bin(&session, output_besteffort, requester_id, participant_id,
-            "shared_memory_reqres", "req_type", "res_type", "", "", UXR_REPLACE);
+    uxrQoS_t qos = {
+        .reliability = UXR_RELIABILITY_RELIABLE, .durability = UXR_DURABILITY_TRANSIENT_LOCAL,
+        .history = UXR_HISTORY_KEEP_LAST, .depth = 1
+    };
+
+    uxr_buffer_create_requester_bin(&session, output_besteffort, requester_id, participant_id, "shared_memory_reqres",
+            "req_type", "res_type", "", "", qos, UXR_REPLACE);
     uxr_set_request_callback(&session, on_request, NULL);
 
     // Create replier
     replier_id = uxr_object_id(0x01, UXR_REPLIER_ID);
-    uxr_buffer_create_replier_bin(&session, reliable_in, replier_id, participant_id,
-            "shared_memory_reqres", "req_type", "res_type", "", "", UXR_REPLACE);
+    uxr_buffer_create_replier_bin(&session, reliable_in, replier_id, participant_id, "shared_memory_reqres", "req_type",
+            "res_type", "", "", qos, UXR_REPLACE);
 
     uxr_set_reply_callback(&session, on_reply, NULL);
 

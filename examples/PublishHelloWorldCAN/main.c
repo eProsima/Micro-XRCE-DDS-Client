@@ -80,8 +80,12 @@ int main(
                     UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
+    uxrQoS_t qos = {
+        .reliability = UXR_RELIABILITY_RELIABLE, .durability = UXR_DURABILITY_TRANSIENT_LOCAL,
+        .history = UXR_HISTORY_KEEP_LAST, .depth = 0
+    };
     uint16_t datawriter_req = uxr_buffer_create_datawriter_bin(&session, reliable_out, datawriter_id, publisher_id,
-                    topic_id, 1, 1, 0, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
+                    topic_id, qos, UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[4];

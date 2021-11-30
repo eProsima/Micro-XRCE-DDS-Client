@@ -99,14 +99,17 @@ int main(
 
     uxr_buffer_create_topic_bin(&session, output_besteffort, topic_id, participant_id,
             "shared_memory_topic", "shared_memory_type", UXR_REPLACE);
-    uxr_buffer_create_datawriter_bin(&session, output_besteffort, datawriter_id, publisher_id, topic_id, 1,
-            1, 10, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
+    uxrQoS_t qos = {
+        .reliability = UXR_RELIABILITY_RELIABLE, .durability = UXR_DURABILITY_TRANSIENT_LOCAL,
+        .history = UXR_HISTORY_KEEP_LAST, .depth = 10
+    };
+    uxr_buffer_create_datawriter_bin(&session, output_besteffort, datawriter_id, publisher_id, topic_id, qos,
+            UXR_REPLACE);
 
     // Create subscriber
     uxrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
     uxrObjectId datareader_id = uxr_object_id(0x01, UXR_DATAREADER_ID);
-    uxr_buffer_create_datareader_bin(&session, reliable_in, datareader_id, subscriber_id, topic_id, 1,
-            1, 10, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
+    uxr_buffer_create_datareader_bin(&session, reliable_in, datareader_id, subscriber_id, topic_id, qos, UXR_REPLACE);
 
     uxr_set_topic_callback(&session, on_topic, NULL);
 
