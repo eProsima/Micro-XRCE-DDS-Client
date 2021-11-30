@@ -161,7 +161,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_subscriber_bin(
  * @param object_id             The identifier of the XRCE DataWriter.
  * @param publisher_id          The identifier of the associated XRCE Publisher.
  * @param topic_id              The identifier of the associated XRCE Topic.
- * @param qos              QoS definition.
+ * @param qos                   QoS definition.
  * @param mode                  The set of flags that determines the entity creation mode.
  *                              The Creation Mode Table describes the entities creation behaviour according to the
  *                              `UXR_REUSE` and `UXR_REPLACE` flags.
