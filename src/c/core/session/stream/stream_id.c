@@ -29,6 +29,8 @@ uxrStreamId uxr_stream_id(
         case UXR_RELIABLE_STREAM:
             stream_id.raw = (uint8_t)(index + RELIABLE_STREAM_THRESHOLD);
             break;
+        default:
+            break;
     }
 
     return stream_id;

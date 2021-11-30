@@ -1,3 +1,4 @@
+#include <uxr/client/profile/multithread/multithread.h>
 #include "udp_transport_internal.h"
 
 /*******************************************************************************
@@ -30,6 +31,7 @@ static bool send_udp_msg(
 {
     bool rv = false;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     uint8_t errcode;
     size_t bytes_sent = uxr_write_udp_data_platform(&transport->platform, buf, len, &errcode);
@@ -41,6 +43,8 @@ static bool send_udp_msg(
     {
         error_code = errcode;
     }
+
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -52,6 +56,7 @@ static bool recv_udp_msg(
 {
     bool rv = false;
     uxrUDPTransport* transport = (uxrUDPTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     uint8_t errcode;
     size_t bytes_received = uxr_read_udp_data_platform(&transport->platform,
@@ -69,6 +74,8 @@ static bool recv_udp_msg(
     {
         error_code = errcode;
     }
+
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -97,6 +104,7 @@ bool uxr_init_udp_transport(
         transport->comm.recv_msg = recv_udp_msg;
         transport->comm.comm_error = get_udp_error;
         transport->comm.mtu = UXR_CONFIG_UDP_TRANSPORT_MTU;
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
     return rv;

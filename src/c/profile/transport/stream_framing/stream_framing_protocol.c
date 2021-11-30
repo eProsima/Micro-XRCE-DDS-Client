@@ -216,7 +216,8 @@ size_t uxr_framing_read_transport(
         uxr_read_cb read_cb,
         void* cb_arg,
         int* timeout,
-        uint8_t* errcode)
+        uint8_t* errcode,
+        size_t max_size)
 {
     int64_t time_init = uxr_millis();
 
@@ -251,6 +252,18 @@ size_t uxr_framing_read_transport(
     size_t bytes_read[2] = {
         0
     };
+
+    // Limit the reading size
+    if (max_size < av_len[0])
+    {
+        av_len[0] = (uint8_t)max_size;
+        av_len[1] = 0;
+    }
+    else if (max_size < av_len[0] + av_len[1])
+    {
+        av_len[1] = (uint8_t)(max_size - av_len[0]);
+    }
+
     if (0 < av_len[0])
     {
         bytes_read[0] = read_cb(cb_arg, &framing_io->rb[framing_io->rb_head], av_len[0], *timeout, errcode);
@@ -277,14 +290,17 @@ size_t uxr_read_framed_msg(
         uint8_t* buf,
         size_t len,
         uint8_t* remote_addr,
-        int timeout,
+        int* timeout,
         uint8_t* errcode)
 {
     size_t rv = 0;
 
-    size_t readed_bytes = uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode);
+    if (framing_io->rb_head == framing_io->rb_tail)
+    {
+        uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 5);
+    }
 
-    if (0 < readed_bytes || (framing_io->rb_tail != framing_io->rb_head))
+    if (framing_io->rb_tail != framing_io->rb_head)
     {
         /* State Machine. */
         bool exit_cond = false;
@@ -318,6 +334,10 @@ size_t uxr_read_framed_msg(
                     {
                         framing_io->state = UXR_FRAMING_READING_DST_ADDR;
                     }
+                    else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 4))
+                    {
+
+                    }
                     else
                     {
                         if (UXR_FRAMING_BEGIN_FLAG != framing_io->src_addr)
@@ -333,6 +353,10 @@ size_t uxr_read_framed_msg(
                     {
                         framing_io->state = (octet == framing_io->local_addr) ? UXR_FRAMING_READING_LEN_LSB :
                                 UXR_FRAMING_UNINITIALIZED;
+                    }
+                    else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 3))
+                    {
+
                     }
                     else
                     {
@@ -353,6 +377,10 @@ size_t uxr_read_framed_msg(
                     {
                         framing_io->msg_len = octet;
                         framing_io->state = UXR_FRAMING_READING_LEN_MSB;
+                    }
+                    else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 2))
+                    {
+
                     }
                     else
                     {
@@ -383,6 +411,10 @@ size_t uxr_read_framed_msg(
                         {
                             framing_io->state = UXR_FRAMING_READING_PAYLOAD;
                         }
+                    }
+                    else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 1))
+                    {
+
                     }
                     else
                     {
@@ -416,7 +448,9 @@ size_t uxr_read_framed_msg(
                         {
                             framing_io->state = UXR_FRAMING_READING_SRC_ADDR;
                         }
-                        else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, &timeout, errcode))
+                        else if (0 <
+                                uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode,
+                                (size_t)((framing_io->msg_len - framing_io->msg_pos) + 2)))
                         {
 
                         }
@@ -433,6 +467,10 @@ size_t uxr_read_framed_msg(
                     {
                         framing_io->msg_crc = octet;
                         framing_io->state = UXR_FRAMING_READING_CRC_MSB;
+                    }
+                    else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 2))
+                    {
+
                     }
                     else
                     {
@@ -459,6 +497,10 @@ size_t uxr_read_framed_msg(
                             rv = framing_io->msg_len;
                         }
                         exit_cond = true;
+                    }
+                    else if (0 < uxr_framing_read_transport(framing_io, read_cb, cb_arg, timeout, errcode, 1))
+                    {
+
                     }
                     else
                     {

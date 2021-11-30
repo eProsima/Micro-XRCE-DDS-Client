@@ -17,7 +17,7 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
     cmake_policy(SET CMP0048 NEW)
 endif()
 
-project(TimeSyncWithCb)
+project(TimeSyncWithCb C)
 
 if(NOT UCLIENT_BUILD_EXAMPLES)
     find_package(microxrcedds_client REQUIRED)
@@ -38,14 +38,12 @@ else()
 
     target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
 
-    install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION examples/uxr/client/${PROJECT_NAME}/${BIN_INSTALL_DIR}
-        )
-
-    install(DIRECTORY ${PROJECT_SOURCE_DIR}/
-        DESTINATION  examples/uxr/client/${PROJECT_NAME}
-        FILES_MATCHING PATTERN "*.h"
-                       PATTERN "*.c"
-                       PATTERN "*.idl"
-        )
+    if(UCLIENT_INSTALL_EXAMPLES)
+        install(
+            TARGETS
+                ${PROJECT_NAME}
+            RUNTIME DESTINATION
+                ${BIN_INSTALL_DIR}
+            )
+    endif()
 endif()

@@ -1,6 +1,37 @@
 cmake_policy(SET CMP0048 NEW)
 project(unitary_tests LANGUAGES C CXX)
 
+if(UCLIENT_PROFILE_MULTITHREAD)
+    include(ExternalProject)
+    find_package(Threads REQUIRED)
+
+    ExternalProject_Add(unitary_tests_project
+        SOURCE_DIR
+            ${CMAKE_CURRENT_SOURCE_DIR}/../../
+        BINARY_DIR
+            ${PROJECT_BINARY_DIR}/microxrcedds_client_unitary
+        INSTALL_DIR
+            ${PROJECT_BINARY_DIR}/temp_install/unitary
+        CMAKE_CACHE_ARGS
+            -DUCLIENT_PROFILE_MULTITHREAD:BOOL=ON
+            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+        BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/unitary/libmicroxrcedds_client.a
+        BUILD_BYPRODUCTS ${PROJECT_BINARY_DIR}/temp_install/lib/unitary/libmicrocdr.a
+        )
+
+    ExternalProject_Get_Property(unitary_tests_project INSTALL_DIR)
+
+    add_library(ucdr_unitary STATIC IMPORTED GLOBAL)
+    add_dependencies(ucdr_unitary unitary_tests_project)
+    set_property(TARGET ucdr_unitary PROPERTY IMPORTED_LOCATION  ${PROJECT_BINARY_DIR}/temp_install/unitary/lib/libmicrocdr.a)
+
+    add_library(uxr_unitary STATIC IMPORTED GLOBAL)
+    add_dependencies(uxr_unitary unitary_tests_project)
+    target_link_libraries(uxr_unitary INTERFACE ucdr_unitary)
+    set_property(TARGET uxr_unitary PROPERTY IMPORTED_LOCATION  ${PROJECT_BINARY_DIR}/temp_install/unitary/lib/libmicroxrcedds_client.a)
+endif()
+
 macro(unitary_test TEST_NAME TEST_SOURCE)
     set(SRCS ${TEST_SOURCE})
 
@@ -20,6 +51,8 @@ macro(unitary_test TEST_NAME TEST_SOURCE)
     target_link_libraries(${TEST_NAME}
         PRIVATE
             microcdr
+            $<$<BOOL:${UCLIENT_PROFILE_MULTITHREAD}>:ucdr_unitary>
+            $<$<BOOL:${UCLIENT_PROFILE_MULTITHREAD}>:uxr_unitary>
             ${GTEST_BOTH_LIBRARIES}
             ${CMAKE_THREAD_LIBS_INIT}
         )

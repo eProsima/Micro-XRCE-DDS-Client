@@ -29,6 +29,9 @@ int main(
         int args,
         char** argv)
 {
+    (void) args;
+    (void) argv;
+
     // Transport
     uxrCustomTransport transport;
     uxr_set_custom_transport_callbacks(

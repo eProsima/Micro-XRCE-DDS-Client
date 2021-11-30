@@ -17,17 +17,25 @@ if (${CMAKE_VERSION} VERSION_GREATER 3.0)
     cmake_policy(SET CMP0048 NEW)
 endif()
 
-project(ShapeDemoClient)
+project(ShapeDemoClient C)
 
 if(NOT UCLIENT_BUILD_EXAMPLES)
     find_package(microxrcedds_client REQUIRED)
 endif()
 
-if(NOT UCLIENT_PROFILE_UDP OR
-   NOT UCLIENT_PROFILE_TCP OR
-   NOT UCLIENT_PROFILE_SERIAL)
+set(BUILD_EXAMPLE TRUE)
+
+if(WIN32 AND (NOT UCLIENT_PROFILE_UDP OR
+ NOT UCLIENT_PROFILE_TCP))
+    message(WARNING "Can not compile example: The UCLIENT_PROFILE_UDP and UCLIENT_PROFILE_TCP must be enabled.")
+    set(BUILD_EXAMPLE FALSE)
+elseif(UNIX AND (NOT UCLIENT_PROFILE_UDP OR
+ NOT UCLIENT_PROFILE_TCP OR NOT UCLIENT_PROFILE_SERIAL))
     message(WARNING "Can not compile example: The UCLIENT_PROFILE_UDP, UCLIENT_PROFILE_TCP and UCLIENT_PROFILE_SERIAL must be enabled.")
-else()
+    set(BUILD_EXAMPLE FALSE)
+endif()
+
+if(BUILD_EXAMPLE)
     add_executable(${PROJECT_NAME} main.c ShapeType.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)

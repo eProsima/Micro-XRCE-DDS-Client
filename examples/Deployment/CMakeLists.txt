@@ -25,7 +25,7 @@ else()
     #############################################################
     ###                     CONFIGURATOR
     #############################################################
-    project(ConfiguratorClient)
+    project(ConfiguratorClient C)
 
     if(NOT UCLIENT_BUILD_EXAMPLES)
         find_package(microxrcedds_client REQUIRED)
@@ -50,7 +50,7 @@ else()
     #############################################################
     ###                      PUBLISHER
     #############################################################
-    project(PublisherClient)
+    project(PublisherClient C)
     add_executable(PublisherClient publisher.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
@@ -70,7 +70,7 @@ else()
     #############################################################
     ###                      SUBSCRIBER
     #############################################################
-    project(SubscriberClient)
+    project(SubscriberClient C)
     add_executable(SubscriberClient subscriber.c HelloWorld.c)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)

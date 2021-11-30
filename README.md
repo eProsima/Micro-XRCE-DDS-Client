@@ -13,13 +13,13 @@
 *eProsima Micro XRCE-DDS* is a library implementing the [DDS-XRCE protocol](https://www.omg.org/spec/DDS-XRCE/About-DDS-XRCE/) as defined and maintained by the OMG, whose aim is to allow resource constrained devices such as microcontrollers to communicate with the [DDS](https://www.omg.org/spec/DDS/About-DDS/>) world as any other DDS actor would do.
 It follows a client/server paradigm and is composed by two libraries, the *Micro XRCE-DDS Client* and the *Micro XRCE-DDS Agent*. The *Micro XRCE-DDS Clients* are lightweight entities meant to be compiled on e**X**tremely **R**esource **C**onstrained **E**nvironments, while the *Micro XRCE-DDS Agent* is a broker which bridges the *Clients* with the DDS world.
 
-<p align="center"> <img src="docs/General.png" alt="Image" width="70%"/> </p>
+<p align="center"> <img src="https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/docs/General.png?raw=true" alt="General architecture" width="70%"/> </p>
 
 The *Micro XRCE-DDS Clients* request operations to the *Agent* to publish and/or subscribe to topics in the DDS global dataspace. Remote procedure calls, as defined by the [DDS-RPC standard](https://www.omg.org/spec/DDS-RPC/About-DDS-RPC/), are also supported, allowing *Clients* to communicate in the DDS dataspace according to a request/reply paradigm.
 The *Agents* process these requests and send back a response with the operation status result and with the requested data, in the case of subscribe/reply operations.
 The communication in the DDS world is mediated by a dedicated `ProxyClient` in charge of creating the *DDS Entities* requested by the *Clients*, such as *Participants*, *Topics*, *Publishers*, and *Subscribers*, which can interact with the DDS Global dataspace.
 
-<p align="center"> <img src="docs/Client.png" alt="Image" width="70%"/> </p>
+<p align="center"> <img src="https://github.com/eProsima/Micro-XRCE-DDS-Client/blob/master/docs/Client.png?raw=true" alt="Client architecture" width="70%"/> </p>
 
 *eProsima Micro XRCE-DDS* provides the user with a C API to create *Micro XRCE-DDS Clients* applications. The library can be configured at compile-time via a set of CMake flags allowing to enable or disable some profiles before compilation, and to manipulate several parameters controlling some of the library's functionalities, which in turn allow tuning the library size.
 
@@ -40,4 +40,3 @@ See the [Quality Declaration](QUALITY.md) for more details.
 ## Getting Help
 
 If you need support you can reach us by mail at `support@eProsima.com` or by phone at `+34 91 804 34 48`.
-

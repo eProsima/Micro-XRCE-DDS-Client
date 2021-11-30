@@ -69,7 +69,7 @@ size_t uxr_read_framed_msg(
         uint8_t* buf,
         size_t len,
         uint8_t* remote_addr,
-        int timeout,
+        int* timeout,
         uint8_t* errcode);
 
 #ifdef __cplusplus

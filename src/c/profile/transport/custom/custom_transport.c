@@ -1,6 +1,10 @@
 #include <uxr/client/profile/transport/custom/custom_transport.h>
-#include "../stream_framing/stream_framing_protocol.h"
+#include <uxr/client/profile/multithread/multithread.h>
 #include <uxr/client/util/time.h>
+
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
+#include "../stream_framing/stream_framing_protocol.h"
+#endif  // ifdef UCLIENT_PROFILE_STREAM_FRAMING
 
 /*******************************************************************************
 * Static members.
@@ -17,11 +21,13 @@ static bool send_custom_msg(
 {
     bool rv = false;
     uxrCustomTransport* transport = (uxrCustomTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     uint8_t errcode;
     size_t bytes_written = 0;
     if (transport->framing)
     {
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
         bytes_written = uxr_write_framed_msg(&transport->framing_io,
                         (uxr_write_cb) transport->write,
                         transport,
@@ -29,6 +35,7 @@ static bool send_custom_msg(
                         len,
                         0x00,
                         &errcode);
+#endif  // ifdef UCLIENT_PROFILE_STREAM_FRAMING
     }
     else
     {
@@ -44,6 +51,7 @@ static bool send_custom_msg(
         error_code = errcode;
     }
 
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -55,15 +63,16 @@ static bool recv_custom_msg(
 {
     bool rv = false;
     uxrCustomTransport* transport = (uxrCustomTransport*)instance;
+    UXR_LOCK_TRANSPORT((&transport->comm));
 
     size_t bytes_read = 0;
-    do
-    {
-        int64_t time_init = uxr_millis();
-        uint8_t remote_addr = 0x00;
-        uint8_t errcode;
+    uint8_t remote_addr = 0x00;
+    uint8_t errcode;
 
-        if (transport->framing)
+    if (transport->framing)
+    {
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
+        do
         {
             bytes_read = uxr_read_framed_msg(&transport->framing_io,
                             (uxr_read_cb) transport->read,
@@ -71,32 +80,35 @@ static bool recv_custom_msg(
                             transport->buffer,
                             sizeof(transport->buffer),
                             &remote_addr,
-                            timeout,
+                            &timeout,
                             &errcode);
-        }
-        else
-        {
-            bytes_read = transport->read(transport,
-                            transport->buffer,
-                            sizeof(transport->buffer),
-                            timeout,
-                            &errcode);
-        }
 
-        if ((0 < bytes_read) && (remote_addr == 0x00))
-        {
-            *len = bytes_read;
-            *buf = transport->buffer;
-            rv = true;
         }
-        else
-        {
-            error_code = errcode;
-        }
-        timeout -= (int)(uxr_millis() - time_init);
+        while ((0 == bytes_read) && (0 < timeout));
+#endif  // ifdef UCLIENT_PROFILE_STREAM_FRAMING
     }
-    while ((0 == bytes_read) && (0 < timeout));
+    else
+    {
+        bytes_read = transport->read(transport,
+                        transport->buffer,
+                        sizeof(transport->buffer),
+                        timeout,
+                        &errcode);
+    }
 
+    if ((0 < bytes_read) && (remote_addr == 0x00))
+    {
+        *len = bytes_read;
+        *buf = transport->buffer;
+        rv = true;
+    }
+    else
+    {
+        error_code = errcode;
+    }
+
+
+    UXR_UNLOCK_TRANSPORT((&transport->comm));
     return rv;
 }
 
@@ -143,8 +155,12 @@ bool uxr_init_custom_transport(
     {
         if (transport->framing)
         {
+#ifdef UCLIENT_PROFILE_STREAM_FRAMING
             /* Init FramingIO. */
             uxr_init_framing_io(&transport->framing_io, 0x00);
+#else
+            return false;
+#endif  // ifdef UCLIENT_PROFILE_STREAM_FRAMING
         }
 
         /* Setup interface. */
@@ -153,7 +169,7 @@ bool uxr_init_custom_transport(
         transport->comm.recv_msg = recv_custom_msg;
         transport->comm.comm_error = get_custom_error;
         transport->comm.mtu = UXR_CONFIG_CUSTOM_TRANSPORT_MTU;
-
+        UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
     return rv;

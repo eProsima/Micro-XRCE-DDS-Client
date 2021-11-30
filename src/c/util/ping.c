@@ -2,9 +2,12 @@
 #include <uxr/client/util/time.h>
 
 #include <uxr/client/core/type/xrce_types.h>
+#include <uxr/client/core/session/session.h>
 #include <uxr/client/core/session/stream/seq_num.h>
+#include <uxr/client/profile/multithread/multithread.h>
 
 #include "../core/serialization/xrce_header_internal.h"
+#include "../core/serialization/xrce_subheader_internal.h"
 #include "../core/session/submessage_internal.h"
 
 bool serialize_get_info_message(
@@ -14,15 +17,51 @@ bool uxr_acknack_pong(
         ucdrBuffer* buffer);
 
 bool listen_info_message(
-        const uxrCommunication* comm,
+        uxrCommunication* comm,
         const int timeout);
+
+bool uxr_run_session_until_pong(
+        uxrSession* session,
+        int timeout_ms);
+
+bool uxr_read_session_header(
+        const uxrSessionInfo* info,
+        struct ucdrBuffer* ub,
+        uint8_t* stream_id_raw,
+        uxrSeqNum* seq_num);
 
 //==================================================================
 //                             PUBLIC
 //==================================================================
+bool uxr_ping_agent_session(
+        uxrSession* session,
+        const int timeout_ms,
+        const uint8_t attempts)
+{
+    uint8_t output_buffer[UXR_PING_BUF];
+    ucdrBuffer ub;
+    ucdr_init_buffer(&ub, output_buffer, sizeof(output_buffer));
+
+    bool ret = false;
+    if (serialize_get_info_message(&ub))
+    {
+        size_t message_length = ucdr_buffer_length(&ub);
+
+        UXR_LOCK_SESSION(session);
+        for (size_t i = 0; !ret && i < attempts; i++)
+        {
+            ret = session->comm->send_msg(session->comm->instance, output_buffer, message_length);
+            ret &= uxr_run_session_until_pong(session, timeout_ms);
+        }
+        UXR_UNLOCK_SESSION(session);
+    }
+
+    return ret;
+}
+
 bool uxr_ping_agent_attempts(
-        const uxrCommunication* comm,
-        const int timeout,
+        uxrCommunication* comm,
+        const int timeout_ms,
         const uint8_t attempts)
 {
     bool agent_pong = false;
@@ -36,20 +75,24 @@ bool uxr_ping_agent_attempts(
 
         for (size_t i = 0; !agent_pong && i < attempts; ++i)
         {
+            UXR_LOCK_TRANSPORT(comm);
+
             comm->send_msg(
                 comm->instance,
                 output_buffer,
                 message_length);
 
             int64_t timestamp = uxr_millis();
-            int poll = timeout;
+            int poll = timeout_ms;
 
-            while (0 < poll && !agent_pong)
+            do
             {
-                agent_pong = listen_info_message(comm, timeout);
+                agent_pong = listen_info_message(comm, timeout_ms);
                 poll -= (int)(uxr_millis() - timestamp);
                 timestamp = uxr_millis();
-            }
+            } while (0 < poll && !agent_pong);
+
+            UXR_UNLOCK_TRANSPORT(comm);
         }
     }
 
@@ -57,10 +100,10 @@ bool uxr_ping_agent_attempts(
 }
 
 inline bool uxr_ping_agent(
-        const uxrCommunication* comm,
-        const int timeout)
+        uxrCommunication* comm,
+        const int timeout_ms)
 {
-    return uxr_ping_agent_attempts(comm, timeout, 1);
+    return uxr_ping_agent_attempts(comm, timeout_ms, 1);
 }
 
 //==================================================================
@@ -86,41 +129,8 @@ bool serialize_get_info_message(
     return res;
 }
 
-bool uxr_acknack_pong(
-        ucdrBuffer* buffer)
-{
-    bool success = true;
-    INFO_Payload info_payload;
-
-    success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
-    success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
-
-    if (info_payload.object_info.optional_config)
-    {
-        success &= uxr_deserialize_ObjectVariant(buffer, &info_payload.object_info.config);
-    }
-
-    success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_activity);
-    if (info_payload.object_info.optional_activity)
-    {
-        success &= ucdr_deserialize_uint8_t(buffer, &info_payload.object_info.activity.kind);
-        if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
-        {
-            success &= ucdr_deserialize_int16_t(buffer,
-                            &info_payload.object_info.activity._.agent.availability);
-            success &= (bool)info_payload.object_info.activity._.agent.availability;
-        }
-    }
-    else
-    {
-        success = false;
-    }
-
-    return success;
-}
-
 bool listen_info_message(
-        const uxrCommunication* comm,
+        uxrCommunication* comm,
         const int timeout)
 {
     uint8_t* input_buffer = NULL;
@@ -137,17 +147,14 @@ bool listen_info_message(
         ucdrBuffer ub;
         ucdr_init_buffer(&ub, input_buffer, len);
 
-        size_t advance_len = 1 /* uint8_t session_id */
-                + 1 /* uint8_t stream_id */
-                + 2 /* uint16_t sequence_number */
-                + CLIENT_KEY_SIZE
-                + 1 /* uint8_t submessage_header_id */
-                + 1 /* uint8_t submessage_flags */
-                + 2; /* uint16_t submessage_length */
-        ucdr_advance_buffer(&ub, advance_len);
-
-        return uxr_acknack_pong(&ub);
+        uxrSessionInfo session_info_fake = {
+            0
+        };
+        uint8_t stream_id_raw;
+        uxrSeqNum seq_num;
+        uxr_read_session_header(&session_info_fake, &ub, &stream_id_raw, &seq_num);
+        success &= uxr_acknack_pong(&ub);
     }
 
-    return false;
+    return success;
 }

@@ -114,7 +114,6 @@ endmacro()
 
 function(set_common_compile_options target)
     enable_language(C)
-    enable_language(CXX)
     if(MSVC OR MSVC_IDE)
         target_compile_options(${target} PRIVATE /W4)
     else()
@@ -127,15 +126,15 @@ function(set_common_compile_options target)
             -Wunused
             $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
             -Wconversion
-            -Wsign-conversion
             $<$<CXX_COMPILER_ID:GNU>:-Wlogical-op>
             $<$<AND:$<CXX_COMPILER_ID:GNU>,$<COMPILE_LANGUAGE:CXX>>:-Wuseless-cast>
-            -Wdouble-promotion
             $<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast>
             $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,6.0.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,6.0.0>>>>:-Wnull-dereference>
             $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,7.0.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,7.0.0>>>>:-Wduplicated-branches>
             $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,6.0.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,6.0.0>>>>:-Wduplicated-cond>
             $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,7.0.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,7.0.0>>>>:-Wrestrict>
+            $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,4.6.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,4.6.0>>>>:-Wdouble-promotion>
+            $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,4.3.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,4.3.0>>>>:-Wsign-conversion>
             )
     endif()
 endfunction()

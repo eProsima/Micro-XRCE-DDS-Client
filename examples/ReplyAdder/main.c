@@ -40,6 +40,7 @@ void on_request(
     (void) object_id;
     (void) request_id;
     (void) length;
+    (void) args;
 
     uint32_t rhs;
     uint32_t lhs;

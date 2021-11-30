@@ -31,9 +31,11 @@ void on_reply(
         uint16_t length,
         void* args)
 {
+    (void) session;
     (void) object_id;
     (void) request_id;
     (void) length;
+    (void) args;
 
     uint64_t result;
     ucdr_deserialize_uint64_t(ub, &result);
@@ -125,8 +127,8 @@ int main(
         0
     };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, requester_id, reliable_in,
-                    &delivery_control);
+    uxr_buffer_request_data(&session, reliable_out, requester_id, reliable_in,
+            &delivery_control);
 
     // Write requests
     bool connected = true;

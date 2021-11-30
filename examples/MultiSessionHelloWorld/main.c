@@ -33,7 +33,7 @@ void on_topic(
         uint16_t length,
         void* args)
 {
-    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length;
+    (void) object_id; (void) request_id; (void) stream_id; (void) length; (void) args;
 
     HelloWorld topic;
     HelloWorld_deserialize_topic(ub, &topic);
@@ -282,10 +282,10 @@ int main(
         0
     };
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req_1 = uxr_buffer_request_data(&session_1, reliable_out_1, datareader_id_1, reliable_in_1,
-                    &delivery_control);
-    uint16_t read_data_req_2 = uxr_buffer_request_data(&session_2, reliable_out_2, datareader_id_2, reliable_in_2,
-                    &delivery_control);
+    uxr_buffer_request_data(&session_1, reliable_out_1, datareader_id_1, reliable_in_1,
+            &delivery_control);
+    uxr_buffer_request_data(&session_2, reliable_out_2, datareader_id_2, reliable_in_2,
+            &delivery_control);
 
     // Write topics
     uint32_t count = 0;

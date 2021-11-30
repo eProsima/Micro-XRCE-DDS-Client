@@ -25,7 +25,7 @@ else()
     #############################################################
     ###                       DISCOVERY
     #############################################################
-    project(Discovery)
+    project(Discovery C)
 
     if(NOT UCLIENT_BUILD_EXAMPLES)
         find_package(microxrcedds_client REQUIRED)

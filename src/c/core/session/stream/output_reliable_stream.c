@@ -8,9 +8,9 @@
 #include "./output_reliable_stream_internal.h"
 #include "./common_reliable_stream_internal.h"
 #include "../submessage_internal.h"
+#include <uxr/client/profile/multithread/multithread.h>
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
-#define MAX_HEARTBEAT_TRIES         (sizeof(int64_t) * 8 - 1)
 
 //==================================================================
 //                             PUBLIC
@@ -28,6 +28,8 @@ void uxr_init_output_reliable_stream(
     stream->base.size = size;
     stream->base.history = history;
     stream->offset = header_offset;
+
+    UXR_INIT_LOCK(&stream->mutex);
 
     uxr_reset_output_reliable_stream(stream);
 }
@@ -104,8 +106,8 @@ bool uxr_prepare_reliable_buffer_to_write(
 
         uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
         uint16_t first_fragment_size = (uint16_t)(buffer_capacity - (uint16_t)(buffer_size + SUBHEADER_SIZE));
-        uint16_t remaining_size = (uint16_t)(length - first_fragment_size);
-        uint16_t last_fragment_size;
+        size_t remaining_size = length - first_fragment_size;
+        size_t last_fragment_size;
         uint16_t necessary_complete_blocks;
         if (0 == (remaining_size % available_block_size))
         {
@@ -143,7 +145,8 @@ bool uxr_prepare_reliable_buffer_to_write(
                 buffer_capacity,
                 0u,
                 uxr_get_reliable_buffer_size(&stream->base, seq_num));
-            uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, last_fragment_size, FLAG_LAST_FRAGMENT);
+            uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t)last_fragment_size,
+                    FLAG_LAST_FRAGMENT);
             uxr_set_reliable_buffer_size(&stream->base, seq_num,
                     stream->offset + (size_t)(SUBHEADER_SIZE) + last_fragment_size);
 
@@ -193,17 +196,15 @@ bool uxr_update_output_stream_heartbeat_timestamp(
     {
         if (0 == stream->next_heartbeat_tries)
         {
-            stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL;
             stream->next_heartbeat_tries = 1;
         }
         else if (current_timestamp >= stream->next_heartbeat_timestamp)
         {
-            int64_t increment = MIN_HEARTBEAT_TIME_INTERVAL << (stream->next_heartbeat_tries % MAX_HEARTBEAT_TRIES);
-            int64_t difference = current_timestamp - stream->next_heartbeat_timestamp;
-            stream->next_heartbeat_timestamp += (difference > increment) ? difference : increment;
             stream->next_heartbeat_tries++;
             must_confirm = true;
         }
+
+        stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL;
     }
     else
     {

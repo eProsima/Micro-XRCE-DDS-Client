@@ -13,6 +13,8 @@ static struct pollfd poll_fd;
 bool my_custom_transport_open(
         uxrCustomTransport* transport)
 {
+    (void) transport;
+
     printf("Micro XRCE-DDS Client Custom transport: opening\n");
 
     bool rv = false;
@@ -49,6 +51,8 @@ bool my_custom_transport_open(
 bool my_custom_transport_close(
         uxrCustomTransport* transport)
 {
+    (void) transport;
+
     printf("Micro XRCE-DDS Client Custom transport: closing\n");
 
     return (-1 == poll_fd.fd) ? true : (0 == close(poll_fd.fd));
@@ -60,6 +64,8 @@ size_t my_custom_transport_write(
         size_t len,
         uint8_t* errcode)
 {
+    (void) transport;
+
     size_t rv = 0;
     ssize_t bytes_sent = send(poll_fd.fd, (void*)buf, len, 0);
     if (-1 != bytes_sent)
@@ -84,6 +90,8 @@ size_t my_custom_transport_read(
         int timeout,
         uint8_t* errcode)
 {
+    (void) transport;
+
     size_t rv = 0;
     int poll_rv = poll(&poll_fd, 1, timeout);
     if (0 < poll_rv)

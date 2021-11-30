@@ -20,6 +20,7 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 ###############################################################################
 # Build options
 ###############################################################################
+option(UCLIENT_BUILD_MICROCDR "Force local build of Micro CDR." OFF)
 option(UCLIENT_SUPERBUILD "Enable superbuild compilation." ON)
 option(UCLIENT_BUILD_TESTS "Build tests." OFF)
 option(UCLIENT_BUILD_EXAMPLES "Build examples." OFF)
@@ -29,6 +30,7 @@ option(UCLIENT_VERBOSE_MESSAGE "Build with message verbosity." OFF)
 option(UCLIENT_PIC "Control Position Independent Code." ON)
 option(UCLIENT_ISOLATED_INSTALL "Install the project and dependencies into separeted folders with version control." OFF)
 option(BUILD_SHARED_LIBS "Control shared/static library building." OFF)
+option(BUILD_DOCUMENTATION "Use doxygen to create product documentation" OFF)
 
 option(UCLIENT_BUILD_CI_TESTS "Build CI test cases." OFF)
 if(UCLIENT_BUILD_CI_TESTS)
@@ -45,6 +47,7 @@ option(UCLIENT_BIG_ENDIANNESS "Set the machine endianness to big endianness (by 
 option(UCLIENT_PROFILE_DISCOVERY "Enable discovery profile." ON)
 option(UCLIENT_PROFILE_UDP "Enable UDP transport." ON)
 option(UCLIENT_PROFILE_TCP "Enable TCP transport." ON)
+option(UCLIENT_PROFILE_CAN "Enable CAN FD transport." OFF)
 option(UCLIENT_PROFILE_SERIAL "Enable Serial transport." ON)
 option(UCLIENT_PROFILE_STREAM_FRAMING "Enable stream framing protocol." ON)
 set(UCLIENT_MAX_OUTPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number of output best-effort streams for session.")
@@ -53,7 +56,7 @@ set(UCLIENT_MAX_INPUT_BEST_EFFORT_STREAMS 1 CACHE STRING "Set the maximum number
 set(UCLIENT_MAX_INPUT_RELIABLE_STREAMS 1 CACHE STRING "Set the maximum number of input reliable streams for session.")
 set(UCLIENT_MAX_SESSION_CONNECTION_ATTEMPTS 10 CACHE STRING "Set the number of connection attemps.")
 set(UCLIENT_MIN_SESSION_CONNECTION_INTERVAL 1000 CACHE STRING "Set the connection interval in milliseconds.")
-set(UCLIENT_MIN_HEARTBEAT_TIME_INTERVAL 1 CACHE STRING "Set the time interval between heartbeats in milliseconds.")
+set(UCLIENT_MIN_HEARTBEAT_TIME_INTERVAL 100 CACHE STRING "Set the time interval between heartbeats in milliseconds.")
 set(UCLIENT_UDP_TRANSPORT_MTU 512 CACHE STRING "Set the UDP transport MTU.")
 set(UCLIENT_TCP_TRANSPORT_MTU 512 CACHE STRING "Set the TCP transport MTU.")
 set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.")
@@ -61,11 +64,20 @@ set(UCLIENT_SERIAL_TRANSPORT_MTU 512 CACHE STRING "Set the Serial transport MTU.
 option(UCLIENT_PROFILE_CUSTOM_TRANSPORT "Enable Custom transport." ON)
 set(UCLIENT_CUSTOM_TRANSPORT_MTU 512 CACHE STRING "Set the Custom transport MTU.")
 
+option(UCLIENT_PROFILE_MULTITHREAD "Enable multithread support." OFF)
+option(UCLIENT_PROFILE_SHARED_MEMORY "Enable shared memory transport support." OFF)
+option(UCLIENT_PROFILE_MATCHING "Enable QoS matching support." OFF)
+set(UCLIENT_SHARED_MEMORY_MAX_ENTITIES 4 CACHE STRING "Max number of entities involved in shared memory.")
+set(UCLIENT_SHARED_MEMORY_STATIC_MEM_SIZE 10 CACHE STRING "Max number data buffers stored in shared memory")
+
+# Off-standard features and tweaks
+option(UCLIENT_TWEAK_XRCE_WRITE_LIMIT "This feature uses a tweak to allow XRCE WRITE DATA submessages grater than 64 kB." ON)
+
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 1.2.1)
-set(_microcdr_tag v1.2.1)
+set(_microcdr_version 2.0.0)
+set(_microcdr_tag v2.0.0)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
@@ -75,7 +87,7 @@ list(APPEND _deps "microcdr\;${_microcdr_version}")
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(NOT UCLIENT_SUPERBUILD)
-    project(microxrcedds_client VERSION "2.0.0" LANGUAGES C)
+    project(microxrcedds_client VERSION "2.1.0" LANGUAGES C)
 else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
@@ -125,7 +137,7 @@ endforeach()
 # Sources
 ###############################################################################
 # Check platform.
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(UCLIENT_PLATFORM_LINUX ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(UCLIENT_PLATFORM_WINDOWS ON)
@@ -138,6 +150,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
         set(UCLIENT_PLATFORM_POSIX_NOPOLL ON)
     elseif(PLATFORM_NAME STREQUAL "FreeRTOS_Plus_TCP")
         set(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP ON)
+    elseif(PLATFORM_NAME STREQUAL "RTEMS_BSD_NET")
+        set(UCLIENT_PLATFORM_RTEMS_BSD_NET ON)
     endif()
 endif()
 
@@ -158,6 +172,8 @@ if(UCLIENT_PROFILE_UDP)
         list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_windows.c)
     elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
         list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_freertos_plus_tcp.c)
+    elseif(UCLIENT_PLATFORM_RTEMS_BSD_NET)
+        list(APPEND _transport_src src/c/profile/transport/ip/udp/udp_transport_rtems_bsd_net.c)
     endif()
 endif()
 
@@ -169,11 +185,14 @@ if(UCLIENT_PROFILE_TCP)
         list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_windows.c)
     elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
         list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_freertos_plus_tcp.c)
+    elseif(UCLIENT_PLATFORM_RTEMS_BSD_NET)
+        list(APPEND _transport_src src/c/profile/transport/ip/tcp/tcp_transport_rtems_bsd_net.c)
     endif()
 endif()
 
 if(UCLIENT_PLATFORM_WINDOWS)
 set(UCLIENT_PROFILE_SERIAL OFF)
+set(UCLIENT_PROFILE_CAN OFF)
 endif()
 
 if(UCLIENT_PROFILE_SERIAL)
@@ -182,6 +201,11 @@ if(UCLIENT_PROFILE_SERIAL)
     if(UCLIENT_PLATFORM_POSIX)
         list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_posix.c)
     endif()
+endif()
+
+if(UCLIENT_PROFILE_CAN AND UCLIENT_PLATFORM_POSIX)
+    list(APPEND _transport_src src/c/profile/transport/can/can_transport.c)
+    list(APPEND _transport_src src/c/profile/transport/can/can_transport_posix.c)
 endif()
 
 if(UCLIENT_PROFILE_DISCOVERY OR UCLIENT_PROFILE_UDP OR UCLIENT_PROFILE_TCP)
@@ -193,6 +217,8 @@ if(UCLIENT_PROFILE_DISCOVERY OR UCLIENT_PROFILE_UDP OR UCLIENT_PROFILE_TCP)
         list(APPEND _transport_src src/c/profile/transport/ip/ip_windows.c)
     elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
         list(APPEND _transport_src src/c/profile/transport/ip/ip_freertos_plus_tcp.c)
+    elseif(UCLIENT_PLATFORM_RTEMS_BSD_NET)
+        list(APPEND _transport_src src/c/profile/transport/ip/ip_rtems_bsd_net.c)
     endif()
 endif()
 
@@ -207,11 +233,17 @@ if(UCLIENT_PROFILE_DISCOVERY)
         list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_windows.c)
     elseif(UCLIENT_PLATFORM_FREERTOS_PLUS_TCP)
         list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_freertos_plus_tcp.c)
+    elseif(UCLIENT_PLATFORM_RTEMS_BSD_NET)
+        list(APPEND _transport_src src/c/profile/discovery/transport/udp_transport_datagram_rtems_bsd_net.c)
     endif()
 endif()
 
 if(UCLIENT_PROFILE_CUSTOM_TRANSPORT)
     list(APPEND _transport_src src/c/profile/transport/custom/custom_transport.c)
+endif()
+
+if(UCLIENT_PROFILE_SHARED_MEMORY)
+    set(UCLIENT_PROFILE_MATCHING ON)
 endif()
 
 # Other sources
@@ -235,8 +267,12 @@ set(SRCS
     src/c/core/session/common_create_entities.c
     src/c/core/session/create_entities_ref.c
     src/c/core/session/create_entities_xml.c
+    src/c/core/session/create_entities_bin.c
     src/c/core/session/read_access.c
     src/c/core/session/write_access.c
+    $<$<BOOL:${UCLIENT_PROFILE_MULTITHREAD}>:src/c/profile/multithread/multithread.c>
+    $<$<BOOL:${UCLIENT_PROFILE_SHARED_MEMORY}>:src/c/profile/shared_memory/shared_memory.c>
+    $<$<BOOL:${UCLIENT_PROFILE_MATCHING}>:src/c/profile/matching/matching.c>
     $<$<BOOL:${UCLIENT_PROFILE_STREAM_FRAMING}>:src/c/profile/transport/stream_framing/stream_framing_protocol.c>
     $<$<OR:$<BOOL:${UCLIENT_VERBOSE_MESSAGE}>,$<BOOL:${UCLIENT_VERBOSE_SERIALIZATION}>>:src/c/core/log/log.c>
     ${_transport_src}
@@ -256,10 +292,13 @@ set(LIB_INSTALL_DIR     ${CMAKE_INSTALL_LIBDIR}     CACHE PATH "Installation dir
 set(DATA_INSTALL_DIR    ${CMAKE_INSTALL_DATADIR}    CACHE PATH "Installation directory for data")
 if(WIN32)
     set(LICENSE_INSTALL_DIR . CACHE PATH "Installation directory for licenses")
+    set(DOC_DIR "doc")
 else()
     set(LICENSE_INSTALL_DIR ${DATA_INSTALL_DIR}/${PROJECT_NAME} CACHE PATH "Installation directory for licenses")
+    set(DOC_DIR "${DATA_INSTALL_DIR}/doc")
 endif()
 
+set(DOC_INSTALL_DIR ${DOC_DIR} CACHE PATH "Installation directory for documentation")
 ###############################################################################
 # Targets
 ###############################################################################
@@ -303,12 +342,17 @@ if((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (UCLIENT_TARGET_TYPE STREQUAL "SHA
         )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+    find_package(Threads REQUIRED)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         microcdr
         $<$<BOOL:$<PLATFORM_ID:Windows>>:ws2_32>
     PRIVATE
         $<$<BOOL:$<PLATFORM_ID:Linux>>:rt>
+        $<$<BOOL:$<PLATFORM_ID:Linux>>:${CMAKE_THREAD_LIBS_INIT}>
     )
 target_include_directories(${PROJECT_NAME}
     PUBLIC
@@ -362,8 +406,19 @@ if(UCLIENT_BUILD_EXAMPLES)
     add_subdirectory(examples/ContinuousFragment)
     add_subdirectory(examples/PublishHelloWorldBestEffort)
     add_subdirectory(examples/SubscribeHelloWorldBestEffort)
+    add_subdirectory(examples/BinaryEntityCreation)
+
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(examples/CustomTransports)
+    endif()
+
+    if(UCLIENT_PROFILE_CAN)
+        add_subdirectory(examples/PublishHelloWorldCAN)
+    endif()
+
+    if(UCLIENT_PROFILE_SHARED_MEMORY)
+        add_subdirectory(examples/SharedMemoryPubSub)
+        add_subdirectory(examples/SharedMemoryReqRep)
     endif()
 endif()
 
@@ -387,11 +442,68 @@ if(UCLIENT_BUILD_TESTS)
     if(UCLIENT_PLATFORM_LINUX)
         add_subdirectory(test/transport/custom_comm)
         add_subdirectory(test/transport/serial_comm)
+        add_subdirectory(test/shared_memory)
     endif()
 endif()
 
 if(UCLIENT_PLATFORM_LINUX AND UCLIENT_MEMORY_TESTS)
     add_subdirectory(test/memory/consumption)
+endif()
+
+###############################################################################
+# Documentation
+###############################################################################
+if(BUILD_DOCUMENTATION)
+    find_package(Doxygen)
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "doxygen is needed to build the documentation. Please install it correctly")
+    endif()
+    if(UNIX)
+        find_program(DOXYFILE_MAKE make)
+        if(DOXYFILE_MAKE)
+            message(STATUS "Found Make: ${DOXYFILE_MAKE}")
+        else()
+            message(FATAL_ERROR "make is needed to build the documentation. Please install it correctly")
+        endif()
+    elseif(WIN32)
+        set(DOXYFILE_MAKE make.bat)
+    endif()
+
+    find_program(WGET_EXE wget)
+    if(WGET_EXE)
+        message(STATUS "Found WGet: ${WGET_EXE}")
+    else()
+        message(FATAL_ERROR "wget is needed to build the documentation. Please install it correctly")
+    endif()
+    find_program(UNZIP_EXE unzip)
+    if(UNZIP_EXE)
+        message(STATUS "Found Unzip: ${UNZIP_EXE}")
+    else()
+        message(FATAL_ERROR "unzip is needed to build the documentation. Please install it correctly")
+    endif()
+
+
+    # Target to create documentation directories
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/doc)
+    add_custom_target(docdirs
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/doc/api_reference
+        COMMENT "Creating documentation directory" VERBATIM)
+
+    ### Doxygen ########################3
+    # Configure the template doxyfile for or specific project
+    configure_file(doxyfile.in ${PROJECT_BINARY_DIR}/doxyfile @ONLY IMMEDIATE)
+    # Add custom target to run doxygen when ever the project is build
+    add_custom_target(doxygen
+        COMMAND "${DOXYGEN_EXECUTABLE}" "${PROJECT_BINARY_DIR}/doxyfile"
+        SOURCES "${PROJECT_BINARY_DIR}/doxyfile"
+        COMMENT "Generating API documentation with doxygen" VERBATIM)
+
+    add_dependencies(doxygen docdirs)
+
+    add_custom_target(doc ALL
+    COMMENT "Generated project documentation" VERBATIM)
+
+    add_dependencies(doc doxygen)
 endif()
 
 ###############################################################################
@@ -488,4 +600,15 @@ if(EXISTS ${CMAKE_BINARY_DIR}/temp_install/)
             USE_SOURCE_PERMISSIONS
         )
     endforeach()
+endif()
+
+# Set output library prefix
+set_property(TARGET microxrcedds_client PROPERTY PREFIX ${LIB_PREFIX})
+
+if(BUILD_DOCUMENTATION)
+    # Instalation of doxygen files
+    install(DIRECTORY ${PROJECT_BINARY_DIR}/doc/api_reference
+        DESTINATION ${DOC_INSTALL_DIR}
+        COMPONENT documentation
+        )
 endif()

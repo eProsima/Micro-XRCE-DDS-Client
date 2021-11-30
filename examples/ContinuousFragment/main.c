@@ -23,8 +23,10 @@
 #define BUFFER_SIZE     100 * STREAM_HISTORY
 
 bool flush_session(
-        uxrSession* session)
+        uxrSession* session,
+        void* args)
 {
+    (void) args;
     return uxr_run_session_until_confirm_delivery(session, 1000);
 }
 
@@ -76,8 +78,8 @@ int main(
             "</rtps>"
             "</participant>"
             "</dds>";
-    uint16_t participant_req = uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0,
-                    participant_xml, UXR_REPLACE);
+    uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0,
+            participant_xml, UXR_REPLACE);
     uxr_run_session_until_confirm_delivery(&session, 100);
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
@@ -86,13 +88,13 @@ int main(
             "<dataType>HelloWorld</dataType>"
             "</topic>"
             "</dds>";
-    uint16_t topic_req = uxr_buffer_create_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml,
-                    UXR_REPLACE);
+    uxr_buffer_create_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml,
+            UXR_REPLACE);
     uxr_run_session_until_confirm_delivery(&session, 100);
     uxrObjectId publisher_id = uxr_object_id(0x01, UXR_PUBLISHER_ID);
     const char* publisher_xml = "";
-    uint16_t publisher_req = uxr_buffer_create_publisher_xml(&session, reliable_out, publisher_id, participant_id,
-                    publisher_xml, UXR_REPLACE);
+    uxr_buffer_create_publisher_xml(&session, reliable_out, publisher_id, participant_id,
+            publisher_xml, UXR_REPLACE);
 
     uxrObjectId datawriter_id = uxr_object_id(0x01, UXR_DATAWRITER_ID);
     const char* datawriter_xml = "<dds>"
@@ -105,16 +107,17 @@ int main(
             "</topic>"
             "</data_writer>"
             "</dds>";
-    uint16_t datawriter_req = uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id,
-                    datawriter_xml, UXR_REPLACE);
+    uxr_buffer_create_datawriter_xml(&session, reliable_out, datawriter_id, publisher_id,
+            datawriter_xml, UXR_REPLACE);
+
     uxr_run_session_until_confirm_delivery(&session, 100);
 
     // Write topic
-    uint8_t buf[20000];
+    char buf[20000];
     memset(buf, 'A', sizeof(buf));
 
     ucdrBuffer ub;
-    uxr_prepare_output_stream_fragmented(&session, reliable_out, datawriter_id, &ub, sizeof(buf), flush_session);
+    uxr_prepare_output_stream_fragmented(&session, reliable_out, datawriter_id, &ub, sizeof(buf), flush_session, NULL);
     ucdr_serialize_array_char(&ub, buf, sizeof(buf));
 
     uxr_run_session_until_confirm_delivery(&session, 1000);

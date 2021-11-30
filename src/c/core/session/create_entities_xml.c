@@ -2,6 +2,7 @@
 #include <uxr/client/core/type/xrce_types.h>
 
 #include "common_create_entities_internal.h"
+#include "../../profile/shared_memory/shared_memory_internal.h"
 
 #include <string.h>
 
@@ -20,7 +21,7 @@ uint16_t uxr_buffer_create_participant_xml(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id,
-        uint16_t domain,
+        uint16_t domain_id,
         const char* xml,
         uint8_t mode)
 {
@@ -28,7 +29,7 @@ uint16_t uxr_buffer_create_participant_xml(
 
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_PARTICIPANT;
-    payload.object_representation._.participant.domain_id = (int16_t)domain;
+    payload.object_representation._.participant.domain_id = (int16_t)domain_id;
 
     return create_entity_xml(session, stream_id, object_id, xml, mode, &payload);
 }
@@ -94,6 +95,8 @@ uint16_t uxr_buffer_create_datawriter_xml(
 {
     //assert with the object_id type
 
+    UXR_ADD_SHARED_MEMORY_ENTITY_XML(session, object_id, xml);
+
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAWRITER;
     uxr_object_id_to_raw(publisher_id, payload.object_representation._.data_writer.publisher_id.data);
@@ -111,6 +114,8 @@ uint16_t uxr_buffer_create_datareader_xml(
 {
     //assert with the object_id type
 
+    UXR_ADD_SHARED_MEMORY_ENTITY_XML(session, object_id, xml);
+
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_DATAREADER;
     uxr_object_id_to_raw(subscriber_id, payload.object_representation._.data_reader.subscriber_id.data);
@@ -126,6 +131,8 @@ uint16_t uxr_buffer_create_requester_xml(
         const char* xml,
         uint8_t mode)
 {
+    UXR_ADD_SHARED_MEMORY_ENTITY_XML(session, object_id, xml);
+
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REQUESTER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
@@ -141,6 +148,8 @@ uint16_t uxr_buffer_create_replier_xml(
         const char* xml,
         uint8_t mode)
 {
+    UXR_ADD_SHARED_MEMORY_ENTITY_XML(session, object_id, xml);
+
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_REPLIER;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);

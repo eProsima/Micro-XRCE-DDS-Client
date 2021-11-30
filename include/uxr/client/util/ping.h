@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file
+ */
+
 #ifndef UXR_CLIENT_UTIL_PING_H_
 #define UXR_CLIENT_UTIL_PING_H_
 
@@ -31,19 +35,38 @@ extern "C"
 #define GET_INFO_MSG_SIZE   8
 #define GET_INFO_REQUEST_ID 9
 
+struct uxrSession;
+
+/**
+ * @brief   Checks the availability status of a valid connection with an agent.
+ *          This methods performs a single attempt.
+ *          This method uses an already opened session in order to do not
+ *          interfere with the rest of the application.
+ * @ingroup      general_utils
+ * @param   session Pointer to the uxrSession struct inited.
+ * @param   timeout_ms Time, in milliseconds, for a ping attempt.
+ * @param   attempts Maximum number of ping attempts to be performed.
+ * @return `true` in case of a successful ping to the agent, `false` otherwise.
+ */
+bool uxr_ping_agent_session(
+        struct uxrSession* session,
+        const int timeout_ms,
+        const uint8_t attempts);
+
 /**
  * @brief   Checks the availability status of a valid connection with an agent.
  *          This methods performs a single attempt.
  *          Transport must be properly initialized before calling this method.
  *          This method does not take care of init/fini the transport struct.
+ * @ingroup      general_utils
  * @param   comm Pointer to the uxrCommunication struct holding the transport
  *               information and callback methods.
- * @param   timeout Time, in milliseconds, for a ping attempt.
+ * @param   timeout_ms Time, in milliseconds, for a ping attempt.
  * @return `true` in case of a successful ping to the agent, `false` otherwise.
  */
 UXRDLLAPI bool uxr_ping_agent(
-        const uxrCommunication* comm,
-        const int timeout);
+        uxrCommunication* comm,
+        const int timeout_ms);
 
 /**
  * @brief   Checks the availability status of a valid connection with an agent.
@@ -52,15 +75,16 @@ UXRDLLAPI bool uxr_ping_agent(
  *          successful ping occurs.
  *          Transport must be properly initialized before calling this method.
  *          This method does not take care of init/fini the transport struct.
+ * @ingroup     general_utils
  * @param   comm Pointer to the uxrCommunication struct holding the transport
  *               information and callback methods.
- * @param   timeout Time, in milliseconds, for a ping attempt.
+ * @param   timeout_ms Time, in milliseconds, for a ping attempt.
  * @param   attempts Maximum number of ping attempts to be performed.
  * @return `true` in case of a successful ping to the agent, `false` otherwise.
  */
 UXRDLLAPI bool uxr_ping_agent_attempts(
-        const uxrCommunication* comm,
-        const int timeout,
+        uxrCommunication* comm,
+        const int timeout_ms,
         const uint8_t attempts);
 
 

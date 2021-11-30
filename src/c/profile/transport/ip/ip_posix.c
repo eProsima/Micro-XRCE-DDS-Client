@@ -15,9 +15,8 @@
 #include <uxr/client/profile/transport/ip/ip.h>
 #include <uxr/client/config.h>
 
-#if defined(UCLIENT_PLATFORM_POSIX)
 #include <arpa/inet.h>
-#elif defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
+#if defined(UCLIENT_PLATFORM_POSIX_NOPOLL)
 #include <sys/socket.h>
 #endif /* if defined(UCLIENT_PLATFORM_POSIX) */
 

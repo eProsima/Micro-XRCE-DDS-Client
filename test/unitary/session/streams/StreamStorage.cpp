@@ -6,6 +6,7 @@ extern "C"
 #include <c/core/session/stream/seq_num.c>
 #include <c/core/session/stream/stream_id.c>
 #include <c/core/session/stream/stream_storage.c>
+#include <uxr/client/profile/multithread/multithread.h>
 }
 
 #define BUFFER_SIZE           128
@@ -204,6 +205,7 @@ void uxr_init_input_best_effort_stream(
         uxrInputBestEffortStream* stream)
 {
     (void) stream;
+    UXR_INIT_LOCK(&stream->mutex);
     StreamStorageTest::input_best_effort_initialized = true;
 }
 
@@ -214,6 +216,7 @@ void uxr_init_output_best_effort_stream(
         uint8_t offset)
 {
     (void) stream; (void) buffer; (void) size; (void) offset;
+    UXR_INIT_LOCK(&stream->mutex);
     StreamStorageTest::output_best_effort_initialized = true;
 }
 
@@ -225,6 +228,7 @@ void uxr_init_input_reliable_stream(
         OnGetFragmentationInfo on_get_fragmentation_info)
 {
     (void) stream; (void) buffer; (void) size; (void) history; (void) on_get_fragmentation_info;
+    UXR_INIT_LOCK(&stream->mutex);
     StreamStorageTest::input_reliable_initialized = true;
 }
 
@@ -236,6 +240,7 @@ void uxr_init_output_reliable_stream(
         uint8_t header_offset)
 {
     (void) stream; (void) buffer; (void) size; (void) history; (void) header_offset;
+    UXR_INIT_LOCK(&stream->mutex);
     StreamStorageTest::output_reliable_initialized = true;
 }
 
