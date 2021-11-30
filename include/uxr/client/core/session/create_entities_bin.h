@@ -61,13 +61,6 @@ typedef struct uxrQoS_t
     uint16_t depth;
 } uxrQoS_t;
 
-static const uxrQoS_t uxrDefaultQoS = {
-    UXR_DURABILITY_TRANSIENT_LOCAL,
-    UXR_RELIABILITY_RELIABLE,
-    UXR_HISTORY_KEEP_LAST,
-    10
-};
-
 /**
  * @brief Buffers into the stream identified by `stream_id` an XRCE CREATE submessage with an XRCE Participant payload.
  *        The submessage will be sent when `uxr_flash_output_streams` or `uxr_run_session` function are called.
@@ -168,7 +161,7 @@ UXRDLLAPI uint16_t uxr_buffer_create_subscriber_bin(
  * @param object_id             The identifier of the XRCE DataWriter.
  * @param publisher_id          The identifier of the associated XRCE Publisher.
  * @param topic_id              The identifier of the associated XRCE Topic.
- * @param uxrQoS_t              QoS definition.
+ * @param qos              QoS definition.
  * @param mode                  The set of flags that determines the entity creation mode.
  *                              The Creation Mode Table describes the entities creation behaviour according to the
  *                              `UXR_REUSE` and `UXR_REPLACE` flags.

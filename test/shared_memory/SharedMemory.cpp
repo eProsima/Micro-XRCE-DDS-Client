@@ -56,11 +56,8 @@ public:
     }
 
 protected:
-    uxrQoS_t qos = {
-        .reliability = UXR_RELIABILITY_RELIABLE,
-        .durability = UXR_DURABILITY_TRANSIENT_LOCAL,
-        .history = UXR_HISTORY_KEEP_LAST,
-        .depth = 1};
+
+    uxrQoS_t qos = {UXR_DURABILITY_TRANSIENT_LOCAL, UXR_RELIABILITY_RELIABLE, UXR_HISTORY_KEEP_LAST, 1};
 
     uxrObjectId create_datawriter(
             std::string topic,
