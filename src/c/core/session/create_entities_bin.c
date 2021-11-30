@@ -129,10 +129,7 @@ uint16_t uxr_buffer_create_datawriter_bin(
         uxrObjectId object_id,
         uxrObjectId publisher_id,
         uxrObjectId topic_id,
-        bool reliable,
-        bool keep_last,
-        uint16_t depth,
-        uxrQoSDurability durability,
+        uxrQoS_t qos,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -148,20 +145,20 @@ uint16_t uxr_buffer_create_datawriter_bin(
     datawriter.qos.base.optional_lifespan_msec = false;
     datawriter.qos.base.optional_user_data = false;
 
-    datawriter.qos.base.optional_history_depth = depth == 0 ? false : true;
-    datawriter.qos.base.history_depth = depth;
+    datawriter.qos.base.optional_history_depth = qos.depth == 0 ? false : true;
+    datawriter.qos.base.history_depth = qos.depth;
 
     datawriter.qos.base.qos_flags = 0;
-    if (reliable)
+    if (qos.reliability == UXR_RELIABILITY_RELIABLE)
     {
         datawriter.qos.base.qos_flags |= is_reliable;
     }
-    if (keep_last)
+    if (qos.history == UXR_HISTORY_KEEP_LAST)
     {
         datawriter.qos.base.qos_flags |= is_history_keep_last;
     }
 
-    switch (durability)
+    switch (qos.durability)
     {
         case UXR_DURABILITY_VOLATILE:
             // datawriter.qos.base.qos_flags all flags zeroed
@@ -196,10 +193,7 @@ uint16_t uxr_buffer_create_datareader_bin(
         uxrObjectId object_id,
         uxrObjectId subscriber_id,
         uxrObjectId topic_id,
-        bool reliable,
-        bool keep_last,
-        uint16_t depth,
-        uxrQoSDurability durability,
+        uxrQoS_t qos,
         uint8_t mode)
 {
     CREATE_Payload payload;
@@ -216,20 +210,20 @@ uint16_t uxr_buffer_create_datareader_bin(
     datareader.qos.base.optional_lifespan_msec = false;
     datareader.qos.base.optional_user_data = false;
 
-    datareader.qos.base.optional_history_depth = depth == 0 ? false : true;
-    datareader.qos.base.history_depth = depth;
+    datareader.qos.base.optional_history_depth = qos.depth == 0 ? false : true;
+    datareader.qos.base.history_depth = qos.depth;
 
     datareader.qos.base.qos_flags = 0;
-    if (reliable)
+    if (qos.reliability == UXR_RELIABILITY_RELIABLE)
     {
         datareader.qos.base.qos_flags |= is_reliable;
     }
-    if (keep_last)
+    if (qos.history == UXR_HISTORY_KEEP_LAST)
     {
         datareader.qos.base.qos_flags |= is_history_keep_last;
     }
 
-    switch (durability)
+    switch (qos.durability)
     {
         case UXR_DURABILITY_VOLATILE:
             // datawriter.qos.base.qos_flags all flags zeroed
@@ -268,8 +262,11 @@ uint16_t uxr_buffer_create_requester_bin(
         const char* reply_type,
         const char* request_topic_name,
         const char* reply_topic_name,
+        uxrQoS_t qos,
         uint8_t mode)
 {
+    (void) qos;
+
     CREATE_Payload payload;
     payload.object_representation.kind = UXR_REQUESTER_ID;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.requester.participant_id.data);
@@ -305,8 +302,11 @@ uint16_t uxr_buffer_create_replier_bin(
         const char* reply_type,
         const char* request_topic_name,
         const char* reply_topic_name,
+        uxrQoS_t qos,
         uint8_t mode)
 {
+    (void) qos;
+
     CREATE_Payload payload;
     payload.object_representation.kind = UXR_REPLIER_ID;
     uxr_object_id_to_raw(participant_id, payload.object_representation._.replier.participant_id.data);

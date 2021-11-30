@@ -56,6 +56,11 @@ public:
     }
 
 protected:
+    uxrQoS_t qos = {
+        .reliability = UXR_RELIABILITY_RELIABLE,
+        .durability = UXR_DURABILITY_TRANSIENT_LOCAL,
+        .history = UXR_HISTORY_KEEP_LAST,
+        .depth = 1};
 
     uxrObjectId create_datawriter(
             std::string topic,
@@ -86,8 +91,8 @@ protected:
             case XRCE_BIN_CREATION:
                 uxr_buffer_create_topic_bin(&session, output_besteffort, topic_id, participant_id,
                         topic.c_str(), type.c_str(), UXR_REPLACE);
-                uxr_buffer_create_datawriter_bin(&session, output_besteffort, datawriter_id, publisher_id, topic_id, 1,
-                        1, 0, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
+                uxr_buffer_create_datawriter_bin(&session, output_besteffort, datawriter_id, publisher_id, topic_id,
+                        qos, UXR_REPLACE);
                 break;
             default:
                 // ASSERT_TRUE(0);
@@ -126,8 +131,8 @@ protected:
             case XRCE_BIN_CREATION:
                 uxr_buffer_create_topic_bin(&session, output_besteffort, topic_id, participant_id,
                         topic.c_str(), type.c_str(), UXR_REPLACE);
-                uxr_buffer_create_datareader_bin(&session, output_besteffort, datareader_id, subscriber_id, topic_id, 1,
-                        1, 0, UXR_DURABILITY_TRANSIENT_LOCAL, UXR_REPLACE);
+                uxr_buffer_create_datareader_bin(&session, output_besteffort, datareader_id, subscriber_id, topic_id,
+                        qos, UXR_REPLACE);
                 break;
             default:
                 // ASSERT_TRUE(0);
@@ -161,7 +166,7 @@ protected:
                 break;
             case XRCE_BIN_CREATION:
                 uxr_buffer_create_requester_bin(&session, output_besteffort, requester_id, participant_id,
-                        name.c_str(), request_type.c_str(), reply_type.c_str(), "", "", UXR_REPLACE);
+                        name.c_str(), request_type.c_str(), reply_type.c_str(), "", "", qos, UXR_REPLACE);
                 break;
             default:
                 // ASSERT_TRUE(0);
@@ -196,7 +201,7 @@ protected:
 
             case XRCE_BIN_CREATION:
                 uxr_buffer_create_replier_bin(&session, output_besteffort, replier_id, participant_id,
-                        name.c_str(), request_type.c_str(), reply_type.c_str(), "", "", UXR_REPLACE);
+                        name.c_str(), request_type.c_str(), reply_type.c_str(), "", "", qos, UXR_REPLACE);
                 break;
             default:
                 // ASSERT_TRUE(0);
