@@ -177,7 +177,7 @@ bool on_full_output_buffer_fragmented(
         0u,
         uxr_get_reliable_buffer_size(&stream->base, stream->last_written));
 
-    if (local_args->data_size <= buffer_capacity)
+    if ((local_args->data_size + SUBHEADER_SIZE + WRITE_DATA_PAYLOAD_SIZE) <= buffer_capacity)
     {
         uxr_buffer_submessage_header(&temp_ub, SUBMESSAGE_ID_FRAGMENT, (uint16_t) local_args->data_size,
                 FLAG_LAST_FRAGMENT);
