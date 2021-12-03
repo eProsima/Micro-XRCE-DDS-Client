@@ -200,6 +200,8 @@ if(UCLIENT_PROFILE_SERIAL)
     list(APPEND _transport_src src/c/profile/transport/serial/serial_transport.c)
     if(UCLIENT_PLATFORM_POSIX)
         list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_posix.c)
+    elseif(UCLIENT_PLATFORM_RTEMS_BSD_NET)
+        list(APPEND _transport_src src/c/profile/transport/serial/serial_transport_rtems_bsd_net.c)
     endif()
 endif()
 
