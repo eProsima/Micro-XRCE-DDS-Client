@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIALTRANSPORTPOSIX_H_
-#define UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIALTRANSPORTPOSIX_H_
+#ifndef UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIALTRANSPORTRTEMS_H_
+#define UXR_CLIENT_PROFILE_TRANSPORT_SERIAL_SERIALTRANSPORTRTEMS_H_
 
 #ifdef __cplusplus
 extern "C"
