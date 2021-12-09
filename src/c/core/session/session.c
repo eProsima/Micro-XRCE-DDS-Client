@@ -394,17 +394,17 @@ bool uxr_run_session_until_confirm_delivery(
 
     int64_t start_timestamp = uxr_millis();
     int remaining_time = timeout_ms;
+    bool ret = false;
 
     uxr_flash_output_streams(session);
 
     do
     {
         listen_message_reliably(session, remaining_time);
+        ret = uxr_output_streams_confirmed(&session->streams);
         remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
-    while (!uxr_output_streams_confirmed(&session->streams) && (remaining_time > 0));
-
-    bool ret = uxr_output_streams_confirmed(&session->streams);
+    while (!ret && (remaining_time > 0));
 
     UXR_UNLOCK_SESSION(session);
     return ret;
