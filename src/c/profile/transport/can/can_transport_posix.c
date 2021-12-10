@@ -77,7 +77,7 @@ size_t uxr_write_can_data_platform(
     if (0 < poll_rv)
     {
         memcpy(&frame.data[1], buf, len);
-        frame.data[0] = len;
+        frame.data[0] = (uint8_t) len;
 
         ssize_t bytes_sent = write(poll_fd_write_.fd, &frame, CANFD_MTU);
 
