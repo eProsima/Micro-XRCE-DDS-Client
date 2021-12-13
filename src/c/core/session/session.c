@@ -1212,11 +1212,14 @@ bool run_session_until_sync(
         uxrSession* session,
         int timeout)
 {
+    int remaining_time = timeout;
     session->synchronized = false;
-    bool timeout_exceeded = false;
-    while (!timeout_exceeded && !session->synchronized)
+
+    do
     {
-        timeout_exceeded = !listen_message_reliably(session, timeout);
-    }
+        listen_message_reliably(session, remaining_time);
+        remaining_time = timeout - (int)(uxr_millis() - start_timestamp);
+    } while (remaining_time > 0 && !session->synchronized);
+
     return session->synchronized;
 }
