@@ -193,7 +193,7 @@ TEST_F(OutputReliableStreamTest, WriteFragmentMessage)
     ucdrBuffer ub;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, message_length, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(3u, stream.last_written);
+    EXPECT_EQ(2u, stream.last_written);
     EXPECT_EQ(capacity, uxr_get_reliable_buffer_size(&stream.base, 0));
     EXPECT_EQ(capacity, uxr_get_reliable_buffer_size(&stream.base, 1));
     EXPECT_EQ(OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, 2));
@@ -231,7 +231,7 @@ TEST_F(OutputReliableStreamTest, WriteMultipleFragmentsAndCheckSubHeaders)
     }
 
     // Writing two fragmented message, 3 slots should be used
-    size_t first_message_size = 1.5 * MAX_FRAGMENT_SIZE;
+    size_t first_message_size = 24; // 1.5 * MAX_FRAGMENT_SIZE;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
     ASSERT_TRUE(available_to_write);
     available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
@@ -246,7 +246,7 @@ TEST_F(OutputReliableStreamTest, WriteMultipleFragmentsAndCheckSubHeaders)
 
         uint8_t session_id, stream_id;
         uint16_t seq_no;
-        uint8_t output_client_key[4] = {};
+        uint8_t output_client_key[4];
         uxr_deserialize_message_header(&ub, &session_id, &stream_id, &seq_no, output_client_key);
 
         while (ub.iterator < ub.final)
