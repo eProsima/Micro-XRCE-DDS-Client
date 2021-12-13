@@ -1212,6 +1212,7 @@ bool run_session_until_sync(
         uxrSession* session,
         int timeout)
 {
+    int64_t start_timestamp = uxr_millis();
     int remaining_time = timeout;
     session->synchronized = false;
 
