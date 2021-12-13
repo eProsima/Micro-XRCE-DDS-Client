@@ -79,7 +79,7 @@ size_t uxr_write_can_data_platform(
         memcpy(&frame.data[1], buf, len);
         frame.data[0] = (uint8_t) len;
 
-        ssize_t bytes_sent = write(poll_fd_write_.fd, &frame, sizeof(struct can_frame));
+        ssize_t bytes_sent = write(poll_fd_write_.fd, &frame, sizeof(struct canfd_frame));
 
         if (-1 != bytes_sent)
         {
@@ -117,7 +117,7 @@ size_t uxr_read_can_data_platform(
 
     if (0 < poll_rv)
     {
-        ssize_t bytes_received = read(platform->poll_fd.fd, &frame, sizeof(struct can_frame));
+        ssize_t bytes_received = read(platform->poll_fd.fd, &frame, sizeof(struct canfd_frame));
 
         if (-1 != bytes_received && frame.data[0] < CANFD_MTU)
         {
