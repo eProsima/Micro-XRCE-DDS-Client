@@ -155,6 +155,7 @@ bool uxr_prepare_reliable_buffer_to_write(
                 buffer + buffer_size + SUBHEADER_SIZE,
                 (uint32_t)(buffer_capacity - buffer_size - SUBHEADER_SIZE));
             ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
+            seq_num = uxr_seq_num_add(seq_num, 1);
             stream->last_written = seq_num;
         }
     }
