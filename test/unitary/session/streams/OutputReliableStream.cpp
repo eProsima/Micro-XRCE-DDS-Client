@@ -193,7 +193,7 @@ TEST_F(OutputReliableStreamTest, WriteFragmentMessage)
     ucdrBuffer ub;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, message_length, &ub);
     ASSERT_TRUE(available_to_write);
-    EXPECT_EQ(2u, stream.last_written);
+    EXPECT_EQ(3u, stream.last_written);
     EXPECT_EQ(capacity, uxr_get_reliable_buffer_size(&stream.base, 0));
     EXPECT_EQ(capacity, uxr_get_reliable_buffer_size(&stream.base, 1));
     EXPECT_EQ(OFFSET + FRAGMENT_OFFSET + SUBMESSAGE_SIZE, uxr_get_reliable_buffer_size(&stream.base, 2));
