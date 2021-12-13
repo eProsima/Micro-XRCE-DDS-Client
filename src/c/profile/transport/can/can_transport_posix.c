@@ -65,7 +65,7 @@ size_t uxr_write_can_data_platform(
         uint8_t* errcode)
 {
     struct canfd_frame frame = {
-        .can_id = platform->can_id, .len = (uint8_t)len
+        .can_id = platform->can_id, .len = (uint8_t) (len+1)
     };
     struct pollfd poll_fd_write_ = {
         .fd = platform->poll_fd.fd, .events = POLLOUT
@@ -83,7 +83,7 @@ size_t uxr_write_can_data_platform(
 
         if (-1 != bytes_sent)
         {
-            rv = frame.len;
+            rv = len;
             *errcode = 0;
         }
         else
