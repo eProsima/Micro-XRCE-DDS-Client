@@ -392,13 +392,18 @@ bool uxr_run_session_until_confirm_delivery(
 {
     UXR_LOCK_SESSION(session);
 
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
     uxr_flash_output_streams(session);
 
-    bool timeout = false;
-    while (!uxr_output_streams_confirmed(&session->streams) && !timeout)
+    do
     {
-        timeout = !listen_message_reliably(session, timeout_ms);
+        listen_message_reliably(session, remaining_time);
+
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
+    while (remaining_time > 0 && !uxr_output_streams_confirmed(&session->streams));
 
     bool ret = uxr_output_streams_confirmed(&session->streams);
 
@@ -478,18 +483,22 @@ bool uxr_run_session_until_one_status(
     session->status_list = status_list;
     session->request_status_list_size = list_size;
 
-    bool timeout = false;
     bool status_confirmed = false;
+
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
     do
     {
-        timeout = !listen_message_reliably(session, timeout_ms);
+        listen_message_reliably(session, timeout_ms);
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
         for (unsigned i = 0; i < list_size && !status_confirmed; ++i)
         {
             status_confirmed = status_list[i] != UXR_STATUS_NONE
                     || request_list[i] == UXR_INVALID_REQUEST_ID;         //CHECK: better give an error? an assert?
         }
     }
-    while (!timeout && !status_confirmed);
+    while (remaining_time > 0 && !status_confirmed);
 
     session->request_status_list_size = 0;
     UXR_UNLOCK_SESSION(session);
