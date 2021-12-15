@@ -148,3 +148,13 @@ bool uxr_output_streams_confirmed(
     }
     return up_to_date;
 }
+
+bool uxr_output_one_stream_confirmed(
+        const uxrOutputReliableStream* stream)
+{
+    bool up_to_date = true;
+    UXR_LOCK((uxrMutex*) &stream->mutex);
+    up_to_date = uxr_is_output_up_to_date(stream);
+    UXR_UNLOCK((uxrMutex*) &stream->mutex);
+    return up_to_date;
+}

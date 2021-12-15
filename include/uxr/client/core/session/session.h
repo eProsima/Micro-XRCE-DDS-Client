@@ -401,6 +401,15 @@ UXRDLLAPI void uxr_flash_output_streams(
         uxrSession* session);
 
 /**
+ * @brief Flashes one output stream seding the data through the transport.
+ * @param session   A uxrSession structure previously initialized.
+ * @param stream_id   A uxrStreamId structure previously initialized.
+ */
+UXRDLLAPI void uxr_flash_one_output_stream(
+        uxrSession* session,
+        const uxrStreamId stream_id);
+
+/**
  * @brief  Keeps communication between the Client and the Agent.
  *         This function involves the following actions:
  *          1. flushing all the output streams sending the data through the transport,
@@ -467,12 +476,29 @@ UXRDLLAPI bool uxr_run_session_until_timeout(
  *        The aforementioned actions will be performed in a loop until a the `timeout` is exceeded
  *        or the output reliable streams confirm the delivery of all their messages.
  * @param session   A uxrSession structure previously initialized.
- * @param timeout   The waiting time in milliseconds.
+ * @param timeout_ms   The waiting time in milliseconds.
  * @return  `true` if all output reliable streams confirm the delivery of their messages. `false` in other case.
  */
 UXRDLLAPI bool uxr_run_session_until_confirm_delivery(
         uxrSession* session,
-        int timeout);
+        int timeout_ms);
+
+/**
+ * @brief  Keeps communication between the Client and the Agent.
+ *         This function involves the following actions:
+ *          1. flushing one output streams sending the data through the transport,
+ *          2. listening messages from the Agent calling the associated callback (topic and status).
+ *        The aforementioned actions will be performed in a loop until a the `timeout` is exceeded
+ *        or the output reliable streams confirm the delivery of all their messages.
+ * @param session   A uxrSession structure previously initialized.
+ * @param stream    A uxrStreamId previously initialized.
+ * @param timeout_ms   The waiting time in milliseconds.
+ * @return  `true` if given output reliable stream confirms the delivery of his messages. `false` in other case.
+ */
+UXRDLLAPI bool uxr_run_session_until_confirm_delivery_one_stream(
+        uxrSession* session,
+        const uxrStreamId stream,
+        int timeout_ms);
 
 /**
  * @brief  Keeps communication between the Client and the Agent.

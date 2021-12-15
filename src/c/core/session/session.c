@@ -394,13 +394,52 @@ bool uxr_run_session_until_confirm_delivery(
 
     uxr_flash_output_streams(session);
 
-    bool timeout = false;
-    while (!uxr_output_streams_confirmed(&session->streams) && !timeout)
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
+    do
     {
-        timeout = !listen_message_reliably(session, timeout_ms);
+        listen_message_reliably(session, remaining_time);
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
+    while (remaining_time > 0 && !uxr_output_streams_confirmed(&session->streams));
 
     bool ret = uxr_output_streams_confirmed(&session->streams);
+
+    UXR_UNLOCK_SESSION(session);
+    return ret;
+}
+
+bool uxr_run_session_until_confirm_delivery_one_stream(
+        uxrSession* session,
+        const uxrStreamId stream_id,
+        int timeout_ms)
+{
+    if (stream_id.direction != UXR_OUTPUT_STREAM ||
+            stream_id.type != UXR_RELIABLE_STREAM ||
+            stream_id.index >= session->streams.output_reliable_size)
+    {
+        return false;
+    }
+
+    UXR_LOCK_SESSION(session);
+
+    const uxrOutputReliableStream* stream =
+            &session->streams.output_reliable[stream_id.index];
+
+    uxr_flash_one_output_stream(session, stream_id);
+
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
+    do
+    {
+        listen_message_reliably(session, remaining_time);
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
+    }
+    while (remaining_time > 0 && !uxr_output_one_stream_confirmed(stream));
+
+    bool ret = uxr_output_one_stream_confirmed(stream);
 
     UXR_UNLOCK_SESSION(session);
     return ret;
@@ -606,6 +645,49 @@ void uxr_flash_output_streams(
         }
 
         UXR_UNLOCK_STREAM_ID(session, id);
+    }
+}
+
+void uxr_flash_one_output_stream(
+        uxrSession* session,
+        const uxrStreamId stream_id)
+{
+    UXR_HANDLE_SHARED_MEMORY();
+
+    if (stream_id.direction == UXR_OUTPUT_STREAM)
+    {
+        if (stream_id.type == UXR_BEST_EFFORT_STREAM)
+        {
+            uxrOutputBestEffortStream* stream = &session->streams.output_best_effort[stream_id.index];
+
+            uint8_t* buffer; size_t length; uxrSeqNum seq_num;
+
+            UXR_LOCK_STREAM_ID(session, stream_id);
+
+            if (uxr_prepare_best_effort_buffer_to_send(stream, &buffer, &length, &seq_num))
+            {
+                uxr_stamp_session_header(&session->info, stream_id.raw, seq_num, buffer);
+                send_message(session, buffer, length);
+            }
+
+            UXR_UNLOCK_STREAM_ID(session, stream_id);
+        }
+        else if (stream_id.type == UXR_RELIABLE_STREAM)
+        {
+            uxrOutputReliableStream* stream = &session->streams.output_reliable[stream_id.index];
+
+            uint8_t* buffer; size_t length; uxrSeqNum seq_num;
+
+            UXR_LOCK_STREAM_ID(session, stream_id);
+
+            while (uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
+            {
+                uxr_stamp_session_header(&session->info, stream_id.raw, seq_num, buffer);
+                send_message(session, buffer, length);
+            }
+
+            UXR_UNLOCK_STREAM_ID(session, stream_id);
+        }
     }
 }
 

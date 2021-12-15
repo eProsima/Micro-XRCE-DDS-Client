@@ -69,6 +69,9 @@ uxrInputReliableStream* uxr_get_input_reliable_stream(
 bool uxr_output_streams_confirmed(
         const uxrStreamStorage* storage);
 
+bool uxr_output_one_stream_confirmed(
+        const uxrOutputReliableStream* storage);
+
 #ifdef __cplusplus
 }
 #endif // ifdef __cplusplus
