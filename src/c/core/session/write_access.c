@@ -295,7 +295,9 @@ uint16_t uxr_prepare_output_stream_fragmented(
     if (rv == UXR_INVALID_REQUEST_ID)
     {
         UXR_UNLOCK_STREAM_ID(session, stream_id);
-    } else {
+    }
+    else
+    {
         (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
 
         ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
