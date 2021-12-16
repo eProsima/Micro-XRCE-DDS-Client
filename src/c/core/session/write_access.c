@@ -220,17 +220,25 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
     if (stream_id.type == UXR_BEST_EFFORT_STREAM || stream == NULL)
     {
-        return rv;
+        UXR_UNLOCK_STREAM_ID(session, stream_id);
+        return UXR_INVALID_REQUEST_ID;
     }
 
     size_t remaining_blocks = get_available_free_slots(stream);
 
     if (0 == remaining_blocks)
     {
-        if (!flush_callback(session, flush_callback_args) ||
-                0 == (remaining_blocks = get_available_free_slots(stream)))
+        UXR_UNLOCK_STREAM_ID(session, stream_id);
+        if (!flush_callback(session, flush_callback_args))
         {
-            return rv;
+            return UXR_INVALID_REQUEST_ID;
+        }
+        UXR_LOCK_STREAM_ID(session, stream_id);
+        remaining_blocks = get_available_free_slots(stream);
+        if (0 == remaining_blocks)
+        {
+            UXR_UNLOCK_STREAM_ID(session, stream_id);
+            return UXR_INVALID_REQUEST_ID;
         }
     }
 
@@ -283,15 +291,21 @@ uint16_t uxr_prepare_output_stream_fragmented(
 
     WRITE_DATA_Payload_Data payload;
     rv = uxr_init_base_object_request(&session->info, entity_id, &payload.base);
-    (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
 
-    ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
+    if (rv == UXR_INVALID_REQUEST_ID)
+    {
+        UXR_UNLOCK_STREAM_ID(session, stream_id);
+    } else {
+        (void) uxr_serialize_WRITE_DATA_Payload_Data(ub, &payload);
 
-    session->continuous_args.stream_id = stream_id;
-    session->continuous_args.data_size = user_required_space;
-    session->continuous_args.flush_callback = flush_callback;
-    session->continuous_args.flush_callback_args = flush_callback_args;
-    ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, session);
+        ucdr_init_buffer(ub, ub->iterator, (size_t)(ub->final - ub->iterator));
+
+        session->continuous_args.stream_id = stream_id;
+        session->continuous_args.data_size = user_required_space;
+        session->continuous_args.flush_callback = flush_callback;
+        session->continuous_args.flush_callback_args = flush_callback_args;
+        ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer_fragmented, session);
+    }
 
     return rv;
 }
