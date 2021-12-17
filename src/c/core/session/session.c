@@ -397,13 +397,12 @@ bool uxr_run_session_until_confirm_delivery(
 
     uxr_flash_output_streams(session);
 
-    do
+    while (remaining_time > 0 && !uxr_output_streams_confirmed(&session->streams))
     {
         listen_message_reliably(session, remaining_time);
 
         remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
-    while (remaining_time > 0 && !uxr_output_streams_confirmed(&session->streams));
 
     bool ret = uxr_output_streams_confirmed(&session->streams);
 
