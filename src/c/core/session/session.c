@@ -397,7 +397,7 @@ bool uxr_run_session_until_confirm_delivery(
 
     uxr_flash_output_streams(session);
 
-    while (remaining_time > 0 && !uxr_output_streams_confirmed(&session->streams))
+    while (remaining_time >= 0 && !uxr_output_streams_confirmed(&session->streams))
     {
         listen_message_reliably(session, remaining_time);
 
