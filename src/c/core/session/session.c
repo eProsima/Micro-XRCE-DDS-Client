@@ -232,6 +232,12 @@ bool uxr_create_session_retries(
 
     bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&ub), (size_t) retries);
     bool created = received && UXR_STATUS_OK == session->info.last_requested_status;
+
+    if (created)
+    {
+        uxr_reset_stream_storage(&session->streams);
+    }
+
     return created;
 }
 
