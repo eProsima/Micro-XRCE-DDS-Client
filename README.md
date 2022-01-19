@@ -5,6 +5,8 @@
 [![Issues](https://img.shields.io/github/issues/eProsima/Micro-XRCE-DDS-Client.svg)](https://github.com/eProsima/Micro-XRCE-DDS-Client/issues)
 [![Forks](https://img.shields.io/github/forks/eProsima/Micro-XRCE-DDS-Client.svg)](https://github.com/eProsima/Micro-XRCE-DDS-Client/network/members)
 [![Stars](https://img.shields.io/github/stars/eProsima/Micro-XRCE-DDS-Client.svg)](https://github.com/eProsima/Micro-XRCE-DDS-Client/stargazers)
+![Read the Docs](https://img.shields.io/readthedocs/micro-xrce-dds?style=plastic)
+![Twitter Follow](https://img.shields.io/twitter/follow/eprosima?style=social)
 
 [![Docker Build Status](https://img.shields.io/docker/cloud/build/eprosima/micro-xrce-dds-client)](https://hub.docker.com/r/eprosima/micro-xrce-dds-client/)
 
