@@ -151,7 +151,6 @@ int main(
     bool connected = true;
     while (connected && count < max_topics)
     {
-        uint8_t read_data_status;
         connected = uxr_run_session_time(&session, 1000);
     }
 
