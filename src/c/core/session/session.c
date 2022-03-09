@@ -630,7 +630,7 @@ pong_status_t uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
     bool success = false;
-    pong_status_t ret = NO_PONG_STATUS;
+    bool ret = false;
     bool active_session = false;
 
     if (ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE)
@@ -647,7 +647,6 @@ pong_status_t uxr_acknack_pong(
 
             success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
             active_session = info_payload.base.result.implementation_status;
-            ret = active_session ? PONG_IN_SESSION_STATUS : PONG_NO_SESSION_STATUS;
 
             success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
 
@@ -670,7 +669,7 @@ pong_status_t uxr_acknack_pong(
         }
     }
 
-    return ret;
+    return ret ? (active_session ? PONG_IN_SESSION_STATUS : PONG_NO_SESSION_STATUS) : NO_PONG_STATUS;
 }
 
 bool uxr_run_session_until_pong(
