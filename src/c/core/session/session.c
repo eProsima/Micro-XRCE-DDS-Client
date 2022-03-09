@@ -125,7 +125,7 @@ static bool run_session_until_sync(
         uxrSession* session,
         int timeout);
 
-bool uxr_acknack_pong(
+pong_status_t uxr_acknack_pong(
         ucdrBuffer* buffer);
 
 //==================================================================
@@ -626,14 +626,14 @@ void uxr_flash_output_streams(
 //==================================================================
 //                             PRIVATE
 //==================================================================
-bool uxr_acknack_pong(
+pong_status_t uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
     bool success = false;
     bool ret = false;
-    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE;
+    bool active_session = false;
 
-    if (must_be_read)
+    if (ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE)
     {
         uint8_t id = 0;
         uint8_t flags = 0;
@@ -646,6 +646,8 @@ bool uxr_acknack_pong(
             INFO_Payload info_payload;
 
             success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
+            active_session = info_payload.base.result.implementation_status;
+
             success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
 
             if (info_payload.object_info.optional_config)
@@ -667,7 +669,7 @@ bool uxr_acknack_pong(
         }
     }
 
-    return ret;
+    return ret ? (active_session ? PONG_IN_SESSION_STATUS : PONG_NO_SESSION_STATUS) : NO_PONG_STATUS;
 }
 
 bool uxr_run_session_until_pong(
@@ -679,11 +681,11 @@ bool uxr_run_session_until_pong(
 
     uxr_flash_output_streams(session);
 
-    session->on_pong_flag = false;
+    session->on_pong_flag = NO_PONG_STATUS;
     do
     {
         listen_message_reliably(session, remaining_time);
-        if (session->on_pong_flag)
+        if (NO_PONG_STATUS != session->on_pong_flag)
         {
             break;
         }
@@ -691,7 +693,7 @@ bool uxr_run_session_until_pong(
     }
     while (remaining_time > 0);
 
-    bool ret = session->on_pong_flag;
+    bool ret = PONG_IN_SESSION_STATUS == session->on_pong_flag;
 
     return ret;
 }
@@ -875,9 +877,9 @@ void read_message(
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, ub, id, seq_num);
     }
-    else if (uxr_acknack_pong(ub))
+    else
     {
-        session->on_pong_flag = true;
+        session->on_pong_flag = uxr_acknack_pong(ub);
     }
 }
 
