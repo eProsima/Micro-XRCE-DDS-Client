@@ -231,7 +231,7 @@ TEST_F(OutputReliableStreamTest, WriteMultipleFragmentsAndCheckSubHeaders)
     }
 
     // Writing two fragmented message, 3 slots should be used
-    size_t first_message_size = 24; //  1.5 * MAX_FRAGMENT_SIZE;
+    size_t first_message_size = 24; // 1.5 * MAX_FRAGMENT_SIZE;
     bool available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);
     ASSERT_TRUE(available_to_write);
     available_to_write = uxr_prepare_reliable_buffer_to_write(&stream, first_message_size, &ub);

@@ -62,6 +62,9 @@ bool uxr_prepare_reliable_buffer_to_write(
     uint8_t* buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
     size_t buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
 
+    // Aligment required for inserting an XRCE subheader
+    buffer_size += ucdr_alignment(buffer_size, 4);
+
     /* Check if the message fit in the current buffer */
     if (buffer_size + length <= buffer_capacity)
     {
@@ -139,6 +142,7 @@ bool uxr_prepare_reliable_buffer_to_write(
                 fragment_size = available_block_size;
             }
 
+            //  Prepare last fragment
             ucdr_init_buffer_origin_offset(
                 &temp_ub,
                 uxr_get_reliable_buffer(&stream->base, seq_num),
@@ -150,6 +154,7 @@ bool uxr_prepare_reliable_buffer_to_write(
             uxr_set_reliable_buffer_size(&stream->base, seq_num,
                     stream->offset + (size_t)(SUBHEADER_SIZE) + last_fragment_size);
 
+            // Prepare user buffer
             ucdr_init_buffer(
                 ub,
                 buffer + buffer_size + SUBHEADER_SIZE,

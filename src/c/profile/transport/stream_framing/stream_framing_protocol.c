@@ -166,10 +166,10 @@ size_t uxr_write_framed_msg(
 
     /* Write payload. */
     uint8_t octet = 0;
-    uint16_t written_len = 0;
+    size_t written_len = 0;
     uint16_t crc = 0;
     bool cond = true;
-    while (written_len < len && cond)
+    while ((written_len < len) && cond)
     {
         octet = *(buf + written_len);
         if (uxr_add_next_octet(framing_io, octet))

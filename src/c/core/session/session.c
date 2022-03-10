@@ -125,7 +125,7 @@ static bool run_session_until_sync(
         uxrSession* session,
         int timeout);
 
-bool uxr_acknack_pong(
+pong_status_t uxr_acknack_pong(
         ucdrBuffer* buffer);
 
 //==================================================================
@@ -232,6 +232,12 @@ bool uxr_create_session_retries(
 
     bool received = wait_session_status(session, create_session_buffer, ucdr_buffer_length(&ub), (size_t) retries);
     bool created = received && UXR_STATUS_OK == session->info.last_requested_status;
+
+    if (created)
+    {
+        uxr_reset_stream_storage(&session->streams);
+    }
+
     return created;
 }
 
@@ -392,12 +398,16 @@ bool uxr_run_session_until_confirm_delivery(
 {
     UXR_LOCK_SESSION(session);
 
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
     uxr_flash_output_streams(session);
 
-    bool timeout = false;
-    while (!uxr_output_streams_confirmed(&session->streams) && !timeout)
+    while (remaining_time >= 0 && !uxr_output_streams_confirmed(&session->streams))
     {
-        timeout = !listen_message_reliably(session, timeout_ms);
+        listen_message_reliably(session, remaining_time);
+
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
     }
 
     bool ret = uxr_output_streams_confirmed(&session->streams);
@@ -478,18 +488,22 @@ bool uxr_run_session_until_one_status(
     session->status_list = status_list;
     session->request_status_list_size = list_size;
 
-    bool timeout = false;
     bool status_confirmed = false;
+
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout_ms;
+
     do
     {
-        timeout = !listen_message_reliably(session, timeout_ms);
+        listen_message_reliably(session, timeout_ms);
+        remaining_time = timeout_ms - (int)(uxr_millis() - start_timestamp);
         for (unsigned i = 0; i < list_size && !status_confirmed; ++i)
         {
             status_confirmed = status_list[i] != UXR_STATUS_NONE
                     || request_list[i] == UXR_INVALID_REQUEST_ID;         //CHECK: better give an error? an assert?
         }
     }
-    while (!timeout && !status_confirmed);
+    while (remaining_time > 0 && !status_confirmed);
 
     session->request_status_list_size = 0;
     UXR_UNLOCK_SESSION(session);
@@ -612,14 +626,14 @@ void uxr_flash_output_streams(
 //==================================================================
 //                             PRIVATE
 //==================================================================
-bool uxr_acknack_pong(
+pong_status_t uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
     bool success = false;
     bool ret = false;
-    bool must_be_read = ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE;
+    bool active_session = false;
 
-    if (must_be_read)
+    if (ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE)
     {
         uint8_t id = 0;
         uint8_t flags = 0;
@@ -632,6 +646,8 @@ bool uxr_acknack_pong(
             INFO_Payload info_payload;
 
             success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
+            active_session = info_payload.base.result.implementation_status;
+
             success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
 
             if (info_payload.object_info.optional_config)
@@ -653,7 +669,7 @@ bool uxr_acknack_pong(
         }
     }
 
-    return ret;
+    return ret ? (active_session ? PONG_IN_SESSION_STATUS : PONG_NO_SESSION_STATUS) : NO_PONG_STATUS;
 }
 
 bool uxr_run_session_until_pong(
@@ -665,11 +681,11 @@ bool uxr_run_session_until_pong(
 
     uxr_flash_output_streams(session);
 
-    session->on_pong_flag = false;
+    session->on_pong_flag = NO_PONG_STATUS;
     do
     {
         listen_message_reliably(session, remaining_time);
-        if (session->on_pong_flag)
+        if (NO_PONG_STATUS != session->on_pong_flag)
         {
             break;
         }
@@ -677,7 +693,7 @@ bool uxr_run_session_until_pong(
     }
     while (remaining_time > 0);
 
-    bool ret = session->on_pong_flag;
+    bool ret = PONG_IN_SESSION_STATUS == session->on_pong_flag;
 
     return ret;
 }
@@ -861,9 +877,9 @@ void read_message(
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, ub, id, seq_num);
     }
-    else if (uxr_acknack_pong(ub))
+    else
     {
-        session->on_pong_flag = true;
+        session->on_pong_flag = uxr_acknack_pong(ub);
     }
 }
 
@@ -1203,11 +1219,15 @@ bool run_session_until_sync(
         uxrSession* session,
         int timeout)
 {
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout;
     session->synchronized = false;
-    bool timeout_exceeded = false;
-    while (!timeout_exceeded && !session->synchronized)
+
+    do
     {
-        timeout_exceeded = !listen_message_reliably(session, timeout);
-    }
+        listen_message_reliably(session, remaining_time);
+        remaining_time = timeout - (int)(uxr_millis() - start_timestamp);
+    } while (remaining_time > 0 && !session->synchronized);
+
     return session->synchronized;
 }

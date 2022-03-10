@@ -13,7 +13,7 @@
 bool serialize_get_info_message(
         ucdrBuffer* ub);
 
-bool uxr_acknack_pong(
+pong_status_t uxr_acknack_pong(
         ucdrBuffer* buffer);
 
 bool listen_info_message(
@@ -153,7 +153,7 @@ bool listen_info_message(
         uint8_t stream_id_raw;
         uxrSeqNum seq_num;
         uxr_read_session_header(&session_info_fake, &ub, &stream_id_raw, &seq_num);
-        success &= uxr_acknack_pong(&ub);
+        success &= NO_PONG_STATUS != uxr_acknack_pong(&ub);
     }
 
     return success;
