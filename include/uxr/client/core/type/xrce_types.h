@@ -40,6 +40,7 @@ extern "C"
 #define UXR_SAMPLE_DELTA_SEQUENCE_MAX      8
 #define UXR_PACKED_SAMPLES_SEQUENCE_MAX    8
 #define UXR_TRANSPORT_LOCATOR_SEQUENCE_MAX 4
+// TODO(pablogs): This can be 2 if shared memory and hard liveliness are enabled
 #define UXR_PROPERTY_SEQUENCE_MAX          1
 
 typedef struct Time_t
