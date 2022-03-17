@@ -169,7 +169,9 @@ pong_status_t uxr_acknack_pong(
         ucdrBuffer* buffer)
 {
     bool success = false;
-    uxrSession fake_session = {0};
+    uxrSession fake_session = {
+        0
+    };
 
     if (ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE)
     {

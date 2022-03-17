@@ -24,13 +24,13 @@
 #define PROFILE_SHARED_MEMORY_ADD_SIZE 21
 #else
 #define PROFILE_SHARED_MEMORY_ADD_SIZE 0
-#endif
+#endif /* ifdef UCLIENT_PROFILE_SHARED_MEMORY */
 
 #ifdef UCLIENT_HARD_LIVELINESS_CHECK
 #define HARD_LIVELINESS_CHECK_ADD_SIZE 26
 #else
 #define HARD_LIVELINESS_CHECK_ADD_SIZE 0
-#endif
+#endif /* ifdef UCLIENT_HARD_LIVELINESS_CHECK */
 
 #define CREATE_SESSION_PROPERTIES_MAX_SIZE PROFILE_SHARED_MEMORY_ADD_SIZE + HARD_LIVELINESS_CHECK_ADD_SIZE
 
@@ -1070,8 +1070,12 @@ void read_submessage_get_info(
         uxrSession* session,
         ucdrBuffer* submessage)
 {
-    GET_INFO_Payload get_info_payload = {0};
-    INFO_Payload info_payload = {0};
+    GET_INFO_Payload get_info_payload = {
+        0
+    };
+    INFO_Payload info_payload = {
+        0
+    };
 
     uxr_deserialize_GET_INFO_Payload(submessage, &get_info_payload);
 
@@ -1114,10 +1118,10 @@ void read_submessage_info(
             success &= ucdr_deserialize_int16_t(submessage,
                             &info_payload.object_info.activity._.agent.availability);
             session->on_pong_flag = (success && (info_payload.object_info.activity._.agent.availability > 0)) ?
-                (active_session ?
+                    (active_session ?
                     PONG_IN_SESSION_STATUS :
                     PONG_NO_SESSION_STATUS) :
-                NO_PONG_STATUS;
+                    NO_PONG_STATUS;
         }
     }
 }
