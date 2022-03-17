@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <uxr/client/client.h>
-#include <uxr/client/util/ping.h>
 #include <ucdr/microcdr.h>
 
 #include <stdio.h> //printf
@@ -55,7 +54,6 @@ int main(
     char* port = argv[2];
     uint32_t max_topics = (args == 4) ? (uint32_t)atoi(argv[3]) : UINT32_MAX;
 
-
     // Transport
     uxrUDPTransport transport;
     if (!uxr_init_udp_transport(&transport, UXR_IPv4, ip, port))
@@ -64,12 +62,6 @@ int main(
         return 1;
     }
 
-
-    while(1){
-
-    while(!uxr_ping_agent(&transport.comm, 100)) {
-        printf("witing agent\n");
-    }
     // Session
     uxrSession session;
     uxr_init_session(&session, &transport.comm, 0xAAAABBBB);
@@ -142,22 +134,17 @@ int main(
     uint32_t count = 0;
     while (connected && count < max_topics)
     {
-        // ucdrBuffer ub;
-        // uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &ub, 4);
-        // ucdr_serialize_int32_t(&ub, count);
-        // printf("Send topic: %i\n", count);
-        // count++;
+        ucdrBuffer ub;
+        uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &ub, 4);
+        ucdr_serialize_int32_t(&ub, count);
+        printf("Send topic: %i\n", count);
+        count++;
 
         connected = uxr_run_session_time(&session, 1000);
-        // connected &= uxr_ping_agent_session(&session, 100, 1);
     }
-
-    printf("Disconnected.\n");
 
     // Delete resources
     uxr_delete_session(&session);
-    }
-
     uxr_close_udp_transport(&transport);
 
     return 0;

@@ -44,7 +44,7 @@ void uxr_buffer_create_session(
         ucdrBuffer* ub,
         uint16_t mtu)
 {
-    CREATE_CLIENT_Payload payload = {};
+    CREATE_CLIENT_Payload payload;
     payload.client_representation.xrce_cookie = DDS_XRCE_XRCE_COOKIE;
     payload.client_representation.xrce_version = DDS_XRCE_XRCE_VERSION;
     payload.client_representation.xrce_vendor_id = VENDOR_ID_EPROSIMA;
@@ -56,16 +56,10 @@ void uxr_buffer_create_session(
     payload.client_representation.optional_properties = false;
 #ifdef UCLIENT_PROFILE_SHARED_MEMORY
     payload.client_representation.optional_properties = true;
-    payload.client_representation.properties.data[payload.client_representation.properties.size].name = "uxr_sm";
-    payload.client_representation.properties.data[payload.client_representation.properties.size].value = "1";
-    payload.client_representation.properties.size++;
+    payload.client_representation.properties.size = 1;
+    payload.client_representation.properties.data[0].name = "uxr_sm";
+    payload.client_representation.properties.data[0].value = "1";
 #endif /* ifdef UCLIENT_PROFILE_SHARED_MEMORY */
-#ifdef UCLIENT_HARD_LIVELINESS_CHECK
-    payload.client_representation.optional_properties = true;
-    payload.client_representation.properties.data[payload.client_representation.properties.size].name = "uxr_hr_lv";
-    payload.client_representation.properties.data[payload.client_representation.properties.size].value = UXR_CONFIG__HARD_LIVELINESS_CHECK_TIMEOUT_STR;
-    payload.client_representation.properties.size++;
-#endif /* ifdef UCLIENT_HARD_LIVELINESS_CHECK */
     payload.client_representation.mtu = mtu;
 
     info->last_request_id = UXR_REQUEST_LOGIN;
