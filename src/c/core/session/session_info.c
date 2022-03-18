@@ -70,7 +70,7 @@ void uxr_buffer_create_session(
 
     const char* str = UXR_CONFIG_HARD_LIVELINESS_CHECK_TIMEOUT_STR;
 
-    if (UXR_CONFIG_HARD_LIVELINESS_CHECK_TIMEOUT > 999999)
+    if (strlen(str) > 6)
     {
         str = "999999";
     }
