@@ -21,12 +21,22 @@
 #include "../../profile/shared_memory/shared_memory_internal.h"
 
 #ifdef UCLIENT_PROFILE_SHARED_MEMORY
-#define CREATE_SESSION_PROPERTIES_MAX_SIZE 21
+#define PROFILE_SHARED_MEMORY_ADD_SIZE 21
+#else
+#define PROFILE_SHARED_MEMORY_ADD_SIZE 0
+#endif /* ifdef UCLIENT_PROFILE_SHARED_MEMORY */
+
+#ifdef UCLIENT_HARD_LIVELINESS_CHECK
+#define HARD_LIVELINESS_CHECK_ADD_SIZE 26
+#else
+#define HARD_LIVELINESS_CHECK_ADD_SIZE 0
+#endif /* ifdef UCLIENT_HARD_LIVELINESS_CHECK */
+
+#define CREATE_SESSION_PROPERTIES_MAX_SIZE PROFILE_SHARED_MEMORY_ADD_SIZE + HARD_LIVELINESS_CHECK_ADD_SIZE
+
+
 #define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE + \
     CREATE_SESSION_PROPERTIES_MAX_SIZE)
-#else
-#define CREATE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + CREATE_CLIENT_PAYLOAD_SIZE)
-#endif /* ifdef UCLIENT_PROFILE_SHARED_MEMORY */
 
 #define DELETE_SESSION_MAX_MSG_SIZE (MAX_HEADER_SIZE + SUBHEADER_SIZE + DELETE_CLIENT_PAYLOAD_SIZE)
 #define HEARTBEAT_MAX_MSG_SIZE      (MAX_HEADER_SIZE + SUBHEADER_SIZE + HEARTBEAT_PAYLOAD_SIZE)
@@ -102,6 +112,12 @@ static void read_submessage_acknack(
 static void read_submessage_timestamp_reply(
         uxrSession* session,
         ucdrBuffer* submessage);
+static void read_submessage_get_info(
+        uxrSession* session,
+        ucdrBuffer* submessage);
+void read_submessage_info(
+        uxrSession* session,
+        ucdrBuffer* submessage);
 #ifdef PERFORMANCE_TESTING
 static void read_submessage_performance(
         uxrSession* session,
@@ -124,9 +140,6 @@ static FragmentationInfo on_get_fragmentation_info(
 static bool run_session_until_sync(
         uxrSession* session,
         int timeout);
-
-pong_status_t uxr_acknack_pong(
-        ucdrBuffer* buffer);
 
 //==================================================================
 //                             PUBLIC
@@ -626,52 +639,6 @@ void uxr_flash_output_streams(
 //==================================================================
 //                             PRIVATE
 //==================================================================
-pong_status_t uxr_acknack_pong(
-        ucdrBuffer* buffer)
-{
-    bool success = false;
-    bool ret = false;
-    bool active_session = false;
-
-    if (ucdr_buffer_remaining(buffer) > SUBHEADER_SIZE)
-    {
-        uint8_t id = 0;
-        uint8_t flags = 0;
-        uint16_t length = 0;
-        uxr_deserialize_submessage_header(buffer, &id, &flags, &length);
-        success = ucdr_buffer_remaining(buffer) >= length;
-
-        if (success && id == SUBMESSAGE_ID_INFO)
-        {
-            INFO_Payload info_payload;
-
-            success &= uxr_deserialize_BaseObjectReply(buffer, &info_payload.base);
-            active_session = info_payload.base.result.implementation_status;
-
-            success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_config);
-
-            if (info_payload.object_info.optional_config)
-            {
-                success &= uxr_deserialize_ObjectVariant(buffer, &info_payload.object_info.config);
-            }
-
-            success &= ucdr_deserialize_bool(buffer, &info_payload.object_info.optional_activity);
-            if (info_payload.object_info.optional_activity)
-            {
-                success &= ucdr_deserialize_uint8_t(buffer, &info_payload.object_info.activity.kind);
-                if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
-                {
-                    success &= ucdr_deserialize_int16_t(buffer,
-                                    &info_payload.object_info.activity._.agent.availability);
-                    ret = success && (info_payload.object_info.activity._.agent.availability > 0);
-                }
-            }
-        }
-    }
-
-    return ret ? (active_session ? PONG_IN_SESSION_STATUS : PONG_NO_SESSION_STATUS) : NO_PONG_STATUS;
-}
-
 bool uxr_run_session_until_pong(
         uxrSession* session,
         int timeout_ms)
@@ -877,10 +844,6 @@ void read_message(
         uxrStreamId id = uxr_stream_id_from_raw(stream_id_raw, UXR_INPUT_STREAM);
         read_stream(session, ub, id, seq_num);
     }
-    else
-    {
-        session->on_pong_flag = uxr_acknack_pong(ub);
-    }
 }
 
 void read_stream(
@@ -989,6 +952,14 @@ void read_submessage(
             read_submessage_timestamp_reply(session, submessage);
             break;
 
+        case SUBMESSAGE_ID_GET_INFO:
+            read_submessage_get_info(session, submessage);
+            break;
+
+        case SUBMESSAGE_ID_INFO:
+            read_submessage_info(session, submessage);
+            break;
+
 #ifdef PERFORMANCE_TESTING
         case SUBMESSAGE_ID_PERFORMANCE:
             read_submessage_performance(session, submessage, length);
@@ -1093,6 +1064,66 @@ void read_submessage_timestamp_reply(
     uxr_deserialize_TIMESTAMP_REPLY_Payload(submessage, &timestamp_reply);
 
     process_timestamp_reply(session, &timestamp_reply);
+}
+
+void read_submessage_get_info(
+        uxrSession* session,
+        ucdrBuffer* submessage)
+{
+    GET_INFO_Payload get_info_payload = {
+        0
+    };
+    INFO_Payload info_payload = {
+        0
+    };
+
+    uxr_deserialize_GET_INFO_Payload(submessage, &get_info_payload);
+
+    info_payload.base.related_request.request_id = get_info_payload.base.request_id;
+
+    uint8_t buffer[12];
+    ucdrBuffer ub;
+    ucdr_init_buffer_origin_offset(&ub, buffer, sizeof(buffer), 0u, uxr_session_header_offset(&session->info));
+
+    uxr_serialize_INFO_Payload(&ub, &info_payload);
+    uxr_stamp_session_header(&session->info, 0, 0, ub.init);
+
+    send_message(session, buffer, ucdr_buffer_length(&ub));
+}
+
+void read_submessage_info(
+        uxrSession* session,
+        ucdrBuffer* submessage)
+{
+    INFO_Payload info_payload;
+
+    bool success = true;
+
+    success &= uxr_deserialize_BaseObjectReply(submessage, &info_payload.base);
+    bool active_session = info_payload.base.result.implementation_status;
+
+    success &= ucdr_deserialize_bool(submessage, &info_payload.object_info.optional_config);
+
+    if (info_payload.object_info.optional_config)
+    {
+        success &= uxr_deserialize_ObjectVariant(submessage, &info_payload.object_info.config);
+    }
+
+    success &= ucdr_deserialize_bool(submessage, &info_payload.object_info.optional_activity);
+    if (info_payload.object_info.optional_activity)
+    {
+        success &= ucdr_deserialize_uint8_t(submessage, &info_payload.object_info.activity.kind);
+        if (success && DDS_XRCE_OBJK_AGENT == info_payload.object_info.activity.kind)
+        {
+            success &= ucdr_deserialize_int16_t(submessage,
+                            &info_payload.object_info.activity._.agent.availability);
+            session->on_pong_flag = (success && (info_payload.object_info.activity._.agent.availability > 0)) ?
+                    (active_session ?
+                    PONG_IN_SESSION_STATUS :
+                    PONG_NO_SESSION_STATUS) :
+                    NO_PONG_STATUS;
+        }
+    }
 }
 
 #ifdef PERFORMANCE_TESTING
