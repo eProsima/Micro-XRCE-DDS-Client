@@ -120,15 +120,11 @@ function(set_common_compile_options target)
         target_compile_options(${target} PRIVATE -Wall
             -Wextra
             -Wshadow
-            $<$<COMPILE_LANGUAGE:CXX>:-Wnon-virtual-dtor>
             -pedantic
             -Wcast-align
             -Wunused
-            $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
             -Wconversion
             $<$<CXX_COMPILER_ID:GNU>:-Wlogical-op>
-            $<$<AND:$<CXX_COMPILER_ID:GNU>,$<COMPILE_LANGUAGE:CXX>>:-Wuseless-cast>
-            $<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast>
             $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,6.0.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,6.0.0>>>>:-Wnull-dereference>
             $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,7.0.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,7.0.0>>>>:-Wduplicated-branches>
             $<$<OR:$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<CXX_COMPILER_VERSION>,6.0.0>>>,$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<VERSION_LESS:$<C_COMPILER_VERSION>,6.0.0>>>>:-Wduplicated-cond>
