@@ -24,6 +24,7 @@ bool uxr_init_tcp_platform(
         const char* port)
 {
     bool rv = false;
+    int errsv = errno;
 
     switch (ip_protocol)
     {
@@ -60,7 +61,13 @@ bool uxr_init_tcp_platform(
         {
             for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
             {
-                if (0 == connect(platform->poll_fd.fd, ptr->ai_addr, ptr->ai_addrlen))
+                int connect_rv;
+                do
+                {
+                    errno = errsv;
+                    connect_rv = connect(platform->poll_fd.fd, ptr->ai_addr, ptr->ai_addrlen);
+                } while (-1 == connect_rv && EINTR == errno);
+                if (0 == connect_rv)
                 {
                     platform->poll_fd.events = POLLIN;
                     rv = true;
@@ -86,7 +93,13 @@ size_t uxr_write_tcp_data_platform(
         uint8_t* errcode)
 {
     size_t rv = 0;
-    ssize_t bytes_sent = send(platform->poll_fd.fd, (void*)buf, len, 0);
+    int errsv = errno;
+    ssize_t bytes_sent;
+    do
+    {
+        errno = errsv;
+        bytes_sent = send(platform->poll_fd.fd, (void*)buf, len, 0);
+    } while (-1 == bytes_sent && EINTR == errno);
     if (-1 != bytes_sent)
     {
         rv = (size_t)bytes_sent;
@@ -107,10 +120,21 @@ size_t uxr_read_tcp_data_platform(
         uint8_t* errcode)
 {
     size_t rv = 0;
-    int poll_rv = poll(&platform->poll_fd, 1, timeout);
+    int errsv = errno;
+    int poll_rv;
+    do
+    {
+        errno = errsv;
+        poll_rv = poll(&platform->poll_fd, 1, timeout);
+    } while (-1 == poll_rv && EINTR == errno);
     if (0 < poll_rv)
     {
-        ssize_t bytes_received = recv(platform->poll_fd.fd, (void*)buf, len, 0);
+        ssize_t bytes_received;
+        do
+        {
+            errno = errsv;
+            bytes_received = recv(platform->poll_fd.fd, (void*)buf, len, 0);
+        } while (-1 == bytes_received && EINTR == errno);
         if (-1 != bytes_received)
         {
             rv = (size_t)bytes_received;
