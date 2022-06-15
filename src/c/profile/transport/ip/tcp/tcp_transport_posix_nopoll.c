@@ -8,9 +8,19 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
+
+#ifdef UCLIENT_PLATFORM_LINUX
+static void sigpipe_handler(
+        int fd)
+{
+    (void)fd;
+}
+
+#endif /* ifdef UCLIENT_PLATFORM_LINUX */
 
 bool uxr_init_tcp_platform(
-        uxrTCPPlatform* platform,
+        struct uxrTCPPlatform* platform,
         uxrIpProtocol ip_protocol,
         const char* ip,
         const char* port)
@@ -29,6 +39,9 @@ bool uxr_init_tcp_platform(
 
     if (-1 != platform->fd)
     {
+#ifdef UCLIENT_PLATFORM_LINUX
+        signal(SIGPIPE, sigpipe_handler);
+#endif /* ifdef UCLIENT_PLATFORM_LINUX */
         struct addrinfo hints;
         struct addrinfo* result;
         struct addrinfo* ptr;
@@ -43,7 +56,7 @@ bool uxr_init_tcp_platform(
                 hints.ai_family = AF_INET6;
                 break;
         }
-        hints.ai_socktype = SOCK_DGRAM;
+        hints.ai_socktype = SOCK_STREAM;
 
         if (0 == getaddrinfo(ip, port, &hints, &result))
         {
@@ -62,13 +75,13 @@ bool uxr_init_tcp_platform(
 }
 
 bool uxr_close_tcp_platform(
-        uxrTCPPlatform* platform)
+        struct uxrTCPPlatform* platform)
 {
     return (-1 == platform->fd) ? true : (0 == close(platform->fd));
 }
 
 size_t uxr_write_tcp_data_platform(
-        uxrTCPPlatform* platform,
+        struct uxrTCPPlatform* platform,
         const uint8_t* buf,
         size_t len,
         uint8_t* errcode)
@@ -88,7 +101,7 @@ size_t uxr_write_tcp_data_platform(
 }
 
 size_t uxr_read_tcp_data_platform(
-        uxrTCPPlatform* platform,
+        struct uxrTCPPlatform* platform,
         uint8_t* buf,
         size_t len,
         int timeout,
