@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_posix_nopoll.h>
+#include <uxr/client/util/time.h>
 #include "udp_transport_internal.h"
 
 #include <sys/types.h>
@@ -110,23 +111,29 @@ size_t uxr_read_udp_data_platform(
     size_t rv = 0;
     int errsv = errno;
 
-    timeout = (timeout <= 0) ? 1 : timeout;
-
-    struct timeval tv;
-    tv.tv_sec = timeout / 1000;
-    tv.tv_usec = (timeout % 1000) * 1000;
-
-    if (0 != setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)))
-    {
-        *errcode = 1;
-        return 0;
-    }
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout;
 
     ssize_t bytes_received;
     do
     {
         errno = errsv;
+
+        remaining_time = (remaining_time <= 0) ? 1 : remaining_time;
+
+        struct timeval tv;
+        tv.tv_sec = remaining_time / 1000;
+        tv.tv_usec = (remaining_time % 1000) * 1000;
+
+        if (0 != setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)))
+        {
+            *errcode = 1;
+            return 0;
+        }
+
         bytes_received = recv(platform->fd, (void*)buf, len, 0);
+
+        remaining_time = timeout - (int)(uxr_millis() - start_timestamp);
     } while (-1 == bytes_received && EINTR == errno);
     if (-1 != bytes_received)
     {

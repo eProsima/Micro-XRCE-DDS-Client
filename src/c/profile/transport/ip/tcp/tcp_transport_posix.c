@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_posix.h>
+#include <uxr/client/util/time.h>
 #include "tcp_transport_internal.h"
 
 #include <arpa/inet.h>
@@ -121,11 +122,15 @@ size_t uxr_read_tcp_data_platform(
 {
     size_t rv = 0;
     int errsv = errno;
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout;
     int poll_rv;
     do
     {
         errno = errsv;
-        poll_rv = poll(&platform->poll_fd, 1, timeout);
+        remaining_time = (remaining_time <= 0) ? 0 : remaining_time;
+        poll_rv = poll(&platform->poll_fd, 1, remaining_time);
+        remaining_time = timeout - (int)(uxr_millis() - start_timestamp);
     } while (-1 == poll_rv && EINTR == errno);
     if (0 < poll_rv)
     {
