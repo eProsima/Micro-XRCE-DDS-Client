@@ -755,7 +755,7 @@ bool wait_session_status(
         do
         {
             listen_message(session, remaining_time);
-            remaining_time -= (int)(uxr_millis() - start_timestamp);
+            remaining_time = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL - (int)(uxr_millis() - start_timestamp);
         } while (remaining_time > 0 && session->info.last_requested_status == UXR_STATUS_NONE);
     }
 
