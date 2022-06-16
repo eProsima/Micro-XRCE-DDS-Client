@@ -366,10 +366,10 @@ TEST_F(SessionTest, WaitSessionStatusBad)
     EXPECT_FALSE(found);
     EXPECT_GE(size_t(SessionTest::listening_counter), attempts);
 
-    // Check elapsed time with 10 ms tolerance
+    // Check elapsed time with 100 ms tolerance
     int64_t final_time = uxr_millis() - start_timestamp;
     int64_t expected_time = (int64_t) (UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL * attempts);
-    EXPECT_NEAR((double) final_time, (double) expected_time, 10);
+    EXPECT_NEAR((double) final_time, (double) expected_time, 100);
 }
 
 TEST_F(SessionTest, SendMessageOk)
