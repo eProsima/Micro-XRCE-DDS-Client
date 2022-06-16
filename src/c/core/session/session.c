@@ -748,7 +748,15 @@ bool wait_session_status(
     for (size_t i = 0; i < attempts && session->info.last_requested_status == UXR_STATUS_NONE; ++i)
     {
         send_message(session, buffer, length);
-        listen_message(session, UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL);
+
+        int64_t start_timestamp = uxr_millis();
+        int remaining_time = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
+
+        do
+        {
+            listen_message(session, remaining_time);
+            remaining_time = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL - (int)(uxr_millis() - start_timestamp);
+        } while (remaining_time > 0 && session->info.last_requested_status == UXR_STATUS_NONE);
     }
 
     return session->info.last_requested_status != UXR_STATUS_NONE;
