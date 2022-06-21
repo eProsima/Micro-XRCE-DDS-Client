@@ -148,6 +148,11 @@ size_t uxr_read_tcp_data_platform(
 
         remaining_time = timeout - (int)(uxr_millis() - start_timestamp);
     } while (-1 == bytes_received && EINTR == errno);
+    if (-1 == bytes_received && (EAGAIN == errno || EWOULDBLOCK == errno))
+    {
+        errno = errsv;
+        bytes_received = 0;
+    }
     if (-1 != bytes_received)
     {
         rv = (size_t)bytes_received;
