@@ -361,9 +361,15 @@ TEST_F(SessionTest, WaitSessionStatusBad)
     uint8_t buffer[MTU];
     size_t length = 0;
     size_t attempts = 10;
+    int64_t start_timestamp = uxr_millis();
     bool found = wait_session_status(&session, buffer, length, attempts);
     EXPECT_FALSE(found);
-    EXPECT_EQ(attempts, size_t(SessionTest::listening_counter));
+    EXPECT_GE(size_t(SessionTest::listening_counter), attempts);
+
+    // Check elapsed time with 100 ms tolerance
+    int64_t final_time = uxr_millis() - start_timestamp;
+    int64_t expected_time = (int64_t) (UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL * attempts);
+    EXPECT_NEAR((double) final_time, (double) expected_time, 100);
 }
 
 TEST_F(SessionTest, SendMessageOk)
