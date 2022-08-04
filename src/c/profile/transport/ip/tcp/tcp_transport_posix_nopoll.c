@@ -104,6 +104,7 @@ size_t uxr_read_tcp_data_platform(
 
     if (0 != setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)))
     {
+        *errcode = 1;
         return 0;
     }
 
