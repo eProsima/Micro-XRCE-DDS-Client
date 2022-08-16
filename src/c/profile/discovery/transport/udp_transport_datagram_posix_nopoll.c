@@ -67,7 +67,10 @@ bool uxr_udp_recv_datagram(
     tv.tv_sec = timeout / 1000;
     tv.tv_usec = (timeout % 1000) * 1000;
 
-    setsockopt(transport->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    if (0 != setsockopt(transport->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)))
+    {
+        return false;
+    }
 
     ssize_t bytes_received = recv(transport->fd, (void*)transport->buffer, sizeof(transport->buffer), 0);
     if (-1 != bytes_received)
