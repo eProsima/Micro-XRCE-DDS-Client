@@ -102,7 +102,11 @@ size_t uxr_read_tcp_data_platform(
     tv.tv_sec = timeout / 1000;
     tv.tv_usec = (timeout % 1000) * 1000;
 
-    setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    if (0 != setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)))
+    {
+        *errcode = 1;
+        return 0;
+    }
 
     ssize_t bytes_received = recv(platform->fd, (void*)buf, len, 0);
     if (-1 != bytes_received)
