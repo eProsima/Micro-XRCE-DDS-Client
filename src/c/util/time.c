@@ -1,6 +1,15 @@
 #include <uxr/client/util/time.h>
 #include <uxr/client/config.h>
+
+#if defined(__ZEPHYR__)
+#if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3,1,0)
+#include <zephyr/posix/time.h>  //  Points to Zephyr toolchain posix time implementation
+#else
+#include <posix/time.h>
+#endif
+#else
 #include <time.h>
+#endif  //  defined(__ZEPHYR__)
 
 #ifdef WIN32
 #include <Windows.h>
@@ -51,10 +60,6 @@ int64_t uxr_nanos(
 #endif // ( configUSE_16_BIT_TICKS == 1 )
     total_tick |= (int64_t) tick_count.xTimeOnEntering;
     return (( total_tick / (int64_t) portTICK_PERIOD_MS ) * 1000000 );
-#elif defined(UCLIENT_PLATFORM_ZEPHYR)
-    struct timespec ts;
-    z_impl_clock_gettime(CLOCK_REALTIME, &ts);
-    return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
 #else
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
