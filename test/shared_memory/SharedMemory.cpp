@@ -999,7 +999,13 @@ TEST_P(SharedMemoryTest, SharedMemoryReqRepFragmentation)
 }
 #endif // ifdef UCLIENT_PROFILE_MULTITHREAD
 
-INSTANTIATE_TEST_CASE_P(
+#ifdef INSTANTIATE_TEST_SUITE_P
+#define GTEST_INSTANTIATE_TEST_MACRO(x, y, z, w) INSTANTIATE_TEST_SUITE_P(x, y, z, w)
+#else
+#define GTEST_INSTANTIATE_TEST_MACRO(x, y, z, w) INSTANTIATE_TEST_CASE_P(x, y, z, w)
+#endif // ifdef INSTANTIATE_TEST_SUITE_P
+
+GTEST_INSTANTIATE_TEST_MACRO(
     SharedMemoryTest,
     SharedMemoryTest,
     ::testing::Values(XRCECreationMode::XRCE_XML_CREATION, XRCECreationMode::XRCE_BIN_CREATION),
