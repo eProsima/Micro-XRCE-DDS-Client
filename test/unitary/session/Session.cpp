@@ -32,6 +32,7 @@ extern "C"
 #include <string>
 #include <array>
 #include <vector>
+#include <algorithm>
 
 #define MTU                   64
 #define HISTORY               4

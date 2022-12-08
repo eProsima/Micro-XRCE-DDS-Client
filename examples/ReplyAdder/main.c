@@ -146,6 +146,7 @@ int main(
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
     uint16_t read_data_req =
             uxr_buffer_request_data(&session, reliable_out, replier_id, reliable_in, &delivery_control);
+    (void) read_data_req;
 
     // Read request
     bool connected = true;
