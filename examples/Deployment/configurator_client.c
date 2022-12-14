@@ -55,7 +55,7 @@ int main(
         char** argv)
 {
     // Check args
-    uint32_t key;
+    uint32_t key = 0;
     int create_delete = 0;
     int pub_sub = 0;
     uint16_t ids = 0;

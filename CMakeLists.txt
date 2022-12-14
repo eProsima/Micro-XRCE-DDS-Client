@@ -15,7 +15,7 @@
 ################################################################################
 ## CMake build rules for Micro XRCE-DDS Client
 ################################################################################
-cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16)
 
 ###############################################################################
 # Build options
@@ -79,8 +79,8 @@ option(UCLIENT_TWEAK_XRCE_WRITE_LIMIT "This feature uses a tweak to allow XRCE W
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 2.0.0)
-set(_microcdr_tag v2.0.0)
+set(_microcdr_version 2.0.1)
+set(_microcdr_tag v2.0.1)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
@@ -90,7 +90,7 @@ list(APPEND _deps "microcdr\;${_microcdr_version}")
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(NOT UCLIENT_SUPERBUILD)
-    project(microxrcedds_client VERSION "2.2.1" LANGUAGES C)
+    project(microxrcedds_client VERSION "2.3.0" LANGUAGES C)
 else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
