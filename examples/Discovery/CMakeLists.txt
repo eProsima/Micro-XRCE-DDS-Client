@@ -36,7 +36,7 @@ else()
         target_compile_options(${PROJECT_NAME} PRIVATE /wd4996)
     endif()
 
-    target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
+    target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-sections,--no-export-dynamic>)
 
     if(UCLIENT_INSTALL_EXAMPLES)
         install(
