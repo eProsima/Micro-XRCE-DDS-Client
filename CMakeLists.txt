@@ -76,6 +76,8 @@ set(UCLIENT_HARD_LIVELINESS_CHECK_TIMEOUT 10000 CACHE STRING "Set the hard livel
 # Off-standard features and tweaks
 option(UCLIENT_TWEAK_XRCE_WRITE_LIMIT "This feature uses a tweak to allow XRCE WRITE DATA submessages grater than 64 kB." ON)
 
+set(UCLIENT_C_STANDARD 99 CACHE STRING "Version of the C language used to build the library")
+
 ###############################################################################
 # Dependencies
 ###############################################################################
@@ -319,7 +321,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     SOVERSION
         ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     C_STANDARD
-        99
+        ${UCLIENT_C_STANDARD}
     C_STANDARD_REQUIRED
         YES
     POSITION_INDEPENDENT_CODE
