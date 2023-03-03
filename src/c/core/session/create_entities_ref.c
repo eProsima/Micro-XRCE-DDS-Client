@@ -20,7 +20,7 @@ uint16_t uxr_buffer_create_participant_ref(
         uxrSession* session,
         uxrStreamId stream_id,
         uxrObjectId object_id,
-        int16_t domain_id,
+        uint16_t domain_id,
         const char* ref,
         uint8_t mode)
 {
@@ -28,7 +28,7 @@ uint16_t uxr_buffer_create_participant_ref(
 
     CREATE_Payload payload;
     payload.object_representation.kind = DDS_XRCE_OBJK_PARTICIPANT;
-    payload.object_representation._.participant.domain_id = domain_id;
+    payload.object_representation._.participant.domain_id = (int16_t)domain_id;
 
     return create_entity_ref(session, stream_id, object_id, ref, mode, &payload);
 }
