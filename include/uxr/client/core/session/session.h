@@ -303,6 +303,9 @@ UXRDLLAPI void uxr_set_performance_callback(
 /**
  * @brief Creates a new session with the Agent.
  *        This function logs in a session, enabling any other XRCE communication with the Agent.
+ *        It blocks  for a time proportional to 
+ *        (UXR_CONFIG_MAX_SESSION_CONNECTION_ATTEMPTS * UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL)
+ *        until a response from the Agent is received.
  * @param session   A uxrSesssion structure previously initialized.
  * @return  true in case of successful session establishment, and false in other case.
  */
