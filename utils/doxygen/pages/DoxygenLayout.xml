@@ -18,8 +18,6 @@
       <tab type="filelist" visible="no" title="" intro=""/>
       <tab type="globals" visible="no" title="Functions" intro=""/>
     </tab>
-    <tab type="dirs" visible="no" title="" intro=""/>
-    <tab type="examples" visible="no" title="" intro=""/>  
   </navindex>
 
    <!-- Layout definition for a group page -->
