@@ -76,6 +76,8 @@ set(UCLIENT_HARD_LIVELINESS_CHECK_TIMEOUT 10000 CACHE STRING "Set the hard livel
 # Off-standard features and tweaks
 option(UCLIENT_TWEAK_XRCE_WRITE_LIMIT "This feature uses a tweak to allow XRCE WRITE DATA submessages grater than 64 kB." ON)
 
+set(UCLIENT_C_STANDARD 99 CACHE STRING "Version of the C language used to build the library")
+
 ###############################################################################
 # Dependencies
 ###############################################################################
@@ -90,7 +92,7 @@ list(APPEND _deps "microcdr\;${_microcdr_version}")
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(NOT UCLIENT_SUPERBUILD)
-    project(microxrcedds_client VERSION "2.3.0" LANGUAGES C)
+    project(microxrcedds_client VERSION "2.4.0" LANGUAGES C)
 else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
@@ -144,6 +146,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(UCLIENT_PLATFORM_LINUX ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(UCLIENT_PLATFORM_WINDOWS ON)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(UCLIENT_PLATFORM_MACOS ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     if(PLATFORM_NAME STREQUAL "nuttx")
         set(UCLIENT_PLATFORM_NUTTX ON)
@@ -158,7 +162,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
     endif()
 endif()
 
-if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_NUTTX OR UCLIENT_PLATFORM_ZEPHYR)
+if(UCLIENT_PLATFORM_LINUX OR UCLIENT_PLATFORM_MACOS OR UCLIENT_PLATFORM_NUTTX OR UCLIENT_PLATFORM_ZEPHYR)
     set(UCLIENT_PLATFORM_POSIX ON)
 endif()
 
@@ -319,7 +323,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     SOVERSION
         ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     C_STANDARD
-        99
+        ${UCLIENT_C_STANDARD}
     C_STANDARD_REQUIRED
         YES
     POSITION_INDEPENDENT_CODE
