@@ -28,7 +28,9 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_freertos_plus_tcp.h>
 #elif defined(UCLIENT_PLATFORM_RTEMS_BSD_NET)
 #include <uxr/client/profile/transport/ip/udp/udp_transport_rtems_bsd_net.h>
-#endif // if defined(UCLIENT_EXTERNAL_UDP)
+#elif defined(UCLIENT_PLATFORM_EXTERNAL)
+#include <uxr/client/profile/transport/ip/udp/udp_transport_external.h>
+#endif
 #include <uxr/client/profile/transport/ip/udp/udp_transport.h>
 #endif //UCLIENT_PROFILE_UDP
 
@@ -41,7 +43,9 @@
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_windows.h>
 #elif defined(UCLIENT_PLATFORM_RTEMS_BSD_NET)
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport_rtems_bsd_net.h>
-#endif // if defined(UCLIENT_EXTERNAL_TCP)
+#elif defined(UCLIENT_PLATFORM_EXTERNAL)
+#include <uxr/client/profile/transport/ip/tcp/tcp_transport_external.h>
+#endif
 #include <uxr/client/profile/transport/ip/tcp/tcp_transport.h>
 #endif //UCLIENT_PROFILE_TCP
 
@@ -50,14 +54,18 @@
 #include <uxr/client/profile/transport/serial/serial_transport_posix.h>
 #elif defined(UCLIENT_PLATFORM_RTEMS_BSD_NET)
 #include <uxr/client/profile/transport/serial/serial_transport_rtems_bsd_net.h>
-#endif // if defined(UCLIENT_EXTERNAL_SERIAL)
+#elif defined(UCLIENT_PLATFORM_EXTERNAL)
+#include <uxr/client/profile/transport/serial/serial_transport_external.h>
+#endif
 #include <uxr/client/profile/transport/serial/serial_transport.h>
 #endif //UCLIENT_PROFILE_SERIAL
 
 #ifdef UCLIENT_PROFILE_CAN
 #if defined(UCLIENT_PLATFORM_POSIX)
 #include <uxr/client/profile/transport/can/can_transport_posix.h>
-#endif // if defined(UCLIENT_EXTERNAL_CAN)
+#elif defined(UCLIENT_PLATFORM_EXTERNAL)
+#include <uxr/client/profile/transport/can/can_transport_external.h>
+#endif
 #include <uxr/client/profile/transport/can/can_transport.h>
 #endif //UCLIENT_PROFILE_CAN
 
