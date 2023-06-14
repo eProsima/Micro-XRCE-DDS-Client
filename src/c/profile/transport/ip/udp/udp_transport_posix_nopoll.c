@@ -55,8 +55,8 @@ bool uxr_init_udp_platform(
                     break;
                 }
             }
+            freeaddrinfo(result);
         }
-        freeaddrinfo(result);
     }
     return rv;
 }
