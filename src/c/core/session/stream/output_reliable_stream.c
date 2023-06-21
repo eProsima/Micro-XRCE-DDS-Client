@@ -98,7 +98,7 @@ bool uxr_prepare_reliable_buffer_to_write(
         }
     }
     /* Check if the message fit in a fragmented message */
-    else if (length < available_block_size * remaining_blocks)
+    else if (length <= available_block_size * remaining_blocks)
     {
         /* Check if the current buffer free space is too small */
         if (buffer_size + (size_t)SUBHEADER_SIZE >= buffer_capacity)
