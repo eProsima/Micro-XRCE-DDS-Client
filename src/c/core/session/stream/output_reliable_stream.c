@@ -62,6 +62,9 @@ bool uxr_prepare_reliable_buffer_to_write(
     uint8_t* buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
     size_t buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
 
+    uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
+    size_t remaining_blocks = get_available_free_slots(stream);
+
     // Aligment required for inserting an XRCE subheader
     buffer_size += ucdr_alignment(buffer_size, 4);
 
@@ -95,7 +98,7 @@ bool uxr_prepare_reliable_buffer_to_write(
         }
     }
     /* Check if the message fit in a fragmented message */
-    else
+    else if (length <= available_block_size * remaining_blocks)
     {
         /* Check if the current buffer free space is too small */
         if (buffer_size + (size_t)SUBHEADER_SIZE >= buffer_capacity)
@@ -105,13 +108,10 @@ bool uxr_prepare_reliable_buffer_to_write(
             buffer_size = uxr_get_reliable_buffer_size(&stream->base, seq_num);
         }
 
-        size_t remaining_blocks = get_available_free_slots(stream);
-
-        uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
         uint16_t first_fragment_size = (uint16_t)(buffer_capacity - (uint16_t)(buffer_size + SUBHEADER_SIZE));
         size_t remaining_size = length - first_fragment_size;
-        size_t last_fragment_size;
-        uint16_t necessary_complete_blocks;
+        size_t last_fragment_size = 0;
+        uint16_t necessary_complete_blocks = 0;
         if (0 == (remaining_size % available_block_size))
         {
             last_fragment_size = available_block_size;
