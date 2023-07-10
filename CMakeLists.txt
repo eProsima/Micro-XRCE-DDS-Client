@@ -81,8 +81,8 @@ set(UCLIENT_C_STANDARD 99 CACHE STRING "Version of the C language used to build 
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 2.0.1)
-set(_microcdr_tag v2.0.1)
+set(_microcdr_version 2.0.2)
+set(_microcdr_tag v2.0.2)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
@@ -92,7 +92,7 @@ list(APPEND _deps "microcdr\;${_microcdr_version}")
 ###############################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 if(NOT UCLIENT_SUPERBUILD)
-    project(microxrcedds_client VERSION "2.4.0" LANGUAGES C)
+    project(microxrcedds_client VERSION "2.4.1" LANGUAGES C)
 else()
     project(uclient_superbuild NONE)
     include(${PROJECT_SOURCE_DIR}/cmake/SuperBuild.cmake)
