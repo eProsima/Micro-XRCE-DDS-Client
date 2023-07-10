@@ -81,8 +81,8 @@ set(UCLIENT_C_STANDARD 99 CACHE STRING "Version of the C language used to build 
 ###############################################################################
 # Dependencies
 ###############################################################################
-set(_microcdr_version 2.0.2)
-set(_microcdr_tag v2.0.2)
+set(_microcdr_version 2.0.1)
+set(_microcdr_tag v2.0.1)
 
 set(_deps "")
 list(APPEND _deps "microcdr\;${_microcdr_version}")
