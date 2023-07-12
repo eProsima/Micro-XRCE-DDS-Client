@@ -135,10 +135,8 @@ uint16_t uxr_prepare_output_stream(
 
         UXR_PREPARE_SHARED_MEMORY(session, entity_id, ub, (uint16_t) len, rv);
     }
-    else
-    {
-        UXR_UNLOCK_STREAM_ID(session, stream_id);
-    }
+
+    UXR_UNLOCK_STREAM_ID(session, stream_id);
 
     return rv;
 }
