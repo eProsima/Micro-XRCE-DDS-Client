@@ -64,6 +64,13 @@ void uxr_buffer_create_session(
     payload.client_representation.properties.size++;
 #endif /* ifdef UCLIENT_PROFILE_SHARED_MEMORY */
 
+#ifdef UCLIENT_BIG_ENDIANNESS
+    payload.client_representation.optional_properties = true;
+    payload.client_representation.properties.data[payload.client_representation.properties.size].name = "uxr_be_pl";
+    payload.client_representation.properties.data[payload.client_representation.properties.size].value = "1";
+    payload.client_representation.properties.size++;
+#endif /* ifdef UCLIENT_BIG_ENDIANNESS */
+
 #ifdef UCLIENT_HARD_LIVELINESS_CHECK
     payload.client_representation.optional_properties = true;
     payload.client_representation.properties.data[payload.client_representation.properties.size].name = "uxr_hl";
