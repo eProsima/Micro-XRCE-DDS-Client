@@ -103,7 +103,7 @@ bool uxr_init_can_transport(
         transport->comm.send_msg = send_can_msg;
         transport->comm.recv_msg = recv_can_msg;
         transport->comm.comm_error = get_can_error;
-        transport->comm.mtu = UXR_CONFIG_CAN_TRANSPORT_MTU;
+        transport->comm.mtu = UXR_CAN_TRANSPORT_MTU;
         UXR_INIT_LOCK(&transport->comm.mutex);
         rv = true;
     }
