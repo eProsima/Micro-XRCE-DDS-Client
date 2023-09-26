@@ -68,18 +68,14 @@ void uxr_buffer_create_session(
     payload.client_representation.optional_properties = true;
     payload.client_representation.properties.data[payload.client_representation.properties.size].name = "uxr_hl";
 
-    const char* str = UXR_CONFIG_HARD_LIVELINESS_CHECK_TIMEOUT_STR;
-
-    if (strlen(str) > 6)
-    {
-        str = "999999";
-    }
-
+    uint32_t timeout = UXR_CONFIG_HARD_LIVELINESS_CHECK_TIMEOUT;
     char buffer[7];
-    const size_t leading_zeros = 6 - strlen(str);
-    memset(buffer, '0', leading_zeros);
-    memcpy(buffer + leading_zeros, str, strlen(str));
-    buffer[6] = '\0';
+
+    if (timeout > 999999)
+    {
+        timeout = 999999;
+    }
+    snprintf(buffer, sizeof(buffer), "%06u", timeout);
 
     payload.client_representation.properties.data[payload.client_representation.properties.size].value = buffer;
     payload.client_representation.properties.size++;
