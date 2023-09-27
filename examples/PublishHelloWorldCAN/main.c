@@ -22,7 +22,7 @@
 #include <stdlib.h> //atoi
 
 #define STREAM_HISTORY  8
-#define BUFFER_SIZE     UXR_CONFIG_CAN_TRANSPORT_MTU* STREAM_HISTORY
+#define BUFFER_SIZE     UXR_CAN_TRANSPORT_MTU* STREAM_HISTORY
 
 int main(
         int args,
