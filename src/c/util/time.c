@@ -62,11 +62,10 @@ int64_t uxr_nanos(
     // https://github.com/zephyrproject-rtos/zephyr/commit/95a22b12174621aeba8ca3e0e61f7c66f03202bf
     #if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3, 5, 99)
     clock_gettime(CLOCK_REALTIME, &ts);
-    return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
     #else
     z_impl_clock_gettime(CLOCK_REALTIME, &ts);
-    return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
     #endif /* if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3, 5, 99) */
+    return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
 #else
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
