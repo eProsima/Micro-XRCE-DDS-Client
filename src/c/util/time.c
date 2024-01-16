@@ -8,7 +8,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
-#include <version.h> 
+#include <version.h>
 #endif /* ifdef WIN32 */
 
 //==================================================================
@@ -57,16 +57,16 @@ int64_t uxr_nanos(
     struct timespec ts;
 
     // From Zephyr version 3.5.99 the z_impl_clock_gettime function
-    // has been renamed to the clock_gettime function. 
+    // has been renamed to the clock_gettime function.
     // This has been done to implement Zephyr's POSIX API as regular library functions
     // https://github.com/zephyrproject-rtos/zephyr/commit/95a22b12174621aeba8ca3e0e61f7c66f03202bf
-    #if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3,5,99)  
-        clock_gettime(CLOCK_REALTIME, &ts);
-        return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
+    #if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3, 5, 99)
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
     #else
-       z_impl_clock_gettime(CLOCK_REALTIME, &ts);
-       return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
-    #endif
+    z_impl_clock_gettime(CLOCK_REALTIME, &ts);
+    return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
+    #endif /* if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3, 5, 99) */
 #else
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
