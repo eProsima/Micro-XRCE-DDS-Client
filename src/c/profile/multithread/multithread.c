@@ -12,6 +12,8 @@ void uxr_init_lock(
 {
 #if defined(PLATFORM_NAME_FREERTOS)
     mutex->impl = xSemaphoreCreateRecursiveMutexStatic( &mutex->xMutexBuffer );
+#elif defined(PLATFORM_NAME_RPIPICO)
+    recursive_mutex_init(&mutex->impl);
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
     k_mutex_init(&mutex->impl);
 #elif defined(UCLIENT_PLATFORM_POSIX)
@@ -29,6 +31,8 @@ void uxr_lock(
 {
 #if defined(PLATFORM_NAME_FREERTOS)
     xSemaphoreTakeRecursive(mutex->impl, portMAX_DELAY);
+#elif defined(PLATFORM_NAME_RPIPICO)
+    recursive_mutex_enter_blocking(&mutex->impl);
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
     k_mutex_lock(&mutex->impl, K_FOREVER);
 #elif defined(UCLIENT_PLATFORM_POSIX)
@@ -43,6 +47,8 @@ void uxr_unlock(
 {
 #if defined(PLATFORM_NAME_FREERTOS)
     xSemaphoreGiveRecursive(mutex->impl);
+#elif defined(PLATFORM_NAME_RPIPICO)
+    recursive_mutex_exit(&mutex->impl);
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
     k_mutex_unlock(&mutex->impl);
 #elif defined(UCLIENT_PLATFORM_POSIX)
