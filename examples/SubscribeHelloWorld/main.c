@@ -37,7 +37,7 @@ void on_topic(
     HelloWorld topic;
     HelloWorld_deserialize_topic(ub, &topic);
 
-    printf("Received topic: %s, id: %i\n", topic.message, topic.index);
+    printf("Received topic: %s, id: %d\n", topic.message, topic.index);
 
     uint32_t* count_ptr = (uint32_t*) args;
     (*count_ptr)++;
