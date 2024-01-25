@@ -124,7 +124,7 @@ int main(
     uint32_t count = 0;
     while (connected && count < max_topics)
     {
-        BigHelloWorld topic = {};
+        BigHelloWorld topic;
         topic.index = count++;
         memset(topic.message, 'A', sizeof(topic.message) - 1);
         topic.message[sizeof(topic.message) - 1] = '\0';
