@@ -38,7 +38,7 @@ void on_topic(
     BigHelloWorld topic;
     BigHelloWorld_deserialize_topic(ub, &topic);
 
-    printf("Received topic with size %ld, id: %i\n", strlen(topic.message), topic.index);
+    printf("Received topic with size %d, id: %i\n", (uint32_t)strlen(topic.message), topic.index);
 
     // Print first 30 characters
     char message[31];

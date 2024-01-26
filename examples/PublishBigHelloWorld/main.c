@@ -134,7 +134,7 @@ int main(
         uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &ub, topic_size);
         BigHelloWorld_serialize_topic(&ub, &topic);
 
-        printf("Send topic with size %ld, id: %d\n", strlen(topic.message), topic.index);
+        printf("Send topic with size %d, id: %d\n", (uint32_t)strlen(topic.message), topic.index);
         connected = uxr_run_session_time(&session, 1000);
     }
 
