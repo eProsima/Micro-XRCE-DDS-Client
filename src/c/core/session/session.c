@@ -543,8 +543,10 @@ bool uxr_sync_session(
     (void) uxr_serialize_TIMESTAMP_Payload(&ub, &timestamp);
 
     uxr_stamp_session_header(&session->info, 0, 0, ub.init);
+    session->waiting_for_time_sync = true;
     send_message(session, timestamp_buffer, ucdr_buffer_length(&ub));
     bool ret = run_session_until_sync(session, timeout);
+    session->waiting_for_time_sync = false;
     UXR_UNLOCK_SESSION(session);
 
     return ret;
@@ -1172,28 +1174,32 @@ void process_timestamp_reply(
         uxrSession* session,
         TIMESTAMP_REPLY_Payload* timestamp)
 {
-    if (session->on_time != NULL)
+    // Discard out-of-date replies.
+    if (session->waiting_for_time_sync)
     {
-        session->on_time(session,
-                uxr_nanos(),
-                uxr_convert_to_nanos(timestamp->receive_timestamp.seconds, timestamp->receive_timestamp.nanoseconds),
-                uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds, timestamp->transmit_timestamp.nanoseconds),
-                uxr_convert_to_nanos(timestamp->originate_timestamp.seconds,
-                timestamp->originate_timestamp.nanoseconds),
-                session->on_time_args);
+        if (session->on_time != NULL)
+        {
+            session->on_time(session,
+                    uxr_nanos(),
+                    uxr_convert_to_nanos(timestamp->receive_timestamp.seconds, timestamp->receive_timestamp.nanoseconds),
+                    uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds, timestamp->transmit_timestamp.nanoseconds),
+                    uxr_convert_to_nanos(timestamp->originate_timestamp.seconds,
+                    timestamp->originate_timestamp.nanoseconds),
+                    session->on_time_args);
+        }
+        else
+        {
+            int64_t t3 = uxr_nanos();
+            int64_t t0 = uxr_convert_to_nanos(timestamp->originate_timestamp.seconds,
+                            timestamp->originate_timestamp.nanoseconds);
+            int64_t t1 = uxr_convert_to_nanos(timestamp->receive_timestamp.seconds,
+                            timestamp->receive_timestamp.nanoseconds);
+            int64_t t2 = uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds,
+                            timestamp->transmit_timestamp.nanoseconds);
+            session->time_offset = ((t0 + t3) - (t1 + t2)) / 2;
+        }
+        session->synchronized = true;
     }
-    else
-    {
-        int64_t t3 = uxr_nanos();
-        int64_t t0 = uxr_convert_to_nanos(timestamp->originate_timestamp.seconds,
-                        timestamp->originate_timestamp.nanoseconds);
-        int64_t t1 = uxr_convert_to_nanos(timestamp->receive_timestamp.seconds,
-                        timestamp->receive_timestamp.nanoseconds);
-        int64_t t2 = uxr_convert_to_nanos(timestamp->transmit_timestamp.seconds,
-                        timestamp->transmit_timestamp.nanoseconds);
-        session->time_offset = ((t0 + t3) - (t1 + t2)) / 2;
-    }
-    session->synchronized = true;
 }
 
 bool uxr_prepare_stream_to_write_submessage(

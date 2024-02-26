@@ -202,6 +202,8 @@ typedef struct uxrSession
     pong_status_t on_pong_flag;
     uxrContinuousArgs continuous_args;
 
+    bool waiting_for_time_sync;
+
 #ifdef UCLIENT_PROFILE_MULTITHREAD
     uxrMutex mutex;
 #endif // ifdef UCLIENT_PROFILE_MULTITHREAD
