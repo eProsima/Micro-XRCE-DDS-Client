@@ -76,7 +76,22 @@ bool uxr_init_tcp_platform(
 bool uxr_close_tcp_platform(
         struct uxrTCPPlatform* platform)
 {
-    return (-1 == platform->poll_fd.fd) ? true : (0 == close(platform->poll_fd.fd));
+    bool rv = true;
+
+    if (-1 != platform->poll_fd.fd)
+    {
+        /* Synchronize the stream with the agent, to avoid losing bytes currently in flight.  */
+        shutdown(platform->poll_fd.fd, SHUT_WR);
+        int poll_rv = poll(&platform->poll_fd, 1, 10000);
+        if (0 < poll_rv)
+        {
+            char dummy;
+            while (recv(platform->poll_fd.fd, &dummy, sizeof(dummy), 0) > 0) {};
+        }
+
+        rv = (0 == close(platform->poll_fd.fd));
+    }
+    return rv;
 }
 
 size_t uxr_write_tcp_data_platform(
