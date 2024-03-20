@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "HelloWorld.h"
+#include "BigHelloWorld.h"
 
 #include <uxr/client/client.h>
 
 #include <stdio.h> //printf
 #include <string.h> //strcmp
 #include <stdlib.h> //atoi
+#include <assert.h> //assert
 
-#define STREAM_HISTORY  8
+#define STREAM_HISTORY  128
 #define BUFFER_SIZE     UXR_CONFIG_UDP_TRANSPORT_MTU* STREAM_HISTORY
 
 void on_topic(
@@ -34,10 +35,16 @@ void on_topic(
 {
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length;
 
-    HelloWorld topic;
-    HelloWorld_deserialize_topic(ub, &topic);
+    BigHelloWorld topic;
+    BigHelloWorld_deserialize_topic(ub, &topic);
 
-    printf("Received topic: %s, id: %d\n", topic.message, topic.index);
+    printf("Received topic with size %d, id: %i\n", (uint32_t)strlen(topic.message), topic.index);
+
+    // Print first 30 characters
+    char message[31];
+    memcpy(message, topic.message, 30);
+    message[30] = '\0';
+    printf("\tMessage: %s...\n", message);
 
     uint32_t* count_ptr = (uint32_t*) args;
     (*count_ptr)++;
@@ -47,6 +54,8 @@ int main(
         int args,
         char** argv)
 {
+    assert(BUFFER_SIZE > BIG_HELLO_WORLD_STRING_SIZE);
+
     // CLI
     if (3 > args || 0 == atoi(argv[2]))
     {
@@ -103,8 +112,8 @@ int main(
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
     const char* topic_xml = "<dds>"
             "<topic>"
-            "<name>HelloWorldTopic</name>"
-            "<dataType>HelloWorld</dataType>"
+            "<name>BigHelloWorldTopic</name>"
+            "<dataType>BigHelloWorld</dataType>"
             "</topic>"
             "</dds>";
     uint16_t topic_req = uxr_buffer_create_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml,
@@ -120,8 +129,8 @@ int main(
             "<data_reader>"
             "<topic>"
             "<kind>NO_KEY</kind>"
-            "<name>HelloWorldTopic</name>"
-            "<dataType>HelloWorld</dataType>"
+            "<name>BigHelloWorldTopic</name>"
+            "<dataType>BigHelloWorld</dataType>"
             "</topic>"
             "</data_reader>"
             "</dds>";
