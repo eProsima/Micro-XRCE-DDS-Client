@@ -1,4 +1,5 @@
 #include <uxr/client/profile/transport/ip/udp/udp_transport_posix_nopoll.h>
+#include <uxr/client/util/time.h>
 #include "udp_transport_internal.h"
 
 #include <sys/types.h>
@@ -16,6 +17,7 @@ bool uxr_init_udp_platform(
         const char* port)
 {
     bool rv = false;
+    int errsv = errno;
 
     switch (ip_protocol)
     {
@@ -49,7 +51,13 @@ bool uxr_init_udp_platform(
         {
             for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
             {
-                if (0 == connect(platform->fd, ptr->ai_addr, ptr->ai_addrlen))
+                int connect_rv;
+                do
+                {
+                    errno = errsv;
+                    connect_rv = connect(platform->fd, ptr->ai_addr, ptr->ai_addrlen);
+                } while (-1 == connect_rv && EINTR == errno);
+                if (0 == connect_rv)
                 {
                     rv = true;
                     break;
@@ -74,7 +82,13 @@ size_t uxr_write_udp_data_platform(
         uint8_t* errcode)
 {
     size_t rv = 0;
-    ssize_t bytes_sent = send(platform->fd, (void*)buf, len, 0);
+    int errsv = errno;
+    ssize_t bytes_sent;
+    do
+    {
+        errno = errsv;
+        bytes_sent = send(platform->fd, (void*)buf, len, 0);
+    } while (-1 == bytes_sent && EINTR == errno);
     if (-1 != bytes_sent)
     {
         rv = (size_t)bytes_sent;
@@ -95,20 +109,37 @@ size_t uxr_read_udp_data_platform(
         uint8_t* errcode)
 {
     size_t rv = 0;
+    int errsv = errno;
 
-    timeout = (timeout <= 0) ? 1 : timeout;
+    int64_t start_timestamp = uxr_millis();
+    int remaining_time = timeout;
 
-    struct timeval tv;
-    tv.tv_sec = timeout / 1000;
-    tv.tv_usec = (timeout % 1000) * 1000;
-
-    if (0 != setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)))
+    ssize_t bytes_received;
+    do
     {
-        *errcode = 1;
-        return 0;
-    }
+        errno = errsv;
 
-    ssize_t bytes_received = recv(platform->fd, (void*)buf, len, 0);
+        remaining_time = (remaining_time <= 0) ? 1 : remaining_time;
+
+        struct timeval tv;
+        tv.tv_sec = remaining_time / 1000;
+        tv.tv_usec = (remaining_time % 1000) * 1000;
+
+        if (0 != setsockopt(platform->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)))
+        {
+            *errcode = 1;
+            return 0;
+        }
+
+        bytes_received = recv(platform->fd, (void*)buf, len, 0);
+
+        remaining_time = timeout - (int)(uxr_millis() - start_timestamp);
+    } while (-1 == bytes_received && EINTR == errno);
+    if (-1 == bytes_received && (EAGAIN == errno || EWOULDBLOCK == errno))
+    {
+        errno = errsv;
+        bytes_received = 0;
+    }
     if (-1 != bytes_received)
     {
         rv = (size_t)bytes_received;
