@@ -409,7 +409,7 @@ bool uxr_serialize_CLIENT_Representation(
     ret &= uxr_serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
     ret &= uxr_serialize_ClientKey(buffer, &input->client_key);
     ret &= ucdr_serialize_uint8_t(buffer, input->session_id);
-    ret &= ucdr_serialize_bool(buffer, input->optional_properties);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_properties)? 0x01 : 0x00);
     if (input->optional_properties == true)
     {
         ret &= uxr_serialize_PropertySeq(buffer, &input->properties);
@@ -447,7 +447,7 @@ bool uxr_serialize_AGENT_Representation(
     ret &= uxr_serialize_XrceCookie(buffer, &input->xrce_cookie);
     ret &= uxr_serialize_XrceVersion(buffer, &input->xrce_version);
     ret &= uxr_serialize_XrceVendorId(buffer, &input->xrce_vendor_id);
-    ret &= ucdr_serialize_bool(buffer, input->optional_properties);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_properties)? 0x01 : 0x00);
     if (input->optional_properties == true)
     {
         ret &= uxr_serialize_PropertySeq(buffer, &input->properties);
@@ -909,13 +909,13 @@ bool uxr_serialize_OBJK_DomainParticipant_Binary(
         const OBJK_DomainParticipant_Binary* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_bool(buffer, input->optional_domain_reference);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_domain_reference)? 0x01 : 0x00);
     if (input->optional_domain_reference == true)
     {
         ret &= ucdr_serialize_string(buffer, input->domain_reference);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_qos_profile_reference);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_qos_profile_reference)? 0x01 : 0x00);
     if (input->optional_qos_profile_reference == true)
     {
         ret &= ucdr_serialize_string(buffer, input->qos_profile_reference);
@@ -950,13 +950,13 @@ bool uxr_serialize_OBJK_Topic_Binary(
 {
     bool ret = true;
     ret &= ucdr_serialize_string(buffer, input->topic_name);
-    ret &= ucdr_serialize_bool(buffer, input->optional_type_reference);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_type_reference)? 0x01 : 0x00);
     if (input->optional_type_reference == true)
     {
         ret &= ucdr_serialize_string(buffer, input->type_reference);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_type_name);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_type_name)? 0x01 : 0x00);
     if (input->optional_type_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->type_name);
@@ -991,13 +991,13 @@ bool uxr_serialize_OBJK_Publisher_Binary_Qos(
         const OBJK_Publisher_Binary_Qos* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_bool(buffer, input->optional_partitions);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_partitions)? 0x01 : 0x00);
     if (input->optional_partitions == true)
     {
         ret &= uxr_serialize_StringSequence_t(buffer, &input->partitions);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_group_data);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_group_data)? 0x01 : 0x00);
     if (input->optional_group_data == true)
     {
         ret &= uxr_serialize_BinarySequence_t(buffer, &input->group_data);
@@ -1031,13 +1031,13 @@ bool uxr_serialize_OBJK_Publisher_Binary(
         const OBJK_Publisher_Binary* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_bool(buffer, input->optional_publisher_name);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_publisher_name)? 0x01 : 0x00);
     if (input->optional_publisher_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->publisher_name);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_qos);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_qos)? 0x01 : 0x00);
     if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_Publisher_Binary_Qos(buffer, &input->qos);
@@ -1071,13 +1071,13 @@ bool uxr_serialize_OBJK_Subscriber_Binary_Qos(
         const OBJK_Subscriber_Binary_Qos* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_bool(buffer, input->optional_partitions);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_partitions)? 0x01 : 0x00);
     if (input->optional_partitions == true)
     {
         ret &= uxr_serialize_StringSequence_t(buffer, &input->partitions);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_group_data);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_group_data)? 0x01 : 0x00);
     if (input->optional_group_data == true)
     {
         ret &= uxr_serialize_BinarySequence_t(buffer, &input->group_data);
@@ -1111,13 +1111,13 @@ bool uxr_serialize_OBJK_Subscriber_Binary(
         const OBJK_Subscriber_Binary* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_bool(buffer, input->optional_subscriber_name);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_subscriber_name)? 0x01 : 0x00);
     if (input->optional_subscriber_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->subscriber_name);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_qos);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_qos)? 0x01 : 0x00);
     if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_Subscriber_Binary_Qos(buffer, &input->qos);
@@ -1152,25 +1152,25 @@ bool uxr_serialize_OBJK_Endpoint_QosBinary(
 {
     bool ret = true;
     ret &= ucdr_serialize_uint16_t(buffer, input->qos_flags);
-    ret &= ucdr_serialize_bool(buffer, input->optional_history_depth);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_history_depth)? 0x01 : 0x00);
     if (input->optional_history_depth == true)
     {
         ret &= ucdr_serialize_uint16_t(buffer, input->history_depth);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_deadline_msec);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_deadline_msec)? 0x01 : 0x00);
     if (input->optional_deadline_msec == true)
     {
         ret &= ucdr_serialize_uint32_t(buffer, input->deadline_msec);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_lifespan_msec);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_lifespan_msec)? 0x01 : 0x00);
     if (input->optional_lifespan_msec == true)
     {
         ret &= ucdr_serialize_uint32_t(buffer, input->lifespan_msec);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_user_data);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_user_data)? 0x01 : 0x00);
     if (input->optional_user_data == true)
     {
         ret &= uxr_serialize_BinarySequence_t(buffer, (BinarySequence_t*) &input->user_data);
@@ -1218,7 +1218,7 @@ bool uxr_serialize_OBJK_DataWriter_Binary_Qos(
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
-    ret &= ucdr_serialize_bool(buffer, input->optional_ownership_strength);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_ownership_strength)? 0x01 : 0x00);
     if (input->optional_ownership_strength == true)
     {
         ret &= ucdr_serialize_uint64_t(buffer, input->ownership_strength);
@@ -1248,13 +1248,13 @@ bool uxr_serialize_OBJK_DataReader_Binary_Qos(
 {
     bool ret = true;
     ret &= uxr_serialize_OBJK_Endpoint_QosBinary(buffer, &input->base);
-    ret &= ucdr_serialize_bool(buffer, input->optional_timebasedfilter_msec);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_timebasedfilter_msec)? 0x01 : 0x00);
     if (input->optional_timebasedfilter_msec == true)
     {
         ret &= ucdr_serialize_uint64_t(buffer, input->timebasedfilter_msec);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_contentbased_filter);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_contentbased_filter)? 0x01 : 0x00);
     if (input->optional_contentbased_filter == true)
     {
         ret &= ucdr_serialize_string(buffer, input->contentbased_filter);
@@ -1290,7 +1290,7 @@ bool uxr_serialize_OBJK_DataReader_Binary(
 {
     bool ret = true;
     ret &= uxr_serialize_ObjectId(buffer, &input->topic_id);
-    ret &= ucdr_serialize_bool(buffer, input->optional_qos);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_qos)? 0x01 : 0x00);
     if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_DataReader_Binary_Qos(buffer, &input->qos);
@@ -1320,7 +1320,7 @@ bool uxr_serialize_OBJK_DataWriter_Binary(
 {
     bool ret = true;
     ret &= uxr_serialize_ObjectId(buffer, &input->topic_id);
-    ret &= ucdr_serialize_bool(buffer, input->optional_qos);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_qos)? 0x01 : 0x00);
     if (input->optional_qos == true)
     {
         ret &= uxr_serialize_OBJK_DataWriter_Binary_Qos(buffer, &input->qos);
@@ -1352,12 +1352,12 @@ bool uxr_serialize_OBJK_Requester_Binary(
     ret &= ucdr_serialize_string(buffer, input->service_name);
     ret &= ucdr_serialize_string(buffer, input->request_type);
     ret &= ucdr_serialize_string(buffer, input->reply_type);
-    ret &= ucdr_serialize_bool(buffer, input->optional_request_topic_name);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_request_topic_name)? 0x01 : 0x00);
     if (input->optional_request_topic_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->request_topic_name);
     }
-    ret &= ucdr_serialize_bool(buffer, input->optional_reply_topic_name);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_reply_topic_name)? 0x01 : 0x00);
     if (input->optional_reply_topic_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->reply_topic_name);
@@ -1396,12 +1396,12 @@ bool uxr_serialize_OBJK_Replier_Binary(
     ret &= ucdr_serialize_string(buffer, input->service_name);
     ret &= ucdr_serialize_string(buffer, input->request_type);
     ret &= ucdr_serialize_string(buffer, input->reply_type);
-    ret &= ucdr_serialize_bool(buffer, input->optional_request_topic_name);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_request_topic_name)? 0x01 : 0x00);
     if (input->optional_request_topic_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->request_topic_name);
     }
-    ret &= ucdr_serialize_bool(buffer, input->optional_reply_topic_name);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_reply_topic_name)? 0x01 : 0x00);
     if (input->optional_reply_topic_name == true)
     {
         ret &= ucdr_serialize_string(buffer, input->reply_topic_name);
@@ -1549,8 +1549,8 @@ bool uxr_serialize_CreationMode(
         const CreationMode* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_bool(buffer, input->reuse);
-    ret &= ucdr_serialize_bool(buffer, input->replace);
+    ret &= ucdr_serialize_bool(buffer, (input->reuse)? 0x01 : 0x00);
+    ret &= ucdr_serialize_bool(buffer, (input->replace)? 0x01 : 0x00);
     return ret;
 }
 
@@ -1737,13 +1737,13 @@ bool uxr_serialize_ObjectInfo(
         const ObjectInfo* input)
 {
     bool ret = true;
-    ret &= ucdr_serialize_bool(buffer, input->optional_config);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_config)? 0x01 : 0x00);
     if (input->optional_config == true)
     {
         ret &= uxr_serialize_ObjectVariant(buffer, &input->config);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_activity);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_activity)? 0x01 : 0x00);
     if (input->optional_activity == true)
     {
         ret &= uxr_serialize_ActivityInfoVariant(buffer, &input->activity);
@@ -1823,13 +1823,13 @@ bool uxr_serialize_ReadSpecification(
     bool ret = true;
     ret &= ucdr_serialize_uint8_t(buffer, input->preferred_stream_id);
     ret &= ucdr_serialize_uint8_t(buffer, input->data_format);
-    ret &= ucdr_serialize_bool(buffer, input->optional_content_filter_expression);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_content_filter_expression)? 0x01 : 0x00);
     if (input->optional_content_filter_expression == true)
     {
         ret &= ucdr_serialize_string(buffer, input->content_filter_expression);
     }
 
-    ret &= ucdr_serialize_bool(buffer, input->optional_delivery_control);
+    ret &= ucdr_serialize_bool(buffer, (input->optional_delivery_control)? 0x01 : 0x00);
     if (input->optional_delivery_control == true)
     {
         ret &= uxr_serialize_DataDeliveryControl(buffer, &input->delivery_control);
