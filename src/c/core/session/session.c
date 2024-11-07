@@ -20,6 +20,9 @@
 #include <uxr/client/profile/multithread/multithread.h>
 #include "../../profile/shared_memory/shared_memory_internal.h"
 
+#include <assert.h>
+#include <limits.h>
+
 #ifdef UCLIENT_PROFILE_SHARED_MEMORY
 #define PROFILE_SHARED_MEMORY_ADD_SIZE 21
 #else
@@ -749,13 +752,19 @@ bool wait_session_status(
     {
         send_message(session, buffer, length);
 
-        int64_t start_timestamp = uxr_millis();
-        int remaining_time = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
+        const int64_t start_timestamp = uxr_millis();
+        int64_t remaining_time = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL;
+        assert(remaining_time > 0);
 
         do
         {
-            listen_message(session, remaining_time);
-            remaining_time = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL - (int)(uxr_millis() - start_timestamp);
+            assert(remaining_time <= INT_MAX); // Protect the narrowing conversion
+            listen_message(session, (int)remaining_time);
+            const int64_t current_timestamp = uxr_millis();
+            assert(current_timestamp >= start_timestamp);
+            const int64_t elapsed_time = current_timestamp - start_timestamp;
+            assert(UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL >= elapsed_time);
+            remaining_time = UXR_CONFIG_MIN_SESSION_CONNECTION_INTERVAL - elapsed_time;
         } while (remaining_time > 0 && session->info.last_requested_status == UXR_STATUS_NONE);
     }
 
