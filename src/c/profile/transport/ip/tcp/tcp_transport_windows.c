@@ -68,8 +68,24 @@ bool uxr_init_tcp_platform(
 bool uxr_close_tcp_platform(
         struct uxrTCPPlatform* platform)
 {
-    bool rv = (INVALID_SOCKET == platform->poll_fd.fd) ? true : (0 == closesocket(platform->poll_fd.fd));
-    return (0 == WSACleanup()) && rv;
+    bool rv = true;
+
+    if (INVALID_SOCKET != platform->poll_fd.fd)
+    {
+        /* Synchronize the stream with the agent, to avoid losing bytes currently in flight.  */
+        shutdown(platform->poll_fd.fd, SD_SEND);
+        int poll_rv = WSAPoll(&platform->poll_fd, 1, 10000);
+        if (0 < poll_rv)
+        {
+            char dummy;
+            while (recv(platform->poll_fd.fd, &dummy, sizeof(dummy), 0) > 0) {};
+        }
+        if (0 == closesocket(platform->poll_fd.fd))
+        {
+            rv = (0 == WSACleanup());
+        }
+    }
+    return rv;
 }
 
 size_t uxr_write_tcp_data_platform(
