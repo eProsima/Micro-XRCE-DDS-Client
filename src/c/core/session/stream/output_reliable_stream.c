@@ -64,6 +64,7 @@ bool uxr_prepare_reliable_buffer_to_write(
 
     uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
     size_t remaining_blocks = get_available_free_slots(stream);
+    static int64_t reliable_ackend_ts = 0x0;
 
     // Aligment required for inserting an XRCE subheader
     buffer_size += ucdr_alignment(buffer_size, 4);
@@ -162,6 +163,17 @@ bool uxr_prepare_reliable_buffer_to_write(
             ucdr_set_on_full_buffer_callback(ub, on_full_output_buffer, stream);
             stream->last_written = seq_num;
         }
+    }
+
+    if (available_to_write == false) {
+        if (reliable_ackend_ts == 0x0) {
+            reliable_ackend_ts = uxr_millis() + UXR_CONFIG_RELIABLE_RESENT_TIME;
+        } else if (reliable_ackend_ts <= uxr_millis()) {
+            stream->last_sent = uxr_seq_num_sub(stream->last_sent, 1);
+            reliable_ackend_ts = uxr_millis() + UXR_CONFIG_RELIABLE_RESENT_TIME;
+        }
+    } else {
+        reliable_ackend_ts = 0x0;
     }
 
     return available_to_write;
