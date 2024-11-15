@@ -7,6 +7,7 @@ extern "C"
 #include <c/core/session/stream/output_best_effort_stream.c>
 #include <c/core/session/submessage.c>
 #include <c/core/serialization/xrce_subheader.c>
+#include <c/util/time.c>
 }
 
 #define BUFFER_SIZE     size_t(32)
