@@ -9,6 +9,7 @@
 #include "./common_reliable_stream_internal.h"
 #include "../submessage_internal.h"
 #include <uxr/client/profile/multithread/multithread.h>
+#include <uxr/client/util/time.h>
 
 #define MIN_HEARTBEAT_TIME_INTERVAL ((int64_t) UXR_CONFIG_MIN_HEARTBEAT_TIME_INTERVAL) // ms
 
