@@ -8,6 +8,7 @@ extern "C"
 #include <c/core/serialization/xrce_subheader.c>
 #include <c/core/session/submessage.c>
 #include <c/core/serialization/xrce_header.c>
+#include <c/util/time.c>
 }
 
 #define BUFFER_SIZE           size_t(128)
