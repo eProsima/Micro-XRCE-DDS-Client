@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-2022
 
     env:
-      TOOLSET: v141
+      TOOLSET: v142
 
     steps:
       - name: Checkout
