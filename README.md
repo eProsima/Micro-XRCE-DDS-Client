@@ -27,6 +27,12 @@ The communication in the DDS world is mediated by a dedicated `ProxyClient` in c
 
 The communication between a *Micro XRCE-DDS Client* and a *Micro XRCE-DDS Agent* is achieved by means of several kinds of built-in transports: **UDPv4**, **UDPv6**, **TCPv4**, **TCPv6** and **Serial** communication. In addition, there is the possibility for the user to generate its own **Custom** transport.
 
+## Commercial support
+
+Looking for commercial support? Write us to info@eprosima.com
+
+Find more about us at [eProsima’s webpage](https://eprosima.com/).
+
 ## Documentation
 
 You can access the *eProsima Micro XRCE-DDS* user documentation online, which is hosted on Read the Docs.
@@ -39,6 +45,3 @@ You can access the *eProsima Micro XRCE-DDS* user documentation online, which is
 
 **eProsima Micro XRCE-DDS Client** claims to be in the **Quality Level 1** category based on the guidelines provided by [ROS 2](https://ros.org/reps/rep-2004.html).
 See the [Quality Declaration](QUALITY.md) for more details.
-## Getting Help
-
-If you need support you can reach us by mail at `support@eProsima.com` or by phone at `+34 91 804 34 48`.

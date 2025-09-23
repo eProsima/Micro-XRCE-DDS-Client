@@ -438,13 +438,13 @@ bool compute_command(
         (void) compute_print_command(session, stream_id, 3, "create_datareader", arg1, arg1, 0, 0, 0, "");
         (void) uxr_run_session_time(session, 20);
     }
-    else if (0 == strcmp(name, "list") || 0 == strcmp(name, "l"))
+    else if (0 == strcmp(name, "help") || 0 == strcmp(name, "h"))
     {
         print_commands();
     }
     else
     {
-        printf("%sUnknown command error, write 'l' or 'list' to show the command list.%s\n", RED_CONSOLE_COLOR,
+        printf("%sUnknown command error, write 'h' or 'help' to show the command list.%s\n", RED_CONSOLE_COLOR,
                 RESTORE_COLOR);
         shapes_demo_error = 2;
     }
