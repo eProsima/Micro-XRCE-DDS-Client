@@ -67,7 +67,7 @@ jobs:
         run: |
           set -euxo pipefail
           python3 - <<'PY'
-          import glob, os, csv, re
+          import csv
           from pathlib import Path
           import matplotlib.pyplot as plt
 
@@ -77,30 +77,41 @@ jobs:
 
           files = sorted(runs_dir.glob("*.csv"))[-30:]  # last 30 by filename (timestamp prefix)
           if not files:
-            raise SystemExit("No historical CSVs found in ci/metrics/complete_profile/runs")
+              raise SystemExit("No historical CSVs found")
 
-          y_vals = []
+          # Dict of series per column
+          series = {}
+
           for f in files:
-            with f.open(newline="") as fh:
-              reader = csv.DictReader(fh)
-              row = next(reader, None)
-              if row is None:
-                continue
-              # CSV values are quoted strings; convert to int safely
-              val = row.get("text")
-              if val is None:
-                continue
-              y_vals.append(int(val))
+              with f.open(newline="") as fh:
+                  reader = csv.DictReader(fh)
+                  row = next(reader, None)
+                  if row is None:
+                      continue
+                  # Initialize keys on first file
+                  if not series:
+                      for key in row.keys():
+                          series[key] = []
+                  # Append values
+                  for key in series:
+                      val = row.get(key)
+                      try:
+                          series[key].append(int(val))
+                      except Exception:
+                          series[key].append(0)
 
-          if not y_vals:
-            raise SystemExit("No numeric 'text' values found to plot")
+          if not any(series.values()):
+              raise SystemExit("No numeric values found")
 
+          x = range(1, len(files)+1)
           plt.figure()
-          plt.plot(range(1, len(y_vals)+1), y_vals)  # line plot
+          for key, values in series.items():
+              plt.plot(x, values, label=key)
+
           plt.title("Complete Profile")
           plt.xlabel("Run (old → new)")
           plt.ylabel("Bytes")
-          plt.xticks([])  # keep clean
+          plt.legend()
           plt.tight_layout()
           plt.savefig(out_png)
           print(f"Wrote {out_png}")
