@@ -104,9 +104,24 @@ jobs:
           python3 ci/metrics/save_results.py \
             --input results/complete_profile.csv \
             --output ci/metrics/complete_profile/complete_profile_timeseries.csv
+          python3 ci/metrics/save_results.py \
+            --input results/core_profile.csv \
+            --output ci/metrics/memory/core_profile_timeseries.csv
+          python3 ci/metrics/save_results.py \
+            --input results/stack.csv \
+            --output ci/metrics/memory/stack_timeseries.csv
+          python3 ci/metrics/save_results.py \
+            --input results/profiles_bss.csv \
+            --output ci/metrics/memory/profiles_bss_timeseries.csv
+          python3 ci/metrics/save_results.py \
+            --input results/profiles_data.csv \
+            --output ci/metrics/memory/profiles_data_timeseries.csv
+          python3 ci/metrics/save_results.py \
+            --input results/profiles_text.csv \
+            --output ci/metrics/memory/profiles_text_timeseries.csv
 
           git status
-          git add ci/metrics/complete_profile/complete_profile_timeseries.csv
+          git add ci/metrics/*_timeseries.csv
           git diff --cached --quiet || git commit -m "metrics: append run ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::8})"
           git push origin "${BR}"
 
@@ -165,6 +180,13 @@ jobs:
           plt.savefig(out_png)
           print(f"Wrote {out_png}")
           PY
+
+      - name: Upload plots
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-plots
+          path: build/*.png
+          if-no-files-found: warning
 
       - name: Add summary
         if: always()
