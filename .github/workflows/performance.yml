@@ -45,17 +45,53 @@ jobs:
         run: |
           ./test/memory/memory_test.sh
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            build/complete_profile.csv
+            build/core_profile.csv
+            build/stack.csv
+            build/profiles_bss.csv
+            build/profiles_data.csv
+            build/profiles_text.csv
+          if-no-files-found: error
+
+  analyze-metrics:
+    name: Analyze Metrics
+    runs-on: ubuntu-24.04
+    needs: performance
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: performance-results
+          path: results
+
+      - name: List files
+        shell: bash
+        run: |
+          ls -l results
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: memory/performance
+
       - name: Save results into memory
         shell: bash
         run: |
           set -euxo pipefail
 
-          git config user.name  "github-actions"
-          git config user.email "github-actions@github.com"
+          # git config user.name  "github-actions"
+          # git config user.email "github-actions@github.com"
 
           BR="memory/performance" # Use this branch to store performance results
-          git fetch origin "${BR}" || true
-          git checkout -B "${BR}"
+          # git fetch origin "${BR}" || true
+          # git checkout -B "${BR}"
 
           python3 ci/metrics/save_results.py \
             --input build/complete_profile.csv \
@@ -120,15 +156,6 @@ jobs:
           plt.savefig(out_png)
           print(f"Wrote {out_png}")
           PY
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: performance-results
-          path: |
-            build/complete_profile.csv
-            build/complete_profile_last30.png
-          if-no-files-found: warn
 
       - name: Add summary
         if: always()
