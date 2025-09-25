@@ -49,10 +49,54 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          mkdir -p ci/metrics/complete_profile/runs
+          ts_dir="ci/metrics/complete_profile"
+          ts_csv="${ts_dir}/complete_profile_timeseries.csv"
+          mkdir -p "${ts_dir}"
 
-          stamp="$(date -u +%Y%m%dT%H%M%SZ)_${GITHUB_RUN_NUMBER}_${GITHUB_SHA::8}"
-          cp build/complete_profile.csv "ci/metrics/complete_profile/runs/${stamp}.csv"
+          python3 - <<'PY'
+          import csv, os
+          from pathlib import Path
+          from datetime import datetime
+
+          run      = os.environ.get("GITHUB_RUN_NUMBER","")
+          sha      = os.environ.get("GITHUB_SHA","")[:8]
+          ts_path  = Path("ci/metrics/complete_profile/complete_profile_timeseries.csv")
+          src_path = Path("build/complete_profile.csv")
+
+          if not src_path.exists():
+              raise SystemExit("missing build/complete_profile.csv")
+
+          # Read first row and header from source csv
+          with src_path.open(newline="") as fh:
+              reader = csv.DictReader(fh)
+              rows = list(reader)
+          if not rows:
+              raise SystemExit("empty complete_profile.csv")
+          row = rows[0]
+
+          # Build a new row with date, run, sha, and all original cols
+          new_line = {"date": datetime.utcnow().isoformat(timespec="seconds"),
+                      "run": run, "sha": sha}
+          for key, val in row.items():
+              try:
+                  new_line[key] = int(val)
+              except Exception:
+                  new_line[key] = val
+
+          # Ensure header is consistent
+          write_header = not ts_path.exists()
+          if write_header:
+              header = ["date","run","sha"] + list(row.keys())
+          else:
+              with ts_path.open(newline="") as fh:
+                  header = next(csv.reader(fh))
+          with ts_path.open("a", newline="") as out:
+              w = csv.DictWriter(out, fieldnames=header)
+              if write_header:
+                  w.writeheader()
+              w.writerow(new_line)
+          print(f"appended to {ts_path}")
+          PY
 
           git config user.name  "github-actions"
           git config user.email "github-actions@github.com"
@@ -61,8 +105,8 @@ jobs:
           git fetch origin "${BR}" || true
           git checkout -B "${BR}"
 
-          git add ci/metrics/complete_profile/runs/
-          git diff --cached --quiet || git commit -m "metrics: complete_profile run ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::8})"
+          git add ci/metrics/complete_profile/complete_profile_timeseries.csv
+          git diff --cached --quiet || git commit -m "metrics: append run ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::8})"
           git push -f origin "${BR}"
 
       - name: Generate plots
@@ -74,46 +118,47 @@ jobs:
           from pathlib import Path
           import matplotlib.pyplot as plt
 
-          runs_dir = Path("ci/metrics/complete_profile/runs")
-          out_png  = Path("build/complete_profile_last30.png")
+          ts_csv = Path("ci/metrics/complete_profile/complete_profile_timeseries.csv")
+          out_png = Path("build/complete_profile_last30.png")
           out_png.parent.mkdir(parents=True, exist_ok=True)
 
-          files = sorted(runs_dir.glob("*.csv"))[-30:]  # last 30 by filename (timestamp prefix)
-          if not files:
-              raise SystemExit("No historical CSVs found")
+          if not ts_csv.exists():
+              raise SystemExit("time-series CSV not found")
 
-          # Dict of series per column
-          series = {}
+          rows = []
+          with ts_csv.open(newline="") as fh:
+              reader = csv.DictReader(fh)
+              header = reader.fieldnames or []
+              for r in reader:
+                  rows.append(r)
 
-          for f in files:
-              with f.open(newline="") as fh:
-                  reader = csv.DictReader(fh)
-                  row = next(reader, None)
-                  if row is None:
-                      continue
-                  # Initialize keys on first file
-                  if not series:
-                      for key in row.keys():
-                          series[key] = []
-                  # Append values
-                  for key in series:
-                      val = row.get(key)
-                      try:
-                          series[key].append(int(val))
-                      except Exception:
-                          series[key].append(0)
+          if not rows:
+              raise SystemExit("No rows in time-series CSV")
 
-          if not any(series.values()):
-              raise SystemExit("No numeric values found")
+          rows = rows[-30:]  # last 30 runs
 
-          x = range(1, len(files)+1)
+          # Choose numeric columns (skip date, run, sha)
+          skip = {"date","run","sha"}
+          cols = [h for h in header if h not in skip]
+
+          x = range(1, len(rows)+1)
+          dates = [r["date"] for r in rows]
+
           plt.figure()
-          for key, values in series.items():
-              plt.plot(x, values, label=key)
+          for key in cols:
+              try:
+                  ys = [int(r.get(key,0)) for r in rows]
+              except Exception:
+                  continue
+              plt.plot(x, ys, label=key)
 
           plt.title("Complete Profile")
-          plt.xlabel("Run (old → new)")
+          plt.xlabel("Date")
           plt.ylabel("Bytes")
+          step = max(1, len(dates)//8)
+          shown = list(range(0, len(dates), step))
+          plt.xticks([i+1 for i in shown], [dates[i] for i in shown], rotation=45, ha="right")
+
           plt.legend()
           plt.tight_layout()
           plt.savefig(out_png)
