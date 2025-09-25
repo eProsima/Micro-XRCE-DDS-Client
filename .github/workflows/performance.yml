@@ -98,12 +98,10 @@ jobs:
           git config user.email "github-actions@github.com"
 
           BR="memory/performance" # Use this branch to store performance results
-          # git fetch origin "${BR}" || true
-          # git checkout -B "${BR}"
 
           python3 ci/metrics/save_results.py \
             --input results/complete_profile.csv \
-            --output ci/metrics/complete_profile/complete_profile_timeseries.csv
+            --output ci/metrics/memory/complete_profile_timeseries.csv
           python3 ci/metrics/save_results.py \
             --input results/core_profile.csv \
             --output ci/metrics/memory/core_profile_timeseries.csv
@@ -120,8 +118,7 @@ jobs:
             --input results/profiles_text.csv \
             --output ci/metrics/memory/profiles_text_timeseries.csv
 
-          git status
-          git add ci/metrics/*_timeseries.csv
+          git add ci/metrics/memory/*_timeseries.csv
           git diff --cached --quiet || git commit -m "metrics: append run ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::8})"
           git push origin "${BR}"
 
@@ -186,7 +183,7 @@ jobs:
         with:
           name: performance-plots
           path: build/*.png
-          if-no-files-found: warning
+          if-no-files-found: warn
 
       - name: Add summary
         if: always()
