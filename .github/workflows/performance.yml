@@ -1,6 +1,9 @@
 name: Weekly Performance
 
 on:
+  pull_request:
+    branches:
+      - develop
   workflow_dispatch:
     inputs:
       name:
