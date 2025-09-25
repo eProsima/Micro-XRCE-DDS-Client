@@ -49,54 +49,6 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          ts_dir="ci/metrics/complete_profile"
-          ts_csv="${ts_dir}/complete_profile_timeseries.csv"
-          mkdir -p "${ts_dir}"
-
-          python3 - <<'PY'
-          import csv, os
-          from pathlib import Path
-          from datetime import datetime
-
-          run      = os.environ.get("GITHUB_RUN_NUMBER","")
-          sha      = os.environ.get("GITHUB_SHA","")[:8]
-          ts_path  = Path("ci/metrics/complete_profile/complete_profile_timeseries.csv")
-          src_path = Path("build/complete_profile.csv")
-
-          if not src_path.exists():
-              raise SystemExit("missing build/complete_profile.csv")
-
-          # Read first row and header from source csv
-          with src_path.open(newline="") as fh:
-              reader = csv.DictReader(fh)
-              rows = list(reader)
-          if not rows:
-              raise SystemExit("empty complete_profile.csv")
-          row = rows[0]
-
-          # Build a new row with date, run, sha, and all original cols
-          new_line = {"date": datetime.utcnow().isoformat(timespec="seconds"),
-                      "run": run, "sha": sha}
-          for key, val in row.items():
-              try:
-                  new_line[key] = int(val)
-              except Exception:
-                  new_line[key] = val
-
-          # Ensure header is consistent
-          write_header = not ts_path.exists()
-          if write_header:
-              header = ["date","run","sha"] + list(row.keys())
-          else:
-              with ts_path.open(newline="") as fh:
-                  header = next(csv.reader(fh))
-          with ts_path.open("a", newline="") as out:
-              w = csv.DictWriter(out, fieldnames=header)
-              if write_header:
-                  w.writeheader()
-              w.writerow(new_line)
-          print(f"appended to {ts_path}")
-          PY
 
           git config user.name  "github-actions"
           git config user.email "github-actions@github.com"
@@ -104,6 +56,10 @@ jobs:
           BR="memory/performance" # Use this branch to store performance results
           git fetch origin "${BR}" || true
           git checkout -B "${BR}"
+
+          python3 ci/metrics/save_results.py \
+            --input build/complete_profile.csv \
+            --output ci/metrics/complete_profile/complete_profile_timeseries.csv
 
           git add ci/metrics/complete_profile/complete_profile_timeseries.csv
           git diff --cached --quiet || git commit -m "metrics: append run ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::8})"
