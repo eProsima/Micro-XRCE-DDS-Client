@@ -175,6 +175,11 @@ jobs:
           {
             echo "## 📊 Performance Metrics (last 52 runs)"
             echo
+            echo "The workflow triggering this run can be found [here](${{ github.event.workflow_run.html_url }})."
+            echo "The python scripts and the data used to generate these plots can be found in the [memory/performance](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/tree/memory/performance) branch."
+            echo "The scripts and data can be modified without affecting develop nor master branches."
+            echo "memory/performance branch is unprotected and can be pushed to in case any manual modifications are needed."
+            echo
             echo "### Complete Profile"
             echo "![Complete Profile](./plots/complete_profile_plot.png)"
             echo
