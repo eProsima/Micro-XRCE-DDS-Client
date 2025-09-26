@@ -64,11 +64,14 @@ jobs:
     needs: performance
 
     steps:
+      - name: Set branch name
+        run: echo "BR=memory/performance" >> $GITHUB_ENV # Use this branch to store performance results
+
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          ref: memory/performance
+          ref: ${{ env.BR }}
 
       - name: Install Python and prerequisites
         shell: bash
@@ -92,8 +95,6 @@ jobs:
           git config user.name  "github-actions"
           git config user.email "github-actions@github.com"
 
-          BR="memory/performance" # Use this branch to store performance results
-
           python3 ci/metrics/save_results.py \
             --input results/complete_profile.csv \
             --output ci/metrics/memory/complete_profile_timeseries.csv
@@ -115,7 +116,7 @@ jobs:
 
           git add ci/metrics/memory/*_timeseries.csv
           git diff --cached --quiet || git commit -m "metrics: append run ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::8})"
-          git push origin "${BR}"
+          git push origin "${{ env.BR }}"
 
       - name: Generate plots
         shell: bash
@@ -126,77 +127,84 @@ jobs:
           
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/complete_profile_timeseries.csv \
-            --output plots/complete_profile_plot.svg \
+            --output ci/metrics/plots/complete_profile_plot.svg \
             --title "Complete Profile" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/core_profile_timeseries.csv \
-            --output plots/core_profile_plot.svg \
+            --output ci/metrics/plots/core_profile_plot.svg \
             --title "Core Profile" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/stack_timeseries.csv \
-            --output plots/stack_plot.svg \
+            --output ci/metrics/plots/stack_plot.svg \
             --title "Simple App Stack Usage" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_bss_timeseries.csv \
-            --output plots/profiles_bss_plot.svg \
+            --output ci/metrics/plots/profiles_bss_plot.svg \
             --title "Increase of .bss memory by enabling profiles" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_data_timeseries.csv \
-            --output plots/profiles_data_plot.svg \
+            --output ci/metrics/plots/profiles_data_plot.svg \
             --title "Increase of .data memory by enabling profiles" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_text_timeseries.csv \
-            --output plots/profiles_text_plot.svg \
+            --output ci/metrics/plots/profiles_text_plot.svg \
             --title "Increase of .text memory by enabling profiles" \
             --ylabel "Bytes" \
             --last "$LAST_N"
+
+          git add ci/metrics/plots/*.svg
+          git diff --cached --quiet || git commit -m "metrics: update plots (${GITHUB_RUN_NUMBER})"
+          git push origin "${{ env.BR }}"
 
       - name: Upload plots
         uses: actions/upload-artifact@v4
         with:
           name: performance-plots
-          path: plots/*.svg
+          path: ci/metrics/plots/*.svg
           if-no-files-found: warn
 
       - name: Add plots to summary
         if: always()
         shell: bash
         run: |
-          b64() { base64 --wrap=0 "$1" 2>/dev/null || base64 -w0 "$1"; }
-          CPP=$(b64 plots/complete_profile_plot.svg)
+          set -euo pipefail
+          
+          BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/memory/performance/ci/metrics/plots"
+          CB="?r=${GITHUB_RUN_NUMBER}"
+
           {
             echo "## 📊 Performance Metrics (last 52 runs)"
             echo
             echo "The workflow triggering this run can be found in the default branch."
             echo "The python scripts and the data used to generate these plots can be found in the [memory/performance](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/tree/memory/performance) branch."
             echo "The scripts and data can be modified without affecting develop nor master branches."
-            echo "memory/performance branch is unprotected and can be pushed to in case any manual modifications are needed."
+            echo "The \`memory/performance\` branch is unprotected and can be pushed to in case any manual modifications are needed."
             echo
             echo "### Complete Profile"
-            echo "![Complete Profile](data:image/svg;base64,${CPP})"
+            echo "<img src=\"${BASE}/complete_profile_plot.svg${CB}\" alt=\"Complete Profile\" width=\"720\"/>"
             echo
             echo "### Core Profile"
-            echo "![Core Profile](./plots/core_profile_plot.svg)"
+            echo "<img src=\"${BASE}/core_profile_plot.svg${CB}\" alt=\"Core Profile\" width=\"720\"/>"
             echo
             echo "### Simple App Stack Usage"
-            echo "![Stack](./plots/stack_plot.svg)"
+            echo "<img src=\"${BASE}/stack_plot.svg${CB}\" alt=\"Stack\" width=\"720\"/>"
             echo
             echo "### Increase of .bss memory by enabling profiles"
-            echo "![.bss Profiles](./plots/profiles_bss_plot.svg)"
+            echo "<img src=\"${BASE}/profiles_bss_plot.svg${CB}\" alt=\"bss\" width=\"720\"/>"
             echo
             echo "### Increase of .data memory by enabling profiles"
-            echo "![.data Profiles](./plots/profiles_data_plot.svg)"
+            echo "<img src=\"${BASE}/profiles_data_plot.svg${CB}\" alt=\"data\" width=\"720\"/>"
             echo
             echo "### Increase of .text memory by enabling profiles"
-            echo "![.text Profiles](./plots/profiles_text_plot.svg)"
+            echo "<img src=\"${BASE}/profiles_text_plot.svg${CB}\" alt=\"text\" width=\"720\"/>"
           } >> "$GITHUB_STEP_SUMMARY"
