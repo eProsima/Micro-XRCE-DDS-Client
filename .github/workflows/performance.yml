@@ -167,3 +167,29 @@ jobs:
           name: performance-plots
           path: plots/*.png
           if-no-files-found: warn
+
+      - name: Add plots to summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## 📊 Performance Metrics (last 52 runs)"
+            echo
+            echo "### Complete Profile"
+            echo "![Complete Profile](./plots/complete_profile_plot.png)"
+            echo
+            echo "### Core Profile"
+            echo "![Core Profile](./plots/core_profile_plot.png)"
+            echo
+            echo "### Simple App Stack Usage"
+            echo "![Stack](./plots/stack_plot.png)"
+            echo
+            echo "### Increase of .bss memory by enabling profiles"
+            echo "![.bss Profiles](./plots/profiles_bss_plot.png)"
+            echo
+            echo "### Increase of .data memory by enabling profiles"
+            echo "![.data Profiles](./plots/profiles_data_plot.png)"
+            echo
+            echo "### Increase of .text memory by enabling profiles"
+            echo "![.text Profiles](./plots/profiles_text_plot.png)"
+          } >> "$GITHUB_STEP_SUMMARY"
