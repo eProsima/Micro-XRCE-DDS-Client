@@ -129,37 +129,37 @@ jobs:
             --output plots/complete_profile_plot.png \
             --title "Complete Profile" \
             --ylabel "Bytes" \
-            --last LAST_N
+            --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/core_profile_timeseries.csv \
             --output plots/core_profile_plot.png \
             --title "Core Profile" \
             --ylabel "Bytes" \
-            --last LAST_N
+            --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/stack_timeseries.csv \
             --output plots/stack_plot.png \
             --title "Simple App Stack Usage" \
             --ylabel "Bytes" \
-            --last LAST_N
+            --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_bss_timeseries.csv \
             --output plots/profiles_bss_plot.png \
             --title "Increase of .bss memory by enabling profiles" \
             --ylabel "Bytes" \
-            --last LAST_N
+            --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_data_timeseries.csv \
             --output plots/profiles_data_plot.png \
             --title "Increase of .data memory by enabling profiles" \
             --ylabel "Bytes" \
-            --last LAST_N
+            --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_text_timeseries.csv \
             --output plots/profiles_text_plot.png \
             --title "Increase of .text memory by enabling profiles" \
             --ylabel "Bytes" \
-            --last LAST_N
+            --last "$LAST_N"
 
       - name: Upload plots
         uses: actions/upload-artifact@v4
