@@ -11,4 +11,4 @@ for snapshot in msparser_data['snapshots']:
 with open('stack.csv', 'w+') as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_ALL)
     csv_writer.writerow(['stack'])
-    csv_writer.writerow([max(stack)+1111])
+    csv_writer.writerow([max(stack)])
