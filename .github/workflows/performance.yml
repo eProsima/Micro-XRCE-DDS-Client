@@ -58,8 +58,8 @@ jobs:
             build/profiles_text.csv
           if-no-files-found: error
 
-  analyze-metrics:
-    name: Analyze Metrics
+  save-metrics-and-plots:
+    name: Save Metrics and Generate Plots
     runs-on: ubuntu-24.04
     needs: performance
 
@@ -208,3 +208,26 @@ jobs:
             echo "### Increase of .text memory by enabling profiles"
             echo "<img src=\"${BASE}/profiles_text_plot.svg${CB}\" alt=\"text\" width=\"720\"/>"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  analyze-metrics:
+    name: Analyze Metrics
+    runs-on: ubuntu-24.04
+    needs: save-metrics-and-plots
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: memory/performance
+
+      - name: Analyze results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 ci/metrics/check_last_result.py --input ci/metrics/memory/complete_profile_timeseries.csv
+          python3 ci/metrics/check_last_result.py --input ci/metrics/memory/core_profile_timeseries.csv
+          python3 ci/metrics/check_last_result.py --input ci/metrics/memory/stack_timeseries.csv
+          python3 ci/metrics/check_last_result.py --input ci/metrics/memory/profiles_bss_timeseries.csv
+          python3 ci/metrics/check_last_result.py --input ci/metrics/memory/profiles_data_timeseries.csv
+          python3 ci/metrics/check_last_result.py --input ci/metrics/memory/profiles_text_timeseries.csv
