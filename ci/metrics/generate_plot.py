@@ -43,10 +43,10 @@ for key in cols:
         ys = [int(r.get(key, 0)) for r in rows]
     except Exception:
         continue
-    plt.plot(x, ys, label=key)
+    plt.plot(x, ys, label=key, marker="o")
 
 plt.title(args.title)
-plt.xlabel("Date")
+# plt.xlabel("Date")
 plt.ylabel(args.ylabel)
 
 # Thin x labels for readability
