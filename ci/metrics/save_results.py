@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import csv, os, sys, argparse
 from pathlib import Path
-from datetime import datetime
+import datetime
 
 parser = argparse.ArgumentParser(description="Append a run's CSV to a time-series file")
 parser.add_argument("--input", required=True, help="Path to the source CSV (from memory_test.sh)")
@@ -26,7 +26,7 @@ row = rows[0]
 
 # Build a new row with metadata and all original columns
 new_line = {
-    "date": datetime.utcnow().isoformat(timespec="seconds"),
+    "date": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
     "run": run,
     "sha": sha,
 }
