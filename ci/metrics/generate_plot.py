@@ -45,8 +45,10 @@ for key in cols:
         continue
     plt.plot(x, ys, label=key, marker="o")
 
+plt.ylim(bottom=0)
+plt.grid(True, which="major", axis="y", linestyle=":", alpha=0.5)
+
 plt.title(args.title)
-# plt.xlabel("Date")
 plt.ylabel(args.ylabel)
 
 # Thin x labels for readability
