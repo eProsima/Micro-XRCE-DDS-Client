@@ -126,37 +126,37 @@ jobs:
           
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/complete_profile_timeseries.csv \
-            --output plots/complete_profile_plot.png \
+            --output plots/complete_profile_plot.svg \
             --title "Complete Profile" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/core_profile_timeseries.csv \
-            --output plots/core_profile_plot.png \
+            --output plots/core_profile_plot.svg \
             --title "Core Profile" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/stack_timeseries.csv \
-            --output plots/stack_plot.png \
+            --output plots/stack_plot.svg \
             --title "Simple App Stack Usage" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_bss_timeseries.csv \
-            --output plots/profiles_bss_plot.png \
+            --output plots/profiles_bss_plot.svg \
             --title "Increase of .bss memory by enabling profiles" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_data_timeseries.csv \
-            --output plots/profiles_data_plot.png \
+            --output plots/profiles_data_plot.svg \
             --title "Increase of .data memory by enabling profiles" \
             --ylabel "Bytes" \
             --last "$LAST_N"
           python3 ci/metrics/generate_plot.py \
             --input ci/metrics/memory/profiles_text_timeseries.csv \
-            --output plots/profiles_text_plot.png \
+            --output plots/profiles_text_plot.svg \
             --title "Increase of .text memory by enabling profiles" \
             --ylabel "Bytes" \
             --last "$LAST_N"
@@ -165,36 +165,38 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: performance-plots
-          path: plots/*.png
+          path: plots/*.svg
           if-no-files-found: warn
 
       - name: Add plots to summary
         if: always()
         shell: bash
         run: |
+          b64() { base64 --wrap=0 "$1" 2>/dev/null || base64 -w0 "$1"; }
+          CPP=$(b64 plots/complete_profile_plot.svg)
           {
             echo "## 📊 Performance Metrics (last 52 runs)"
             echo
-            echo "The workflow triggering this run can be found [here](${{ github.event.workflow_run.html_url }})."
+            echo "The workflow triggering this run can be found in the default branch."
             echo "The python scripts and the data used to generate these plots can be found in the [memory/performance](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/tree/memory/performance) branch."
             echo "The scripts and data can be modified without affecting develop nor master branches."
             echo "memory/performance branch is unprotected and can be pushed to in case any manual modifications are needed."
             echo
             echo "### Complete Profile"
-            echo "![Complete Profile](./plots/complete_profile_plot.png)"
+            echo "![Complete Profile](data:image/svg;base64,${CPP})"
             echo
             echo "### Core Profile"
-            echo "![Core Profile](./plots/core_profile_plot.png)"
+            echo "![Core Profile](./plots/core_profile_plot.svg)"
             echo
             echo "### Simple App Stack Usage"
-            echo "![Stack](./plots/stack_plot.png)"
+            echo "![Stack](./plots/stack_plot.svg)"
             echo
             echo "### Increase of .bss memory by enabling profiles"
-            echo "![.bss Profiles](./plots/profiles_bss_plot.png)"
+            echo "![.bss Profiles](./plots/profiles_bss_plot.svg)"
             echo
             echo "### Increase of .data memory by enabling profiles"
-            echo "![.data Profiles](./plots/profiles_data_plot.png)"
+            echo "![.data Profiles](./plots/profiles_data_plot.svg)"
             echo
             echo "### Increase of .text memory by enabling profiles"
-            echo "![.text Profiles](./plots/profiles_text_plot.png)"
+            echo "![.text Profiles](./plots/profiles_text_plot.svg)"
           } >> "$GITHUB_STEP_SUMMARY"
