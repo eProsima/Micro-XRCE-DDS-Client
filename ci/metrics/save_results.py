@@ -3,6 +3,8 @@ import csv, os, sys, argparse
 from pathlib import Path
 import datetime
 
+MAX_ROWS = 208 # 4 years of weekly runs
+
 parser = argparse.ArgumentParser(description="Append a run's CSV to a time-series file")
 parser.add_argument("--input", required=True, help="Path to the source CSV (from memory_test.sh)")
 parser.add_argument("--output", required=True, help="Path to the cumulative time-series CSV")
@@ -37,18 +39,29 @@ for key, val in row.items():
         new_line[key] = val
 
 # Ensure header is consistent
-write_header = not ts_path.exists()
-if write_header:
+if not ts_path.exists():
     header = ["date", "run", "sha"] + list(row.keys())
+    ts_path.parent.mkdir(parents=True, exist_ok=True)
+    with ts_path.open("w", newline="") as out:
+        w = csv.DictWriter(out, fieldnames=header)
+        w.writeheader()
+        w.writerow(new_line)
 else:
     with ts_path.open(newline="") as fh:
-        header = next(csv.reader(fh))
+        reader = list(csv.reader(fh))
+        header = reader[0]
+        existing = reader[1:]
 
-ts_path.parent.mkdir(parents=True, exist_ok=True)
-with ts_path.open("a", newline="") as out:
-    w = csv.DictWriter(out, fieldnames=header)
-    if write_header:
-        w.writeheader()
-    w.writerow(new_line)
+    # append new row
+    existing.append([new_line.get(h, "") for h in header])
 
-print(f"Appended row to {ts_path}")
+    # keep only last N rows
+    trimmed = existing[-MAX_ROWS:]
+
+    # rewrite file
+    with ts_path.open("w", newline="") as out:
+        w = csv.writer(out)
+        w.writerow(header)
+        w.writerows(trimmed)
+
+print(f"Appended row to {ts_path} (keeping last {MAX_ROWS} rows)")
