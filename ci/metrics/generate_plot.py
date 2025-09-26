@@ -12,9 +12,9 @@ parser.add_argument("--last", type=int, default=30, help="Number of last runs to
 args = parser.parse_args()
 
 ts_csv = Path(args.input)
-out_png = Path(args.output)
+out_file = Path(args.output)
 
-out_png.parent.mkdir(parents=True, exist_ok=True)
+out_file.parent.mkdir(parents=True, exist_ok=True)
 
 if not ts_csv.exists():
     sys.exit(f"{ts_csv} not found")
@@ -58,5 +58,5 @@ plt.xticks([i+1 for i in shown], [dates[i] for i in shown], rotation=45, ha="rig
 
 plt.legend()
 plt.tight_layout()
-plt.savefig(out_png)
-print(f"Wrote {out_png}")
+plt.savefig(out_file)
+print(f"Wrote {out_file}")
