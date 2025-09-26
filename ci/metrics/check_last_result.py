@@ -44,14 +44,13 @@ for c in cols:
 summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
 if summary_path:
     with open(summary_path, "a", encoding="utf-8") as s:
-        s.write("## Metric comparison (last vs previous)\n\n")
         s.write(f"File: `{ts_csv}`  \n")
         if diffs:
             s.write("| Metric | Previous | Last |\n|---|---:|---:|\n")
             for c, a, b in diffs:
                 s.write(f"| {c} | {a} | {b} |\n")
         else:
-            s.write("No differences detected.\n")
+            s.write("No differences detected to previous run.\n")
 
 if diffs:
     print("Differences detected:")
