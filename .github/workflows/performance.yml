@@ -84,11 +84,6 @@ jobs:
           name: performance-results
           path: results
 
-      - name: List files
-        shell: bash
-        run: |
-          ls -l results
-
       - name: Save results into memory
         shell: bash
         run: |
@@ -126,69 +121,49 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          python3 - <<'PY'
-          import csv
-          from pathlib import Path
-          import matplotlib.pyplot as plt
 
-          ts_csv = Path("ci/metrics/complete_profile/complete_profile_timeseries.csv")
-          out_png = Path("build/complete_profile_last30.png")
-          out_png.parent.mkdir(parents=True, exist_ok=True)
-
-          if not ts_csv.exists():
-              raise SystemExit("time-series CSV not found")
-
-          rows = []
-          with ts_csv.open(newline="") as fh:
-              reader = csv.DictReader(fh)
-              header = reader.fieldnames or []
-              for r in reader:
-                  rows.append(r)
-
-          if not rows:
-              raise SystemExit("No rows in time-series CSV")
-
-          rows = rows[-30:]  # last 30 runs
-
-          # Choose numeric columns (skip date, run, sha)
-          skip = {"date","run","sha"}
-          cols = [h for h in header if h not in skip]
-
-          x = range(1, len(rows)+1)
-          dates = [r["date"] for r in rows]
-
-          plt.figure()
-          for key in cols:
-              try:
-                  ys = [int(r.get(key,0)) for r in rows]
-              except Exception:
-                  continue
-              plt.plot(x, ys, label=key)
-
-          plt.title("Complete Profile")
-          plt.xlabel("Date")
-          plt.ylabel("Bytes")
-          step = max(1, len(dates)//8)
-          shown = list(range(0, len(dates), step))
-          plt.xticks([i+1 for i in shown], [dates[i] for i in shown], rotation=45, ha="right")
-
-          plt.legend()
-          plt.tight_layout()
-          plt.savefig(out_png)
-          print(f"Wrote {out_png}")
-          PY
+          LAST_N=52
+          
+          python3 ci/metrics/generate_plot.py \
+            --input ci/metrics/memory/complete_profile_timeseries.csv \
+            --output plots/complete_profile_plot.png \
+            --title "Complete Profile" \
+            --ylabel "Bytes" \
+            --last LAST_N
+          python3 ci/metrics/generate_plot.py \
+            --input ci/metrics/memory/core_profile_timeseries.csv \
+            --output plots/core_profile_plot.png \
+            --title "Core Profile" \
+            --ylabel "Bytes" \
+            --last LAST_N
+          python3 ci/metrics/generate_plot.py \
+            --input ci/metrics/memory/stack_timeseries.csv \
+            --output plots/stack_plot.png \
+            --title "Simple App Stack Usage" \
+            --ylabel "Bytes" \
+            --last LAST_N
+          python3 ci/metrics/generate_plot.py \
+            --input ci/metrics/memory/profiles_bss_timeseries.csv \
+            --output plots/profiles_bss_plot.png \
+            --title "Increase of .bss memory by enabling profiles" \
+            --ylabel "Bytes" \
+            --last LAST_N
+          python3 ci/metrics/generate_plot.py \
+            --input ci/metrics/memory/profiles_data_timeseries.csv \
+            --output plots/profiles_data_plot.png \
+            --title "Increase of .data memory by enabling profiles" \
+            --ylabel "Bytes" \
+            --last LAST_N
+          python3 ci/metrics/generate_plot.py \
+            --input ci/metrics/memory/profiles_text_timeseries.csv \
+            --output plots/profiles_text_plot.png \
+            --title "Increase of .text memory by enabling profiles" \
+            --ylabel "Bytes" \
+            --last LAST_N
 
       - name: Upload plots
         uses: actions/upload-artifact@v4
         with:
           name: performance-plots
-          path: build/*.png
+          path: plots/*.png
           if-no-files-found: warn
-
-      - name: Add summary
-        if: always()
-        shell: bash
-        run: |
-          echo "## Complete Profile (last 30 runs)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "![Complete Profile](./build/complete_profile_last30.png)" >> "$GITHUB_STEP_SUMMARY"
