@@ -1,7 +1,7 @@
 name: Weekly Performance
 
 on:
-  pull_request:
+  push:
     branches:
       - develop
   workflow_dispatch:
@@ -228,6 +228,7 @@ jobs:
 
           {
             echo "## Analyze Memory Metrics"
+            echo
             echo "⚠️ Failure of this job should be treated as a warning. It can be safely ignored if there are intentional changes that affect memory usage."
           } >> "$GITHUB_STEP_SUMMARY"
 
