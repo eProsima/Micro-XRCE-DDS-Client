@@ -225,6 +225,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          {
+            echo "## Analyze Memory Metrics"
+            echo "⚠️ Failure of this job should be treated as a warning. It can be safely ignored if there are intentional changes that affect memory usage."
+          } >> "$GITHUB_STEP_SUMMARY"
+
           python3 ci/metrics/check_last_result.py --input ci/metrics/memory/complete_profile_timeseries.csv
           python3 ci/metrics/check_last_result.py --input ci/metrics/memory/core_profile_timeseries.csv
           python3 ci/metrics/check_last_result.py --input ci/metrics/memory/stack_timeseries.csv
