@@ -12,4 +12,3 @@ with open('stack.csv', 'w+') as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_ALL)
     csv_writer.writerow(['stack'])
     csv_writer.writerow([max(stack)])
-
