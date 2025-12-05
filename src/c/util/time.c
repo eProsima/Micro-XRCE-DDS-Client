@@ -12,7 +12,7 @@
 #endif /* ifdef WIN32 */
 
 // PX4
-#if defined(__PX4_NUTTX) || defined(__PX4_POSIX) || defined(UCLIENT_PLATFORM_NUTTX) || defined(UCLIENT_PLATFORM_POSIX)
+#if defined(__PX4)
 
 #ifdef	__cplusplus
 # define __BEGIN_DECLS	extern "C" {
@@ -82,7 +82,7 @@ int64_t uxr_nanos(
     z_impl_clock_gettime(CLOCK_REALTIME, &ts);
     #endif /* if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3, 5, 99) */
     return (((int64_t)ts.tv_sec) * 1000000000) + ts.tv_nsec;
-#elif defined(__PX4_NUTTX) || defined(__PX4_POSIX) || defined(UCLIENT_PLATFORM_NUTTX) || defined(UCLIENT_PLATFORM_POSIX)
+#elif defined(__PX4)
 
     return (int64_t)(hrt_absolute_time() * 1000);
 #else
