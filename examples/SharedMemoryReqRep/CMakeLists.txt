@@ -33,7 +33,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     C_STANDARD_REQUIRED YES
     )
 
-target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>)
+target_link_libraries(${PROJECT_NAME} microxrcedds_client $<$<C_COMPILER_ID:GNU>:-Wl,--gc-sections,--no-export-dynamic>)
 
 if(UCLIENT_INSTALL_EXAMPLES)
     install(
