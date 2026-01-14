@@ -1,3 +1,8 @@
+extern "C"
+{
+#include <c/util/time.c>
+}
+
 #include <gtest/gtest.h>
 #include <uxr/client/client.h>
 
