@@ -33,6 +33,12 @@ struct uxrSession;
 #include "FreeRTOS.h"
 #include "semphr.h"
 #elif defined(UCLIENT_PLATFORM_ZEPHYR)
+#include <version.h>
+#if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(3, 1, 0)
+#include <zephyr/kernel.h>
+#else
+#include <zephyr.h>
+#endif
 #elif defined(UCLIENT_PLATFORM_POSIX)
 #include <pthread.h>
 #endif // ifdef WIN32
