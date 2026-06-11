@@ -158,11 +158,13 @@ bool on_full_output_buffer_fragmented(
 
     if (0 == remaining_blocks)
     {
+        UXR_UNLOCK_STREAM_ID(session, local_args->stream_id);
         if (!local_args->flush_callback(session, local_args->flush_callback_args) ||
                 0 == (remaining_blocks = get_available_free_slots(stream)))
         {
             return true;
         }
+        UXR_LOCK_STREAM_ID(session, local_args->stream_id);
     }
 
     size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream->base);
