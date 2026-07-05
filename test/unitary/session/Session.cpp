@@ -103,6 +103,7 @@ public:
     uint8_t input_reliable_buffer[MTU * HISTORY];
 
     static int listening_counter;
+    static int sending_counter;
 
     static bool send_msg(
             void* instance,
@@ -122,6 +123,13 @@ public:
         else if (std::string("SendMessageError") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
         {
             EXPECT_EQ(size_t(MTU), len);
+            return false;
+        }
+        else if (std::string("FlashReliableStreamSendError") ==
+                ::testing::UnitTest::GetInstance()->current_test_info()->name())
+        {
+            EXPECT_EQ(size_t(OFFSET + SUBHEADER_SIZE + 8), len);
+            SessionTest::sending_counter++;
             return false;
         }
         else if (std::string("SendHeartbeat") == ::testing::UnitTest::GetInstance()->current_test_info()->name())
@@ -272,6 +280,7 @@ public:
 
 SessionTest* SessionTest::current = nullptr;
 int SessionTest::listening_counter;
+int SessionTest::sending_counter;
 
 TEST_F(SessionTest, SetStatusCallback)
 {
@@ -353,6 +362,28 @@ TEST_F(SessionTest, FlashStreams)
     (void) uxr_prepare_stream_to_write_submessage(&session, output_reliable, 8, &ub, 1, 0);
     (void) uxr_prepare_stream_to_write_submessage(&session, output_best_effort, 8, &ub, 1, 0);
     uxr_flash_output_streams(&session);
+}
+
+TEST_F(SessionTest, FlashReliableStreamSendError)
+{
+    SessionTest::sending_counter = 0;
+
+    ucdrBuffer ub;
+    uxrStreamId output_reliable = uxr_stream_id(0, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
+    (void) uxr_prepare_stream_to_write_submessage(&session, output_reliable, 8, &ub, 1, 0);
+
+    uxrOutputReliableStream* stream = &session.streams.output_reliable[0];
+    uxr_flash_output_streams(&session);
+
+    EXPECT_EQ(1, SessionTest::sending_counter);
+    EXPECT_EQ(SEQ_NUM_MAX, stream->last_sent);
+    EXPECT_EQ(0u, stream->last_written);
+
+    uxr_flash_output_streams(&session);
+
+    EXPECT_EQ(2, SessionTest::sending_counter);
+    EXPECT_EQ(SEQ_NUM_MAX, stream->last_sent);
+    EXPECT_EQ(0u, stream->last_written);
 }
 
 TEST_F(SessionTest, WaitSessionStatusBad)

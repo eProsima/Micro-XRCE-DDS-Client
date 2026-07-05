@@ -45,6 +45,9 @@ bool uxr_prepare_next_reliable_buffer_to_send(
         uint8_t** buffer,
         size_t* length,
         uxrSeqNum* seq_num);
+void uxr_cancel_reliable_buffer_to_send(
+        uxrOutputReliableStream* stream,
+        uxrSeqNum seq_num);
 
 bool uxr_update_output_stream_heartbeat_timestamp(
         uxrOutputReliableStream* stream,
