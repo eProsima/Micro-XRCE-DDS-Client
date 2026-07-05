@@ -2,7 +2,7 @@ import sys
 import re
 import csv
 
-pattern = re.compile('(?P<name>[\w]+)\s(?P<text>[\d]+)\s(?P<data>[\d]+)\s(?P<bss>[\d]+)\s')
+pattern = re.compile(r'(?P<name>[\w]+)\s(?P<text>[\d]+)\s(?P<data>[\d]+)\s(?P<bss>[\d]+)\s')
 
 # Take data from file.
 complete_profile_data = []
