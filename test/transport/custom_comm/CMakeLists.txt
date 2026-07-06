@@ -16,7 +16,7 @@
 #
 ###############################################################################
 
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
 # New project because of the CXX GTest dependency.
 if(CMAKE_VERSION VERSION_LESS 3.0)
