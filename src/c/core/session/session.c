@@ -629,7 +629,11 @@ void uxr_flash_output_streams(
         while (uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
         {
             uxr_stamp_session_header(&session->info, id.raw, seq_num, buffer);
-            send_message(session, buffer, length);
+            if (!send_message(session, buffer, length))
+            {
+                uxr_cancel_reliable_buffer_to_send(stream, seq_num);
+                break;
+            }
         }
 
         UXR_UNLOCK_STREAM_ID(session, id);

@@ -192,6 +192,19 @@ bool uxr_prepare_next_reliable_buffer_to_send(
     return data_to_send;
 }
 
+void uxr_cancel_reliable_buffer_to_send(
+        uxrOutputReliableStream* stream,
+        uxrSeqNum seq_num)
+{
+    uxrSeqNum next_seq_num = uxr_seq_num_add(seq_num, 1);
+    stream->last_sent = uxr_seq_num_sub(seq_num, 1);
+    if (stream->last_written == next_seq_num &&
+            stream->offset == uxr_get_reliable_buffer_size(&stream->base, next_seq_num))
+    {
+        stream->last_written = seq_num;
+    }
+}
+
 bool uxr_update_output_stream_heartbeat_timestamp(
         uxrOutputReliableStream* stream,
         int64_t current_timestamp)
