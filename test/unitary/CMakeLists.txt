@@ -89,4 +89,6 @@ unitary_test(SessionInfo        session/SessionInfo.cpp)
 unitary_test(Session            session/Session.cpp)
 unitary_test(WriteReadAccess    session/WriteReadAccess.cpp)
 unitary_test(Utils              session/Utils.cpp)
+unitary_test(DiscoveryTransport profile/DiscoveryTransport.cpp)
+target_link_libraries(DiscoveryTransport PRIVATE microxrcedds_client)
 

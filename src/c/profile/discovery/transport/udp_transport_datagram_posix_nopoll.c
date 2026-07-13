@@ -88,7 +88,7 @@ void uxr_bytes_to_ip(
         char* ip)
 {
     struct in_addr addr;
-    addr.s_addr = (in_addr_t)(*bytes + (*(bytes + 1) << 8) + (*(bytes + 2) << 16) + (*(bytes + 3) << 24));
+    memcpy(&addr.s_addr, bytes, sizeof(addr.s_addr));
     char* internal_ip = inet_ntoa(addr);
     strcpy(ip, internal_ip);
 }
