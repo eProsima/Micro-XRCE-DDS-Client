@@ -50,7 +50,7 @@ if(BUILD_EXAMPLE)
         PRIVATE
         microxrcedds_client
         $<$<BOOL:${WIN32}>:ws2_32>
-        $<$<C_COMPILER_ID:GNU>:-Wl,--gc-section,--no-export-dynamic>
+        $<$<C_COMPILER_ID:GNU>:-Wl,--gc-sections,--no-export-dynamic>
         )
 
     if(UCLIENT_INSTALL_EXAMPLES)
