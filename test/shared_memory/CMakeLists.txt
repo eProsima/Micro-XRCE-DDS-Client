@@ -78,3 +78,5 @@ set_target_properties(sharedmem_test PROPERTIES
     CXX_STANDARD_REQUIRED
         YES
     )
+
+include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/../../src)
