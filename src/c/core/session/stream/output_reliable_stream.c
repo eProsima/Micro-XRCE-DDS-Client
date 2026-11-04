@@ -275,6 +275,15 @@ void uxr_process_acknack(
         uxrSeqNum first_unacked_seq_num)
 {
     uxrSeqNum last_acked_seq_num = uxr_seq_num_sub(first_unacked_seq_num, 1);
+
+    // A valid ACKNACK acknowledges a position in [last_acknown, last_sent]. ACKNACKs can be
+    // reordered, and a stale one would underflow and clean the whole history.
+    if (0 > uxr_seq_num_cmp(last_acked_seq_num, stream->last_acknown) ||
+            0 < uxr_seq_num_cmp(last_acked_seq_num, stream->last_sent))
+    {
+        return;
+    }
+
     size_t buffers_to_clean = uxr_seq_num_sub(last_acked_seq_num, stream->last_acknown);
     for (size_t i = 0; i < buffers_to_clean; i++)
     {
