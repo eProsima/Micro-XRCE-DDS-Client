@@ -444,6 +444,56 @@ TEST_F(OutputReliableStreamTest, AcknackProcessLost)
     EXPECT_EQ(message_length, uxr_get_reliable_buffer_size(&stream.base, 0));
 }
 
+TEST_F(OutputReliableStreamTest, AcknackProcessStale)
+{
+    ucdrBuffer ub;
+    uint8_t* message; size_t length; uxrSeqNum seq_num;
+    for (int i = 0; i < 2; ++i)
+    {
+        (void) uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, &ub);
+        (void) uxr_prepare_next_reliable_buffer_to_send(&stream, &message, &length, &seq_num);
+    }
+    uxr_process_acknack(&stream, 0, uxrSeqNum(2));
+    ASSERT_EQ(1u, stream.last_acknown);
+
+    // Written, but not sent yet
+    (void) uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, &ub);
+    size_t message_length = uxr_get_reliable_buffer_size(&stream.base, 2);
+    ASSERT_NE(OFFSET, message_length);
+
+    // A reordered ACKNACK, older than the one above
+    uxr_process_acknack(&stream, 0, uxrSeqNum(1));
+    EXPECT_EQ(1u, stream.last_acknown);
+    EXPECT_EQ(message_length, uxr_get_reliable_buffer_size(&stream.base, 2));
+
+    EXPECT_TRUE(uxr_prepare_next_reliable_buffer_to_send(&stream, &message, &length, &seq_num));
+    EXPECT_EQ(2u, seq_num);
+    EXPECT_EQ(message_length, length);
+}
+
+TEST_F(OutputReliableStreamTest, AcknackProcessBeyondSent)
+{
+    ucdrBuffer ub;
+    uint8_t* message; size_t length; uxrSeqNum seq_num;
+    (void) uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, &ub);
+    (void) uxr_prepare_next_reliable_buffer_to_send(&stream, &message, &length, &seq_num);
+    size_t sent_length = uxr_get_reliable_buffer_size(&stream.base, 0);
+
+    // Written, but not sent yet
+    (void) uxr_prepare_reliable_buffer_to_write(&stream, SUBMESSAGE_SIZE, &ub);
+    size_t unsent_length = uxr_get_reliable_buffer_size(&stream.base, 1);
+    ASSERT_NE(OFFSET, unsent_length);
+
+    // Acknowledges seq 1, which was never sent
+    uxr_process_acknack(&stream, 0, uxrSeqNum(2));
+    EXPECT_EQ(SEQ_NUM_MAX, stream.last_acknown);
+    EXPECT_EQ(sent_length, uxr_get_reliable_buffer_size(&stream.base, 0));
+    EXPECT_EQ(unsent_length, uxr_get_reliable_buffer_size(&stream.base, 1));
+
+    EXPECT_TRUE(uxr_prepare_next_reliable_buffer_to_send(&stream, &message, &length, &seq_num));
+    EXPECT_EQ(1u, seq_num);
+}
+
 TEST_F(OutputReliableStreamTest, SendMessageLostNoLost)
 {
     uint8_t* lost_message; size_t lost_length; uxrSeqNum lost_seq_num_it;
