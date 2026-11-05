@@ -154,16 +154,27 @@ bool on_full_output_buffer_fragmented(
 
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, local_args->stream_id.index);
 
+    UXR_LOCK_STREAM_STATE(stream);
     size_t remaining_blocks = get_available_free_slots(stream);
+    UXR_UNLOCK_STREAM_STATE(stream);
 
     if (0 == remaining_blocks)
     {
-        if (!local_args->flush_callback(session, local_args->flush_callback_args) ||
-                0 == (remaining_blocks = get_available_free_slots(stream)))
+        // The stream mutex stays held, to keep this message whole while it waits for an ACKNACK
+        if (!local_args->flush_callback(session, local_args->flush_callback_args))
+        {
+            return true;
+        }
+        UXR_LOCK_STREAM_STATE(stream);
+        remaining_blocks = get_available_free_slots(stream);
+        UXR_UNLOCK_STREAM_STATE(stream);
+        if (0 == remaining_blocks)
         {
             return true;
         }
     }
+
+    UXR_LOCK_STREAM_STATE(stream);
 
     size_t buffer_capacity = uxr_get_reliable_buffer_capacity(&stream->base);
     uint16_t available_block_size = (uint16_t)(buffer_capacity - (uint16_t)(stream->offset + SUBHEADER_SIZE));
@@ -191,6 +202,8 @@ bool on_full_output_buffer_fragmented(
     }
 
     stream->last_written = uxr_seq_num_add(stream->last_written, 1);
+
+    UXR_UNLOCK_STREAM_STATE(stream);
 
     // Preparing the buffer for the user
     ucdr_init_buffer(
@@ -224,7 +237,9 @@ uint16_t uxr_prepare_output_stream_fragmented(
         return UXR_INVALID_REQUEST_ID;
     }
 
+    UXR_LOCK_STREAM_STATE(stream);
     size_t remaining_blocks = get_available_free_slots(stream);
+    UXR_UNLOCK_STREAM_STATE(stream);
 
     if (0 == remaining_blocks)
     {
@@ -234,13 +249,17 @@ uint16_t uxr_prepare_output_stream_fragmented(
             return UXR_INVALID_REQUEST_ID;
         }
         UXR_LOCK_STREAM_ID(session, stream_id);
+        UXR_LOCK_STREAM_STATE(stream);
         remaining_blocks = get_available_free_slots(stream);
+        UXR_UNLOCK_STREAM_STATE(stream);
         if (0 == remaining_blocks)
         {
             UXR_UNLOCK_STREAM_ID(session, stream_id);
             return UXR_INVALID_REQUEST_ID;
         }
     }
+
+    UXR_LOCK_STREAM_STATE(stream);
 
     uxrSeqNum seq_num = stream->last_written;
     uint8_t* buffer = uxr_get_reliable_buffer(&stream->base, seq_num);
@@ -276,6 +295,8 @@ uint16_t uxr_prepare_output_stream_fragmented(
         (uint32_t)(buffer_capacity - buffer_size - SUBHEADER_SIZE));
 
     stream->last_written = seq_num;
+
+    UXR_UNLOCK_STREAM_STATE(stream);
 
     // Fill the SUBMESSAGE_ID_WRITE_DATA
     size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + data_size;

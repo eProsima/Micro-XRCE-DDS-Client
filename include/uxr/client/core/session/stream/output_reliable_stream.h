@@ -52,6 +52,7 @@ typedef struct uxrOutputReliableStream
 
 #ifdef UCLIENT_PROFILE_MULTITHREAD
     uxrMutex mutex;
+    uxrMutex state_mutex;
 #endif // ifdef UCLIENT_PROFILE_MULTITHREAD
 
 } uxrOutputReliableStream;

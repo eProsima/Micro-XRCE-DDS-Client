@@ -20,6 +20,8 @@ extern "C"
 {
 #endif // ifdef __cplusplus
 
+#include <stdbool.h>
+
 #include <uxr/client/config.h>
 #include <uxr/client/visibility.h>
 #include <uxr/client/core/session/stream/stream_id.h>
@@ -65,6 +67,9 @@ UXRDLLAPI void uxr_lock(
 UXRDLLAPI void uxr_unlock(
         uxrMutex* mutex);
 
+UXRDLLAPI bool uxr_try_lock(
+        uxrMutex* mutex);
+
 // Conditional defines
 
 #define UXR_INIT_LOCK(X) uxr_init_lock(X)
@@ -91,6 +96,15 @@ UXRDLLAPI void uxr_unlock(
             uxr_unlock(stream_mutex); \
         } \
 }
+
+// A stream's state mutex guards its sequence numbers, slot sizes and heartbeat state, and is the
+// innermost lock: nothing waits for another lock or for an ACKNACK while holding it. The stream
+// mutex keeps one message whole, and can stay held while that message waits for an ACKNACK, so
+// nothing may wait for it while holding the session mutex. The lock order is stream mutex,
+// session mutex, input stream mutexes, state mutex.
+#define UXR_LOCK_STREAM_STATE(stream) uxr_lock(&(stream)->state_mutex)
+#define UXR_UNLOCK_STREAM_STATE(stream) uxr_unlock(&(stream)->state_mutex)
+#define UXR_TRY_LOCK(X) uxr_try_lock(X)
 
 #define UXR_LOCK_ALL_INPUT_STREAMS(session) \
     for (uint8_t i = 0; i < session->streams.input_best_effort_size; ++i){ \
@@ -123,6 +137,10 @@ UXRDLLAPI void uxr_unlock(
 
 #define UXR_LOCK_STREAM_ID(session, stream_id)
 #define UXR_UNLOCK_STREAM_ID(session, stream_id)
+
+#define UXR_LOCK_STREAM_STATE(stream)
+#define UXR_UNLOCK_STREAM_STATE(stream)
+#define UXR_TRY_LOCK(X) true
 
 #define UXR_LOCK_ALL_INPUT_STREAMS(session)
 #define UXR_UNLOCK_ALL_INPUT_STREAMS(session)

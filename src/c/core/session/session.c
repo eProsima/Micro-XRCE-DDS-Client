@@ -624,10 +624,23 @@ void uxr_flash_output_streams(
 
         uint8_t* buffer; size_t length; uxrSeqNum seq_num;
 
-        UXR_LOCK_STREAM_ID(session, id);
-
-        while (uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num))
+        // Every caller holds the session mutex, so this must not wait for the stream mutex. If it
+        // is taken, a message is being written, and its writer flushes when it is ready.
+        if (!UXR_TRY_LOCK(&stream->mutex))
         {
+            continue;
+        }
+
+        for (;;)
+        {
+            UXR_LOCK_STREAM_STATE(stream);
+            bool data_to_send = uxr_prepare_next_reliable_buffer_to_send(stream, &buffer, &length, &seq_num);
+            UXR_UNLOCK_STREAM_STATE(stream);
+
+            if (!data_to_send)
+            {
+                break;
+            }
             uxr_stamp_session_header(&session->info, id.raw, seq_num, buffer);
             if (!send_message(session, buffer, length))
             {
@@ -636,7 +649,7 @@ void uxr_flash_output_streams(
             }
         }
 
-        UXR_UNLOCK_STREAM_ID(session, id);
+        UXR_UNLOCK(&stream->mutex);
     }
 }
 
@@ -703,7 +716,7 @@ bool listen_message_reliably(
             uxrOutputReliableStream* stream = &session->streams.output_reliable[i];
             uxrStreamId id = uxr_stream_id(i, UXR_RELIABLE_STREAM, UXR_OUTPUT_STREAM);
 
-            UXR_LOCK_STREAM_ID(session, id);
+            UXR_LOCK_STREAM_STATE(stream);
             if (uxr_update_output_stream_heartbeat_timestamp(stream, timestamp))
             {
                 write_submessage_heartbeat(session, id);
@@ -713,7 +726,7 @@ bool listen_message_reliably(
             {
                 next_heartbeat_timestamp = stream->next_heartbeat_timestamp;
             }
-            UXR_UNLOCK_STREAM_ID(session, id);
+            UXR_UNLOCK_STREAM_STATE(stream);
         }
 
         int32_t poll_to_next_heartbeat =
@@ -1052,7 +1065,7 @@ void read_submessage_acknack(
     uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, id.index);
     if (stream)
     {
-        UXR_LOCK_STREAM_ID(session, id);
+        UXR_LOCK_STREAM_STATE(stream);
 
         uint16_t nack_bitmap = (uint16_t)(((uint16_t)acknack.nack_bitmap[0] << 8) + acknack.nack_bitmap[1]);
         uxr_process_acknack(stream, nack_bitmap, acknack.first_unacked_seq_num);
@@ -1064,7 +1077,7 @@ void read_submessage_acknack(
             send_message(session, buffer, length);
         }
 
-        UXR_UNLOCK_STREAM_ID(session, id);
+        UXR_UNLOCK_STREAM_STATE(stream);
     }
 }
 
@@ -1222,7 +1235,13 @@ bool uxr_prepare_stream_to_write_submessage(
         case UXR_RELIABLE_STREAM:
         {
             uxrOutputReliableStream* stream = uxr_get_output_reliable_stream(&session->streams, stream_id.index);
-            available = stream && uxr_prepare_reliable_buffer_to_write(stream, submessage_size, ub);
+            available = false;
+            if (stream)
+            {
+                UXR_LOCK_STREAM_STATE(stream);
+                available = uxr_prepare_reliable_buffer_to_write(stream, submessage_size, ub);
+                UXR_UNLOCK_STREAM_STATE(stream);
+            }
             break;
         }
         default:
