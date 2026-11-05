@@ -278,8 +278,10 @@ void uxr_process_acknack(
     size_t buffers_to_clean = uxr_seq_num_sub(last_acked_seq_num, stream->last_acknown);
     for (size_t i = 0; i < buffers_to_clean; i++)
     {
-        stream->last_acknown = uxr_seq_num_add(stream->last_acknown, 1);
-        uxr_set_reliable_buffer_size(&stream->base, stream->last_acknown, stream->offset);
+        // Clean the slot first: once last_acknown moves, a publish can write to this slot
+        uxrSeqNum next_acknown = uxr_seq_num_add(stream->last_acknown, 1);
+        uxr_set_reliable_buffer_size(&stream->base, next_acknown, stream->offset);
+        stream->last_acknown = next_acknown;
     }
 
     stream->send_lost = (0 < bitmap);
