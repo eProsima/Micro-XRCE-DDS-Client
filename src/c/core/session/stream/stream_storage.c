@@ -142,9 +142,9 @@ bool uxr_output_streams_confirmed(
     bool up_to_date = true;
     for (unsigned i = 0; i < storage->output_reliable_size && up_to_date; ++i)
     {
-        UXR_LOCK((uxrMutex*) &storage->output_reliable[i].mutex);
+        UXR_LOCK((uxrMutex*) &storage->output_reliable[i].state_mutex);
         up_to_date = uxr_is_output_up_to_date(&storage->output_reliable[i]);
-        UXR_UNLOCK((uxrMutex*) &storage->output_reliable[i].mutex);
+        UXR_UNLOCK((uxrMutex*) &storage->output_reliable[i].state_mutex);
     }
     return up_to_date;
 }

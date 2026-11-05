@@ -30,6 +30,7 @@ void uxr_init_output_reliable_stream(
     stream->offset = header_offset;
 
     UXR_INIT_LOCK(&stream->mutex);
+    UXR_INIT_LOCK(&stream->state_mutex);
 
     uxr_reset_output_reliable_stream(stream);
 }

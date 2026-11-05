@@ -52,6 +52,20 @@ void uxr_unlock(
 #endif /* if defined(PLATFORM_NAME_FREERTOS) */
 }
 
+bool uxr_try_lock(
+        uxrMutex* mutex)
+{
+#if defined(PLATFORM_NAME_FREERTOS)
+    return pdTRUE == xSemaphoreTakeRecursive(mutex->impl, 0);
+#elif defined(UCLIENT_PLATFORM_ZEPHYR)
+    return 0 == k_mutex_lock(&mutex->impl, K_NO_WAIT);
+#elif defined(UCLIENT_PLATFORM_POSIX)
+    return 0 == pthread_mutex_trylock(&mutex->impl);
+#else
+#error XRCE multithreading not supported for this platform.
+#endif /* if defined(PLATFORM_NAME_FREERTOS) */
+}
+
 uxrMutex* uxr_get_stream_mutex_from_id(
         struct uxrSession* session,
         uxrStreamId stream_id)
