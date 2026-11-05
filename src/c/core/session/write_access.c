@@ -224,6 +224,24 @@ uint16_t uxr_prepare_output_stream_fragmented(
         return UXR_INVALID_REQUEST_ID;
     }
 
+    // A message that fits the whole history is written in one go by uxr_prepare_output_stream,
+    // after waiting for free slots if needed, so it is never left half written. Only a larger
+    // message is written below as slots free up.
+    size_t block_size = uxr_get_reliable_buffer_capacity(&stream->base) - (size_t)(stream->offset + SUBHEADER_SIZE);
+    size_t whole_payload_size = WRITE_DATA_PAYLOAD_SIZE + data_size;
+    size_t whole_submessage_size = SUBHEADER_SIZE + whole_payload_size + uxr_submessage_padding(whole_payload_size);
+    if (whole_submessage_size <= block_size * stream->base.history)
+    {
+        UXR_UNLOCK_STREAM_ID(session, stream_id);
+        rv = uxr_prepare_output_stream(session, stream_id, entity_id, ub, (uint32_t)data_size);
+        if (UXR_INVALID_REQUEST_ID == rv)
+        {
+            (void) flush_callback(session, flush_callback_args);
+            rv = uxr_prepare_output_stream(session, stream_id, entity_id, ub, (uint32_t)data_size);
+        }
+        return rv;
+    }
+
     size_t remaining_blocks = get_available_free_slots(stream);
 
     if (0 == remaining_blocks)
