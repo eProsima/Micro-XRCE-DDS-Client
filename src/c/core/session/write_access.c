@@ -202,6 +202,19 @@ bool on_full_output_buffer_fragmented(
     return false;
 }
 
+// Whether a WRITE_DATA submessage with this much data fits the whole history, split into
+// fragments if needed.
+static bool fits_history(
+        const uxrOutputReliableStream* stream,
+        size_t data_size)
+{
+    size_t payload_size = WRITE_DATA_PAYLOAD_SIZE + data_size;
+    size_t submessage_size = SUBHEADER_SIZE + payload_size + uxr_submessage_padding(payload_size);
+    size_t fragment_capacity = uxr_get_reliable_buffer_capacity(&stream->base)
+            - (size_t)(stream->offset + SUBHEADER_SIZE);
+    return submessage_size <= fragment_capacity * stream->base.history;
+}
+
 uint16_t uxr_prepare_output_stream_fragmented(
         uxrSession* session,
         uxrStreamId stream_id,
@@ -222,6 +235,21 @@ uint16_t uxr_prepare_output_stream_fragmented(
     {
         UXR_UNLOCK_STREAM_ID(session, stream_id);
         return UXR_INVALID_REQUEST_ID;
+    }
+
+    // A message that fits the whole history is written in one go by uxr_prepare_output_stream,
+    // after waiting for free slots if needed, so it is never left half written. Only a larger
+    // message is written below as slots free up.
+    if (fits_history(stream, data_size))
+    {
+        UXR_UNLOCK_STREAM_ID(session, stream_id);
+        rv = uxr_prepare_output_stream(session, stream_id, entity_id, ub, (uint32_t)data_size);
+        if (UXR_INVALID_REQUEST_ID == rv)
+        {
+            (void) flush_callback(session, flush_callback_args);
+            rv = uxr_prepare_output_stream(session, stream_id, entity_id, ub, (uint32_t)data_size);
+        }
+        return rv;
     }
 
     size_t remaining_blocks = get_available_free_slots(stream);
