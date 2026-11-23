@@ -215,14 +215,14 @@ bool uxr_update_output_stream_heartbeat_timestamp(
         if (0 == stream->next_heartbeat_tries)
         {
             stream->next_heartbeat_tries = 1;
+            stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL;
         }
         else if (current_timestamp >= stream->next_heartbeat_timestamp)
         {
             stream->next_heartbeat_tries++;
             must_confirm = true;
+            stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL;
         }
-
-        stream->next_heartbeat_timestamp = current_timestamp + MIN_HEARTBEAT_TIME_INTERVAL;
     }
     else
     {

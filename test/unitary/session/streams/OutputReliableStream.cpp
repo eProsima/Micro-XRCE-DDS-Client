@@ -409,8 +409,42 @@ TEST_F(OutputReliableStreamTest, HeartbeatUnsuccessfulSecondHeartbeat)
 
     bool must_confirm = uxr_update_output_stream_heartbeat_timestamp(&stream, MIN_HEARTBEAT_TIME_INTERVAL);
     ASSERT_FALSE(must_confirm);
-    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 2, stream.next_heartbeat_timestamp);
+    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL * 4, stream.next_heartbeat_timestamp);
     EXPECT_EQ(2u, stream.next_heartbeat_tries);
+}
+
+TEST_F(OutputReliableStreamTest, HeartbeatWhenPolledFasterThanInterval)
+{
+    ucdrBuffer ub;
+    for (size_t i = 0; i < HISTORY; ++i)
+    {
+        (void) uxr_prepare_reliable_buffer_to_write(&stream, MAX_SUBMESSAGE_SIZE, &ub);
+        uint8_t* message; size_t length; uxrSeqNum seq_num;
+        (void) uxr_prepare_next_reliable_buffer_to_send(&stream, &message, &length, &seq_num);
+    }
+
+    // The history is full of unacknowledged messages: only a heartbeat can recover the stream.
+    uint8_t* message; size_t length; uxrSeqNum seq_num;
+    ASSERT_FALSE(uxr_prepare_next_reliable_buffer_to_send(&stream, &message, &length, &seq_num));
+
+    // The session polls the stream every 1 ms, much faster than the heartbeat interval.
+    int64_t first_heartbeat = -1;
+    size_t heartbeats = 0;
+    for (int64_t now = 0; now <= MIN_HEARTBEAT_TIME_INTERVAL * 3; ++now)
+    {
+        if (uxr_update_output_stream_heartbeat_timestamp(&stream, now))
+        {
+            if (0 == heartbeats)
+            {
+                first_heartbeat = now;
+            }
+            ++heartbeats;
+        }
+    }
+
+    EXPECT_EQ(MIN_HEARTBEAT_TIME_INTERVAL, first_heartbeat);
+    EXPECT_EQ(3u, heartbeats);
+    EXPECT_EQ(4u, stream.next_heartbeat_tries);
 }
 
 TEST_F(OutputReliableStreamTest, AcknackProcessNoLost)
